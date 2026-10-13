@@ -1,0 +1,18 @@
+# Glossario
+- Tool: modulo com pagina e manifesto.
+- Registro de tools: lista central que alimenta home, busca e sitemap.
+- Schema / Fonte de schema (DDL, JSON, migration, SQLModel).
+- Dialeto: mysql, pgsql, sqlsrv, sqlite.
+- Output target: formato de saida cadastrado em output_targets.
+- Premissas: suposicoes do modelo mostradas ao usuario.
+- Provider LLM: implementacao de LlmProvider (DeepSeek).
+- Processamento local: roda no navegador.
+- Solicitacao de IA (ai_request): registro de um job.
+- AICache: cache de respostas, chave MD5 do payload canonico.
+- Prompt hash: MD5 do payload canonico + target + dialeto + modelo + versao do prompt.
+- Cota: usos gratis (vitalicios) ou franquia mensal de tokens.
+- Franquia de tokens: limite mensal de tokens do plano pago.
+- Ledger de uso: livro-razao de debitos/estornos.
+- Plano: Free, Pro mensal, Pro anual.
+- Consentimento: estado do banner de cookies.
+- Worker: processo queue:work sob Supervisor.
