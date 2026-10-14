@@ -31,7 +31,7 @@ SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, ca
    - **Busca** na arvore por **chave e valor**, sem acento e sem caixa (`normalize()` da busca da home), expandindo os ancestrais do que casa, com contador de resultados e aviso quando a lista e cortada. Busca por caminho JSONPath nao entrou.
    - **Limite de entrada** de `config/tools.php` (`TOOLS_MAX_INPUT_BYTES`, padrao 5 MB): passar dele **nao bloqueia a digitacao**, bloqueia a analise, com o tamanho formatado no idioma da pagina. O limite protege o navegador de quem usa, nao o servidor.
    - **Erro com linha e coluna**: a posicao sai do texto do motor (`at position N`, `line N column M`) e a linha/coluna sao calculadas aqui; a mensagem crua do motor fica como detalhe tecnico. A ultima saida valida continua na tela enquanto o texto esta invalido.
-   - **Virtualizacao propria** das listas grandes (janela sobre linhas de altura uniforme, conta numa funcao pura) acima de um limiar de config - sem dependencia nova; o CodeMirror ja virtualiza o texto dele.
+   - **Virtualizacao propria** das listas grandes (janela sobre linhas de altura uniforme, conta numa funcao pura) acima do limiar de `config/tools.php` (`TOOLS_VIRTUALIZE_FROM`, padrao 2000 linhas), que desce por prop como o teto de entrada - sem dependencia nova; o CodeMirror ja virtualiza o texto dele.
    - **Parse em Web Worker** com **queda para a thread principal** quando `Worker` nao existe ou a criacao falha, e descarte de resposta velha (a digitacao tem debounce).
    - Nao entrou (e nao estava na linha do SPEC): o painel de busca do proprio CodeMirror (Cmd+F), a indentacao por Tab (`indentWithTab`) e a validacao por schema.
 

@@ -44,6 +44,7 @@ return [
             'unavailable' => 'Herramienta no disponible.',
             'invalid' => 'JSON no válido en la línea {line}, columna {column}.',
             'invalid_no_position' => 'JSON no válido.',
+            'stale_tree' => 'Árbol de la última versión válida.',
             'too_large' => 'El texto ocupa {size} y supera el límite de {limit}. El análisis está desactivado.',
             'file_too_large' => 'El archivo ocupa {size} y supera el límite de {limit}.',
             'file_type' => 'Formato no admitido. Envía un archivo .json o .txt.',
@@ -103,9 +104,9 @@ return [
         ],
 
         'shortcuts' => [
+            'format' => 'Formatear el documento',
             'search' => 'Buscar en el árbol',
-            'undo' => 'Deshacer en el editor',
-            'paste' => 'Pegar en el editor',
+            'clear' => 'Limpiar la búsqueda',
         ],
     ],
 

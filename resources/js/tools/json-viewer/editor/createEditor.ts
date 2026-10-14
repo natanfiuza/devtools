@@ -13,6 +13,7 @@ import {
     keymap,
     lineNumbers,
     placeholder as placeholderExtension,
+    type KeyBinding,
 } from '@codemirror/view';
 import { jsonEditorTheme, jsonHighlightStyle } from './theme';
 
@@ -41,6 +42,8 @@ export interface EditorOptions {
     onDocChange?: (doc: string) => void;
     /** Cmd/Ctrl+F: a busca do documento mora na tela, nao no editor. */
     onFind?: () => void;
+    /** Cmd/Ctrl+Enter: o mesmo "formatar" do botao, sem tirar a mao do teclado. */
+    onFormat?: () => void;
 }
 
 /** O erro que o editor desenha - o texto ja vem traduzido de quem chama. */
@@ -54,12 +57,33 @@ export interface EditorError {
 }
 
 export function createEditor(parent: HTMLElement, options: EditorOptions): EditorView {
-    const keymaps = [...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap];
+    /*
+    | As teclas da tela vem **antes** das do motor.
+    |
+    | Duas teclas com o mesmo nome nao se anulam: elas entram na mesma fila, e a
+    | primeira que atender fica com a tecla. O `Mod-Enter` ja tem dono no
+    | `defaultKeymap` (inserir linha em branco), entao os atalhos da tela vao na
+    | frente - senao o "formatar" nunca chegaria a rodar.
+    */
+    const command: KeyBinding[] = [];
+
+    if (options.onFormat !== undefined) {
+        const onFormat = options.onFormat;
+
+        command.push({
+            key: 'Mod-Enter',
+            run: () => {
+                onFormat();
+
+                return true;
+            },
+        });
+    }
 
     if (options.onFind !== undefined) {
         const onFind = options.onFind;
 
-        keymaps.push({
+        command.push({
             key: 'Mod-f',
             run: () => {
                 onFind();
@@ -68,6 +92,8 @@ export function createEditor(parent: HTMLElement, options: EditorOptions): Edito
             },
         });
     }
+
+    const keymaps = [...command, ...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap];
 
     const extensions: Extension[] = [
         lineNumbers(),

@@ -34,6 +34,8 @@ const props = defineProps<{
     slug: string;
     /** Teto de entrada das tools, em bytes (config/tools.php). */
     maxInputBytes: number;
+    /** A partir de quantas linhas uma lista passa a ser virtualizada. */
+    virtualizeFrom: number;
 }>();
 
 const { t } = useI18n();
@@ -109,6 +111,7 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
                     :is="toolComponent"
                     v-if="toolComponent"
                     :max-input-bytes="maxInputBytes"
+                    :virtualize-from="virtualizeFrom"
                 />
                 <p v-else class="text-sm text-destructive">
                     {{ t('tools.ui.states.unavailable') }}

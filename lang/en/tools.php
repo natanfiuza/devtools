@@ -44,6 +44,7 @@ return [
             'unavailable' => 'Tool unavailable.',
             'invalid' => 'Invalid JSON on line {line}, column {column}.',
             'invalid_no_position' => 'Invalid JSON.',
+            'stale_tree' => 'Tree from the last valid version.',
             'too_large' => 'The text is {size} and goes past the {limit} limit. Parsing is off.',
             'file_too_large' => 'The file is {size} and goes past the {limit} limit.',
             'file_type' => 'Unsupported format. Use a .json or .txt file.',
@@ -103,9 +104,9 @@ return [
         ],
 
         'shortcuts' => [
+            'format' => 'Format the document',
             'search' => 'Search the tree',
-            'undo' => 'Undo in the editor',
-            'paste' => 'Paste into the editor',
+            'clear' => 'Clear the search',
         ],
     ],
 

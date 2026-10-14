@@ -15,7 +15,7 @@ import {
     X,
 } from '@lucide/vue';
 import { useDebounceFn } from '@vueuse/core';
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ToolActionBar from '@/components/tool/ToolActionBar.vue';
 import ToolButton from '@/components/tool/ToolButton.vue';
@@ -28,6 +28,7 @@ import {
     INITIAL_COLLAPSE_DEPTH,
     type AnalyzeOptions,
     type AnalyzeOutcome,
+    type AnalyzeSuccess,
 } from './lib/analyze';
 import { formatBytes } from './lib/bytes';
 import { downloadText } from './lib/download';
@@ -53,6 +54,8 @@ import sample from './sample.json?raw';
 const props = defineProps<{
     /** Limite de entrada em bytes, vindo de `config/tools.php` pelo controller. */
     maxInputBytes: number;
+    /** Acima de quantas linhas a arvore passa a renderizar so a janela. */
+    virtualizeFrom: number;
 }>();
 
 const { t, locale } = useI18n();
@@ -100,9 +103,34 @@ const success = computed(() => {
     return current !== null && current.ok ? current : null;
 });
 
-const nodes = computed<JsonNode[]>(() => success.value?.nodes ?? []);
-const hasTree = computed(() => nodes.value.length > 0);
+/**
+ * A ultima analise que deu certo.
+ *
+ * E o que sustenta a promessa do SPEC (secao 5): enquanto o texto esta
+ * invalido - ou grande demais para ser analisado -, a arvore da ultima versao
+ * valida **continua na tela**, marcada como defasada. Quem esta corrigindo o
+ * erro nao perde a referencia do que o documento era.
+ */
+const lastValid = shallowRef<AnalyzeSuccess | null>(null);
+
 const isEmpty = computed(() => text.value.trim() === '');
+
+/** Nao ha analise valida para o texto atual: a arvore na tela e a anterior. */
+const stale = computed(
+    () => success.value === null && !isEmpty.value && lastValid.value !== null,
+);
+
+const nodes = computed<JsonNode[]>(() => {
+    if (success.value !== null) {
+        return success.value.nodes;
+    }
+
+    const last = lastValid.value;
+
+    return stale.value && last !== null ? last.nodes : [];
+});
+
+const hasTree = computed(() => nodes.value.length > 0);
 const canRewrite = computed(() => success.value !== null);
 
 /** O erro do documento: linha e coluna quando o motor informou. */
@@ -178,6 +206,7 @@ async function runAnalysis(extra: Partial<AnalyzeOptions> = {}): Promise<Analyze
     outcome.value = result;
 
     if (result.ok) {
+        lastValid.value = result;
         collapsed.value = new Set(result.collapsed);
     }
 
@@ -213,6 +242,8 @@ watch(text, () => {
 
 function resetDocument(): void {
     outcome.value = null;
+    // Documento vazio nao tem "ultima versao valida": a arvore sai da tela.
+    lastValid.value = null;
     collapsed.value = new Set();
     busy.value = false;
     tooLarge.value = false;
@@ -364,28 +395,11 @@ const statsMessage = computed(() => {
 });
 
 /**
- * O recado do rodape: o erro do arquivo manda, depois o que acabou de
- * acontecer, e por ultimo o tamanho do documento.
+ * O recado do painel de saida, quando nao ha arvore para desenhar.
+ *
+ * Com a arvore defasada na tela (`stale`) ele tambem alimenta o rodape: o erro
+ * que interrompeu a analise continua visivel, ao lado da arvore antiga.
  */
-const status = computed<{ text: string; error: boolean } | null>(() => {
-    const fileMessage = fileErrorMessage.value;
-
-    if (fileMessage !== null) {
-        return { text: fileMessage, error: true };
-    }
-
-    const feedbackText = feedbackMessage.value;
-
-    if (feedbackText !== null) {
-        return { text: feedbackText, error: false };
-    }
-
-    const stats = statsMessage.value;
-
-    return stats === null ? null : { text: stats, error: false };
-});
-
-/** O recado do painel de saida, quando nao ha arvore para desenhar. */
 const state = computed<{ text: string; error: boolean } | null>(() => {
     if (tooLarge.value) {
         return {
@@ -404,6 +418,33 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
     }
 
     return busy.value ? { text: t('tools.ui.states.parsing'), error: false } : null;
+});
+
+/**
+ * O recado do rodape: o erro do arquivo manda, depois o que acabou de
+ * acontecer, depois o erro que deixou a arvore defasada, e por ultimo o
+ * tamanho do documento.
+ */
+const status = computed<{ text: string; error: boolean } | null>(() => {
+    const fileMessage = fileErrorMessage.value;
+
+    if (fileMessage !== null) {
+        return { text: fileMessage, error: true };
+    }
+
+    const feedbackText = feedbackMessage.value;
+
+    if (feedbackText !== null) {
+        return { text: feedbackText, error: false };
+    }
+
+    if (stale.value) {
+        return state.value;
+    }
+
+    const stats = statsMessage.value;
+
+    return stats === null ? null : { text: stats, error: false };
 });
 
 let feedbackTimer = 0;
@@ -493,6 +534,21 @@ function focusSearch(): void {
     searchBox.value?.querySelector('input')?.focus();
 }
 
+/**
+ * Esc limpa a busca da arvore.
+ *
+ * Escuta na janela, e nao no campo: quem esta com o foco no editor (que acabou
+ * de receber o `Mod-f`) tambem espera que o Esc desfaca a busca - e e isso que a
+ * faixa de atalhos anuncia. Sem busca ativa o Esc segue com o resto da pagina.
+ */
+function onKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !hasQuery.value) {
+        return;
+    }
+
+    query.value = '';
+}
+
 /*
 | Arquivo por clique e por arrasto
 */
@@ -563,7 +619,12 @@ function onDrop(event: DragEvent): void {
     }
 }
 
+onMounted(() => {
+    window.addEventListener('keydown', onKeydown);
+});
+
 onBeforeUnmount(() => {
+    window.removeEventListener('keydown', onKeydown);
     window.clearTimeout(feedbackTimer);
     client.dispose();
 });
@@ -628,6 +689,7 @@ onBeforeUnmount(() => {
         <template #input-header>
             <ToolButton
                 :label="t('tools.json-viewer.format')"
+                :shortcut="`${commandKey} Enter`"
                 :disabled="!canRewrite"
                 @click="format"
             >
@@ -671,6 +733,7 @@ onBeforeUnmount(() => {
                     :placeholder="t('tools.ui.states.empty')"
                     :error="editorError"
                     @find="focusSearch"
+                    @format="format"
                 />
 
                 <div
@@ -704,11 +767,18 @@ onBeforeUnmount(() => {
                 <Input
                     v-model="query"
                     type="search"
-                    class="h-7 w-40 pl-7 text-xs"
+                    class="h-7 w-40 pr-9 pl-7 text-xs"
                     :placeholder="t('tools.json-viewer.search.placeholder')"
                     :aria-label="t('tools.json-viewer.search.label')"
                     data-test="json-viewer-search"
                 />
+                <!-- O `Esc` que a faixa de atalhos anuncia, colado no campo. -->
+                <kbd
+                    class="pointer-events-none absolute top-1/2 right-1.5 hidden -translate-y-1/2 rounded border bg-surface-2 px-1 font-mono text-[10px] text-subtle sm:inline"
+                    data-test="json-viewer-search-shortcut"
+                >
+                    Esc
+                </kbd>
             </div>
 
             <span
@@ -754,13 +824,30 @@ onBeforeUnmount(() => {
         </template>
 
         <template #output>
+            <!--
+                A arvore na tela e da ultima versao valida, e nao do texto que
+                esta no editor: o aviso diz isso, e a arvore sai em opacidade
+                reduzida (SPEC secao 5).
+            -->
+            <p
+                v-if="stale"
+                role="status"
+                class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
+                data-test="json-viewer-stale"
+            >
+                <TriangleAlert class="size-3.5" aria-hidden="true" />
+                {{ t('tools.ui.states.stale_tree') }}
+            </p>
+
             <div class="relative min-h-0 flex-1">
                 <JsonTree
                     v-if="hasTree"
-                    class="absolute inset-0"
+                    class="absolute inset-0 transition-opacity"
+                    :class="stale ? 'opacity-50' : ''"
                     :nodes="nodes"
                     :collapsed="collapsed"
                     :matches="matches"
+                    :virtualize-from="virtualizeFrom"
                     @toggle="toggle"
                     @copy="copyPath"
                 />
@@ -796,21 +883,21 @@ onBeforeUnmount(() => {
         <template #shortcuts>
             <span class="flex items-center gap-1.5">
                 <kbd class="rounded border bg-surface-2 px-1 font-mono">
+                    {{ commandKey }} Enter
+                </kbd>
+                {{ t('tools.json-viewer.shortcuts.format') }}
+            </span>
+            <span class="flex items-center gap-1.5">
+                <kbd class="rounded border bg-surface-2 px-1 font-mono">
                     {{ commandKey }} F
                 </kbd>
                 {{ t('tools.json-viewer.shortcuts.search') }}
             </span>
             <span class="flex items-center gap-1.5">
                 <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                    {{ commandKey }} Z
+                    Esc
                 </kbd>
-                {{ t('tools.json-viewer.shortcuts.undo') }}
-            </span>
-            <span class="flex items-center gap-1.5">
-                <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                    {{ commandKey }} V
-                </kbd>
-                {{ t('tools.json-viewer.shortcuts.paste') }}
+                {{ t('tools.json-viewer.shortcuts.clear') }}
             </span>
         </template>
     </ToolShell>

@@ -11,8 +11,12 @@
  * linha de altura fixa justamente para que a matematica acima continue valendo.
  */
 
-/** Acima disto a lista passa a renderizar so a janela. */
-export const VIRTUALIZE_FROM = 2000;
+/*
+ * O limiar a partir do qual a lista passa a renderizar so a janela **nao** mora
+ * aqui: e um limite, e limite mora na configuracao (`config/tools.php`,
+ * `tools.limits.virtualize_from`), que o controller entrega a pagina da tool.
+ * Do que e geometria - a altura da linha e a folga - este modulo cuida.
+ */
 
 /** Altura da linha, em pixels - tem que bater com a classe da linha na tela. */
 export const ROW_HEIGHT = 24;

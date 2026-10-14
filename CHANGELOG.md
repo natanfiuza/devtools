@@ -94,6 +94,24 @@ ferramentas sem tocar em pagina, shell ou rota. Aceite em
   removido sem substituto); o `Esc` do rodape da palette virou chave de i18n
   (`app.search.key_escape`, "Échap" em frances); o contrato de `hidden` entre os
   dois leitores foi registrado no ADR-007 e na secao 4.
+- Verificacao independente da F2 (secao "Revisao de 2026-10-14" do
+  `docs/acceptance/FASE-2.md`), que fechou cinco divergencias entre o aceite e o
+  codigo - tres delas em coisas que este bloco ja prometia e o codigo nao fazia:
+  a **arvore da ultima versao valida continua na tela** quando o texto fica
+  invalido ou passa do limite, marcada como defasada (`stale_tree` nos 5
+  idiomas) e com opacidade reduzida, como o SPEC secao 5 exige; os **atalhos**
+  foram ligados e o `kbd` apareceu na tela - `Mod-Enter` formata (o editor
+  registra a tecla **antes** das do CodeMirror, que ja usava `Mod-Enter` para
+  inserir linha em branco), `Mod-f` busca e `Esc` limpa a busca, com o `kbd` no
+  botao Formatar, no campo de busca e na faixa de atalhos (que passa a listar os
+  tres do mockup, no lugar de desfazer/colar); e o **limiar de virtualizacao**
+  saiu do modulo para `config/tools.php` (`TOOLS_VIRTUALIZE_FROM`, padrao 2000),
+  descendo por prop como o teto de entrada. As outras duas eram de texto: o nome
+  do protocolo do worker no aceite passou a ser o real (`{id, text, options}` /
+  `{id, outcome}`) e a celula dos commits deixou de afirmar que a fase inteira
+  estava no working tree. O DESIGN e o glossario passaram a descrever o que foi
+  entregue (24px por linha, 14px de indentacao, as acoes por painel e o termo
+  "arvore defasada").
 
 ### Fora do escopo (proximas fases)
 

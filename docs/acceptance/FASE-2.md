@@ -2,8 +2,8 @@
 
 Gerado em 2026-10-14, no inicio da fase (regra do `docs/SPEC.md` secao 9).
 Fonte: `docs/SPEC.md` secao 9 (F2) + secao 4 (rota `/{locale}/tools/{slug}`) +
-secao 5 (JSON Viewer) + `docs/design/DESIGN.md` (pagina de tool, entregavel 5)
-+ decisoes do plano de execucao da sessao.
+secao 5 (JSON Viewer) + `docs/design/DESIGN.md` (secao "Pagina de tool" e os
+entregaveis 5 e 6) + decisoes do plano de execucao da sessao.
 
 ## Escopo da fase
 
@@ -71,13 +71,75 @@ Preenchido em 2026-10-14, ao fim da fase.
 | 7 | Busca na arvore | **Atende com correcao do criterio** (feita acima): a busca e por **chave e valor**, sem acento e sem caixa, expandindo os ancestrais do que casa, com contador e aviso de corte; a busca por caminho JSONPath nao entrou. |
 | 8 | Caminho JSONPath | **Atende.** `json-path.test.ts`: `.chave` para identificador, `['chave']` para o resto, com escape de `'` e `\`, e o caminho de array indexado. |
 | 9 | Formatar, minificar, ordenar | **Atende.** `json-transform.test.ts` (recursivo, arrays intactos, comparacao por code unit - sem `localeCompare`) + `json-viewer.test.ts` (a acao age no texto e entra no historico do editor, entao o Ctrl+Z desfaz). |
-| 10 | Erro com linha e coluna | **Atende.** `json-parse.test.ts` (posicao -> linha/coluna, erro sem posicao, detalhe do motor) + `json-viewer.test.ts` (a ultima saida valida continua na tela e a linha do erro fica marcada no editor). |
+| 10 | Erro com linha e coluna | **Atende.** `json-parse.test.ts` (posicao -> linha/coluna, erro sem posicao, detalhe do motor) + `json-viewer.test.ts`: `mostra o erro com linha e coluna` (o erro na faixa de estado e a linha marcada no editor) e **`mantem a ultima arvore valida na tela, marcada como defasada`**, que e o comportamento que o SPEC secao 5 exige. Esta celula afirmava o mesmo no aceite original, mas o codigo nao fazia isso: a analise invalida zerava a saida e a arvore saia da tela - ver a nota de revisao no fim. |
 | 11 | Limite de `config/tools.php` | **Atende.** `ToolPageTest` (a prop vem da configuracao: `config(['tools.limits.input_bytes' => 1234])`) e `json-viewer.test.ts` (passar do limite bloqueia a analise e nao a digitacao, com o tamanho formatado no idioma da pagina). |
-| 12 | Virtualizacao | **Atende.** `json-window.test.ts` (topo, meio, fundo, folga, lista menor que a janela) e `json-viewer.test.ts` (a janela entra acima do limiar de config). |
-| 13 | Web Worker com queda | **Atende.** `json-worker.test.ts` exercita o **caminho de queda** (o jsdom nao tem `Worker`), o descarte de resposta velha e o protocolo `{id, task, payload}`; o worker de verdade so roda no navegador - conferido no `npm run build` (chunk `parser.worker-*.js`) e no smoke manual. |
+| 12 | Virtualizacao | **Atende.** `json-window.test.ts` (topo, meio, fundo, folga, lista menor que a janela) e `json-viewer.test.ts` (`renderiza so a janela quando a lista passa do limiar da configuracao`, com dois limiares na mesma lista). O limiar vem de `config/tools.php` (`TOOLS_VIRTUALIZE_FROM`) por `ToolPageTest`; no aceite original ele era a constante `VIRTUALIZE_FROM` no modulo e o teste que esta celula citava nao existia - ver a nota de revisao no fim. |
+| 13 | Web Worker com queda | **Atende.** `json-worker.test.ts` exercita o **caminho de queda** (o jsdom nao tem `Worker`), o descarte de resposta velha e o protocolo `{id, text, options}` (pedido) / `{id, outcome}` (resposta); o worker de verdade so roda no navegador - conferido no `npm run build` (chunk `parser.worker-*.js`) e no smoke manual. O aceite original nomeava o protocolo `{id, task, payload}`, que nunca existiu - ver a nota de revisao no fim. |
 | 14 | Tema por token | **Atende.** `json-editor-theme.test.ts` (so `var(--json-*)`, nenhuma cor literal, os 5 tokens) + `design-tokens.test.ts` (contraste de `--json-punct` contra `--surface` nos dois temas). |
 | 15 | SSR entrega casca e metas | **Atende.** Smoke com `INERTIA_SSR_ENABLED=true` nos 5 idiomas: title, description, `og:*` (imagem da tool e `alt` traduzido), canonical, 6 hreflang, `<h1>` e breadcrumb no HTML do servidor; o editor nao esta la (por desenho - `ClientOnly`). |
 | 16 | Imagem OG por tool | **Atende.** `SeoMetaTest`: `og:image` = `/og/json-viewer.png` na pagina da tool, dimensoes conferidas no PNG de verdade (`getimagesize`), `alt` traduzido nos 5 idiomas e queda para a imagem padrao quando a tool nao tem PNG (fixture). A imagem padrao da F1 saiu **byte a byte igual** da refatoracao. |
 | 17 | i18n | **Atende.** `TranslationsParityTest` verde com as chaves novas (`tools.ui.*` e `tools.json-viewer.*`) nos 5 idiomas; os testes de componente afirmam texto traduzido, nao literal. |
 | 18 | Gates | **Atende.** `composer test` (pint + phpstan nivel 7 sem erro + **266 testes, 6375 assercoes**), `npm run test` (**299 testes em 23 arquivos**), `npm run types:check`, `npm run build` (CodeMirror em chunk proprio) e `npm run build:ssr` - os cinco verdes. |
-| 19 | Nenhum commit | **Atende.** `git log` continua no `1f00431` (commit da F1), feito pelo usuario; a fase inteira esta no working tree. |
+| 19 | Nenhum commit | **Atende.** No momento do aceite o `git log` parava no `1f00431` (commit da F1) e a fase inteira estava no working tree. Depois do aceite o usuario commitou a fase (`edb62b2`, `feat: adiciona pagina de tool e o JSON Viewer funcional`, 13:35) - o trabalho continua sendo commitado so por ele, pelo gitpr; o assistente nao commita. |
+
+## Revisao de 2026-10-14 (verificacao independente)
+
+A pedido, os 19 criterios foram conferidos um a um contra o repositorio (a
+leitura do codigo, dos testes e do `git log` no commit `edb62b2`). **14 dos 19
+se confirmaram integralmente** e cinco nao descreviam o que o codigo fazia:
+
+1. **Criterio 10 (arvore defasada).** O codigo zerava a saida a cada analise
+   invalida, e a arvore saia da tela - o oposto do que o SPEC secao 5 promete e
+   do que esta celula afirmava; um teste chegava a afirmar a ausencia
+   (`exists()).toBe(false)`). **Corrigido no codigo**: o ultimo `AnalyzeOutcome`
+   com sucesso fica guardado, a arvore dele permanece na tela com aviso
+   ("Arvore da ultima versao valida", chave nova em `tools.ui.states` nos 5
+   idiomas) e opacidade reduzida, e o erro com linha e coluna segue no rodape.
+   Vale tambem para o texto acima do limite; o documento vazio continua zerando
+   tudo.
+2. **Criterio 12 (virtualizacao).** A evidencia citada - "`json-viewer.test.ts`
+   (a janela entra acima do limiar)" - nao existia (zero referencias a
+   virtualizacao nesse arquivo), e o limiar era a constante `VIRTUALIZE_FROM` no
+   modulo, nao configuracao. **Corrigido no codigo**: o limiar passou a
+   `config/tools.php` (`TOOLS_VIRTUALIZE_FROM`, padrao 2000, com entrada no
+   `.env.example`), descendo por prop como o teto de entrada (`ToolController` ->
+   `tools/Show` -> `Tool.vue` -> `JsonTree.vue`), e o teste que a celula alegava
+   existe agora de verdade.
+3. **Criterio 13 (protocolo do worker).** O nome `{id, task, payload}` nunca
+   existiu: o protocolo e `{id, text, options}` / `{id, outcome}`.
+   **Corrigido aqui**, no texto da celula.
+4. **Criterio 19 (commits).** A afirmacao de que o `git log` continuava no
+   `1f00431` ja era falsa quando a revisao olhou: o usuario havia commitado a
+   fase as 13:35 (`edb62b2`). **Corrigido aqui**, no texto da celula.
+5. **Criterio 5 + SPEC secao 5 / DESIGN (o `kbd` do atalho).** O criterio pedia a
+   barra de acoes, mas o SPEC e o DESIGN pedem "o `kbd` do atalho ao lado de cada
+   botao" - e nenhum botao recebia atalho. **Corrigido no codigo**: `Mod-Enter`
+   formata (novo `onFormat` no editor, registrado **antes** das teclas do motor,
+   que ja usavam `Mod-Enter` para inserir linha em branco), `Esc` limpa a busca
+   da arvore, o botao Formatar mostra `Ctrl/⌘ Enter`, o campo de busca mostra
+   `Esc`, e a faixa de atalhos passou a listar os tres do mockup (formatar,
+   buscar e limpar a busca) no lugar de desfazer/colar.
+
+Divergencias menores, resolvidas na documentacao: o DESIGN descrevia a arvore
+com 20px por linha e 16px de indentacao (o entregue sao 24px e 14px) e punha as
+transformacoes na barra de cima (o entregue as poe no cabecalho da Entrada, e
+copiar/baixar na barra de cima) - a secao "Pagina de tool" foi reescrita para
+descrever o que existe; a fonte deste documento citava o "entregavel 5" do
+DESIGN como se fosse a pagina de tool (o 5 e a imagem OG por tool, o 6 e o
+mockup da Tool), agora corrigido; a contagem de assercoes do criterio 18 no
+aceite (6.375) nao bate com a medida no commit (6.380) - numeros de relatorio,
+sem efeito no resultado.
+
+**Gates depois da revisao** (no working tree, sem commit): `composer test` -
+Pint limpo, PHPStan nivel 7 com 0 erro, **266 testes e 6.392 assercoes** verdes;
+`npm run test` - **310 testes em 24 arquivos**; `npm run types:check`,
+`npm run build` e `npm run build:ssr` verdes; smoke com `INERTIA_SSR_ENABLED=true`
+nos 5 idiomas (58-62 KB, title/description/canonical/6 hreflang/`og:image` com
+`alt` no HTML do servidor), 404 para slug desconhecido e para tool `soon`, e o
+sitemap com 20 URLs. Nenhum commit: a revisao termina no working tree, para o
+usuario commitar pelo gitpr.
+
+O levantamento completo e o relatorio da tarefa estao em
+`docs/survey/20261014_verificacao_fase2_surveyfacts.md`,
+`docs/plans/develop_natan/20261014_verificacao_fase2_plansfacts.md` e
+`docs/claude-code/reports/develop_natan/20261014_develop_natan_verificacao_fase2.md`.
