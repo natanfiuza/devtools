@@ -94,3 +94,59 @@ it('tem a imagem padrao com as dimensoes que a meta promete', function () {
         ->and($size[1])->toBe((int) config('seo.image.height'))
         ->and($size['mime'])->toBe('image/png');
 });
+
+/*
+| Imagem por tool (F2): a pagina de uma ferramenta que funciona mostra o card
+| dela, e nao o padrao. As duas imagens saem do mesmo desenho, entao as metas de
+| tamanho continuam valendo para as duas.
+*/
+
+it('usa a imagem da propria tool na pagina dela', function () {
+    $relative = trim((string) config('seo.image.tools_dir'), '/').'/json-viewer.png';
+
+    $html = $this->get('/pt-br/tools/json-viewer')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<meta property="og:image" content="'.url($relative).'">')
+        // A padrao nao aparece mais: sao metas de uma imagem so.
+        ->not->toContain('content="'.url((string) config('seo.image.file')).'"')
+        ->toContain('<meta property="og:image:width" content="'.config('seo.image.width').'">')
+        ->toContain('<meta property="og:image:height" content="'.config('seo.image.height').'">');
+});
+
+it('tem o PNG da tool com as dimensoes que a meta promete', function () {
+    $path = public_path(
+        trim((string) config('seo.image.tools_dir'), '/').'/json-viewer.png',
+    );
+
+    expect(is_file($path))->toBeTrue("Falta o PNG da tool: {$path}");
+
+    $size = getimagesize($path);
+
+    expect($size)
+        ->not->toBeFalse()
+        ->and($size[0])->toBe((int) config('seo.image.width'))
+        ->and($size[1])->toBe((int) config('seo.image.height'))
+        ->and($size['mime'])->toBe('image/png');
+});
+
+it('descreve a imagem da tool no idioma da pagina', function () {
+    // A imagem tem o nome da ferramenta; a descricao repete esse nome no idioma
+    // de quem vai ler o card, e nao o nome do idioma padrao.
+    foreach (Locales::all() as $code => $locale) {
+        $alt = trans('tools.json-viewer.name', [], $code).' - '.trans('app.tagline', [], $code);
+
+        expect($this->get('/'.$locale['slug'].'/tools/json-viewer')->assertOk()->getContent())
+            ->toContain('<meta property="og:image:alt" content="'.e($alt).'">');
+    }
+});
+
+it('cai na imagem padrao quando a tool nao tem PNG proprio', function () {
+    // A fixture tem uma tool `available` e nenhuma imagem desenhada para ela: o
+    // card sai com a padrao, em vez de apontar para um arquivo que nao existe.
+    config(['tools.path' => base_path('tests/Fixtures/tools')]);
+
+    expect($this->get('/pt-br/tools/zeta-tool')->assertOk()->getContent())
+        ->toContain('<meta property="og:image" content="'.url((string) config('seo.image.file')).'">')
+        ->not->toContain('zeta-tool.png');
+});

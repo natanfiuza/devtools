@@ -19,8 +19,8 @@ final class Sitemap
     /**
      * Paginas de conteudo, na ordem em que aparecem no arquivo.
      *
-     * A rota da tool nao esta aqui: ela nasce na F2, junto com a primeira
-     * ferramenta que funciona (docs/SPEC.md secao 9).
+     * A rota da tool nao esta aqui: cada ferramenta entra pelo slug, e so
+     * quando ja funciona (docs/SPEC.md secao 9).
      *
      * @var list<string>
      */

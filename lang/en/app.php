@@ -37,6 +37,7 @@ return [
         'hint_navigate' => 'Navigate',
         'hint_select' => 'Open',
         'hint_close' => 'Close',
+        'key_escape' => 'Esc',
     ],
 
     'theme' => [

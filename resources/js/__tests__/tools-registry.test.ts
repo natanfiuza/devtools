@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { categoryById, categoryOrder } from '@/tools/categories';
+import { toolComponentLoader } from '@/tools/components';
 import { hasIcon } from '@/tools/icons';
 import {
     allTools,
@@ -46,9 +47,14 @@ describe('registro', () => {
         expect(allTools.map((tool) => tool.slug)).toEqual(MVP);
     });
 
-    it('deixa todas as tools no ciclo "soon" na F1', () => {
-        expect(allTools.every((tool) => tool.status === 'soon')).toBe(true);
-        expect(availableTools).toEqual([]);
+    it('deixa uma unica tool funcionando na F2: o JSON Viewer', () => {
+        // As outras sete seguem no ciclo "soon": card com selo e sem link.
+        expect(availableTools.map((tool) => tool.slug)).toEqual([
+            'json-viewer',
+        ]);
+        expect(allTools.filter((tool) => tool.status === 'soon')).toHaveLength(
+            7,
+        );
     });
 
     it('registra so uma tool por slug', () => {
@@ -81,13 +87,53 @@ describe('registro', () => {
         }
     });
 
-    it('nao devolve caminho enquanto a tool nao funciona', () => {
-        const soon = toolAt(0);
-        const available: ToolManifest = { ...soon, status: 'available' };
+    it('so devolve caminho para tool que funciona', () => {
+        // O JSON Viewer e a primeira tool com pagina: e o unico card da home
+        // que vira link. As outras sete continuam sem caminho.
+        expect(toolPath(toolAt(0), 'pt-br')).toBe('/pt-br/tools/json-viewer');
 
-        expect(toolPath(soon, 'pt-br')).toBeNull();
-        expect(toolPath(available, 'pt-br')).toBe(`/pt-br/tools/${soon.slug}`);
+        for (const tool of allTools.filter((item) => item.status === 'soon')) {
+            expect(toolPath(tool, 'pt-br'), tool.slug).toBeNull();
+        }
     });
+
+    /*
+    | O contrato do registro e: tool que funciona tem `manifest.json` **e**
+    | `Tool.vue` no proprio diretorio. Um manifest `available` sem componente
+    | daria uma pagina sem ferramenta - e o servidor, que so le o manifest, nao
+    | teria como saber.
+    */
+    it('tem componente para cada tool que funciona', () => {
+        for (const tool of availableTools) {
+            expect(
+                toolComponentLoader(tool.slug),
+                `Tool.vue de ${tool.slug}`,
+            ).not.toBeNull();
+        }
+
+        expect(toolComponentLoader('nao-existe')).toBeNull();
+    });
+
+    // O import carrega CodeMirror e o worker (ADR-018) e, com a suite inteira
+    // em paralelo, passa dos 5s padrao do Vitest: o timeout e explicito para o
+    // gate nao depender da carga da maquina.
+    it(
+        'carrega o componente da tool sob demanda',
+        async () => {
+            // O glob e lazy: o chunk da home nao pode carregar CodeMirror nem
+            // o worker (ADR-018). O carregador devolve o modulo so quando
+            // chamado.
+            const loader = toolComponentLoader('json-viewer');
+
+            expect(loader).not.toBeNull();
+
+            const component = await loader?.();
+
+            expect(component).toBeDefined();
+            expect(typeof component).toBe('object');
+        },
+        20000,
+    );
 
     it('monta as chaves de traducao pelo slug', () => {
         const tool = toolAt(0);
@@ -97,7 +143,9 @@ describe('registro', () => {
             `tools.${tool.slug}.description`,
         );
         expect(toolKeys.keywords(tool)).toBe(`tools.${tool.slug}.keywords`);
-        expect(statusKey(tool)).toBe('tools.status.soon');
+        // O selo segue o status: a tool que funciona nao mostra "em breve".
+        expect(statusKey(tool)).toBe('tools.status.available');
+        expect(statusKey(toolAt(1))).toBe('tools.status.soon');
     });
 });
 

@@ -264,6 +264,29 @@ describe('decisao', () => {
         ]);
     });
 
+    it('aceitar de novo depois de recusar religa a medicao sem segunda tag', async () => {
+        const wrapper = montar();
+
+        await clicar(wrapper, 'consent-accept');
+        await clicar(wrapper, 'consent-reopen');
+        await clicar(wrapper, 'consent-reject');
+        await clicar(wrapper, 'consent-reopen');
+        await clicar(wrapper, 'consent-accept');
+
+        expect(document.cookie).toContain('consent=granted');
+        expect(tags()).toHaveLength(1);
+
+        // A ultima decisao e a que vale (ADR-013): a recusa parou a medicao
+        // pelo Consent Mode e o aceite de novo a religa, sem tag nova.
+        const commands = window.dataLayer ?? [];
+
+        expect(commands[commands.length - 1]).toEqual([
+            'consent',
+            'update',
+            { analytics_storage: 'granted' },
+        ]);
+    });
+
     it('sem id configurado nao injeta tag nem com aceite', async () => {
         const wrapper = montar({ ga4Id: null });
 

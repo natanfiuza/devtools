@@ -38,3 +38,12 @@
 - Idioma de navegacao: o idioma da pagina aberta agora (prefixo da URL ou cookie `locale`, ex. `pt-br`); pode diferir do idioma da conta.
 - Anonimizacao: exclusao que apaga o que identifica a pessoa e mantem a cobranca (guarda fiscal); a linha fica marcada por `anonymized_at` e nao volta.
 - Exportacao de dados: download imediato dos dados da conta em JSON; nada fica guardado no servidor e credenciais (senha, tokens) nao saem no arquivo.
+- Tool disponivel: tool com `status: available` no manifesto; e a unica que tem pagina, card linkado, entrada no sitemap e imagem OG propria (`soon` aparece com selo e nao navega; `hidden` nao aparece em lugar nenhum).
+- Pagina da tool: `/{locale}/tools/{slug}`, uma so para todas as ferramentas - cabecalho e metas vem do registro e o componente da tool entra por glob lazy; slug desconhecido, `soon` e `hidden` dao o mesmo 404 (ADR-029).
+- Shell da tool: a casca que toda ferramenta compartilha dentro da pagina - barra de acoes, os dois paineis (entrada | saida) com divisor arrastavel, faixa de status e de atalhos; no mobile os mesmos paineis viram abas (ADR-029).
+- Limite de entrada: teto em bytes do texto que uma tool aceita analisar, de `config/tools.php` (`TOOLS_MAX_INPUT_BYTES`, padrao 5 MB); passar dele nao bloqueia a digitacao, bloqueia a analise, e o limite protege o navegador de quem usa.
+- Arvore (do JSON): a saida do viewer em linhas, uma por no, com colapso; e a mesma coisa que o editor mostra, com as mesmas cores de token.
+- Virtualizacao de lista: desenhar so as linhas visiveis (mais uma folga) em vez da lista inteira, com altura de linha uniforme - o que permite abrir um JSON grande sem travar a rolagem.
+- Worker de parse (com queda): o Web Worker que analisa o JSON fora da thread principal; quando o ambiente nao tem `Worker` (SSR, jsdom) ou a criacao falha, o mesmo codigo roda na thread principal.
+- Caminho JSONPath: notacao do caminho de um no dentro do documento - `.chave` quando o nome e identificador, `['chave']` quando nao e (com escape de `'` e `\`).
+- Imagem OG por tool: PNG do card de compartilhamento de uma tool que funciona, em `public/og/<slug>.png`, sem idioma nenhum; o nome traduzido da ferramenta vai no `og:image:alt` e, sem o arquivo, a pagina usa a imagem padrao do site (ADR-030).

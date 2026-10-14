@@ -18,6 +18,48 @@ return [
         'soon' => 'Em breve',
     ],
 
+    /*
+    | Textos da casca de qualquer tool (os paineis, a barra de acoes e os
+    | estados). O que e de uma ferramenta so mora em `tools.<slug>.*`.
+    */
+    'ui' => [
+        'input' => 'Entrada',
+        'output' => 'Saída',
+        'resize' => 'Redimensionar os painéis',
+        'drop' => 'Largue o ficheiro aqui',
+
+        'actions' => [
+            'open' => 'Abrir ficheiro',
+            'example' => 'Exemplo',
+            'clear' => 'Limpar',
+            'copy' => 'Copiar',
+            'copied' => 'Copiado',
+            'copy_manual' => 'Selecione o texto e copie',
+            'download' => 'Descarregar',
+        ],
+
+        'states' => [
+            'empty' => 'Cole, escreva ou largue um ficheiro JSON para começar.',
+            'parsing' => 'A analisar...',
+            'unavailable' => 'Ferramenta indisponível.',
+            'invalid' => 'JSON inválido na linha {line}, coluna {column}.',
+            'invalid_no_position' => 'JSON inválido.',
+            'too_large' => 'O texto tem {size} e passa do limite de {limit}. A análise está desligada.',
+            'file_too_large' => 'O ficheiro tem {size} e passa do limite de {limit}.',
+            'file_type' => 'Formato não aceite. Envie um ficheiro .json ou .txt.',
+            'file_unreadable' => 'Não foi possível ler o ficheiro.',
+            'drop_hint' => 'Largue para abrir o ficheiro.',
+        ],
+
+        'limits' => [
+            'of' => 'de {limit}',
+        ],
+
+        'shortcuts' => [
+            'title' => 'Atalhos',
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -31,6 +73,40 @@ return [
         'name' => 'JSON Viewer',
         'description' => 'Explore, formate e valide JSON em árvore, com pesquisa e cópia de qualquer caminho.',
         'keywords' => 'formatar, validar, árvore, minimizar, caminho',
+        'intro' => 'Cole um JSON para ver a árvore colorida, formatar, minimizar e copiar o caminho de qualquer nó. Tudo corre no seu navegador: nada do que cola aqui é enviado para o servidor.',
+
+        'format' => 'Formatar',
+        'minify' => 'Minimizar',
+        'sort_keys' => 'Ordenar chaves',
+        'expand_all' => 'Expandir tudo',
+        'collapse_all' => 'Recolher tudo',
+        'download_name' => 'documento',
+
+        'tree' => [
+            'toggle' => 'Recolher ou expandir',
+            'copy_path' => 'Copiar caminho',
+            'copied' => 'Caminho copiado: {path}',
+        ],
+
+        'search' => [
+            'placeholder' => 'Pesquisar chave ou valor',
+            'label' => 'Pesquisar na árvore',
+            'clear' => 'Limpar pesquisa',
+            'results' => 'Resultados: {count}',
+            'truncated' => 'A mostrar os primeiros {count} resultados.',
+            'none' => 'Sem resultados.',
+        ],
+
+        'stats' => [
+            'keys' => 'Chaves: {count}',
+            'items' => 'Itens: {count}',
+        ],
+
+        'shortcuts' => [
+            'search' => 'Pesquisar na árvore',
+            'undo' => 'Desfazer no editor',
+            'paste' => 'Colar no editor',
+        ],
     ],
 
     'ai-sql-builder' => [

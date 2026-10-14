@@ -37,6 +37,12 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    // O worker do parser do JSON Viewer e um modulo ES (o `{ type: 'module' }`
+    // do `new Worker`). Sem isto o build sairia com o formato padrao (`iife`),
+    // que ignora o tipo pedido no codigo e quebraria o `import` dentro dele.
+    worker: {
+        format: 'es',
+    },
     server: {
         watch: {
             ignored: [

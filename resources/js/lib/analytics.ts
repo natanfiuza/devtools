@@ -53,6 +53,10 @@ export function writeConsent(
  * Quem chama ja decidiu: o aceite e o unico caminho ate aqui. Ainda assim o
  * `consent default` negado vai na frente de todos os comandos - nada e medido
  * antes do `update` que o aceite libera.
+ *
+ * Aceite repetido (o rodape reabre e o visitante volta atras) nao cria uma
+ * segunda tag: reafirma o `granted` no Consent Mode, que e quem liga e desliga
+ * a medicao depois que o gtag.js ja rodou.
  */
 export function loadAnalytics(id: string): void {
     if (typeof document === 'undefined' || id === '') {
@@ -60,6 +64,8 @@ export function loadAnalytics(id: string): void {
     }
 
     if (document.querySelector(`script[${TAG_ATTRIBUTE}]`) !== null) {
+        gtag('consent', 'update', { analytics_storage: 'granted' });
+
         return;
     }
 

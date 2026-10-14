@@ -1,8 +1,8 @@
 <?php
 
 use App\Support\Locales;
+use App\Support\Tools;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
@@ -10,25 +10,39 @@ uses(RefreshDatabase::class);
 | Sitemap (docs/SPEC.md secao 7).
 |
 | O arquivo sai das rotas publicas de conteudo, nos cinco idiomas, com as
-| irmas de cada pagina. O que se cobra aqui: as URLs certas, as alternates
-| completas, nada de `noindex` dentro - e que nenhuma URL do arquivo minta
-| sobre a pagina que ela aponta.
+| irmas de cada pagina - a pagina da tool inclusa, quando a tool funciona. O
+| que se cobra aqui: as URLs certas, as alternates completas, nada de
+| `noindex` dentro - e que nenhuma URL do arquivo minta sobre a pagina que ela
+| aponta.
 */
 
 const SITEMAP_NS = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
 const SITEMAP_XHTML_NS = 'http://www.w3.org/1999/xhtml';
 
-/** As paginas de conteudo, na ordem, com as URLs de cada idioma. */
+/**
+ * As paginas de conteudo, na ordem, com as URLs de cada idioma.
+ *
+ * A pagina de cada tool que funciona entra aqui como uma pagina de conteudo a
+ * mais: e a mesma promessa (cinco idiomas, com as irmas), entao a lista do
+ * teste sai do registro, e nao escrita a mao.
+ */
 function sitemapGroups(): array
 {
+    /** @var list<array{string, array<string, string>}> $pages */
+    $pages = [['home', []], ['privacy', []], ['terms', []]];
+
+    foreach (Tools::available() as $tool) {
+        $pages[] = ['tools.show', ['slug' => (string) $tool['slug']]];
+    }
+
     $groups = [];
 
-    foreach (['home', 'privacy', 'terms'] as $name) {
+    foreach ($pages as [$name, $params]) {
         $urls = [];
 
         foreach (Locales::all() as $locale) {
-            $urls[$locale['html']] = route($name, ['locale' => $locale['slug']]);
+            $urls[$locale['html']] = route($name, ['locale' => $locale['slug'], ...$params]);
         }
 
         $groups[] = $urls;
@@ -120,21 +134,16 @@ it('deixa de fora o que nao entra no indice', function () {
         ->not->toContain('/register')
         ->not->toContain('/styleguide')
         ->not->toContain('/dashboard')
-        // Nenhuma tool funciona ainda: a rota delas nasce na F2.
-        ->not->toContain('/tools/');
+        // F2: a primeira tool funciona e entra no indice; as que ainda nao
+        // funcionam ficam de fora, mesmo com o manifest no registro.
+        ->not->toContain('/tools/ai-sql-builder')
+        ->not->toContain('/tools/sql-formatter');
 });
 
-it('lista a tool que ja funciona, quando a rota dela existe', function () {
-    // A fixture tem uma tool `available` (zeta) e uma `soon` (alpha).
+it('lista a tool que funciona nos cinco idiomas', function () {
+    // A fixture tem uma tool `available` (zeta) e uma `soon` (alpha): e a
+    // separacao entre as duas que este teste cobra, com a rota de verdade.
     config(['tools.path' => base_path('tests/Fixtures/tools')]);
-
-    Route::get('{locale}/tools/{slug}', fn (): string => '')
-        ->whereIn('locale', Locales::slugs())
-        ->name('tools.show');
-
-    // Rota registrada no meio do teste: o indice de nomes so e refeito quando
-    // o framework sobe, e `Route::has()` le desse indice.
-    Route::getRoutes()->refreshNameLookups();
 
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
 
@@ -143,11 +152,25 @@ it('lista a tool que ja funciona, quando a rota dela existe', function () {
         ->not->toContain('alpha-tool');
 });
 
+it('lista a pagina do JSON Viewer, que e a tool da F2', function () {
+    $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
+
+    foreach (Locales::all() as $locale) {
+        expect($xml)->toContain(
+            route('tools.show', ['locale' => $locale['slug'], 'slug' => 'json-viewer']),
+        );
+    }
+});
+
 it('nao aponta para nenhuma pagina que pede noindex', function () {
     // A lista de paginas do sitemap e escrita a mao; se alguem puser uma nela
     // que tambem esteja no NOINDEX, o sitemap passa a mentir - e este teste cai.
     foreach (sitemapLocations($this->get('/sitemap.xml')->assertOk()->getContent()) as $loc) {
-        $html = $this->get($loc)->assertOk()->getContent();
+        $response = $this->get($loc);
+
+        expect($response->status())->toBe(200, "URL do sitemap sem pagina: {$loc}");
+
+        $html = $response->getContent();
 
         expect($html)
             ->not->toContain('content="noindex')

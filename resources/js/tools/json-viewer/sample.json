@@ -1,0 +1,38 @@
+{
+    "ferramenta": "JSON Viewer",
+    "versao": 2,
+    "ativo": true,
+    "limite de bytes": 5242880,
+    "tags": ["json", "arvore", "validacao"],
+    "autor": {
+        "nome": "Nataniel Fiuza",
+        "site": "https://natanfiuza.dev.br",
+        "redes": null
+    },
+    "recursos": [
+        {
+            "nome": "Arvore colorida",
+            "pronto": true,
+            "atalho": "Ctrl F"
+        },
+        {
+            "nome": "Copiar caminho",
+            "pronto": true,
+            "exemplo": "$.autor.nome"
+        },
+        {
+            "nome": "Ordenar chaves",
+            "pronto": true,
+            "ordem": "alfabetica"
+        }
+    ],
+    "estatisticas": {
+        "nos": 42,
+        "chaves": 18,
+        "itens": 6
+    },
+    "meta": {
+        "limite.mb": 5,
+        "modo": "somente no navegador"
+    }
+}

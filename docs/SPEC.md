@@ -17,12 +17,24 @@ Textos de interface sao escritos com acentuacao correta (o produto e traduzido);
 
 ## 4. Registro de tools
 Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.json`: `slug`, `status` (`soon|available|hidden`), `category`, `icon`, `order` e `keywords` (termos tecnicos de busca). O manifesto guarda so identidade e ciclo de vida - **nenhum texto visivel mora ali**: o nome, a descricao e as palavras-chave traduzidas vem de `tools.<slug>.*` nos 5 idiomas, por convencao a partir do slug.
-O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007).
-Rota generica `/{locale}/tools/{slug}` (F2, junto com a primeira tool `available`). SSR para SEO.
+O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007). `hidden` nao aparece para o visitante em leitor nenhum: hoje o TypeScript a exclui e o `Tools::all()` do PHP ainda a devolve (nada publico consome `all()` - o sitemap usa `available()`), e a F3 alinha os dois quando a primeira tool `hidden` existir.
+Rota generica `/{locale}/tools/{slug}` (entrou na F2, junto com a primeira tool `available`). A pagina e **generica**: `pages/tools/Show.vue` traz so o cabecalho (nome, descricao e icone do registro), as metas e o shell; o componente da tool vem de `resources/js/tools/<slug>/Tool.vue`, resolvido por um glob **lazy** (`tools/components.ts`) - a F3 acrescenta ferramentas sem tocar no shell. Quem decide se a pagina existe e o servidor: **slug desconhecido, tool `soon` e tool `hidden` dao o mesmo 404** (ADR-007), porque um 200 de "em breve" seria uma segunda representacao do status e um link morto no indice. As props sao duas: `slug` (do registro, nunca da URL) e `maxInputBytes` (de `config/tools.php`).
+SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, canonical, hreflang e `og:image` da tool); o editor e a arvore montam no cliente (`ClientOnly`), porque CodeMirror e Web Worker dependem do DOM (ADR-029).
 
 ## 5. Tools
 ### MVP
-1. JSON Viewer/Formatter: arvore colorida colapsavel, busca, copiar caminho (JSONPath), minify/pretty, validar com linha/coluna do erro, ordenar chaves, limite 5 MB, virtualizacao de listas grandes, parse em Web Worker.
+1. JSON Viewer/Formatter: arvore colorida colapsavel, busca, copiar caminho (JSONPath), minify/pretty, validar com linha/coluna do erro, ordenar chaves, limite 5 MB, virtualizacao de listas grandes, parse em Web Worker. **Entregue na F2** (aceite em docs/acceptance/FASE-2.md), na pagina generica descrita na secao 4:
+
+   - **Shell** (`components/tool/ToolShell.vue`): dois paineis (entrada | saida) com divisor arrastavel - `role="separator"`, setas do teclado, duplo clique restaura e a divisao fica no `localStorage` -, e **abas no mobile** (o `Tabs` do shadcn-vue ja vendorizado), porque lado a lado nao cabe numa tela de telefone. Barra de acoes com o `kbd` do atalho ao lado de cada botao.
+   - **Entrada**: CodeMirror 6 com realce por tokens `--json-*`, marcacao de erro na linha (`lintGutter`), historico e desfazer (ADR-018). Alem de digitar e colar: **abrir arquivo** e **arrastar e soltar** (lidos com `FileReader`), exemplo pronto e limpar.
+   - **Saida**: a arvore (o painel nao tem abas Arvore/Formatado - formatar, minificar e ordenar chaves agem no texto da esquerda). Colapso por no, expandir/recolher tudo, copiar o caminho JSONPath de qualquer no (`.chave` quando o nome e identificador, `['chave']` quando nao e), contagem de chaves, itens e tamanho.
+   - **Busca** na arvore por **chave e valor**, sem acento e sem caixa (`normalize()` da busca da home), expandindo os ancestrais do que casa, com contador de resultados e aviso quando a lista e cortada. Busca por caminho JSONPath nao entrou.
+   - **Limite de entrada** de `config/tools.php` (`TOOLS_MAX_INPUT_BYTES`, padrao 5 MB): passar dele **nao bloqueia a digitacao**, bloqueia a analise, com o tamanho formatado no idioma da pagina. O limite protege o navegador de quem usa, nao o servidor.
+   - **Erro com linha e coluna**: a posicao sai do texto do motor (`at position N`, `line N column M`) e a linha/coluna sao calculadas aqui; a mensagem crua do motor fica como detalhe tecnico. A ultima saida valida continua na tela enquanto o texto esta invalido.
+   - **Virtualizacao propria** das listas grandes (janela sobre linhas de altura uniforme, conta numa funcao pura) acima de um limiar de config - sem dependencia nova; o CodeMirror ja virtualiza o texto dele.
+   - **Parse em Web Worker** com **queda para a thread principal** quando `Worker` nao existe ou a criacao falha, e descarte de resposta velha (a digitacao tem debounce).
+   - Nao entrou (e nao estava na linha do SPEC): o painel de busca do proprio CodeMirror (Cmd+F), a indentacao por Tab (`indentWithTab`) e a validacao por schema.
+
 2. AI SQL Builder (secao 6).
 3. JSON -> TypeScript / PHP DTO / Pydantic.
 4. SQL Formatter (dialetos MySQL, PostgreSQL, SQL Server, SQLite).
@@ -91,7 +103,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 ## 9. Fases (cada uma termina com testes verdes e parada para revisao)
 - F0 Fundacao: projeto Laravel 13 + starter Vue, TS estrito, Tailwind tokens, shadcn-vue, i18n 5 idiomas, layout, tema claro/escuro/sistema (sem flash, ADR-021), SSR da Inertia ligado em producao, deploy.sh, supervisor conf, Pest/Vitest.
 - F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA: concluida em 2026-10-14. As 8 tools do MVP entram **registradas** com `status: "soon"` (nenhuma funciona ainda): grid, busca, sitemap e testes ja sao reais e cada fase seguinte so troca o status. Vieram junto o sitemap/robots servidos pela aplicacao e as tags OG com imagem padrao (heranca da F0, ADR-007/013). Aceite em docs/acceptance/FASE-1.md.
-- F2 JSON Viewer (com CodeMirror 6 e testes).
+- F2 JSON Viewer (com CodeMirror 6 e testes): concluida em 2026-10-14. O `json-viewer` e a primeira tool `available` - o card da home passa a linkar e o sitemap a listar -, na **pagina generica da tool** (secao 4, ADR-029), com CodeMirror 6 minimo e o realce por tokens do DESIGN (ADR-018) e o parse em Web Worker. Veio junto a **imagem OG por tool** (ADR-030). Aceite em docs/acceptance/FASE-2.md.
 - F3 Tools simples (3 a 8 do MVP).
 - F4 Auth: concluida. O ciclo principal - login e-mail/senha, OAuth Google/GitHub, verificacao, definir senha, newsletter e paginas legais - entrou junto da F0 (ADR-022/023/024), e as telas de settings traduzidas e o ciclo de conta (exportar e excluir conta, secao 8) entraram no bloco de 2026-10-14 (ADR-026/028).
 - F5 AI SQL Builder: output_targets, cache, fila, DeepSeek, polling, cota free. O estado da cota (`App\Support/Quota`) e o livro-razao ja existem (ADR-027); falta o consumo.
@@ -129,11 +141,12 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Consentimento com **tres estados** e decisao resolvida no servidor: sem cookie (ou com cookie corrompido) a decisao e nula e o banner aparece; o GA4 so e injetado no cliente, depois do aceite e com id configurado (ADR-013).
 - `robots.txt` e `sitemap.xml` servidos pela **aplicacao**, com o arquivo estatico de `public/` removido: arquivo estatico vence a rota e amarraria a linha do `Sitemap:` ao ambiente.
 - Guia de estilo fora do indice e do sitemap: e pagina de referencia do DESIGN, nao conteudo do site - continua navegavel, mas `noindex`.
-- Uma imagem OG padrao do site (1200x630), **comitada**, gerada por comando artisan de uso unico que nunca roda em producao (o VPS nao tem GD nem rede para baixar as fontes); a imagem por tool fica para a F2/F3.
+- Uma imagem OG padrao do site (1200x630), **comitada**, gerada por comando artisan de uso unico que nunca roda em producao (o VPS nao tem GD nem rede para baixar as fontes); a imagem por tool ficou para a F2 e chegou la (ADR-030).
+- Rota `/{locale}/tools/{slug}` com **pagina generica da tool**: o cabecalho e o shell sao um so para todas, e o componente da tool vem de `resources/js/tools/<slug>/Tool.vue` por glob lazy - a fase seguinte acrescenta ferramentas sem tocar na pagina (ADR-029). Slug desconhecido, `soon` e `hidden` dao o mesmo 404 (ADR-007), e o SSR entrega a casca e as metas enquanto o editor monta no cliente.
+- Imagem OG **por tool**: uma por tool que funciona e **sem idioma nenhum** (o site tem cinco e a imagem e uma so) - o nome traduzido da ferramenta vai no `og:image:alt`, e a pagina cai na imagem padrao quando o PNG daquela tool nao existe (ADR-030).
 
 ### 11.2 Abertas (com a fase onde precisam ser resolvidas)
 - F4: mensagens de validacao nos 5 idiomas. O Laravel so traz `validation.php` em ingles; nas telas traduzidas o erro de formulario ainda sai em ingles ("The email field is required"), junto com nomes de campo em ingles.
-- F2: `--elevated` (`#5d707f`) e usado como cor de pontuacao do JSON no DESIGN.md, contrariando a propria regra de que a cor serve so para bordas/superficies.
 - F5: nome da coluna de dialetos em `output_targets` (ADR-011 diz `dialetos`; secao 6 diz `supported_dialects(json)` + `sort`).
 - F5: Laravel AI SDK x cliente HTTP fino (diferido pelo ADR-003).
 - Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek, GA4).

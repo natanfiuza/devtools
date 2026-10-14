@@ -1,0 +1,8 @@
+{
+    "slug": "hidden-tool",
+    "status": "hidden",
+    "category": "json",
+    "icon": "braces",
+    "order": 40,
+    "keywords": ["fixture", "hidden"]
+}

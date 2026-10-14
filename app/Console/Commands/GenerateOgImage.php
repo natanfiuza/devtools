@@ -10,17 +10,20 @@ use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
- * Desenha a imagem padrao de compartilhamento (og:image).
+ * Desenha as imagens de compartilhamento (og:image): a padrao do site e uma por
+ * tool que funciona.
  *
- * Comando de uso unico: o PNG sai em public/ e vai comitado, entao em producao
- * ele nunca roda - o VPS nao precisa de GD nem de rede. E por isso que as
- * fontes sao baixadas aqui, na primeira execucao, para storage/app/og-fonts
+ * Comando de uso unico: os PNGs saem em public/ e vao comitados, entao em
+ * producao ele nunca roda - o VPS nao precisa de GD nem de rede. E por isso que
+ * as fontes sao baixadas aqui, na primeira execucao, para storage/app/og-fonts
  * (fora do git), em vez de entrarem no repositorio.
  *
- * O desenho segue o DESIGN - tipografico, sem decoracao: o wordmark e os nomes
- * das tools registradas, que saem do proprio registro (App\Support\Tools).
- * Mexeu no registro ou nos nomes das tools, roda o comando de novo. Nao ha
- * frase em idioma nenhum: o site tem cinco idiomas e a imagem e uma so.
+ * O desenho segue o DESIGN - tipografico, sem decoracao. A imagem padrao traz o
+ * wordmark e os nomes das tools registradas; a de cada tool troca a lista pelo
+ * nome dela e pelos termos do proprio manifest (`keywords`), que sao o que o
+ * App\Support\Tools entrega. Tudo sai do registro: mexeu nele, roda o comando
+ * de novo. Nao ha frase em idioma nenhum - o site tem cinco idiomas e a imagem
+ * e uma so.
  *
  * Cores do tema escuro do DESIGN.md (--bg, --fg, --brand, --fg-muted).
  */
@@ -28,7 +31,7 @@ class GenerateOgImage extends Command
 {
     protected $signature = 'seo:og-image';
 
-    protected $description = 'Gera a imagem padrao de compartilhamento em public/';
+    protected $description = 'Gera a imagem padrao e a de cada tool que funciona em public/';
 
     private const BACKGROUND = [0x0B, 0x0C, 0x0F];
 
@@ -49,6 +52,12 @@ class GenerateOgImage extends Command
 
     private const NAMES_LINE_HEIGHT = 52;
 
+    /** Na imagem da tool, o wordmark e coadjuvante: entra pequeno, no alto. */
+    private const TOOL_WORDMARK_SIZE = 44;
+
+    /** Piso do nome da tool: abaixo disto o texto fica menor que a lista. */
+    private const TOOL_NAME_MIN_SIZE = 56;
+
     public function handle(): int
     {
         $mono = $this->font('mono');
@@ -67,27 +76,91 @@ class GenerateOgImage extends Command
             return self::FAILURE;
         }
 
-        $image = $this->draw($width, $height, $mono, $sans);
-        $path = public_path((string) config('seo.image.file'));
+        $default = public_path((string) config('seo.image.file'));
 
-        if (! imagepng($image, $path, 9)) {
-            $this->error("Nao foi possivel escrever {$path}.");
-
+        if (! $this->write($this->drawDefault($width, $height, $mono, $sans), $default)) {
             return self::FAILURE;
         }
 
-        $this->info("Imagem escrita em {$path} ({$width}x{$height}).");
+        // Uma imagem por tool que funciona: e a imagem do card da pagina dela.
+        // Tool que nao funciona nao tem pagina e nao precisa de card.
+        foreach (Tools::available() as $tool) {
+            $path = public_path($this->toolsDir().'/'.$tool['slug'].'.png');
+
+            File::ensureDirectoryExists(dirname($path));
+
+            if (! $this->write($this->drawTool($tool['slug'], $tool['keywords'], $width, $height, $mono, $sans), $path)) {
+                return self::FAILURE;
+            }
+        }
 
         return self::SUCCESS;
     }
 
     /**
-     * O desenho inteiro: fundo, wordmark e a lista de tools.
+     * O desenho da imagem padrao: o wordmark e a lista de tools abaixo.
      *
      * @param  int<1, max>  $width
      * @param  int<1, max>  $height
      */
-    private function draw(int $width, int $height, string $mono, string $sans): GdImage
+    private function drawDefault(int $width, int $height, string $mono, string $sans): GdImage
+    {
+        $image = $this->background($width, $height);
+
+        // Wordmark `devtools_`, igual ao AppWordmark: o cursor na cor de marca.
+        $baseline = (int) ($height / 2) - 24;
+        $this->wordmark($image, $mono, self::WORDMARK_SIZE, self::MARGIN, $baseline);
+
+        // Abaixo, o que o site tem: os nomes das tools, vindos do registro.
+        $this->lines($image, $this->toolNames(), $sans, $baseline + 96, $width);
+
+        return $image;
+    }
+
+    /**
+     * O desenho da pagina de uma tool: o wordmark pequeno no alto e o nome da
+     * ferramenta no lugar do wordmark grande.
+     *
+     * A linha de baixo traz os termos do proprio manifest (`keywords`) em vez
+     * dos nomes das outras tools - o card fala daquela ferramenta, e continua
+     * sem frase em idioma nenhum.
+     *
+     * @param  list<string>  $keywords
+     * @param  int<1, max>  $width
+     * @param  int<1, max>  $height
+     */
+    private function drawTool(string $slug, array $keywords, int $width, int $height, string $mono, string $sans): GdImage
+    {
+        $image = $this->background($width, $height);
+
+        $limit = $width - 2 * self::MARGIN;
+
+        $this->wordmark($image, $mono, self::TOOL_WORDMARK_SIZE, self::MARGIN, self::MARGIN + self::TOOL_WORDMARK_SIZE);
+
+        $name = __("tools.{$slug}.name");
+        $size = self::WORDMARK_SIZE;
+
+        // Nome longo encolhe em vez de vazar: a imagem tem largura fixa e o
+        // texto nunca chega na margem direita.
+        while ($size > self::TOOL_NAME_MIN_SIZE && $this->textWidth($name, $sans, $size) > $limit) {
+            $size -= 8;
+        }
+
+        $baseline = (int) ($height / 2) - 24;
+        $this->text($image, $name, $sans, $size, self::MARGIN, $baseline, self::FOREGROUND);
+
+        $this->lines($image, $keywords, $sans, $baseline + 96, $width);
+
+        return $image;
+    }
+
+    /**
+     * Fundo do desenho: o mesmo `--bg` do tema escuro, nas duas imagens.
+     *
+     * @param  int<1, max>  $width
+     * @param  int<1, max>  $height
+     */
+    private function background(int $width, int $height): GdImage
     {
         $image = imagecreatetruecolor($width, $height);
 
@@ -104,29 +177,61 @@ class GenerateOgImage extends Command
             $this->color($image, self::BACKGROUND),
         );
 
-        // Wordmark `devtools_`, igual ao AppWordmark: o cursor na cor de marca.
-        $baseline = (int) ($height / 2) - 24;
-        $this->text($image, 'devtools', $mono, self::WORDMARK_SIZE, self::MARGIN, $baseline, self::FOREGROUND);
+        return $image;
+    }
 
-        $cursor = self::MARGIN + $this->textWidth('devtools', $mono, self::WORDMARK_SIZE);
-        $this->text($image, '_', $mono, self::WORDMARK_SIZE, $cursor, $baseline, self::BRAND);
+    /**
+     * O wordmark `devtools_`, com o cursor na cor de marca (AppWordmark).
+     */
+    private function wordmark(GdImage $image, string $font, int $size, int $x, int $y): void
+    {
+        $this->text($image, 'devtools', $font, $size, $x, $y, self::FOREGROUND);
 
-        // Abaixo, o que o site tem: os nomes das tools, vindos do registro.
+        $cursor = $x + $this->textWidth('devtools', $font, $size);
+        $this->text($image, '_', $font, $size, $cursor, $y, self::BRAND);
+    }
+
+    /**
+     * A lista de termos do desenho, quebrada na largura da imagem.
+     *
+     * @param  list<string>  $terms
+     * @param  int<1, max>  $width
+     */
+    private function lines(GdImage $image, array $terms, string $font, int $y, int $width): void
+    {
         $lines = $this->wrap(
-            implode('  ·  ', $this->toolNames()),
-            $sans,
+            implode('  ·  ', $terms),
+            $font,
             self::NAMES_SIZE,
             $width - 2 * self::MARGIN,
         );
 
-        $y = $baseline + 96;
-
         foreach ($lines as $line) {
-            $this->text($image, $line, $sans, self::NAMES_SIZE, self::MARGIN, $y, self::MUTED);
+            $this->text($image, $line, $font, self::NAMES_SIZE, self::MARGIN, $y, self::MUTED);
             $y += self::NAMES_LINE_HEIGHT;
         }
+    }
 
-        return $image;
+    /**
+     * Escreve o PNG, dizendo onde ele foi parar.
+     */
+    private function write(GdImage $image, string $path): bool
+    {
+        if (! imagepng($image, $path, 9)) {
+            $this->error("Nao foi possivel escrever {$path}.");
+
+            return false;
+        }
+
+        $this->info('Imagem escrita em '.$path.' ('.imagesx($image).'x'.imagesy($image).').');
+
+        return true;
+    }
+
+    /** Diretorio das imagens por tool, dentro de public/. */
+    private function toolsDir(): string
+    {
+        return trim((string) config('seo.image.tools_dir'), '/');
     }
 
     /**

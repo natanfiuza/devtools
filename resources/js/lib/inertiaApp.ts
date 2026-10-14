@@ -27,6 +27,10 @@ export function resolveLayout(name: string): unknown {
             return PublicLayout;
         case name.startsWith('newsletter/'):
             return PublicLayout;
+        // As ferramentas do site (F2) sao paginas publicas e indexaveis: mesma
+        // casca da home, sem sidebar nem barra de conta.
+        case name.startsWith('tools/'):
+            return PublicLayout;
         case name.startsWith('auth/'):
             return AuthLayout;
         // O painel tem layout proprio: nao herda o header publico nem a

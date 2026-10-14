@@ -3,6 +3,110 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## F2 - JSON Viewer, pagina da tool e imagem OG por tool - 2026-10-14
+
+A fase da secao 9 do SPEC, mais o que a F1 deixou explicitamente para ela: a
+rota `/{locale}/tools/{slug}` e a imagem OG por tool. O `json-viewer` vira a
+**primeira tool `available`** - o card da home passa a linkar, a busca a abrir e
+o sitemap a listar -, e a pagina onde ela abre e generica: a F3 acrescenta
+ferramentas sem tocar em pagina, shell ou rota. Aceite em
+`docs/acceptance/FASE-2.md`.
+
+### Adicionado
+
+- **Rota e pagina da tool** (ADR-029): `GET /{locale}/tools/{slug}`
+  (`tools.show`) com `ToolController` - slug desconhecido, tool `soon` e tool
+  `hidden` dao o **mesmo 404** -, props `slug` (do registro) e `maxInputBytes`
+  (`config/tools.php`, `TOOLS_MAX_INPUT_BYTES`, padrao 5 MB). A pagina
+  (`pages/tools/Show.vue`) e generica: breadcrumb, cabecalho com nome,
+  descricao e icone do registro, metas via `PageHead` e o componente da tool
+  vindo de `resources/js/tools/<slug>/Tool.vue` por **glob lazy**
+  (`tools/components.ts`). O SSR entrega a casca e as metas; o editor monta no
+  cliente (`ClientOnly`), porque CodeMirror e Web Worker dependem do DOM.
+- **Shell da tool** (`components/tool/ToolShell.vue`, `ToolActionBar.vue`,
+  `ToolButton.vue`): barra de acoes com o `kbd` do atalho, dois paineis
+  (entrada | saida) com divisor arrastavel - `role="separator"`,
+  `aria-valuenow`, setas do teclado, duplo clique restaura e a divisao fica no
+  `localStorage` por tool - e **abas no mobile** (`Tabs` do reka-ui ja
+  vendorizado, sem dependencia nova) com `force-mount`: trocar de aba nao pode
+  desmontar o editor.
+- **JSON Viewer** (a primeira tool que funciona): editor CodeMirror 6 com
+  realce pelos tokens do DESIGN, erro marcado na linha e historico; arvore
+  colorida colapsavel com contagem de chaves, itens e tamanho, expandir/recolher
+  tudo e copia do **caminho JSONPath** de qualquer no; busca na arvore por chave
+  e valor (sem acento e sem caixa) expandindo os ancestrais do que casa;
+  formatar, minificar e ordenar chaves (recursivo, arrays intactos); erro de
+  sintaxe com **linha e coluna** calculadas aqui, mantendo a ultima saida valida
+  na tela; abrir arquivo, arrastar e soltar, exemplo, limpar, copiar e baixar;
+  limite de entrada vindo da configuracao, com o tamanho formatado no idioma da
+  pagina.
+- **Funcoes puras** (`lib/parse`, `tree`, `path`, `transform`, `window`) e
+  **virtualizacao propria** das listas grandes - janela sobre linhas de altura
+  uniforme, conta numa funcao pura, sem dependencia nova.
+- **Parse em Web Worker com queda** (`lib/parser.worker.ts`): o JSON e analisado
+  fora da thread principal, e o cliente cai para a thread principal quando nao
+  ha `Worker` (SSR, jsdom) ou a criacao falha, descartando resposta velha - a
+  digitacao tem debounce.
+- **Imagem OG por tool** (ADR-030): `seo:og-image` passa a escrever tambem
+  `public/og/<slug>.png` para cada tool `available`, com o nome da ferramenta no
+  lugar do wordmark e os termos do proprio manifesto na linha de baixo;
+  `config/seo.php` ganhou `image.tools_dir` e `App\Support\Seo` escolhe a
+  imagem pela rota, **caindo na padrao** quando o arquivo nao existe. A imagem
+  nao tem idioma: o nome traduzido da ferramenta vai no `og:image:alt`.
+- i18n `tools.ui.*` (os textos do shell, compartilhados pelas 8 tools) e
+  `tools.json-viewer.*` nos 5 idiomas.
+- Testes: `ToolPageTest` (Pest) e `SeoMetaTest` estendido (imagem, `alt`
+  traduzido e queda para a padrao), mais `json-parse`, `json-tree`, `json-path`,
+  `json-transform`, `json-window`, `json-viewer`, `json-editor-theme`,
+  `tool-shell` e `tool-page` (Vitest).
+
+### Alterado
+
+- `resources/js/tools/json-viewer/manifest.json` passa a `status: "available"`:
+  o card da home ganha link e perde o selo, a busca Cmd+K passa a abrir a
+  pagina, e o `SitemapTest` deixa de fixar "nenhuma tool no sitemap" e passa a
+  usar a rota de verdade.
+- `ToolCard.vue` vira `Link` quando a tool tem caminho; `inertiaApp.ts` mapeia
+  `tools/*` para o layout publico.
+- `App\Support\Tools::all()` passa a carregar os `keywords` do manifesto (a
+  imagem OG usa os termos da propria tool).
+- `--json-punct` ganha valor proprio nos dois temas (fecha o item da SPEC
+  11.2): a pontuacao do JSON deixa de depender do `--elevated`, que fica so com
+  bordas e superficies - o DESIGN passa a citar o valor real.
+
+### Decidido
+
+- ADR-018 revisado (conjunto minimo de pacotes, sem `basicSetup`, tema por
+  token e parse no worker com queda) e **ADR-029** (pagina generica da tool) e
+  **ADR-030** (imagem OG por tool) novos.
+
+### Corrigido
+
+- Revisao independente da F1 (secao "Revisao independente" do
+  `docs/acceptance/FASE-1.md`): **aceitar de novo depois de recusar religa a
+  medicao** - `loadAnalytics` reafirma o `consent update granted` em vez de sair
+  cedo quando a tag ja esta na pagina (`lib/analytics.ts`), com teste proprio
+  para a sequencia aceitar -> recusar -> aceitar.
+- O teste de import sob demanda do registro (`tools-registry.test.ts`) ganhou
+  **timeout explicito**: o gate `npm run test` ficava vermelho por timeout do
+  Vitest sob carga, nao por defeito.
+- `docs/SPEC.md`: os itens **3 a 8 do MVP** voltam a secao 5 (o bloco tinha sido
+  removido sem substituto); o `Esc` do rodape da palette virou chave de i18n
+  (`app.search.key_escape`, "Échap" em frances); o contrato de `hidden` entre os
+  dois leitores foi registrado no ADR-007 e na secao 4.
+
+### Fora do escopo (proximas fases)
+
+- As tools simples 3 a 8 do MVP (F3): elas entram pelo **mesmo** shell e pela
+  mesma pagina, e uma tool nova custa um `Tool.vue`, o status no manifesto e as
+  chaves de traducao.
+- Nao entraram no viewer (e nao estavam na linha do SPEC): o painel de busca do
+  proprio CodeMirror (rotulos fixos em ingles), a indentacao por Tab e a
+  validacao por schema.
+- O arrasto real de arquivo, o layout do CodeMirror e o worker de verdade nao
+  sao testaveis em jsdom: o que os cerca (funcao pura da janela, caminho de
+  queda e smoke manual com SSR) esta coberto.
+
 ## F1 - Registro de tools, home, busca e consentimento - 2026-10-14
 
 A fase da secao 9 do SPEC, mais o que a F0 deixou para tras (sitemap e imagens
@@ -16,8 +120,10 @@ cada fase seguinte so troca o status. Aceite em `docs/acceptance/FASE-1.md`.
   `resources/js/tools/<slug>/` com `slug`, `status`, `category`, `icon`,
   `order` e `keywords`; `registry.ts` carrega tudo com `import.meta.glob` e
   `App\Support\Tools` le os **mesmos arquivos** no PHP, para o sitemap. Nenhum
-  texto visivel mora no manifesto: os 5 idiomas trazem `tools.<slug>.*`, com o
-  nome da tool em ingles em todos (nome de produto).
+  texto visivel mora no manifesto: os 5 idiomas trazem `tools.<slug>.*`. Cinco
+  nomes sao de produto e ficam iguais em ingles nos 5 idiomas; os outros tres
+  sao descritivos e mudam por idioma (`JSON to code`, `Base64, URL and Hash` e
+  `Timestamp and UUID` em ingles).
 - **Home real** (`HomeController`): hero com titulo e campo de busca, chips das
   categorias que tem tool, grid de 3 colunas com as 8 tools (card sem link e com
   o selo "Em breve" enquanto a tool nao abre), destaque do AI SQL Builder com

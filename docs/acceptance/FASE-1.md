@@ -99,3 +99,52 @@ Conferencia manual pendente (usuario): abrir a palette no teclado, aceitar e
 recusar no banner e ver a tag do GA entrar e sair do `<head>` no devtools com um
 id real - em teste e em desenvolvimento nao ha id, entao a medicao fica desligada
 de proposito.
+
+## Revisao independente (2026-10-14)
+
+Auditoria pedida depois da fase fechada, para **conferir** o auto-relato acima em
+vez de reassumi-lo: quatro leituras independentes dos criterios nas fontes, os
+cinco gates executados de verdade (com o exit code capturado, nao com o do
+`tail` do pipe) e o smoke de SSR refeito do zero, com banco descartavel. Nada
+acima foi reescrito - a tabela original fica como registro do que foi aceito na
+F1; o que segue e o que a revisao encontrou.
+
+Os criterios 3, 4, 5, 7, 9, 11 e 15 se confirmaram como estavam. O **6** e o
+**13** precisaram de correcao; o **14** ganhou evidencia nova; o **12** tinha uma
+excecao; o **1** e parte do **10** foram **superados pela F2 por desenho** (o
+`json-viewer` ficou `available`, o card ganhou link e a imagem OG por tool
+chegou); e a tabela acima saiu com imprecisoes de atribuicao e de contagem, que
+este adendo corrige.
+
+| Ponto | O que a revisao achou | O que foi feito |
+|---|---|---|
+| 6 | **Parcial, com defeito real**: o teste de servidor cobria **um** estado (granted com id), nao "nenhum dos estados" como a tabela diz; e a sequencia aceitar -> recusar -> aceitar **nao religava a medicao** - `loadAnalytics` saia cedo quando a tag ja existia, entao o `consent update granted` nunca era reenviado: cookie e tela diziam "granted" e o Consent Mode ficava em `denied`. O teste que executava a sequencia so contava a tag e nao pegava. Falhava para o lado seguro (nao media), mas contrariava o **ADR-013** | `lib/analytics.ts` reafirma o `granted` quando a tag ja esta na pagina, com teste proprio em `consent-banner.test.ts` |
+| 13 | **Nao reproduzivel**: `composer test`, `types:check` e os dois builds verdes, mas `npm run test` vermelho em **3 de 4** passadas completas, sempre o import sob demanda do registro estourando o timeout de 5s do Vitest sob carga (isolado passa em ~3s) - nenhum defeito do codigo testado | Timeout explicito no teste; **3 de 3** passadas verdes (300 testes, 23 arquivos) |
+| 14 | O smoke so existia como registro. Refazer mostrou que ele se sustenta (tabela abaixo), agora com banco SQLite descartavel e uma conferencia a mais: quem **ja decidiu** nao ve o banner no HTML do servidor | Zero erro no log do SSR; **zero** `googletagmanager`/`gtag(` nos 5 idiomas |
+| 12 | "Zero string hardcoded" tinha **uma excecao**: o `<kbd>Esc</kbd>` literal no rodape da palette | Virou `app.search.key_escape` nos 5 idiomas ("Échap" em frances) |
+| 5 | "Sem piscar" e **estrutural** (a decisao e resolvida no servidor a cada carregamento) e nunca teve teste dedicado; a revisao conferiu no HTML do servidor: com `Cookie: consent=granted` **ou** `consent=denied`, o banner nao vem | Evidencia nova, sem teste novo |
+| 8 | "15 URLs" era verdade na F1 e ficou defasado pela F2 (json-viewer x5): hoje sao **20**. O teste deriva a lista do registro, nao fixa numero | So a contagem, corrigida aqui |
+| 2 | "8 testes" do `ToolsRegistryTest` virou **9** (a fixture de manifesto quebrado entrou depois) | So a contagem, corrigida aqui |
+| 1 e 4 | A atribuicao ao `HomeTest` de checagens que so existem em `home.test.ts` (linhas 55 e 58 desta tabela); os chips de categoria sao do `tools-registry.test.ts`, nao do `home.test.ts` | So a atribuicao, corrigida aqui |
+
+Smoke de SSR da revisao: SQLite descartavel, `php artisan serve` com
+`INERTIA_SSR_ENABLED=true` e `node bootstrap/ssr/ssr.js` no 13714, tudo removido
+no fim.
+
+| URL | HTTP | O que foi conferido no HTML **do servidor** |
+|---|---|---|
+| `/en`, `/pt-br`, `/pt-pt`, `/fr`, `/es` | 200 | os 8 nomes de tool em cada idioma (cinco sao nome de produto e ficam em ingles nos 5; tres sao descritivos e sao traduzidos) e os 6 chips de categoria mais o "todas"; precos da tabela formatados no idioma (`R$ 29,90` no pt-BR, `29,90 BRL` no es); os `data-test` dos cartoes e do banner, que so existem no HTML renderizado |
+| `/pt-br/styleguide`, `/pt-br/login` | 200 | `noindex` sem `og:*` e sem hreflang |
+| `/sitemap.xml` | 200 | 20 `loc` e 20 `x-default`, sem `styleguide` e sem tool `soon` |
+| `/robots.txt` | 200 | as 4 linhas de `Disallow` e a linha do `Sitemap:` |
+| as 5 homes com `Cookie: consent=granted` e com `consent=denied` | 200 | banner **ausente** nos dois casos: a decisao chega resolvida do servidor |
+
+Gates depois das correcoes: `composer test` verde (266 testes, 6.380 assercoes);
+`npm run test` **3 de 3** verde (300 testes em 23 arquivos, era 1 de 4);
+`types:check`, `build` e `build:ssr` exit 0.
+
+Resta a conferencia manual de sempre (usuario): palette no teclado,
+aceitar/recusar no banner e ver a tag do GA entrar e sair do `<head>` no devtools
+com um id real no `.env` local - incluindo **aceitar de novo depois de recusar**,
+a sequencia corrigida nesta revisao. Sem id configurado, a medicao fica desligada
+de proposito.

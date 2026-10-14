@@ -18,6 +18,48 @@ return [
         'soon' => 'Coming soon',
     ],
 
+    /*
+    | Textos da casca de qualquer tool (os paineis, a barra de acoes e os
+    | estados). O que e de uma ferramenta so mora em `tools.<slug>.*`.
+    */
+    'ui' => [
+        'input' => 'Input',
+        'output' => 'Output',
+        'resize' => 'Resize the panels',
+        'drop' => 'Drop the file here',
+
+        'actions' => [
+            'open' => 'Open file',
+            'example' => 'Example',
+            'clear' => 'Clear',
+            'copy' => 'Copy',
+            'copied' => 'Copied',
+            'copy_manual' => 'Select the text and copy it',
+            'download' => 'Download',
+        ],
+
+        'states' => [
+            'empty' => 'Paste, type or drop a JSON file to start.',
+            'parsing' => 'Parsing...',
+            'unavailable' => 'Tool unavailable.',
+            'invalid' => 'Invalid JSON on line {line}, column {column}.',
+            'invalid_no_position' => 'Invalid JSON.',
+            'too_large' => 'The text is {size} and goes past the {limit} limit. Parsing is off.',
+            'file_too_large' => 'The file is {size} and goes past the {limit} limit.',
+            'file_type' => 'Unsupported format. Use a .json or .txt file.',
+            'file_unreadable' => 'Could not read the file.',
+            'drop_hint' => 'Drop to open the file.',
+        ],
+
+        'limits' => [
+            'of' => 'of {limit}',
+        ],
+
+        'shortcuts' => [
+            'title' => 'Shortcuts',
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -31,6 +73,40 @@ return [
         'name' => 'JSON Viewer',
         'description' => 'Explore, format and validate JSON as a tree, with search and copy of any path.',
         'keywords' => 'format, pretty print, minify, validate, tree, path',
+        'intro' => 'Paste JSON to see the colour-coded tree, format, minify and copy the path of any node. Everything runs in your browser: nothing you paste here is sent to the server.',
+
+        'format' => 'Format',
+        'minify' => 'Minify',
+        'sort_keys' => 'Sort keys',
+        'expand_all' => 'Expand all',
+        'collapse_all' => 'Collapse all',
+        'download_name' => 'document',
+
+        'tree' => [
+            'toggle' => 'Collapse or expand',
+            'copy_path' => 'Copy path',
+            'copied' => 'Path copied: {path}',
+        ],
+
+        'search' => [
+            'placeholder' => 'Search key or value',
+            'label' => 'Search the tree',
+            'clear' => 'Clear search',
+            'results' => 'Results: {count}',
+            'truncated' => 'Showing the first {count} results.',
+            'none' => 'No results.',
+        ],
+
+        'stats' => [
+            'keys' => 'Keys: {count}',
+            'items' => 'Items: {count}',
+        ],
+
+        'shortcuts' => [
+            'search' => 'Search the tree',
+            'undo' => 'Undo in the editor',
+            'paste' => 'Paste into the editor',
+        ],
     ],
 
     'ai-sql-builder' => [
