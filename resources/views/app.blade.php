@@ -1,5 +1,6 @@
 @php
     use App\Support\Locales;
+    use App\Support\Seo;
 
     // O tema e o idioma vem resolvidos no servidor (App\Http\Middleware\
     // ResolveLocale e HandleAppearance): o HTML ja sai com a classe do tema e
@@ -12,6 +13,16 @@
     // Telas de acesso e paginas de token nao entram no indice nem ganham
     // hreflang (App\Support\Seo); a prop vem compartilhada pelo Inertia.
     $noindex = (bool) ($page['props']['seo']['noindex'] ?? false);
+
+    // A URL desta pagina no idioma dela: e o canonical e tambem o og:url.
+    $canonical = $noindex
+        ? url()->current()
+        : ($alternates[$localeConfig['html']] ?? url()->current());
+
+    // Metas de compartilhamento: so nas paginas indexaveis, que sao as unicas
+    // feitas para circular. As de cada pagina (titulo e descricao) saem do
+    // <Head> do Inertia, junto com o <title>.
+    $og = $noindex ? null : Seo::openGraph();
 @endphp
 <!DOCTYPE html>
 <html
@@ -52,7 +63,7 @@
 
         @if ($noindex)
             <meta name="robots" content="noindex, follow">
-            <link rel="canonical" href="{{ url()->current() }}">
+            <link rel="canonical" href="{{ $canonical }}">
         @else
             @foreach ($alternates as $hreflang => $url)
                 <link rel="alternate" hreflang="{{ $hreflang }}" href="{{ $url }}">
@@ -60,8 +71,22 @@
 
             @if ($alternates !== [])
                 <link rel="alternate" hreflang="x-default" href="{{ $alternates[Locales::html(Locales::fallback())] ?? reset($alternates) }}">
-                <link rel="canonical" href="{{ $alternates[$localeConfig['html']] ?? url()->current() }}">
             @endif
+
+            <link rel="canonical" href="{{ $canonical }}">
+
+            <meta property="og:type" content="{{ $og['type'] }}">
+            <meta property="og:site_name" content="{{ $og['siteName'] }}">
+            <meta property="og:locale" content="{{ $og['locale'] }}">
+            @foreach ($og['alternates'] as $alternate)
+                <meta property="og:locale:alternate" content="{{ $alternate }}">
+            @endforeach
+            <meta property="og:url" content="{{ $canonical }}">
+            <meta property="og:image" content="{{ $og['image']['url'] }}">
+            <meta property="og:image:width" content="{{ $og['image']['width'] }}">
+            <meta property="og:image:height" content="{{ $og['image']['height'] }}">
+            <meta property="og:image:alt" content="{{ $og['image']['alt'] }}">
+            <meta name="twitter:card" content="summary_large_image">
         @endif
 
         @fonts

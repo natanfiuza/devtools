@@ -153,17 +153,27 @@ it('nao atende as telas de acesso sem o prefixo de idioma', function () {
 });
 
 it('declara hreflang de todos os idiomas na pagina publica', function () {
-    $response = $this->get('/pt-br/styleguide')->assertOk();
+    $response = $this->get('/pt-br')->assertOk();
 
     $html = $response->getContent();
 
     foreach (Locales::all() as $locale) {
         expect($html)->toContain('hreflang="'.$locale['html'].'"');
-        expect($html)->toContain(url('/'.$locale['slug'].'/styleguide'));
+        expect($html)->toContain(url('/'.$locale['slug']));
     }
 
     expect($html)->toContain('hreflang="x-default"');
-    expect($html)->toContain('<link rel="canonical" href="'.url('/pt-br/styleguide').'">');
+    expect($html)->toContain('<link rel="canonical" href="'.url('/pt-br').'">');
+});
+
+it('tira o guia de estilo do indice', function () {
+    // Pagina de referencia do DESIGN, nao e conteudo: continua navegavel, mas
+    // sem hreflang, com noindex e fora do sitemap (App\Support\Seo).
+    $html = $this->get('/pt-br/styleguide')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<meta name="robots" content="noindex, follow">')
+        ->not->toContain('hreflang');
 });
 
 it('nao declara hreflang nas telas de acesso', function () {

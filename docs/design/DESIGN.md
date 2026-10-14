@@ -14,13 +14,42 @@ Excecao documentada: no escuro a pontuacao JSON e #71828e, e nao o --elevated #5
 Inter (UI), JetBrains Mono (codigo) - baixadas do Bunny Fonts no build e servidas pelo proprio dominio (plugin `fonts` do laravel-vite-plugin, com preload). Escala 12/13/14/16/20/32/56. Titulos com tracking -0.02em, peso 500-600.
 ## Layout
 Container 1120px; header 56px sticky com blur: wordmark `devtools_` (cursor em --accent), links Tools/Pricing/Docs, seletor de idioma, Cmd+K, Login.
-Home: hero (titulo 56px + subtitulo + campo de busca Cmd+K), grid 3 colunas de cards (icone de linha 20px, nome, 1 linha), categorias como chips, secao 'AI SQL Builder' em destaque com preview, footer minimo (idioma, privacidade, termos, doar).
+Home (F1): hero de titulo 56px com subtitulo e um campo de busca que abre a palette; chips de categoria logo abaixo (`JSON`, `SQL`, `Codificacao e hash`, `Seguranca`, `Data e hora`, `Texto` - so as que tem tool); grid de 3 colunas com todas as tools do registro (card de borda 1px sem sombra, icone de linha 20px, nome e uma linha de descricao, com o selo "Em breve" enquanto a tool nao abre); destaque do AI SQL Builder com preview estatico e CTA de cadastro; secao de precos; footer minimo (idioma, Privacidade, Termos, Cookies, doar).
+```
++--------------------------------------------------------------+
+|  devtools_  Tools Precos Styleguide [pt] [Buscar] [Login]    |
+| ------------------------------------------------------------ |
+|                                                              |
+|   Ferramentas                                                |
+|   Formate, converta e inspecione dados direto no navegador.  |
+|   [ Buscar uma ferramenta...                   Cmd K ]       |
+|   ---------------------------------------------------------- |
+|   [Todas] [JSON] [SQL] [Codificacao] [Seguranca] [...]       |
+|   ---------------------------------------------------------- |
+|   +-------------+  +-------------+  +-------------+          |
+|   | {} JSON V.  |  | <> AI SQL B.|  | </> JSON->C |          |
+|   | 1 linha     |  | 1 linha     |  | 1 linha     |          |
+|   |   Em breve  |  |   Em breve  |  |   Em breve  |          |
+|   +-------------+  +-------------+  +-------------+          |
+|   ... 8 cards, 3 por linha ...                               |
+|   ---------------------------------------------------------- |
+|   [ AI SQL Builder - preview estatico + CTA de cadastro ]    |
+|   ---------------------------------------------------------- |
+|   Planos                                                     |
+|   Free (Gratis)    Pro (R$ 29,90/mes)    Pro (R$ 299/ano)    |
+|   5 usos vitalicios 2.000.000 tokens     2.000.000 tokens    |
+|   [Criar conta]    [Falar por e-mail]    [Falar por e-mail]  |
++--------------------------------------------------------------+
+```
+O card nao e link enquanto a tool nao abre: sem `href`, sem cursor de mao - o selo "Em breve" e o aviso, e nao ha clique que nao leve a lugar nenhum. Na secao de precos o CTA do Free e criar conta e o dos pagos e o contato por e-mail, porque no site nao existe botao de assinar (a venda e manual, ADR-027); os numeros vem da tabela `plans`, formatados no idioma da pagina.
 Pagina de tool: 2 paineis (entrada | saida) redimensionaveis, barra de acoes (copiar, baixar, limpar, exemplo), atalhos visiveis, mobile empilhado em abas.
 Tela de acesso (login, criar conta, senha): moldura propria em 3 faixas - barra 56px so com wordmark, idioma e tema; coluna centrada de 384px; rodape de uma linha (copyright, Privacidade, Termos). Cabecalho (titulo 20px + descricao fg-muted) e card de borda 1px sem sombra, padding 24px, raio 12px.
 Login e Register comecam pelos botoes sociais (outline, largura cheia, marca monocromatica 16px) e uma divisoria 'ou'. Erro em --destructive com role=alert e aria-invalid no campo; envio com Spinner dentro do botao. Aviso de sucesso em caixa de borda --accent/40 e fundo --accent/5.
 Newsletter: no rodape publico (campo + botao outline) e, em Register, como checkbox; a resposta sai como toast (flash), nunca inline.
 ## Componentes
 Button (primary --accent texto escuro; ghost; outline), Input, Select, Tabs, Dialog, Command palette, Toast, Badge, Card sem sombra (borda 1px, hover border-strong), Tooltip, Skeleton, ConsentBanner (canto inferior, nao bloqueia).
+Command palette (F1): Dialog + Input do reka-ui ja vendorizado - nao entrou dependencia nova, e nao existe primitivo `command` no projeto. Lista com `role="listbox"`/`option`, `aria-activedescendant` e foco preso no campo; abre por Cmd/Ctrl+K e por `/` fora de campo de texto, fecha no Esc. Cada linha: icone, nome, categoria e o selo "Em breve" quando for o caso; tool que ainda nao abre aparece e nao navega.
+ConsentBanner (F1): faixa no canto inferior esquerdo, largura maxima de 420px, borda 1px, fundo --surface, sem sombra e sem overlay - a pagina continua utilizavel e rolavel. Titulo "Cookies", uma linha de texto, os dois botoes (Aceitar em primary, Recusar em outline) e "Detalhes", que abre as categorias Necessarios (fixa) e Medicao (interruptor) com o link da Politica de Privacidade. Decidido, o banner some e volta so pelo botao "Cookies" no rodape.
 ## Tabela densa (AdminTable)
 Primeira tabela do projeto: ela vive no painel administrativo, nao no site. Regras: borda 1px entre linhas (nunca sombra), altura de linha 40px, cabecalho em 12px maiusculo com fg-subtle, celula numerica alinhada a direita em JetBrains Mono, coluna de acao a direita. Sem zebra. Ordenacao e filtro na barra acima da tabela, nunca dentro do cabecalho. Estados: vazio (titulo + uma linha de ajuda, sem ilustracao), carregando (Skeleton de 5 linhas) e erro (AlertError). Paginacao como contagem + anterior/proxima, porque o painel nao usa scroll infinito.
 ## Painel do usuario (area autenticada)
@@ -63,3 +92,5 @@ chaves #a7a5c6; strings #66ced6; numeros #8797b2; boolean/null #6d8a96; pontuaca
 Contraste AA, foco visivel 2px --accent, navegacao por teclado, aria-labels, i18n com textos expansivos (fr/es ~30% maiores).
 ## Entregaveis de design
 1) tokens.css + tailwind preset 2) pagina /styleguide com todos os componentes 3) wordmark SVG 4) favicon 5) OG image por tool (gerada) 6) mockups textuais das telas Home, Tool, AI Builder, Pricing, Admin.
+Estado na F1: 1 a 4 prontos; a **imagem OG padrao do site** (`public/og-default.png`, 1200x630) entrou junto - fundo --bg, wordmark `devtools_` com o cursor em --accent e os nomes das tools em --fg-muted -, gerada por um comando artisan de uso unico (`seo:og-image`) que baixa as fontes para `storage/app/og-fonts/` (fora do git) e escreve o PNG, que **vai comitado**: em producao o comando nunca roda e o VPS nao precisa de GD nem de rede. A imagem **por tool** (5) continua pendente e entra na F2/F3, quando houver tool `available` para ilustrar. Os mockups (6) cobrem Home, Tool, AI Builder, Pricing e Admin; o do Pricing e o da secao de precos da home.
+Fora do design, mas decidido junto: `sitemap.xml` e `robots.txt` sao servidos pela **aplicacao** (`/sitemap.xml`, `/robots.txt`, fora do prefixo de idioma) e o `public/robots.txt` estatico saiu do repositorio - arquivo estatico vence a rota, no nginx e no `artisan serve`, e amarraria a linha do `Sitemap:` a um ambiente.

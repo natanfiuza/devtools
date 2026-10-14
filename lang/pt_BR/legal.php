@@ -33,7 +33,7 @@ return [
             ],
             'cookies' => [
                 'title' => 'Cookies',
-                'body' => 'Usamos apenas cookies essenciais: sessão, idioma e preferência de tema. Nada de cookie de publicidade. Uma medição de uso agregada pode entrar depois, sempre com a opção de recusar.',
+                'body' => 'Os cookies essenciais mantêm o site funcionando: sessão, idioma e preferência de tema. Os de medição (Google Analytics) são opcionais e só entram depois que você aceita; a escolha pode ser mudada a qualquer momento em "Cookies", no rodapé. Nada de cookie de publicidade.',
             ],
             'retention' => [
                 'title' => 'Por quanto tempo',

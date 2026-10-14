@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LegalDocument from '@/components/LegalDocument.vue';
+import PageHead from '@/components/PageHead.vue';
 
 /**
  * Politica de Privacidade, publica e indexavel (`/{locale}/privacy`).
@@ -28,10 +29,18 @@ const sections = [
     'security',
     'changes',
 ] as const;
+
+/** A introducao e o resumo da pagina - o mesmo no texto e no compartilhamento. */
+const description = computed<string>(() =>
+    t('legal.privacy.intro', { app: t('app.brand') }),
+);
 </script>
 
 <template>
-    <Head :title="t('legal.privacy.title')" />
+    <PageHead
+        :title="t('legal.privacy.title')"
+        :description="description"
+    />
 
     <LegalDocument
         namespace="privacy"

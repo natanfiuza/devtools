@@ -1,0 +1,8 @@
+{
+    "slug": "json-to-code",
+    "status": "soon",
+    "category": "json",
+    "icon": "file-code",
+    "order": 30,
+    "keywords": ["json", "typescript", "interface", "type", "php", "dto", "pydantic", "python", "class", "model"]
+}

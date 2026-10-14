@@ -1,0 +1,8 @@
+{
+    "slug": "zeta-tool",
+    "status": "available",
+    "category": "sql",
+    "icon": "database",
+    "order": 20,
+    "keywords": ["fixture", "zeta"]
+}

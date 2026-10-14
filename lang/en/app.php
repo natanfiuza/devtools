@@ -18,8 +18,6 @@ return [
         'dashboard' => 'Dashboard',
         'settings' => 'Settings',
         'search' => 'Search',
-        'search_placeholder' => 'Search tools',
-        'search_coming_soon' => 'Coming soon',
         'toggle_theme' => 'Toggle theme',
         'change_language' => 'Change language',
         'show_password' => 'Show password',
@@ -29,6 +27,18 @@ return [
         'skip_to_content' => 'Skip to content',
     ],
 
+    'search' => [
+        'trigger' => 'Search tools',
+        'placeholder' => 'Search by name, category or keyword',
+        'title' => 'Tool search',
+        'description' => 'Type to filter and use the arrow keys to choose.',
+        'empty' => 'Nothing found for "{query}".',
+        'count' => 'Results: {count}',
+        'hint_navigate' => 'Navigate',
+        'hint_select' => 'Open',
+        'hint_close' => 'Close',
+    ],
+
     'theme' => [
         'label' => 'Theme',
         'light' => 'Light',
@@ -36,10 +46,24 @@ return [
         'system' => 'System',
     ],
 
+    'consent' => [
+        'title' => 'Cookies',
+        'body' => 'I use cookies to remember your preferences and, if you accept, to measure which pages help. No ads.',
+        'accept' => 'Accept',
+        'reject' => 'Decline',
+        'details' => 'Details',
+        'necessary' => 'Necessary',
+        'necessary_body' => 'Session, language and theme. The site does not work without them.',
+        'analytics' => 'Measurement',
+        'analytics_body' => 'Google Analytics: page views, no personal data.',
+        'privacy' => 'Privacy Policy',
+    ],
+
     'footer' => [
         'language' => 'Language',
         'privacy' => 'Privacy',
         'terms' => 'Terms',
+        'cookies' => 'Cookies',
         'donate' => 'Donate',
         'rights' => 'All rights reserved.',
     ],

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\HandleAppearance;
+use App\Http\Middleware\HandleConsent;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveLocale;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
@@ -18,8 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Preferencias escritas pelo navegador (tema e idioma) chegam em claro.
-        $middleware->encryptCookies(except: ['appearance', 'locale', 'sidebar_state']);
+        // Preferencias escritas pelo navegador (tema, idioma e consentimento)
+        // chegam em claro: quem as grava e o proprio cliente.
+        $middleware->encryptCookies(except: ['appearance', 'locale', 'sidebar_state', 'consent']);
 
         // Conta suspensa perde a sessao (ADR-025). Fica como alias porque vale
         // so nas areas autenticadas: nas paginas publicas nao se consulta a
@@ -32,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
             // O idioma precisa ser resolvido antes das props compartilhadas.
             ResolveLocale::class,
             HandleAppearance::class,
+            // So para limpar o cookie de consentimento invalido (ADR-013).
+            HandleConsent::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);

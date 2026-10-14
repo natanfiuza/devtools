@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { Menu } from '@lucide/vue';
+import { Menu, Search } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import AnalyticsScript from '@/components/AnalyticsScript.vue';
 import AppWordmark from '@/components/AppWordmark.vue';
+import CommandPalette from '@/components/CommandPalette.vue';
+import ConsentBanner from '@/components/ConsentBanner.vue';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NewsletterForm from '@/components/NewsletterForm.vue';
 import SearchTrigger from '@/components/SearchTrigger.vue';
@@ -16,6 +19,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { useCommandPalette } from '@/composables/useCommandPalette';
+import { useConsent } from '@/composables/useConsent';
 import { useRoutes } from '@/composables/useRoutes';
 import { dashboard } from '@/routes';
 
@@ -23,14 +28,25 @@ import { dashboard } from '@/routes';
  * Layout do site publico (DESIGN.md): container 1120px, header de 56px
  * sticky com blur, footer minimo.
  *
- * Os links Tools e Styleguide sao paginas que existem hoje. Pricing e Docs
- * entram quando as paginas entrarem (F1/F7) -- link morto no header nao.
+ * Os links do header sao Tools, Planos e Styleguide. "Planos" e ancora da
+ * secao de precos da home (nao ha pagina de precos); Docs entra na F7.
+ *
+ * A palette de busca e montada aqui, uma vez por pagina: o gatilho do header,
+ * o do hero e o item do menu mobile abrem a mesma.
  */
 const { t } = useI18n();
 const page = usePage();
 const routes = useRoutes();
+const { open: openSearch } = useCommandPalette();
+const { open: openConsent } = useConsent();
 
 const menuOpen = ref(false);
+
+/** Fecha o menu mobile antes de abrir a palette (senao os dois ficam abertos). */
+const openSearchFromMenu = (): void => {
+    menuOpen.value = false;
+    openSearch();
+};
 
 const year = new Date().getFullYear();
 
@@ -67,6 +83,11 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                     <Button variant="ghost" size="sm" as-child>
                         <Link :href="routes.home.value">
                             {{ t('app.nav.tools') }}
+                        </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" as-child>
+                        <Link :href="`${routes.home.value}#precos`">
+                            {{ t('app.nav.pricing') }}
                         </Link>
                     </Button>
                     <Button variant="ghost" size="sm" as-child>
@@ -126,11 +147,32 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                                 <Button
                                     variant="ghost"
                                     class="justify-start"
+                                    @click="openSearchFromMenu()"
+                                >
+                                    <Search
+                                        class="size-4"
+                                        aria-hidden="true"
+                                    />
+                                    {{ t('app.actions.search') }}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    class="justify-start"
                                     as-child
                                     @click="menuOpen = false"
                                 >
                                     <Link :href="routes.home.value">
                                         {{ t('app.nav.tools') }}
+                                    </Link>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    class="justify-start"
+                                    as-child
+                                    @click="menuOpen = false"
+                                >
+                                    <Link :href="`${routes.home.value}#precos`">
+                                        {{ t('app.nav.pricing') }}
                                     </Link>
                                 </Button>
                                 <Button
@@ -202,6 +244,14 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                         >
                             {{ t('app.footer.terms') }}
                         </Link>
+                        <button
+                            type="button"
+                            data-test="consent-reopen"
+                            class="hover:text-foreground"
+                            @click="openConsent()"
+                        >
+                            {{ t('app.footer.cookies') }}
+                        </button>
                     </nav>
 
                     <div class="flex items-center gap-2">
@@ -215,5 +265,9 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                 <NewsletterForm />
             </div>
         </footer>
+
+        <ConsentBanner />
+        <AnalyticsScript />
+        <CommandPalette />
     </div>
 </template>

@@ -33,7 +33,7 @@ return [
             ],
             'cookies' => [
                 'title' => 'Cookies',
-                'body' => 'We use essential cookies only: session, language and theme preference. No advertising cookies. Aggregate usage analytics may be added later, always with the option to refuse.',
+                'body' => 'Essential cookies keep the site working: session, language and theme preference. Measurement cookies (Google Analytics) are optional and load only after you accept; you can change that choice at any time in "Cookies", in the footer. No advertising cookies.',
             ],
             'retention' => [
                 'title' => 'How long we keep it',

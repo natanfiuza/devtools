@@ -3,6 +3,96 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## F1 - Registro de tools, home, busca e consentimento - 2026-10-14
+
+A fase da secao 9 do SPEC, mais o que a F0 deixou para tras (sitemap e imagens
+OG). As 8 tools do MVP entram **registradas** com `status: "soon"` - nenhuma
+funciona ainda -, entao o grid, a busca, o sitemap e os testes ja sao reais e
+cada fase seguinte so troca o status. Aceite em `docs/acceptance/FASE-1.md`.
+
+### Adicionado
+
+- **Registro de tools** (ADR-007 revisado): um `manifest.json` por tool em
+  `resources/js/tools/<slug>/` com `slug`, `status`, `category`, `icon`,
+  `order` e `keywords`; `registry.ts` carrega tudo com `import.meta.glob` e
+  `App\Support\Tools` le os **mesmos arquivos** no PHP, para o sitemap. Nenhum
+  texto visivel mora no manifesto: os 5 idiomas trazem `tools.<slug>.*`, com o
+  nome da tool em ingles em todos (nome de produto).
+- **Home real** (`HomeController`): hero com titulo e campo de busca, chips das
+  categorias que tem tool, grid de 3 colunas com as 8 tools (card sem link e com
+  o selo "Em breve" enquanto a tool nao abre), destaque do AI SQL Builder com
+  preview e **secao de precos** lendo a tabela `plans` - os mesmos numeros do
+  painel, formatados no idioma da pagina -, com CTA de criar conta no Free e de
+  contato por e-mail nos pagos, porque no site nao existe botao de assinar.
+- **Busca Cmd+K** (`CommandPalette` + `SearchTrigger`, no header e no hero):
+  abre por Cmd/Ctrl+K e por `/` fora de campo de texto, filtra por nome,
+  categoria e palavras-chave nos 5 idiomas, navega com as setas e o Enter e
+  fecha no Esc; combobox/listbox com `aria-activedescendant` e foco preso.
+  Construida sobre o `Dialog` e o `Input` do reka-ui ja vendorizado - **sem
+  dependencia nova**.
+- **Consentimento LGPD + GA4** (ADR-013 revisado): `config/analytics.php`
+  (`ANALYTICS_GA4_ID`, nome e validade do cookie), `App\Support\Consent` com os
+  tres estados resolvidos no **servidor** (cookie corrompido volta a nulo e o
+  middleware `HandleConsent` apaga o lixo), banner com Necessarios e Medicao, e
+  a tag do GA4 injetada **so no cliente**, uma vez, somente com aceite e id
+  configurado - `consent default denied` antes de qualquer tag. Id vazio
+  desliga a medicao. Sem decisao, nenhuma linha de GA no HTML do servidor nem no
+  SSR. Reabrir pelo botao "Cookies" no rodape.
+- **Sitemap e robots servidos pela aplicacao** (heranca da F0): `GET
+  /sitemap.xml` com home, Privacidade e Termos nos 5 idiomas e as alternates de
+  cada pagina (com `x-default`), listando tool **apenas** quando ela for
+  `available`; `GET /robots.txt` com o `Disallow` das areas privadas e a linha
+  do `Sitemap:`. Os dois ficam fora do prefixo de idioma, porque sao do site
+  inteiro.
+- **Tags OG** (heranca da F0): `og:*` e `twitter:card` no ramo indexavel do
+  `app.blade.php` (tipo, `og:url` igual ao canonical, idioma com os alternates,
+  imagem, `site_name`) e `og:title`/`og:description` por pagina via `<Head>`;
+  `public/og-default.png` (1200x630) gerada pelo comando de uso unico
+  `seo:og-image`, que baixa as fontes para `storage/app/og-fonts/` (fora do git)
+  e escreve um PNG que vai comitado.
+- `PageHead.vue` centraliza titulo e descricao das paginas indexaveis, e
+  `App\Support\Seo` passa a montar tambem as metas de compartilhamento.
+- Testes: `ToolsRegistryTest`, `HomeTest`, `ConsentTest`, `SeoMetaTest`,
+  `SitemapTest` e `RobotsTest` (Pest) mais `tools-registry.test.ts`,
+  `command-palette.test.ts`, `home.test.ts`, `consent-banner.test.ts` e
+  `page-head.test.ts` (Vitest).
+
+### Alterado
+
+- Pagina de Privacidade: a secao de cookies descreve a medicao como ela e -
+  cookies de medicao opcionais, que so entram depois do aceite e podem ser
+  revogados pelo rodape - nos 5 idiomas, com a data de revisao atualizada.
+- `Home.vue` deixa de ser esqueleto e o `SearchTrigger` deixa de ser um botao
+  desabilitado com "em breve" (o antigo `search_coming_soon` saiu do i18n).
+- O guia de estilo sai do indice e do sitemap: e pagina de referencia do DESIGN,
+  nao conteudo do site - continua navegavel, com `noindex`.
+
+### Removido
+
+- `public/robots.txt` estatico: arquivo estatico vence a rota, no nginx e no
+  `artisan serve`, e amarraria a linha do `Sitemap:` ao ambiente. Ha teste que
+  falha se ele voltar.
+
+### Decidido
+
+- ADR-007 revisado (manifesto em JSON, com dois leitores sobre os mesmos
+  arquivos) e ADR-013 revisado (banner, cookie e injecao do GA; exclusao e
+  exportacao de conta passam a ser so do ADR-028).
+- A rota `/{locale}/tools/{slug}` entra na **F2**, junto com a primeira tool
+  `available`: nada e `available` na F1, entao nao ha link quebrado.
+- A imagem OG por tool fica para a F2/F3; a F1 entrega uma imagem padrao do
+  site.
+
+### Fora do escopo (proximas fases)
+
+- A pagina da tool, o CodeMirror e a primeira tool que funciona (F2); as tools
+  simples 3 a 8 do MVP (F3).
+- AI SQL Builder, cache, fila e o consumo real da cota (F5); gateway, doacao e
+  webhooks (F6); historico de uso, SEO final e hardening (F7). Mensagens de
+  validacao nos 5 idiomas segue aberto (SPEC secao 11.2).
+- Nome traduzivel de plano: `plans.name` e coluna de dado e aparece igual nos 5
+  idiomas.
+
 ## F0 - Papeis, modelo comercial e paineis - 2026-10-14
 
 Bloco antecipado por decisao do grill: papeis e o painel administrativo (F7), o
