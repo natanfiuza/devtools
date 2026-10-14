@@ -12,11 +12,13 @@ Site de ferramentas para desenvolvedores. Tools do cliente sao gratuitas e sem l
 
 ## 3. Idiomas
 en, pt-BR, pt-PT, fr, es. URL prefixada (/pt-br/...), hreflang, seletor no header, escolha do idioma no cadastro e idioma da conta em `users.locale`, trocavel no perfil (ADR-026). Precedencia: em rota prefixada a URL manda (e passa a valer como cookie); sem prefixo - area autenticada, `/admin`, telas de token - a ordem e cookie -> idioma da conta -> `Accept-Language` -> en. O idioma da conta e tambem o idioma dos e-mails. Fallback: en.
-Alcance do prefixo: paginas publicas **e telas de autenticacao** vivem sob `/{locale}` — login, cadastro, esqueci/redefinir senha, verificar e-mail, confirmar senha e logout (ADR-022). A area autenticada (dashboard, settings) nao tem prefixo e usa o idioma da sessao/cookie. Rotas de maquina ficam fora: `/api`, `/webhooks`, `/admin` e `/auth/{provider}/*` (a URL de callback e cadastrada uma vez no provedor). `/` resolve o idioma do visitante e redireciona. Telas de acesso e paginas de token sao `noindex, follow` + canonical e sem hreflang; as paginas legais seguem indexaveis com hreflang normal.
+Alcance do prefixo: paginas publicas **e telas de autenticacao** vivem sob `/{locale}` — login, cadastro, esqueci/redefinir senha, verificar e-mail, confirmar senha e logout (ADR-022). A area autenticada (dashboard, settings) nao tem prefixo e usa o idioma da sessao/cookie. Rotas de maquina ficam fora: `/api`, `/webhooks`, `/admin` e `/auth/{provider}/*` (a URL de callback e cadastrada uma vez no provedor), e tambem `/sitemap.xml` e `/robots.txt`, que sao do site inteiro e nao de um idioma. `/` resolve o idioma do visitante e redireciona. Telas de acesso, paginas de token e o guia de estilo sao `noindex, follow` + canonical e sem hreflang; as paginas legais e a home seguem indexaveis com hreflang normal.
 Textos de interface sao escritos com acentuacao correta (o produto e traduzido); a documentacao do repo e escrita sem acentos, como este arquivo.
 
 ## 4. Registro de tools
-Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.ts` (slug, i18n keys, categoria, icone, keywords, status). Home, busca Ctrl/Cmd+K e sitemap leem do registro. Rota generica `/{locale}/tools/{slug}`. SSR para SEO.
+Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.json`: `slug`, `status` (`soon|available|hidden`), `category`, `icon`, `order` e `keywords` (termos tecnicos de busca). O manifesto guarda so identidade e ciclo de vida - **nenhum texto visivel mora ali**: o nome, a descricao e as palavras-chave traduzidas vem de `tools.<slug>.*` nos 5 idiomas, por convencao a partir do slug.
+O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007).
+Rota generica `/{locale}/tools/{slug}` (F2, junto com a primeira tool `available`). SSR para SEO.
 
 ## 5. Tools
 ### MVP
@@ -71,6 +73,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 - Login social (ADR-023): vinculo com conta existente so quando o provedor confirma o e-mail; conta nova nasce **sem senha** (`users.password` nulo) e a primeira senha e definida na tela de confirmar senha, a partir da area sensivel.
 - Tabelas novas do ciclo de conta: `social_accounts` (vinculo com o provedor) e `newsletter_subscribers` (inscritos).
 - Planos: Free (5 usos vitalicios, 8 KB de schema, 500 caracteres), Pro mensal (R$ 29,90) e Pro anual (R$ 299,00), ambos com 2.000.000 de tokens, 64 KB e 4.000 caracteres. Precos e limites vivem em `plans` e o admin edita pela tela de Planos; nao ha renovacao automatica - o periodo vencido simplesmente deixa de valer ate alguem conceder de novo (ADR-027).
+- A home publica mostra os planos ativos lidos da **tabela** (mesma fonte e mesmos numeros do painel, formatados no servidor no idioma da pagina); no site nao existe botao de assinar, porque quem vende e o admin - o CTA e criar conta (Free) ou falar por e-mail (Pro).
 - Venda manual (ADR-027): o admin concede plano e/ou cota e registra o pagamento recebido por fora (pix, transferencia, dinheiro), com estorno que encerra a assinatura junto. Pagamento (ADR-017): interface PaymentGateway e Mercado Pago entram na F6; `gateway`/`gateway_ref` ja existem nas duas tabelas.
 - Painel do usuario (area autenticada, uma navegacao so): Visao geral (plano, cota, assinatura, vencimento), Historico, Faturas (assinatura e pagamentos) e Conta (Perfil, Seguranca, Aparencia); exportar dados em JSON e excluir a conta ficam na Conta (ADR-028). Nao ha botao de assinar nem de cancelar: quem vende e o admin.
 - Webhooks idempotentes; assinatura valida e cota liberada so apos confirmacao.
@@ -87,7 +90,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 
 ## 9. Fases (cada uma termina com testes verdes e parada para revisao)
 - F0 Fundacao: projeto Laravel 13 + starter Vue, TS estrito, Tailwind tokens, shadcn-vue, i18n 5 idiomas, layout, tema claro/escuro/sistema (sem flash, ADR-021), SSR da Inertia ligado em producao, deploy.sh, supervisor conf, Pest/Vitest.
-- F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA.
+- F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA: concluida em 2026-10-14. As 8 tools do MVP entram **registradas** com `status: "soon"` (nenhuma funciona ainda): grid, busca, sitemap e testes ja sao reais e cada fase seguinte so troca o status. Vieram junto o sitemap/robots servidos pela aplicacao e as tags OG com imagem padrao (heranca da F0, ADR-007/013). Aceite em docs/acceptance/FASE-1.md.
 - F2 JSON Viewer (com CodeMirror 6 e testes).
 - F3 Tools simples (3 a 8 do MVP).
 - F4 Auth: concluida. O ciclo principal - login e-mail/senha, OAuth Google/GitHub, verificacao, definir senha, newsletter e paginas legais - entrou junto da F0 (ADR-022/023/024), e as telas de settings traduzidas e o ciclo de conta (exportar e excluir conta, secao 8) entraram no bloco de 2026-10-14 (ADR-026/028).
@@ -122,6 +125,12 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Idioma da conta x idioma de navegacao: `users.locale` e preferencia duravel (escolhida no cadastro, opcional, e no perfil) e o cookie registra onde a pessoa esta navegando agora; sem prefixo a ordem e cookie -> conta -> `Accept-Language` -> en (ADR-026, muda o comportamento definido na F0).
 - Venda manual: assinatura concedida e pagamento registrado fora do gateway, com precos e limites na tabela `plans` e vigencia resolvida na leitura (ADR-027, fecha o item de valores da 11.2 e adianta parte da F6).
 - Exclusao de conta por anonimizacao, com o registro de cobranca preservado por guarda fiscal, e exportacao em JSON de download imediato (ADR-028).
+- Registro de tools com **fonte unica** no `manifest.json` de cada tool, com dois leitores sobre os mesmos arquivos: o TypeScript (home, chips, busca) e o PHP (sitemap). O texto visivel nunca mora no manifesto - vem de `tools.<slug>.*` por convencao a partir do slug (ADR-007).
+- Consentimento com **tres estados** e decisao resolvida no servidor: sem cookie (ou com cookie corrompido) a decisao e nula e o banner aparece; o GA4 so e injetado no cliente, depois do aceite e com id configurado (ADR-013).
+- `robots.txt` e `sitemap.xml` servidos pela **aplicacao**, com o arquivo estatico de `public/` removido: arquivo estatico vence a rota e amarraria a linha do `Sitemap:` ao ambiente.
+- Guia de estilo fora do indice e do sitemap: e pagina de referencia do DESIGN, nao conteudo do site - continua navegavel, mas `noindex`.
+- Uma imagem OG padrao do site (1200x630), **comitada**, gerada por comando artisan de uso unico que nunca roda em producao (o VPS nao tem GD nem rede para baixar as fontes); a imagem por tool fica para a F2/F3.
+
 ### 11.2 Abertas (com a fase onde precisam ser resolvidas)
 - F4: mensagens de validacao nos 5 idiomas. O Laravel so traz `validation.php` em ingles; nas telas traduzidas o erro de formulario ainda sai em ingles ("The email field is required"), junto com nomes de campo em ingles.
 - F2: `--elevated` (`#5d707f`) e usado como cor de pontuacao do JSON no DESIGN.md, contrariando a propria regra de que a cor serve so para bordas/superficies.

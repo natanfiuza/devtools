@@ -4,7 +4,10 @@ use App\Http\Controllers\Account\BillingController;
 use App\Http\Controllers\Account\HistoryController;
 use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 use App\Support\Locales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +24,9 @@ Route::get('/', function (Request $request) {
 Route::prefix('{locale}')
     ->whereIn('locale', Locales::slugs())
     ->group(function (): void {
-        Route::inertia('/', 'Home')->name('home');
+        // A home tem controller (e nao `Route::inertia`) porque monta o
+        // catalogo de planos no idioma da requisicao.
+        Route::get('/', HomeController::class)->name('home');
         Route::inertia('styleguide', 'Styleguide')->name('styleguide');
 
         // Paginas legais: conteudo proprio, entao continuam indexaveis e com
@@ -29,6 +34,12 @@ Route::prefix('{locale}')
         Route::get('privacy', [LegalController::class, 'privacy'])->name('privacy');
         Route::get('terms', [LegalController::class, 'terms'])->name('terms');
     });
+
+// Sitemap e robots: sao de todo o site, nao de um idioma, entao ficam fora do
+// prefixo. O `robots.txt` de public/ saiu do repositorio - arquivo estatico
+// vence a rota, no nginx e no `artisan serve`.
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('robots.txt', RobotsController::class)->name('robots');
 
 // Definir a primeira senha: contas criadas por login social (ADR-023) chegam
 // aqui quando o Fortify pede a senha em settings/security. O prefixo de idioma

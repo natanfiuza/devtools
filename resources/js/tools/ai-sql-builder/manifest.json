@@ -1,0 +1,8 @@
+{
+    "slug": "ai-sql-builder",
+    "status": "soon",
+    "category": "sql",
+    "icon": "sparkles",
+    "order": 20,
+    "keywords": ["sql", "ai", "query", "database", "select", "insert", "update", "ddl", "schema", "dialect"]
+}

@@ -1,0 +1,8 @@
+{
+    "slug": "json-viewer",
+    "status": "soon",
+    "category": "json",
+    "icon": "braces",
+    "order": 10,
+    "keywords": ["json", "format", "formatter", "pretty", "minify", "validate", "tree", "jsonpath", "schema"]
+}

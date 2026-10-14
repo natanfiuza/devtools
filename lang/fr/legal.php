@@ -33,7 +33,7 @@ return [
             ],
             'cookies' => [
                 'title' => 'Cookies',
-                'body' => 'Nous utilisons uniquement des cookies essentiels : session, langue et préférence de thème. Aucun cookie publicitaire. Une mesure d’audience agrégée pourra être ajoutée plus tard, toujours avec la possibilité de refuser.',
+                'body' => 'Les cookies essentiels font fonctionner le site : session, langue et préférence de thème. Les cookies de mesure (Google Analytics) sont facultatifs et ne sont déposés qu’après votre acceptation ; ce choix peut être modifié à tout moment dans « Cookies », au pied de page. Aucun cookie publicitaire.',
             ],
             'retention' => [
                 'title' => 'Pendant combien de temps',

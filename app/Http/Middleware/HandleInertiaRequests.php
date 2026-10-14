@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Support\Analytics;
 use App\Support\Appearance;
+use App\Support\Consent;
 use App\Support\Impersonation;
 use App\Support\Locales;
 use App\Support\Seo;
@@ -56,6 +58,15 @@ class HandleInertiaRequests extends Middleware
             'locales' => Locales::forFrontend($locale),
             'translations' => $this->translations($locale),
             'appearance' => Appearance::resolve($request),
+            // Medicao e consentimento (ADR-013). A decisao e resolvida aqui
+            // para o banner nao piscar para quem ja respondeu; o id nulo
+            // desliga a tag no cliente.
+            'analytics' => [
+                'ga4Id' => Analytics::ga4Id(),
+                'consent' => Consent::fromRequest($request),
+                'cookie' => Consent::cookie(),
+                'days' => Consent::days(),
+            ],
             'seo' => [
                 'noindex' => Seo::noindex($request),
             ],

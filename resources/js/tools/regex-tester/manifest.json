@@ -1,0 +1,8 @@
+{
+    "slug": "regex-tester",
+    "status": "soon",
+    "category": "text",
+    "icon": "regex",
+    "order": 80,
+    "keywords": ["regex", "regexp", "pattern", "match", "replace", "groups", "capture", "test"]
+}

@@ -19,6 +19,6 @@ return [
     'contact_email' => env('LEGAL_CONTACT_EMAIL', config('mail.from.address')),
 
     // Data da ultima revisao dos textos, exibida nas duas paginas.
-    'updated_at' => env('LEGAL_UPDATED_AT', '2026-10-13'),
+    'updated_at' => env('LEGAL_UPDATED_AT', '2026-10-14'),
 
 ];

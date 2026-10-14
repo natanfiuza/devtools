@@ -51,6 +51,35 @@ final class Format
     }
 
     /**
+     * Tamanho em bytes na unidade que se le de relance: 8192 vira "8 KB".
+     *
+     * As siglas (B, KB, MB, GB) sao iguais nos 5 idiomas - sao simbolo de
+     * unidade, como o codigo da moeda em `money()` -, mas o numero sai no
+     * formato do idioma (virgula decimal em pt/fr/es).
+     */
+    public static function bytes(int $bytes): string
+    {
+        foreach (['GB' => 1024 ** 3, 'MB' => 1024 ** 2, 'KB' => 1024] as $unit => $step) {
+            if ($bytes >= $step) {
+                return self::decimal($bytes / $step).' '.$unit;
+            }
+        }
+
+        return self::number($bytes).' B';
+    }
+
+    /**
+     * Numero com no maximo uma casa decimal: 8,0 vira "8" e 1,5 continua "1,5".
+     */
+    private static function decimal(float $value): string
+    {
+        $formatter = new NumberFormatter(self::locale(), NumberFormatter::DECIMAL);
+        $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, 1);
+
+        return $formatter->format($value) ?: (string) round($value, 1);
+    }
+
+    /**
      * Tamanho do texto de uma data no idioma da tela.
      */
     private static function format(

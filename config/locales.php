@@ -54,6 +54,7 @@ return [
         'admin',
         'account',
         'home',
+        'tools',
         'settings',
         'styleguide',
         'locales',

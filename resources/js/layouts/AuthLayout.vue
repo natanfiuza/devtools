@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import AnalyticsScript from '@/components/AnalyticsScript.vue';
 import AppWordmark from '@/components/AppWordmark.vue';
+import ConsentBanner from '@/components/ConsentBanner.vue';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { useRoutes } from '@/composables/useRoutes';
@@ -14,6 +16,11 @@ import { useRoutes } from '@/composables/useRoutes';
  * A moldura nao escreve titulo: quem o faz e o `AuthCard`, dentro da pagina.
  * Assim cada tela decide o proprio cabecalho - inclusive trocando-o conforme o
  * estado, como a de confirmar senha - sem depender de props de layout.
+ *
+ * O banner de consentimento e a tag de medicao (ADR-013) entram aqui tambem:
+ * quem cai direto numa tela de acesso precisa poder decidir na mesma hora. O
+ * rodape desta moldura continua de uma linha - quem reabre o banner pelo
+ * rodape e a home, e a decisao ja tomada vale para as telas de acesso.
  */
 const { t } = useI18n();
 const routes = useRoutes();
@@ -73,5 +80,8 @@ const year = new Date().getFullYear();
                 </Link>
             </div>
         </footer>
+
+        <ConsentBanner />
+        <AnalyticsScript />
     </div>
 </template>
