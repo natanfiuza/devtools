@@ -18,4 +18,15 @@ return [
 
     'path' => resource_path('js/tools'),
 
+    /*
+    | Limites das tools do cliente.
+    |
+    | O limite de entrada existe para proteger o **navegador de quem usa**, nao
+    | o servidor: o texto nunca sai da maquina (CLAUDE.md). Passar dele nao
+    | bloqueia a digitacao - bloqueia a analise, com o tamanho na tela.
+    */
+    'limits' => [
+        'input_bytes' => (int) env('TOOLS_MAX_INPUT_BYTES', 5 * 1024 * 1024),
+    ],
+
 ];

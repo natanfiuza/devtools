@@ -23,6 +23,12 @@ return [
 
     'image' => [
         'file' => 'og-default.png',
+
+        // Uma imagem por tool que funciona: `public/<tools_dir>/<slug>.png`,
+        // desenhada pelo mesmo comando e comitada junto com a padrao. A pagina
+        // da tool usa a dela; sem o arquivo, cai na padrao (App\Support\Seo).
+        'tools_dir' => 'og',
+
         'width' => 1200,
         'height' => 630,
     ],

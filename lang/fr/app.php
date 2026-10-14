@@ -37,6 +37,8 @@ return [
         'hint_navigate' => 'Naviguer',
         'hint_select' => 'Ouvrir',
         'hint_close' => 'Fermer',
+        // A tecla no teclado frances e "Échap".
+        'key_escape' => 'Échap',
     ],
 
     'theme' => [

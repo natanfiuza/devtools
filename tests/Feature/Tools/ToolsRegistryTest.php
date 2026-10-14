@@ -78,19 +78,20 @@ it('nao repete slug nem ordem de exibicao', function () {
 });
 
 /*
-| F1: nenhuma tool funciona ainda - o grid e a busca mostram todas com o selo
-| "em breve". Quando a F2 ligar a primeira, este teste muda de proposito (e o
-| sitemap passa a listar a tool).
+| F2: a primeira tool funciona. O selo "em breve" fica com as outras sete, e o
+| sitemap - que lista so o que funciona - passa a ter a pagina dela.
 */
-it('nao lista nenhuma tool para o sitemap na F1', function () {
-    expect(Tools::available())->toBe([]);
+it('lista para o sitemap apenas as tools que funcionam', function () {
+    expect(array_column(Tools::available(), 'slug'))->toBe(['json-viewer']);
 });
 
 it('ordena pelo campo order e filtra as que funcionam', function () {
     config(['tools.path' => base_path('tests/Fixtures/tools')]);
 
-    // A fixture tem uma tool disponivel, uma "soon" e um manifest sem slug.
-    expect(array_column(Tools::all(), 'slug'))->toBe(['alpha-tool', 'zeta-tool']);
+    // A fixture tem uma tool disponivel, uma "soon", uma "hidden" e um manifest
+    // sem slug. As tres situacoes de status estao la porque a pagina da tool
+    // cobra o 404 de cada uma (ToolPageTest).
+    expect(array_column(Tools::all(), 'slug'))->toBe(['alpha-tool', 'zeta-tool', 'hidden-tool']);
     expect(array_column(Tools::available(), 'slug'))->toBe(['zeta-tool']);
 });
 
@@ -103,6 +104,20 @@ it('traduz nome, descricao e palavras-chave de cada slug nos 5 idiomas', functio
                 expect(is_string($value) && trim($value) !== '')
                     ->toBeTrue("Falta tools.{$tool['slug']}.{$field} em {$code}");
             }
+        }
+    }
+});
+
+it('traduz a introducao de cada tool que funciona', function () {
+    // A pagina da tool mostra `tools.<slug>.intro`; so as que funcionam tem
+    // pagina, entao so delas se cobra a introducao. O `trans` devolve a propria
+    // chave quando ela nao existe: e contra isso que a comparacao guarda.
+    foreach (Locales::codes() as $code) {
+        foreach (Tools::available() as $tool) {
+            $key = "tools.{$tool['slug']}.intro";
+            $value = trans($key, [], $code);
+
+            expect($value)->toBeString()->not->toBe($key, "Falta {$key} em {$code}");
         }
     }
 });

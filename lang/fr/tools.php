@@ -18,6 +18,48 @@ return [
         'soon' => 'Bientôt disponible',
     ],
 
+    /*
+    | Textos da casca de qualquer tool (os paineis, a barra de acoes e os
+    | estados). O que e de uma ferramenta so mora em `tools.<slug>.*`.
+    */
+    'ui' => [
+        'input' => 'Entrée',
+        'output' => 'Sortie',
+        'resize' => 'Redimensionner les panneaux',
+        'drop' => 'Déposez le fichier ici',
+
+        'actions' => [
+            'open' => 'Ouvrir un fichier',
+            'example' => 'Exemple',
+            'clear' => 'Effacer',
+            'copy' => 'Copier',
+            'copied' => 'Copié',
+            'copy_manual' => 'Sélectionnez le texte et copiez-le',
+            'download' => 'Télécharger',
+        ],
+
+        'states' => [
+            'empty' => 'Collez, saisissez ou déposez un fichier JSON pour commencer.',
+            'parsing' => 'Analyse...',
+            'unavailable' => 'Outil indisponible.',
+            'invalid' => 'JSON invalide à la ligne {line}, colonne {column}.',
+            'invalid_no_position' => 'JSON invalide.',
+            'too_large' => 'Le texte fait {size} et dépasse la limite de {limit}. L\'analyse est désactivée.',
+            'file_too_large' => 'Le fichier fait {size} et dépasse la limite de {limit}.',
+            'file_type' => 'Format non pris en charge. Envoyez un fichier .json ou .txt.',
+            'file_unreadable' => 'Impossible de lire le fichier.',
+            'drop_hint' => 'Déposez pour ouvrir le fichier.',
+        ],
+
+        'limits' => [
+            'of' => 'sur {limit}',
+        ],
+
+        'shortcuts' => [
+            'title' => 'Raccourcis',
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -31,6 +73,40 @@ return [
         'name' => 'JSON Viewer',
         'description' => 'Explorez, formatez et validez du JSON en arbre, avec recherche et copie de n\'importe quel chemin.',
         'keywords' => 'formater, valider, arbre, minifier, chemin',
+        'intro' => 'Collez du JSON pour voir l\'arbre coloré, formater, minifier et copier le chemin de n\'importe quel nœud. Tout s\'exécute dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'format' => 'Formater',
+        'minify' => 'Minifier',
+        'sort_keys' => 'Trier les clés',
+        'expand_all' => 'Tout déplier',
+        'collapse_all' => 'Tout replier',
+        'download_name' => 'document',
+
+        'tree' => [
+            'toggle' => 'Replier ou déplier',
+            'copy_path' => 'Copier le chemin',
+            'copied' => 'Chemin copié : {path}',
+        ],
+
+        'search' => [
+            'placeholder' => 'Rechercher une clé ou une valeur',
+            'label' => 'Rechercher dans l\'arbre',
+            'clear' => 'Effacer la recherche',
+            'results' => 'Résultats : {count}',
+            'truncated' => 'Affichage des {count} premiers résultats.',
+            'none' => 'Aucun résultat.',
+        ],
+
+        'stats' => [
+            'keys' => 'Clés : {count}',
+            'items' => 'Éléments : {count}',
+        ],
+
+        'shortcuts' => [
+            'search' => 'Rechercher dans l\'arbre',
+            'undo' => 'Annuler dans l\'éditeur',
+            'paste' => 'Coller dans l\'éditeur',
+        ],
     ],
 
     'ai-sql-builder' => [

@@ -1,24 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { Badge } from '@/components/ui/badge';
+import { useRoutes } from '@/composables/useRoutes';
 import { toolIcon } from '@/tools/icons';
-import { statusKey, toolKeys } from '@/tools/registry';
+import { statusKey, toolKeys, toolPath } from '@/tools/registry';
 import type { ToolManifest } from '@/tools/types';
 
 /**
  * Card de uma ferramenta no grid da home (DESIGN: icone de linha, nome e uma
  * linha de descricao).
  *
- * Na F1 nenhuma tool funciona, entao o card **nao** e um link: nao ha pagina
- * para onde ir e um link morto seria pior que a ausencia dele. Quando o status
- * virar `available` (F2), e aqui que entra o `Link` - o componente ja recebe
- * `tool` inteiro, com o que a decisao precisa.
+ * Tool que funciona e um link para a pagina dela; as que ainda nao funcionam
+ * aparecem com o selo "em breve" e **sem** link - nao ha para onde ir, e um
+ * link morto seria pior que a ausencia dele. Quem decide e o proprio registro,
+ * pelo status (ADR-007).
  *
  * A raiz e `<li>` porque quem o usa e uma lista (`ToolGrid`).
  */
-defineProps<{ tool: ToolManifest }>();
+const props = defineProps<{ tool: ToolManifest }>();
 
 const { t } = useI18n();
+const routes = useRoutes();
+
+/** `null` enquanto a tool nao funciona. */
+const href = computed(() => toolPath(props.tool, routes.localeSlug.value));
 </script>
 
 <template>
@@ -32,8 +39,18 @@ const { t } = useI18n();
                 class="size-5 shrink-0 text-brand"
                 aria-hidden="true"
             />
+            <!-- O nome e o link (e nao o card inteiro): area de clique do
+                 tamanho do texto, sem transformar o selo em parte do alvo. -->
             <h3 class="truncate text-base font-medium">
-                {{ t(toolKeys.name(tool)) }}
+                <Link
+                    v-if="href"
+                    :href="href"
+                    data-test="tool-card-link"
+                    class="rounded-sm outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                    {{ t(toolKeys.name(tool)) }}
+                </Link>
+                <template v-else>{{ t(toolKeys.name(tool)) }}</template>
             </h3>
             <Badge
                 v-if="tool.status !== 'available'"

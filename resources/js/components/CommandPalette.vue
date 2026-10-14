@@ -271,7 +271,7 @@ onKeyStroke('/', (event) => {
                 </span>
                 <span class="flex items-center gap-1">
                     <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                        Esc
+                        {{ t('app.search.key_escape') }}
                     </kbd>
                     {{ t('app.search.hint_close') }}
                 </span>

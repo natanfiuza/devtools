@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\ToolController;
 use App\Support\Locales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,12 @@ Route::prefix('{locale}')
         // hreflang normal. Ficam linkadas no rodape do site.
         Route::get('privacy', [LegalController::class, 'privacy'])->name('privacy');
         Route::get('terms', [LegalController::class, 'terms'])->name('terms');
+
+        // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
+        // so, e o componente de cada tool entra por dentro dela. Sem restricao
+        // de formato no slug - o 404 de tool que nao funciona e regra de
+        // negocio, nao de URL.
+        Route::get('tools/{slug}', ToolController::class)->name('tools.show');
     });
 
 // Sitemap e robots: sao de todo o site, nao de um idioma, entao ficam fora do

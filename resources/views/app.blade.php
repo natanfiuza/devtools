@@ -22,7 +22,7 @@
     // Metas de compartilhamento: so nas paginas indexaveis, que sao as unicas
     // feitas para circular. As de cada pagina (titulo e descricao) saem do
     // <Head> do Inertia, junto com o <title>.
-    $og = $noindex ? null : Seo::openGraph();
+    $og = $noindex ? null : Seo::openGraph(request());
 @endphp
 <!DOCTYPE html>
 <html

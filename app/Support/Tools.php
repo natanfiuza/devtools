@@ -18,7 +18,11 @@ final class Tools
     /**
      * Tools registradas, na ordem do manifest.
      *
-     * @return list<array{slug: string, status: string, order: int}>
+     * As `keywords` vem junto porque sao elas que desenham a imagem de
+     * compartilhamento de cada tool (app/Console/Commands/GenerateOgImage.php):
+     * termos do proprio manifest, sem frase em idioma nenhum.
+     *
+     * @return list<array{slug: string, status: string, order: int, keywords: list<string>}>
      */
     public static function all(): array
     {
@@ -38,6 +42,12 @@ final class Tools
             $status = is_array($decoded) ? ($decoded['status'] ?? null) : null;
             $order = is_array($decoded) ? ($decoded['order'] ?? 0) : 0;
 
+            /** @var list<string> $keywords */
+            $keywords = array_values(array_filter(
+                is_array($decoded) ? ($decoded['keywords'] ?? []) : [],
+                'is_string',
+            ));
+
             if (! is_string($slug) || ! is_string($status)) {
                 continue;
             }
@@ -46,6 +56,7 @@ final class Tools
                 'slug' => $slug,
                 'status' => $status,
                 'order' => is_int($order) ? $order : 0,
+                'keywords' => $keywords,
             ];
         }
 
@@ -56,9 +67,10 @@ final class Tools
     }
 
     /**
-     * Tools que ja funcionam - as unicas que entram no sitemap.
+     * Tools que ja funcionam - as unicas que entram no sitemap e as unicas com
+     * imagem de compartilhamento propria.
      *
-     * @return list<array{slug: string, status: string, order: int}>
+     * @return list<array{slug: string, status: string, order: int, keywords: list<string>}>
      */
     public static function available(): array
     {
@@ -66,5 +78,24 @@ final class Tools
             self::all(),
             fn (array $tool): bool => $tool['status'] === 'available',
         ));
+    }
+
+    /**
+     * Uma tool pelo slug, ou `null` se ela nao existe.
+     *
+     * O slug vem cru da URL: quem monta nome de arquivo a partir dele precisa
+     * validar o formato antes (`resources/js/tools/<slug>/manifest.json`).
+     *
+     * @return array{slug: string, status: string, order: int, keywords: list<string>}|null
+     */
+    public static function find(string $slug): ?array
+    {
+        foreach (self::all() as $tool) {
+            if ($tool['slug'] === $slug) {
+                return $tool;
+            }
+        }
+
+        return null;
     }
 }

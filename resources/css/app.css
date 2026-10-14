@@ -128,7 +128,10 @@
     --json-string: var(--brand);
     --json-number: var(--muted-foreground);
     --json-literal: var(--subtle);
-    --json-punct: var(--elevated);
+    /* Mesma regra do tema escuro (ver o bloco .dark): pontuacao e texto, e
+       --elevated e para borda e superficie. O tom e o mesmo de antes - o que
+       muda e a pontuacao parar de depender de um token de superficie. */
+    --json-punct: #46545f;
 
     --sidebar: var(--surface);
     --sidebar-foreground: var(--foreground);

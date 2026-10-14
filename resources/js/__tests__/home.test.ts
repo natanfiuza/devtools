@@ -196,7 +196,7 @@ describe('hero e destaque', () => {
 });
 
 describe('grid de ferramentas', () => {
-    it('mostra as oito tools do registro, com o selo e sem link', () => {
+    it('mostra as oito tools do registro, na ordem de exibicao', () => {
         const wrapper = montar();
 
         expect(cartoes(wrapper)).toHaveLength(8);
@@ -205,14 +205,28 @@ describe('grid de ferramentas', () => {
                 (card) => card.attributes('data-test')?.replace('tool-card-', ''),
             ),
         ).toEqual(allTools.map((tool) => tool.slug));
+    });
 
-        // Todas "em breve" nesta fase.
-        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(8);
+    /*
+    | F2: o JSON Viewer funciona, entao o card dele vira link para a pagina da
+    | tool. O selo "em breve" fica com as outras sete - e card que nao funciona
+    | nao linka, senao seria um link morto no indice (ADR-007).
+    */
+    it('linka o card da tool que funciona e deixa as outras com o selo', () => {
+        const wrapper = montar();
+
+        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(7);
         expect(wrapper.text()).toContain('SELO_EM_BREVE');
+        expect(wrapper.text()).not.toContain('SELO_DISPONIVEL');
 
-        // Sem link: nao ha pagina de tool para onde ir (F2).
-        expect(wrapper.get('[data-test="tool-grid"]').findAll('a')).toHaveLength(
-            0,
+        const links = wrapper.get('[data-test="tool-grid"]').findAll('a');
+
+        expect(links).toHaveLength(1);
+        expect(links[0]?.attributes('href')).toBe('/pt-br/tools/json-viewer');
+
+        // O card que linka e o do JSON Viewer - o primeiro do grid.
+        expect(cartoes(wrapper)[0]?.attributes('data-test')).toBe(
+            'tool-card-json-viewer',
         );
     });
 
