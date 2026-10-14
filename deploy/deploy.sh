@@ -10,7 +10,7 @@
 #   - o build vai para uma release propria e a troca e um rename de symlink:
 #     nunca existe um instante com HTML novo e assets ausentes, e o HTML que
 #     ja esta no navegador de alguem continua encontrando seus arquivos;
-#   - npm ci so roda quando o package-lock.json muda (leva minutos).
+#   - npm install so roda quando o package.json muda (leva minutos).
 #
 # Nao usar: este script e para o servidor. Em dev use npm run dev.
 
@@ -55,16 +55,22 @@ log "Deploy iniciado: $(git rev-parse --short "origin/$BRANCH")"
 
 git pull -q --ff-only "origin/$BRANCH"
 
+# O composer.lock nao e versionado (ADR-014): sem lockfile, `composer install`
+# nao instala versoes do lock - ele resolve a arvore na hora e escreve um lock
+# novo. O lado PHP do deploy deixou de ser reproduzivel junto com o do npm.
 composer install --no-dev --optimize-autoloader -q
 
 # --- dependencias de front -------------------------------------------------
-LOCK_HASH="$(sha256sum package-lock.json | cut -d' ' -f1)"
-STORED_HASH="$(cat storage/framework/npm-lock.sha256 2>/dev/null || true)"
+# O package-lock.json nao e versionado (ADR-014): o gatilho e o package.json,
+# e quem resolve a arvore de dependencias e o npm install. A contrapartida
+# assumida e que o build no servidor deixa de ser reproduzivel.
+DEPS_HASH="$(sha256sum package.json | cut -d' ' -f1)"
+STORED_HASH="$(cat storage/framework/npm-deps.sha256 2>/dev/null || true)"
 
-if [ "$LOCK_HASH" != "$STORED_HASH" ] || [ ! -d node_modules ]; then
-    log "package-lock.json mudou: npm ci"
-    npm ci --no-audit --no-fund
-    printf '%s\n' "$LOCK_HASH" > storage/framework/npm-lock.sha256
+if [ "$DEPS_HASH" != "$STORED_HASH" ] || [ ! -d node_modules ]; then
+    log "package.json mudou: npm install"
+    npm install --no-audit --no-fund
+    printf '%s\n' "$DEPS_HASH" > storage/framework/npm-deps.sha256
 fi
 
 # --- build + troca atomica -------------------------------------------------
