@@ -1,0 +1,36 @@
+<?php
+
+/*
+| Assuntos e corpos dos e-mails transacionais.
+|
+| Namespace SO do servidor: nao entra em config/locales.php e nao vai para o
+| front. Por isso a interpolacao aqui e sempre ":param" (Laravel).
+|
+| Os e-mails saem no idioma da conta (HasLocalePreference no User), nao no
+| idioma de quem pediu.
+*/
+
+return [
+    'reset' => [
+        'subject' => 'Reset your password',
+        'intro' => 'You asked to reset the password of your :app account.',
+        'action' => 'Create a new password',
+        'expire' => 'This link is valid for :minutes minutes.',
+        'ignore' => 'If it was not you, just ignore this email: your password stays the same.',
+    ],
+
+    'verify' => [
+        'subject' => 'Confirm your email',
+        'intro' => 'One step left: confirm this email is yours to unlock your :app account.',
+        'action' => 'Confirm email',
+        'ignore' => 'If you did not create the account, just ignore this email.',
+    ],
+
+    'newsletter' => [
+        'subject' => 'Confirm your newsletter subscription',
+        'greeting' => 'Newsletter subscription at :app',
+        'intro' => 'One click left to start receiving the newsletter: just confirm this email is yours.',
+        'action' => 'Confirm subscription',
+        'ignore' => 'If it was not you, just ignore this email: nothing will be sent.',
+    ],
+];

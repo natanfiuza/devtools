@@ -6,12 +6,14 @@ Site de ferramentas para desenvolvedores. Tools do cliente sao gratuitas e sem l
 ## 2. Stack e infra
 - PHP 8.3 / Laravel 13 / Inertia / Vue 3 / TypeScript estrito / Tailwind / shadcn-vue / vue-i18n.
 - MySQL. Fila `database`. Supervisor ja instalado: arquivo em `deploy/supervisor/devtools-worker.conf` (queue:work --tries=2 --timeout=120 --max-time=3600).
-- Deploy: cron a cada minuto -> `deploy/deploy.sh` (flock, git pull --ff-only, composer install --no-dev, migrate --force, optimize, queue:restart). Executa apenas se HEAD mudou. Build de assets: ver ADR-014 (public/build versionado ou build no servidor - decidir na Fase 0).
+- Deploy: cron a cada minuto -> `deploy/deploy.sh` (flock, git pull --ff-only, composer install --no-dev, migrate --force, optimize, queue:restart). Executa apenas se HEAD mudou. Assets sao construidos no servidor, em release propria com troca atomica de symlink: ver ADR-014 e docs/RUNBOOK.md.
 - Testes: Pest (backend) e Vitest (frontend), rodados em dev. Sem CI.
 - GA4 com Consent Mode v2 e banner LGPD/GDPR.
 
 ## 3. Idiomas
 en, pt-BR, pt-PT, fr, es. URL prefixada (/pt-br/...), hreflang, seletor no header, preferencia salva no usuario/cookie. Fallback: en.
+Alcance do prefixo (decidido na F0): as paginas publicas vivem sob `/{locale}`; a area autenticada (dashboard, settings) nao tem prefixo e usa o idioma da sessao/cookie. `/api`, `/webhooks` e `/admin` ficam fora. `/` resolve o idioma do visitante e redireciona.
+Textos de interface sao escritos com acentuacao correta (o produto e traduzido); a documentacao do repo e escrita sem acentos, como este arquivo.
 
 ## 4. Registro de tools
 Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.ts` (slug, i18n keys, categoria, icone, keywords, status). Home, busca Ctrl/Cmd+K e sitemap leem do registro. Rota generica `/{locale}/tools/{slug}`. SSR para SEO.
@@ -40,7 +42,7 @@ Diff texto/JSON; Cron explainer; YAML/JSON/TOML/XML; DDL -> migration Laravel; e
 - Pro: limites em `plans` (sugestao inicial schema 64 KB, descricao 4000 chars) + franquia mensal de tokens.
 ### Fluxo
 1. POST /api/ai/queries valida (auth, e-mail verificado, tamanho, cota).
-2. Normaliza payload -> calcula `prompt_hash` (MD5, ADR-016). Cache hit => retorna resultado imediato, SEM debitar cota (ver pergunta aberta Q1).
+2. Normaliza payload -> calcula `prompt_hash` (MD5, ADR-016). Cache hit => retorna resultado imediato, SEM debitar cota (decidido; ver secao 11).
 3. Cache miss: estima tokens (chars/4), reserva cota, cria `ai_requests` (status queued), despacha Job `ProcessAiQuery` na fila.
 4. Job chama DeepSeek (modelo flash, config `ai.model`), JSON mode, valida JSON de saida, valida SQL (parser; somente SELECT; bloquear DDL/DML), grava `ai_cache`, ajusta debito com `usage` real da API, status done/failed (estorno em falha).
 5. Frontend faz polling GET /api/ai/queries/{id} a cada 1.5s (backoff ate 5s, timeout 120s).
@@ -78,7 +80,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 - SQL gerado nunca e executado.
 
 ## 9. Fases (cada uma termina com testes verdes e parada para revisao)
-- F0 Fundacao: projeto Laravel 13 + starter Vue, TS estrito, Tailwind tokens, shadcn-vue, i18n 5 idiomas, layout, tema dark, deploy.sh, supervisor conf, Pest/Vitest.
+- F0 Fundacao: projeto Laravel 13 + starter Vue, TS estrito, Tailwind tokens, shadcn-vue, i18n 5 idiomas, layout, tema claro/escuro/sistema (sem flash, ADR-021), SSR da Inertia ligado em producao, deploy.sh, supervisor conf, Pest/Vitest.
 - F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA.
 - F2 JSON Viewer (com CodeMirror 6 e testes).
 - F3 Tools simples (3 a 8 do MVP).
@@ -90,5 +92,24 @@ Criterios de aceite por fase em docs/acceptance/FASE-N.md (gerar ao iniciar cada
 
 ## 10. Documentacao a manter
 README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves), CHANGELOG.md.
+Escrito ate aqui (F0): README, RUNBOOK, DESIGN, docs/adr/, docs/glossario.md, CHANGELOG. ARQUITETURA.md e API.md entram quando houver o que documentar (fila e IA na F5; endpoints publicos na F7).
 
-## 11. Perguntas abertas (ver resposta ao usuario)
+## 11. Perguntas abertas
+Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a referencia a "Q1" na secao 6 apontava para lugar nenhum).
+### 11.1 Decididas
+- Cache hit **nao** debita cota; a cota so e debitada em cache miss (era a citada "Q1", secao 6 item 2).
+- Assets: build no servidor (era "decidir na Fase 0"; ver ADR-014).
+- Tema claro e escuro desde a F0, com contraste AA validado por teste (era "validar" no DESIGN.md).
+- i18n: fonte unica em `lang/{locale}/*.php`, exposta ao Inertia escopada por namespace e consumida pelo vue-i18n.
+- Testes em SQLite `:memory:`; dev local e producao em MariaDB.
+- SSR da Inertia ligado em producao, com gate por `INERTIA_SSR_ENABLED`.
+- Git: commits e PR apenas pelo usuario, via gitpr, com aprovacao de cada um.
+- Prefixo de idioma na URL so nas paginas publicas (secao 3); area autenticada sem prefixo.
+- Documentacao do repo em portugues sem acentos; strings de interface com acentuacao correta.
+### 11.2 Abertas (com a fase onde precisam ser resolvidas)
+- F2: `--elevated` (`#5d707f`) e usado como cor de pontuacao do JSON no DESIGN.md, contrariando a propria regra de que a cor serve so para bordas/superficies.
+- F5: nome da coluna de dialetos em `output_targets` (ADR-011 diz `dialetos`; secao 6 diz `supported_dialects(json)` + `sort`).
+- F5: Laravel AI SDK x cliente HTTP fino (diferido pelo ADR-003).
+- F6: valores de `price_cents`, `monthly_tokens`, `max_schema_bytes`, `max_prompt_chars` e `lifetime_free_uses` por plano (a secao 6 traz apenas a sugestao inicial do Pro).
+- F7: como se cria o primeiro admin (seeder ou comando artisan) e o alcance dos ajustes de cota pelo admin.
+- Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek, GA4).

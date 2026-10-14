@@ -16,3 +16,7 @@
 - Plano: Free, Pro mensal, Pro anual.
 - Consentimento: estado do banner de cookies.
 - Worker: processo queue:work sob Supervisor.
+- Tema (aparicao): claro, escuro ou sistema; resolvido no servidor para a pagina nao piscar.
+- Codigo de idioma x slug de idioma: `pt_BR` e o diretorio em lang/; `pt-br` e a URL e o cookie.
+- Release de assets: build de um deploy em storage/app/builds, publicado pela troca de symlink.
+- Hreflang: link no head apontando a mesma pagina nos outros idiomas (mais `x-default`).
