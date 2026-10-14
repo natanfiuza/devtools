@@ -43,10 +43,17 @@ vi.mock('@/tools/components', async () => {
 
     const Stub = define({
         name: 'ToolStub',
-        props: { maxInputBytes: { type: Number, default: 0 } },
+        props: {
+            maxInputBytes: { type: Number, default: 0 },
+            virtualizeFrom: { type: Number, default: 0 },
+        },
         setup(props) {
             return () =>
-                create('div', { 'data-test': 'tool-stub' }, String(props.maxInputBytes));
+                create(
+                    'div',
+                    { 'data-test': 'tool-stub' },
+                    `${props.maxInputBytes}/${props.virtualizeFrom}`,
+                );
         },
     });
 
@@ -76,13 +83,14 @@ const traducoes = {
 function montar(
     slug = 'json-viewer',
     maxInputBytes = 5_000_000,
+    virtualizeFrom = 2000,
 ): VueWrapper {
     const i18n = createI18nInstance();
 
     applyTranslations(i18n, { locale: 'pt-br', translations: traducoes });
 
     return mount(Show, {
-        props: { slug, maxInputBytes },
+        props: { slug, maxInputBytes, virtualizeFrom },
         global: { plugins: [i18n] },
     });
 }
@@ -122,14 +130,15 @@ describe('Pagina da tool', () => {
         expect(wrapper.text()).toContain('FERRAMENTAS');
     });
 
-    it('encaixa o componente da tool com o limite de entrada', async () => {
-        const wrapper = montar('json-viewer', 1234);
+    it('encaixa o componente da tool com os limites configurados', async () => {
+        const wrapper = montar('json-viewer', 1234, 77);
 
         await flushPromises();
 
-        // O limite e do servidor (`config/tools.php`) e desce por prop: quem
-        // decide o que e grande demais nao e a tela.
-        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe('1234');
+        // Os dois limites sao do servidor (`config/tools.php`) e descem por
+        // prop: quem decide o que e grande demais - para analisar e para
+        // virtualizar - nao e a tela.
+        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe('1234/77');
     });
 
     it('avisa quando o diretorio da tool nao tem componente', async () => {

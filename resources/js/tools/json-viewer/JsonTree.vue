@@ -3,7 +3,7 @@ import { useElementSize } from '@vueuse/core';
 import { computed, ref } from 'vue';
 import { nodePath } from './lib/path';
 import { visibleRows, type JsonNode } from './lib/tree';
-import { VIRTUALIZE_FROM, windowRange } from './lib/window';
+import { windowRange } from './lib/window';
 import TreeRow from './TreeRow.vue';
 
 /*
@@ -11,9 +11,8 @@ import TreeRow from './TreeRow.vue';
  *
  * Colapsar esconde a subarvore inteira, entao a tela desenha uma lista **plana**
  * de indices visiveis - e a janela e um corte nessa lista. Uma lista de cem mil
- * linhas no DOM trava a pagina; a partir de `VIRTUALIZE_FROM` so a parte
- * visivel existe, com folga em cima e embaixo para o quadro seguinte chegar
- * pronto.
+ * linhas no DOM trava a pagina; a partir do limiar so a parte visivel existe,
+ * com folga em cima e embaixo para o quadro seguinte chegar pronto.
  *
  * O caminho de cada linha e montado aqui, uma vez por linha renderizada, e nao
  * dentro da linha: com a lista virtualizada sao dezenas de caminhos por quadro,
@@ -26,6 +25,8 @@ const props = defineProps<{
     collapsed: Set<number>;
     /** Indices que casam com a busca, quando ha busca ativa. */
     matches?: Set<number>;
+    /** Acima de quantas linhas a lista passa a renderizar so a janela. */
+    virtualizeFrom: number;
 }>();
 
 const emit = defineEmits<{
@@ -43,7 +44,7 @@ const scrollTop = ref(0);
 // listas pequenas, que nao passam pela virtualizacao.
 const { height } = useElementSize(scroller);
 
-const virtual = computed(() => rows.value.length > VIRTUALIZE_FROM);
+const virtual = computed(() => rows.value.length > props.virtualizeFrom);
 
 const range = computed(() =>
     windowRange(scrollTop.value, height.value, rows.value.length),

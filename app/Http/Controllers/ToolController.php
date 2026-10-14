@@ -13,7 +13,8 @@ use Inertia\Response;
  *
  * A pagina e **generica** - um shell com dois paineis onde o componente da
  * propria tool se encaixa (a F3 acrescenta tools sem tocar aqui). O servidor
- * so responde o que ele sabe: qual tool e o limite de entrada configurado.
+ * so responde o que ele sabe: qual tool e os limites configurados em
+ * `config/tools.php` (o teto de entrada e o limiar da virtualizacao).
  *
  * Slug desconhecido, tool `soon` e tool `hidden` dao o **mesmo 404**: so
  * `available` tem pagina (ADR-007). Um 200 de "em breve" criaria uma segunda
@@ -36,6 +37,7 @@ class ToolController extends Controller
         return Inertia::render('tools/Show', [
             'slug' => $tool['slug'],
             'maxInputBytes' => (int) config('tools.limits.input_bytes'),
+            'virtualizeFrom' => (int) config('tools.limits.virtualize_from'),
         ]);
     }
 }

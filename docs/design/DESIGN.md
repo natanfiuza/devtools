@@ -42,7 +42,7 @@ Home (F1): hero de titulo 56px com subtitulo e um campo de busca que abre a pale
 +--------------------------------------------------------------+
 ```
 O card nao e link enquanto a tool nao abre: sem `href`, sem cursor de mao - o selo "Em breve" e o aviso, e nao ha clique que nao leve a lugar nenhum. Na secao de precos o CTA do Free e criar conta e o dos pagos e o contato por e-mail, porque no site nao existe botao de assinar (a venda e manual, ADR-027); os numeros vem da tabela `plans`, formatados no idioma da pagina.
-Pagina de tool (F2): mesma largura de container da home, com breadcrumb de uma linha acima do cabecalho (icone 24px, nome em 32px e a descricao em fg-muted). Abaixo, a casca que toda ferramenta compartilha: barra de acoes (botao outline + o `kbd` do atalho ao lado), dois paineis lado a lado - `Entrada` | `Saida`, titulo em 11px maiusculo com fg-subtle, borda 1px, raio 12px, fundo --surface, altura minima de 380px - separados por um divisor de 12px que se arrasta (duplo clique restaura; a divisao fica no localStorage, por tool); embaixo, a faixa de status (chaves, itens, tamanho em JetBrains Mono) e a de atalhos em 12px fg-subtle. Abaixo de 768px os mesmos dois paineis viram abas (`Entrada` | `Saida`) e as acoes de cada painel sobem para o topo da aba - trocar de aba **nao** desmonta o editor.
+Pagina de tool (F2): mesma largura de container da home, com breadcrumb de uma linha acima do cabecalho (icone 24px, nome em 32px e a descricao em fg-muted). Abaixo, a casca que toda ferramenta compartilha: barra de acoes (botao outline + o `kbd` do atalho ao lado), dois paineis lado a lado - `Entrada` | `Saida`, titulo em 11px maiusculo com fg-subtle, borda 1px, raio 12px, fundo --surface, altura minima de 380px - separados por um divisor de 12px que se arrasta (duplo clique restaura; a divisao fica no localStorage, por tool); embaixo, a faixa de status (chaves, itens, tamanho em JetBrains Mono) e a de atalhos em 12px fg-subtle, com tres itens - formatar, buscar na arvore e limpar a busca - cada um com a tecla num `kbd`. Abaixo de 768px os mesmos dois paineis viram abas (`Entrada` | `Saida`) e as acoes de cada painel sobem para o topo da aba - trocar de aba **nao** desmonta o editor.
 ```
 +--------------------------------------------------------------+
 |   Ferramentas > JSON Viewer                                  |
@@ -50,25 +50,29 @@ Pagina de tool (F2): mesma largura de container da home, com breadcrumb de uma l
 |   {} JSON Viewer                                             |
 |   Formate, valide e inspecione JSON sem sair do navegador.   |
 | ------------------------------------------------------------ |
-|   [Formatar  Cmd+Shift+F] [Minificar] [Ordenar] [Exemplo]    |
+|   [Exemplo] [Abrir] [Limpar]           [Copiar] [Baixar]     |
 |  +------------------------+ |  +----------------------------+|
-|  | ENTRADA        [Abrir] | |  | SAIDA    [Buscar] [Tudo]   ||
-|  | ---------------------- | |  | -------------------------- ||
-|  | {                      | |  | v raiz           3 chaves  ||
-|  |   "nome": "devtools",  | |  |     nome: "devtools"       ||
-|  |   "tags": [            | |  | v tags            2 itens  ||
-|  |     "json",            | |  |       0: "json"            ||
-|  |     "viewer"           | |  |       1: "viewer"          ||
-|  |   ],                   | |  | v meta                     ||
-|  |   "meta": { "tema": 1 }| |  |     tema: 1  > chaves 19 KB||
+|  | ENTRADA                | |  | SAIDA    [Buscar] [Tudo]   ||
+|  | [Formatar Cmd+Enter]   | |  | -------------------------- ||
+|  | [Minificar] [Ordenar]  | |  | v raiz           3 chaves  ||
+|  | ---------------------- | |  |     nome: "devtools"       ||
+|  | {                      | |  | v tags            2 itens  ||
+|  |   "nome": "devtools",  | |  |       0: "json"            ||
+|  |   "tags": [            | |  |       1: "viewer"          ||
+|  |     "json",            | |  | v meta                     ||
+|  |     "viewer"           | |  |     tema: 1  > chaves 19 KB||
+|  |   ],                   | |  |                            ||
+|  |   "meta": { "tema": 1 }| |  |                            ||
 |  | }                      | |  |                            ||
+|  |                        | |  |                            ||
+|  |                        | |  |                            ||
 |  +------------------------+ |  +----------------------------+|
 | ------------------------------------------------------------ |
 |   3 chaves  4 itens  0,2 KB                                  |
 |   Cmd+Enter formata · Cmd+F busca · Esc limpa a busca        |
 +--------------------------------------------------------------+
 ```
-Cada painel tem a acao no proprio cabecalho: na entrada, abrir arquivo e limpar; na saida, buscar na arvore e expandir/recolher tudo. Copiar e baixar ficam na barra de cima, junto das transformacoes (formatar, minificar, ordenar chaves), porque agem no documento inteiro. O caminho JSONPath de um no aparece ao copiar, no proprio no - nao ha coluna extra para ele. A arvore sobe uma linha por nivel, com 20px por linha e indentacao de 16px; o erro de sintaxe sai em --destructive com a linha e a coluna, e nunca em Dialog.
+As acoes se dividem por onde agem: na barra de cima ficam **exemplo, abrir arquivo e limpar** (a esquerda) e **copiar e baixar** (a direita) - as duas ultimas no documento inteiro; no cabecalho da **entrada** ficam as transformacoes, que reescrevem o texto - **formatar** (com o `kbd` do atalho ao lado), **minificar** e **ordenar chaves**; no cabecalho da **saida** fica o que e da arvore - buscar, o contador de resultados, limpar a busca (com o `kbd` do `Esc`) e expandir/recolher tudo. O caminho JSONPath de um no aparece ao copiar, no proprio no - nao ha coluna extra para ele. A arvore sobe uma linha por nivel, com 24px por linha e indentacao de 14px; o erro de sintaxe sai em --destructive com a linha e a coluna, e nunca em Dialog. Enquanto o texto esta invalido, a arvore da ultima versao valida **continua na tela** com um aviso na saida e opacidade reduzida (SPEC secao 5): quem esta corrigindo o erro nao perde a referencia do documento.
 Tela de acesso (login, criar conta, senha): moldura propria em 3 faixas - barra 56px so com wordmark, idioma e tema; coluna centrada de 384px; rodape de uma linha (copyright, Privacidade, Termos). Cabecalho (titulo 20px + descricao fg-muted) e card de borda 1px sem sombra, padding 24px, raio 12px.
 Login e Register comecam pelos botoes sociais (outline, largura cheia, marca monocromatica 16px) e uma divisoria 'ou'. Erro em --destructive com role=alert e aria-invalid no campo; envio com Spinner dentro do botao. Aviso de sucesso em caixa de borda --accent/40 e fundo --accent/5.
 Newsletter: no rodape publico (campo + botao outline) e, em Register, como checkbox; a resposta sai como toast (flash), nunca inline.

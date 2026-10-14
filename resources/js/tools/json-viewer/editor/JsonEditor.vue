@@ -19,6 +19,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     'update:modelValue': [value: string];
     find: [];
+    format: [];
 }>();
 
 const host = ref<HTMLElement | null>(null);
@@ -36,6 +37,7 @@ onMounted(() => {
         placeholder: props.placeholder,
         onDocChange: (doc) => emit('update:modelValue', doc),
         onFind: () => emit('find'),
+        onFormat: () => emit('format'),
     });
 
     setEditorError(view.value, props.error ?? null);

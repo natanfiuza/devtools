@@ -43,6 +43,7 @@ const traducoes = {
                 unavailable: 'INDISPONIVEL',
                 invalid: 'INVALIDO:{line}:{column}',
                 invalid_no_position: 'INVALIDO_SEM_POSICAO',
+                stale_tree: 'ARVORE_DEFASADA',
                 too_large: 'GRANDE:{size}:{limit}',
                 file_too_large: 'ARQUIVO_GRANDE:{size}:{limit}',
                 file_type: 'TIPO_NAO_ACEITO',
@@ -74,9 +75,9 @@ const traducoes = {
             },
             stats: { keys: 'CHAVES:{count}', items: 'ITENS:{count}' },
             shortcuts: {
+                format: 'ATALHO_FORMATAR',
                 search: 'ATALHO_BUSCA',
-                undo: 'ATALHO_DESFAZER',
-                paste: 'ATALHO_COLAR',
+                clear: 'ATALHO_LIMPAR',
             },
         },
     },
@@ -111,13 +112,19 @@ const EditorStub = defineComponent({
 /** Limite de folga: o dos testes de limite e passado na mao. */
 const LIMITE_FOLGADO = 5_000_000;
 
-function montar(maxInputBytes: number = LIMITE_FOLGADO): VueWrapper {
+/** O limiar da virtualizacao, como o controller o entrega (config/tools.php). */
+const VIRTUALIZA_DE = 2000;
+
+function montar(
+    maxInputBytes: number = LIMITE_FOLGADO,
+    virtualizeFrom: number = VIRTUALIZA_DE,
+): VueWrapper {
     const i18n = createI18nInstance();
 
     applyTranslations(i18n, { locale: 'pt-br', translations: traducoes });
 
     return mount(Tool, {
-        props: { maxInputBytes },
+        props: { maxInputBytes, virtualizeFrom },
         global: {
             plugins: [i18n],
             stubs: { JsonEditor: EditorStub },
@@ -125,10 +132,25 @@ function montar(maxInputBytes: number = LIMITE_FOLGADO): VueWrapper {
     });
 }
 
+/**
+ * O rotulo do botao, sem as teclas.
+ *
+ * O `kbd` do atalho mora dentro do botao (DESIGN: "atalhos visiveis"), e o
+ * `text()` do Vue Test Utils devolve o texto todo: sem tirar as teclas, o
+ * "Formatar" deixaria de casar com "FORMATAR Ctrl Enter".
+ */
+function rotuloDoBotao(node: DOMWrapper<Element>): string {
+    const copia = node.element.cloneNode(true) as Element;
+
+    copia.querySelectorAll('kbd').forEach((tecla) => tecla.remove());
+
+    return (copia.textContent ?? '').trim();
+}
+
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
     const found = wrapper
         .findAll('button')
-        .find((node) => node.text().trim() === rotulo);
+        .find((node) => rotuloDoBotao(node) === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -214,13 +236,25 @@ describe('JSON Viewer', () => {
             }
         });
 
-        it('mostra os atalhos do teclado', () => {
+        it('mostra os atalhos do teclado, com a tecla ao lado de cada um', () => {
             const wrapper = montar();
-            const atalhos = wrapper.get('[data-test="tool-shell-shortcuts"]').text();
+            const faixa = wrapper.get('[data-test="tool-shell-shortcuts"]');
+            const atalhos = faixa.text();
 
+            expect(atalhos).toContain('ATALHO_FORMATAR');
             expect(atalhos).toContain('ATALHO_BUSCA');
-            expect(atalhos).toContain('ATALHO_DESFAZER');
-            expect(atalhos).toContain('ATALHO_COLAR');
+            expect(atalhos).toContain('ATALHO_LIMPAR');
+            expect(faixa.findAll('kbd').map((tecla) => tecla.text())).toEqual([
+                'Ctrl Enter',
+                'Ctrl F',
+                'Esc',
+            ]);
+        });
+
+        it('anuncia o atalho no proprio botao de formatar', () => {
+            const wrapper = montar();
+
+            expect(botao(wrapper, 'FORMATAR').get('kbd').text()).toBe('Ctrl Enter');
         });
     });
 
@@ -271,6 +305,30 @@ describe('JSON Viewer', () => {
             // Recolher tudo mantem a raiz aberta - fechada, nao sobraria nada.
             expect(linhas(wrapper)).toHaveLength(3);
         });
+
+        it('renderiza so a janela quando a lista passa do limiar da configuracao', async () => {
+            // O limiar vem de `config/tools.php` e desce por prop, como o teto
+            // de entrada - com um limiar baixo, uma lista pequena ja exercita
+            // a janela, que e o que o jsdom alcanca (sem layout nao ha altura
+            // de janela, so a folga).
+            const grande = `{"itens": [${Array.from({ length: 30 }, (_, i) => i).join(', ')}]}`;
+
+            const semJanela = montar(LIMITE_FOLGADO, 1000);
+
+            await digitar(semJanela, grande);
+            await clicar(semJanela, 'EXPANDIR');
+
+            // A lista inteira: raiz, a chave e os 30 itens.
+            expect(linhas(semJanela)).toHaveLength(32);
+
+            const comJanela = montar(LIMITE_FOLGADO, 3);
+
+            await digitar(comJanela, grande);
+            await clicar(comJanela, 'EXPANDIR');
+
+            expect(linhas(comJanela).length).toBeLessThan(32);
+            expect(linhas(comJanela).length).toBeGreaterThan(0);
+        });
     });
 
     describe('busca', () => {
@@ -311,6 +369,31 @@ describe('JSON Viewer', () => {
 
             await clicar(wrapper, 'LIMPAR_BUSCA');
 
+            expect(wrapper.find('[data-test="json-viewer-search-count"]').exists()).toBe(false);
+        });
+
+        it('mostra o Esc junto do campo de busca', () => {
+            const wrapper = montar();
+
+            expect(wrapper.get('[data-test="json-viewer-search-shortcut"]').text()).toBe('Esc');
+        });
+
+        it('limpa a busca no Esc', async () => {
+            const wrapper = montar();
+
+            await digitar(wrapper, DOCUMENTO);
+            await wrapper.get('[data-test="json-viewer-search"]').setValue('Nataniel');
+            await flushPromises();
+
+            // O Esc vale com o foco onde estiver - quem digitou no editor logo
+            // depois de um `Mod-f` tambem espera que ele desfaca a busca.
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            await flushPromises();
+
+            const campo = wrapper.get('[data-test="json-viewer-search"]')
+                .element as HTMLInputElement;
+
+            expect(campo.value).toBe('');
             expect(wrapper.find('[data-test="json-viewer-search-count"]').exists()).toBe(false);
         });
     });
@@ -371,6 +454,20 @@ describe('JSON Viewer', () => {
             expect(textoDoEditor(wrapper)).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
         });
 
+        it('formata o documento pelo atalho do editor', async () => {
+            const wrapper = montar();
+
+            await digitar(wrapper, '{"a":1,"b":[2,3]}');
+
+            // O `Mod-Enter` de verdade esta em json-editor-keys.test.ts, que
+            // monta o CodeMirror; aqui o que se cobra e a ligacao entre o
+            // recado do editor e a acao da tela.
+            wrapper.findComponent({ name: 'JsonEditor' }).vm.$emit('format');
+            await flushPromises();
+
+            expect(textoDoEditor(wrapper)).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
+        });
+
         it('minifica o documento', async () => {
             const wrapper = montar();
 
@@ -395,6 +492,8 @@ describe('JSON Viewer', () => {
 
             await digitar(wrapper, '{\n  "a": 1\n  "b": 2\n}');
 
+            // Sem nenhuma versao valida antes, nao ha arvore nenhuma para
+            // mostrar: a faixa de estado ocupa o lugar dela.
             expect(wrapper.get('[data-test="json-viewer-state"]').text()).toContain(
                 'INVALIDO:3:3',
             );
@@ -402,6 +501,44 @@ describe('JSON Viewer', () => {
                 'INVALIDO:3:3',
             );
             expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
+        });
+
+        it('mantem a ultima arvore valida na tela, marcada como defasada', async () => {
+            const wrapper = montar();
+
+            await digitar(wrapper, DOCUMENTO);
+            await clicar(wrapper, 'EXPANDIR');
+
+            // A arvore do documento que valia.
+            expect(linhas(wrapper)).toHaveLength(7);
+
+            await digitar(wrapper, '{\n  "a": 1\n  "b": 2\n}');
+
+            // O texto quebrou: a arvore **continua** na tela, com o aviso, e o
+            // erro com linha e coluna segue visivel no rodape (SPEC secao 5).
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(true);
+            expect(linhas(wrapper)).toHaveLength(7);
+            expect(wrapper.get('[data-test="json-viewer-stale"]').text()).toBe(
+                'ARVORE_DEFASADA',
+            );
+            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toContain(
+                'INVALIDO:3:3',
+            );
+        });
+
+        it('larga a arvore defasada quando o documento e limpo', async () => {
+            const wrapper = montar();
+
+            await digitar(wrapper, DOCUMENTO);
+            await digitar(wrapper, '{\n  "a": 1\n  "b": 2\n}');
+
+            expect(wrapper.find('[data-test="json-viewer-stale"]').exists()).toBe(true);
+
+            await digitar(wrapper, '');
+
+            // Documento vazio nao tem "ultima versao valida".
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
+            expect(wrapper.find('[data-test="json-viewer-stale"]').exists()).toBe(false);
         });
 
         it('desliga a analise quando o texto passa do limite', async () => {

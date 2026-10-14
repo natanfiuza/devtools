@@ -1,18 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { OVERSCAN, ROW_HEIGHT, VIRTUALIZE_FROM, windowRange } from '@/tools/json-viewer/lib/window';
+import { OVERSCAN, ROW_HEIGHT, windowRange } from '@/tools/json-viewer/lib/window';
 
 /**
  * A conta da virtualizacao. Sem layout: e justamente por isso que ela mora numa
  * funcao pura - a alternativa seria medir altura de linha no navegador e
  * descobrir o erro de conta so na tela.
+ *
+ * O limiar a partir do qual a janela entra nao esta aqui: ele vem da
+ * configuracao (`config/tools.php`) ate a tela, e quem o cobra e
+ * json-viewer.test.ts.
  */
 
 const VIEWPORT = 240;
 const ROWS_IN_VIEWPORT = VIEWPORT / ROW_HEIGHT;
 
-describe('constantes', () => {
-    it('so virtualiza lista grande', () => {
-        expect(VIRTUALIZE_FROM).toBe(2000);
+describe('geometria', () => {
+    it('tem altura de linha e folga positivas', () => {
         expect(OVERSCAN).toBeGreaterThan(0);
         expect(ROW_HEIGHT).toBeGreaterThan(0);
     });

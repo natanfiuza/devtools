@@ -27,6 +27,15 @@ return [
     */
     'limits' => [
         'input_bytes' => (int) env('TOOLS_MAX_INPUT_BYTES', 5 * 1024 * 1024),
+
+        /*
+        | Acima disto as listas de uma tool passam a renderizar so a janela
+        | visivel (a virtualizacao da arvore do JSON Viewer). E um limiar de
+        | desempenho, e nao de negocio - mas mora aqui pelo mesmo motivo dos
+        | outros: limite nao mora no codigo (CLAUDE.md). A pagina da tool o
+        | entrega ao componente como o teto de entrada.
+        */
+        'virtualize_from' => (int) env('TOOLS_VIRTUALIZE_FROM', 2000),
     ],
 
 ];
