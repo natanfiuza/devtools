@@ -2,6 +2,7 @@
 Status: Aceito
 Data: 2026-10-05
 Atualizado: 2026-10-13 (estrategia de assets definida; decisao deixa de estar pendente)
+Atualizado: 2026-10-14 (os lockfiles saem do git e a falha no meio do deploy fica registrada de proposito)
 
 ## Decisao
 Deploy continuo por cron: a cada minuto o `deploy/deploy.sh` roda, pega um
@@ -26,9 +27,16 @@ segundo antes quebra. Com as releases, o HTML que ja esta no navegador de
 alguem continua encontrando os arquivos dele; mantemos as **3 ultimas** e as
 antigas so saem depois da troca.
 
-`npm ci` so roda quando o hash do `package-lock.json` muda (leva minutos e
+O `package-lock.json` **nao e versionado** (esta no `.gitignore`, junto de
+`composer.lock`): quem resolve a arvore de dependencias no servidor e o
+`npm install`, que so roda quando o hash do `package.json` muda (leva minutos e
 quase todo deploy nao mexe em dependencia); o hash fica em
-`storage/framework/npm-lock.sha256`.
+`storage/framework/npm-deps.sha256`.
+
+Pelo mesmo motivo o `composer.lock` tambem saiu do git: sem lockfile, o
+`composer install` do deploy **nao instala versoes do lock** - ele resolve a
+arvore na hora e escreve um lock novo. Nenhum dos dois lados do build e
+reproduzivel.
 
 Migrations rodam nesse mesmo deploy, com o site no ar, entao precisam ser
 **retrocompativeis**: adicionar coluna com default/nullable, renomear em dois
@@ -42,6 +50,29 @@ passos, nunca dropar no mesmo deploy que para de usar.
   (paliativo: o proximo deploy republica). Rollback de codigo e `git revert`.
 - O bundle de SSR e carregado no boot do processo: o deploy reinicia o
   programa do supervisor para o node enxergar a release nova.
+- O build do servidor **nao e reproduzivel**: sem lockfile versionado e com
+  faixas (`^`) no `package.json`, dois deploys do mesmo commit podem instalar
+  versoes diferentes de dependencia. E o preco de deixar o lock fora do git; o
+  caminho de volta, se um dia for preciso, e recomitar o arquivo e voltar ao
+  `npm ci`.
+- O build **depende de rede**: o plugin `fonts` do `laravel-vite-plugin` baixa
+  Inter e JetBrains Mono do Bunny por `fetch` sempre que nao tem cache, e o
+  cache mora em `node_modules/.cache/laravel-vite-plugin/fonts` — que a
+  instalacao de dependencias apaga junto com o `node_modules`.
+- **Uma falha no meio do script deixa o PHP novo com o JS velho** — e ela e
+  definitiva: o `set -euo pipefail` aborta na primeira falha, e como o
+  `git pull` ja moveu o HEAD para `origin/main`, a execucao seguinte do cron
+  sai cedo e **nao retenta nada**. Os assets sao publicados depois do pull e do
+  `composer install`, entao uma falha entre esses passos e o build (rede, Node,
+  disco) deixa a aplicacao com codigo e traducao novos servindo o bundle
+  antigo — foi assim que a home ficou mostrando chave de traducao crua em
+  2026-10-14. `migrate`, `optimize`, `queue:restart` e o reinicio do SSR tambem
+  nao rodam nesse caso, e o unico conserto e entrar commit novo (ou rodar o
+  script a mao no servidor). **Mantido de proposito** (decisao de 2026-10-14):
+  publicar os assets antes do pull nao resolve — o bundle novo precisa das
+  dependencias novas do `composer install` — e as alternativas (retomar do
+  ponto de falha, reverter o pull automaticamente) custam mais do que o
+  problema que evitam. Diagnostico em `docs/RUNBOOK.md`.
 - Nada aqui exige acesso ao servidor para publicar: commit no `main` e o cron
   leva. Por isso migration quebrada e o unico erro que nao da para desfazer
   rapido — a regra de retrocompatibilidade nao e estilo, e o que compra isso.

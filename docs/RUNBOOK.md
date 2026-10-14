@@ -84,11 +84,16 @@ tail -f /var/www/devtools/storage/logs/deploy.log     # acompanhar
 ```
 
 O que ele faz, na ordem: `git fetch` + `pull --ff-only`; `composer install
---no-dev`; `npm ci` **apenas quando o `package-lock.json` muda** (o hash fica
-em `storage/framework/npm-lock.sha256`, porque `npm ci` leva minutos); build
+--no-dev`; `npm install` **apenas quando o `package.json` muda** (o hash fica
+em `storage/framework/npm-deps.sha256`, porque instalar leva minutos); build
 do Vite e do bundle de SSR dentro de uma release nova; troca dos symlinks
 `public/build` e `bootstrap/ssr`; limpeza das releases antigas; `migrate
 --force`; `optimize`; `queue:restart`; reinicio do SSR.
+
+Nenhum lockfile e versionado (`package-lock.json` e `composer.lock` estao no
+`.gitignore`, ver ADR-014): sem lock, as duas instalacoes resolvem a arvore de
+dependencias na hora. E por isso que o gatilho do `npm install` e o
+`package.json` — nao ha lock para comparar.
 
 Duas garantias que valem entender:
 
@@ -96,12 +101,40 @@ Duas garantias que valem entender:
   release propria e a publicacao e o `mv -T` de um symlink, que e atomico.
   Quem carregou a pagina antes da troca continua encontrando o JS antigo,
   porque a release anterior segue no disco (as 3 ultimas ficam).
-- **Uma execucao por vez.** Um `flock` em `/tmp/devtools-deploy.lock` faz a
-  segunda chamada sair em silencio; deploy demorado nao empilha.
+- **Uma execucao por vez.** Um `flock` em
+  `storage/framework/locks/deploy.lock` faz a segunda chamada sair em
+  silencio; deploy demorado nao empilha.
 
 O `deploy.sh` precisa de `php`, `composer`, `node`, `npm` e `git` no PATH; ele
 monta um PATH explicito porque o cron nao herda o do shell de login. Se faltar
 algum, o log diz qual.
+
+### Quando o deploy falha no meio
+
+**Ele nao e retentado.** O `set -euo pipefail` aborta na primeira falha e o
+`git pull` ja moveu o HEAD; a execucao seguinte do cron ve
+`HEAD == origin/main` e sai na hora. Se a falha for antes da troca do symlink,
+o site fica com **o PHP novo e o JS velho** — o sintoma classico e chave de
+traducao crua na tela, porque o texto vem do servidor (idioma atual) e o
+bundle servido e o anterior. `migrate`, `optimize`, `queue:restart` e o
+reinicio do SSR tambem nao rodam nesse caso.
+
+Comece pelo log: ele diz em que passo parou.
+
+```bash
+tail -150 /var/www/devtools/storage/logs/deploy.log
+ls -l /var/www/devtools/public/build /var/www/devtools/bootstrap/ssr
+ls -1dt /var/www/devtools/storage/app/builds/* | head -5
+```
+
+Se `public/build` **nao** for um symlink (ou apontar para uma release antiga),
+a publicacao nunca aconteceu. O conserto e rodar o script a mao depois de
+resolver a causa, ou entrar commit novo (qualquer commit no `main` dispara o
+deploy inteiro de novo).
+
+Isso e decisao consciente, nao descuido: as alternativas (retomar do ponto de
+falha, desfazer o pull automaticamente, publicar assets antes das dependencias)
+custam mais do que o problema que evitam. Ver ADR-014.
 
 ### Rollback
 
@@ -241,9 +274,10 @@ Problemas que ja sabemos diagnosticar:
 | 502 no nginx | php-fpm fora do ar (`systemctl status php8.3-fpm`) |
 | 500 em toda pagina | `.env` errado ou `storage` sem permissao de escrita |
 | CSS/JS 404 apos deploy | build falhou ou o symlink nao trocou: `ls -l public/build` e o `deploy.log` |
+| Chave de traducao crua na tela | PHP novo com JS velho: o deploy morreu antes do build e o cron **nao retenta** (secao 2, "Quando o deploy falha no meio") |
 | Pagina sem HTML no servidor | SSR desligado ou processo morto (`curl 127.0.0.1:13714/health`) |
 | "command not found" no cron | binario fora do PATH do `deploy.sh` (o log diz qual) |
-| Deploy nao roda | `flock` preso: `fuser /tmp/devtools-deploy.lock` |
+| Deploy nao roda | `flock` preso: `fuser storage/framework/locks/deploy.lock` |
 | Assets antigos servidos | release ainda na janela das 3 guardadas: normal; a limpeza e por data |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
