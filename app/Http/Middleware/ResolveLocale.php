@@ -14,10 +14,13 @@ use Symfony\Component\HttpFoundation\Response;
  * Define o idioma da requisicao.
  *
  * - Rotas com prefixo {locale} (paginas publicas e autenticacao): o slug da
- *   URL manda; a preferencia e persistida (coluna users.locale e cookie) para
- *   valer nas rotas sem prefixo.
- * - Demais rotas (dashboard, settings): usuario -> cookie -> Accept-Language
- *   -> fallback (docs/SPEC.md secao 3).
+ *   URL manda e vai para o cookie - e navegacao, nao preferencia.
+ * - Demais rotas (dashboard, settings): cookie -> idioma da conta ->
+ *   Accept-Language -> fallback (docs/SPEC.md secao 3).
+ *
+ * O idioma da conta (`users.locale`) e preferencia explicita: so muda quando a
+ * pessoa muda, no cadastro ou no perfil. Navegar por /fr nao reescreve o idioma
+ * dos e-mails de quem tem conta (ADR-026).
  */
 class ResolveLocale
 {
@@ -27,7 +30,7 @@ class ResolveLocale
         $localized = is_string($slug) ? Locales::fromSlug($slug) : null;
 
         if ($localized !== null) {
-            $this->remember($request, $localized);
+            $this->rememberBrowsing($request, $localized);
         } else {
             $localized = Locales::preferred($request);
         }
@@ -44,18 +47,12 @@ class ResolveLocale
     }
 
     /**
-     * Guarda a preferencia escolhida pela URL para as proximas visitas.
+     * Guarda no cookie o idioma que a pessoa acabou de escolher navegando.
      */
-    private function remember(Request $request, string $code): void
+    private function rememberBrowsing(Request $request, string $code): void
     {
         if ($request->cookie('locale') !== Locales::slug($code)) {
             Cookie::queue('locale', Locales::slug($code), 60 * 24 * 365);
-        }
-
-        $user = $request->user();
-
-        if ($user !== null && $request->isMethod('GET') && $user->locale !== $code) {
-            $user->forceFill(['locale' => $code])->save();
         }
     }
 }

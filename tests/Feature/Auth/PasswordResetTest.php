@@ -1,12 +1,19 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 
 uses(RefreshDatabase::class);
+
+/*
+| O projeto usa App\Notifications\ResetPassword no lugar da notificacao do
+| framework (User::sendPasswordResetNotification): o texto sai de
+| lang/{locale}/mail.php, no idioma da conta. A troca de classe importa aqui
+| porque Notification::assertSentTo casa pelo nome exato da classe.
+*/
 
 beforeEach(function () {
     $this->skipUnlessFortifyHas(Features::resetPasswords());

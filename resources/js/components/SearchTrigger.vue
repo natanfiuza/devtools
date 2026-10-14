@@ -27,12 +27,12 @@ const shortcut = computed<string>(() => {
         type="button"
         aria-disabled="true"
         :title="t('app.actions.search_coming_soon')"
-        class="text-muted-foreground hover:border-border-strong focus-visible:outline-ring inline-flex h-9 w-full max-w-64 cursor-default items-center gap-2 rounded-md border px-3 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+        class="inline-flex h-9 w-full max-w-64 cursor-default items-center gap-2 rounded-md border px-3 text-sm text-muted-foreground transition-colors hover:border-border-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
         <Search class="size-4 shrink-0" aria-hidden="true" />
         <span class="truncate">{{ t('app.actions.search_placeholder') }}</span>
         <kbd
-            class="bg-surface-2 text-subtle ml-auto hidden rounded border px-1.5 font-mono text-[11px] sm:inline"
+            class="ml-auto hidden rounded border bg-surface-2 px-1.5 font-mono text-[11px] text-subtle sm:inline"
         >
             {{ shortcut }}
         </kbd>

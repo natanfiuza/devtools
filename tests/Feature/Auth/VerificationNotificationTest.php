@@ -1,12 +1,18 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 
 uses(RefreshDatabase::class);
+
+/*
+| App\Notifications\VerifyEmail no lugar da notificacao do framework, para o
+| e-mail sair de lang/{locale}/mail.php. Notification::assertSentTo casa pelo
+| nome exato da classe, entao o import tem que ser o da notificacao enviada.
+*/
 
 beforeEach(function () {
     $this->skipUnlessFortifyHas(Features::emailVerification());

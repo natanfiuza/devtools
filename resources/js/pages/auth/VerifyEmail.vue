@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import AuthCard from '@/components/AuthCard.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
+import { useRoutes } from '@/composables/useRoutes';
 
-defineOptions({
-    layout: {
-        title: 'Email verification',
-        description:
-            'Please verify your email address by clicking on the link we just emailed to you.',
-    },
-});
+const { t } = useI18n();
+const routes = useRoutes();
+const page = usePage();
+
+/** Conta autenticada nesta tela, entao o e-mail sempre esta nas props. */
+const email = computed<string>(() => page.props.auth.user.email);
 
 defineProps<{
     status?: string;
@@ -20,28 +21,47 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Email verification" />
+    <Head :title="t('auth.verify.title')" />
 
-    <div
-        v-if="status === 'verification-link-sent'"
-        class="mb-4 text-center text-sm font-medium text-green-600"
-    >
-        A new verification link has been sent to the email address you provided
-        during registration.
-    </div>
+    <AuthCard :title="t('auth.verify.title')">
+        <p
+            v-if="status === 'verification-link-sent'"
+            class="mb-5 rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm"
+            role="status"
+            aria-live="polite"
+        >
+            {{ t('auth.verify.sent') }}
+        </p>
 
-    <Form
-        v-bind="send.form()"
-        class="space-y-6 text-center"
-        v-slot="{ processing }"
-    >
-        <Button :disabled="processing" variant="secondary">
-            <Spinner v-if="processing" />
-            Resend verification email
-        </Button>
+        <p class="mb-5 text-sm text-muted-foreground">
+            {{ t('auth.verify.description', { email }) }}
+        </p>
 
-        <TextLink :href="logout()" as="button" class="mx-auto block text-sm">
-            Log out
-        </TextLink>
-    </Form>
+        <Form
+            v-bind="routes.form.resendVerification.value"
+            v-slot="{ processing }"
+            class="flex flex-col gap-3"
+        >
+            <Button
+                type="submit"
+                variant="secondary"
+                class="w-full"
+                :disabled="processing"
+                data-test="resend-verification-button"
+            >
+                <Spinner v-if="processing" />
+                {{ t('auth.verify.resend') }}
+            </Button>
+
+            <!-- Sair e POST: o TextLink precisa do metodo explicito. -->
+            <TextLink
+                :href="routes.logout.value"
+                method="post"
+                as="button"
+                class="mx-auto text-sm"
+            >
+                {{ t('auth.verify.logout') }}
+            </TextLink>
+        </Form>
+    </AuthCard>
 </template>

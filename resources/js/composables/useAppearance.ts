@@ -120,7 +120,10 @@ export function useAppearance(): UseAppearanceReturn {
         // Vale a cada navegacao: depois do login a conta pode trazer um tema
         // diferente do que estava no <html>.
         appearance.value =
-            stored ?? (isAppearance(page.props.appearance) ? page.props.appearance : 'system');
+            stored ??
+            (isAppearance(page.props.appearance)
+                ? page.props.appearance
+                : 'system');
 
         updateTheme(appearance.value);
     });

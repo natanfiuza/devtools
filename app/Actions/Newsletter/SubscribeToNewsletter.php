@@ -42,6 +42,13 @@ final class SubscribeToNewsletter
             $subscriber->locale = $locale;
         }
 
+        // Quem se descadastrou volta como pendente: sem limpar a confirmacao
+        // antiga, o e-mail novo pediria um clique que ja nao muda nada - e a
+        // pessoa voltaria para a lista sem ter confirmado (double opt-in).
+        if ($subscriber->unsubscribed_at !== null) {
+            $subscriber->confirmed_at = null;
+        }
+
         $subscriber->token = NewsletterSubscriber::newToken();
         $subscriber->unsubscribed_at = null;
         $subscriber->save();

@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import AuthCard from '@/components/AuthCard.vue';
 import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { login } from '@/routes';
-import { email } from '@/routes/password';
+import { useRoutes } from '@/composables/useRoutes';
 
-defineOptions({
-    layout: {
-        title: 'Forgot password',
-        description: 'Enter your email to receive a password reset link',
-    },
-});
+const { t } = useI18n();
+const routes = useRoutes();
 
 defineProps<{
     status?: string;
@@ -22,45 +19,57 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Forgot password" />
+    <Head :title="t('auth.forgot.title')" />
 
-    <div
-        v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
+    <AuthCard
+        :title="t('auth.forgot.title')"
+        :description="t('auth.forgot.description')"
     >
-        {{ status }}
-    </div>
+        <p
+            v-if="status"
+            class="mb-5 rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm"
+            role="status"
+            aria-live="polite"
+        >
+            {{ status }}
+        </p>
 
-    <div class="space-y-6">
-        <Form v-bind="email.form()" v-slot="{ errors, processing }">
+        <Form
+            v-bind="routes.form.forgotPassword.value"
+            v-slot="{ errors, processing }"
+            class="flex flex-col gap-5"
+        >
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">{{ t('auth.forgot.email') }}</Label>
                 <Input
                     id="email"
                     type="email"
                     name="email"
-                    autocomplete="off"
+                    required
                     v-focus
-                    placeholder="email@example.com"
+                    autocomplete="email"
+                    :placeholder="t('auth.forgot.email_placeholder')"
+                    :aria-invalid="errors.email ? 'true' : undefined"
+                    aria-describedby="email-error"
                 />
-                <InputError :message="errors.email" />
+                <InputError id="email-error" :message="errors.email" />
             </div>
 
-            <div class="my-6 flex items-center justify-start">
-                <Button
-                    class="w-full"
-                    :disabled="processing"
-                    data-test="email-password-reset-link-button"
-                >
-                    <Spinner v-if="processing" />
-                    Email password reset link
-                </Button>
-            </div>
+            <Button
+                type="submit"
+                class="w-full"
+                :disabled="processing"
+                data-test="email-password-reset-link-button"
+            >
+                <Spinner v-if="processing" />
+                {{ t('auth.forgot.submit') }}
+            </Button>
+
+            <p class="text-center text-sm text-muted-foreground">
+                <TextLink :href="routes.login.value">
+                    {{ t('auth.forgot.back') }}
+                </TextLink>
+            </p>
         </Form>
-
-        <div class="space-x-1 text-center text-sm text-muted-foreground">
-            <span>Or, return to</span>
-            <TextLink :href="login()">log in</TextLink>
-        </div>
-    </div>
+    </AuthCard>
 </template>

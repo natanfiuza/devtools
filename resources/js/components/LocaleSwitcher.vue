@@ -10,7 +10,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLocale } from '@/composables/useLocale';
-import type { Locale } from '@/types';
 
 const { t } = useI18n();
 const { locales, current, switchTo } = useLocale();

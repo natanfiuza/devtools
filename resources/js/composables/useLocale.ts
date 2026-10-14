@@ -12,13 +12,20 @@ export type UseLocaleReturn = {
 /**
  * Troca de idioma.
  *
- * Nas paginas publicas o idioma esta na URL, entao trocar e navegar para o
- * mesmo caminho no outro idioma (`/pt-br/styleguide` -> `/fr/styleguide`).
- * Nas paginas internas (login, painel) o caminho nao tem idioma: grava o
- * cookie e recarrega, e o servidor resolve de novo. Em ambos os casos o
- * servidor persiste a escolha (cookie e, se houver, users.locale).
+ * Nas paginas publicas e nas de acesso o idioma esta na URL (ADR-022), entao
+ * trocar e navegar para o mesmo caminho no outro idioma
+ * (`/pt-br/styleguide` -> `/fr/styleguide`, `/pt-br/login` -> `/fr/login`).
+ * No painel e nas configuracoes o caminho nao tem idioma: grava o cookie e
+ * recarrega, e o servidor resolve de novo.
+ *
+ * Trocar por aqui muda o idioma de navegacao (cookie), nao o idioma da conta:
+ * esse so muda no cadastro e no perfil (ADR-026).
  */
-export function swapLocaleInPath(path: string, slugs: string[], slug: string): string | null {
+export function swapLocaleInPath(
+    path: string,
+    slugs: string[],
+    slug: string,
+): string | null {
     const [first = '', ...rest] = path.replace(/^\/+/, '').split('/');
 
     if (!slugs.includes(first)) {

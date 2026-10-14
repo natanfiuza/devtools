@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Support\Locales;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -34,7 +36,18 @@ class AppServiceProvider extends ServiceProvider
         // pega exatamente o grupo do Fortify; as nossas continuam com whereIn.
         Route::pattern('locale', implode('|', Locales::slugs()));
 
+        $this->configureAuthorization();
+
         $this->configureDefaults();
+    }
+
+    /**
+     * Porta do painel administrativo (ADR-025). As regras por alvo (nao
+     * suspender, excluir ou entrar como um admin) vivem na UserPolicy.
+     */
+    protected function configureAuthorization(): void
+    {
+        Gate::define('access-admin', fn (User $user): bool => $user->isAdmin());
     }
 
     /**

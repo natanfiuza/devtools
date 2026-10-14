@@ -1,7 +1,7 @@
-import AppLayout from '@/layouts/AppLayout.vue';
+import AccountLayout from '@/layouts/account/AccountLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import PublicLayout from '@/layouts/PublicLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
+import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 
 export const appName = import.meta.env.VITE_APP_NAME || 'devtools';
 
@@ -14,19 +14,26 @@ export function appTitle(title: string): string {
  * Layout padrao por pagina. Compartilhado entre o cliente (app.ts) e o
  * servidor (ssr.ts) para que a hidratacao veja exatamente a mesma arvore.
  *
- * As telas publicas ficam em PublicLayout; as de auth e settings mantem os
- * layouts do starter kit (o PublicLayout e o do site, nao o do painel).
+ * As telas publicas ficam em PublicLayout, o login em AuthLayout e o painel
+ * administrativo no layout proprio dele. Tudo o mais e a area da conta - uma
+ * navegacao so para visao geral, historico, faturas e settings.
  */
 export function resolveLayout(name: string): unknown {
     switch (true) {
         case name === 'Home':
         case name === 'Styleguide':
+        case name === 'Privacy':
+        case name === 'Terms':
+            return PublicLayout;
+        case name.startsWith('newsletter/'):
             return PublicLayout;
         case name.startsWith('auth/'):
             return AuthLayout;
-        case name.startsWith('settings/'):
-            return [AppLayout, SettingsLayout];
+        // O painel tem layout proprio: nao herda o header publico nem a
+        // sidebar da area autenticada (DESIGN: Painel administrativo).
+        case name.startsWith('admin/'):
+            return AdminLayout;
         default:
-            return AppLayout;
+            return AccountLayout;
     }
 }

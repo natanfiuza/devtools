@@ -10,13 +10,31 @@
 - Solicitacao de IA (ai_request): registro de um job.
 - AICache: cache de respostas, chave MD5 do payload canonico.
 - Prompt hash: MD5 do payload canonico + target + dialeto + modelo + versao do prompt.
-- Cota: usos gratis (vitalicios) ou franquia mensal de tokens.
-- Franquia de tokens: limite mensal de tokens do plano pago.
-- Ledger de uso: livro-razao de debitos/estornos.
-- Plano: Free, Pro mensal, Pro anual.
+- Cota: quanto a conta ainda pode consumir - usos vitalicios no Free, tokens da franquia nos planos pagos - sempre calculada do livro-razao, sem coluna de saldo.
+- Franquia de tokens: limite de tokens do plano pago dentro do periodo corrente da assinatura; e a unidade da Cota quando ha assinatura vigente.
+- Ledger de uso: livro-razao de debitos, estornos e concessoes; nao guarda saldo.
+- Plano: linha de `plans` com preco e limites (Free, Pro mensal, Pro anual); o admin edita pela tela de Planos e o codigo nunca fixa valores.
 - Consentimento: estado do banner de cookies.
 - Worker: processo queue:work sob Supervisor.
 - Tema (aparicao): claro, escuro ou sistema; resolvido no servidor para a pagina nao piscar.
 - Codigo de idioma x slug de idioma: `pt_BR` e o diretorio em lang/; `pt-br` e a URL e o cookie.
 - Release de assets: build de um deploy em storage/app/builds, publicado pela troca de symlink.
 - Hreflang: link no head apontando a mesma pagina nos outros idiomas (mais `x-default`).
+- Conta social: conta no Google ou GitHub que o usuario usa para entrar no site; e do provedor, nao nossa.
+- Vinculo social: ligacao entre uma conta social e a conta local (`social_accounts`); criado so quando o provedor confirma que o e-mail e do usuario.
+- Conta sem senha: conta local sem senha (`users.password` nulo), tipicamente criada por login social; a pessoa define a primeira senha pela tela de confirmar senha.
+- Double opt-in: inscricao que so vale depois da confirmacao pelo link enviado por e-mail; entrar duas vezes na lista exige dois aceites.
+- Descadastro: saida da newsletter pelo link do proprio e-mail; a linha nao e apagada, fica marcada e o reenvio so acontece com nova confirmacao.
+- Pagina legal: Politica de Privacidade e Termos de Uso; conteudo proprio do site, sob `/{locale}`, indexavel e com hreflang normal (ao contrario das telas de acesso).
+- Papel: `user` ou `admin` (`users.role`); diz o que a pessoa pode fazer no site, e nao quem ela e.
+- Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Planos, Pagamentos e Auditoria -, acessiveis so com o papel `admin`.
+- Painel do usuario: area autenticada sob uma navegacao unica - Visao geral, Historico, Faturas e Conta (Perfil, Seguranca, Aparencia).
+- Auditoria: registro em `admin_actions` de toda acao administrativa sobre uma conta ou sobre o catalogo; nao e log de aplicacao e nunca guarda conteudo de schema ou prompt.
+- Impersonacao (entrar como): sessao em que o admin passa a ver o site como o alvo, para dar suporte; a faixa no topo nao pode ser dispensada e a saida e uma rota propria (`DELETE /impersonation`).
+- Suspensao: conta marcada em `users.suspended_at`; nao entra mais e a sessao aberta cai no primeiro request autenticado.
+- Assinatura: vinculo entre conta e plano com periodo (`subscriptions`); "vigente" e resolvido na leitura (ativa e sem periodo vencido), sem estado `expirada` gravado.
+- Pagamento manual: cobranca registrada pelo admin por dinheiro recebido fora do site (`gateway = manual`), com forma (pix, transferencia, dinheiro, outro), nota opcional e sem valor negativo - estorno e `status = refunded`.
+- Idioma da conta: preferencia duradoura gravada em `users.locale` (codigo, ex. `pt_BR`), escolhida no cadastro e no perfil; e tambem o idioma dos e-mails que saem para ela.
+- Idioma de navegacao: o idioma da pagina aberta agora (prefixo da URL ou cookie `locale`, ex. `pt-br`); pode diferir do idioma da conta.
+- Anonimizacao: exclusao que apaga o que identifica a pessoa e mantem a cobranca (guarda fiscal); a linha fica marcada por `anonymized_at` e nao volta.
+- Exportacao de dados: download imediato dos dados da conta em JSON; nada fica guardado no servidor e credenciais (senha, tokens) nao saem no arquivo.

@@ -12,8 +12,12 @@ return [
         'label' => 'Newsletter',
         'description' => 'News about the tools, once in a while. No spam.',
         'email' => 'Email',
-        'email_placeholder' => 'you@example.com',
+        'email_placeholder' => "you{'@'}example.com",
         'submit' => 'Subscribe',
+    ],
+
+    // Server side: flashed on subscribe (no parameter).
+    'subscribe' => [
         'check_email' => 'Almost there: confirm your subscription in the email we just sent.',
         'already_confirmed' => 'You are already subscribed.',
     ],

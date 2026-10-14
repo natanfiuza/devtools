@@ -1,114 +1,221 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import AuthCard from '@/components/AuthCard.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import SocialAuthButtons from '@/components/SocialAuthButtons.vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
-import { login } from '@/routes';
-import { store } from '@/routes/register';
+import { useRoutes } from '@/composables/useRoutes';
+import type { Locale } from '@/types';
+
+const { t } = useI18n();
+const routes = useRoutes();
+const page = usePage();
 
 defineProps<{
     passwordRules: string;
 }>();
 
-defineOptions({
-    layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
-    },
-});
+/**
+ * Idioma principal da conta, ja pre-selecionado com o idioma da pagina - quem
+ * nao mexer no campo fica com o idioma em que se cadastrou. Nao troca a
+ * interface: o cookie do idioma de navegacao continua como esta (ADR-026).
+ */
+const locale = ref(page.props.locale);
+
+const locales = computed<Locale[]>(() => page.props.locales ?? []);
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head :title="t('auth.register.title')" />
 
-    <Form
-        v-bind="store.form()"
-        :reset-on-success="['password', 'password_confirmation']"
-        v-slot="{ errors, processing }"
-        class="flex flex-col gap-6"
+    <AuthCard
+        :title="t('auth.register.title')"
+        :description="t('auth.register.description')"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="name">Name</Label>
-                <Input
-                    id="name"
-                    type="text"
-                    required
-                    v-focus
-                    :tabindex="1"
-                    autocomplete="name"
-                    name="name"
-                    placeholder="Full name"
-                />
-                <InputError :message="errors.name" />
-            </div>
+        <SocialAuthButtons />
 
-            <div class="grid gap-2">
-                <Label for="email">Email address</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    required
-                    :tabindex="2"
-                    autocomplete="email"
-                    name="email"
-                    placeholder="email@example.com"
-                />
-                <InputError :message="errors.email" />
-            </div>
+        <div class="my-5 flex items-center gap-3">
+            <span class="h-px flex-1 bg-border" aria-hidden="true" />
+            <span class="text-xs tracking-wide text-muted-foreground uppercase">
+                {{ t('auth.social.divider') }}
+            </span>
+            <span class="h-px flex-1 bg-border" aria-hidden="true" />
+        </div>
 
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
-                <PasswordInput
-                    id="password"
-                    required
-                    :tabindex="3"
-                    autocomplete="new-password"
-                    name="password"
-                    placeholder="Password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password" />
-            </div>
+        <Form
+            v-bind="routes.form.register.value"
+            :reset-on-success="['password', 'password_confirmation']"
+            v-slot="{ errors, processing }"
+            class="flex flex-col gap-5"
+        >
+            <div class="grid gap-4">
+                <div class="grid gap-2">
+                    <Label for="name">{{ t('auth.register.name') }}</Label>
+                    <Input
+                        id="name"
+                        type="text"
+                        name="name"
+                        required
+                        v-focus
+                        autocomplete="name"
+                        :placeholder="t('auth.register.name_placeholder')"
+                        :aria-invalid="errors.name ? 'true' : undefined"
+                        aria-describedby="name-error"
+                    />
+                    <InputError id="name-error" :message="errors.name" />
+                </div>
 
-            <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
-                <PasswordInput
-                    id="password_confirmation"
-                    required
-                    :tabindex="4"
-                    autocomplete="new-password"
-                    name="password_confirmation"
-                    placeholder="Confirm password"
-                    :passwordrules="passwordRules"
-                />
-                <InputError :message="errors.password_confirmation" />
+                <div class="grid gap-2">
+                    <Label for="email">{{ t('auth.register.email') }}</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        required
+                        autocomplete="email"
+                        :placeholder="t('auth.register.email_placeholder')"
+                        :aria-invalid="errors.email ? 'true' : undefined"
+                        aria-describedby="email-error"
+                    />
+                    <InputError id="email-error" :message="errors.email" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="password">
+                        {{ t('auth.register.password') }}
+                    </Label>
+                    <PasswordInput
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="new-password"
+                        :passwordrules="passwordRules"
+                        :aria-invalid="errors.password ? 'true' : undefined"
+                        aria-describedby="password-error"
+                    />
+                    <InputError
+                        id="password-error"
+                        :message="errors.password"
+                    />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="password_confirmation">
+                        {{ t('auth.register.password_confirmation') }}
+                    </Label>
+                    <PasswordInput
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        required
+                        autocomplete="new-password"
+                        :passwordrules="passwordRules"
+                        :aria-invalid="
+                            errors.password_confirmation ? 'true' : undefined
+                        "
+                        aria-describedby="password-confirmation-error"
+                    />
+                    <InputError
+                        id="password-confirmation-error"
+                        :message="errors.password_confirmation"
+                    />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="locale">{{ t('auth.register.locale') }}</Label>
+                    <Select v-model="locale" name="locale">
+                        <SelectTrigger
+                            id="locale"
+                            class="w-full"
+                            aria-describedby="locale-help"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="option in locales"
+                                :key="option.code"
+                                :value="option.code"
+                            >
+                                <span :lang="option.html">{{
+                                    option.name
+                                }}</span>
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p
+                        id="locale-help"
+                        class="text-xs leading-relaxed text-muted-foreground"
+                    >
+                        {{ t('auth.register.locale_help') }}
+                    </p>
+                    <InputError id="locale-error" :message="errors.locale" />
+                </div>
+
+                <Label
+                    for="newsletter"
+                    class="flex items-start gap-3 text-sm leading-snug font-normal"
+                >
+                    <!-- value="1": o CreateNewUser valida a newsletter como
+                         boolean, e o valor padrao do checkbox e "on", que a
+                         regra recusa. -->
+                    <Checkbox
+                        id="newsletter"
+                        name="newsletter"
+                        value="1"
+                        class="mt-0.5"
+                    />
+                    <span>{{ t('auth.register.newsletter') }}</span>
+                </Label>
             </div>
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
-                tabindex="5"
+                class="w-full"
                 :disabled="processing"
                 data-test="register-user-button"
             >
                 <Spinner v-if="processing" />
-                Create account
+                {{ t('auth.register.submit') }}
             </Button>
-        </div>
 
-        <div class="text-center text-sm text-muted-foreground">
-            Already have an account?
-            <TextLink
-                :href="login()"
-                class="underline underline-offset-4"
-                :tabindex="6"
-                >Log in</TextLink
+            <p
+                class="text-center text-xs leading-relaxed text-muted-foreground"
             >
-        </div>
-    </Form>
+                <i18n-t keypath="auth.register.terms" tag="span">
+                    <template #terms>
+                        <TextLink :href="routes.terms.value">
+                            {{ t('auth.register.terms_link') }}
+                        </TextLink>
+                    </template>
+                    <template #privacy>
+                        <TextLink :href="routes.privacy.value">
+                            {{ t('auth.register.privacy_link') }}
+                        </TextLink>
+                    </template>
+                </i18n-t>
+            </p>
+
+            <p class="text-center text-sm text-muted-foreground">
+                {{ t('auth.register.have_account') }}
+                <TextLink :href="routes.login.value">
+                    {{ t('auth.register.login') }}
+                </TextLink>
+            </p>
+        </Form>
+    </AuthCard>
 </template>

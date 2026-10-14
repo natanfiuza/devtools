@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import { LogOut, Settings } from '@lucide/vue';
+import { useI18n } from 'vue-i18n';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -8,9 +9,12 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import UserInfo from '@/components/UserInfo.vue';
-import { logout } from '@/routes';
+import { useRoutes } from '@/composables/useRoutes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
+
+const { t } = useI18n();
+const routes = useRoutes();
 
 type Props = {
     user: User;
@@ -34,21 +38,23 @@ defineProps<Props>();
         <DropdownMenuItem :as-child="true">
             <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
                 <Settings class="mr-2 h-4 w-4" />
-                Settings
+                {{ t('app.actions.settings') }}
             </Link>
         </DropdownMenuItem>
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
     <DropdownMenuItem :as-child="true">
+        <!-- Sair e POST: o Link precisa do metodo explicito. -->
         <Link
             class="block w-full cursor-pointer"
-            :href="logout()"
+            :href="routes.logout.value"
+            method="post"
             @click="handleLogout"
             as="button"
             data-test="logout-button"
         >
             <LogOut class="mr-2 h-4 w-4" />
-            Log out
+            {{ t('app.actions.logout') }}
         </Link>
     </DropdownMenuItem>
 </template>

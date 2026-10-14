@@ -6,7 +6,11 @@
 
 const DEFAULT_DAYS = 365;
 
-export function setCookie(name: string, value: string, days = DEFAULT_DAYS): void {
+export function setCookie(
+    name: string,
+    value: string,
+    days = DEFAULT_DAYS,
+): void {
     if (typeof document === 'undefined') {
         return;
     }
