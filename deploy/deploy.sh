@@ -27,8 +27,13 @@ KEEP_RELEASES=3
 
 cd "$APP_DIR"
 
-# Uma execucao por vez (a anterior pode estar no meio de um build).
-exec 9>/tmp/devtools-deploy.lock
+# Uma execução por vez, tanto manualmente quanto pelo cron.
+LOCK_DIR="$APP_DIR/storage/framework/locks"
+LOCK_FILE="$LOCK_DIR/deploy.lock"
+
+mkdir -p "$LOCK_DIR"
+
+exec 9>"$LOCK_FILE"
 flock -n 9 || exit 0
 
 log() { printf '%s %s\n' "$(date -Is)" "$*"; }
