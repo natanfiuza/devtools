@@ -5,8 +5,9 @@ defineProps<{
 </script>
 
 <template>
-    <div v-show="message">
-        <p class="text-sm text-red-600 dark:text-red-500">
+    <!-- role="alert": o leitor de tela anuncia o erro quando ele aparece. -->
+    <div v-show="message" role="alert">
+        <p class="text-sm text-destructive">
             {{ message }}
         </p>
     </div>

@@ -51,6 +51,8 @@ return [
     */
     'namespaces' => [
         'app',
+        'admin',
+        'account',
         'home',
         'settings',
         'styleguide',

@@ -31,13 +31,13 @@ const routes = useRoutes();
             >
                 {{ t('home.title') }}
             </h1>
-            <p class="text-muted-foreground mt-4 text-lg">
+            <p class="mt-4 text-lg text-muted-foreground">
                 {{ t('home.subtitle') }}
             </p>
 
             <div class="mt-8 max-w-md">
                 <SearchTrigger class="flex" />
-                <p class="text-subtle mt-2 text-sm">
+                <p class="mt-2 text-sm text-subtle">
                     {{ t('home.search_hint') }}
                 </p>
             </div>
@@ -46,10 +46,7 @@ const routes = useRoutes();
         <div class="mt-16 grid gap-4 md:grid-cols-3">
             <Card>
                 <CardHeader>
-                    <Wrench
-                        class="text-brand size-5"
-                        aria-hidden="true"
-                    />
+                    <Wrench class="size-5 text-brand" aria-hidden="true" />
                     <CardTitle class="mt-2">
                         {{ t('home.status_title') }}
                     </CardTitle>
@@ -68,10 +65,7 @@ const routes = useRoutes();
 
             <Card>
                 <CardHeader>
-                    <Sparkles
-                        class="text-accent-2 size-5"
-                        aria-hidden="true"
-                    />
+                    <Sparkles class="size-5 text-accent-2" aria-hidden="true" />
                     <CardTitle class="mt-2">
                         {{ t('home.ai_title') }}
                     </CardTitle>

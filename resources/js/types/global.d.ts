@@ -26,6 +26,12 @@ declare module '@inertiajs/core' {
             localeSlug: string;
             localeHtml: string;
             locales: Locale[];
+            /** Admin que esta impersonando esta sessao (ADR-025). */
+            impersonation: { email: string } | null;
+            seo: {
+                /** Tela de acesso: pede `noindex` e nada de `hreflang`. */
+                noindex: boolean;
+            };
             translations: Translations;
             [key: string]: unknown;
         };

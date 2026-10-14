@@ -13,4 +13,6 @@ export type User = {
 
 export type Auth = {
     user: User;
+    /** Pode abrir o painel administrativo (ADR-025). */
+    isAdmin: boolean;
 };

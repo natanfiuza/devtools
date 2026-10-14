@@ -6,6 +6,7 @@ use App\Actions\Newsletter\SubscribeToNewsletter;
 use App\Enums\NewsletterSource;
 use App\Http\Requests\Newsletter\SubscribeRequest;
 use App\Models\NewsletterSubscriber;
+use App\Support\Locales;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -114,6 +115,7 @@ class NewsletterController extends Controller
             'message' => __('newsletter.invalid_link'),
         ]);
 
-        return redirect()->route('home', ['locale' => app()->getLocale()]);
+        // Slug (pt-br) e nao codigo (pt_BR): a home e uma rota {locale}.
+        return redirect()->route('home', ['locale' => Locales::slug(app()->getLocale())]);
     }
 }

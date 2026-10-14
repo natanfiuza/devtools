@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Laravel\Socialite\AbstractUser;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
 
 /**
@@ -64,8 +65,13 @@ final class SocialProviders
      */
     public static function emailIsVerified(string $provider, SocialiteUser $user): bool
     {
+        // email_verified so existe no payload cru, e o payload cru so esta no
+        // AbstractUser (o que o Google e o GitHub devolvem). Driver que devolva
+        // outro User nao confirma nada - e "nao confirma" e o padrao seguro.
+        $raw = $user instanceof AbstractUser ? $user->getRaw() : [];
+
         return match ($provider) {
-            'google' => (bool) ($user->getRaw()['email_verified'] ?? false),
+            'google' => (bool) ($raw['email_verified'] ?? false),
             'github' => $user->getEmail() !== null,
             default => false,
         };

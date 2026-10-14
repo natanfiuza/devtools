@@ -22,6 +22,8 @@ return [
         'search_coming_soon' => 'Coming soon',
         'toggle_theme' => 'Toggle theme',
         'change_language' => 'Change language',
+        'show_password' => 'Show password',
+        'hide_password' => 'Hide password',
         'open_menu' => 'Open menu',
         'close_menu' => 'Close menu',
         'skip_to_content' => 'Skip to content',

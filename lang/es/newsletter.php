@@ -12,8 +12,12 @@ return [
         'label' => 'Newsletter',
         'description' => 'Novedades de las herramientas, de vez en cuando. Sin spam.',
         'email' => 'Correo',
-        'email_placeholder' => 'tu@ejemplo.com',
+        'email_placeholder' => "tu{'@'}ejemplo.com",
         'submit' => 'Suscribirme',
+    ],
+
+    // Consumidas pelo servidor no flash da inscricao (sem parametro).
+    'subscribe' => [
         'check_email' => 'Casi listo: confirma la suscripción en el correo que acabamos de enviar.',
         'already_confirmed' => 'Ya estás suscrito.',
     ],

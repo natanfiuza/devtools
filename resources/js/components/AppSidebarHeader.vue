@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import type { BreadcrumbItem } from '@/types';
 
-withDefaults(
-    defineProps<{
-        breadcrumbs?: BreadcrumbItem[];
-    }>(),
-    {
-        breadcrumbs: () => [],
-    },
-);
+/**
+ * Barra da area autenticada.
+ *
+ * Mostra a secao aberta (vem de `useActiveSection`), e nao o breadcrumb do
+ * starter kit: com a navegacao unificada a secao ja diz onde a pessoa esta, e o
+ * titulo da tela fica no conteudo.
+ */
+defineProps<{
+    /** Titulo da secao aberta, ja traduzido. */
+    title: string;
+}>();
 </script>
 
 <template>
@@ -19,9 +20,7 @@ withDefaults(
     >
         <div class="flex items-center gap-2">
             <SidebarTrigger class="-ml-1" />
-            <template v-if="breadcrumbs && breadcrumbs.length > 0">
-                <Breadcrumbs :breadcrumbs="breadcrumbs" />
-            </template>
+            <h1 class="truncate text-sm font-medium">{{ title }}</h1>
         </div>
     </header>
 </template>

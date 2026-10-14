@@ -3,6 +3,7 @@
 namespace App\Concerns;
 
 use App\Models\User;
+use App\Support\Locales;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -19,6 +20,17 @@ trait ProfileValidationRules
             'name' => $this->nameRules(),
             'email' => $this->emailRules($userId),
         ];
+    }
+
+    /**
+     * Idioma da conta - so os que existem em lang/. `sometimes` porque a
+     * preferencia e opcional: quem nao manda o campo nao muda de idioma.
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function localeRules(): array
+    {
+        return ['sometimes', 'string', Rule::in(Locales::codes())];
     }
 
     /**

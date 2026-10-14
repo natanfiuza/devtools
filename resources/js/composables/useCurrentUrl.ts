@@ -65,12 +65,14 @@ export function useCurrentUrl(): UseCurrentUrlReturn {
         return isCurrentUrl(urlToCheck, currentUrl, true);
     }
 
-    function whenCurrentUrl(
+    function whenCurrentUrl<T, F = null>(
         urlToCheck: NonNullable<InertiaLinkProps['href']>,
-        ifTrue: any,
-        ifFalse: any = null,
-    ) {
-        return isCurrentUrl(urlToCheck) ? ifTrue : ifFalse;
+        ifTrue: T,
+        ifFalse?: F,
+    ): T | F {
+        // Sem `ifFalse`, o tipo exportado promete `F` (que ja e `null` por
+        // padrao); o `as` mantem a promessa sem afrouxar a assinatura.
+        return isCurrentUrl(urlToCheck) ? ifTrue : (ifFalse as F);
     }
 
     return {

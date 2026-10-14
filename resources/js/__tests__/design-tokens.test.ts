@@ -65,15 +65,12 @@ function parseColor(value: string, palette: Palette, seen = 0): Rgb {
         return [(int >> 16) & 255, (int >> 8) & 255, int & 255];
     }
 
-    const rgba =
-        /^rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\/\s*([\d.]+)%?\s*\)$/.exec(trimmed);
+    const rgba = /^rgb\(\s*(\d+)\s+(\d+)\s+(\d+)\s*\/\s*([\d.]+)%?\s*\)$/.exec(
+        trimmed,
+    );
 
     if (rgba !== null) {
-        return [
-            Number(rgba[1]),
-            Number(rgba[2]),
-            Number(rgba[3]),
-        ];
+        return [Number(rgba[1]), Number(rgba[2]), Number(rgba[3])];
     }
 
     throw new Error(`Cor nao reconhecida: ${value}`);
@@ -168,7 +165,11 @@ describe.each(THEMES)('contraste AA no tema %s', (_name, selector) => {
 
     it('anel de foco tem 3:1 contra o fundo (WCAG 1.4.11)', () => {
         const ratio = contrast(
-            over(palette['--ring'] ?? '', palette['--background'] ?? '', palette),
+            over(
+                palette['--ring'] ?? '',
+                palette['--background'] ?? '',
+                palette,
+            ),
             parseColor(palette['--background'] ?? '', palette),
         );
 

@@ -83,6 +83,42 @@ it('nao tem traducao vazia', function () {
     }
 });
 
+/*
+| O vue-i18n compila as mensagens no navegador (e no SSR) e usa "@" e "|" como
+| sintaxe: mensagem vinculada e separador de plural. Um "@" solto - como no
+| exemplo de e-mail do placeholder - nao compila, e a mensagem inteira sai crua
+| na tela (no SSR, derruba a renderizacao da pagina). A saida e a interpolacao
+| literal: {'@'} e {'|'}.
+*/
+it('escapa o que o vue-i18n le como sintaxe', function () {
+    $soltos = [];
+
+    foreach (Locales::codes() as $code) {
+        foreach (config('locales.namespaces') as $namespace) {
+            foreach (leafKeys(require lang_path($code.'/'.$namespace.'.php')) as $key) {
+                $message = trans($namespace.'.'.$key, [], $code);
+
+                if (! is_string($message)) {
+                    continue;
+                }
+
+                // Tira as formas escapadas antes de procurar o caractere cru.
+                $limpo = str_replace(["{'@'}", "{'|'}"], '', $message);
+
+                if (str_contains($limpo, '@')) {
+                    $soltos[] = "{$code}/{$namespace}.{$key} (@ -> {'@'})";
+                }
+
+                if (str_contains($limpo, '|')) {
+                    $soltos[] = "{$code}/{$namespace}.{$key} (| -> {'|'})";
+                }
+            }
+        }
+    }
+
+    expect($soltos)->toBe([]);
+});
+
 it('nomeia todos os idiomas no proprio idioma', function () {
     foreach (Locales::codes() as $code) {
         $names = require lang_path($code.'/locales.php');

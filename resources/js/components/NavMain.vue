@@ -10,7 +10,15 @@ import {
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import type { NavItem } from '@/types';
 
+/**
+ * Um grupo da navegacao lateral: titulo e itens.
+ *
+ * O titulo vem de fora (i18n) - antes era o texto fixo "Platform", que so
+ * servia enquanto existia um grupo unico.
+ */
 defineProps<{
+    /** Titulo do grupo, ja traduzido. */
+    label: string;
     items: NavItem[];
 }>();
 
@@ -19,7 +27,7 @@ const { isCurrentUrl } = useCurrentUrl();
 
 <template>
     <SidebarGroup class="px-2 py-0">
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarGroupLabel>{{ label }}</SidebarGroupLabel>
         <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
                 <SidebarMenuButton

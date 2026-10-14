@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Support\Appearance;
+use App\Support\Impersonation;
 use App\Support\Locales;
 use App\Support\Seo;
 use Illuminate\Http\Request;
@@ -39,6 +41,11 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $locale = app()->getLocale();
+        $user = $request->user();
+        // Quem esta por tras da sessao, quando ela e uma impersonation. Vai
+        // como prop porque a faixa de aviso aparece em toda tela autenticada
+        // (ADR-025) - e nulo no caso normal.
+        $impersonator = $user instanceof User ? Impersonation::actor($request) : null;
 
         return [
             ...parent::share($request),
@@ -53,8 +60,14 @@ class HandleInertiaRequests extends Middleware
                 'noindex' => Seo::noindex($request),
             ],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                // O papel cru nao vai para o frontend (esta no #[Hidden] do
+                // modelo): o que as telas decidem e "pode ver o painel?".
+                'isAdmin' => $user instanceof User && $user->isAdmin(),
             ],
+            'impersonation' => $impersonator === null
+                ? null
+                : ['email' => $impersonator->email],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

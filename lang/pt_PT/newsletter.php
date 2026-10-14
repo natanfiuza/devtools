@@ -12,8 +12,12 @@ return [
         'label' => 'Newsletter',
         'description' => 'Novidades das ferramentas, de vez em quando. Sem spam.',
         'email' => 'E-mail',
-        'email_placeholder' => 'voce@exemplo.com',
+        'email_placeholder' => "voce{'@'}exemplo.com",
         'submit' => 'Subscrever',
+    ],
+
+    // Consumidas pelo servidor no flash da subscricao (sem parametro).
+    'subscribe' => [
         'check_email' => 'Falta pouco: confirme a subscrição no e-mail que acabámos de enviar.',
         'already_confirmed' => 'Já está subscrito.',
     ],

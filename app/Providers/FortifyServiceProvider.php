@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Actions\Fortify\AuthenticateUser;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Models\User;
@@ -42,6 +43,10 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+
+        // Login proprio no lugar do Auth::attempt: a conta suspensa precisa de
+        // uma recusa com texto proprio (ADR-025).
+        Fortify::authenticateUsing(new AuthenticateUser);
     }
 
     /**

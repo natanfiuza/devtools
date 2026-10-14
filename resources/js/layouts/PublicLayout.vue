@@ -5,6 +5,7 @@ import { Menu } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import AppWordmark from '@/components/AppWordmark.vue';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
+import NewsletterForm from '@/components/NewsletterForm.vue';
 import SearchTrigger from '@/components/SearchTrigger.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useRoutes } from '@/composables/useRoutes';
-import { dashboard, login } from '@/routes';
+import { dashboard } from '@/routes';
 
 /**
  * Layout do site publico (DESIGN.md): container 1120px, header de 56px
@@ -31,6 +32,8 @@ const routes = useRoutes();
 
 const menuOpen = ref(false);
 
+const year = new Date().getFullYear();
+
 const isAuthenticated = (): boolean => page.props.auth?.user != null;
 </script>
 
@@ -38,20 +41,20 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
     <div class="flex min-h-screen flex-col">
         <a
             href="#conteudo"
-            class="bg-surface focus:outline-ring sr-only rounded-md px-3 py-2 text-sm focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:outline-2 focus:outline-offset-2"
+            class="sr-only rounded-md bg-surface px-3 py-2 text-sm focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:outline-2 focus:outline-offset-2 focus:outline-ring"
         >
             {{ t('app.actions.skip_to_content') }}
         </a>
 
         <header
-            class="bg-background/80 sticky top-0 z-40 border-b backdrop-blur"
+            class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur"
         >
             <div
                 class="mx-auto flex h-14 w-full max-w-[1120px] items-center gap-4 px-4"
             >
                 <Link
                     :href="routes.home.value"
-                    class="focus:outline-ring rounded-md focus:outline-2 focus:outline-offset-2"
+                    class="rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-ring"
                 >
                     <AppWordmark />
                     <span class="sr-only">{{ t('app.brand') }}</span>
@@ -84,7 +87,7 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                         as-child
                         class="hidden md:inline-flex"
                     >
-                        <Link :href="login().url">
+                        <Link :href="routes.login.value">
                             {{ t('app.actions.login') }}
                         </Link>
                     </Button>
@@ -147,7 +150,7 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                                     as-child
                                     @click="menuOpen = false"
                                 >
-                                    <Link :href="login().url">
+                                    <Link :href="routes.login.value">
                                         {{ t('app.actions.login') }}
                                     </Link>
                                 </Button>
@@ -175,16 +178,41 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
 
         <footer class="border-t">
             <div
-                class="text-muted-foreground mx-auto flex w-full max-w-[1120px] flex-col gap-3 px-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between"
+                class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between"
             >
-                <p>
-                    &copy; {{ new Date().getFullYear() }} {{ t('app.brand') }}
-                    &middot; {{ t('app.footer.rights') }}
-                </p>
-                <div class="flex items-center gap-2">
-                    <span class="sr-only">{{ t('app.footer.language') }}</span>
-                    <LocaleSwitcher />
+                <div class="flex flex-col gap-3">
+                    <p>
+                        &copy; {{ year }} {{ t('app.brand') }} &middot;
+                        {{ t('app.footer.rights') }}
+                    </p>
+
+                    <nav
+                        class="flex flex-wrap items-center gap-x-4 gap-y-1"
+                        :aria-label="t('app.footer.language')"
+                    >
+                        <Link
+                            :href="routes.privacy.value"
+                            class="hover:text-foreground"
+                        >
+                            {{ t('app.footer.privacy') }}
+                        </Link>
+                        <Link
+                            :href="routes.terms.value"
+                            class="hover:text-foreground"
+                        >
+                            {{ t('app.footer.terms') }}
+                        </Link>
+                    </nav>
+
+                    <div class="flex items-center gap-2">
+                        <span class="sr-only">
+                            {{ t('app.footer.language') }}
+                        </span>
+                        <LocaleSwitcher />
+                    </div>
                 </div>
+
+                <NewsletterForm />
             </div>
         </footer>
     </div>

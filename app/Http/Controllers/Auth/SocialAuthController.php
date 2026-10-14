@@ -54,6 +54,12 @@ class SocialAuthController extends Controller
             ->first();
 
         if ($account !== null) {
+            // A suspensao vale tambem para quem entra pelo provedor: senao
+            // suspender so fecharia uma das portas (ADR-025).
+            if ($account->user->isSuspended()) {
+                return $this->suspended();
+            }
+
             return $this->authenticate($request, $account->user);
         }
 
@@ -71,6 +77,10 @@ class SocialAuthController extends Controller
         // porta de entrada para tomar conta alheia (decisao do grill).
         if ($user !== null && ! $verified) {
             return $this->backWithStatus('auth.social.email_unverified', $provider);
+        }
+
+        if ($user !== null && $user->isSuspended()) {
+            return $this->suspended();
         }
 
         if ($user === null) {
@@ -101,6 +111,17 @@ class SocialAuthController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    /**
+     * Conta suspensa: mesma recusa do login por senha, no mesmo canal das
+     * outras recusas do login social (ADR-025).
+     */
+    private function suspended(): RedirectResponse
+    {
+        return redirect()
+            ->route('login')
+            ->with('status', __('auth.suspended'));
     }
 
     /**

@@ -75,7 +75,9 @@ const dialect = ref<string>('');
             <h1 class="text-[32px] font-semibold tracking-[-0.02em]">
                 {{ t('styleguide.title') }}
             </h1>
-            <p class="text-muted-foreground mt-2">{{ t('styleguide.subtitle') }}</p>
+            <p class="mt-2 text-muted-foreground">
+                {{ t('styleguide.subtitle') }}
+            </p>
         </header>
 
         <section class="mt-12">
@@ -96,7 +98,7 @@ const dialect = ref<string>('');
                     <code class="font-mono text-[13px]">{{ token }}</code>
                 </li>
             </ul>
-            <p class="text-subtle mt-3 text-sm">
+            <p class="mt-3 text-sm text-subtle">
                 {{ t('styleguide.notes.contrast') }}
             </p>
         </section>
@@ -106,10 +108,14 @@ const dialect = ref<string>('');
                 {{ t('styleguide.sections.typography') }}
             </h2>
             <div class="mt-4 space-y-3 rounded-md border p-6">
-                <p class="text-[56px] leading-tight font-semibold tracking-[-0.02em]">
+                <p
+                    class="text-[56px] leading-tight font-semibold tracking-[-0.02em]"
+                >
                     devtools
                 </p>
-                <p class="text-[32px] font-semibold tracking-[-0.02em]">32 / 600</p>
+                <p class="text-[32px] font-semibold tracking-[-0.02em]">
+                    32 / 600
+                </p>
                 <p class="text-xl font-medium">20 / 500</p>
                 <p class="text-base">16 / 400</p>
                 <p class="text-sm">14 / 400</p>
@@ -119,7 +125,7 @@ const dialect = ref<string>('');
                     const query = 'select 1'; // JetBrains Mono
                 </p>
             </div>
-            <p class="text-subtle mt-3 text-sm">
+            <p class="mt-3 text-sm text-subtle">
                 {{ t('styleguide.notes.fonts') }}
             </p>
         </section>
@@ -136,7 +142,9 @@ const dialect = ref<string>('');
                 <Button variant="outline">
                     {{ t('styleguide.labels.outline') }}
                 </Button>
-                <Button variant="ghost">{{ t('styleguide.labels.ghost') }}</Button>
+                <Button variant="ghost">{{
+                    t('styleguide.labels.ghost')
+                }}</Button>
                 <Button variant="destructive">
                     {{ t('styleguide.labels.destructive') }}
                 </Button>
@@ -165,7 +173,9 @@ const dialect = ref<string>('');
                     <Select v-model="dialect">
                         <SelectTrigger id="styleguide-select">
                             <SelectValue
-                                :placeholder="t('styleguide.labels.select_placeholder')"
+                                :placeholder="
+                                    t('styleguide.labels.select_placeholder')
+                                "
                             />
                         </SelectTrigger>
                         <SelectContent>
@@ -212,9 +222,11 @@ const dialect = ref<string>('');
                 {{ t('styleguide.sections.cards') }}
             </h2>
             <div class="mt-4 grid gap-4 md:grid-cols-2">
-                <Card class="hover:border-border-strong transition-colors">
+                <Card class="transition-colors hover:border-border-strong">
                     <CardHeader>
-                        <CardTitle>{{ t('styleguide.labels.card_title') }}</CardTitle>
+                        <CardTitle>{{
+                            t('styleguide.labels.card_title')
+                        }}</CardTitle>
                         <CardDescription>
                             {{ t('styleguide.labels.card_body') }}
                         </CardDescription>
@@ -238,7 +250,9 @@ const dialect = ref<string>('');
             <div class="mt-4 grid max-w-2xl gap-4">
                 <Alert>
                     <Info aria-hidden="true" />
-                    <AlertTitle>{{ t('styleguide.labels.card_title') }}</AlertTitle>
+                    <AlertTitle>{{
+                        t('styleguide.labels.card_title')
+                    }}</AlertTitle>
                     <AlertDescription>
                         {{ t('styleguide.labels.card_body') }}
                     </AlertDescription>
@@ -246,7 +260,9 @@ const dialect = ref<string>('');
 
                 <Alert variant="destructive">
                     <Info aria-hidden="true" />
-                    <AlertTitle>{{ t('styleguide.labels.destructive') }}</AlertTitle>
+                    <AlertTitle>{{
+                        t('styleguide.labels.destructive')
+                    }}</AlertTitle>
                     <AlertDescription>
                         {{ t('styleguide.labels.card_body') }}
                     </AlertDescription>
@@ -274,7 +290,9 @@ const dialect = ref<string>('');
                         {{ t('styleguide.labels.toast') }}
                     </Button>
 
-                    <span class="text-muted-foreground inline-flex items-center gap-2 text-sm">
+                    <span
+                        class="inline-flex items-center gap-2 text-sm text-muted-foreground"
+                    >
                         <Spinner class="size-4" />
                         {{ t('styleguide.labels.loading') }}
                     </span>
@@ -302,7 +320,7 @@ const dialect = ref<string>('');
             </ul>
 
             <pre
-                class="bg-surface-2 mt-4 overflow-x-auto rounded-md border p-4 font-mono text-sm"
+                class="mt-4 overflow-x-auto rounded-md border bg-surface-2 p-4 font-mono text-sm"
             ><span class="text-json-punct">{</span>
   <span class="text-json-key">{{ t('styleguide.labels.sample_key') }}</span><span class="text-json-punct">:</span> <span class="text-json-string">{{ t('styleguide.labels.sample_string') }}</span><span class="text-json-punct">,</span>
   <span class="text-json-key">"count"</span><span class="text-json-punct">:</span> <span class="text-json-number">{{ t('styleguide.labels.sample_number') }}</span><span class="text-json-punct">,</span>

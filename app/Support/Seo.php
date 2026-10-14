@@ -26,6 +26,11 @@ final class Seo
         'verification.',
         'newsletter.confirm',
         'newsletter.unsubscribe',
+        // Area autenticada: nao tem conteudo proprio nem versao por idioma, e
+        // o painel administrativo nao deve aparecer em busca nenhuma.
+        'dashboard',
+        'settings',
+        'admin',
     ];
 
     public static function noindex(Request $request): bool

@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Account\BillingController;
+use App\Http\Controllers\Account\HistoryController;
+use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\LegalController;
 use App\Support\Locales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +23,11 @@ Route::prefix('{locale}')
     ->group(function (): void {
         Route::inertia('/', 'Home')->name('home');
         Route::inertia('styleguide', 'Styleguide')->name('styleguide');
+
+        // Paginas legais: conteudo proprio, entao continuam indexaveis e com
+        // hreflang normal. Ficam linkadas no rodape do site.
+        Route::get('privacy', [LegalController::class, 'privacy'])->name('privacy');
+        Route::get('terms', [LegalController::class, 'terms'])->name('terms');
     });
 
 // Definir a primeira senha: contas criadas por login social (ADR-023) chegam
@@ -26,16 +35,24 @@ Route::prefix('{locale}')
 // vale porque a tela de origem e a de confirmar senha, que e prefixed.
 Route::prefix('{locale}')
     ->whereIn('locale', Locales::slugs())
-    ->middleware(['auth', 'verified', 'throttle:6,1'])
+    ->middleware(['auth', 'verified', 'active', 'throttle:6,1'])
     ->group(function (): void {
         Route::post('user/password/set', [SetPasswordController::class, 'store'])
             ->name('password.set');
     });
 
-Route::middleware(['auth', 'verified'])->group(function (): void {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+// Area da conta: uma navegacao so - visao geral, historico, faturas - com as
+// URLs de sempre (`/dashboard` continua sendo `/dashboard`).
+//
+// `active` em toda area autenticada: suspender derruba a sessao aberta na hora,
+// e nao so barra o proximo login (ADR-025).
+Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
+    Route::get('dashboard', OverviewController::class)->name('dashboard');
+    Route::get('dashboard/history', HistoryController::class)->name('dashboard.history');
+    Route::get('dashboard/billing', BillingController::class)->name('dashboard.billing');
 });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth-social.php';
 require __DIR__.'/newsletter.php';
+require __DIR__.'/admin.php';

@@ -7,6 +7,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Enums\NewsletterSource;
 use App\Models\User;
+use App\Support\Locales;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -35,10 +36,16 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $input['password'],
         ]);
 
-        // O idioma do formulario vira o idioma da conta: e por ele que saem os
-        // e-mails e os acessos seguintes. "locale" nao esta em Fillable de
-        // proposito (nao vem do request), entao a atribuicao e direta.
-        $user->locale = app()->getLocale();
+        // O idioma escolhido no formulario vira o idioma da conta: e por ele que
+        // saem os e-mails. Sem escolha - ou com um codigo que nao existe - vale
+        // o idioma da pagina, para o cadastro nunca falhar por causa disso.
+        // "locale" nao esta em Fillable de proposito, entao a atribuicao e
+        // direta.
+        $escolhido = $input['locale'] ?? null;
+
+        $user->locale = is_string($escolhido) && Locales::isSupported($escolhido)
+            ? $escolhido
+            : app()->getLocale();
         $user->save();
 
         // Checkbox opcional, desmarcado por padrao: so inscreve se marcado, e

@@ -90,18 +90,16 @@ final class Locales
     }
 
     /**
-     * Preferencia do visitante, na ordem: idioma do usuario autenticado,
-     * cookie, Accept-Language, fallback.
+     * Idioma de navegacao do visitante, na ordem: cookie, idioma da conta,
+     * Accept-Language, fallback.
+     *
+     * O cookie vem na frente porque e a escolha mais recente e mais local - a
+     * pessoa acabou de abrir /fr neste navegador. O idioma da conta e a
+     * preferencia duradoura (a dos e-mails), que so muda quando a pessoa muda
+     * no cadastro ou no perfil (ADR-026).
      */
     public static function preferred(Request $request): string
     {
-        $user = $request->user();
-        $account = $user?->locale;
-
-        if (is_string($account) && self::isSupported($account)) {
-            return $account;
-        }
-
         // O cookie e escrito pelo JS com o slug da URL (pt-br), nao com o
         // codigo do idioma (pt_BR).
         $stored = $request->cookie('locale');
@@ -109,6 +107,13 @@ final class Locales
 
         if ($cookie !== null) {
             return $cookie;
+        }
+
+        $user = $request->user();
+        $account = $user?->locale;
+
+        if (is_string($account) && self::isSupported($account)) {
+            return $account;
         }
 
         // O fallback vai na frente: sem nenhum slug em comum, getPreferredLanguage
@@ -120,7 +125,10 @@ final class Locales
 
     /**
      * URLs desta mesma pagina em todos os idiomas (atributo hreflang).
-     * Vazio quando a rota nao tem prefixo de idioma (painel, login).
+     * Vazio quando a rota nao tem prefixo de idioma: o painel e as rotas de
+     * maquina (`auth/{provider}/...`) ficam fora do prefixo (ADR-022). Nas
+     * telas de acesso, que tem prefixo mas pedem `noindex`, quem corta as
+     * alternates e a view.
      *
      * @return array<string, string> html => url
      */

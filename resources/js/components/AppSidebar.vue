@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import { ArrowLeft } from '@lucide/vue';
+import { useI18n } from 'vue-i18n';
 import AppLogo from '@/components/AppLogo.vue';
-import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -14,29 +14,21 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useAccountNav } from '@/composables/useAccountNav';
+import { useRoutes } from '@/composables/useRoutes';
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
-];
+/**
+ * Sidebar da area autenticada.
+ *
+ * Uma navegacao so para a conta inteira: visao geral, historico, faturas e a
+ * secao Conta (DESIGN: Painel do usuario). Os dois links fixos do starter kit
+ * (Repository e Documentation, apontando para o repositorio do kit) sairam -
+ * nao eram do site.
+ */
+const { t } = useI18n();
+const groups = useAccountNav();
+const routes = useRoutes();
 </script>
 
 <template>
@@ -45,7 +37,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="dashboard.url()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
@@ -54,11 +46,28 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain
+                v-for="group in groups"
+                :key="group.label"
+                :label="group.label"
+                :items="group.items"
+            />
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                        as-child
+                        :tooltip="t('account.nav.back_to_site')"
+                    >
+                        <a :href="routes.home.value">
+                            <ArrowLeft />
+                            <span>{{ t('account.nav.back_to_site') }}</span>
+                        </a>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
             <NavUser />
         </SidebarFooter>
     </Sidebar>
