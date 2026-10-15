@@ -8,7 +8,9 @@ Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 O `composer install` deixou de rodar em **todo** deploy: as duas instalacoes
 dependem do hash do manifesto, e uma falha no meio do script pode ser refeita
 sem commit novo. A mudanca vive no `deploy/deploy.sh` (e nas docs abaixo);
-nada muda para quem usa o site.
+nada muda para quem usa o site. No VPS, porem, o script em uso e uma **copia**
+(`deploy-instaled.sh`), trocada a mao - e so depois dessa troca a mudanca vale
+em producao (passo a passo em `deploy/deploy-instaled.md`).
 
 ### Adicionado
 
@@ -17,6 +19,10 @@ nada muda para quem usa o site.
   quando `HEAD == origin/main`, e era o que o RUNBOOK mandava fazer). Com a
   trava ocupada, o `--force` avisa e sai com codigo 1; o cron nunca passa a
   flag.
+- `deploy/deploy-instaled.md`: o passo a passo para trocar a copia instalada do
+  script no VPS (o cron executa `deploy-instaled.sh`, nao o arquivo do repo) -
+  sinal de que ha versao nova (`diff -q`), backup datado, troca atomica com
+  `mv -T`, como conferir com `--force`, rollback e os problemas comuns.
 
 ### Alterado
 
@@ -30,16 +36,35 @@ nada muda para quem usa o site.
   pulada.
 - `storage/framework/.gitignore`: `*.sha256` - os arquivos de estado do gate
   estavam fora do git por acidente (o `.gitignore` de la lista nomes um a um).
+- `.gitignore` (raiz): a copia instalada do script no VPS e os arquivos que a
+  troca cria (`/deploy/deploy-instaled.sh`, `.sh.novo` e `.bak-*`) - o
+  `git status` do servidor fica limpo.
 
 ### Corrigido
 
+- `deploy/deploy.sh`: o `git pull` passava `origin/main` como um **argumento
+  unico** (`git pull -q --ff-only "origin/$BRANCH"`), e o git le argumento
+  unico como repositorio - o deploy morria logo depois do "Deploy iniciado",
+  com `fatal: 'origin/main' does not appear to be a git repository`. Agora e
+  `git pull -q --ff-only origin "$BRANCH"` (o `git fetch` da linha de cima ja
+  estava na forma certa, e por isso passava). O defeito esta no repositorio
+  desde `172aea0`, o commit que criou o script.
 - `docs/adr/ADR-014-deploy.md` dizia que, sem lockfile, o `composer install` do
   deploy "resolve a arvore na hora"; o servidor tem o lock do ultimo install, e
   e ele que o install usa - o que existe e a recusa quando o manifesto pede
   pacote novo.
 - `docs/RUNBOOK.md` secao 2: o conserto manual documentado ("rodar o script a
-  mao") nao funcionava; agora e `deploy.sh --force`, e a secao descreve as
-  dependencias sob gatilho.
+  mao") nao funcionava; agora e `deploy-instaled.sh --force`, e a secao descreve
+  as dependencias sob gatilho.
+- `docs/RUNBOOK.md` secao 2 e o tutorial: o comando manual documentado rodava
+  como `www-data`, que nao escreve no `.git` do repositorio (do `root`) - o
+  `git fetch` do script morria com `insufficient permission for adding an
+  object to repository database`; os dois passam a mandar rodar como o dono do
+  repositorio, que e o usuario do cron.
+- `docs/RUNBOOK.md`, `docs/SPEC.md` e `docs/adr/ADR-014-deploy.md` diziam que o
+  cron executa `deploy/deploy.sh`; ele executa a **copia instalada**
+  (`deploy-instaled.sh`). O arquivo do repo chega pelo pull, mas quem roda e a
+  copia, trocada a mao.
 
 ## F3 - Tools simples (3 a 8 do MVP) - 2026-10-14
 
