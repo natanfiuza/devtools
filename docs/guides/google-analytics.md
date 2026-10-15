@@ -93,6 +93,24 @@ da tag nao e o mesmo Measurement ID do stream aberto na console (dois streams na
 mesma propriedade), e `.env` novo com config velha (`optimize:clear && optimize`,
 secao 2).
 
+**O teste tambem e instavel com o aceite feito**, e as duas razoes sao do
+desenho, nao um defeito:
+
+- Quando o site e carregado **dentro de um iframe** (o Tag Assistant faz isso na
+  tela dele), o cookie `consent` **nao acompanha** a requisicao: ele e
+  `SameSite=Lax` (`resources/js/lib/cookies.ts`), e cookie Lax nao vai em
+  contexto de terceiro. Sem cookie, o servidor monta a pagina como "ainda nao
+  decidiu" - banner, sem tag. Em **aba propria** (navegacao top-level) o cookie
+  vai junto e a tag entra. A mesma configuracao passa ou falha conforme o
+  contexto em que o teste carregou a pagina naquela rodada.
+- A tag entra **depois da hidratacao** - e o cliente que injeta, por desenho. Uma
+  verificacao que escaneia cedo demais nao a encontra; a que reescaneia depois
+  encontra.
+
+Por isso o teste do Google nao e criterio: **se o Tempo real mostra a visita, a
+medicao esta funcionando.** Para o teste ficar verde, use o Tag Assistant com a
+pagina numa aba normal, aceitando o banner ali.
+
 ## 4. O que NAO ligar na console
 
 | O que | Onde | Por que |
