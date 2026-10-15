@@ -3,6 +3,51 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Medicao declarada no banner e ativacao do GA4 - 2026-10-15
+
+O banner dizia "Google Analytics: paginas vistas, **sem dado pessoal**" enquanto
+a medicao, uma vez aceita, grava o cookie `_ga` - um identificador persistente.
+Agora os dois lados falam a mesma lingua: o texto do banner descreve o que a
+medicao faz (e em 5 idiomas), o "Nada de anuncios" deixou de depender so do
+Consent Mode, a Politica de Privacidade cita o Google como medidor, e **ativar a
+medicao** ganhou um passo a passo - que e so preencher uma variavel: o
+carregamento ja existia desde a F1 (ADR-013).
+
+### Adicionado
+
+- `docs/guides/google-analytics.md` (pasta `docs/guides/`, nova): como criar a
+  propriedade GA4, ligar o `ANALYTICS_GA4_ID` no `.env` de producao, conferir no
+  devtools e o que **nao** ligar na console (Google Signals, personalizacao de
+  anuncios, Enhanced measurement) - mais a rotacao do id e o mapa de onde cada
+  peca vive no codigo.
+- `docs/adr/ADR-032-medicao-com-cookies.md`: a frase do banner e afirmacao
+  factual - GA4 padrao depois do aceite, sinais de anuncio desligados no
+  `config`, Google declarado na politica, area da conta medida e admin fora.
+- `resources/js/__tests__/consent-layouts.test.ts`: a area da conta mostra o
+  banner e injeta a tag so com aceite; o painel administrativo nao injeta nada,
+  nem com `consent=granted`.
+
+### Alterado
+
+- `lang/{pt_BR,pt_PT,en,es,fr}/app.php` (`consent.analytics_body`): "paginas
+  vistas e cookies de medicao, so depois do seu aceite" no lugar de "sem dado
+  pessoal" (as chaves nao mudaram).
+- `lang/{pt_BR,pt_PT,en,es,fr}/legal.php`: a secao "Com quem compartilhamos"
+  passa a citar o Google tambem como medidor; `config/legal.php` foi para
+  `2026-10-15`, a data que aparece no topo das paginas legais.
+- `resources/js/lib/analytics.ts`: `gtag('config', id, { allow_google_signals:
+  false, allow_ad_personalization_signals: false })` - o "Nada de anuncios" nao
+  fica so por conta do Consent Mode.
+- `resources/js/layouts/account/AccountLayout.vue`: monta `ConsentBanner` e
+  `AnalyticsScript`, como os layouts publico e de acesso. O `AdminLayout.vue`
+  segue sem os dois, de proposito.
+- `docs/RUNBOOK.md`: `ANALYTICS_GA4_ID` no bloco de `.env` de producao, secao 9
+  (medicao) com o link do guia, rotacao do GA4 na secao 7 e uma linha na tabela
+  de diagnostico.
+- `docs/SPEC.md` (secoes 8, 10 e 11), `docs/glossario.md` (termo **Medicao**) e
+  `docs/adr/ADR-013-consentimento.md` (a lista de layouts com banner ficou
+  defasada e foi corrigida).
+
 ## Deploy - dependencias sob gatilho (composer + npm) - 2026-10-15
 
 O `composer install` deixou de rodar em **todo** deploy: as duas instalacoes

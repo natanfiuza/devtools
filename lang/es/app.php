@@ -56,7 +56,7 @@ return [
         'necessary' => 'Necesarias',
         'necessary_body' => 'Sesión, idioma y tema. Sin ellas el sitio no funciona.',
         'analytics' => 'Medición',
-        'analytics_body' => 'Google Analytics: páginas vistas, sin datos personales.',
+        'analytics_body' => 'Google Analytics: páginas vistas y cookies de medición, solo después de que aceptes.',
         'privacy' => 'Política de Privacidad',
     ],
 

@@ -25,6 +25,17 @@ const DENIED_BY_DEFAULT = {
     analytics_storage: 'denied',
 } as const;
 
+/**
+ * Opcoes do `config`: o banner promete "Nada de anuncios" e a Politica de
+ * Privacidade promete "Nada de cookie de publicidade". O Consent Mode ja nega
+ * publicidade nos dois estados - isto e o cinto alem do suspensorio, para a
+ * promessa nao depender so do consentimento (ADR-032).
+ */
+const NO_ADS = {
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+} as const;
+
 declare global {
     interface Window {
         /** Fila de comandos do gtag; existe antes da tag carregar. */
@@ -72,7 +83,7 @@ export function loadAnalytics(id: string): void {
     gtag('consent', 'default', DENIED_BY_DEFAULT);
     gtag('consent', 'update', { analytics_storage: 'granted' });
     gtag('js', new Date());
-    gtag('config', id);
+    gtag('config', id, NO_ADS);
 
     const script = document.createElement('script');
     script.async = true;

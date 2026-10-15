@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AnalyticsScript from '@/components/AnalyticsScript.vue';
 import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import ConsentBanner from '@/components/ConsentBanner.vue';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { useAccountNav } from '@/composables/useAccountNav';
@@ -20,6 +22,10 @@ import type { NavItem } from '@/types';
  *
  * O conteudo respira em 896px: as telas da conta sao formularios e tabelas
  * curtas - o painel administrativo, que e mais largo, tem layout proprio.
+ *
+ * A conta e medida como o site (ADR-032): o banner e a tag sobem aqui tambem,
+ * com a decisao vinda do servidor. O admin fica de fora - la nao ha banner nem
+ * tag, nem com aceite.
  */
 const { t } = useI18n();
 const groups = useAccountNav();
@@ -49,6 +55,9 @@ const { activeTitle } = useActiveSection(items, () => t('account.nav.menu'));
                 </div>
             </div>
         </AppContent>
+
+        <ConsentBanner />
+        <AnalyticsScript />
         <Toaster />
     </AppShell>
 </template>

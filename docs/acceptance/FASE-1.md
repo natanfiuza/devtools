@@ -148,3 +148,20 @@ aceitar/recusar no banner e ver a tag do GA entrar e sair do `<head>` no devtool
 com um id real no `.env` local - incluindo **aceitar de novo depois de recusar**,
 a sequencia corrigida nesta revisao. Sem id configurado, a medicao fica desligada
 de proposito.
+
+## Emenda (2026-10-15)
+
+O que o banner **declara** sobre a medicao mudou depois desta aceitacao, e a
+area da conta entrou na medicao (ADR-032). `consent.analytics_body` deixou de
+dizer "sem dado pessoal" - o GA4, uma vez aceito, grava o cookie `_ga` - e passou
+a declarar "paginas vistas e cookies de medicao, so depois do seu aceite" nos 5
+idiomas; os sinais de publicidade foram desligados no `config`; a Politica de
+Privacidade passou a citar o Google como medidor; e o `AccountLayout` monta o par
+banner + tag (o `AdminLayout` nao).
+
+Nada disso muda os criterios 5 a 7 desta fase: a decisao continua vinda do
+servidor, sem aceite nao ha requisicao nenhuma ao Google, e recusar nao carrega
+nada. A cobertura nova e o `consent-layouts.test.ts` (conta mede, admin nao).
+
+A **conferencia manual pendente continua pendente** - e agora tem procedimento
+escrito: secao 3 de `docs/guides/google-analytics.md`.
