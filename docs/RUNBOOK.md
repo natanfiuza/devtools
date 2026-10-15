@@ -79,21 +79,28 @@ Automatico: o cron chama o [`deploy/deploy.sh`](../deploy/deploy.sh) a cada
 minuto e ele sai na hora quando o `main` do remoto nao mudou.
 
 ```bash
-sudo -u www-data /var/www/devtools/deploy/deploy.sh   # manual, se precisar
-tail -f /var/www/devtools/storage/logs/deploy.log     # acompanhar
+sudo -u www-data /var/www/devtools/deploy/deploy.sh          # manual
+sudo -u www-data /var/www/devtools/deploy/deploy.sh --force  # refaz sem commit novo
+tail -f /var/www/devtools/storage/logs/deploy.log            # acompanhar
 ```
 
-O que ele faz, na ordem: `git fetch` + `pull --ff-only`; `composer install
---no-dev`; `npm install` **apenas quando o `package.json` muda** (o hash fica
-em `storage/framework/npm-deps.sha256`, porque instalar leva minutos); build
-do Vite e do bundle de SSR dentro de uma release nova; troca dos symlinks
+O que ele faz, na ordem: `git fetch` + `pull --ff-only`; dependencias **apenas
+quando o manifesto muda** — `composer install --no-dev` (com queda para
+`composer update` se o lock do servidor nao servir mais) e `npm install`, cada
+um com o hash do manifesto guardado em `storage/framework/<nome>-deps.sha256`;
+build do Vite e do bundle de SSR dentro de uma release nova; troca dos symlinks
 `public/build` e `bootstrap/ssr`; limpeza das releases antigas; `migrate
---force`; `optimize`; `queue:restart`; reinicio do SSR.
+--force`; `optimize`; `queue:restart`; reinicio do SSR. Com `--force` (uso
+manual) o corpo roda mesmo sem commit novo.
 
 Nenhum lockfile e versionado (`package-lock.json` e `composer.lock` estao no
-`.gitignore`, ver ADR-014): sem lock, as duas instalacoes resolvem a arvore de
-dependencias na hora. E por isso que o gatilho do `npm install` e o
-`package.json` — nao ha lock para comparar.
+`.gitignore`, ver ADR-014): o servidor tem os locks do ultimo install, e nenhum
+deles acompanha o manifesto. Por isso o gatilho e o hash do `package.json` /
+`composer.json` — nao ha lock confiavel para comparar —, e por isso o
+`composer install` **recusa o lock** (exit 4, sem instalar nada) quando o
+manifesto pede um pacote que ele nao tem, caindo para `composer update`. O hash
+so e gravado depois de uma instalacao que terminou bem: um deploy que morreu no
+meio deixa o hash para tras, e o proximo deploy refaz o que faltou.
 
 Duas garantias que valem entender:
 
@@ -103,7 +110,8 @@ Duas garantias que valem entender:
   porque a release anterior segue no disco (as 3 ultimas ficam).
 - **Uma execucao por vez.** Um `flock` em
   `storage/framework/locks/deploy.lock` faz a segunda chamada sair em
-  silencio; deploy demorado nao empilha.
+  silencio (com `--force`, ela avisa e sai com codigo 1, para o operador nao
+  achar que rodou); deploy demorado nao empilha.
 
 O `deploy.sh` precisa de `php`, `composer`, `node`, `npm` e `git` no PATH; ele
 monta um PATH explicito porque o cron nao herda o do shell de login. Se faltar
@@ -128,9 +136,17 @@ ls -1dt /var/www/devtools/storage/app/builds/* | head -5
 ```
 
 Se `public/build` **nao** for um symlink (ou apontar para uma release antiga),
-a publicacao nunca aconteceu. O conserto e rodar o script a mao depois de
-resolver a causa, ou entrar commit novo (qualquer commit no `main` dispara o
-deploy inteiro de novo).
+a publicacao nunca aconteceu. O conserto e rodar o script **com `--force`**
+depois de resolver a causa:
+
+```bash
+sudo -u www-data /var/www/devtools/deploy/deploy.sh --force
+```
+
+Sem a flag ele sai na hora (`HEAD == origin/main`), entao uma execucao manual
+sem `--force` nao conserta nada aqui. Qualquer commit no `main` tambem dispara
+o deploy inteiro pelo cron — e o gatilho por hash garante que uma instalacao
+que nao terminou seja refeita junto.
 
 Isso e decisao consciente, nao descuido: as alternativas (retomar do ponto de
 falha, desfazer o pull automaticamente, publicar assets antes das dependencias)
@@ -274,7 +290,7 @@ Problemas que ja sabemos diagnosticar:
 | 502 no nginx | php-fpm fora do ar (`systemctl status php8.3-fpm`) |
 | 500 em toda pagina | `.env` errado ou `storage` sem permissao de escrita |
 | CSS/JS 404 apos deploy | build falhou ou o symlink nao trocou: `ls -l public/build` e o `deploy.log` |
-| Chave de traducao crua na tela | PHP novo com JS velho: o deploy morreu antes do build e o cron **nao retenta** (secao 2, "Quando o deploy falha no meio") |
+| Chave de traducao crua na tela | PHP novo com JS velho: o deploy morreu antes do build e o cron **nao retenta sozinho** — `deploy.sh --force` refaz (secao 2, "Quando o deploy falha no meio") |
 | Pagina sem HTML no servidor | SSR desligado ou processo morto (`curl 127.0.0.1:13714/health`) |
 | "command not found" no cron | binario fora do PATH do `deploy.sh` (o log diz qual) |
 | Deploy nao roda | `flock` preso: `fuser storage/framework/locks/deploy.lock` |

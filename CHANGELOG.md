@@ -3,6 +3,44 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Deploy - dependencias sob gatilho (composer + npm) - 2026-10-15
+
+O `composer install` deixou de rodar em **todo** deploy: as duas instalacoes
+dependem do hash do manifesto, e uma falha no meio do script pode ser refeita
+sem commit novo. A mudanca vive no `deploy/deploy.sh` (e nas docs abaixo);
+nada muda para quem usa o site.
+
+### Adicionado
+
+- `deploy/deploy.sh --force`: roda o corpo do deploy mesmo sem commit novo - o
+  caminho manual para consertar uma falha no meio (o script normal sai na hora
+  quando `HEAD == origin/main`, e era o que o RUNBOOK mandava fazer). Com a
+  trava ocupada, o `--force` avisa e sai com codigo 1; o cron nunca passa a
+  flag.
+
+### Alterado
+
+- `deploy/deploy.sh`: `composer install --no-dev --optimize-autoloader` so roda
+  quando o `sha256` do `composer.json` difere do guardado em
+  `storage/framework/composer-deps.sha256` (ou quando nao ha `vendor/`), e o
+  `npm install` ganhou a mesma rede (`[ ! -d node_modules ]`). Quando o install
+  **recusa** o lock do servidor (exit 4: o `composer.lock` de la nao acompanha
+  o `composer.json`, porque nenhum dos dois e versionado), o script cai para
+  `composer update` em vez de morrer no meio. Os dois gates logam a etapa
+  pulada.
+- `storage/framework/.gitignore`: `*.sha256` - os arquivos de estado do gate
+  estavam fora do git por acidente (o `.gitignore` de la lista nomes um a um).
+
+### Corrigido
+
+- `docs/adr/ADR-014-deploy.md` dizia que, sem lockfile, o `composer install` do
+  deploy "resolve a arvore na hora"; o servidor tem o lock do ultimo install, e
+  e ele que o install usa - o que existe e a recusa quando o manifesto pede
+  pacote novo.
+- `docs/RUNBOOK.md` secao 2: o conserto manual documentado ("rodar o script a
+  mao") nao funcionava; agora e `deploy.sh --force`, e a secao descreve as
+  dependencias sob gatilho.
+
 ## F3 - Tools simples (3 a 8 do MVP) - 2026-10-14
 
 A fase da secao 9 do SPEC: **as seis tools simples viram `available` de uma vez**

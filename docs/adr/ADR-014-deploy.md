@@ -3,12 +3,14 @@ Status: Aceito
 Data: 2026-10-05
 Atualizado: 2026-10-13 (estrategia de assets definida; decisao deixa de estar pendente)
 Atualizado: 2026-10-14 (os lockfiles saem do git e a falha no meio do deploy fica registrada de proposito)
+Atualizado: 2026-10-15 (as duas instalacoes passam a depender do hash do manifesto e o deploy manual ganha `--force`)
 
 ## Decisao
 Deploy continuo por cron: a cada minuto o `deploy/deploy.sh` roda, pega um
 `flock` (uma execucao por vez), faz `git fetch` e **sai imediatamente se o HEAD
-nao mudou**. Quando mudou: `git pull --ff-only`, `composer install --no-dev`,
-build e `migrate --force`; no fim `queue:restart` e reinicio do SSR.
+nao mudou**. Quando mudou: `git pull --ff-only`, as dependencias **sob gatilho**
+(abaixo), build e `migrate --force`; no fim `queue:restart` e reinicio do SSR.
+Com `--force` (uso manual) o corpo roda mesmo sem commit novo.
 
 **Assets sao construidos no servidor.** `public/build` e `bootstrap/ssr` nao
 vao para o git (o kit ja os ignora): sao artefatos de build, e versionar saida
@@ -27,16 +29,21 @@ segundo antes quebra. Com as releases, o HTML que ja esta no navegador de
 alguem continua encontrando os arquivos dele; mantemos as **3 ultimas** e as
 antigas so saem depois da troca.
 
-O `package-lock.json` **nao e versionado** (esta no `.gitignore`, junto de
-`composer.lock`): quem resolve a arvore de dependencias no servidor e o
-`npm install`, que so roda quando o hash do `package.json` muda (leva minutos e
-quase todo deploy nao mexe em dependencia); o hash fica em
-`storage/framework/npm-deps.sha256`.
+Nem o `package-lock.json` nem o `composer.lock` sao versionados (os dois estao
+no `.gitignore`): o servidor tem os locks do ultimo install, e nenhum deles
+acompanha o manifesto. Cada instalacao so roda quando o **hash do manifesto**
+difere do guardado em `storage/framework/<nome>-deps.sha256` - instalar leva
+minutos e quase todo deploy nao mexe em dependencia. O hash so e gravado
+**depois** de uma instalacao que terminou bem: um deploy que morreu no meio
+deixa o hash para tras, e o proximo deploy refaz o que faltou. (O gatilho nao e
+um `git diff` contra o commit anterior: depois do pull o HEAD ja mudou, e o
+commit seguinte que nao toca o manifesto nao apareceria no diff.)
 
-Pelo mesmo motivo o `composer.lock` tambem saiu do git: sem lockfile, o
-`composer install` do deploy **nao instala versoes do lock** - ele resolve a
-arvore na hora e escreve um lock novo. Nenhum dos dois lados do build e
-reproduzivel.
+Quando o `composer.json` muda, o install roda primeiro, contra o lock que o
+servidor tem; se o manifesto pede um pacote que esse lock nao tem, o install
+**recusa o lock** (exit 4) sem instalar nada, e o script cai para `composer
+update`, que resolve a arvore de novo e reescreve o lock. Nenhum dos dois lados
+do build e reproduzivel.
 
 Migrations rodam nesse mesmo deploy, com o site no ar, entao precisam ser
 **retrocompativeis**: adicionar coluna com default/nullable, renomear em dois
@@ -67,8 +74,9 @@ passos, nunca dropar no mesmo deploy que para de usar.
   disco) deixa a aplicacao com codigo e traducao novos servindo o bundle
   antigo — foi assim que a home ficou mostrando chave de traducao crua em
   2026-10-14. `migrate`, `optimize`, `queue:restart` e o reinicio do SSR tambem
-  nao rodam nesse caso, e o unico conserto e entrar commit novo (ou rodar o
-  script a mao no servidor). **Mantido de proposito** (decisao de 2026-10-14):
+  nao rodam nesse caso. O conserto e `deploy/deploy.sh --force` no servidor (o
+  corpo inteiro roda de novo, e o gatilho por hash refaz as instalacoes que nao
+  terminaram) ou entrar commit novo, que dispara o cron. **Mantido de proposito** (decisao de 2026-10-14):
   publicar os assets antes do pull nao resolve — o bundle novo precisa das
   dependencias novas do `composer install` — e as alternativas (retomar do
   ponto de falha, reverter o pull automaticamente) custam mais do que o
