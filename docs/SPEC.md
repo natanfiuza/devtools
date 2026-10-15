@@ -6,7 +6,7 @@ Site de ferramentas para desenvolvedores. Tools do cliente sao gratuitas e sem l
 ## 2. Stack e infra
 - PHP 8.3 / Laravel 13 / Inertia / Vue 3 / TypeScript estrito / Tailwind / shadcn-vue / vue-i18n.
 - MySQL. Fila `database`. Supervisor ja instalado: arquivo em `deploy/supervisor/devtools-worker.conf` (queue:work --tries=2 --timeout=120 --max-time=3600).
-- Deploy: cron a cada minuto -> `deploy/deploy.sh` (flock, git pull --ff-only, composer install --no-dev, migrate --force, optimize, queue:restart). Executa apenas se HEAD mudou. Assets sao construidos no servidor, em release propria com troca atomica de symlink: ver ADR-014 e docs/RUNBOOK.md.
+- Deploy: cron a cada minuto -> a copia instalada do script no VPS (`deploy-instaled.sh`; a fonte e `deploy/deploy.sh` no repo, trocada a mao quando ela muda - `deploy/deploy-instaled.md`). O script: flock, git pull --ff-only, dependencias sob gatilho por hash (composer e npm), migrate --force, optimize, queue:restart; executa apenas se HEAD mudou. Assets sao construidos no servidor, em release propria com troca atomica de symlink: ver ADR-014 e docs/RUNBOOK.md.
 - Testes: Pest (backend) e Vitest (frontend), rodados em dev. Sem CI.
 - GA4 com Consent Mode v2 e banner LGPD/GDPR.
 

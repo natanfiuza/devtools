@@ -69,7 +69,7 @@ fi
 
 log "Deploy iniciado: $(git rev-parse --short "origin/$BRANCH")"
 
-git pull -q --ff-only "origin/$BRANCH"
+git pull -q --ff-only origin "$BRANCH"
 
 # --- dependencias ----------------------------------------------------------
 # O gatilho dos dois manifestos e o hash guardado, escrito so depois de uma

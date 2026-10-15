@@ -67,21 +67,24 @@ Os arquivos de `/build` sao servidos direto do disco (com `expires 1y` e
 `immutable` para `/build/assets/`, porque o Vite poe hash no nome), e o
 `index.php` vai para o FPM. O dominio deve estar com TLS (certbot).
 
-Cron do deploy, a cada minuto:
+Cron do deploy, a cada minuto, no crontab do **mesmo usuario que fez o clone** (secao 1:
+`root`) - o script faz `git fetch`, que escreve em `.git/objects`:
 
 ```cron
-* * * * * /var/www/devtools/deploy/deploy.sh >> /var/www/devtools/storage/logs/deploy.log 2>&1
+* * * * * /var/www/devtools/deploy/deploy-instaled.sh >> /var/www/devtools/storage/logs/deploy.log 2>&1
 ```
 
 ## 2. Deploy
 
-Automatico: o cron chama o [`deploy/deploy.sh`](../deploy/deploy.sh) a cada
-minuto e ele sai na hora quando o `main` do remoto nao mudou.
+Automatico: o cron chama a **copia instalada** (`deploy-instaled.sh`) a cada
+minuto e ela sai na hora quando o `main` do remoto nao mudou. Trocar essa copia
+quando o `deploy.sh` do repo muda e um passo manual: o passo a passo esta em
+[deploy/deploy-instaled.md](../deploy/deploy-instaled.md).
 
 ```bash
-sudo -u www-data /var/www/devtools/deploy/deploy.sh          # manual
-sudo -u www-data /var/www/devtools/deploy/deploy.sh --force  # refaz sem commit novo
-tail -f /var/www/devtools/storage/logs/deploy.log            # acompanhar
+sudo /var/www/devtools/deploy/deploy-instaled.sh          # manual (mesmo usuario do cron)
+sudo /var/www/devtools/deploy/deploy-instaled.sh --force  # refaz sem commit novo
+tail -f /var/www/devtools/storage/logs/deploy.log         # acompanhar
 ```
 
 O que ele faz, na ordem: `git fetch` + `pull --ff-only`; dependencias **apenas
@@ -140,7 +143,7 @@ a publicacao nunca aconteceu. O conserto e rodar o script **com `--force`**
 depois de resolver a causa:
 
 ```bash
-sudo -u www-data /var/www/devtools/deploy/deploy.sh --force
+sudo /var/www/devtools/deploy/deploy-instaled.sh --force
 ```
 
 Sem a flag ele sai na hora (`HEAD == origin/main`), entao uma execucao manual

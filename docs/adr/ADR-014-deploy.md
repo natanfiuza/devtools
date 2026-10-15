@@ -74,9 +74,9 @@ passos, nunca dropar no mesmo deploy que para de usar.
   disco) deixa a aplicacao com codigo e traducao novos servindo o bundle
   antigo — foi assim que a home ficou mostrando chave de traducao crua em
   2026-10-14. `migrate`, `optimize`, `queue:restart` e o reinicio do SSR tambem
-  nao rodam nesse caso. O conserto e `deploy/deploy.sh --force` no servidor (o
-  corpo inteiro roda de novo, e o gatilho por hash refaz as instalacoes que nao
-  terminaram) ou entrar commit novo, que dispara o cron. **Mantido de proposito** (decisao de 2026-10-14):
+  nao rodam nesse caso. O conserto e `deploy-instaled.sh --force` no servidor
+  (o corpo inteiro roda de novo, e o gatilho por hash refaz as instalacoes que
+  nao terminaram) ou entrar commit novo, que dispara o cron. **Mantido de proposito** (decisao de 2026-10-14):
   publicar os assets antes do pull nao resolve — o bundle novo precisa das
   dependencias novas do `composer install` — e as alternativas (retomar do
   ponto de falha, reverter o pull automaticamente) custam mais do que o
@@ -84,6 +84,11 @@ passos, nunca dropar no mesmo deploy que para de usar.
 - Nada aqui exige acesso ao servidor para publicar: commit no `main` e o cron
   leva. Por isso migration quebrada e o unico erro que nao da para desfazer
   rapido — a regra de retrocompatibilidade nao e estilo, e o que compra isso.
+- Mudanca **no proprio script de deploy** e a excecao: o VPS executa uma copia
+  (`deploy/deploy-instaled.sh`), trocada a mao quando o `deploy/deploy.sh`
+  muda - sem a troca, o pull traz o arquivo novo mas quem roda continua sendo o
+  antigo. Passo a passo em
+  [deploy/deploy-instaled.md](../../deploy/deploy-instaled.md).
 - Passo a passo de operacao (instalacao, supervisor, backup, rotacao de
   chaves, diagnostico) em [docs/RUNBOOK.md](../RUNBOOK.md).
 
