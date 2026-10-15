@@ -3,6 +3,140 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## F3 - Tools simples (3 a 8 do MVP) - 2026-10-14
+
+A fase da secao 9 do SPEC: **as seis tools simples viram `available` de uma vez**
+(`json-to-code`, `sql-formatter`, `base64-url-hash`, `jwt-decoder`,
+`timestamp-uuid`, `regex-tester`), todas na mesma pagina e na mesma casca da F2 -
+a fase nao mexeu em rota, em `Show.vue` nem na forma do shell. Com elas, o site
+sai de uma ferramenta que funciona para sete; o **AI SQL Builder** e o unico
+card que continua com o selo "em breve", porque depende de servidor (F5).
+Aceite em `docs/acceptance/FASE-3.md`.
+
+### Adicionado
+
+- **Base comum das tools** (o que duas ou mais usam sai de dentro de uma):
+  `components/tool/CodeEditor.vue` (editor parametrizado pela extensao de
+  linguagem), `FileDropzone.vue`, `lib/clipboard.ts`, `lib/download.ts`,
+  `lib/bytes.ts`, `lib/file.ts` (abrir arquivo e arrastar-e-soltar),
+  `lib/position.ts` (posicao do erro a partir da mensagem de uma biblioteca),
+  `lib/encoding.ts`, `lib/editor/` (CodeMirror por token) e `lib/worker/`
+  (cliente e servidor do worker, com queda para a thread principal). O
+  `json-viewer` passa a consumir os mesmos, **sem mudanca de comportamento**.
+- **JSON para codigo** (`json-to-code`): inferencia de um modelo de tipos a
+  partir do documento - campo ausente em parte do array vira opcional, array de
+  tipos diferentes vira uniao, `null` vira anulavel, inteiro e decimal se
+  distinguem, vazio tem tipo proprio (`lib/infer.ts`) -, plano de declaracoes
+  com nome unico por objeto (`lib/plan.ts`) e tres emissores
+  (`lib/emit/{typescript,php,pydantic}.ts`): `export interface`, `final class`
+  com `declare(strict_types=1)` e propriedades promovidas `public readonly`, e
+  `BaseModel` do Pydantic na ordem em que o Python consegue definir. O alvo
+  (TypeScript | PHP (DTO) | Pydantic) e o nome do tipo raiz ficam no cabecalho
+  da **saida**; a contagem de tipos vai para a faixa de status.
+- **SQL Formatter** (`sql-formatter`): quatro dialetos (`mysql`, `pgsql`,
+  `sqlsrv`, `sqlite` - o vocabulario do glossario, traduzido para os nomes das
+  bibliotecas em `lib/dialects.ts`), caixa das palavras-chave (maiusculas,
+  minusculas ou manter), indentacao fixa em 2 espacos e o erro sintatico da
+  biblioteca convertido em **linha e coluna** na tela. A formatacao roda em
+  worker, com queda para a thread principal.
+- **Base64, URL e Hash** (`base64-url-hash`): direcao (codificar | decodificar)
+  no cabecalho da entrada e **abas de modo** no painel de saida - Base64 (UTF-8
+  de verdade, com a variante URL-safe sem padding), URL (componente e
+  formulario, `+` no lugar do espaco) e Hash (MD5, SHA-1, SHA-256 e SHA-512 de
+  uma vez, hex minusculo, com copiar por linha). O MD5 e do repositorio
+  (`lib/md5.ts`, conferido contra os vetores do RFC 1321) porque a Web Crypto
+  nao tem MD5; sem `crypto.subtle` (conexao nao segura) os tres SHA avisam o
+  motivo e o MD5 continua funcionando.
+- **JWT Decoder** (`jwt-decoder`), que so decodifica: cabecalho e payload em
+  JSON colorido, com `Bearer` colado sendo tolerado; `exp`, `iat` e `nbf`
+  aparecem como data legivel no idioma e com selo de estado ("expirado" em
+  `--destructive`); a assinatura sai so como **comprimento em bytes** e com o
+  rotulo de nao verificada, e uma **faixa de aviso** no topo da saida diz que a
+  ferramenta nao valida assinatura.
+- **Timestamp e UUID** (`timestamp-uuid`): a entrada aceita digitos (a unidade
+  sai da quantidade deles), texto de data ISO 8601, ou um UUID v7/ULID colado -
+  que nao e instante, mas carrega um, e a tool diz de que tipo ele veio. A saida
+  traz seis leituras com copiar (Unix em segundos e milissegundos, ISO em UTC e
+  local, data por extenso no idioma da pagina e tempo relativo) e os geradores
+  de UUID v4, UUID v7 e ULID, de 1, 5 ou 10 por vez.
+- **Regex Tester** (`regex-tester`), com o modelo de seguranca do **ADR-031**:
+  a busca roda num Web Worker descartavel e, passando de
+  `TOOLS_REGEX_TIMEOUT_MS`, o worker e encerrado e **nenhum resultado** fica na
+  tela - nem a lista parcial, nem a leitura anterior. Padrao invalido volta como
+  resultado, nao derruba o worker. A saida traz a lista de correspondencias
+  (indice, trecho, posicao e grupos numerados e nomeados), o texto com cada
+  correspondencia realcada e a previa da substituicao (`$1`, `$<nome>`); acima
+  de `TOOLS_REGEX_MAX_MATCHES` a lista para e avisa.
+- `config/tools.php` e `.env.example`: `TOOLS_REGEX_TIMEOUT_MS` (padrao 2000) e
+  `TOOLS_REGEX_MAX_MATCHES` (padrao 1000), descendo por prop como o teto de
+  entrada.
+- Dependencias novas: `sql-formatter` (a unica de runtime) e
+  `@codemirror/lang-sql`. Ambas entram por glob lazy, no chunk da tool.
+- **Imagens OG das seis tools novas** (`public/og/<slug>.png`), geradas pelo
+  `seo:og-image` ao virar o `status` e comitadas (ADR-030).
+- i18n: os textos das seis tools nos 5 idiomas; os do shell (`tools.ui.*`)
+  deixam de falar de JSON e passam a valer para qualquer ferramenta.
+- Testes (Vitest): `json-to-code`, `json-to-code-infer`, `json-to-code-emit`,
+  `sql-dialects`, `sql-format`, `sql-formatter`, `encoding-base64`,
+  `encoding-url`, `base64-url-hash`, `md5`, `hash`, `jwt-decode`,
+  `jwt-decoder`, `time`, `ids`, `regex-run`, `regex-worker`, `regex-tester`,
+  `position` e `file`.
+
+### Alterado
+
+- Os seis `manifest.json` passam a `status: "available"`: o card da home ganha
+  link e perde o selo, a busca passa a abrir a pagina e o sitemap vai de 5 para
+  **50 URLs** (10 paginas x 5 idiomas).
+- `App\Support\Tools::all()` passa a excluir `hidden`, como o leitor
+  TypeScript: era a unica divergencia entre os dois leitores, e o consumidor
+  que a expunha e o cartao padrao de compartilhamento, desenhado a partir
+  dali. `Tools::find()` le `all()`, entao uma tool `hidden` nao e encontrada -
+  e o mesmo `null` do slug desconhecido, que vira o mesmo 404 (ADR-007).
+- `ToolButton.vue` ganha `ariaLabel` (os alternadores de flag do Regex Tester
+  mostram o simbolo, e nao a frase) e `ToolShell.vue` recebe os controles de
+  produto nos slots `#input-header` e `#output-header`, que ja existiam.
+- `resources/js/lib/parse.ts` e `types.ts` do `json-viewer` viram
+  `lib/json/{parse,types}.ts`, e o editor do `json-viewer` (`editor/JsonEditor.vue`
+  e companhia) vira o `CodeEditor.vue` compartilhado.
+
+### Decidido
+
+- **ADR-031** (modelo de seguranca do Regex Tester: worker com prazo, nenhum
+  resultado no estouro, teto de correspondencias) e **ADR-029 emendado** (o que
+  a F3 confirmou, a conta de cinco ferramentas que eram seis, a excecao do
+  Regex Tester que cabe na casca e a base comum que saiu de dentro da primeira
+  tool). **ADR-007** registra o alinhamento de `hidden` entre os dois leitores.
+- Listas de produto (dialetos, alvos, algoritmos) como constantes tipadas do
+  modulo, no `Select` ou `Tabs` do painel que elas governam; os numeros seguem
+  em `config/tools.php`.
+- "Ultima saida valida" deixa de ser so do JSON Viewer e vira estado da casca
+  (glossario), com o `json-to-code` e o `sql-formatter` mostrando a ultima saida
+  boa enquanto a entrada nao fecha - e o Regex Tester como excecao, pelo
+  ADR-031.
+
+### Corrigido
+
+- `AdminPanelTest`: o teste de busca fixava o termo "ana" e criava o admin com
+  e-mail sorteado pelo Faker - um em cada cem e-mails gerados contem o termo
+  (`nathanael`, `mariana`, `susana`), e a lista voltava com duas contas. Os
+  e-mails do teste passam a ser fixos.
+
+## Deploy - lockfiles fora do git e gatilho de dependencias - 2026-10-14
+
+Bloco que veio antes da F3, para a home voltar a publicar: os **dois lockfiles
+saem do git** (`composer.lock` e `package-lock.json`, com o `.gitignore`
+cobrindo os dois) e o `deploy.sh` passa a decidir a instalacao de dependencias
+de front pelo **hash do `package.json`** (`storage/framework/npm-deps.sha256`),
+chamando `npm install --no-audit --no-fund` no lugar de `npm ci`. Nenhum dos
+dois lados do build e reproduzivel, e isso e assumido no ADR-014 (atualizado):
+faixas `^` no `package.json` significam que dois deploys do mesmo commit podem
+instalar versoes diferentes.
+
+A falha no meio do script - que deixa o PHP novo servindo o JS velho e nao
+retenta, porque o `git pull` ja moveu o HEAD - fica **mantida de proposito**, com
+o diagnostico no `docs/RUNBOOK.md`. A publicacao continua dependendo do merge em
+`main`, que e o que o cron observa (commit em `develop_natan` nao publica nada).
+
 ## F2 - JSON Viewer, pagina da tool e imagem OG por tool - 2026-10-14
 
 A fase da secao 9 do SPEC, mais o que a F1 deixou explicitamente para ela: a

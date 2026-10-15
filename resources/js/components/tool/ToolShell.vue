@@ -34,6 +34,17 @@ const props = defineProps<{
     splitKey: string;
 }>();
 
+/*
+| A casca nao aceita atributo nenhum.
+|
+| A pagina da tool entrega **todos** os limites da configuracao (o teto de
+| entrada, o limiar da virtualizacao, o tempo do regex), e cada tool declara so
+| os que usa. O que sobra chegaria aqui e viraria atributo solto no elemento
+| raiz - `regex-timeout-ms="2000"` no `<div>` da casca, invisivel e sem
+| sentido. Quem quiser por classe ou identificador na casca passa por prop.
+*/
+defineOptions({ inheritAttrs: false });
+
 const { t } = useI18n();
 
 const { percent, dragging, onPointerDown, onKeydown, reset } = useSplitPane(

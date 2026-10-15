@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Copy } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isContainer, leafText, type JsonNode } from './lib/tree';
-import type { JsonNodeKind } from './lib/types';
+import type { JsonNodeKind } from '@/lib/json/types';
 import { ROW_HEIGHT } from './lib/window';
 
 /*

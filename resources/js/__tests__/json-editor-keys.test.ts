@@ -1,6 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createEditor, type EditorOptions } from '@/tools/json-viewer/editor/createEditor';
+import { createEditor, type EditorOptions } from '@/lib/editor/createEditor';
 
 /**
  * As teclas do editor.

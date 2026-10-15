@@ -9,7 +9,7 @@ import {
     searchNodes,
     visibleRows,
 } from '@/tools/json-viewer/lib/tree';
-import type { JsonValue } from '@/tools/json-viewer/lib/types';
+import type { JsonValue } from '@/lib/json/types';
 
 /**
  * A arvore achatada: indices, profundidade, colapso e busca.

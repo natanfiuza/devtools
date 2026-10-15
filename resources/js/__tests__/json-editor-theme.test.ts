@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest';
  */
 
 const source = readFileSync(
-    resolve(process.cwd(), 'resources/js/tools/json-viewer/editor/theme.ts'),
+    resolve(process.cwd(), 'resources/js/lib/editor/theme.ts'),
     'utf8',
 );
 

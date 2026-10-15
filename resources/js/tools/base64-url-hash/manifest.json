@@ -1,6 +1,6 @@
 {
     "slug": "base64-url-hash",
-    "status": "soon",
+    "status": "available",
     "category": "encode",
     "icon": "binary",
     "order": 50,

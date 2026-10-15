@@ -47,13 +47,21 @@ describe('registro', () => {
         expect(allTools.map((tool) => tool.slug)).toEqual(MVP);
     });
 
-    it('deixa uma unica tool funcionando na F2: o JSON Viewer', () => {
-        // As outras sete seguem no ciclo "soon": card com selo e sem link.
+    it('deixa sete tools funcionando, e so o AI SQL Builder no ciclo "soon"', () => {
+        // F2 entregou a primeira (o JSON Viewer); a F3 virou as seis simples de
+        // uma vez. O AI SQL Builder depende de servidor: segue com selo e sem
+        // link.
         expect(availableTools.map((tool) => tool.slug)).toEqual([
             'json-viewer',
+            'json-to-code',
+            'sql-formatter',
+            'base64-url-hash',
+            'jwt-decoder',
+            'timestamp-uuid',
+            'regex-tester',
         ]);
         expect(allTools.filter((tool) => tool.status === 'soon')).toHaveLength(
-            7,
+            1,
         );
     });
 
@@ -88,12 +96,15 @@ describe('registro', () => {
     });
 
     it('so devolve caminho para tool que funciona', () => {
-        // O JSON Viewer e a primeira tool com pagina: e o unico card da home
-        // que vira link. As outras sete continuam sem caminho.
+        // O caminho e o mesmo do card: quem funciona vira link, quem nao
+        // funciona fica sem - e o slug e o da rota.
         expect(toolPath(toolAt(0), 'pt-br')).toBe('/pt-br/tools/json-viewer');
+        expect(toolPath(toolAt(1), 'pt-br')).toBeNull();
 
-        for (const tool of allTools.filter((item) => item.status === 'soon')) {
-            expect(toolPath(tool, 'pt-br'), tool.slug).toBeNull();
+        for (const tool of allTools) {
+            expect(toolPath(tool, 'en'), tool.slug).toBe(
+                tool.status === 'available' ? `/en/tools/${tool.slug}` : null,
+            );
         }
     });
 

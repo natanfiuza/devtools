@@ -134,10 +134,10 @@ it('deixa de fora o que nao entra no indice', function () {
         ->not->toContain('/register')
         ->not->toContain('/styleguide')
         ->not->toContain('/dashboard')
-        // F2: a primeira tool funciona e entra no indice; as que ainda nao
-        // funcionam ficam de fora, mesmo com o manifest no registro.
-        ->not->toContain('/tools/ai-sql-builder')
-        ->not->toContain('/tools/sql-formatter');
+        // As tools que funcionam entram no indice (F2 levou a primeira, a F3
+        // levou as seis seguintes); a que depende de servidor fica de fora,
+        // mesmo com o manifest no registro.
+        ->not->toContain('/tools/ai-sql-builder');
 });
 
 it('lista a tool que funciona nos cinco idiomas', function () {
@@ -152,13 +152,28 @@ it('lista a tool que funciona nos cinco idiomas', function () {
         ->not->toContain('alpha-tool');
 });
 
-it('lista a pagina do JSON Viewer, que e a tool da F2', function () {
+it('lista a pagina de cada tool que funciona', function () {
+    // A lista e escrita a mao de proposito: o teste dos grupos sai do registro,
+    // e este aqui nao - se um manifest voltar para `soon` sem querer, o outro
+    // continua verde e este cai.
+    $slugs = [
+        'json-viewer',
+        'json-to-code',
+        'sql-formatter',
+        'base64-url-hash',
+        'jwt-decoder',
+        'timestamp-uuid',
+        'regex-tester',
+    ];
+
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
 
     foreach (Locales::all() as $locale) {
-        expect($xml)->toContain(
-            route('tools.show', ['locale' => $locale['slug'], 'slug' => 'json-viewer']),
-        );
+        foreach ($slugs as $slug) {
+            expect($xml)->toContain(
+                route('tools.show', ['locale' => $locale['slug'], 'slug' => $slug]),
+            );
+        }
     }
 });
 

@@ -1,4 +1,4 @@
-import { analyzeJson, type ParseFailure } from './parse';
+import { analyzeJson, type ParseFailure } from '@/lib/json/parse';
 import { collapseFrom, flatten, type JsonNode } from './tree';
 import { minifyJson, prettyJson, sortJson } from './transform';
 

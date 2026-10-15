@@ -1,3 +1,4 @@
+import { lineColumnAt, lineColumnFromMessage, positionFromMessage } from '@/lib/position';
 import type { JsonValue } from './types';
 
 /**
@@ -7,10 +8,8 @@ import type { JsonValue } from './types';
  * navegador de quem usa tem. O problema e que a mensagem dele nao e
  * padronizada: cada motor escreve a posicao de um jeito, e nenhum deles
  * promete traducao. Entao a mensagem crua fica como detalhe tecnico e o que a
- * tela mostra e a linha e a coluna, calculadas aqui.
- *
- * A convencao de linha e coluna **1-based** e a mesma dos editores: e o numero
- * que o usuario le no canto da tela.
+ * tela mostra e a linha e a coluna, calculadas aqui - as contas de posicao
+ * moram em `lib/position`, que o SQL Formatter tambem usa.
  *
  * O que **nao** da para detectar aqui: chave duplicada. `{"a":1,"a":2}` e
  * aceito por V8, Firefox e Safari (fica a ultima) e nao ha erro nenhum para
@@ -56,62 +55,6 @@ export function hasBom(text: string): boolean {
 
 export function byteLength(text: string): number {
     return new TextEncoder().encode(text).length;
-}
-
-/**
- * Posicao que a mensagem do motor aponta, em code units.
- *
- * V8 escreve `at position 12`; o `position N` sem o `at` cobre as variacoes
- * dele mesmo e de outros motores.
- */
-export function positionFromMessage(message: string): number | null {
-    const match = /(?:at\s+)?position\s+(\d+)/i.exec(message);
-
-    if (match === null || match[1] === undefined) {
-        return null;
-    }
-
-    return Number(match[1]);
-}
-
-/**
- * Linha e coluna que a mensagem do motor ja traz prontas (Firefox escreve
- * `line 3 column 5`).
- */
-export function lineColumnFromMessage(
-    message: string,
-): { line: number | null; column: number | null } {
-    const match = /line\s+(\d+)(?:\s*(?:column|col)\s+(\d+))?/i.exec(message);
-
-    if (match === null || match[1] === undefined) {
-        return { line: null, column: null };
-    }
-
-    return {
-        line: Number(match[1]),
-        column: match[2] === undefined ? null : Number(match[2]),
-    };
-}
-
-/**
- * Linha e coluna de uma posicao em code units.
- *
- * A coluna conta **caracteres**, e nao code units: com um emoji antes do erro,
- * a coluna em code units apontaria dois lugares depois do que o olho ve.
- */
-export function lineColumnAt(text: string, position: number): { line: number; column: number } {
-    const limit = Math.min(Math.max(position, 0), text.length);
-    let line = 1;
-    let lineStart = 0;
-
-    for (let index = 0; index < limit; index += 1) {
-        if (text[index] === '\n') {
-            line += 1;
-            lineStart = index + 1;
-        }
-    }
-
-    return { line, column: [...text.slice(lineStart, limit)].length + 1 };
 }
 
 /**

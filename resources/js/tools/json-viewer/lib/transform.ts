@@ -1,4 +1,4 @@
-import type { JsonValue } from './types';
+import type { JsonValue } from '@/lib/json/types';
 
 /**
  * As transformacoes de texto do viewer: formatar, minificar e ordenar chaves.

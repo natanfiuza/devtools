@@ -208,26 +208,41 @@ describe('grid de ferramentas', () => {
     });
 
     /*
-    | F2: o JSON Viewer funciona, entao o card dele vira link para a pagina da
-    | tool. O selo "em breve" fica com as outras sete - e card que nao funciona
-    | nao linka, senao seria um link morto no indice (ADR-007).
+    | F3: sete tools funcionam, entao sete cards viram link para a propria pagina
+    | (a F2 entregou a primeira, a F3 as seis simples). O selo "em breve" fica so
+    | com o AI SQL Builder - e card que nao funciona nao linka, senao seria um
+    | link morto no indice (ADR-007).
     */
-    it('linka o card da tool que funciona e deixa as outras com o selo', () => {
+    it('linka o card das tools que funcionam e deixa a outra com o selo', () => {
         const wrapper = montar();
 
-        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(7);
+        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(1);
         expect(wrapper.text()).toContain('SELO_EM_BREVE');
         expect(wrapper.text()).not.toContain('SELO_DISPONIVEL');
 
         const links = wrapper.get('[data-test="tool-grid"]').findAll('a');
 
-        expect(links).toHaveLength(1);
+        expect(links).toHaveLength(7);
+
+        // O primeiro do grid e o JSON Viewer, a primeira da ordem de exibicao.
         expect(links[0]?.attributes('href')).toBe('/pt-br/tools/json-viewer');
 
-        // O card que linka e o do JSON Viewer - o primeiro do grid.
-        expect(cartoes(wrapper)[0]?.attributes('data-test')).toBe(
-            'tool-card-json-viewer',
+        // E nenhum link aponta para tool que nao funciona.
+        for (const link of links) {
+            const slug = link.attributes('href')?.replace('/pt-br/tools/', '');
+
+            expect(
+                allTools.find((tool) => tool.slug === slug)?.status,
+            ).toBe('available');
+        }
+
+        // O card sem link e o do AI SQL Builder - o segundo do grid.
+        const semLink = cartoes(wrapper)[1];
+
+        expect(semLink?.attributes('data-test')).toBe(
+            'tool-card-ai-sql-builder',
         );
+        expect(semLink?.find('a').exists()).toBe(false);
     });
 
     it('escreve nome e descricao de cada card pelo i18n', () => {

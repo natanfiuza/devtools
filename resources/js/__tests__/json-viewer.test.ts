@@ -43,7 +43,7 @@ const traducoes = {
                 unavailable: 'INDISPONIVEL',
                 invalid: 'INVALIDO:{line}:{column}',
                 invalid_no_position: 'INVALIDO_SEM_POSICAO',
-                stale_tree: 'ARVORE_DEFASADA',
+                stale_output: 'SAIDA_DEFASADA',
                 too_large: 'GRANDE:{size}:{limit}',
                 file_too_large: 'ARQUIVO_GRANDE:{size}:{limit}',
                 file_type: 'TIPO_NAO_ACEITO',
@@ -60,6 +60,7 @@ const traducoes = {
             expand_all: 'EXPANDIR',
             collapse_all: 'RECOLHER',
             download_name: 'documento',
+            file_types: 'JSON_OU_TXT',
             tree: {
                 toggle: 'ALTERNAR',
                 copy_path: 'COPIAR_CAMINHO',
@@ -85,7 +86,7 @@ const traducoes = {
 
 /** O duble do editor: mesmo contrato de texto, sem CodeMirror. */
 const EditorStub = defineComponent({
-    name: 'JsonEditor',
+    name: 'CodeEditor',
     props: {
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
@@ -127,7 +128,7 @@ function montar(
         props: { maxInputBytes, virtualizeFrom },
         global: {
             plugins: [i18n],
-            stubs: { JsonEditor: EditorStub },
+            stubs: { CodeEditor: EditorStub },
         },
     });
 }
@@ -191,7 +192,7 @@ async function esperarAnalise(): Promise<void> {
  * de um botao (exemplo, arquivo), que ja passou pela analise antes de escrever.
  */
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'JsonEditor' }).vm.$emit('update:modelValue', value);
+    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
 
     await esperarAnalise();
 }
@@ -462,7 +463,7 @@ describe('JSON Viewer', () => {
             // O `Mod-Enter` de verdade esta em json-editor-keys.test.ts, que
             // monta o CodeMirror; aqui o que se cobra e a ligacao entre o
             // recado do editor e a acao da tela.
-            wrapper.findComponent({ name: 'JsonEditor' }).vm.$emit('format');
+            wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('format');
             await flushPromises();
 
             expect(textoDoEditor(wrapper)).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
@@ -519,7 +520,7 @@ describe('JSON Viewer', () => {
             expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(true);
             expect(linhas(wrapper)).toHaveLength(7);
             expect(wrapper.get('[data-test="json-viewer-stale"]').text()).toBe(
-                'ARVORE_DEFASADA',
+                'SAIDA_DEFASADA',
             );
             expect(wrapper.get('[data-test="json-viewer-status"]').text()).toContain(
                 'INVALIDO:3:3',

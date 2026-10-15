@@ -36,6 +36,10 @@ const props = defineProps<{
     maxInputBytes: number;
     /** A partir de quantas linhas uma lista passa a ser virtualizada. */
     virtualizeFrom: number;
+    /** Teto de tempo de uma expressao regular, em milissegundos. */
+    regexTimeoutMs: number;
+    /** Quantos resultados o Regex Tester devolve antes de cortar. */
+    regexMaxMatches: number;
 }>();
 
 const { t } = useI18n();
@@ -112,6 +116,8 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
                     v-if="toolComponent"
                     :max-input-bytes="maxInputBytes"
                     :virtualize-from="virtualizeFrom"
+                    :regex-timeout-ms="regexTimeoutMs"
+                    :regex-max-matches="regexMaxMatches"
                 />
                 <p v-else class="text-sm text-destructive">
                     {{ t('tools.ui.states.unavailable') }}

@@ -5,31 +5,41 @@ import { tags } from '@lezer/highlight';
 /**
  * O tema do editor.
  *
- * Nao ha paleta paralela aqui: toda cor e um `var(--json-*)` do DESIGN, o mesmo
- * token que a arvore usa. Duas consequencias boas - o editor e a arvore nunca
- * saem de sincronia, e trocar de tema claro/escuro nao passa por JavaScript: a
- * classe no documento troca as variaveis e o CodeMirror repinta.
+ * Nao ha paleta paralela aqui: toda cor e um `var(--json-*)` do DESIGN, a mesma
+ * familia de tokens que a arvore do JSON Viewer usa (ADR-018). Duas
+ * consequencias boas - as telas de codigo nunca saem de sincronia com o resto,
+ * e trocar de tema claro/escuro nao passa por JavaScript: a classe no documento
+ * troca as variaveis e o CodeMirror repinta.
  *
  * O tema **nao** se declara escuro para o motor (`EditorView.theme(spec, {dark:
  * true})`): no projeto o tema e uma classe no documento, e nao a preferencia do
  * sistema, entao escolher um dos dois deixaria o outro com a selecao e os
  * paineis nas cores do motor. Os paineis e a selecao estao estilizados abaixo.
  *
+ * Os tokens ainda se chamam `--json-*` porque nasceram com o JSON Viewer: a
+ * familia agora pinta qualquer linguagem (o `keyword` de baixo e o `SELECT` do
+ * SQL), e renomear tudo mexeria no DESIGN e em quem consome os mesmos tokens -
+ * a arvore do JSON - sem mudar um pixel.
+ *
  * As cores sao conferidas em resources/js/__tests__/json-editor-theme.test.ts.
  */
 
 /** Uma cor por token de sintaxe, e nenhuma cor literal. */
-export const jsonHighlightStyle = HighlightStyle.define([
+export const codeHighlightStyle = HighlightStyle.define([
     { tag: tags.propertyName, color: 'var(--json-key)' },
     { tag: tags.string, color: 'var(--json-string)' },
     { tag: tags.number, color: 'var(--json-number)' },
     { tag: [tags.bool, tags.null], color: 'var(--json-literal)' },
     { tag: [tags.brace, tags.squareBracket, tags.separator], color: 'var(--json-punct)' },
+    { tag: tags.keyword, color: 'var(--json-key)' },
+    { tag: tags.typeName, color: 'var(--json-key)' },
+    { tag: tags.className, color: 'var(--json-key)' },
+    { tag: tags.comment, color: 'var(--subtle)' },
     // O `⚠` que o parser usa no texto que nao entende.
     { tag: tags.invalid, color: 'var(--destructive)' },
 ]);
 
-export const jsonEditorTheme = EditorView.theme({
+export const codeEditorTheme = EditorView.theme({
     '&': {
         height: '100%',
         color: 'var(--foreground)',

@@ -99,7 +99,13 @@ it('mostra a visao geral com os numeros do mes', function () {
 });
 
 it('busca e filtra a lista de contas', function () {
-    $admin = User::factory()->admin()->create(['name' => 'Dona do Painel']);
+    // Todo e-mail desta conta e fixo: a busca casa nome **ou** e-mail, e um
+    // e-mail sorteado pelo Faker contendo o termo buscado ("ana") faria a lista
+    // devolver duas contas em vez de uma - a cada cem execucoes, mais ou menos.
+    $admin = User::factory()->admin()->create([
+        'name' => 'Dona do Painel',
+        'email' => 'painel@exemplo.com',
+    ]);
     User::factory()->create(['name' => 'Ana Souza', 'email' => 'ana@exemplo.com']);
     User::factory()->create(['name' => 'Bruno Lima', 'email' => 'bruno@exemplo.com']);
     User::factory()->create([

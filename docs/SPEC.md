@@ -17,7 +17,7 @@ Textos de interface sao escritos com acentuacao correta (o produto e traduzido);
 
 ## 4. Registro de tools
 Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.json`: `slug`, `status` (`soon|available|hidden`), `category`, `icon`, `order` e `keywords` (termos tecnicos de busca). O manifesto guarda so identidade e ciclo de vida - **nenhum texto visivel mora ali**: o nome, a descricao e as palavras-chave traduzidas vem de `tools.<slug>.*` nos 5 idiomas, por convencao a partir do slug.
-O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007). `hidden` nao aparece para o visitante em leitor nenhum: hoje o TypeScript a exclui e o `Tools::all()` do PHP ainda a devolve (nada publico consome `all()` - o sitemap usa `available()`), e a F3 alinha os dois quando a primeira tool `hidden` existir.
+O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007). `hidden` nao aparece para o visitante em leitor nenhum: os dois leitores a excluem - o TypeScript em `allTools`, e o PHP em `Tools::all()`, que e a lista que desenha o cartao de compartilhamento; `Tools::available()` continua sendo a lista menor, a do sitemap e das imagens por tool.
 Rota generica `/{locale}/tools/{slug}` (entrou na F2, junto com a primeira tool `available`). A pagina e **generica**: `pages/tools/Show.vue` traz so o cabecalho (nome, descricao e icone do registro), as metas e o shell; o componente da tool vem de `resources/js/tools/<slug>/Tool.vue`, resolvido por um glob **lazy** (`tools/components.ts`) - a F3 acrescenta ferramentas sem tocar no shell. Quem decide se a pagina existe e o servidor: **slug desconhecido, tool `soon` e tool `hidden` dao o mesmo 404** (ADR-007), porque um 200 de "em breve" seria uma segunda representacao do status e um link morto no indice. As props sao duas: `slug` (do registro, nunca da URL) e `maxInputBytes` (de `config/tools.php`).
 SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, canonical, hreflang e `og:image` da tool); o editor e a arvore montam no cliente (`ClientOnly`), porque CodeMirror e Web Worker dependem do DOM (ADR-029).
 
@@ -35,13 +35,55 @@ SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, ca
    - **Parse em Web Worker** com **queda para a thread principal** quando `Worker` nao existe ou a criacao falha, e descarte de resposta velha (a digitacao tem debounce).
    - Nao entrou (e nao estava na linha do SPEC): o painel de busca do proprio CodeMirror (Cmd+F), a indentacao por Tab (`indentWithTab`) e a validacao por schema.
 
-2. AI SQL Builder (secao 6).
-3. JSON -> TypeScript / PHP DTO / Pydantic.
-4. SQL Formatter (dialetos MySQL, PostgreSQL, SQL Server, SQLite).
-5. Base64 / URL encode / Hash.
-6. JWT Decoder (somente decodifica, avisar que nao valida assinatura).
-7. Timestamp / UUID / ULID.
-8. Regex Tester.
+2. AI SQL Builder (secao 6). **Nao entregue**: depende de servidor (fila, cota, provider) e fica na F5. E a unica tool do MVP que continua `soon`.
+3. JSON -> TypeScript / PHP DTO / Pydantic (`json-to-code`). **Entregue na F3** (aceite em docs/acceptance/FASE-3.md), na pagina generica descrita na secao 4:
+
+   - **Alvo e nome da raiz** no cabecalho da **saida**: um `Select` com as tres linguagens de destino (TypeScript, PHP (DTO) e Pydantic) e, ao lado, o campo do nome da raiz (padrao `Root`), usado literal nas tres saidas - sem sufixo, sem pluralizacao, sem "s" de array.
+   - **Inferencia** (`lib/infer.ts`): o JSON vira um **modelo de tipos** antes de virar codigo - chave ausente em parte do array vira opcional, array de tipos diferentes vira uniao, `null` junto de outro tipo vira anulavel, inteiro e decimal se distinguem, e array e objeto vazios tem tipo proprio (nada de `never`). A entrada precisa ser um **objeto JSON com ao menos uma chave**: array, escalar ou objeto vazio param com a frase do estado, em vez de sair um codigo pela metade.
+   - **Emissao** (`lib/emit/{typescript,php,pydantic}.ts`) a partir do **plano de declaracoes** (`lib/plan.ts`, que nomeia cada objeto aninhado sem repetir nome): `export interface` no TypeScript (uma por objeto, com a uniao saindo **dentro** da propriedade - `string | number` - e o objeto vazio virando `Record<string, unknown>`); `declare(strict_types=1)` + `final class` com propriedades promovidas `public readonly` no PHP; `BaseModel` no Pydantic, com os modelos **do mais fundo para o mais raso**, porque o Python le a classe no momento em que a define.
+   - **Nome de campo** nao e renomeado no TypeScript (a chave que precisa de aspas continua entre aspas); no PHP e no Python, `first-name` vira `first_name` pelo mesmo `lib/names.ts` que nomeia os tipos.
+   - **Entrada invalida mantem a ultima saida valida** na tela (o `stale_output` da secao 5.1), com o aviso na saida e a opacidade reduzida.
+   - Contagem de tipos na faixa de status, e copiar/baixar como nas outras.
+
+4. SQL Formatter (`sql-formatter`). **Entregue na F3**, na pagina generica:
+
+   - **Dialeto** (`lib/dialects.ts`) no cabecalho da **saida**: os quatro slugs do glossario (`mysql`, `pgsql`, `sqlsrv`, `sqlite`), padrao `mysql` e **sem memoria** - abrir a tool de novo comeca no padrao, porque a tela nao lembra escolha. O slug e o vocabulario do AI SQL Builder (secao 6); a traducao para os nomes das bibliotecas (`transactsql` no `sql-formatter`, os objetos do `@codemirror/lang-sql` no realce) mora so ali.
+   - **Caixa das palavras-chave** (`Maiusculas` | `minusculas` | `Manter`) como **unica** opcao alem do dialeto, com `Maiusculas` no papel de padrao; a indentacao e fixa em 2 espacos, e as duas escolhas da tela vao **explicitas** na chamada da biblioteca (o resto do comportamento e o padrao da versao instalada).
+   - **Formatacao** (`lib/format.ts`) com o `sql-formatter` por dentro e um resultado proprio por fora: a posicao do erro sai da mensagem da biblioteca (`lib/position.ts`) e vira **linha e coluna** na tela, com so a **primeira linha** da mensagem crua como detalhe tecnico.
+   - **Formatacao em Web Worker** com queda para a thread principal, como no JSON Viewer - aqui o worker e fluidez, e nao protecao (ADR-031).
+   - **Entrada invalida mantem a ultima saida valida** na tela, como no `json-to-code`.
+
+5. Base64 / URL encode / Hash (`base64-url-hash`). **Entregue na F3**:
+
+   - **Direcao** (Codificar | Decodificar) no cabecalho da **entrada**; o painel de saida tem **abas de modo** (`Base64` | `URL` | `Hash`) - as unicas abas dentro de um painel em toda a F3, porque aqui a entrada e uma so e as leituras sao tres.
+   - **Base64** (`lib/encoding.ts`): UTF-8 de verdade (nada de `btoa` cru), com a variante **URL-safe sem padding** ao lado; na volta, caractere fora do alfabeto, sobra no fim ou bytes que nao formam UTF-8 param com a frase do estado, e nao com um texto meio decodificado.
+   - **URL**: componente (`encodeURIComponent`) e formulario (`+` no lugar do espaco), nas duas direcoes.
+   - **Hash**: os **quatro de uma vez** (MD5, SHA-1, SHA-256, SHA-512), uma linha cada, hex minusculo, com copiar por linha. Sem HMAC. O MD5 e do repositorio (`lib/md5.ts`, conferido contra os vetores do RFC 1321); os tres SHA saem da Web Crypto, e o navegador que so a expoe em conexao segura (sem `crypto.subtle`) ve as tres linhas vazias **com a razao escrita**, sem derrubar o MD5.
+
+6. JWT Decoder (`jwt-decoder`), somente decodifica. **Entregue na F3**:
+
+   - **Entrada**: o token colado, com ou sem o prefixo `Bearer` (e o espaco) na frente.
+   - **Saida**: um bloco para o **cabecalho** e um para o **payload**, em JSON com as cores `--json-*` e copiar em cada um; as claims de tempo (`exp`, `iat`, `nbf`) aparecem tambem como **data legivel no idioma** e como selo de estado - "expirado" em `--destructive`, e "ainda nao vale".
+   - **Assinatura**: aparece **so como comprimento em bytes** e com o rotulo "nao verificada" - nao ha chave, JWKS nem HS256 no escopo.
+   - **Faixa fixa no topo da saida** dizendo que a ferramenta decodifica e **nao valida** a assinatura, com borda `--accent/40` (aviso, e nao erro).
+
+7. Timestamp / UUID / ULID (`timestamp-uuid`). **Entregue na F3**:
+
+   - **Entrada**: digitos (a unidade sai da **quantidade de digitos** - segundos ou milissegundos) ou **texto de data** (ISO 8601); o botao "Agora" preenche com o instante corrente.
+   - **Saida em seis linhas**, cada uma com copiar: Unix em segundos, Unix em milissegundos, ISO 8601 em UTC, ISO 8601 local, data por extenso **no idioma da pagina** e tempo relativo.
+   - **Id colado**: um UUID v7 ou um ULID na entrada nao e instante, mas **carrega um** - a tool le o instante embutido e diz de que tipo ele veio.
+   - **Geradores** (`lib/ids.ts`): UUID v4 (`crypto.randomUUID`) e UUID v7 e ULID proprios, em 1, 5 ou 10 de uma vez, com "copiar todos" - a lista sai no painel de saida, e nao em Dialog.
+
+8. Regex Tester (`regex-tester`). **Entregue na F3**:
+
+   - **O padrao mora na barra de acoes**, em linha inteira, com as flags ao lado - a unica vez que a F3 estica a convencao do shell, e o porque esta no DESIGN (Q19). `i`, `m`, `s` e `u` sao **alternadores** e mudam como o padrao e lido; `g` esta **sempre ligado** (a tela lista e conta os casamentos) e `y` fica de fora (ancoraria cada tentativa no `lastIndex` e mudaria o sentido do padrao em silencio).
+   - **Texto de teste** no painel de entrada; a **saida** tem a lista de casamentos (indice, trecho, posicao e os grupos numerados e nomeados), a previa do texto com **cada casamento realcado** e o campo de substituicao com a previa do resultado (`$1`, `$<nome>`).
+   - **Busca em Web Worker com prazo** (ADR-031): passou de `TOOLS_REGEX_TIMEOUT_MS`, o worker e encerrado e a tela **nao mostra resultado nenhum** - nem a lista parcial, nem a leitura que ja estava la -, so a frase do estouro. Padrao invalido volta como **resultado** (o detalhe e a mensagem do motor do navegador) e nao derruba o worker; sem worker (SSR, jsdom, CSP) a busca roda na thread principal e **sem prazo**.
+   - **Teto de casamentos** (`TOOLS_REGEX_MAX_MATCHES`, padrao 1000): a lista para no teto e **avisa**; o texto substituido continua saindo do texto inteiro.
+   - A substituicao **nao se aplica** ao texto de entrada: a previa e previa, e o texto da esquerda e de quem digita.
+
+Base comum das tools da F3 (o que duas ou mais usam saiu do `json-viewer`, Q8): a casca (`components/tool/ToolShell.vue`), o editor parametrizado por linguagem (`components/tool/CodeEditor.vue` sobre `lib/editor/`), copiar (`useCopyFeedback` + `lib/clipboard.ts`), abrir arquivo e arrastar-e-soltar (`lib/file.ts` + `components/tool/FileDropzone.vue`), baixar (`lib/download.ts`) e tamanho em bytes (`lib/bytes.ts`); o parse e os tipos do JSON foram para `lib/json/`, e o cliente de worker para `lib/worker/`. O `json-viewer` passou a consumir os mesmos, sem mudanca de comportamento.
+
 ### Futuro
 Diff texto/JSON; Cron explainer; YAML/JSON/TOML/XML; DDL -> migration Laravel; explicador de EXPLAIN; mock data/seeder/factory a partir do schema; cURL -> Http/fetch; gerador .env.example; cheatsheets; API publica; historico compartilhavel; anuncios.
 
@@ -104,7 +146,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 - F0 Fundacao: projeto Laravel 13 + starter Vue, TS estrito, Tailwind tokens, shadcn-vue, i18n 5 idiomas, layout, tema claro/escuro/sistema (sem flash, ADR-021), SSR da Inertia ligado em producao, deploy.sh, supervisor conf, Pest/Vitest.
 - F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA: concluida em 2026-10-14. As 8 tools do MVP entram **registradas** com `status: "soon"` (nenhuma funciona ainda): grid, busca, sitemap e testes ja sao reais e cada fase seguinte so troca o status. Vieram junto o sitemap/robots servidos pela aplicacao e as tags OG com imagem padrao (heranca da F0, ADR-007/013). Aceite em docs/acceptance/FASE-1.md.
 - F2 JSON Viewer (com CodeMirror 6 e testes): concluida em 2026-10-14. O `json-viewer` e a primeira tool `available` - o card da home passa a linkar e o sitemap a listar -, na **pagina generica da tool** (secao 4, ADR-029), com CodeMirror 6 minimo e o realce por tokens do DESIGN (ADR-018) e o parse em Web Worker. Veio junto a **imagem OG por tool** (ADR-030). Aceite em docs/acceptance/FASE-2.md.
-- F3 Tools simples (3 a 8 do MVP).
+- F3 Tools simples (3 a 8 do MVP): concluida em 2026-10-14. As seis tools viram `available` de uma vez e a pagina generica da F2 nao mudou de forma - cada uma so acrescentou o proprio `Tool.vue` e os `lib/` (ADR-029, emendado). O que duas ou mais usam saiu do `json-viewer` para `components/tool/`, `lib/` e `composables/`, e o `json-viewer` passou a consumir os mesmos sem mudanca de comportamento. O AI SQL Builder, unico dependente de servidor, e o unico card que continua com o selo "em breve". Veio junto o **modelo de seguranca do Regex Tester** (execucao em Web Worker com prazo, ADR-031). Aceite em docs/acceptance/FASE-3.md.
 - F4 Auth: concluida. O ciclo principal - login e-mail/senha, OAuth Google/GitHub, verificacao, definir senha, newsletter e paginas legais - entrou junto da F0 (ADR-022/023/024), e as telas de settings traduzidas e o ciclo de conta (exportar e excluir conta, secao 8) entraram no bloco de 2026-10-14 (ADR-026/028).
 - F5 AI SQL Builder: output_targets, cache, fila, DeepSeek, polling, cota free. O estado da cota (`App\Support/Quota`) e o livro-razao ja existem (ADR-027); falta o consumo.
 - F6 Planos/pagamento/doacao/webhooks. O modelo comercial (catalogo de planos, assinaturas, pagamentos e cota) foi adiantado em 2026-10-14 com a venda manual (ADR-027); o gateway (Mercado Pago, interface PaymentGateway) e a renovacao por periodo continuam aqui.
@@ -144,6 +186,13 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Uma imagem OG padrao do site (1200x630), **comitada**, gerada por comando artisan de uso unico que nunca roda em producao (o VPS nao tem GD nem rede para baixar as fontes); a imagem por tool ficou para a F2 e chegou la (ADR-030).
 - Rota `/{locale}/tools/{slug}` com **pagina generica da tool**: o cabecalho e o shell sao um so para todas, e o componente da tool vem de `resources/js/tools/<slug>/Tool.vue` por glob lazy - a fase seguinte acrescenta ferramentas sem tocar na pagina (ADR-029). Slug desconhecido, `soon` e `hidden` dao o mesmo 404 (ADR-007), e o SSR entrega a casca e as metas enquanto o editor monta no cliente.
 - Imagem OG **por tool**: uma por tool que funciona e **sem idioma nenhum** (o site tem cinco e a imagem e uma so) - o nome traduzido da ferramenta vai no `og:image:alt`, e a pagina cai na imagem padrao quando o PNG daquela tool nao existe (ADR-030).
+- Listas de produto (dialetos do SQL, alvos de codigo, algoritmos de hash) como **constantes tipadas do modulo**, e nao tabela nem config: nao ha o que administrar sem deploy. Ficam por `Select` ou `Tabs` **no cabecalho do painel** que elas governam; as abas de modo existem so no `base64-url-hash`, dentro do painel de saida, porque ali a entrada e uma so e as leituras sao tres. Os **numeros** (limites de tamanho, prazo do regex, teto de casamentos) continuam em `config/tools.php` e chegam por prop.
+- `hidden` significa a mesma coisa nos **dois leitores** do registro: nao aparece para o visitante em leitor nenhum - o TypeScript em `allTools` e o PHP em `Tools::all()`, que e a lista que desenha o cartao de compartilhamento. `Tools::available()` continua sendo a lista menor, a do sitemap e das imagens por tool (secao 4).
+- O **padrao do Regex Tester mora na barra de acoes**, em linha inteira, e nao no painel de entrada: e a unica excecao da fase a convencao do shell, e o porque esta no DESIGN. `i`, `m`, `s` e `u` sao alternadores, `g` esta sempre ligado (a tela lista e conta os casamentos) e `y` fica de fora, porque ancoraria cada tentativa no `lastIndex` e mudaria o sentido do padrao em silencio.
+- Regex Tester roda em **Web Worker com prazo**: passou de `TOOLS_REGEX_TIMEOUT_MS`, o worker e encerrado e a tela nao mostra resultado nenhum - nem a lista parcial, nem a leitura valida que ja estava la. E a unica excecao ao "ultima saida valida" da fase, e o porque esta no ADR-031, junto do teto de casamentos e da queda para a thread principal quando nao ha worker (SSR, teste, CSP).
+- `sql-formatter` e a **unica dependencia nova de runtime** da fase; o MD5 e do repositorio (`lib/md5.ts`, conferido contra o RFC 1321), porque a Web Crypto nao tem MD5, e os tres SHA saem dela. Os slugs de dialeto (`mysql`, `pgsql`, `sqlsrv`, `sqlite`) sao o vocabulario compartilhado com o AI SQL Builder: a traducao para o nome de cada biblioteca mora so no mapeamento.
+- **"Ultima saida valida" e um estado geral**, e nao do `json-viewer`: `json-to-code` e `sql-formatter` mostram a ultima saida boa com aviso e opacidade reduzida enquanto a entrada nao fecha (glossario, ADR-029 emendado).
+- A base comum das tools (casca, editor parametrizado por linguagem, copiar, abrir arquivo com arrastar-e-soltar, baixar, tamanho em bytes, parse e tipos do JSON, cliente de worker) mora em `resources/js/components/tool/`, `resources/js/lib/` e `resources/js/composables/`, e nao dentro de uma tool: a fase seguinte acrescenta ferramenta sem copiar cola.
 
 ### 11.2 Abertas (com a fase onde precisam ser resolvidas)
 - F4: mensagens de validacao nos 5 idiomas. O Laravel so traz `validation.php` em ingles; nas telas traduzidas o erro de formulario ainda sai em ingles ("The email field is required"), junto com nomes de campo em ingles.

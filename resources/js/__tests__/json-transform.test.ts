@@ -6,7 +6,7 @@ import {
     JSON_INDENT,
     sortJson,
 } from '@/tools/json-viewer/lib/transform';
-import type { JsonValue } from '@/tools/json-viewer/lib/types';
+import type { JsonValue } from '@/lib/json/types';
 
 /**
  * Formatacao, minificacao e ordenacao de chaves. Tudo por **valor**, e nao por

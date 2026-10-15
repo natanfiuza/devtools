@@ -66,10 +66,13 @@ Um nome de produto em cinco idiomas dentro do JSON viraria cinco manifestos.
   `icons.ts` para um componente do Lucide: o JSON nao carrega componente, e o
   mapa nao pode ter buraco (ha teste para isso).
 - `hidden` existe desde ja para tool despublicada sem apagar o diretorio. Nada
-  usa o estado ainda. O contrato e que ela nao aparece para o visitante em
-  leitor nenhum: o TypeScript ja a exclui, e o `Tools::all()` do PHP ainda a
-  devolve (nada publico consome `all()` - o sitemap usa `available()`); a F3
-  alinha os dois leitores quando a primeira tool `hidden` existir.
+  usa o estado ainda, mas **a F3 alinhou os dois leitores**: o `Tools::all()` do
+  PHP tambem exclui `hidden`, como o `allTools` do TypeScript. O que motivou o
+  alinhamento foi o consumidor que este ADR nao contava - `GenerateOgImage`
+  desenha o cartao padrao de compartilhamento a partir de `all()`, e uma tool
+  escondida entraria no nome dos cards. O `Tools::find()` le `all()`, entao uma
+  tool `hidden` nao e encontrada: e o mesmo `null` do slug desconhecido, que a
+  pagina da tool transforma no mesmo 404 (ADR-029).
 - O sitemap so conhece o registro, nao o banco: nao ha consulta para monta-lo, e
   um manifesto malformado aparece como erro no teste, nunca como 500 no ar.
 
