@@ -15,14 +15,21 @@ import {
     X,
 } from '@lucide/vue';
 import { useDebounceFn } from '@vueuse/core';
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CodeEditor from '@/components/tool/CodeEditor.vue';
+import FileDropzone from '@/components/tool/FileDropzone.vue';
 import ToolActionBar from '@/components/tool/ToolActionBar.vue';
 import ToolButton from '@/components/tool/ToolButton.vue';
 import ToolShell from '@/components/tool/ToolShell.vue';
 import { Input } from '@/components/ui/input';
-import JsonEditor from './editor/JsonEditor.vue';
-import type { EditorError } from './editor/createEditor';
+import { useCopyFeedback } from '@/composables/useCopyFeedback';
+import { useFileError } from '@/composables/useFileError';
+import { formatBytes } from '@/lib/bytes';
+import { downloadText } from '@/lib/download';
+import type { EditorError } from '@/lib/editor/createEditor';
+import { acceptAttribute, readTextFile, type FileRules } from '@/lib/file';
+import { byteLength, hasBom } from '@/lib/json/parse';
 import JsonTree from './JsonTree.vue';
 import {
     INITIAL_COLLAPSE_DEPTH,
@@ -30,9 +37,6 @@ import {
     type AnalyzeOutcome,
     type AnalyzeSuccess,
 } from './lib/analyze';
-import { formatBytes } from './lib/bytes';
-import { downloadText } from './lib/download';
-import { byteLength, hasBom } from './lib/parse';
 import { createAnalyzeClient } from './lib/parseClient';
 import { nodePath } from './lib/path';
 import { collapseFrom, searchNodes, type JsonNode } from './lib/tree';
@@ -65,8 +69,11 @@ const client = createAnalyzeClient();
 /** Espera entre a ultima tecla e a analise: digitar nao analisa por tecla. */
 const DEBOUNCE_MS = 200;
 
-/** Quanto tempo o recado de copia fica na tela. */
-const FEEDBACK_MS = 2500;
+/** O que a caixa de arquivo aceita; o mesmo vale para o `accept` do seletor. */
+const FILE_RULES: Pick<FileRules, 'extensions' | 'types'> = {
+    extensions: ['.json', '.txt'],
+    types: ['application/json', 'text/plain'],
+};
 
 /** O texto do painel de entrada - a fonte da verdade da tela. */
 const text = ref('');
@@ -76,15 +83,17 @@ const outcome = shallowRef<AnalyzeOutcome | null>(null);
 const collapsed = shallowRef<Set<number>>(new Set());
 const query = ref('');
 const busy = ref(false);
-const dragging = ref(false);
 const tooLarge = ref(false);
 const inputBytes = ref(0);
 
-const feedback = ref<'copied' | 'path' | 'manual' | null>(null);
-const feedbackPath = ref('');
-const fileError = ref<{ kind: FileErrorKind; size: number } | null>(null);
+/** O recado de copia, e a recusa de arquivo - os dois caem na barra de baixo. */
+const copyFeedback = useCopyFeedback();
+const fileError = useFileError(
+    () => props.maxInputBytes,
+    () => t('tools.json-viewer.file_types'),
+);
 
-const fileInput = ref<HTMLInputElement | null>(null);
+const dropzone = useTemplateRef<InstanceType<typeof FileDropzone>>('dropzone');
 const searchBox = ref<HTMLElement | null>(null);
 
 /** A tecla de comando muda com o teclado, nao com o idioma. */
@@ -249,14 +258,14 @@ function resetDocument(): void {
     tooLarge.value = false;
     inputBytes.value = 0;
     query.value = '';
-    feedback.value = null;
-    fileError.value = null;
+    copyFeedback.clear();
+    fileError.clear();
 }
 
 /** Troca o documento inteiro: e o caminho de colar, abrir, exemplo e limpar. */
 function applyText(value: string): void {
-    fileError.value = null;
-    feedback.value = null;
+    fileError.clear();
+    copyFeedback.clear();
     query.value = '';
 
     // Sem mudanca de texto nao ha `watch`: deixar o `intake` armado faria a
@@ -342,40 +351,6 @@ function collapseAll(): void {
 | Os recados da tela
 */
 
-const fileErrorMessage = computed(() => {
-    const current = fileError.value;
-
-    if (current === null) {
-        return null;
-    }
-
-    if (current.kind === 'file_too_large') {
-        return t('tools.ui.states.file_too_large', {
-            size: formatBytes(current.size, locale.value),
-            limit: formatBytes(props.maxInputBytes, locale.value),
-        });
-    }
-
-    return t(
-        current.kind === 'file_type'
-            ? 'tools.ui.states.file_type'
-            : 'tools.ui.states.file_unreadable',
-    );
-});
-
-const feedbackMessage = computed(() => {
-    switch (feedback.value) {
-        case 'copied':
-            return t('tools.ui.actions.copied');
-        case 'path':
-            return t('tools.json-viewer.tree.copied', { path: feedbackPath.value });
-        case 'manual':
-            return t('tools.ui.actions.copy_manual');
-        default:
-            return null;
-    }
-});
-
 const statsMessage = computed(() => {
     const current = success.value;
 
@@ -426,13 +401,13 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
  * tamanho do documento.
  */
 const status = computed<{ text: string; error: boolean } | null>(() => {
-    const fileMessage = fileErrorMessage.value;
+    const fileMessage = fileError.message.value;
 
     if (fileMessage !== null) {
         return { text: fileMessage, error: true };
     }
 
-    const feedbackText = feedbackMessage.value;
+    const feedbackText = copyFeedback.message.value;
 
     if (feedbackText !== null) {
         return { text: feedbackText, error: false };
@@ -446,18 +421,6 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
 
     return stats === null ? null : { text: stats, error: false };
 });
-
-let feedbackTimer = 0;
-
-function showFeedback(kind: 'copied' | 'path' | 'manual', path = ''): void {
-    feedback.value = kind;
-    feedbackPath.value = path;
-
-    window.clearTimeout(feedbackTimer);
-    feedbackTimer = window.setTimeout(() => {
-        feedback.value = null;
-    }, FEEDBACK_MS);
-}
 
 /*
 | As acoes
@@ -501,29 +464,15 @@ function clear(): void {
     applyText('');
 }
 
-async function copyValue(value: string, path = ''): Promise<void> {
-    try {
-        // Fora de contexto seguro o navegador nem expoe a area de transferencia.
-        if (navigator.clipboard === undefined) {
-            throw new Error('sem area de transferencia');
-        }
-
-        await navigator.clipboard.writeText(value);
-        showFeedback(path === '' ? 'copied' : 'path', path);
-    } catch {
-        // Sem permissao (ou sem API): a saida e copiar na mao, e o recado diz.
-        showFeedback('manual');
-    }
-}
-
 function copyDocument(): void {
-    void copyValue(text.value);
+    void copyFeedback.copy(text.value);
 }
 
+/** O caminho copiado se anuncia: o recado mostra qual foi, e nao so "copiado". */
 function copyPath(index: number): void {
     const path = nodePath(nodes.value, index);
 
-    void copyValue(path, path);
+    void copyFeedback.copy(path, t('tools.json-viewer.tree.copied', { path }));
 }
 
 function download(): void {
@@ -550,73 +499,29 @@ function onKeydown(event: KeyboardEvent): void {
 }
 
 /*
-| Arquivo por clique e por arrasto
+| Arquivo
 */
 
-/** O que a caixa de arquivo aceita alem da extensao. */
-const ACCEPTED_TYPES = ['application/json', 'text/plain'];
-const FILE_EXTENSION = /\.(?:json|txt)$/i;
+/** O arquivo escolhido ou solto entra pelo mesmo caminho do texto colado. */
+async function onFile(file: File): Promise<void> {
+    fileError.clear();
 
-type FileErrorKind = 'file_too_large' | 'file_type' | 'file_unreadable';
-
-function readAsText(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => resolve(String(reader.result ?? ''));
-        // Texto interno: nao vai para a tela, so decide o recado traduzido.
-        reader.onerror = () => reject(new Error('leitura falhou'));
-        reader.readAsText(file);
+    const result = await readTextFile(file, {
+        ...FILE_RULES,
+        maxBytes: props.maxInputBytes,
     });
-}
 
-async function loadFile(file: File): Promise<void> {
-    fileError.value = null;
-
-    if (file.size > props.maxInputBytes) {
-        fileError.value = { kind: 'file_too_large', size: file.size };
+    if (!result.ok) {
+        fileError.fail(result.kind, result.size);
 
         return;
     }
 
-    if (!FILE_EXTENSION.test(file.name) && !ACCEPTED_TYPES.includes(file.type)) {
-        fileError.value = { kind: 'file_type', size: file.size };
-
-        return;
-    }
-
-    try {
-        applyText(await readAsText(file));
-    } catch {
-        fileError.value = { kind: 'file_unreadable', size: file.size };
-    }
+    applyText(result.text);
 }
 
-function pickFile(): void {
-    fileInput.value?.click();
-}
-
-function onFileChosen(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    // Zerar o campo e o que permite escolher o mesmo arquivo duas vezes
-    // seguidas: com ele preenchido, o segundo `change` nao acontece.
-    input.value = '';
-
-    if (file !== undefined) {
-        void loadFile(file);
-    }
-}
-
-function onDrop(event: DragEvent): void {
-    dragging.value = false;
-
-    const file = event.dataTransfer?.files?.[0];
-
-    if (file !== undefined) {
-        void loadFile(file);
-    }
+function openFile(): void {
+    dropzone.value?.pick();
 }
 
 onMounted(() => {
@@ -625,7 +530,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeydown);
-    window.clearTimeout(feedbackTimer);
     client.dispose();
 });
 </script>
@@ -645,7 +549,7 @@ onBeforeUnmount(() => {
 
                 <ToolButton
                     :label="t('tools.ui.actions.open')"
-                    @click="pickFile"
+                    @click="openFile"
                 >
                     <template #icon>
                         <FolderOpen class="size-3.5" />
@@ -720,42 +624,22 @@ onBeforeUnmount(() => {
         </template>
 
         <template #input>
-            <div
-                class="relative flex min-h-0 flex-1 flex-col"
-                data-test="json-viewer-dropzone"
-                @dragover.prevent="dragging = true"
-                @dragleave="dragging = false"
-                @drop.prevent="onDrop"
+            <FileDropzone
+                ref="dropzone"
+                :accept="acceptAttribute(FILE_RULES)"
+                testid="json-viewer"
+                @file="onFile"
             >
-                <JsonEditor
+                <CodeEditor
                     v-model="text"
+                    testid="json-editor"
                     class="absolute inset-0"
                     :placeholder="t('tools.ui.states.empty')"
                     :error="editorError"
                     @find="focusSearch"
                     @format="format"
                 />
-
-                <div
-                    v-if="dragging"
-                    class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-ring bg-surface/90 p-4 text-center"
-                    data-test="json-viewer-dropzone-overlay"
-                >
-                    <p class="text-sm font-medium">{{ t('tools.ui.drop') }}</p>
-                    <p class="text-xs text-subtle">
-                        {{ t('tools.ui.states.drop_hint') }}
-                    </p>
-                </div>
-
-                <input
-                    ref="fileInput"
-                    type="file"
-                    accept=".json,.txt,application/json,text/plain"
-                    class="sr-only"
-                    data-test="json-viewer-file"
-                    @change="onFileChosen"
-                />
-            </div>
+            </FileDropzone>
         </template>
 
         <template #output-header>
@@ -836,7 +720,7 @@ onBeforeUnmount(() => {
                 data-test="json-viewer-stale"
             >
                 <TriangleAlert class="size-3.5" aria-hidden="true" />
-                {{ t('tools.ui.states.stale_tree') }}
+                {{ t('tools.ui.states.stale_output') }}
             </p>
 
             <div class="relative min-h-0 flex-1">

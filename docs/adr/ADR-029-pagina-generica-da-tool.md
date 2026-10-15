@@ -1,6 +1,7 @@
 # ADR-029-pagina-generica-da-tool
 Status: Aceito
 Data: 2026-10-14
+Emenda: 2026-10-14 (F3) - secao no fim do arquivo
 
 ## Decisao
 **Toda tool que funciona abre na mesma pagina, e nao numa pagina propria: o
@@ -96,3 +97,48 @@ chunk da home nem no bundle de SSR, e a F3 nao toca em arquivo de infraestrutura
 - **Um `aria-hidden`/`v-show` sem `force-mount` no mobile** - o reka-ui so
   esconde o painel inativo se ele estiver desmontado; com `force-mount` a
   escondida tem que ser escrita no shell, e foi.
+
+## Emenda da F3 (2026-10-14)
+A F3 entregou as seis tools simples. O que a fase confirmou e o que ela obrigou a
+corrigir aqui:
+
+- **A promessa se cumpriu**: nenhuma rota, nenhuma pagina e nenhuma linha de
+  `Show.vue` mudaram para receber seis ferramentas. Cada uma foi um `Tool.vue`,
+  um `lib/` proprio, o manifesto e as chaves de traducao (`json-to-code`,
+  `sql-formatter`, `base64-url-hash`, `jwt-decoder`, `timestamp-uuid`,
+  `regex-tester`).
+- **A conta estava errada**: a secao "Por que" dizia cinco ferramentas na F3 -
+  foram **seis** (o MVP tem oito, e o AI SQL Builder fica para a F5).
+- **O shell aguentou as seis, mas nao sem uma excecao**: a consequencia que
+  dizia "uma tool que precise de outra forma de tela nao cabe neste shell (o AI
+  SQL Builder)" ficou incompleta. O **Regex Tester** tambem nao cabe na
+  convencao - o padrao dele mora na **barra de acoes**, em linha inteira, e nao
+  no painel de entrada -, e mesmo assim ele **nao** virou pagina propria: a
+  excecao e do campo, nao da tela, e por isso ela cabe na casca e esta
+  documentada no DESIGN (o porque esta no ADR-031). So o AI SQL Builder, que
+  tem formulario, cota e resultado em abas, continua precisando de pagina
+  propria.
+- **A casca ganhou estados gerais, e nao de uma tool**: `tools.ui.*` deixou de
+  falar de JSON - os estados da casca (`empty`, `parsing`, `too_large`,
+  `file_type`, `file_unreadable`, `invalid_no_position` e `stale_output`) valem
+  para qualquer ferramenta, e o erro **com linha e coluna** continua sendo do
+  JSON Viewer, porque so ele analisa o texto inteiro de uma vez. A **ultima
+  saida valida** deixou de ser "arvore defasada" e virou estado geral do shell
+  (glossario): `json-to-code` e `sql-formatter` mostram a ultima saida boa com
+  aviso enquanto a entrada nao fecha, e o Regex Tester e a excecao, porque no
+  estouro de tempo nao fica resultado nenhum (ADR-031).
+- **Os controles de produto moram no cabecalho do painel** que eles governam:
+  `#input-header` e `#output-header` sao slots do shell desde a F2, e a F3 os
+  ocupou com `Select` (o alvo e o nome da raiz do `json-to-code`; o dialeto e a
+  caixa das palavras-chave do `sql-formatter`; a direcao do `base64-url-hash`)
+  e com `Tabs` de modo **dentro** do painel de saida, no `base64-url-hash` - a
+  unica tool da fase cuja entrada e uma so e as leituras sao tres. `ToolButton`
+  ganhou `ariaLabel` por causa dos alternadores de flag do Regex Tester, que
+  mostram o simbolo (`i`, `m`, `s`, `u`) e nao a frase.
+- **A base comum saiu de dentro da primeira tool**: casca, editor parametrizado
+  por linguagem, copiar, abrir arquivo com arrastar-e-soltar, baixar, tamanho em
+  bytes, parse e tipos do JSON e o cliente de worker moram em
+  `components/tool/`, `lib/` e `composables/`; o diretorio de uma tool guarda so
+  o que e dela. O `json-viewer` passou a consumir os mesmos ajudantes **sem
+  mudanca de comportamento** - o ADR nao prometia isso, e o custo entrou na
+  fase: extrair mexeu em codigo ja commitado, e a suite do viewer foi a rede.

@@ -1,0 +1,4 @@
+Padaria do Bairro - pedido #42
+cliente: João da Silva
+entrega: Rua das Acácias, 120 - São Paulo/SP
+cupom: PROMO+10% & brinde=sim

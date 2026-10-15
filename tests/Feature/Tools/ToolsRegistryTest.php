@@ -78,21 +78,40 @@ it('nao repete slug nem ordem de exibicao', function () {
 });
 
 /*
-| F2: a primeira tool funciona. O selo "em breve" fica com as outras sete, e o
-| sitemap - que lista so o que funciona - passa a ter a pagina dela.
+| F3: as seis tools simples viram `available` de uma vez. O selo "em breve" fica
+| so com o AI SQL Builder, que depende de servidor, e o sitemap - que lista so o
+| que funciona - passa a ter as sete paginas.
 */
 it('lista para o sitemap apenas as tools que funcionam', function () {
-    expect(array_column(Tools::available(), 'slug'))->toBe(['json-viewer']);
+    expect(array_column(Tools::available(), 'slug'))->toBe([
+        'json-viewer',
+        'json-to-code',
+        'sql-formatter',
+        'base64-url-hash',
+        'jwt-decoder',
+        'timestamp-uuid',
+        'regex-tester',
+    ]);
 });
 
-it('ordena pelo campo order e filtra as que funcionam', function () {
+it('ordena pelo campo order e nao devolve a tool escondida', function () {
     config(['tools.path' => base_path('tests/Fixtures/tools')]);
 
     // A fixture tem uma tool disponivel, uma "soon", uma "hidden" e um manifest
     // sem slug. As tres situacoes de status estao la porque a pagina da tool
-    // cobra o 404 de cada uma (ToolPageTest).
-    expect(array_column(Tools::all(), 'slug'))->toBe(['alpha-tool', 'zeta-tool', 'hidden-tool']);
+    // cobra o 404 de cada uma (ToolPageTest); a `hidden` tambem serve aqui, para
+    // prender o filtro que o leitor TypeScript ja tinha e o PHP ganhou na F3.
+    expect(array_column(Tools::all(), 'slug'))->toBe(['alpha-tool', 'zeta-tool']);
     expect(array_column(Tools::available(), 'slug'))->toBe(['zeta-tool']);
+});
+
+it('nao acha a tool escondida pelo slug', function () {
+    config(['tools.path' => base_path('tests/Fixtures/tools')]);
+
+    // Mesmo `null` do slug desconhecido: e o 404 da pagina da tool, e nada mais
+    // no servidor precisa saber que a tool existe.
+    expect(Tools::find('hidden-tool'))->toBeNull();
+    expect(Tools::find('zeta-tool'))->not->toBeNull();
 });
 
 it('traduz nome, descricao e palavras-chave de cada slug nos 5 idiomas', function () {

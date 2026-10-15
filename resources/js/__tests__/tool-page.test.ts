@@ -46,13 +46,15 @@ vi.mock('@/tools/components', async () => {
         props: {
             maxInputBytes: { type: Number, default: 0 },
             virtualizeFrom: { type: Number, default: 0 },
+            regexTimeoutMs: { type: Number, default: 0 },
+            regexMaxMatches: { type: Number, default: 0 },
         },
         setup(props) {
             return () =>
                 create(
                     'div',
                     { 'data-test': 'tool-stub' },
-                    `${props.maxInputBytes}/${props.virtualizeFrom}`,
+                    `${props.maxInputBytes}/${props.virtualizeFrom}/${props.regexTimeoutMs}/${props.regexMaxMatches}`,
                 );
         },
     });
@@ -84,13 +86,15 @@ function montar(
     slug = 'json-viewer',
     maxInputBytes = 5_000_000,
     virtualizeFrom = 2000,
+    regexTimeoutMs = 2000,
+    regexMaxMatches = 1000,
 ): VueWrapper {
     const i18n = createI18nInstance();
 
     applyTranslations(i18n, { locale: 'pt-br', translations: traducoes });
 
     return mount(Show, {
-        props: { slug, maxInputBytes, virtualizeFrom },
+        props: { slug, maxInputBytes, virtualizeFrom, regexTimeoutMs, regexMaxMatches },
         global: { plugins: [i18n] },
     });
 }
@@ -131,14 +135,14 @@ describe('Pagina da tool', () => {
     });
 
     it('encaixa o componente da tool com os limites configurados', async () => {
-        const wrapper = montar('json-viewer', 1234, 77);
+        const wrapper = montar('json-viewer', 1234, 77, 321, 12);
 
         await flushPromises();
 
-        // Os dois limites sao do servidor (`config/tools.php`) e descem por
-        // prop: quem decide o que e grande demais - para analisar e para
-        // virtualizar - nao e a tela.
-        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe('1234/77');
+        // Os limites sao do servidor (`config/tools.php`) e descem por prop:
+        // quem decide o que e grande demais - para analisar, para virtualizar e
+        // para o tempo do regex - nao e a tela.
+        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe('1234/77/321/12');
     });
 
     it('avisa quando o diretorio da tool nao tem componente', async () => {

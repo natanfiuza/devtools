@@ -1,0 +1,36 @@
+{
+    "pedido": "A-1024",
+    "criado_em": "2026-10-14T09:30:00Z",
+    "pago": false,
+    "total": 189.9,
+    "itens": [
+        {
+            "sku": "CAN-01",
+            "nome": "Caneta esferografica",
+            "quantidade": 3,
+            "preco": 4.5,
+            "desconto": null
+        },
+        {
+            "sku": "PAP-A4",
+            "nome": "Papel A4",
+            "quantidade": 1,
+            "preco": 129.9,
+            "entrega": "2026-10-20"
+        }
+    ],
+    "cliente": {
+        "nome": "Maria Silva",
+        "email": "maria@exemplo.com",
+        "telefone": null,
+        "enderecos": [
+            {
+                "rua": "Rua das Flores, 42",
+                "cidade": "Sao Paulo",
+                "principal": true
+            }
+        ]
+    },
+    "etiquetas": ["urgente", "presente"],
+    "metadados": {}
+}

@@ -8,7 +8,7 @@ import {
     nodePath,
 } from '@/tools/json-viewer/lib/path';
 import { flatten } from '@/tools/json-viewer/lib/tree';
-import type { JsonValue } from '@/tools/json-viewer/lib/types';
+import type { JsonValue } from '@/lib/json/types';
 
 /**
  * JSONPath do no: o que a pessoa copia da linha e cola em outra ferramenta.

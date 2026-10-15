@@ -14,10 +14,11 @@ uses(RefreshDatabase::class);
 | 404 (ADR-007). Um 200 de "em breve" seria uma segunda representacao do status
 | e um link morto no indice.
 |
-| O que se cobra aqui e esse contrato e as tres props que so o servidor conhece:
-| o slug (que vem do registro, nunca da URL), o teto de entrada e o limiar da
-| virtualizacao. O resto da pagina e do cliente - nome, descricao, editor e
-| arvore saem do registro e do componente da tool, cobertos pelo vitest.
+| O que se cobra aqui e esse contrato e as props que so o servidor conhece: o
+| slug (que vem do registro, nunca da URL) e os limites de `config/tools.php` -
+| o teto de entrada, o limiar da virtualizacao, o tempo do regex e o teto de
+| resultados. O resto da pagina e do cliente - nome, descricao, editor e arvore
+| saem do registro e do componente da tool, cobertos pelo vitest.
 */
 
 it('entrega a pagina da tool nos cinco idiomas', function () {
@@ -33,23 +34,29 @@ it('entrega a pagina da tool nos cinco idiomas', function () {
                 ->where('seo.noindex', false)
                 ->has('maxInputBytes')
                 ->has('virtualizeFrom')
+                ->has('regexTimeoutMs')
+                ->has('regexMaxMatches')
             );
     }
 });
 
 it('manda os limites que vem da configuracao', function () {
-    // Nenhum limite mora no codigo (CLAUDE.md): os dois saem de
+    // Nenhum limite mora no codigo (CLAUDE.md): os quatro saem de
     // config/tools.php. Se alguem trocar a config por um numero escrito no
     // controller, cai aqui.
     config([
         'tools.limits.input_bytes' => 1234,
         'tools.limits.virtualize_from' => 77,
+        'tools.limits.regex_timeout_ms' => 321,
+        'tools.limits.regex_max_matches' => 12,
     ]);
 
     $this->get('/pt-br/tools/json-viewer')->assertOk()->assertInertia(
         fn (Assert $page) => $page
             ->where('maxInputBytes', 1234)
-            ->where('virtualizeFrom', 77),
+            ->where('virtualizeFrom', 77)
+            ->where('regexTimeoutMs', 321)
+            ->where('regexMaxMatches', 12),
     );
 });
 

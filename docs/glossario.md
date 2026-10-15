@@ -4,6 +4,7 @@
 - Schema / Fonte de schema (DDL, JSON, migration, SQLModel).
 - Dialeto: mysql, pgsql, sqlsrv, sqlite.
 - Output target: formato de saida cadastrado em output_targets.
+- Linguagem de destino: a linguagem em que a tool JSON para codigo escreve o modelo de tipos - TypeScript, PHP (DTO) ou Pydantic; e escolha de tela, e nao formato cadastrado, por isso nao se confunde com o Output target, que e do AI SQL Builder.
 - Premissas: suposicoes do modelo mostradas ao usuario.
 - Provider LLM: implementacao de LlmProvider (DeepSeek).
 - Processamento local: roda no navegador.
@@ -43,8 +44,12 @@
 - Shell da tool: a casca que toda ferramenta compartilha dentro da pagina - barra de acoes, os dois paineis (entrada | saida) com divisor arrastavel, faixa de status e de atalhos; no mobile os mesmos paineis viram abas (ADR-029).
 - Limite de entrada: teto em bytes do texto que uma tool aceita analisar, de `config/tools.php` (`TOOLS_MAX_INPUT_BYTES`, padrao 5 MB); passar dele nao bloqueia a digitacao, bloqueia a analise, e o limite protege o navegador de quem usa.
 - Arvore (do JSON): a saida do viewer em linhas, uma por no, com colapso; e a mesma coisa que o editor mostra, com as mesmas cores de token.
-- Arvore defasada: a arvore da **ultima versao valida** que continua na tela enquanto o texto esta invalido (ou acima do limite), com aviso e opacidade reduzida; o erro atual aparece com linha e coluna no rodape, e a busca e a copia de caminho seguem agindo sobre a arvore que esta na tela.
+- Ultima saida valida: a saida da ultima entrada que fechou continua na tela - com aviso e opacidade reduzida - enquanto a entrada de agora esta invalida ou acima do limite (`states.stale_output`); e o que as tools mostram no lugar de uma saida pela metade. O Regex Tester e a excecao: no estouro de tempo nao fica resultado nenhum (ADR-031).
+- Arvore defasada: o caso do JSON Viewer da ultima saida valida - a arvore da **ultima versao valida** que continua na tela enquanto o texto esta invalido (ou acima do limite), com aviso e opacidade reduzida; o erro atual aparece com linha e coluna no rodape, e a busca e a copia de caminho seguem agindo sobre a arvore que esta na tela.
 - Virtualizacao de lista: desenhar so as linhas visiveis (mais uma folga) em vez da lista inteira, com altura de linha uniforme - o que permite abrir um JSON grande sem travar a rolagem; o limiar de linhas vem de `config/tools.php` (`TOOLS_VIRTUALIZE_FROM`, padrao 2000).
-- Worker de parse (com queda): o Web Worker que analisa o JSON fora da thread principal; quando o ambiente nao tem `Worker` (SSR, jsdom) ou a criacao falha, o mesmo codigo roda na thread principal.
+- Worker da tool (com queda): o Web Worker que faz o trabalho pesado de uma tool fora da thread principal - o parse do JSON, a formatacao do SQL, a busca do Regex Tester; quando o ambiente nao tem `Worker` (SSR, jsdom, CSP) ou a criacao falha, o mesmo codigo roda na thread principal, e so o Regex Tester tem regra propria ali (ADR-031).
 - Caminho JSONPath: notacao do caminho de um no dentro do documento - `.chave` quando o nome e identificador, `['chave']` quando nao e (com escape de `'` e `\`).
 - Imagem OG por tool: PNG do card de compartilhamento de uma tool que funciona, em `public/og/<slug>.png`, sem idioma nenhum; o nome traduzido da ferramenta vai no `og:image:alt` e, sem o arquivo, a pagina usa a imagem padrao do site (ADR-030).
+- Correspondencia (match): o trecho do texto de teste que o padrao do Regex Tester reconhece, com posicao e grupos; a tela lista, conta e realca as correspondencias, e os comentarios do codigo chamam a mesma coisa de casamento.
+- Prazo da busca: o tempo maximo que uma busca do Regex Tester pode durar, de `config/tools.php` (`TOOLS_REGEX_TIMEOUT_MS`, padrao 2000 ms); passou dele o worker e encerrado e nao fica resultado nenhum na tela (ADR-031).
+- Teto de correspondencias: o numero maximo de correspondencias que o Regex Tester lista, de `config/tools.php` (`TOOLS_REGEX_MAX_MATCHES`, padrao 1000); a lista para no teto e avisa, e o texto substituido continua saindo do texto inteiro.

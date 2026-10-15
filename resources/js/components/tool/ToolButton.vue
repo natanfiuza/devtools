@@ -12,6 +12,14 @@ import { Button } from '@/components/ui/button';
  */
 defineProps<{
     label: string;
+    /**
+     * O nome acessivel, quando o rotulo visivel nao diz o que o botao faz.
+     *
+     * O alternador de flag do Regex Tester mostra so a letra (`i`), que e o nome
+     * da coisa na lingua do motor e nao uma palavra: quem le por leitor de tela
+     * precisa da descricao, que vem traduzida por aqui.
+     */
+    ariaLabel?: string;
     /** Atalho ja formatado (`Ctrl Enter`, `c`), opcional. */
     shortcut?: string;
     disabled?: boolean;
@@ -30,6 +38,7 @@ defineEmits<{ click: [] }>();
         :variant="variant ?? 'outline'"
         :disabled="disabled"
         :aria-pressed="pressed"
+        :aria-label="ariaLabel"
         @click="$emit('click')"
     >
         <slot name="icon" />

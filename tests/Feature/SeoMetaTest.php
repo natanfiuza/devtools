@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\Locales;
+use App\Support\Tools;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -96,9 +97,9 @@ it('tem a imagem padrao com as dimensoes que a meta promete', function () {
 });
 
 /*
-| Imagem por tool (F2): a pagina de uma ferramenta que funciona mostra o card
-| dela, e nao o padrao. As duas imagens saem do mesmo desenho, entao as metas de
-| tamanho continuam valendo para as duas.
+| Imagem por tool (F2, ampliada na F3): a pagina de uma ferramenta que funciona
+| mostra o card dela, e nao o padrao - e agora sao sete. Todas as imagens saem
+| do mesmo desenho, entao as metas de tamanho valem para todas.
 */
 
 it('usa a imagem da propria tool na pagina dela', function () {
@@ -114,20 +115,35 @@ it('usa a imagem da propria tool na pagina dela', function () {
         ->toContain('<meta property="og:image:height" content="'.config('seo.image.height').'">');
 });
 
-it('tem o PNG da tool com as dimensoes que a meta promete', function () {
-    $path = public_path(
-        trim((string) config('seo.image.tools_dir'), '/').'/json-viewer.png',
-    );
+it('tem o PNG de cada tool que funciona, com as dimensoes que a meta promete', function () {
+    // O `seo:og-image` desenha uma imagem por tool `available`: uma tool que
+    // virasse `available` sem a imagem cairia na padrao em silencio, e e contra
+    // esse silencio que o teste guarda.
+    foreach (Tools::available() as $tool) {
+        $path = public_path(
+            trim((string) config('seo.image.tools_dir'), '/').'/'.$tool['slug'].'.png',
+        );
 
-    expect(is_file($path))->toBeTrue("Falta o PNG da tool: {$path}");
+        expect(is_file($path))->toBeTrue("Falta o PNG da tool: {$path}");
 
-    $size = getimagesize($path);
+        $size = getimagesize($path);
 
-    expect($size)
-        ->not->toBeFalse()
-        ->and($size[0])->toBe((int) config('seo.image.width'))
-        ->and($size[1])->toBe((int) config('seo.image.height'))
-        ->and($size['mime'])->toBe('image/png');
+        expect($size)
+            ->not->toBeFalse()
+            ->and($size[0])->toBe((int) config('seo.image.width'))
+            ->and($size[1])->toBe((int) config('seo.image.height'))
+            ->and($size['mime'])->toBe('image/png');
+    }
+});
+
+it('aponta o card de cada tool que funciona para o PNG dela', function () {
+    foreach (Tools::available() as $tool) {
+        $slug = (string) $tool['slug'];
+        $relative = trim((string) config('seo.image.tools_dir'), '/')."/{$slug}.png";
+
+        expect($this->get("/pt-br/tools/{$slug}")->assertOk()->getContent())
+            ->toContain('<meta property="og:image" content="'.url($relative).'">');
+    }
 });
 
 it('descreve a imagem da tool no idioma da pagina', function () {

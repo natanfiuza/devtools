@@ -39,15 +39,15 @@ return [
         ],
 
         'states' => [
-            'empty' => 'Cole, digite ou solte um arquivo JSON para começar.',
-            'parsing' => 'Analisando...',
+            'empty' => 'Cole, digite ou solte um arquivo para começar.',
+            'parsing' => 'Processando...',
             'unavailable' => 'Ferramenta indisponível.',
-            'invalid' => 'JSON inválido na linha {line}, coluna {column}.',
-            'invalid_no_position' => 'JSON inválido.',
-            'stale_tree' => 'Árvore da última versão válida.',
-            'too_large' => 'O texto tem {size} e passa do limite de {limit}. A análise está desligada.',
+            'invalid' => 'Entrada inválida na linha {line}, coluna {column}.',
+            'invalid_no_position' => 'Entrada inválida.',
+            'stale_output' => 'Saída da última entrada válida.',
+            'too_large' => 'O texto tem {size} e passa do limite de {limit}: nada será processado.',
             'file_too_large' => 'O arquivo tem {size} e passa do limite de {limit}.',
-            'file_type' => 'Formato não aceito. Envie um arquivo .json ou .txt.',
+            'file_type' => 'Formato não aceito. Envie um arquivo {formats}.',
             'file_unreadable' => 'Não foi possível ler o arquivo.',
             'drop_hint' => 'Solte para abrir o arquivo.',
         ],
@@ -82,6 +82,7 @@ return [
         'expand_all' => 'Expandir tudo',
         'collapse_all' => 'Recolher tudo',
         'download_name' => 'documento',
+        'file_types' => 'JSON ou TXT',
 
         'tree' => [
             'toggle' => 'Recolher ou expandir',
@@ -120,36 +121,186 @@ return [
         'name' => 'JSON para código',
         'description' => 'Transforme JSON em tipos TypeScript, DTOs PHP e modelos Python.',
         'keywords' => 'gerar tipos, interface, dto, pydantic',
+        'intro' => 'Cole um JSON e escolha o alvo: interfaces TypeScript, DTOs PHP com propriedades promovidas ou modelos Pydantic. A inferência roda no seu navegador: nada do que você cola aqui é enviado para o servidor.',
+
+        'target' => 'Linguagem de destino',
+        'root_name' => 'Nome do tipo raiz',
+        'download_name' => 'tipos',
+        'file_types' => 'JSON ou TXT',
+
+        'targets' => [
+            'typescript' => 'TypeScript',
+            'php' => 'PHP (DTO)',
+            'pydantic' => 'Pydantic',
+        ],
+
+        'states' => [
+            'root_object' => 'A raiz precisa ser um objeto JSON com pelo menos uma chave.',
+        ],
+
+        'stats' => [
+            'types' => 'Tipos: {count}',
+        ],
     ],
 
     'sql-formatter' => [
         'name' => 'SQL Formatter',
         'description' => 'Formate consultas SQL nos dialetos MySQL, PostgreSQL, SQL Server e SQLite.',
         'keywords' => 'embelezar, indentar, consulta',
+        'intro' => 'Cole a consulta e escolha o dialeto: o SQL sai indentado do lado direito, e a caixa das palavras-chave é a sua escolha. A formatação roda no seu navegador: nada do que você cola aqui é enviado para o servidor.',
+
+        'dialect' => 'Dialeto',
+        'keyword_case' => 'Caixa das palavras-chave',
+        'download_name' => 'consulta',
+        'file_types' => 'SQL ou TXT',
+
+        'dialects' => [
+            'mysql' => 'MySQL',
+            'pgsql' => 'PostgreSQL',
+            'sqlsrv' => 'SQL Server',
+            'sqlite' => 'SQLite',
+        ],
+
+        'cases' => [
+            'upper' => 'MAIÚSCULAS',
+            'lower' => 'minúsculas',
+            'preserve' => 'Manter',
+        ],
     ],
 
     'base64-url-hash' => [
         'name' => 'Base64, URL e Hash',
-        'description' => 'Codifique e decodifique Base64 e URL, e gere hashes MD5, SHA-1 e SHA-256.',
+        'description' => 'Codifique e decodifique Base64 e URL, e gere os hashes MD5, SHA-1, SHA-256 e SHA-512.',
         'keywords' => 'codificar, decodificar, resumo, digest',
+        'intro' => 'Uma entrada, três leituras: o mesmo texto vira Base64, vira URL codificada ou vira hash. Escolha a aba à direita e a direção à esquerda. A conta roda no seu navegador: nada do que você cola aqui é enviado para o servidor.',
+
+        'direction' => 'Direção',
+        'file_types' => 'TXT',
+        'row_copied' => '{label} copiado',
+
+        'directions' => [
+            'encode' => 'Codificar',
+            'decode' => 'Decodificar',
+        ],
+
+        'modes' => [
+            'base64' => 'Base64',
+            'url' => 'URL',
+            'hash' => 'Hash',
+        ],
+
+        'rows' => [
+            'base64' => 'Base64',
+            'urlSafe' => 'Base64 URL-safe',
+            'component' => 'Componente',
+            'form' => 'Formulário',
+            'md5' => 'MD5',
+            'sha1' => 'SHA-1',
+            'sha256' => 'SHA-256',
+            'sha512' => 'SHA-512',
+        ],
+
+        'states' => [
+            'invalid_base64' => 'Isto não é o Base64 de um texto: há caractere fora do alfabeto, sobra um caractere solto no fim, ou os bytes não formam UTF-8.',
+            'invalid_url' => 'Isto não é uma URL codificada válida: há uma sequência de escape quebrada ou bytes que não formam UTF-8.',
+            'no_crypto' => 'Este navegador só expõe a Web Crypto em conexão segura (HTTPS), então as três linhas SHA ficam sem valor aqui. O MD5 continua — mas lembre: MD5 é checksum, e não assinatura.',
+        ],
     ],
 
     'jwt-decoder' => [
         'name' => 'JWT Decoder',
         'description' => 'Leia o cabeçalho e o payload de um JWT. A assinatura não é validada.',
         'keywords' => 'token, bearer, claims, autenticação',
+        'intro' => 'Cole o token (o prefixo Bearer pode vir junto) para ler o cabeçalho, o payload e as datas dos claims. A ferramenta decodifica e não valida a assinatura, e tudo roda no seu navegador: nada do que você cola aqui vai para o servidor.',
+
+        'header' => 'Cabeçalho',
+        'payload' => 'Payload',
+        'signature' => 'Assinatura',
+        'signature_bytes' => '{count} bytes',
+        'not_verified' => 'não verificada',
+        'block_copied' => '{label} copiado',
+
+        'warning' => 'Este decodificador não valida a assinatura: ele mostra o que está escrito no token, e nada aqui prova que o token é autêntico.',
+
+        'claims_title' => 'Datas',
+
+        'claims' => [
+            'expired' => 'expirado',
+            'not_yet' => 'ainda não vale',
+        ],
+
+        'states' => [
+            'shape' => 'Isto não é um JWT: são três partes separadas por ponto (cabeçalho, payload e assinatura), e aqui não há três.',
+            'base64' => 'Alguma das partes não é base64url válido, ou os bytes não formam UTF-8.',
+            'json' => 'O cabeçalho ou o payload não é um objeto JSON.',
+        ],
     ],
 
     'timestamp-uuid' => [
         'name' => 'Timestamp e UUID',
         'description' => 'Converta timestamps Unix e datas, e gere valores UUID e ULID.',
         'keywords' => 'unix, epoch, data, guid',
+        'intro' => 'Cole um instante — Unix em segundos ou milissegundos, uma data ou um UUID v7/ULID — para ver as seis leituras dele. O painel da direita também gera UUID v4, v7 e ULID. Tudo roda no seu navegador: nada do que você cola aqui é enviado ao servidor.',
+
+        'now' => 'Agora',
+        'kind' => 'Tipo de id',
+        'quantity' => 'Quantidade',
+        'generate' => 'Gerar',
+        'ids_title' => 'Ids gerados: {count}',
+        'copy_ids' => 'Copiar todos',
+        'ids_copied' => '{count} ids copiados',
+        'id_copied' => 'Id copiado',
+        'row_copied' => '{label} copiado',
+        'recognised' => 'O id colado guarda este instante ({kind})',
+
+        'kinds' => [
+            'uuid_v4' => 'UUID v4',
+            'uuid_v7' => 'UUID v7',
+            'ulid' => 'ULID',
+        ],
+
+        'readings' => [
+            'unix_seconds' => 'Unix (segundos)',
+            'unix_ms' => 'Unix (milissegundos)',
+            'iso_utc' => 'ISO 8601 (UTC)',
+            'iso_local' => 'ISO 8601 (local)',
+            'long_date' => 'Data por extenso',
+            'relative' => 'Tempo relativo',
+        ],
+
+        'states' => [
+            'unreadable' => 'Não deu para ler um instante aqui: use o Unix em segundos ou milissegundos, uma data (ISO 8601) ou um UUID v7/ULID.',
+        ],
     ],
 
     'regex-tester' => [
         'name' => 'Regex Tester',
         'description' => 'Teste expressões regulares com destaque ao vivo das correspondências e dos grupos.',
         'keywords' => 'padrão, correspondência, grupos',
+        'intro' => 'Escreva a expressão regular na barra de cima e o texto de teste no painel da esquerda: as correspondências saem destacadas, uma a uma, com os grupos numerados e nomeados, e o campo de substituição mostra o texto trocado. A busca corre no seu navegador: nada do que você cola aqui é enviado ao servidor.',
+
+        'pattern' => 'Expressão regular',
+        'replacement' => 'Substituir por',
+        'replacement_hint' => 'Ex.: $1 ou $<nome>',
+        'position' => 'Posição {start}',
+        'matches_count' => 'Correspondências: {count}',
+        'matches_none' => 'Nenhuma correspondência.',
+        'truncated' => 'Mostrando as primeiras {count} correspondências.',
+        'replaced_title' => 'Resultado da substituição',
+        'file_types' => 'TXT',
+
+        'flags' => [
+            'i' => 'Ignorar maiúsculas e minúsculas',
+            'm' => 'Multilinha: ^ e $ em cada linha',
+            's' => 'O ponto também casa a quebra de linha',
+            'u' => 'Unicode: casar por ponto de código',
+        ],
+
+        'states' => [
+            'pattern' => 'A expressão não é válida. O detalhe abaixo é a mensagem do motor do navegador.',
+            'pattern_empty' => 'Escreva a expressão regular para testar.',
+            'timeout' => 'A busca passou de {seconds} segundos e foi interrompida: nenhum resultado é mostrado. Restrinja a expressão para evitar o retrocesso.',
+        ],
     ],
 
 ];

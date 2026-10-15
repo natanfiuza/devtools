@@ -18,6 +18,11 @@ final class Tools
     /**
      * Tools registradas, na ordem do manifest.
      *
+     * `hidden` fica de fora, como no leitor TypeScript
+     * (resources/js/tools/registry.ts): a tool escondida nao aparece para o
+     * visitante em leitor nenhum - nem na home, nem no sitemap, nem no cartao
+     * de compartilhamento, que desenha os nomes a partir daqui.
+     *
      * As `keywords` vem junto porque sao elas que desenham a imagem de
      * compartilhamento de cada tool (app/Console/Commands/GenerateOgImage.php):
      * termos do proprio manifest, sem frase em idioma nenhum.
@@ -48,7 +53,7 @@ final class Tools
                 'is_string',
             ));
 
-            if (! is_string($slug) || ! is_string($status)) {
+            if (! is_string($slug) || ! is_string($status) || $status === 'hidden') {
                 continue;
             }
 
@@ -82,6 +87,9 @@ final class Tools
 
     /**
      * Uma tool pelo slug, ou `null` se ela nao existe.
+     *
+     * Le `all()`, entao a tool `hidden` nao e encontrada - e o mesmo `null` do
+     * slug desconhecido, que a pagina de tool transforma no mesmo 404 (ADR-007).
      *
      * O slug vem cru da URL: quem monta nome de arquivo a partir dele precisa
      * validar o formato antes (`resources/js/tools/<slug>/manifest.json`).

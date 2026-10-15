@@ -1,6 +1,6 @@
 {
     "slug": "sql-formatter",
-    "status": "soon",
+    "status": "available",
     "category": "sql",
     "icon": "database",
     "order": 40,

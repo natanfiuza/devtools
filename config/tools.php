@@ -36,6 +36,25 @@ return [
         | entrega ao componente como o teto de entrada.
         */
         'virtualize_from' => (int) env('TOOLS_VIRTUALIZE_FROM', 2000),
+
+        /*
+        | O teto de tempo de uma expressao regular, em milissegundos.
+        |
+        | Uma regex pode ser escrita para nao terminar (o "catastrofico"
+        | `(a+)+$`): quem rodasse o texto inteiro com ela travaria a aba. O
+        | Regex Tester roda a busca num worker e o encerra ao estourar este
+        | tempo - o navegador de quem usa segue inteiro (ADR-031).
+        */
+        'regex_timeout_ms' => (int) env('TOOLS_REGEX_TIMEOUT_MS', 2000),
+
+        /*
+        | Quantos resultados o Regex Tester devolve antes de cortar.
+        |
+        | O numero e a lista na tela, e nao a busca: um padrao de um caractere
+        | num texto longo casa milhares de vezes, e a tela nao fica melhor com
+        | todas elas. Ao cortar, a tool avisa.
+        */
+        'regex_max_matches' => (int) env('TOOLS_REGEX_MAX_MATCHES', 1000),
     ],
 
 ];

@@ -1,6 +1,6 @@
 {
     "slug": "jwt-decoder",
-    "status": "soon",
+    "status": "available",
     "category": "security",
     "icon": "key-round",
     "order": 60,

@@ -1,0 +1,3 @@
+2026-10-01T12:00:00Z INFO  pedido 4417 criado por ana.souza@exemplo.com
+2026-10-01T12:00:03Z WARN  pedido 4418 recusado: cartao vencido
+2026-10-01T12:00:07Z ERROR pedido 4419 falhou no gateway (tempo esgotado)

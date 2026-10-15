@@ -1,5 +1,5 @@
 import { normalize } from '@/tools/search';
-import type { JsonNodeKind, JsonPrimitive, JsonValue } from './types';
+import type { JsonNodeKind, JsonPrimitive, JsonValue } from '@/lib/json/types';
 
 /**
  * A arvore do JSON como **lista plana em pre-ordem**.

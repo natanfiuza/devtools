@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { byteUnit, formatBytes } from '@/tools/json-viewer/lib/bytes';
+import { byteUnit, formatBytes } from '@/lib/bytes';
 
 /**
  * Tamanho legivel nos cinco idiomas.

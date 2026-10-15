@@ -1,6 +1,5 @@
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { json } from '@codemirror/lang-json';
 import { bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language';
 import { lintGutter, setDiagnostics } from '@codemirror/lint';
 import { highlightSelectionMatches } from '@codemirror/search';
@@ -15,21 +14,25 @@ import {
     placeholder as placeholderExtension,
     type KeyBinding,
 } from '@codemirror/view';
-import { jsonEditorTheme, jsonHighlightStyle } from './theme';
+import { codeEditorTheme, codeHighlightStyle } from './theme';
 
 /**
- * O editor de JSON.
+ * O editor de codigo.
  *
  * O conjunto de extensoes e montado item por item, e nao pelo `basicSetup`: o
  * `basicSetup` traz autocompletar, dobra de codigo e um painel de busca com
  * rotulos em ingles - e nenhum dos tres e usado aqui, num projeto em que toda
  * string visivel e traducao.
  *
+ * A linguagem entra por `extensions`, e nao por um mapa de nomes de linguagem:
+ * quem sabe qual e a linguagem e a tela que a pede, entao o pacote dela (o
+ * `@codemirror/lang-sql`, por exemplo) so pesa no pedaco de codigo que o usa.
+ *
  * Duas ausencias sao deliberadas:
  *
  * - **Barra de busca do motor** (`searchKeymap`): o painel dela tem rotulo
- *   fixo em ingles, sem traducao. O Cmd+F continua funcionando, mas aponta para
- *   a busca da tela, que e uma so para o documento inteiro.
+ *   fixo em ingles, sem traducao. O Cmd+F continua funcionando quando ha quem
+ *   escute, mas aponta para a busca da tela, que e uma so para o documento.
  * - **Tab para indentar** (`indentWithTab`): prenderia o foco do teclado dentro
  *   do editor - quem precisa de indentacao usa o botao "formatar", que e
  *   melhor que digitar espaco.
@@ -44,6 +47,15 @@ export interface EditorOptions {
     onFind?: () => void;
     /** Cmd/Ctrl+Enter: o mesmo "formatar" do botao, sem tirar a mao do teclado. */
     onFormat?: () => void;
+    /**
+     * O que **esta** tela acrescenta: a linguagem, o realce de resultados, o
+     * que mais ela precisar.
+     *
+     * Entram uma vez, na montagem - o motor nao troca extensao em uso. O que
+     * muda durante a vida do editor (os resultados de uma busca, por exemplo)
+     * entra por dentro da propria extensao, que le o de fora e se redesenha.
+     */
+    extensions?: Extension[];
 }
 
 /** O erro que o editor desenha - o texto ja vem traduzido de quem chama. */
@@ -103,13 +115,13 @@ export function createEditor(parent: HTMLElement, options: EditorOptions): Edito
         drawSelection(),
         bracketMatching(),
         indentOnInput(),
-        json(),
+        ...(options.extensions ?? []),
         closeBrackets(),
         highlightSelectionMatches(),
         lintGutter(),
         EditorView.lineWrapping,
-        syntaxHighlighting(jsonHighlightStyle),
-        jsonEditorTheme,
+        syntaxHighlighting(codeHighlightStyle),
+        codeEditorTheme,
         keymap.of(keymaps),
     ];
 

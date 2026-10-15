@@ -2,9 +2,9 @@
  * Baixar o documento como arquivo.
  *
  * O `Blob` fica na memoria da pagina e o link e um `<a download>` de verdade:
- * nenhuma requisicao sai daqui, que e a mesma regra do resto da tool. A ancora
- * entra e sai do documento porque um clique em elemento solto e ignorado por
- * parte dos navegadores.
+ * nenhuma requisicao sai daqui, que e a mesma regra do resto das tools. A
+ * ancora entra e sai do documento porque um clique em elemento solto e ignorado
+ * por parte dos navegadores.
  */
 
 /** Tempo de espera antes de liberar a URL, em milissegundos. */
