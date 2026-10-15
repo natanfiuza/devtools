@@ -53,6 +53,10 @@ DB_PASSWORD=senha-forte
 # O processo do SSR sobe pelo supervisor (secao 4). Sem ele ligado, as
 # paginas continuam funcionando, mas sem HTML renderizado no servidor.
 INERTIA_SSR_ENABLED=true
+
+# Medicao (GA4). Vazio desliga a medicao - e o que se quer em local e em teste:
+# so este .env carrega o id. Passo a passo na secao 9.
+ANALYTICS_GA4_ID=
 ```
 
 Permissoes e a primeira carga:
@@ -275,6 +279,11 @@ por regra do projeto — nunca no codigo.
 **Senha do banco**: `ALTER USER 'devtools'@'localhost' IDENTIFIED BY '...'`,
 atualiza o `.env` e `optimize:clear`.
 
+**Medicao (GA4)**: criar a propriedade nova no Google, trocar
+`ANALYTICS_GA4_ID` no `.env` e rodar `php artisan optimize:clear && php artisan optimize`.
+Sem redeploy e sem migracao: o historico fica na propriedade antiga. O passo a
+passo esta em [guides/google-analytics.md](guides/google-analytics.md#5-rotacao-do-id).
+
 ## 8. Logs e diagnostico
 
 ```bash
@@ -298,6 +307,8 @@ Problemas que ja sabemos diagnosticar:
 | "command not found" no cron | binario fora do PATH do `deploy.sh` (o log diz qual) |
 | Deploy nao roda | `flock` preso: `fuser storage/framework/locks/deploy.lock` |
 | Assets antigos servidos | release ainda na janela das 3 guardadas: normal; a limpeza e por data |
+| Medicao nao aparece no GA | id vazio no `.env` (medicao desligada), banner sem aceite, ou config em cache: `optimize:clear && optimize` (secao 9) |
+| Teste do Google ("Teste sua tag", Tag Assistant) acusa tag ausente | **Esperado** quando o banner nao foi aceito naquela sessao: o teste abre o site sem o cookie `consent`, e sem aceite nao ha tag (ADR-013). Aceite o banner na sessao do teste; a prova real e o Tempo real (secao 9) |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 
@@ -305,3 +316,22 @@ Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 chown -R www-data:www-data storage bootstrap/cache
 php artisan optimize:clear && php artisan optimize
 ```
+
+## 9. Medicao (Google Analytics)
+
+O carregamento ja existe no codigo (ADR-013/ADR-032): ativar e preencher uma
+variavel. **O passo a passo completo - criar a propriedade, conferir e o que nao
+ligar na console - esta em [guides/google-analytics.md](guides/google-analytics.md)**.
+O que segue e a parte de operacao.
+
+- `ANALYTICS_GA4_ID` **vazio desliga a medicao**, mesmo com aceite. So o `.env`
+  de producao carrega o id - em local, em teste e em CI fica vazio de proposito.
+- Sem aceite no banner, **nenhuma** requisicao sai para o Google: a tag e
+  injetada no cliente, uma vez, e o HTML do servidor nunca tem GA, nem no SSR.
+- Depois de mexer no `.env`:
+  `php artisan optimize:clear && php artisan optimize`. O `deploy.sh` nao toca
+  no `.env` (ADR-014).
+- A area da conta e medida junto com o site; o painel administrativo (`/admin`)
+  **nao** e - la nao ha banner nem tag, nem com aceite.
+- Desligar e o mesmo caminho ao contrario: esvaziar a variavel e rodar os dois
+  comandos.

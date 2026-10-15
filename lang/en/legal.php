@@ -29,7 +29,7 @@ return [
             ],
             'sharing' => [
                 'title' => 'With whom we share',
-                'body' => 'We do not sell or rent your data. We share only with the providers that keep the site running: hosting and email delivery, plus Google or GitHub when you choose to sign in with them.',
+                'body' => 'We do not sell or rent your data. We share only with the providers that keep the site running: hosting and email delivery, plus Google or GitHub when you choose to sign in with them. If you accept measurement, page views also go to Google Analytics.',
             ],
             'cookies' => [
                 'title' => 'Cookies',

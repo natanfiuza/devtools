@@ -137,7 +137,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 - Painel administrativo (ADR-025): `/admin` com o papel `admin`, uma tela por assunto - Visao geral (numeros e ultimos cadastros), Contas (as nove acoes sobre uma conta: verificar e-mail, reenviar verificacao, mandar redefinicao de senha, papel, suspender, reativar, plano, cota, excluir - mais entrar como), Assinantes (newsletter), Planos (preco e limites), Pagamentos (registrar e estornar) e Auditoria. Tudo em 5 idiomas; o primeiro admin nasce por `php artisan devtools:admin {email} [--revoke]`. `output_targets`, `ai_requests` e cache entram na F5/F6.
 
 ## 8. Privacidade e seguranca
-- Banner de consentimento (necessarios/analytics), GA so apos aceite, pagina de privacidade e termos, exportar/excluir conta.
+- Banner de consentimento (necessarios/analytics), GA so apos aceite, pagina de privacidade e termos, exportar/excluir conta. O que o banner declara e o que o GA faz sao a mesma coisa: a frase e afirmacao factual, com os sinais de anuncio desligados no `config` (ADR-032). Ativar a medicao e operacao, nao codigo - `docs/guides/google-analytics.md`.
 - Schema/prompt nao vao para logs; avisar usuario para nao enviar dados sensiveis.
 - Rate limit por usuario e IP; Turnstile no cadastro; CSP; chave DeepSeek apenas em .env.
 - SQL gerado nunca e executado.
@@ -155,7 +155,7 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 Criterios de aceite por fase em docs/acceptance/FASE-N.md (gerar ao iniciar cada fase).
 
 ## 10. Documentacao a manter
-README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves), CHANGELOG.md.
+README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/guides/ (passo a passo de operacao, hoje o do GA4), docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves), CHANGELOG.md.
 Escrito ate aqui (F0): README, RUNBOOK, DESIGN, docs/adr/, docs/glossario.md, CHANGELOG. ARQUITETURA.md e API.md entram quando houver o que documentar (fila e IA na F5; endpoints publicos na F7).
 Tambem fazem parte do repo: docs/acceptance/ (criterios por fase), docs/plans/ e docs/survey/ (plano e levantamento de cada sessao de grill) e docs/claude-code/reports/{branch}/ (relatorio ao fim de cada tarefa, regra do CLAUDE.md).
 Texto de produto que se atualiza sem deploy de codigo: paginas legais em `lang/{locale}/legal.php` e contato/data de revisao em `config/legal.php`; limites, precos e nomes de modelo de IA em `config/` e nas tabelas, nunca no codigo.
@@ -181,6 +181,7 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Exclusao de conta por anonimizacao, com o registro de cobranca preservado por guarda fiscal, e exportacao em JSON de download imediato (ADR-028).
 - Registro de tools com **fonte unica** no `manifest.json` de cada tool, com dois leitores sobre os mesmos arquivos: o TypeScript (home, chips, busca) e o PHP (sitemap). O texto visivel nunca mora no manifesto - vem de `tools.<slug>.*` por convencao a partir do slug (ADR-007).
 - Consentimento com **tres estados** e decisao resolvida no servidor: sem cookie (ou com cookie corrompido) a decisao e nula e o banner aparece; o GA4 so e injetado no cliente, depois do aceite e com id configurado (ADR-013).
+- A medicao e o **GA4 padrao** - com cookie `_ga` depois do aceite - e o banner declara exatamente isso ("paginas vistas e cookies de medicao"), em vez da frase antiga "sem dado pessoal": o texto mostrado ao visitante e afirmacao factual, nao resumo de marketing. Os sinais de publicidade vao desligados no `config` (o "Nada de anuncios" nao depende so do Consent Mode), a Politica de Privacidade cita o Google como medidor e a **area da conta** e medida junto com o site - o painel administrativo nao e. O id vive so no `.env` de producao: ativar a medicao e operacao, nao codigo (ADR-032; guia em `docs/guides/google-analytics.md`).
 - `robots.txt` e `sitemap.xml` servidos pela **aplicacao**, com o arquivo estatico de `public/` removido: arquivo estatico vence a rota e amarraria a linha do `Sitemap:` ao ambiente.
 - Guia de estilo fora do indice e do sitemap: e pagina de referencia do DESIGN, nao conteudo do site - continua navegavel, mas `noindex`.
 - Uma imagem OG padrao do site (1200x630), **comitada**, gerada por comando artisan de uso unico que nunca roda em producao (o VPS nao tem GD nem rede para baixar as fontes); a imagem por tool ficou para a F2 e chegou la (ADR-030).
@@ -198,4 +199,4 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - F4: mensagens de validacao nos 5 idiomas. O Laravel so traz `validation.php` em ingles; nas telas traduzidas o erro de formulario ainda sai em ingles ("The email field is required"), junto com nomes de campo em ingles.
 - F5: nome da coluna de dialetos em `output_targets` (ADR-011 diz `dialetos`; secao 6 diz `supported_dialects(json)` + `sort`).
 - F5: Laravel AI SDK x cliente HTTP fino (diferido pelo ADR-003).
-- Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek, GA4).
+- Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek) - a do GA4 saiu desta lista e esta no guia (`docs/guides/google-analytics.md`, secao 5).

@@ -224,6 +224,17 @@ describe('decisao', () => {
             { analytics_storage: 'granted' },
         ]);
 
+        // O "Nada de anuncios" do banner nao fica so por conta do Consent Mode:
+        // os sinais de publicidade vao desligados no proprio config (ADR-032).
+        expect(window.dataLayer?.[3]).toEqual([
+            'config',
+            'G-TESTE123',
+            {
+                allow_google_signals: false,
+                allow_ad_personalization_signals: false,
+            },
+        ]);
+
         // O banner sai da tela com a decisao tomada.
         expect(banner(wrapper).exists()).toBe(false);
 

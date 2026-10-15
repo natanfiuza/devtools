@@ -16,6 +16,7 @@
 - Ledger de uso: livro-razao de debitos, estornos e concessoes; nao guarda saldo.
 - Plano: linha de `plans` com preco e limites (Free, Pro mensal, Pro anual); o admin edita pela tela de Planos e o codigo nunca fixa valores.
 - Consentimento: estado do banner de cookies.
+- Medicao: a categoria opcional do banner de consentimento - e o que liga o Google Analytics, que so carrega depois do aceite e nunca no painel administrativo. A frase que o banner mostra sobre ela e uma afirmacao factual: descreve os cookies que a medicao usa e o aceite que a libera (ADR-013, ADR-032).
 - Worker: processo queue:work sob Supervisor.
 - Tema (aparicao): claro, escuro ou sistema; resolvido no servidor para a pagina nao piscar.
 - Codigo de idioma x slug de idioma: `pt_BR` e o diretorio em lang/; `pt-br` e a URL e o cookie.

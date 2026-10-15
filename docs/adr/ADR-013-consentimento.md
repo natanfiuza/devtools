@@ -1,7 +1,7 @@
 # ADR-013-consentimento
 Status: Aceito
 Data: 2026-10-05
-Atualizado: 2026-10-14 (banner, cookie e injecao do GA definidos; a parte de exclusao e exportacao de conta passou para o ADR-028)
+Atualizado: 2026-10-15 (o que o banner declara sobre a medicao e o que o GA faz passaram a ser a mesma coisa, e a area da conta entrou na medicao - ADR-032; em 2026-10-14: banner, cookie e injecao do GA definidos, e a parte de exclusao e exportacao de conta passou para o ADR-028)
 
 ## Decisao
 **Nada de medicao antes do aceite, e o aceite e uma decisao de tres estados
@@ -59,8 +59,9 @@ nao decidiu". Um cookie corrompido cai no mesmo lugar - e o lugar seguro.
 - O texto da Politica de Privacidade passou a descrever a medicao como ela e -
   cookies de medicao opcionais, recusaveis e revogaveis pelo rodape -, e a data
   de revisao (`config/legal.php`) foi atualizada junto.
-- O banner aparece nos dois layouts publicos (site e telas de acesso) e nao
-  bloqueia a pagina: fica no canto inferior.
+- O banner aparece no site, nas telas de acesso e na **area da conta** (ADR-032),
+  e nao bloqueia a pagina: fica no canto inferior. O painel administrativo fica
+  fora - sem banner e sem medicao.
 - O GA nao e testavel de ponta a ponta daqui (nao ha id real em teste): a
   cobertura e por teste de componente (aceitar grava o cookie e injeta a tag uma
   unica vez; recusar nao injeta; reabrir pelo rodape volta a mostrar) e pela

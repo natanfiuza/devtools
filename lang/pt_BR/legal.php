@@ -29,7 +29,7 @@ return [
             ],
             'sharing' => [
                 'title' => 'Com quem compartilhamos',
-                'body' => 'Não vendemos nem alugamos seus dados. Compartilhamos apenas com quem faz o site funcionar: hospedagem e envio de e-mails, além do Google ou GitHub quando você escolhe entrar com eles.',
+                'body' => 'Não vendemos nem alugamos seus dados. Compartilhamos apenas com quem faz o site funcionar: hospedagem e envio de e-mails, além do Google ou GitHub quando você escolhe entrar com eles. Se você aceitar a medição, as páginas vistas também vão para o Google Analytics.',
             ],
             'cookies' => [
                 'title' => 'Cookies',
