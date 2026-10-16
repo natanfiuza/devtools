@@ -17,17 +17,22 @@ defeito.
 ### Corrigido
 
 - `resources/js/lib/analytics.ts`: o shim `gtag` enfileira `arguments`, nao o
-  rest parameter. O tipo de `window.dataLayer` passa a representar o que o
-  gtag.js aceita (`IArguments | Record<string, unknown>`), entao enfileirar um
-  Array volta a ser **erro de compilacao**, com a razao no docblock e no ponto
-  do `push`.
+  rest parameter, e usa sobrecarga TypeScript (`function gtag(...command:
+  unknown[]): void; function gtag(): void`) para nao emitir `...e` no bundle JS
+  minificado. O tipo de `window.dataLayer` passa a representar o que o gtag.js
+  aceita (`IArguments | Record<string, unknown>`), entao enfileirar um Array
+  volta a ser **erro de compilacao**, com a razao no docblock e no ponto do
+  `push`.
 - `resources/js/__tests__/consent-banner.test.ts`: as assercoes leem a fila como
   lista e um teste novo afirma o formato de **cada** item (`[object Arguments]`,
   nunca Array). Era o teste que faltava: os 663 testes verdes conviviam com a
   medicao zerada.
 - `docs/guides/google-analytics.md`: a secao 6 ganha "A fila do gtag" (o
-  contrato que nao se pode "simplificar") e a secao 3 deixa de tratar "tag
-  detectada, zero hits" como falso alarme - era o sintoma de um defeito real.
+  contrato que nao se pode "simplificar"), a secao 3 deixa de tratar "tag
+  detectada, zero hits" como falso alarme (incluindo a checagem de bundle antigo
+  preso no deploy) e a secao 4 explica como manter so "Page views (browser
+  history events)" ligado no Enhanced measurement para medir a navegacao SPA do
+  Inertia sem coletar os outros 5 eventos.
 
 ## Medicao declarada no banner e ativacao do GA4 - 2026-10-15
 

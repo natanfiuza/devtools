@@ -121,11 +121,19 @@ pagina numa aba normal, aceitando o banner ali.
 
 **"Tag detectada, zero hits" e sintoma, nao ruido.** A prova de que o hit saiu e
 a requisicao `/g/collect` no Network (passo 3, status **204**) e o Tempo real
-(passo 5). Sem nenhuma das duas depois do aceite, o suspeito numero um e o
-formato dos comandos na fila do `dataLayer`: o gtag.js despacha so o item que for
-um objeto `arguments` e ignora um Array **em silencio** - tag detectada, nenhum
-erro no console, nenhum hit. Foi esse o defeito corrigido em 2026-10-16; o
-contrato esta na secao 6 e o teste afirma o formato.
+(passo 5). Sem nenhuma das duas depois do aceite, dois suspeitos, nesta ordem:
+
+1. **Formato dos comandos na fila do `dataLayer`:** o gtag.js despacha so o item
+   que for um objeto `arguments` e ignora um Array **em silencio** - tag
+   detectada, nenhum erro no console, nenhum hit. Foi esse o defeito corrigido em
+   2026-10-16; o contrato esta na secao 6 e o teste afirma o formato.
+2. **Bundle JS antigo ainda publicado no VPS (`public/build`):** se o commit da
+   correcao ja entrou no `main` mas o navegador continua recebendo o `app-*.js`
+   anterior (`function ...(...e){...dataLayer.push(e)}`), o deploy parou antes da
+   troca do symlink ou a copia `deploy/deploy-instaled.sh` esta defasada. Confira
+   o `Last-Modified` de `/build/manifest.json` e rode
+   `sudo /var/www/devtools/deploy/deploy-instaled.sh --force` (ver
+   `deploy/deploy-instaled.md` e `docs/RUNBOOK.md` secao 2).
 
 ## 4. O que NAO ligar na console
 
@@ -133,7 +141,7 @@ contrato esta na secao 6 e o teste afirma o formato.
 |---|---|---|
 | Google Signals | Admin -> Data collection -> Google signals | Cruzaria a visita com contas logadas no Google; o banner promete "Nada de anuncios" |
 | Personalizacao de anuncios | Admin -> Data collection | Nao ha publicidade neste site - so medicao |
-| Enhanced measurement (scroll, cliques de saida, busca do site) | Admin -> Data streams -> stream | Vem **ligado** por padrao e coleta mais do que "paginas vistas"; desligue se quiser a coleta exatamente como o banner declara |
+| Eventos extras do Enhanced measurement (scrolls, cliques de saida, busca no site, video e downloads) | Admin -> Data streams -> stream -> Enhanced measurement (engrenagem) | Vem **ligado** por padrao e coleta mais do que "paginas vistas". **Mantenha o Enhanced measurement ligado so com "Page views" ("Page changes based on browser history events") marcado** - e assim que o GA4 mede as trocas de pagina do Inertia (`history.pushState`) sem um segundo `gtag('config')` - e **desligue os outros 5 interruptores** |
 | User-ID / dados fornecidos pelo usuario | Admin -> Data collection | O site nao manda identificador de usuario para o GA |
 | Retencao de dados | Admin -> Data collection -> Data retention | Deixar em **14 meses** (o maximo): menos dado guardado, mesma leitura |
 
