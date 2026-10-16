@@ -62,10 +62,18 @@ A validade do cookie de consentimento (180 dias) sai de
    enquanto o banner estiver sem resposta. Recusar: continua nenhuma. Aceitar:
    uma requisicao `gtag/js?id=G-...`, **uma vez so** (reabrir o banner pelo
    rodape e aceitar de novo nao cria uma segunda).
-3. DevTools -> **Application -> Cookies**: `consent=granted` e, depois que a tag
+3. Ainda no **Network**, filtrar por `collect`: depois do aceite sai um
+   `.../g/collect?...` (`region1.google-analytics.com` ou
+   `www.google-analytics.com`) com status **204** - e o **hit** (a pagina vista)
+   chegando ao GA. Na query, o `gcs` diz o que o Consent Mode liberou:
+   `G100` e tudo negado (a tag carrega, mas so sai ping sem cookie - "hit"
+   nenhum, que e o desenho de quem nao aceitou). Aqui o aceite nega publicidade
+   por desenho, entao **nao** espere `G111`: o valor normal tem a medicao
+   liberada e a publicidade negada (algo como `G101`).
+4. DevTools -> **Application -> Cookies**: `consent=granted` e, depois que a tag
    roda, os cookies do GA (`_ga` e `_ga_<id do stream>`).
-4. Console do GA -> **Reports -> Realtime**: a visita aparece depois do aceite.
-5. **View-source** da pagina (HTML do servidor): nenhuma ocorrencia de
+5. Console do GA -> **Reports -> Realtime**: a visita aparece depois do aceite.
+6. **View-source** da pagina (HTML do servidor): nenhuma ocorrencia de
    `googletagmanager` nem de `gtag(`, em nenhum estado do banner. E o que o
    `ConsentTest` afirma a cada rodada de teste.
 
@@ -111,6 +119,14 @@ Por isso o teste do Google nao e criterio: **se o Tempo real mostra a visita, a
 medicao esta funcionando.** Para o teste ficar verde, use o Tag Assistant com a
 pagina numa aba normal, aceitando o banner ali.
 
+**"Tag detectada, zero hits" e sintoma, nao ruido.** A prova de que o hit saiu e
+a requisicao `/g/collect` no Network (passo 3, status **204**) e o Tempo real
+(passo 5). Sem nenhuma das duas depois do aceite, o suspeito numero um e o
+formato dos comandos na fila do `dataLayer`: o gtag.js despacha so o item que for
+um objeto `arguments` e ignora um Array **em silencio** - tag detectada, nenhum
+erro no console, nenhum hit. Foi esse o defeito corrigido em 2026-10-16; o
+contrato esta na secao 6 e o teste afirma o formato.
+
 ## 4. O que NAO ligar na console
 
 | O que | Onde | Por que |
@@ -153,6 +169,22 @@ cabe numa janela de segundos.
 | Componente sem marcacao que chama a injecao | `resources/js/components/AnalyticsScript.vue` |
 | Banner | `resources/js/components/ConsentBanner.vue` |
 | Onde o par e montado | `PublicLayout.vue`, `AuthLayout.vue` e `account/AccountLayout.vue` (**nao** no `AdminLayout`) |
+
+### A fila do gtag: `arguments`, nunca Array
+
+Os comandos (`consent`, `js`, `config`) vao para `window.dataLayer`, e o gtag.js
+os le quando carrega. O que ele **despacha** e so o item que for um objeto
+`arguments` (`[object Arguments]`, ou um objeto com `callee`); um Array comum cai
+no ramo dos "campos de modelo" e e ignorado - tag carregada, nenhum erro no
+console, nenhum hit. Quem escreve `dataLayer.push([...])` acha que enfileirou um
+comando e nao enfileirou nada.
+
+Por isso o shim em `lib/analytics.ts` usa `arguments` **de proposito** (o
+`eslint-disable` de `prefer-rest-params` existe por isso) e por isso o tipo de
+`window.dataLayer` nao aceita Array: as duas coisas barram a "simplificacao" que,
+em 2026-10-16, deixou a medicao zerada com a tag carregando normalmente. A
+regressao esta presa no teste "enfileira os comandos como objetos `arguments`"
+(`resources/js/__tests__/consent-banner.test.ts`).
 
 ## 7. Desligar
 

@@ -3,6 +3,32 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Medicao inativa: a fila do gtag - 2026-10-16
+
+A medicao foi ligada em producao e o GA4 **nao recebeu nenhum hit**. A tag
+carregava (detectada no Tag Assistant, `dataLayer` com os quatro comandos, a
+requisicao `gtag/js?id=G-...` respondendo 200) e nada chegava ao Google - sem um
+erro no console. Causa: os comandos iam para a fila como **Arrays**, e o gtag.js
+so despacha item que seja um objeto `arguments`; um Array cai no ramo dos "campos
+de modelo" e e ignorado em silencio. O snippet oficial do Google sempre fez
+`dataLayer.push(arguments)` - a "simplificacao" para rest parameter foi o
+defeito.
+
+### Corrigido
+
+- `resources/js/lib/analytics.ts`: o shim `gtag` enfileira `arguments`, nao o
+  rest parameter. O tipo de `window.dataLayer` passa a representar o que o
+  gtag.js aceita (`IArguments | Record<string, unknown>`), entao enfileirar um
+  Array volta a ser **erro de compilacao**, com a razao no docblock e no ponto
+  do `push`.
+- `resources/js/__tests__/consent-banner.test.ts`: as assercoes leem a fila como
+  lista e um teste novo afirma o formato de **cada** item (`[object Arguments]`,
+  nunca Array). Era o teste que faltava: os 663 testes verdes conviviam com a
+  medicao zerada.
+- `docs/guides/google-analytics.md`: a secao 6 ganha "A fila do gtag" (o
+  contrato que nao se pode "simplificar") e a secao 3 deixa de tratar "tag
+  detectada, zero hits" como falso alarme - era o sintoma de um defeito real.
+
 ## Medicao declarada no banner e ativacao do GA4 - 2026-10-15
 
 O banner dizia "Google Analytics: paginas vistas, **sem dado pessoal**" enquanto

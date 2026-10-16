@@ -130,6 +130,23 @@ function tags(): Element[] {
     return Array.from(document.querySelectorAll('script[data-analytics]'));
 }
 
+/**
+ * O comando de indice `indice` da fila do gtag, como lista.
+ *
+ * A fila guarda objetos `arguments` - e so isso que o gtag.js despacha -, entao
+ * o `Array.from` aqui e so para comparar com o literal do comando.
+ */
+function comando(indice: number): unknown[] {
+    return Array.from(
+        ((window.dataLayer ?? [])[indice] ?? []) as ArrayLike<unknown>,
+    );
+}
+
+/** A fila inteira, cada comando como lista. */
+function comandos(): unknown[][] {
+    return (window.dataLayer ?? []).map((_item, indice) => comando(indice));
+}
+
 async function clicar(wrapper: VueWrapper, nome: string): Promise<void> {
     await botao(wrapper, nome).trigger('click');
     await nextTick();
@@ -208,7 +225,7 @@ describe('decisao', () => {
 
         // Consent Mode: o padrao negado e o primeiro comando, e so o aceite
         // libera a medicao. Publicidade fica negada nos dois.
-        expect(window.dataLayer?.[0]).toEqual([
+        expect(comando(0)).toEqual([
             'consent',
             'default',
             {
@@ -218,7 +235,7 @@ describe('decisao', () => {
                 analytics_storage: 'denied',
             },
         ]);
-        expect(window.dataLayer?.[1]).toEqual([
+        expect(comando(1)).toEqual([
             'consent',
             'update',
             { analytics_storage: 'granted' },
@@ -226,7 +243,7 @@ describe('decisao', () => {
 
         // O "Nada de anuncios" do banner nao fica so por conta do Consent Mode:
         // os sinais de publicidade vao desligados no proprio config (ADR-032).
-        expect(window.dataLayer?.[3]).toEqual([
+        expect(comando(3)).toEqual([
             'config',
             'G-TESTE123',
             {
@@ -268,7 +285,7 @@ describe('decisao', () => {
 
         expect(document.cookie).toContain('consent=denied');
         // O gtag.js ja rodou: quem para o envio e o update negado.
-        expect(window.dataLayer).toContainEqual([
+        expect(comandos()).toContainEqual([
             'consent',
             'update',
             { analytics_storage: 'denied' },
@@ -289,13 +306,40 @@ describe('decisao', () => {
 
         // A ultima decisao e a que vale (ADR-013): a recusa parou a medicao
         // pelo Consent Mode e o aceite de novo a religa, sem tag nova.
-        const commands = window.dataLayer ?? [];
+        const fila = comandos();
 
-        expect(commands[commands.length - 1]).toEqual([
+        expect(fila[fila.length - 1]).toEqual([
             'consent',
             'update',
             { analytics_storage: 'granted' },
         ]);
+    });
+
+    it('enfileira os comandos como objetos `arguments`, o unico formato que o gtag.js despacha', async () => {
+        const wrapper = montar();
+
+        // O ciclo inteiro, para a fila ter todos os comandos que o modulo sabe
+        // enfileirar: os quatro da injecao mais o update da recusa.
+        await clicar(wrapper, 'consent-accept');
+        await clicar(wrapper, 'consent-reopen');
+        await clicar(wrapper, 'consent-reject');
+
+        const fila = window.dataLayer ?? [];
+
+        // O que interessa aqui e o formato de cada item, nao a contagem: os
+        // testes acima ja afirmam o conteudo dos comandos.
+        expect(fila.length).toBeGreaterThanOrEqual(5);
+
+        for (const item of fila) {
+            // Um Array comum (o formato "obvio", e o defeito de 2026-10-16) cai
+            // no ramo dos campos de modelo do gtag.js: o comando nunca e
+            // despachado, e nada aparece no console. A fila fica bonita e a
+            // medicao fica sem hit nenhum.
+            expect(Array.isArray(item)).toBe(false);
+            expect(Object.prototype.toString.call(item)).toBe(
+                '[object Arguments]',
+            );
+        }
     });
 
     it('sem id configurado nao injeta tag nem com aceite', async () => {

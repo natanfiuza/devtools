@@ -165,3 +165,16 @@ nada. A cobertura nova e o `consent-layouts.test.ts` (conta mede, admin nao).
 
 A **conferencia manual pendente continua pendente** - e agora tem procedimento
 escrito: secao 3 de `docs/guides/google-analytics.md`.
+
+## Emenda (2026-10-16)
+
+A conferencia manual acima foi feita em producao, com um id real, e **encontrou
+um defeito**: a tag carregava e o GA4 nao recebia hit nenhum. O `gtag` deste repo
+enfileirava os comandos como Arrays, e o gtag.js so despacha objetos `arguments`
+(Array e ignorado em silencio). Corrigido em `resources/js/lib/analytics.ts`, com
+teste de regressao do formato da fila (CHANGELOG de 2026-10-16).
+
+Os criterios 5 a 7 desta fase nao mudam: o defeito zerava a **coleta**, nunca a
+regra do aceite (sem aceite nao havia requisicao nenhuma, e a tag seguia unica).
+O procedimento da secao 3 do guia continua valendo; o que mudou foi a leitura de
+"tag detectada, zero hits": deixou de ser falso alarme e passou a ser sintoma.

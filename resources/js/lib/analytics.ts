@@ -36,17 +36,40 @@ const NO_ADS = {
     allow_ad_personalization_signals: false,
 } as const;
 
+/**
+ * Um item da fila do gtag: um comando (objeto `arguments`) ou um evento
+ * (objeto simples, como o `gtm.dom` que o proprio gtag.js enfileira).
+ *
+ * `IArguments` no tipo nao e capricho: e o contrato do gtag.js. Um Array nao
+ * corresponde a ele, entao o erro de tipo aqui e o que barra a regressao.
+ */
+type GtagQueueItem = IArguments | Record<string, unknown>;
+
 declare global {
     interface Window {
         /** Fila de comandos do gtag; existe antes da tag carregar. */
-        dataLayer?: unknown[][];
+        dataLayer?: GtagQueueItem[];
     }
 }
 
-/** Enfileira um comando do gtag (o gtag.js le a fila quando carrega). */
-function gtag(...command: unknown[]): void {
+/**
+ * Enfileira um comando do gtag (o gtag.js le a fila quando carrega).
+ *
+ * O `arguments` e obrigatorio, nao estilo antigo. O gtag.js so despacha o item
+ * da fila que for um objeto `arguments` (`[object Arguments]` ou um objeto com
+ * `callee`); um Array comum cai no ramo dos "campos de modelo" e o comando e
+ * ignorado em silencio - sem erro no console, sem hit nenhum, mas com a tag
+ * detectada. Foi exatamente esse o defeito de 2026-10-16. O snippet oficial do
+ * Google faz o mesmo (`dataLayer.push(arguments)`).
+ */
+function gtag(..._command: unknown[]): void {
     window.dataLayer = window.dataLayer ?? [];
-    window.dataLayer.push(command);
+
+    // O `arguments` e o contrato do gtag.js (ver o docblock acima), entao a
+    // regra que pede rest parameters nao vale aqui: o rest seria justamente o
+    // Array que o gtag.js ignora.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments);
 }
 
 /** Grava a decisao no cookie que o servidor le (mesmo nome, mesma validade). */
