@@ -62,12 +62,14 @@ declare global {
  * detectada. Foi exatamente esse o defeito de 2026-10-16. O snippet oficial do
  * Google faz o mesmo (`dataLayer.push(arguments)`).
  */
-function gtag(..._command: unknown[]): void {
+function gtag(...command: unknown[]): void;
+function gtag(): void {
     window.dataLayer = window.dataLayer ?? [];
 
     // O `arguments` e o contrato do gtag.js (ver o docblock acima), entao a
     // regra que pede rest parameters nao vale aqui: o rest seria justamente o
-    // Array que o gtag.js ignora.
+    // Array que o gtag.js ignora. A sobrecarga mantem a checagem de tipos nas
+    // chamadas sem emitir `...e` na funcao JS minificada.
     // eslint-disable-next-line prefer-rest-params
     window.dataLayer.push(arguments);
 }
