@@ -211,3 +211,72 @@ untracked, mas e de tarefa anterior e nao faz parte desta.)
   de producao (secoes 1 e 2 do guia) - acao do usuario.
 - **Conferencia manual com id real**: devtools, rede e cookies, nos dois estados
   (secao 3 do guia).
+
+## 10. Adendo (2026-10-16): o defeito que zerava os hits
+
+Com o id real em producao, a medicao nao mandava hit nenhum ao GA4. O defeito era
+**anterior a esta tarefa** (estava no codigo desde a F1) e so apareceu quando
+existiu um id de verdade.
+
+**Sintoma**, levantado ao vivo com o usuario: `view-source` sem GA (correto, e o
+que o `ConsentTest` afirma), a requisicao `gtag/js?id=G-...` saindo **uma vez**
+depois do aceite, a tag no DOM, o `dataLayer` com os quatro comandos na ordem
+certa (`consent default` negado -> `consent update granted` -> `js` -> `config`),
+o `push` ja substituido pelo gtag.js e `gtm.dom`/`gtm.load` na fila - e **zero**
+requisicoes `/g/collect`, sem um erro no console.
+
+**Causa**, provada no fonte do gtag.js (439.645 bytes, baixado com `curl`):
+
+- o despachante so trata item que passe em `Qb(a)`
+  (`Object.prototype.toString.call(a) === "[object Arguments]"` ou um objeto com
+  `callee`); o que nao passa cai em `else q=f`, o ramo dos **campos de modelo** -
+  um Array nao e comando, e lido como estado;
+- o mapa de handlers (`OD`) tem `config`, `consent`, `js`, `event`, `get`, `set`
+  e mais: os nossos comandos **tem** handler, o problema era o formato do item;
+- o gtag.js **nao** define `window.gtag` (nao ha `window.gtag` no fonte), entao o
+  `Uncaught ReferenceError: gtag is not defined` que apareceu ao digitar
+  `gtag('event', 'teste_manual')` no console nao indicava defeito nenhum: o
+  `gtag` deste repo e local ao modulo, como deve ser.
+
+O defeito era **nosso**: `resources/js/lib/analytics.ts` enfileirava com um rest
+parameter (`gtag(...command)` -> `dataLayer.push(command)`), ou seja um Array. O
+snippet oficial do Google sempre fez `dataLayer.push(arguments)`.
+
+### Correcao
+
+- `resources/js/lib/analytics.ts`: `window.dataLayer.push(arguments)`, com o
+  contrato no docblock e no ponto do `push` - e o `eslint-disable` de
+  `prefer-rest-params` (o unico do repo hoje), justificado no lugar: o rest
+  parameter **e** o defeito. O tipo de `window.dataLayer` virou
+  `(IArguments | Record<string, unknown>)[]`, entao enfileirar um Array agora e
+  **erro de compilacao** (`TS2345`, conferido).
+- `resources/js/__tests__/consent-banner.test.ts`: helpers `comando()`/`comandos()`
+  (a fila lida como lista) e o teste de regressao "enfileira os comandos como
+  objetos `arguments`", que afirma `[object Arguments]` e **nao** Array em cada
+  item. Conferido com o defeito de volta: o teste falha.
+- `docs/guides/google-analytics.md`: a secao 6 ganha "A fila do gtag" (o
+  contrato) e a secao 3 troca "zero hits nao e criterio" por "zero hits e
+  sintoma" - e perde a afirmacao errada de que o `gcs` esperado seria `G111`
+  (aqui a publicidade e negada por desenho: `G100`/`G101`).
+- `CHANGELOG.md` (2026-10-16) e `docs/acceptance/FASE-1.md` (emenda).
+
+### Verificacao
+
+- `npm run test`: 47 arquivos, **664** testes (o novo entre eles) verdes.
+- `npm run types:check`: limpo. `npm run lint:check`: 6 erros, **todos
+  pre-existentes** (`auth-login.test.ts` x3, `json-bytes.test.ts`,
+  `newsletter-form.test.ts`, `AnalyticsScript.vue`) - o unico que a correcao
+  somava (`prefer-rest-params` em `analytics.ts`) foi resolvido com o disable
+  justificado. O de `AnalyticsScript.vue` (`vue/valid-template-root`, template so
+  com comentario) e anterior e ficou fora do escopo.
+- `composer test`: Pint sem violacao, PHPStan nivel 7 com 0 erros, Pest com 268
+  testes / 7.166 assercoes.
+- Conferido por leitura no fonte do gtag.js **e** por reversao: sem a correcao, o
+  teste novo falha e o `tsc` acusa.
+
+### A licao
+
+Os quatro comandos "bonitos" no `dataLayer` **nao** eram prova de que o gtag.js os
+estava lendo, e a conferencia manual que estava pendente desde a F1 era
+exatamente a que expunha isso. O que teria exposto antes e o teste de formato da
+fila - agora existe.
