@@ -21,14 +21,24 @@ import type { PublicPlan } from '@/types';
  */
 
 vi.mock('@inertiajs/vue3', () => ({
-    usePage: () => ({ props: { localeSlug: 'pt-br' } }),
+    usePage: () => ({
+        props: {
+            localeSlug: 'pt-br',
+            // Titulo e descricao resolvidos no servidor (App\Support\Seo).
+            seo: {
+                meta: {
+                    title: 'NAV_FERRAMENTAS',
+                    description: 'SUBTITULO_HOME',
+                },
+            },
+        },
+    }),
     router: { visit: vi.fn() },
     Head: defineComponent({
         name: 'InertiaHead',
         props: { title: { type: String, default: '' } },
         render() {
-            // Como no componente do Inertia: o titulo vem por prop e as metas
-            // (og:title, og:description) pelo slot.
+            // O titulo vem por prop; as metas sao da view (app.blade.php).
             return h('div', { 'data-test': 'head-title' }, [
                 h('span', { 'data-test': 'head-title-text' }, this.title),
                 this.$slots.default?.(),
@@ -165,13 +175,12 @@ describe('hero e destaque', () => {
         expect(wrapper.text()).toContain('SUBTITULO_HOME');
 
         // O titulo curto fica na aba; a frase da home e o resumo que a busca e
-        // o card de compartilhamento mostram.
+        // o card de compartilhamento mostram - os dois resolvidos no servidor
+        // e entregues pelas props compartilhadas.
         expect(wrapper.get('[data-test="head-title-text"]').text()).toBe(
             'NAV_FERRAMENTAS',
         );
-        expect(
-            wrapper.get('meta[name="description"]').attributes('content'),
-        ).toBe('SUBTITULO_HOME');
+        expect(wrapper.findAll('meta')).toHaveLength(0);
     });
 
     it('abre a busca pelo gatilho do hero', () => {

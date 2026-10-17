@@ -69,6 +69,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'seo' => [
                 'noindex' => Seo::noindex($request),
+                // Titulo e descricao resolvidos no servidor: o Blade escreve as
+                // metas e o PageHead usa o titulo na navegacao do cliente.
+                'meta' => Seo::pageMeta($request),
             ],
             'auth' => [
                 'user' => $user,

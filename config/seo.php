@@ -12,7 +12,11 @@
 |
 | Largura e altura ficam aqui porque as metas og:image:width/height saem daqui:
 | assim elas nao mentem se a imagem for redesenhada - o teste confere o PNG de
-| verdade (tests/Feature/SeoMetaTest.php).
+| verdade (tests/Feature/SeoMetaTest.php). O card e quadrado (1200x1200): o
+| WhatsApp exibe o preview numa area quadrada e corta imagens horizontais.
+|
+| A versao entra na URL do og:image (`?v=2`) para o cache das redes buscar o
+| arquivo novo depois de um redesenho; incrementar junto com o comando.
 |
 | As fontes do desenho sao baixadas na primeira execucao do comando e ficam
 | fora do git, em storage/app/og-fonts.
@@ -30,7 +34,11 @@ return [
         'tools_dir' => 'og',
 
         'width' => 1200,
-        'height' => 630,
+        'height' => 1200,
+
+        // Muda a query string do og:image; o arquivo em disco e o mesmo.
+        // Incrementar quando os PNGs forem redesenhados.
+        'version' => 2,
     ],
 
     'fonts' => [

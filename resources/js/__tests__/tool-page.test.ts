@@ -18,7 +18,13 @@ import Show from '@/pages/tools/Show.vue';
  * no `tools-registry.test.ts`.
  */
 
-const { pageProps } = vi.hoisted(() => ({ pageProps: { localeSlug: 'pt-br' } }));
+const { pageProps } = vi.hoisted(() => ({
+    pageProps: {
+        localeSlug: 'pt-br',
+        // Titulo e descricao resolvidos no servidor (App\Support\Seo).
+        seo: { meta: { title: 'JSON_VIEWER', description: 'RESUMO' } },
+    },
+}));
 
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: pageProps }),
@@ -26,7 +32,10 @@ vi.mock('@inertiajs/vue3', () => ({
         name: 'InertiaHead',
         props: { title: { type: String, default: '' } },
         render() {
-            return h('div', [this.$slots.default?.()]);
+            return h('div', [
+                h('span', { 'data-test': 'title-prop' }, this.title),
+                this.$slots.default?.(),
+            ]);
         },
     }),
     Link: defineComponent({
@@ -110,17 +119,15 @@ describe('Pagina da tool', () => {
         expect(wrapper.text()).toContain('INTRO');
     });
 
-    it('leva nome e descricao para o cabecalho da pagina', async () => {
+    it('aplica o titulo da pagina na aba', async () => {
         const wrapper = montar();
 
         await flushPromises();
 
-        expect(
-            wrapper.get('meta[property="og:title"]').attributes('content'),
-        ).toBe('JSON_VIEWER');
-        expect(
-            wrapper.get('meta[property="og:description"]').attributes('content'),
-        ).toBe('RESUMO');
+        // O titulo vem do servidor pelas props compartilhadas, no mesmo idioma
+        // da pagina; as metas sao escritas pela view.
+        expect(wrapper.get('[data-test="title-prop"]').text()).toBe('JSON_VIEWER');
+        expect(wrapper.findAll('meta')).toHaveLength(0);
     });
 
     it('volta para a home pelo caminho do idioma', async () => {

@@ -33,6 +33,11 @@ declare module '@inertiajs/core' {
             seo: {
                 /** Tela de acesso: pede `noindex` e nada de `hreflang`. */
                 noindex: boolean;
+                /** Titulo e descricao resolvidos no servidor (App\Support\Seo). */
+                meta: {
+                    title: string;
+                    description: string;
+                };
             };
             translations: Translations;
             [key: string]: unknown;

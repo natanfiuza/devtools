@@ -20,9 +20,12 @@
         : ($alternates[$localeConfig['html']] ?? url()->current());
 
     // Metas de compartilhamento: so nas paginas indexaveis, que sao as unicas
-    // feitas para circular. As de cada pagina (titulo e descricao) saem do
-    // <Head> do Inertia, junto com o <title>.
+    // feitas para circular. Titulo e descricao sao resolvidos no servidor
+    // (App\Support\Seo::pageMeta): robo de preview nao executa JS e o SSR
+    // pode estar fora do ar.
     $og = $noindex ? null : Seo::openGraph(request());
+    $meta = Seo::pageMeta(request());
+    $documentTitle = Seo::documentTitle($meta['title']);
 @endphp
 <!DOCTYPE html>
 <html
@@ -75,6 +78,9 @@
 
             <link rel="canonical" href="{{ $canonical }}">
 
+            <meta name="description" content="{{ $meta['description'] }}">
+            <meta property="og:title" content="{{ $meta['title'] }}">
+            <meta property="og:description" content="{{ $meta['description'] }}">
             <meta property="og:type" content="{{ $og['type'] }}">
             <meta property="og:site_name" content="{{ $og['siteName'] }}">
             <meta property="og:locale" content="{{ $og['locale'] }}">
@@ -93,7 +99,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'devtools') }}</title>
+            <title>{{ $documentTitle }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

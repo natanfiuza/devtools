@@ -75,7 +75,7 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
 </script>
 
 <template>
-    <PageHead :title="name" :description="description" />
+    <PageHead />
 
     <div class="mx-auto w-full max-w-[1120px] px-4 py-8">
         <Breadcrumb class="mb-6">

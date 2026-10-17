@@ -37,10 +37,7 @@ const tools = allTools;
 </script>
 
 <template>
-    <PageHead
-        :title="t('app.nav.tools')"
-        :description="t('home.subtitle')"
-    />
+    <PageHead />
 
     <div class="mx-auto w-full max-w-[1120px] px-4 py-16 sm:py-24">
         <header class="max-w-3xl">
