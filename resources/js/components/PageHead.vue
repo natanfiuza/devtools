@@ -1,32 +1,20 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 /**
- * Cabecalho de uma pagina indexavel: o titulo da aba e a descricao.
+ * Titulo da aba das paginas indexaveis.
  *
- * As duas frases vao em dois lugares cada uma - o titulo tambem no card de
- * compartilhamento (`og:title`) e a descricao tambem no resumo que a busca
- * mostra (`meta description`). Quem le esses campos e o robo; o texto da tela
- * continua no template da pagina, com as mesmas chaves de traducao.
- *
- * O `<title>` continua sendo o do componente do Inertia, que escapa o texto e
- * ignora a prop se um titulo ja vier no slot.
- *
- * As metas do site inteiro (`og:type`, `og:url`, `og:image`, `og:locale`)
- * ficam no app.blade.php: elas nao mudam de pagina para pagina.
+ * O titulo e a descricao das metas sao resolvidos no servidor
+ * (App\Support\Seo::pageMeta) e escritos pelo app.blade.php. Aqui o titulo
+ * chega pelas props compartilhadas e o <Head> do Inertia o aplica na
+ * navegacao do cliente e no SSR. Nenhuma meta e escrita aqui: no SSR elas
+ * duplicariam as do Blade.
  */
-defineProps<{
-    /** Titulo curto: o da aba do navegador e o do card. */
-    title: string;
-    /** Uma ou duas frases sobre a pagina. */
-    description: string;
-}>();
+const page = usePage();
+const title = computed(() => page.props.seo.meta.title);
 </script>
 
 <template>
-    <Head :title="title">
-        <meta name="description" :content="description" />
-        <meta property="og:title" :content="title" />
-        <meta property="og:description" :content="description" />
-    </Head>
+    <Head :title="title" />
 </template>

@@ -3,6 +3,43 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Preview do WhatsApp: card quadrado e metas no servidor - 2026-10-17
+
+Um link colado no WhatsApp mostrava a imagem horizontal pequena/cortada e so o
+nome do site e o dominio: o HTML ao vivo respondia `<title>devtools</title>`
+**sem** `og:title`, `og:description` e `meta description`, mesmo para User-Agent
+de navegador. As metas so existiam no `<Head>` do Inertia, e o SSR nao estava
+entregando o head em producao - e robo de preview nao executa JS.
+
+### Alterado
+
+- `App\Support\Seo`: novo `pageMeta()` resolve titulo e descricao de cada
+  pagina no servidor (home, tool, privacidade, termos e o fallback do site, com
+  os dois campos vazios em `noindex`), e o `{app}` das paginas legais passa a
+  ser interpolado no PHP; novo `documentTitle()` monta o `<title>` no mesmo
+  formato do `appTitle()` do frontend; a URL do `og:image` ganhou a versao de
+  cache `?v=`.
+- `resources/views/app.blade.php`: escreve `<title>`, `meta description`,
+  `og:title` e `og:description` a partir de `Seo::pageMeta()` - as metas nao
+  dependem mais do SSR.
+- `PageHead.vue` emite so o `<title>`, lido da shared prop `seo.meta`; as
+  paginas passam a usar `<PageHead />` sem props e o componente nao escreve
+  mais meta nenhuma.
+- `config/seo.php`: imagem 1200x1200 (quadrada) e nova `image.version` (2).
+- `GenerateOgImage`: desenho no canvas quadrado, com o texto na faixa central de
+  628px que o corte 1.91:1 preserva; a imagem da tool mantem o wordmark pequeno
+  no alto da faixa, o nome da ferramenta e os `keywords` do manifesto.
+
+### Corrigido
+
+- Os 8 PNGs (`og-default.png` e `og/<slug>.png` das 7 tools `available`) foram
+  redesenhados em 1200x1200 e seguem comitados.
+
+### Documentacao
+
+- **ADR-033** (novo) e emenda na ADR-030; SPEC (secoes 4 e 11.1), DESIGN,
+  glossario e este changelog.
+
 ## Medicao inativa: a fila do gtag - 2026-10-16
 
 A medicao foi ligada em producao e o GA4 **nao recebeu nenhum hit**. A tag

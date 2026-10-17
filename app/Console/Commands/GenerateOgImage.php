@@ -25,6 +25,10 @@ use RuntimeException;
  * de novo. Nao ha frase em idioma nenhum - o site tem cinco idiomas e a imagem
  * e uma so.
  *
+ * O canvas e quadrado (1200x1200): o WhatsApp exibe o preview numa area
+ * quadrada e corta imagens horizontais. Nas redes que ainda cortam 1.91:1 as
+ * bordas somem, entao o texto fica na faixa central (CROP_BAND_HEIGHT).
+ *
  * Cores do tema escuro do DESIGN.md (--bg, --fg, --brand, --fg-muted).
  */
 class GenerateOgImage extends Command
@@ -57,6 +61,15 @@ class GenerateOgImage extends Command
 
     /** Piso do nome da tool: abaixo disto o texto fica menor que a lista. */
     private const TOOL_NAME_MIN_SIZE = 56;
+
+    /** Altura da faixa central que o corte 1.91:1 das redes preserva. */
+    private const CROP_BAND_HEIGHT = 628;
+
+    /** Baseline do texto principal, acima do centro para a lista caber abaixo. */
+    private const MAIN_BASELINE_OFFSET = 48;
+
+    /** Distancia entre o baseline do texto principal e a primeira linha. */
+    private const LINES_OFFSET = 96;
 
     public function handle(): int
     {
@@ -108,11 +121,11 @@ class GenerateOgImage extends Command
         $image = $this->background($width, $height);
 
         // Wordmark `devtools_`, igual ao AppWordmark: o cursor na cor de marca.
-        $baseline = (int) ($height / 2) - 24;
+        $baseline = $this->mainBaseline($height);
         $this->wordmark($image, $mono, self::WORDMARK_SIZE, self::MARGIN, $baseline);
 
         // Abaixo, o que o site tem: os nomes das tools, vindos do registro.
-        $this->lines($image, $this->toolNames(), $sans, $baseline + 96, $width);
+        $this->lines($image, $this->toolNames(), $sans, $baseline + self::LINES_OFFSET, $width);
 
         return $image;
     }
@@ -135,7 +148,10 @@ class GenerateOgImage extends Command
 
         $limit = $width - 2 * self::MARGIN;
 
-        $this->wordmark($image, $mono, self::TOOL_WORDMARK_SIZE, self::MARGIN, self::MARGIN + self::TOOL_WORDMARK_SIZE);
+        // O wordmark pequeno fica no alto da faixa central: nas redes que
+        // cortam 1.91:1 ele nao desaparece junto com a borda de cima.
+        $bandTop = (int) (($height - min($height, self::CROP_BAND_HEIGHT)) / 2);
+        $this->wordmark($image, $mono, self::TOOL_WORDMARK_SIZE, self::MARGIN, $bandTop + self::TOOL_WORDMARK_SIZE + 24);
 
         $name = __("tools.{$slug}.name");
         $size = self::WORDMARK_SIZE;
@@ -146,12 +162,21 @@ class GenerateOgImage extends Command
             $size -= 8;
         }
 
-        $baseline = (int) ($height / 2) - 24;
+        $baseline = $this->mainBaseline($height);
         $this->text($image, $name, $sans, $size, self::MARGIN, $baseline, self::FOREGROUND);
 
-        $this->lines($image, $keywords, $sans, $baseline + 96, $width);
+        $this->lines($image, $keywords, $sans, $baseline + self::LINES_OFFSET, $width);
 
         return $image;
+    }
+
+    /**
+     * Baseline do texto principal: um pouco acima do centro, para a lista de
+     * termos caber abaixo sem sair da faixa central.
+     */
+    private function mainBaseline(int $height): int
+    {
+        return (int) ($height / 2) - self::MAIN_BASELINE_OFFSET;
     }
 
     /**

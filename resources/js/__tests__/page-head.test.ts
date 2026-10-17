@@ -1,17 +1,23 @@
 import { describe, expect, it, vi } from 'vitest';
-import { mount, type VueWrapper } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { defineComponent, h } from 'vue';
 import PageHead from '@/components/PageHead.vue';
 
 /**
- * Cabecalho das paginas indexaveis: o titulo e a descricao vao para a aba, para
- * a busca e para o card de compartilhamento.
+ * Cabecalho das paginas indexaveis: so o titulo da aba.
  *
- * O `Head` do Inertia entra como stub que devolve o slot: o que se verifica e o
- * que o componente escreve, nao o gerenciador do <head> do Inertia.
+ * O titulo e a descricao sao resolvidos no servidor e escritos pelo
+ * app.blade.php; aqui chega so o titulo, pelas props compartilhadas, para a
+ * navegacao do cliente e o SSR. O `Head` do Inertia entra como stub que mostra
+ * a prop: o que se verifica e o que o componente entrega a ele.
  */
 
 vi.mock('@inertiajs/vue3', () => ({
+    usePage: () => ({
+        props: {
+            seo: { meta: { title: 'TITULO', description: 'RESUMO' } },
+        },
+    }),
     Head: defineComponent({
         name: 'InertiaHead',
         props: { title: { type: String, default: '' } },
@@ -24,34 +30,16 @@ vi.mock('@inertiajs/vue3', () => ({
     }),
 }));
 
-function montar(title = 'TITULO', description = 'RESUMO'): VueWrapper {
-    return mount(PageHead, { props: { title, description } });
-}
-
 describe('PageHead', () => {
-    it('da o titulo a aba e ao card', () => {
-        const wrapper = montar();
+    it('da o titulo da pagina a aba', () => {
+        const wrapper = mount(PageHead);
 
         expect(wrapper.get('[data-test="title-prop"]').text()).toBe('TITULO');
-        expect(
-            wrapper.get('meta[property="og:title"]').attributes('content'),
-        ).toBe('TITULO');
     });
 
-    it('leva a descricao para a busca e para o card', () => {
-        const wrapper = montar();
-
-        expect(
-            wrapper.get('meta[name="description"]').attributes('content'),
-        ).toBe('RESUMO');
-        expect(
-            wrapper.get('meta[property="og:description"]').attributes('content'),
-        ).toBe('RESUMO');
-    });
-
-    it('nao escreve mais nada no head', () => {
-        // As metas do site inteiro (og:type, og:url, og:image) sao da view: se
-        // aparecerem aqui, viram duas fontes do mesmo valor.
-        expect(montar().findAll('meta')).toHaveLength(3);
+    it('nao escreve meta nenhuma', () => {
+        // As metas (description, og:title, og:description) sao da view: se
+        // aparecessem aqui, viram duas fontes do mesmo valor.
+        expect(mount(PageHead).findAll('meta')).toHaveLength(0);
     });
 });

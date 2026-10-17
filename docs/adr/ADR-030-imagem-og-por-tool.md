@@ -69,3 +69,14 @@ duplicam meta tags contraditorias.
 - **Escrever a imagem da tool no lugar da padrao** (sobrescrever
   `og-default.png` durante a geracao) - a home e as paginas legais perderiam o
   card do site.
+
+## Emenda (2026-10-17, ADR-033)
+
+A ADR-033 mudou duas coisas desta decisao: o canvas passou de 1200x630 para
+**1200x1200 (quadrado)**, com o desenho na faixa central que o corte 1.91:1
+preserva, e o titulo e a descricao das paginas deixaram de sair do `<Head>` do
+Inertia para sair do Blade (`Seo::pageMeta()`). O resto continua valendo: uma
+imagem por tool `available`, sem idioma, com o nome traduzido no
+`og:image:alt`, e queda para a padrao quando o arquivo nao existe. A URL da
+imagem ganhou `?v=` de cache, e o arquivo em disco continua sendo procurado
+sem a query.
