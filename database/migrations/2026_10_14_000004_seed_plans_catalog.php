@@ -34,7 +34,7 @@ return new class extends Migration
         [
             'slug' => 'pro-monthly',
             'name' => 'Pro',
-            'price_cents' => 2990,
+            'price_cents' => 890,
             'currency' => 'BRL',
             'interval' => 'month',
             'monthly_tokens' => 2000000,
@@ -47,7 +47,7 @@ return new class extends Migration
         [
             'slug' => 'pro-yearly',
             'name' => 'Pro',
-            'price_cents' => 29900,
+            'price_cents' => 8900,
             'currency' => 'BRL',
             'interval' => 'year',
             'monthly_tokens' => 2000000,

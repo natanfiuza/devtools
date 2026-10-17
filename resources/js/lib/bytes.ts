@@ -32,8 +32,11 @@ export function byteUnit(bytes: number): ByteUnit {
 export function formatBytes(bytes: number, locale: string): string {
     const size = Math.max(bytes, 0);
     const unit = byteUnit(size);
+    // O i18n usa o codigo de pasta do Laravel (`pt_BR`, `pt_PT`); o `Intl` pede
+    // tag BCP 47 com hifen (`pt-BR`, `pt-PT`) e lanca `RangeError` com underscore.
+    const tag = locale.replaceAll('_', '-');
 
-    return new Intl.NumberFormat(locale, {
+    return new Intl.NumberFormat(tag, {
         style: 'unit',
         unit,
         unitDisplay: 'short',

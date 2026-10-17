@@ -19,6 +19,7 @@ return [
         'users' => 'Comptes',
         'subscribers' => 'Abonnés',
         'plans' => 'Forfaits',
+        'intents' => 'Intentions',
         'payments' => 'Paiements',
         'audit' => 'Audit',
         'back_to_site' => 'Retour au site',
@@ -253,6 +254,25 @@ return [
         ],
     ],
 
+    'intents' => [
+        'title' => 'Intentions d\'abonnement',
+        'description' => 'Demandes d\'abonnement Pro envoyées via le formulaire, en attente de contact et d\'activation.',
+        'account' => 'Compte',
+        'username' => 'Utilisateur',
+        'plan' => 'Forfait',
+        'contact' => 'Contact et document',
+        'payment_method' => 'Paiement',
+        'status' => 'Statut',
+        'status_all' => 'Toutes',
+        'status_pending' => 'En attente',
+        'status_fulfilled' => 'Traitée',
+        'status_canceled' => 'Annulée',
+        'created' => 'Envoyée le',
+        'fulfill' => 'Marquer traitée',
+        'cancel' => 'Annuler',
+        'empty' => 'Aucune intention d\'abonnement pour ce filtre.',
+    ],
+
     'audit' => [
         'title' => 'Audit',
         'description' => 'Qui a fait quoi, sur qui et quand.',
@@ -292,6 +312,10 @@ return [
             'removed' => 'Abonné désinscrit',
             'resubscribed' => 'Abonné réinscrit',
         ],
+        'intent' => [
+            'fulfilled' => 'Intention d\'abonnement traitée',
+            'canceled' => 'Intention d\'abonnement annulée',
+        ],
     ],
 
     'toasts' => [
@@ -318,6 +342,10 @@ return [
         'payment_registered' => 'Paiement enregistré.',
         'payment_refunded' => 'Paiement remboursé et abonnement terminé.',
         'payment_already_refunded' => 'Le paiement était déjà remboursé.',
+        'intent_fulfilled' => 'Intention d\'abonnement marquée comme traitée.',
+        'intent_already_fulfilled' => 'L\'intention était déjà traitée.',
+        'intent_canceled' => 'Intention d\'abonnement annulée.',
+        'intent_already_canceled' => 'L\'intention était déjà annulée.',
         'impersonation_started' => 'Vous êtes maintenant :name.',
         'impersonation_stopped' => 'De retour sur votre compte.',
     ],

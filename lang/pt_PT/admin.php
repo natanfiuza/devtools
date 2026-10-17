@@ -19,6 +19,7 @@ return [
         'users' => 'Contas',
         'subscribers' => 'Subscritores',
         'plans' => 'Planos',
+        'intents' => 'Intenções',
         'payments' => 'Pagamentos',
         'audit' => 'Auditoria',
         'back_to_site' => 'Voltar ao site',
@@ -253,6 +254,25 @@ return [
         ],
     ],
 
+    'intents' => [
+        'title' => 'Intenções de subscrição',
+        'description' => 'Pedidos de subscrição Pro enviados pelo formulário, a aguardar contacto e ativação.',
+        'account' => 'Conta',
+        'username' => 'Utilizador',
+        'plan' => 'Plano',
+        'contact' => 'Contacto e documento',
+        'payment_method' => 'Pagamento',
+        'status' => 'Situação',
+        'status_all' => 'Todas',
+        'status_pending' => 'Pendente',
+        'status_fulfilled' => 'Atendida',
+        'status_canceled' => 'Cancelada',
+        'created' => 'Enviada em',
+        'fulfill' => 'Marcar atendida',
+        'cancel' => 'Cancelar',
+        'empty' => 'Nenhuma intenção de subscrição para este filtro.',
+    ],
+
     'audit' => [
         'title' => 'Auditoria',
         'description' => 'Quem fez o quê, em quem e quando.',
@@ -292,6 +312,10 @@ return [
             'removed' => 'Subscritor cancelado',
             'resubscribed' => 'Subscritor reinscrito',
         ],
+        'intent' => [
+            'fulfilled' => 'Intenção de subscrição atendida',
+            'canceled' => 'Intenção de subscrição cancelada',
+        ],
     ],
 
     'toasts' => [
@@ -318,6 +342,10 @@ return [
         'payment_registered' => 'Pagamento registado.',
         'payment_refunded' => 'Pagamento devolvido e subscrição terminada.',
         'payment_already_refunded' => 'O pagamento já estava devolvido.',
+        'intent_fulfilled' => 'Intenção de subscrição marcada como atendida.',
+        'intent_already_fulfilled' => 'A intenção já estava atendida.',
+        'intent_canceled' => 'Intenção de subscrição cancelada.',
+        'intent_already_canceled' => 'A intenção já estava cancelada.',
         'impersonation_started' => 'Está agora como :name.',
         'impersonation_stopped' => 'De volta à sua conta.',
     ],

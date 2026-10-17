@@ -19,6 +19,7 @@ return [
         'users' => 'Accounts',
         'subscribers' => 'Subscribers',
         'plans' => 'Plans',
+        'intents' => 'Intents',
         'payments' => 'Payments',
         'audit' => 'Audit log',
         'back_to_site' => 'Back to site',
@@ -253,6 +254,25 @@ return [
         ],
     ],
 
+    'intents' => [
+        'title' => 'Subscription intents',
+        'description' => 'Pro subscription requests submitted through the form, awaiting contact and activation.',
+        'account' => 'Account',
+        'username' => 'Username',
+        'plan' => 'Plan',
+        'contact' => 'Contact and tax ID',
+        'payment_method' => 'Payment',
+        'status' => 'Status',
+        'status_all' => 'All',
+        'status_pending' => 'Pending',
+        'status_fulfilled' => 'Fulfilled',
+        'status_canceled' => 'Canceled',
+        'created' => 'Submitted at',
+        'fulfill' => 'Mark fulfilled',
+        'cancel' => 'Cancel',
+        'empty' => 'No subscription intents for this filter.',
+    ],
+
     'audit' => [
         'title' => 'Audit log',
         'description' => 'Who did what, to whom and when.',
@@ -292,6 +312,10 @@ return [
             'removed' => 'Subscriber unsubscribed',
             'resubscribed' => 'Subscriber resubscribed',
         ],
+        'intent' => [
+            'fulfilled' => 'Subscription intent fulfilled',
+            'canceled' => 'Subscription intent canceled',
+        ],
     ],
 
     'toasts' => [
@@ -318,6 +342,10 @@ return [
         'payment_registered' => 'Payment recorded.',
         'payment_refunded' => 'Payment refunded and subscription ended.',
         'payment_already_refunded' => 'The payment was already refunded.',
+        'intent_fulfilled' => 'Subscription intent marked as fulfilled.',
+        'intent_already_fulfilled' => 'The intent was already fulfilled.',
+        'intent_canceled' => 'Subscription intent canceled.',
+        'intent_already_canceled' => 'The intent was already canceled.',
         'impersonation_started' => 'You are now signed in as :name.',
         'impersonation_stopped' => 'Back to your account.',
     ],

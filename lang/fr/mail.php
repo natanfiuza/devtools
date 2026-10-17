@@ -33,4 +33,12 @@ return [
         'action' => 'Confirmer l’abonnement',
         'ignore' => 'Si ce n’est pas vous, ignorez cet e-mail : rien ne sera envoyé.',
     ],
+
+    'intent' => [
+        'subject' => '[:app] Nouvelle intention d’abonnement (@:username)',
+        'intro' => 'Nouvelle intention d’abonnement Pro enregistrée par :name (:email).',
+        'details' => 'Forfait : :plan | Utilisateur : :username | Téléphone : :phone | Document : :document | Paiement : :method',
+        'notes' => 'Remarques : :notes',
+        'action' => 'Ouvrir les intentions dans l’administration',
+    ],
 ];

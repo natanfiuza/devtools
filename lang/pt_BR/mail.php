@@ -33,4 +33,12 @@ return [
         'action' => 'Confirmar inscrição',
         'ignore' => 'Se não foi você, ignore este e-mail: nada será enviado.',
     ],
+
+    'intent' => [
+        'subject' => '[:app] Nova intenção de assinatura (@:username)',
+        'intro' => 'Nova intenção de assinatura Pro registrada por :name (:email).',
+        'details' => 'Plano: :plan | Usuário: :username | Telefone: :phone | Documento: :document | Pagamento: :method',
+        'notes' => 'Observações: :notes',
+        'action' => 'Abrir intenções no painel',
+    ],
 ];

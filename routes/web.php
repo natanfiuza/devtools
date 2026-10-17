@@ -6,8 +6,10 @@ use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\PricingController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SubscriptionIntentController;
 use App\Http\Controllers\ToolController;
 use App\Support\Locales;
 use Illuminate\Http\Request;
@@ -25,9 +27,8 @@ Route::get('/', function (Request $request) {
 Route::prefix('{locale}')
     ->whereIn('locale', Locales::slugs())
     ->group(function (): void {
-        // A home tem controller (e nao `Route::inertia`) porque monta o
-        // catalogo de planos no idioma da requisicao.
         Route::get('/', HomeController::class)->name('home');
+        Route::get('pricing', PricingController::class)->name('pricing');
         Route::inertia('styleguide', 'Styleguide')->name('styleguide');
 
         // Paginas legais: conteudo proprio, entao continuam indexaveis e com
@@ -58,6 +59,16 @@ Route::prefix('{locale}')
         Route::post('user/password/set', [SetPasswordController::class, 'store'])
             ->name('password.set');
     });
+
+// Intencao de assinatura Pro (ADR-033): o GET aceita visitante para guardar a
+// URL pretendida (`url.intended`) e redirecionar ao cadastro; o POST exige
+// conta ativa (sem exigir `verified` para nao barrar quem acabou de cadastrar).
+Route::get('subscribe', [SubscriptionIntentController::class, 'create'])
+    ->middleware('active')
+    ->name('subscribe');
+Route::post('subscribe', [SubscriptionIntentController::class, 'store'])
+    ->middleware(['auth', 'active'])
+    ->name('subscribe.store');
 
 // Area da conta: uma navegacao so - visao geral, historico, faturas - com as
 // URLs de sempre (`/dashboard` continua sendo `/dashboard`).

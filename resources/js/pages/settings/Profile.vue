@@ -65,6 +65,34 @@ const locale = ref(user.value.locale ?? page.props.locale);
             </div>
 
             <div class="grid gap-2">
+                <Label for="username">{{ t('settings.profile.username') }}</Label>
+                <div class="relative mt-1">
+                    <span
+                        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 font-mono text-sm text-muted-foreground"
+                        aria-hidden="true"
+                    >
+                        @
+                    </span>
+                    <Input
+                        id="username"
+                        class="block w-full pl-7 font-mono"
+                        name="username"
+                        :default-value="user.username ?? ''"
+                        autocomplete="off"
+                        :placeholder="t('settings.profile.username_placeholder')"
+                        aria-describedby="username-help"
+                    />
+                </div>
+                <p
+                    id="username-help"
+                    class="text-xs leading-relaxed text-muted-foreground"
+                >
+                    {{ t('settings.profile.username_help') }}
+                </p>
+                <InputError class="mt-2" :message="errors.username" />
+            </div>
+
+            <div class="grid gap-2">
                 <Label for="email">{{ t('settings.profile.email') }}</Label>
                 <Input
                     id="email"

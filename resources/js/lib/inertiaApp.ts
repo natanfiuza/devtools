@@ -21,6 +21,8 @@ export function appTitle(title: string): string {
 export function resolveLayout(name: string): unknown {
     switch (true) {
         case name === 'Home':
+        case name === 'Pricing':
+        case name === 'Subscribe':
         case name === 'Styleguide':
         case name === 'Privacy':
         case name === 'Terms':

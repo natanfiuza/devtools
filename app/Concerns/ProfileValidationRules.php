@@ -60,4 +60,27 @@ trait ProfileValidationRules
                 : Rule::unique(User::class)->ignore($userId),
         ];
     }
+
+    /**
+     * Identificador publico da conta (`@nomedeusuario`, ADR-033).
+     *
+     * Apenas letras minusculas, digitos e underscore, de 3 a 30 caracteres.
+     * No perfil e opcional (`nullable`); no formulario de intencao de
+     * assinatura e obrigatorio (`$required = true`).
+     *
+     * @return array<int, ValidationRule|array<mixed>|string>
+     */
+    protected function usernameRules(?int $userId = null, bool $required = false): array
+    {
+        return [
+            $required ? 'required' : 'nullable',
+            'string',
+            'min:3',
+            'max:30',
+            'regex:/^[a-z0-9_]+$/',
+            $userId === null
+                ? Rule::unique(User::class, 'username')
+                : Rule::unique(User::class, 'username')->ignore($userId),
+        ];
+    }
 }

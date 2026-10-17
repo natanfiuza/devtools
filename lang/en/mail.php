@@ -33,4 +33,12 @@ return [
         'action' => 'Confirm subscription',
         'ignore' => 'If it was not you, just ignore this email: nothing will be sent.',
     ],
+
+    'intent' => [
+        'subject' => '[:app] New subscription intent (@:username)',
+        'intro' => 'New Pro subscription intent submitted by :name (:email).',
+        'details' => 'Plan: :plan | Username: :username | Phone: :phone | Document: :document | Payment: :method',
+        'notes' => 'Notes: :notes',
+        'action' => 'Open intents in admin panel',
+    ],
 ];

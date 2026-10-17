@@ -12,9 +12,12 @@ return [
 
     'profile' => [
         'title' => 'Perfil',
-        'description' => 'Atualize seu nome e seu e-mail',
+        'description' => 'Atualize seu nome, seu identificador e seu e-mail',
         'name' => 'Nome',
         'name_placeholder' => 'Nome completo',
+        'username' => 'Nome de usuário',
+        'username_placeholder' => 'nomedeusuario',
+        'username_help' => 'Apenas letras minúsculas, números e sublinhado (3 a 30 caracteres). Usado como seu identificador exclusivo na plataforma.',
         'email' => 'E-mail',
         'email_placeholder' => "voce{'@'}exemplo.com",
         'locale' => 'Idioma da conta',

@@ -12,9 +12,12 @@ return [
 
     'profile' => [
         'title' => 'Profil',
-        'description' => 'Mettez à jour votre nom et votre adresse e-mail',
+        'description' => 'Mettez à jour votre nom, votre identifiant et votre adresse e-mail',
         'name' => 'Nom',
         'name_placeholder' => 'Nom complet',
+        'username' => 'Nom d’utilisateur',
+        'username_placeholder' => 'nomdutilisateur',
+        'username_help' => 'Lettres minuscules, chiffres et tiret bas uniquement (3 à 30 caractères). Utilisé comme identifiant unique sur la plateforme.',
         'email' => 'Adresse e-mail',
         'email_placeholder' => "vous{'@'}exemple.com",
         'locale' => 'Langue du compte',

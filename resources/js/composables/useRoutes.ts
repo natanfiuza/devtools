@@ -4,13 +4,16 @@ import {
     home,
     login,
     logout,
+    pricing,
     privacy,
     register,
     styleguide,
+    subscribe,
     terms,
 } from '@/routes';
 import { store as loginStore } from '@/routes/login';
 import { store as registerStore } from '@/routes/register';
+import { store as subscribeStore } from '@/routes/subscribe';
 import {
     email as forgotPasswordAction,
     request as forgotPassword,
@@ -32,9 +35,11 @@ export type UseRoutesReturn = {
     localeSlug: ComputedRef<string>;
 
     home: ComputedRef<string>;
+    pricing: ComputedRef<string>;
     styleguide: ComputedRef<string>;
     privacy: ComputedRef<string>;
     terms: ComputedRef<string>;
+    subscribe: (plan?: string) => string;
 
     login: ComputedRef<string>;
     register: ComputedRef<string>;
@@ -50,6 +55,7 @@ export type UseRoutesReturn = {
         setPassword: FormAction;
         resendVerification: FormAction;
         newsletter: FormAction;
+        subscribe: ComputedRef<RouteFormDefinition<'post'>>;
         /** O token do e-mail faz parte da URL, entao vem por parametro. */
         newsletterConfirm: (token: string) => RouteFormDefinition<'post'>;
         newsletterUnsubscribe: (token: string) => RouteFormDefinition<'post'>;
@@ -89,9 +95,12 @@ export function useRoutes(): UseRoutesReturn {
         localeSlug: slug,
 
         home: url(home),
+        pricing: url(pricing),
         styleguide: url(styleguide),
         privacy: url(privacy),
         terms: url(terms),
+        subscribe: (plan?: string) =>
+            subscribe.url(plan ? { query: { plan } } : undefined),
 
         login: url(login),
         register: url(register),
@@ -107,6 +116,9 @@ export function useRoutes(): UseRoutesReturn {
             setPassword: form(setPasswordAction),
             resendVerification: form(resendVerificationAction),
             newsletter: form(newsletterAction),
+            subscribe: computed<RouteFormDefinition<'post'>>(() =>
+                subscribeStore.form(),
+            ),
             newsletterConfirm: (token: string) =>
                 newsletterConfirmAction.form({ locale: slug.value, token }),
             newsletterUnsubscribe: (token: string) =>

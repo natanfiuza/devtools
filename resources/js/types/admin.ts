@@ -174,3 +174,20 @@ export type AdminPlanOption = {
     isFree?: boolean;
     price?: string;
 };
+
+export type AdminIntentRow = {
+    id: number;
+    userId: number;
+    userName: string;
+    userEmail: string;
+    username: string;
+    planSlug: string;
+    planName: string;
+    interval: string | null;
+    phone: string;
+    document: string;
+    paymentMethod: string;
+    notes: string | null;
+    status: 'pending' | 'fulfilled' | 'canceled';
+    createdAt: string | null;
+};

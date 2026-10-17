@@ -2,6 +2,7 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
+    ClipboardList,
     CreditCard,
     LayoutGrid,
     Mail,
@@ -50,6 +51,11 @@ const navItems = computed<NavItem[]>(() => [
         icon: Mail,
     },
     { title: t('admin.nav.plans'), href: admin.plans.index.url(), icon: Tag },
+    {
+        title: t('admin.nav.intents'),
+        href: admin.intents.index.url(),
+        icon: ClipboardList,
+    },
     {
         title: t('admin.nav.payments'),
         href: admin.payments.index.url(),

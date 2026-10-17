@@ -6,6 +6,7 @@ use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\SocialAccount;
 use App\Models\Subscription;
+use App\Models\SubscriptionIntent;
 use App\Models\UsageLedger;
 use App\Models\User;
 
@@ -34,6 +35,7 @@ final class ExportUserData
             'exported_at' => now()->toIso8601String(),
             'account' => [
                 'name' => $user->name,
+                'username' => $user->username,
                 'email' => $user->email,
                 'locale' => $user->locale,
                 'appearance' => $user->appearance,
@@ -58,6 +60,22 @@ final class ExportUserData
                     'status' => $subscription->status->value,
                     'start' => $subscription->current_period_start?->toIso8601String(),
                     'end' => $subscription->current_period_end?->toIso8601String(),
+                ])
+                ->all(),
+            'subscription_intents' => $user->subscriptionIntents()
+                ->with('plan')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (SubscriptionIntent $intent): array => [
+                    'plan' => $intent->plan->name,
+                    'interval' => $intent->plan->interval,
+                    'username' => $intent->username,
+                    'phone' => $intent->phone,
+                    'document' => $intent->document,
+                    'payment_method' => $intent->payment_method->value,
+                    'notes' => $intent->notes,
+                    'status' => $intent->status->value,
+                    'created_at' => $intent->created_at?->toIso8601String(),
                 ])
                 ->all(),
             'payments' => $user->payments()

@@ -31,7 +31,10 @@ const href = computed(() => toolPath(props.tool, routes.localeSlug.value));
 <template>
     <li
         :data-test="`tool-card-${tool.slug}`"
-        class="flex flex-col gap-2 rounded-xl border bg-card p-5 transition-colors hover:border-border-strong"
+        :class="[
+            'relative flex flex-col gap-2 rounded-xl border bg-card p-5 transition-colors',
+            href ? 'cursor-pointer hover:border-border-strong' : '',
+        ]"
     >
         <div class="flex items-center gap-2">
             <component
@@ -39,14 +42,14 @@ const href = computed(() => toolPath(props.tool, routes.localeSlug.value));
                 class="size-5 shrink-0 text-brand"
                 aria-hidden="true"
             />
-            <!-- O nome e o link (e nao o card inteiro): area de clique do
-                 tamanho do texto, sem transformar o selo em parte do alvo. -->
+            <!-- O link cobre o cartao inteiro (after:inset-0) nas tools
+                 disponiveis, mantendo a semantica de lista (<li> -> <h3><a>). -->
             <h3 class="truncate text-base font-medium">
                 <Link
                     v-if="href"
                     :href="href"
                     data-test="tool-card-link"
-                    class="rounded-sm outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    class="rounded-sm outline-none after:absolute after:inset-0 after:rounded-xl hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
                     {{ t(toolKeys.name(tool)) }}
                 </Link>

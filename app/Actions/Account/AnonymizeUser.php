@@ -43,6 +43,7 @@ final class AnonymizeUser
 
             $user->forceFill([
                 'name' => '',
+                'username' => null,
                 'email' => 'removido+'.$id.'@'.self::PLACEHOLDER_DOMAIN,
                 'password' => null,
                 'remember_token' => null,
@@ -57,6 +58,7 @@ final class AnonymizeUser
             ])->save();
 
             $user->socialAccounts()->delete();
+            $user->subscriptionIntents()->delete();
 
             DB::table('sessions')->where('user_id', $id)->delete();
         });

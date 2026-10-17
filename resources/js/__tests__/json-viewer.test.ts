@@ -119,10 +119,11 @@ const VIRTUALIZA_DE = 2000;
 function montar(
     maxInputBytes: number = LIMITE_FOLGADO,
     virtualizeFrom: number = VIRTUALIZA_DE,
+    locale: string = 'pt_BR',
 ): VueWrapper {
     const i18n = createI18nInstance();
 
-    applyTranslations(i18n, { locale: 'pt-br', translations: traducoes });
+    applyTranslations(i18n, { locale, translations: traducoes });
 
     return mount(Tool, {
         props: { maxInputBytes, virtualizeFrom },

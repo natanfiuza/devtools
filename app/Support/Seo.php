@@ -35,6 +35,7 @@ final class Seo
         'dashboard',
         'settings',
         'admin',
+        'subscribe',
     ];
 
     public static function noindex(Request $request): bool
@@ -76,6 +77,10 @@ final class Seo
             'home' => [
                 'title' => (string) trans('app.nav.tools'),
                 'description' => (string) trans('home.subtitle'),
+            ],
+            'pricing' => [
+                'title' => (string) trans('home.pricing.title'),
+                'description' => (string) trans('home.pricing.subtitle'),
             ],
             'privacy' => [
                 'title' => (string) trans('legal.privacy.title'),

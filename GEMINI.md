@@ -13,7 +13,8 @@ Leia SEMPRE: `docs/SPEC.md`, `docs/glossario.md`, `docs/adr/*`, `docs/design/DES
 - Tools do cliente rodam 100% no navegador; nada de requisicao ao servidor.
 - Deploy: cron executa a copia instalada `deploy/deploy-instaled.sh` (fonte em `deploy/deploy.sh` no repo; ver `deploy/deploy-instaled.md` e `docs/RUNBOOK.md`) a cada minuto. Migrations devem ser retrocompativeis (sem downtime).
 - GIT: nunca faca commit nem push. O usuario commita e abre PR pelo `gitpr`, aprovando cada um. Se um commit for necessario, peca intervencao manual do usuario e pare.
-- Ao finalizar qualquer tarefa, gerar relatorio detalhado em `docs/claude-code/reports/{branch}/{dataatual}_{branch}_{taskname}.md`, onde `{dataatual}` deve ser substituida pela data atual (`YYYYMMDD`), `{branch}` pela branch atual e `{taskname}` por uma descricao curta da tarefa, sem espacos ou caracteres especiais, apenas letras minusculas separadas por underscore.
+- Ao finalizar qualquer tarefa, gerar relatorio detalhado em `docs/gemini/reports/{branch}/{dataatual}_{branch}_{taskname}.md`, onde `{dataatual}` deve ser substituida pela data atual (`YYYYMMDD`), `{branch}` pela branch atual e `{taskname}` por uma descricao curta da tarefa, sem espacos ou caracteres especiais, apenas letras minusculas separadas por underscore.
+- Toda vez que um plano de implementação for gerado ele deve ser salvo em `docs/gemini/plans/{branch}/{dataatual}_{branch}_{planname}.md`, onde {dataatual} deve ser substituida pelo data atual, e onde {branch} deve ser substituida pela branch atual, onde {planname} deve ser uma descrição curta do plano, sem espaços ou caracteres especiais, apenas letras minusculas, separados por underscore.
 
 ## Comandos Principais
 - `composer dev` — Sobe ambiente local (`php artisan serve`, Vite HMR, fila e `pail`).

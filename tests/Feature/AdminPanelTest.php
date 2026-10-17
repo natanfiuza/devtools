@@ -273,7 +273,7 @@ it('lista os planos com os numeros que o painel edita', function () {
             ->where('plans.0.priceCents', 0)
             ->where('plans.0.subscribers', 0)
             ->where('plans.1.slug', 'pro-monthly')
-            ->where('plans.1.priceCents', 2990)
+            ->where('plans.1.priceCents', 890)
             ->where('plans.1.monthlyTokens', 2000000));
 });
 
@@ -317,7 +317,7 @@ it('mostra a auditoria e filtra por acao', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/Audit')
             ->has('entries.data', 2)
-            ->has('actionTypes', 16)
+            ->has('actionTypes', 18)
             ->where('entries.data.0.actor', $admin->email)
             ->where('entries.data.0.target', $user->name.' <'.$user->email.'>'));
 
