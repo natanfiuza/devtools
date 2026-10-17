@@ -24,12 +24,14 @@ return [
     'cta' => [
         'register' => 'Criar conta',
         'contact' => 'Falar por e-mail',
+        'subscribe' => 'Assinar agora',
     ],
 
     'pricing' => [
         'title' => 'Planos',
-        'subtitle' => 'Sem renovação automática: a cobrança é combinada por e-mail e o plano vale até o fim do período.',
+        'subtitle' => 'Escolha o plano ideal para o seu fluxo. Sem renovação automática oculta: registre sua intenção de assinatura e reserve seu identificador exclusivo.',
         'free' => 'Grátis',
+        'yearly_badge' => '2 meses grátis',
         'interval' => [
             'month' => 'por mês',
             'year' => 'por ano',
@@ -39,6 +41,61 @@ return [
             'tokens' => '{count} tokens por mês',
             'schema' => 'Schema de até {size}',
             'prompt' => 'Descrição de até {count} caracteres',
+            'username' => "Reserva exclusiva de {'@'}nomedeusuario",
+            'history' => 'Histórico salvo no AI SQL Builder (90 dias)',
+            'priority' => 'Suporte prioritário e acesso antecipado',
         ],
+        'advantages' => [
+            'title' => 'Vantagens de ser assinante Pro',
+            'subtitle' => 'Mais capacidade no AI SQL Builder, reserva do seu identificador na plataforma e prioridade nas novidades.',
+            'items' => [
+                'username' => [
+                    'title' => "Seu {'@'}nomedeusuario exclusivo",
+                    'body' => 'Garanta seu identificador único na plataforma para perfil e futuros links compartilhados de consultas.',
+                ],
+                'history' => [
+                    'title' => 'Histórico de consultas por 90 dias',
+                    'body' => 'Consulte, reutilize e copie o SQL e o código ORM gerados anteriormente no AI SQL Builder.',
+                ],
+                'quota' => [
+                    'title' => 'Cota mensal de 2M tokens e limites ampliados',
+                    'body' => 'Envie schemas DDL de até 64 KB e descrições detalhadas de até 4.000 caracteres por consulta.',
+                ],
+                'priority' => [
+                    'title' => 'Suporte prioritário e acesso antecipado',
+                    'body' => 'Acesso em primeira mão às novas ferramentas e aos novos alvos de saída de código com IA.',
+                ],
+                'discount' => [
+                    'title' => 'Economia de 2 meses no plano anual',
+                    'body' => 'Assinando o plano anual você paga o equivalente a 10 meses e garante 12 meses completos de acesso Pro.',
+                ],
+            ],
+        ],
+    ],
+
+    'subscribe' => [
+        'title' => 'Intenção de assinatura Pro',
+        'subtitle' => "Escolha entre o plano mensal ou anual, reserve seu {'@'}nomedeusuario exclusivo e informe os dados para ativação da assinatura.",
+        'pending_title' => 'Pedido de assinatura registrado',
+        'pending_body' => "Recebemos sua intenção de assinatura e seu {'@'}nomedeusuario já está reservado na sua conta. Entraremos em contato para concluir a ativação.",
+        'submitted_toast' => 'Intenção de assinatura registrada com sucesso.',
+        'plan_label' => 'Escolha o seu plano',
+        'username_label' => 'Seu nome de usuário exclusivo',
+        'username_placeholder' => 'nomedeusuario',
+        'username_help' => 'Apenas letras minúsculas, números e sublinhado (3 a 30 caracteres). Reservado imediatamente na sua conta.',
+        'phone_label' => 'Telefone / WhatsApp',
+        'phone_placeholder' => '(11) 99999-9999',
+        'document_label' => 'CPF ou CNPJ',
+        'document_placeholder' => '000.000.000-00',
+        'payment_method_label' => 'Forma de pagamento preferida',
+        'payment_methods' => [
+            'pix' => 'Pix',
+            'credit_card' => 'Cartão de crédito',
+            'boleto' => 'Boleto bancário',
+        ],
+        'notes_label' => 'Observações (opcional)',
+        'notes_placeholder' => 'Alguma preferência de horário ou detalhe sobre a cobrança',
+        'submit' => 'Registrar intenção de assinatura',
+        'update_submit' => 'Atualizar intenção de assinatura',
     ],
 ];

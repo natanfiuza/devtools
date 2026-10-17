@@ -10,6 +10,16 @@ class ProfileUpdateRequest extends FormRequest
 {
     use ProfileValidationRules;
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('username') && is_string($this->input('username'))) {
+            $limpo = strtolower(ltrim(trim($this->input('username')), '@'));
+            $this->merge([
+                'username' => $limpo === '' ? null : $limpo,
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -19,6 +29,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             ...$this->profileRules($this->user()->id),
+            'username' => ['sometimes', ...$this->usernameRules($this->user()->id)],
             'locale' => $this->localeRules(),
         ];
     }

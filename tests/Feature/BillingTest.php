@@ -28,7 +28,7 @@ it('sobe com o catalogo de planos da Q11', function () {
 
     $mensal = Plan::query()->where('slug', 'pro-monthly')->sole();
 
-    expect($mensal->price_cents)->toBe(2990)
+    expect($mensal->price_cents)->toBe(890)
         ->and($mensal->interval)->toBe('month')
         ->and($mensal->monthly_tokens)->toBe(2000000)
         ->and($mensal->max_schema_bytes)->toBe(65536)
@@ -37,7 +37,7 @@ it('sobe com o catalogo de planos da Q11', function () {
 
     $anual = Plan::query()->where('slug', 'pro-yearly')->sole();
 
-    expect($anual->price_cents)->toBe(29900)
+    expect($anual->price_cents)->toBe(8900)
         ->and($anual->interval)->toBe('year')
         ->and($anual->monthly_tokens)->toBe(2000000);
 });

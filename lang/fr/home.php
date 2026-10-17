@@ -24,12 +24,14 @@ return [
     'cta' => [
         'register' => 'Créer un compte',
         'contact' => 'Écrire un e-mail',
+        'subscribe' => 'S\'abonner maintenant',
     ],
 
     'pricing' => [
         'title' => 'Tarifs',
-        'subtitle' => 'Sans renouvellement automatique : la facturation se fait par e-mail et le forfait vaut jusqu\'à la fin de la période.',
+        'subtitle' => 'Choisissez le forfait adapté à votre flux. Aucun renouvellement automatique caché : enregistrez votre intention d\'abonnement et réservez votre identifiant exclusif.',
         'free' => 'Gratuit',
+        'yearly_badge' => '2 mois offerts',
         'interval' => [
             'month' => 'par mois',
             'year' => 'par an',
@@ -39,6 +41,61 @@ return [
             'tokens' => '{count} tokens par mois',
             'schema' => 'Schéma jusqu\'à {size}',
             'prompt' => 'Description jusqu\'à {count} caractères',
+            'username' => "Réservation exclusive de {'@'}nomdutilisateur",
+            'history' => 'Historique conservé dans AI SQL Builder (90 jours)',
+            'priority' => 'Support prioritaire et accès anticipé',
         ],
+        'advantages' => [
+            'title' => 'Les avantages de l\'abonnement Pro',
+            'subtitle' => 'Plus de capacité dans AI SQL Builder, réservation de votre identifiant sur la plateforme et priorité sur les nouveautés.',
+            'items' => [
+                'username' => [
+                    'title' => "Votre {'@'}nomdutilisateur exclusif",
+                    'body' => 'Réservez votre identifiant unique sur la plateforme pour votre profil et vos futurs liens de requêtes partagés.',
+                ],
+                'history' => [
+                    'title' => 'Historique des requêtes sur 90 jours',
+                    'body' => 'Consultez, réutilisez et copiez le SQL et le code ORM générés précédemment dans AI SQL Builder.',
+                ],
+                'quota' => [
+                    'title' => 'Quota mensuel de 2M tokens et limites étendues',
+                    'body' => 'Envoyez des schémas DDL jusqu\'à 64 Ko et des descriptions détaillées jusqu\'à 4 000 caractères par requête.',
+                ],
+                'priority' => [
+                    'title' => 'Support prioritaire et accès anticipé',
+                    'body' => 'Accès en avant-première aux nouveaux outils et aux nouvelles cibles de génération de code IA.',
+                ],
+                'discount' => [
+                    'title' => '2 mois d\'économie sur le forfait annuel',
+                    'body' => 'Avec le forfait annuel, payez l\'équivalent de 10 mois et profitez de 12 mois complets d\'accès Pro.',
+                ],
+            ],
+        ],
+    ],
+
+    'subscribe' => [
+        'title' => 'Intention d\'abonnement Pro',
+        'subtitle' => "Choisissez entre le forfait mensuel ou annuel, réservez votre {'@'}nomdutilisateur exclusif et indiquez vos coordonnées pour activer l'abonnement.",
+        'pending_title' => 'Demande d\'abonnement enregistrée',
+        'pending_body' => "Nous avons bien reçu votre intention d'abonnement et votre {'@'}nomdutilisateur est déjà réservé sur votre compte. Nous vous contacterons pour finaliser l'activation.",
+        'submitted_toast' => 'Intention d\'abonnement enregistrée avec succès.',
+        'plan_label' => 'Choisissez votre forfait',
+        'username_label' => 'Votre nom d\'utilisateur exclusif',
+        'username_placeholder' => 'nomdutilisateur',
+        'username_help' => 'Lettres minuscules, chiffres et tiret bas uniquement (3 à 30 caractères). Réservé immédiatement sur votre compte.',
+        'phone_label' => 'Téléphone / WhatsApp',
+        'phone_placeholder' => '+33 6 12 34 56 78',
+        'document_label' => 'Identifiant fiscal (CPF / CNPJ)',
+        'document_placeholder' => '000.000.000-00',
+        'payment_method_label' => 'Mode de paiement préféré',
+        'payment_methods' => [
+            'pix' => 'Pix',
+            'credit_card' => 'Carte bancaire',
+            'boleto' => 'Boleto bancaire',
+        ],
+        'notes_label' => 'Remarques (facultatif)',
+        'notes_placeholder' => 'Une préférence d\'horaire ou un détail sur la facturation',
+        'submit' => 'Enregistrer l\'intention d\'abonnement',
+        'update_submit' => 'Mettre à jour l\'intention d\'abonnement',
     ],
 ];

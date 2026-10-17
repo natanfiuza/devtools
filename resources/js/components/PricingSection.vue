@@ -2,34 +2,41 @@
 import { Link } from '@inertiajs/vue3';
 import { Check } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRoutes } from '@/composables/useRoutes';
 import type { PublicPlan } from '@/types';
 
 /**
- * Secao de precos da home.
+ * Grade de planos da pagina de precos (`/{locale}/pricing`).
  *
  * Os planos vem da tabela `plans` (props), formatados no servidor: nao ha
- * preco nem limite no codigo. A compra e manual (ADR-027) - por isso o plano
- * pago chama o contato por e-mail em vez de abrir um checkout -, e o gratuito
- * chama o cadastro.
- *
- * O nome do plano e coluna de dado e aparece igual nos 5 idiomas; o resto da
- * linha (unidade, "por mes", "Gratis") e texto de idioma.
+ * preco nem limite no codigo. Os planos pagos levam ao formulario de intencao
+ * de assinatura (`/subscribe?plan=<slug>`), que exige conta cadastrada
+ * (ADR-033), e o gratuito leva ao cadastro.
  */
-defineProps<{ plans: PublicPlan[]; contactEmail: string | null }>();
+defineProps<{ plans: PublicPlan[] }>();
 
 const { t } = useI18n();
 const routes = useRoutes();
 
-/** Linhas do card, na ordem: franquia, schema e tamanho da descricao. */
+/** Linhas do card: franquia, schema, prompt e vantagens extras nos planos Pro. */
 function features(plan: PublicPlan): string[] {
+    if (plan.isFree) {
+        return [
+            t('home.pricing.features.uses', { count: plan.lifetimeFreeUses }),
+            t('home.pricing.features.schema', { size: plan.schemaSize }),
+            t('home.pricing.features.prompt', { count: plan.promptChars }),
+        ];
+    }
+
     return [
-        plan.isFree
-            ? t('home.pricing.features.uses', { count: plan.lifetimeFreeUses })
-            : t('home.pricing.features.tokens', { count: plan.monthlyTokens }),
+        t('home.pricing.features.tokens', { count: plan.monthlyTokens }),
         t('home.pricing.features.schema', { size: plan.schemaSize }),
         t('home.pricing.features.prompt', { count: plan.promptChars }),
+        t('home.pricing.features.username'),
+        t('home.pricing.features.history'),
+        t('home.pricing.features.priority'),
     ];
 }
 </script>
@@ -42,7 +49,16 @@ function features(plan: PublicPlan): string[] {
             :data-test="`plan-card-${plan.slug}`"
             class="flex flex-col rounded-xl border bg-card p-6"
         >
-            <h3 class="text-base font-medium">{{ plan.name }}</h3>
+            <div class="flex items-center justify-between gap-2">
+                <h3 class="text-base font-medium">{{ plan.name }}</h3>
+                <Badge
+                    v-if="plan.interval === 'year'"
+                    variant="secondary"
+                    data-test="plan-yearly-badge"
+                >
+                    {{ t('home.pricing.yearly_badge') }}
+                </Badge>
+            </div>
 
             <p class="mt-2 text-[32px] leading-tight font-semibold tracking-[-0.02em]">
                 {{ plan.isFree ? t('home.pricing.free') : plan.price }}
@@ -65,28 +81,18 @@ function features(plan: PublicPlan): string[] {
                 </li>
             </ul>
 
-            <Button v-if="plan.isFree" class="mt-6" as-child>
+            <Button v-if="plan.isFree" class="mt-6" variant="outline" as-child>
                 <Link :href="routes.register.value">
                     {{ t('home.cta.register') }}
                 </Link>
             </Button>
-            <Button
-                v-else-if="contactEmail !== null"
-                class="mt-6"
-                variant="outline"
-                as-child
-            >
-                <a
-                    :href="`mailto:${contactEmail}`"
-                    data-test="plan-contact"
+            <Button v-else class="mt-6" as-child>
+                <Link
+                    :href="routes.subscribe(plan.slug)"
+                    :data-test="`plan-subscribe-${plan.slug}`"
                 >
-                    {{ t('home.cta.contact') }}
-                </a>
-            </Button>
-            <!-- Sem contato configurado a venda nao tem por onde comecar: o
-                 botao desabilitado diz isso melhor que um link quebrado. -->
-            <Button v-else class="mt-6" variant="outline" disabled>
-                {{ t('home.cta.contact') }}
+                    {{ t('home.cta.subscribe') }}
+                </Link>
             </Button>
         </li>
     </ul>

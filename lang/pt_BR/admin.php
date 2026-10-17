@@ -19,6 +19,7 @@ return [
         'users' => 'Contas',
         'subscribers' => 'Assinantes',
         'plans' => 'Planos',
+        'intents' => 'Intenções',
         'payments' => 'Pagamentos',
         'audit' => 'Auditoria',
         'back_to_site' => 'Voltar ao site',
@@ -253,6 +254,25 @@ return [
         ],
     ],
 
+    'intents' => [
+        'title' => 'Intenções de assinatura',
+        'description' => 'Pedidos de assinatura Pro enviados pelo formulário, aguardando contato e ativação.',
+        'account' => 'Conta',
+        'username' => 'Usuário',
+        'plan' => 'Plano',
+        'contact' => 'Contato e documento',
+        'payment_method' => 'Pagamento',
+        'status' => 'Situação',
+        'status_all' => 'Todas',
+        'status_pending' => 'Pendente',
+        'status_fulfilled' => 'Atendida',
+        'status_canceled' => 'Cancelada',
+        'created' => 'Enviada em',
+        'fulfill' => 'Marcar atendida',
+        'cancel' => 'Cancelar',
+        'empty' => 'Nenhuma intenção de assinatura para este filtro.',
+    ],
+
     'audit' => [
         'title' => 'Auditoria',
         'description' => 'Quem fez o quê, em quem e quando.',
@@ -292,6 +312,10 @@ return [
             'removed' => 'Assinante descadastrado',
             'resubscribed' => 'Assinante reinscrito',
         ],
+        'intent' => [
+            'fulfilled' => 'Intenção de assinatura atendida',
+            'canceled' => 'Intenção de assinatura cancelada',
+        ],
     ],
 
     'toasts' => [
@@ -318,6 +342,10 @@ return [
         'payment_registered' => 'Pagamento registrado.',
         'payment_refunded' => 'Pagamento estornado e assinatura encerrada.',
         'payment_already_refunded' => 'O pagamento já estava estornado.',
+        'intent_fulfilled' => 'Intenção de assinatura marcada como atendida.',
+        'intent_already_fulfilled' => 'A intenção já estava atendida.',
+        'intent_canceled' => 'Intenção de assinatura cancelada.',
+        'intent_already_canceled' => 'A intenção já estava cancelada.',
         'impersonation_started' => 'Você agora está como :name.',
         'impersonation_stopped' => 'De volta à sua conta.',
     ],

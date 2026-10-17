@@ -13,11 +13,11 @@ Excecao documentada: no escuro a pontuacao JSON e `--json-punct: #71828e`, e nao
 ## Tipografia
 Inter (UI), JetBrains Mono (codigo) - baixadas do Bunny Fonts no build e servidas pelo proprio dominio (plugin `fonts` do laravel-vite-plugin, com preload). Escala 12/13/14/16/20/32/56. Titulos com tracking -0.02em, peso 500-600.
 ## Layout
-Container 1120px; header 56px sticky com blur: wordmark `devtools_` (cursor em --accent), links Tools/Pricing/Docs, seletor de idioma, Cmd+K, Login.
-Home (F1): hero de titulo 56px com subtitulo e um campo de busca que abre a palette; chips de categoria logo abaixo (`JSON`, `SQL`, `Codificacao e hash`, `Seguranca`, `Data e hora`, `Texto` - so as que tem tool); grid de 3 colunas com todas as tools do registro (card de borda 1px sem sombra, icone de linha 20px, nome e uma linha de descricao, com o selo "Em breve" enquanto a tool nao abre); destaque do AI SQL Builder com preview estatico e CTA de cadastro; secao de precos; footer minimo (idioma, Privacidade, Termos, Cookies, doar).
+Container 1120px; header 56px sticky com blur: wordmark `devtools_` (cursor em --accent), links Tools/Pricing, seletor de idioma, Cmd+K, Login (a pagina `/styleguide` permanece acessivel pela URL para referencia visual, mas sem link na barra superior).
+Home (F1): hero de titulo 56px com subtitulo e um campo de busca que abre a palette; chips de categoria logo abaixo (`JSON`, `SQL`, `Codificacao e hash`, `Seguranca`, `Data e hora`, `Texto` - so as que tem tool); grid de 3 colunas com todas as tools do registro (card de borda 1px sem sombra, icone de linha 20px, nome e uma linha de descricao, clicavel em toda a area do card quando `available`, ou com o selo "Em breve" enquanto a tool nao abre); destaque do AI SQL Builder com preview estatico e CTA de cadastro; footer minimo (idioma, Privacidade, Termos, Cookies, doar). A grade de planos e vantagens Pro vive em pagina publica propria (`/{locale}/pricing`, ADR-034).
 ```
 +--------------------------------------------------------------+
-|  devtools_  Tools Precos Styleguide [pt] [Buscar] [Login]    |
+|  devtools_  Tools Precos              [pt] [Buscar] [Login]  |
 | ------------------------------------------------------------ |
 |                                                              |
 |   Ferramentas                                                |
@@ -29,19 +29,14 @@ Home (F1): hero de titulo 56px com subtitulo e um campo de busca que abre a pale
 |   +-------------+  +-------------+  +-------------+          |
 |   | {} JSON V.  |  | <> AI SQL B.|  | </> JSON->C |          |
 |   | 1 linha     |  | 1 linha     |  | 1 linha     |          |
-|   |   Em breve  |  |   Em breve  |  |   Em breve  |          |
+|   |             |  |   Em breve  |  |             |          |
 |   +-------------+  +-------------+  +-------------+          |
 |   ... 8 cards, 3 por linha ...                               |
 |   ---------------------------------------------------------- |
 |   [ AI SQL Builder - preview estatico + CTA de cadastro ]    |
-|   ---------------------------------------------------------- |
-|   Planos                                                     |
-|   Free (Gratis)    Pro (R$ 29,90/mes)    Pro (R$ 299/ano)    |
-|   5 usos vitalicios 2.000.000 tokens     2.000.000 tokens    |
-|   [Criar conta]    [Falar por e-mail]    [Falar por e-mail]  |
 +--------------------------------------------------------------+
 ```
-O card nao e link enquanto a tool nao abre: sem `href`, sem cursor de mao - o selo "Em breve" e o aviso, e nao ha clique que nao leve a lugar nenhum. Na secao de precos o CTA do Free e criar conta e o dos pagos e o contato por e-mail, porque no site nao existe botao de assinar (a venda e manual, ADR-027); os numeros vem da tabela `plans`, formatados no idioma da pagina.
+O card nao e link enquanto a tool nao abre: sem `href`, sem cursor de mao - o selo "Em breve" e o aviso, e nao ha clique que nao leve a lugar nenhum. Quando a tool esta disponivel (`href` presente), o card inteiro e clicavel via stretched link (`after:inset-0`). Na pagina dedicada de planos (`/{locale}/pricing`), o CTA do Free leva ao cadastro e o dos pagos leva ao formulario de intencao de assinatura (`/subscribe?plan=<slug>`, ADR-034); os numeros vem da tabela `plans` (R$ 8,90/mes e R$ 89,00/ano), formatados no idioma da pagina.
 Pagina de tool (F2): mesma largura de container da home, com breadcrumb de uma linha acima do cabecalho (icone 24px, nome em 32px e a descricao em fg-muted). Abaixo, a casca que toda ferramenta compartilha: barra de acoes (botao outline + o `kbd` do atalho ao lado), dois paineis lado a lado - `Entrada` | `Saida`, titulo em 11px maiusculo com fg-subtle, borda 1px, raio 12px, fundo --surface, altura minima de 380px - separados por um divisor de 12px que se arrasta (duplo clique restaura; a divisao fica no localStorage, por tool); embaixo, a faixa de status (chaves, itens, tamanho em JetBrains Mono) e a de atalhos em 12px fg-subtle, com tres itens - formatar, buscar na arvore e limpar a busca - cada um com a tecla num `kbd`. Abaixo de 768px os mesmos dois paineis viram abas (`Entrada` | `Saida`) e as acoes de cada painel sobem para o topo da aba - trocar de aba **nao** desmonta o editor.
 ```
 +--------------------------------------------------------------+

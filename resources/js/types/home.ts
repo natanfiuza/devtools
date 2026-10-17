@@ -25,3 +25,15 @@ export type PublicPlan = {
     /** Limite de schema ja legivel (ex.: `8 KB`). */
     schemaSize: string;
 };
+
+/** Pedido de intencao de assinatura ja registrado pelo usuario (ADR-033). */
+export type PendingSubscriptionIntent = {
+    id: number;
+    planSlug: string;
+    username: string;
+    phone: string;
+    document: string;
+    paymentMethod: 'pix' | 'credit_card' | 'boleto';
+    notes: string;
+    createdAt: string | null;
+};

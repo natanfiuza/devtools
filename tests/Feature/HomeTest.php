@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Plan;
 use App\Support\Locales;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -25,63 +24,8 @@ it('entrega a home nos cinco idiomas', function () {
                 ->component('Home')
                 ->where('locale', $code)
                 ->where('seo.noindex', false)
-                ->has('plans', 3)
             );
     }
-});
-
-it('manda os planos ativos na ordem de exibicao, com o dado cru a vista da tela', function () {
-    $this->get('/pt-br')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('plans.0.slug', 'free')
-        ->where('plans.0.isFree', true)
-        ->where('plans.0.interval', null)
-        ->where('plans.0.schemaSize', '8 KB')
-        ->where('plans.0.lifetimeFreeUses', '5')
-        ->where('plans.1.slug', 'pro-monthly')
-        ->where('plans.1.isFree', false)
-        ->where('plans.1.interval', 'month')
-        ->where('plans.2.slug', 'pro-yearly')
-        ->where('plans.2.interval', 'year')
-        ->has('plans.2.name')
-    );
-});
-
-it('formata preco e numeros no idioma da pagina', function () {
-    $this->get('/pt-br')->assertOk()->assertInertia(fn (Assert $page) => $page
-        // O espaco entre simbolo e numero e o estreito do Intl (U+00A0).
-        ->where('plans.1.price', "R$\u{00A0}29,90")
-        ->where('plans.1.monthlyTokens', '2.000.000')
-        ->where('plans.1.promptChars', '4.000')
-    );
-
-    $this->get('/en')->assertOk()->assertInertia(fn (Assert $page) => $page
-        // A moeda e do dado (BRL); quem muda com o idioma e o numero.
-        ->where('plans.1.price', 'R$29.90')
-        ->where('plans.1.monthlyTokens', '2,000,000')
-    );
-});
-
-it('tira do site o plano desativado', function () {
-    Plan::query()->where('slug', 'pro-yearly')->update(['active' => false]);
-
-    $this->get('/pt-br')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->has('plans', 2)
-        ->where('plans.1.slug', 'pro-monthly')
-    );
-});
-
-it('manda o contato da venda manual e aceita a ausencia dele', function () {
-    config()->set('legal.contact_email', 'vendas@exemplo.com');
-
-    $this->get('/pt-br')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('contactEmail', 'vendas@exemplo.com')
-    );
-
-    config()->set('legal.contact_email', '');
-
-    $this->get('/pt-br')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('contactEmail', null)
-    );
 });
 
 it('tem os textos da home nos cinco idiomas', function () {

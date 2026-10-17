@@ -29,7 +29,7 @@
 - Descadastro: saida da newsletter pelo link do proprio e-mail; a linha nao e apagada, fica marcada e o reenvio so acontece com nova confirmacao.
 - Pagina legal: Politica de Privacidade e Termos de Uso; conteudo proprio do site, sob `/{locale}`, indexavel e com hreflang normal (ao contrario das telas de acesso).
 - Papel: `user` ou `admin` (`users.role`); diz o que a pessoa pode fazer no site, e nao quem ela e.
-- Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Planos, Pagamentos e Auditoria -, acessiveis so com o papel `admin`.
+- Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Planos, Intencoes, Pagamentos e Auditoria -, acessiveis so com o papel `admin`.
 - Painel do usuario: area autenticada sob uma navegacao unica - Visao geral, Historico, Faturas e Conta (Perfil, Seguranca, Aparencia).
 - Auditoria: registro em `admin_actions` de toda acao administrativa sobre uma conta ou sobre o catalogo; nao e log de aplicacao e nunca guarda conteudo de schema ou prompt.
 - Impersonacao (entrar como): sessao em que o admin passa a ver o site como o alvo, para dar suporte; a faixa no topo nao pode ser dispensada e a saida e uma rota propria (`DELETE /impersonation`).
@@ -54,3 +54,5 @@
 - Correspondencia (match): o trecho do texto de teste que o padrao do Regex Tester reconhece, com posicao e grupos; a tela lista, conta e realca as correspondencias, e os comentarios do codigo chamam a mesma coisa de casamento.
 - Prazo da busca: o tempo maximo que uma busca do Regex Tester pode durar, de `config/tools.php` (`TOOLS_REGEX_TIMEOUT_MS`, padrao 2000 ms); passou dele o worker e encerrado e nao fica resultado nenhum na tela (ADR-031).
 - Teto de correspondencias: o numero maximo de correspondencias que o Regex Tester lista, de `config/tools.php` (`TOOLS_REGEX_MAX_MATCHES`, padrao 1000); a lista para no teto e avisa, e o texto substituido continua saindo do texto inteiro.
+- Username (`@nomedeusuario`): identificador exclusivo da conta (`users.username`, 3 a 30 caracteres em `[a-z0-9_]`), reservado imediatamente no envio da intencao de assinatura e editavel em `Configuracoes > Perfil` (`/settings/profile`); na anonimizacao e limpo (ADR-034).
+- Intencao de assinatura: pedido registrado por usuario autenticado em `/subscribe` (`subscription_intents`) escolhendo plano mensal ou anual, reservando o `@username` e informando telefone/WhatsApp, CPF/CNPJ e forma de pagamento preferida; notifica o admin por e-mail e entra na fila de `/admin/intents` (ADR-034).

@@ -12,9 +12,12 @@ return [
 
     'profile' => [
         'title' => 'Profile',
-        'description' => 'Update your name and email address',
+        'description' => 'Update your name, handle, and email address',
         'name' => 'Name',
         'name_placeholder' => 'Full name',
+        'username' => 'Username',
+        'username_placeholder' => 'username',
+        'username_help' => 'Lowercase letters, numbers, and underscores only (3 to 30 characters). Used as your unique handle on the platform.',
         'email' => 'Email address',
         'email_placeholder' => "you{'@'}example.com",
         'locale' => 'Account language',

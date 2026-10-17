@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $username
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string|null $password
@@ -32,7 +33,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'username', 'email', 'password'])]
 #[Hidden(['password', 'appearance', 'remember_token', 'role', 'suspended_at'])]
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
@@ -160,6 +161,14 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function usageLedger(): HasMany
     {
         return $this->hasMany(UsageLedger::class);
+    }
+
+    /**
+     * @return HasMany<SubscriptionIntent, $this>
+     */
+    public function subscriptionIntents(): HasMany
+    {
+        return $this->hasMany(SubscriptionIntent::class);
     }
 
     /**

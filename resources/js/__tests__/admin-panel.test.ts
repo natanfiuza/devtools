@@ -101,6 +101,7 @@ const traducoes = {
             users: 'USUARIOS',
             subscribers: 'ASSINANTES',
             plans: 'PLANOS',
+            intents: 'INTENCOES',
             payments: 'PAGAMENTOS',
             audit: 'AUDITORIA',
             panel: 'PAINEL',
@@ -149,7 +150,7 @@ beforeEach(() => {
 });
 
 describe('navegacao do painel', () => {
-    it('lista as seis secoes com o caminho de cada uma', () => {
+    it('lista as sete secoes com o caminho de cada uma', () => {
         const wrapper = montarPainel();
 
         const itens = wrapper.findAll('nav a');
@@ -159,6 +160,7 @@ describe('navegacao do painel', () => {
             'USUARIOS',
             'ASSINANTES',
             'PLANOS',
+            'INTENCOES',
             'PAGAMENTOS',
             'AUDITORIA',
         ]);
@@ -167,6 +169,7 @@ describe('navegacao do painel', () => {
             '/admin/users',
             '/admin/subscribers',
             '/admin/plans',
+            '/admin/intents',
             '/admin/payments',
             '/admin/audit',
         ]);

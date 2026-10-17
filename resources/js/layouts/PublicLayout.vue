@@ -86,13 +86,8 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                         </Link>
                     </Button>
                     <Button variant="ghost" size="sm" as-child>
-                        <Link :href="`${routes.home.value}#precos`">
+                        <Link :href="routes.pricing.value">
                             {{ t('app.nav.pricing') }}
-                        </Link>
-                    </Button>
-                    <Button variant="ghost" size="sm" as-child>
-                        <Link :href="routes.styleguide.value">
-                            {{ t('app.nav.styleguide') }}
                         </Link>
                     </Button>
                 </nav>
@@ -171,18 +166,8 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                                     as-child
                                     @click="menuOpen = false"
                                 >
-                                    <Link :href="`${routes.home.value}#precos`">
+                                    <Link :href="routes.pricing.value">
                                         {{ t('app.nav.pricing') }}
-                                    </Link>
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    class="justify-start"
-                                    as-child
-                                    @click="menuOpen = false"
-                                >
-                                    <Link :href="routes.styleguide.value">
-                                        {{ t('app.nav.styleguide') }}
                                     </Link>
                                 </Button>
                                 <Button

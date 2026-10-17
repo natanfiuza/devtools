@@ -28,6 +28,7 @@ it('updates the profile information', function () {
         ->actingAs($user)
         ->patch(route('profile.update'), [
             'name' => 'Test User',
+            'username' => 'Test_User_01',
             'email' => 'test@example.com',
         ]);
 
@@ -38,6 +39,7 @@ it('updates the profile information', function () {
     $user->refresh();
 
     $this->assertSame('Test User', $user->name);
+    $this->assertSame('test_user_01', $user->username);
     $this->assertSame('test@example.com', $user->email);
     $this->assertNull($user->email_verified_at);
 });

@@ -24,12 +24,14 @@ return [
     'cta' => [
         'register' => 'Crear cuenta',
         'contact' => 'Escribir por correo',
+        'subscribe' => 'Suscribirse ahora',
     ],
 
     'pricing' => [
         'title' => 'Planes',
-        'subtitle' => 'Sin renovación automática: el cobro se acuerda por correo y el plan vale hasta el final del periodo.',
+        'subtitle' => 'Elige el plan ideal para tu flujo. Sin renovación automática oculta: registra tu intención de suscripción y reserva tu identificador exclusivo.',
         'free' => 'Gratis',
+        'yearly_badge' => '2 meses gratis',
         'interval' => [
             'month' => 'por mes',
             'year' => 'por año',
@@ -39,6 +41,61 @@ return [
             'tokens' => '{count} tokens por mes',
             'schema' => 'Esquema de hasta {size}',
             'prompt' => 'Descripción de hasta {count} caracteres',
+            'username' => "Reserva exclusiva de {'@'}nombredeusuario",
+            'history' => 'Historial guardado en AI SQL Builder (90 días)',
+            'priority' => 'Soporte prioritario y acceso anticipado',
         ],
+        'advantages' => [
+            'title' => 'Ventajas de ser suscriptor Pro',
+            'subtitle' => 'Más capacidad en AI SQL Builder, reserva de tu identificador en la plataforma y prioridad en las novedades.',
+            'items' => [
+                'username' => [
+                    'title' => "Tu {'@'}nombredeusuario exclusivo",
+                    'body' => 'Asegura tu identificador único en la plataforma para tu perfil y futuros enlaces compartidos de consultas.',
+                ],
+                'history' => [
+                    'title' => 'Historial de consultas por 90 días',
+                    'body' => 'Consulta, reutiliza y copia el SQL y el código ORM generados anteriormente en AI SQL Builder.',
+                ],
+                'quota' => [
+                    'title' => 'Cuota mensual de 2M tokens y límites ampliados',
+                    'body' => 'Envía esquemas DDL de hasta 64 KB y descripciones detalladas de hasta 4.000 caracteres por consulta.',
+                ],
+                'priority' => [
+                    'title' => 'Soporte prioritario y acceso anticipado',
+                    'body' => 'Acceso de primera mano a nuevas herramientas y nuevos destinos de código con IA.',
+                ],
+                'discount' => [
+                    'title' => 'Ahorro de 2 meses en el plan anual',
+                    'body' => 'Con el plan anual pagas el equivalente a 10 meses y aseguras 12 meses completos de acceso Pro.',
+                ],
+            ],
+        ],
+    ],
+
+    'subscribe' => [
+        'title' => 'Intención de suscripción Pro',
+        'subtitle' => "Elige entre el plan mensual o anual, reserva tu {'@'}nombredeusuario exclusivo e indica tus datos para activar la suscripción.",
+        'pending_title' => 'Solicitud de suscripción registrada',
+        'pending_body' => "Recibimos tu intención de suscripción y tu {'@'}nombredeusuario ya está reservado en tu cuenta. Nos pondremos en contacto para completar la activación.",
+        'submitted_toast' => 'Intención de suscripción registrada con éxito.',
+        'plan_label' => 'Elige tu plan',
+        'username_label' => 'Tu nombre de usuario exclusivo',
+        'username_placeholder' => 'nombredeusuario',
+        'username_help' => 'Solo letras minúsculas, números y guion bajo (de 3 a 30 caracteres). Reservado de inmediato en tu cuenta.',
+        'phone_label' => 'Teléfono / WhatsApp',
+        'phone_placeholder' => '+55 (11) 99999-9999',
+        'document_label' => 'Documento fiscal (CPF / CNPJ)',
+        'document_placeholder' => '000.000.000-00',
+        'payment_method_label' => 'Forma de pago preferida',
+        'payment_methods' => [
+            'pix' => 'Pix',
+            'credit_card' => 'Tarjeta de crédito',
+            'boleto' => 'Boleto bancario',
+        ],
+        'notes_label' => 'Observaciones (opcional)',
+        'notes_placeholder' => 'Alguna preferencia de horario o detalle sobre el cobro',
+        'submit' => 'Registrar intención de suscripción',
+        'update_submit' => 'Actualizar intención de suscripción',
     ],
 ];

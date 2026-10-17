@@ -3,12 +3,13 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import { defineComponent, h } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Home from '@/pages/Home.vue';
+import Pricing from '@/pages/Pricing.vue';
 import { allTools } from '@/tools/registry';
 import type { PublicPlan } from '@/types';
 
 /**
- * Home publica: hero, chips de categoria, grid, destaque do AI SQL Builder e
- * precos.
+ * Home publica: hero, chips de categoria, grid, destaque do AI SQL Builder;
+ * e pagina dedicada de Planos (`Pricing.vue`).
  *
  * As traducoes sao marcadores - inclusive as das tools, geradas a partir do
  * registro real -, para que qualquer texto fixo no componente apareca no lugar
@@ -16,8 +17,8 @@ import type { PublicPlan } from '@/types';
  * aceite pede (as 8 tools do MVP na home), e o contrato do registro ja esta
  * coberto em tools-registry.test.ts.
  *
- * Os planos vem por prop, como o `HomeController` manda: preco e numero ja
- * formatados no servidor.
+ * Os planos vem por prop em `Pricing.vue`, como o `PricingController` manda:
+ * preco e numero ja formatados no servidor.
  */
 
 vi.mock('@inertiajs/vue3', () => ({
@@ -49,7 +50,7 @@ vi.mock('@inertiajs/vue3', () => ({
         name: 'InertiaLink',
         props: { href: { type: String, default: '' } },
         render() {
-            return h('a', { href: this.href }, this.$slots.default?.());
+            return h('a', { href: this.href, class: this.$attrs.class }, this.$slots.default?.());
         },
     }),
 }));
@@ -99,18 +100,34 @@ const traducoes = {
         },
         cta: {
             register: 'CRIAR_CONTA',
+            subscribe: 'ASSINAR_PLANO',
             contact: 'FALAR_POR_EMAIL',
         },
         pricing: {
             title: 'TITULO_PLANOS',
             subtitle: 'SUBTITULO_PLANOS',
             free: 'GRATIS',
+            yearly_badge: 'DOIS_MESES_GRATIS',
             interval: { month: 'POR_MES', year: 'POR_ANO' },
             features: {
                 uses: 'USOS:{count}',
                 tokens: 'TOKENS:{count}',
                 schema: 'SCHEMA:{size}',
                 prompt: 'DESCRICAO:{count}',
+                username: 'VANTAGEM_USERNAME',
+                history: 'VANTAGEM_HISTORICO',
+                priority: 'VANTAGEM_SUPORTE',
+            },
+            advantages: {
+                title: 'TITULO_VANTAGENS',
+                subtitle: 'SUBTITULO_VANTAGENS',
+                items: {
+                    username: { title: 'BV_USER_T', body: 'BV_USER_B' },
+                    quota: { title: 'BV_TOK_T', body: 'BV_TOK_B' },
+                    history: { title: 'BV_HIST_T', body: 'BV_HIST_B' },
+                    priority: { title: 'BV_SUP_T', body: 'BV_SUP_B' },
+                    discount: { title: 'BV_YEAR_T', body: 'BV_YEAR_B' },
+                },
             },
         },
     },
@@ -153,12 +170,21 @@ const planos: PublicPlan[] = [
     },
 ];
 
-function montar(contactEmail: string | null = 'contato@exemplo.com'): VueWrapper {
+function montar(): VueWrapper {
     const i18n = createI18nInstance();
     applyTranslations(i18n, { locale: 'pt_BR', translations: traducoes });
 
     return mount(Home, {
-        props: { plans: planos, contactEmail },
+        global: { plugins: [i18n] },
+    });
+}
+
+function montarPlanos(): VueWrapper {
+    const i18n = createI18nInstance();
+    applyTranslations(i18n, { locale: 'pt_BR', translations: traducoes });
+
+    return mount(Pricing, {
+        props: { plans: planos },
         global: { plugins: [i18n] },
     });
 }
@@ -222,7 +248,7 @@ describe('grid de ferramentas', () => {
     | com o AI SQL Builder - e card que nao funciona nao linka, senao seria um
     | link morto no indice (ADR-007).
     */
-    it('linka o card das tools que funcionam e deixa a outra com o selo', () => {
+    it('linka o card inteiro das tools que funcionam e deixa a outra com o selo', () => {
         const wrapper = montar();
 
         expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(1);
@@ -233,8 +259,10 @@ describe('grid de ferramentas', () => {
 
         expect(links).toHaveLength(7);
 
-        // O primeiro do grid e o JSON Viewer, a primeira da ordem de exibicao.
+        // O primeiro do grid e o JSON Viewer, a primeira da ordem de exibicao,
+        // com stretched link (`after:inset-0`) cobrindo o card todo.
         expect(links[0]?.attributes('href')).toBe('/pt-br/tools/json-viewer');
+        expect(links[0]?.attributes('class')).toContain('after:inset-0');
 
         // E nenhum link aponta para tool que nao funciona.
         for (const link of links) {
@@ -300,9 +328,9 @@ describe('filtro por categoria', () => {
     });
 });
 
-describe('precos', () => {
+describe('precos (pagina dedicada)', () => {
     it('monta um card por plano, na ordem que o servidor mandou', () => {
-        const wrapper = montar();
+        const wrapper = montarPlanos();
 
         expect(
             wrapper
@@ -314,11 +342,12 @@ describe('precos', () => {
         expect(wrapper.text()).toContain('SUBTITULO_PLANOS');
     });
 
-    it('escreve preco, intervalo e linhas de limite com o dado do servidor', () => {
-        const wrapper = montar();
+    it('escreve preco, intervalo, vantagens e linhas de limite com o dado do servidor', () => {
+        const wrapper = montarPlanos();
 
         const gratuito = wrapper.get('[data-test="plan-card-free"]');
         const mensal = wrapper.get('[data-test="plan-card-pro-monthly"]');
+        const anual = wrapper.get('[data-test="plan-card-pro-yearly"]');
 
         // O gratuito nao mostra "R$ 0,00": mostra o texto do idioma.
         expect(gratuito.text()).toContain('GRATIS');
@@ -331,10 +360,16 @@ describe('precos', () => {
         expect(mensal.text()).toContain('POR_MES');
         expect(mensal.text()).toContain('TOKENS:2.000.000');
         expect(mensal.text()).toContain('SCHEMA:64 KB');
+        expect(mensal.text()).toContain('VANTAGEM_USERNAME');
+        expect(mensal.text()).toContain('VANTAGEM_HISTORICO');
+        expect(mensal.text()).toContain('VANTAGEM_SUPORTE');
+
+        expect(anual.text()).toContain('DOIS_MESES_GRATIS');
+        expect(wrapper.text()).toContain('BV_YEAR_T');
     });
 
-    it('chama o cadastro no gratuito e o contato no pago (venda manual)', () => {
-        const wrapper = montar();
+    it('chama o cadastro no gratuito e o formulario de intencao de assinatura no pago', () => {
+        const wrapper = montarPlanos();
 
         expect(
             wrapper
@@ -343,31 +378,26 @@ describe('precos', () => {
                 .attributes('href'),
         ).toBe('/pt-br/register');
 
-        const contato = wrapper.get('[data-test="plan-contact"]');
-        expect(contato.attributes('href')).toBe('mailto:contato@exemplo.com');
-        expect(contato.text()).toBe('FALAR_POR_EMAIL');
-        expect(wrapper.get('[data-test="plan-card-pro-yearly"]').text()).toContain(
-            'PRECO_ANUAL',
-        );
-    });
+        const mensalCta = wrapper
+            .get('[data-test="plan-card-pro-monthly"]')
+            .get('[data-test="plan-subscribe-pro-monthly"]');
+        expect(mensalCta.attributes('href')).toBe('/subscribe?plan=pro-monthly');
+        expect(mensalCta.text()).toBe('ASSINAR_PLANO');
 
-    it('nao oferece link de contato quando nao ha e-mail configurado', () => {
-        const wrapper = montar(null);
-
-        expect(wrapper.find('[data-test="plan-contact"]').exists()).toBe(false);
-        expect(
-            wrapper.get('[data-test="plan-card-pro-monthly"]').get('button')
-                .attributes('disabled'),
-        ).toBeDefined();
+        const anualCta = wrapper
+            .get('[data-test="plan-card-pro-yearly"]')
+            .get('[data-test="plan-subscribe-pro-yearly"]');
+        expect(anualCta.attributes('href')).toBe('/subscribe?plan=pro-yearly');
     });
 
     it('nao escreve preco nem limite no codigo da tela', () => {
-        const wrapper = montar();
+        const wrapper = montarPlanos();
         const texto = wrapper.text();
 
         // Os numeros so podem vir da tabela `plans` (via prop).
-        expect(texto).not.toContain('2990');
-        expect(texto).not.toContain('29,90');
+        expect(texto).not.toContain('890');
+        expect(texto).not.toContain('8,90');
         expect(texto).not.toContain('2000000');
     });
 });
+

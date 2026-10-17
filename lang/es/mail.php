@@ -33,4 +33,12 @@ return [
         'action' => 'Confirmar suscripción',
         'ignore' => 'Si no fuiste tú, ignora este correo: no se enviará nada.',
     ],
+
+    'intent' => [
+        'subject' => '[:app] Nueva intención de suscripción (@:username)',
+        'intro' => 'Nueva intención de suscripción Pro registrada por :name (:email).',
+        'details' => 'Plan: :plan | Usuario: :username | Teléfono: :phone | Documento: :document | Pago: :method',
+        'notes' => 'Observaciones: :notes',
+        'action' => 'Abrir intenciones en el panel',
+    ],
 ];

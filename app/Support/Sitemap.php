@@ -26,6 +26,7 @@ final class Sitemap
      */
     private const PAGES = [
         'home',
+        'pricing',
         'privacy',
         'terms',
     ];
