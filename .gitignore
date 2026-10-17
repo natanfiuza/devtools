@@ -49,3 +49,4 @@ composer.lock
 /deploy/deploy-instaled.sh
 /deploy/deploy-instaled.sh.novo
 /deploy/deploy-instaled.sh.bak-*
+storage/framework/locks/

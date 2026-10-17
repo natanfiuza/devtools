@@ -113,6 +113,10 @@ else
 fi
 
 # --- build + troca atomica -------------------------------------------------
+# O `php artisan optimize` do deploy anterior deixa as rotas em cache; limpa
+# antes do build para o plugin do Wayfinder ler `routes/*.php` atualizado.
+php artisan route:clear
+
 RELEASE="$RELEASES_DIR/$(date -u +%Y%m%d%H%M%S)"
 mkdir -p "$RELEASE"
 

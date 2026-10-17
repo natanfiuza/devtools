@@ -78,6 +78,8 @@
   - `resources/js/types/auth.ts`
   - `resources/js/types/home.ts`
   - `resources/js/types/admin.ts`
+  - `vite.config.ts` (adicionado `php artisan route:clear` antes de `wayfinder:generate` para evitar que o cache de rotas do deploy anterior oculte rotas novas durante `vite build` no servidor)
+  - `deploy/deploy.sh` (adicionado `php artisan route:clear` antes do `npm run build`)
   - `lang/{pt_BR,pt_PT,en,es,fr}/{home,settings,admin,mail}.php`
 - **Testes e Documentacao**:
   - `tests/Feature/PricingTest.php`

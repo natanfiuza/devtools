@@ -35,6 +35,10 @@ export default defineConfig({
         }),
         wayfinder({
             formVariants: true,
+            // Em producao o `php artisan optimize` grava `bootstrap/cache/routes-v7.php`.
+            // Sem limpar o cache de rotas antes, o `wayfinder:generate` le a tabela de
+            // rotas do deploy anterior e deixa de gerar rotas novas durante o `vite build`.
+            command: 'php artisan route:clear && php artisan wayfinder:generate',
         }),
     ],
     // O worker do parser do JSON Viewer e um modulo ES (o `{ type: 'module' }`
