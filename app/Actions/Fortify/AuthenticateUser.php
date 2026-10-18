@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 /**
  * Login por e-mail e senha, no lugar do `Auth::attempt` padrao do Fortify.
@@ -25,12 +26,25 @@ final class AuthenticateUser
         $email = $request->string('email')->trim()->lower()->value();
         $password = $request->string('password')->value();
 
-        $user = User::query()->where('email', $email)->first();
+        $user = User::withTrashed()->where('email', $email)->first();
 
         // Sem conta, sem senha local ou senha errada: a mesma resposta, para
         // nao revelar quais e-mails existem.
         if ($user === null || $user->password === null || ! Hash::check($password, $user->password)) {
             return null;
+        }
+
+        // Se a conta estiver em soft delete dentro da janela de 30 dias, reativa automaticamente
+        if ($user->trashed()) {
+            if ($user->deleted_at !== null && $user->deleted_at->gt(now()->subDays(30))) {
+                $user->restore();
+                Inertia::flash('toast', [
+                    'type' => 'success',
+                    'message' => __('auth.reactivated'),
+                ]);
+            } else {
+                return null;
+            }
         }
 
         if ($user->isSuspended()) {

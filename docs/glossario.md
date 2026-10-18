@@ -56,3 +56,7 @@
 - Teto de correspondencias: o numero maximo de correspondencias que o Regex Tester lista, de `config/tools.php` (`TOOLS_REGEX_MAX_MATCHES`, padrao 1000); a lista para no teto e avisa, e o texto substituido continua saindo do texto inteiro.
 - Username (`@nomedeusuario`): identificador exclusivo da conta (`users.username`, 3 a 30 caracteres em `[a-z0-9_]`), reservado imediatamente no envio da intencao de assinatura e editavel em `Configuracoes > Perfil` (`/settings/profile`); na anonimizacao e limpo (ADR-034).
 - Intencao de assinatura: pedido registrado por usuario autenticado em `/subscribe` (`subscription_intents`) escolhendo plano mensal ou anual, reservando o `@username` e informando telefone/WhatsApp, CPF/CNPJ e forma de pagamento preferida; notifica o admin por e-mail e entra na fila de `/admin/intents` (ADR-034).
+- Soft delete de conta (carencia de 30 dias): solicitacao de exclusao que marca `users.deleted_at`; durante 30 dias a conta fica inativa mas pode ser reativada no login; apos 30 dias a rotina de expurgo anonimiza os dados (ADR-028) e remove fotos fisicas (ADR-035).
+- TaskSchedule / Agendador assincrono: rotina cadastrada em `task_schedules`, lida no scheduler de `bootstrap/app.php` e executada de forma assincrona via `ExecuteCommand` na fila de jobs (padrao SIG-Novo).
+- Foto de perfil (UUID): imagem do usuario armazenada em `storage/app/data/user_profile_image/{uuid}`, vinculada a `users.photo_uuid` e servida pela rota publica `/users/profile/photo/{uuid}`.
+

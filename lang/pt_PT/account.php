@@ -90,16 +90,17 @@ return [
 
     'delete' => [
         'title' => 'Eliminar conta',
-        'description' => 'Apaga os seus dados pessoais e termina o acesso.',
+        'description' => 'Agende a eliminação da sua conta com período de carência de 30 dias.',
         'warning_title' => 'Atenção',
-        'warning' => 'Esta ação não tem volta.',
+        'warning' => 'A sua conta entrará em período de carência por 30 dias. Se iniciar sessão durante esse prazo, ela será reativada. Após 30 dias, todos os seus dados pessoais serão expurgados definitivamente.',
         'action' => 'Eliminar conta',
         'dialog_title' => 'Tem a certeza de que quer eliminar a sua conta?',
-        'dialog_description' => 'O nome, o e-mail, a palavra-passe e os vínculos são apagados, e a conta já não entra. Os pagamentos ficam guardados pelo prazo fiscal. Descarregue os seus dados antes: depois já não dá.',
+        'dialog_description' => 'A sua conta será agendada para eliminação em 30 dias. Durante esse prazo pode recuperá-la iniciando sessão. Após os 30 dias, o nome, e-mail, palavra-passe e fotografia serão eliminados definitivamente, mantendo apenas os registos de pagamento pelo prazo fiscal.',
         'download' => 'Descarregar os meus dados',
         'password' => 'Palavra-passe',
         'password_placeholder' => 'Palavra-passe',
         'cancel' => 'Cancelar',
         'confirm' => 'Eliminar conta',
+        'scheduled_notice' => 'A sua conta foi agendada para eliminação e será eliminada definitivamente em 30 dias. Pode reativá-la em qualquer altura durante esse período iniciando sessão.',
     ],
 ];

@@ -128,6 +128,10 @@ return [
             'verify' => '/{locale}/email/verify/{id}/{hash}',
             'send' => '/{locale}/email/verification-notification',
         ],
+
+        'two-factor' => [
+            'login' => '/{locale}/two-factor-challenge',
+        ],
     ],
 
     /*
@@ -189,6 +193,10 @@ return [
         Features::registration(),
         Features::resetPasswords(),
         Features::emailVerification(),
+        Features::twoFactorAuthentication([
+            'confirm' => true,
+            'confirmPassword' => true,
+        ]),
     ],
 
 ];

@@ -5,12 +5,16 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleConsent;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveLocale;
+use App\Jobs\ExecuteCommand;
+use App\Models\TaskSchedule;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -56,4 +60,38 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        try {
+            $tasks = TaskSchedule::where('is_active', true)->get();
+
+            foreach ($tasks as $task) {
+                $command = $task->command;
+                $parameters = $task->parameters ?? [];
+                $expression = $task->expression;
+
+                if (empty($command)) {
+                    continue;
+                }
+
+                $event = $schedule->call(function () use ($command, $parameters): void {
+                    ExecuteCommand::dispatch($command, $parameters);
+                });
+
+                if (str_starts_with($expression, 'dailyAt:')) {
+                    $time = substr($expression, 8);
+                    $event->dailyAt($time);
+                } elseif ($expression === 'hourly') {
+                    $event->hourly();
+                } elseif ($expression === 'everyMinute') {
+                    $event->everyMinute();
+                } else {
+                    $event->cron($expression);
+                }
+            }
+        } catch (Throwable $e) {
+            // Em comandos como migrate inicial ou sem conexao de banco pronta, ignora silenciosamente
+            Log::info('[Scheduler] Agendamento ignorado: '.$e->getMessage());
+        }
+    })
+    ->create();

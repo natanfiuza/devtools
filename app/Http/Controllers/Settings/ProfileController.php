@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Actions\Account\AnonymizeUser;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
@@ -66,15 +65,13 @@ class ProfileController extends Controller
     }
 
     /**
-     * Exclui a conta anonimizando a linha (ADR-028).
+     * Agenda a exclusao da conta aplicando soft delete (janela de 30 dias).
      *
-     * Apagar de verdade nao da: o pagamento aponta para a conta com
-     * `restrictOnDelete`, porque registro fiscal nao se apaga. O que sai e o
-     * que identifica a pessoa - nome, e-mail, senha, vinculos - e o que sobra
-     * e uma linha sem dono. A conta nao entra mais: sem senha, o login por
-     * senha recusa; sem vinculo, o social nao encontra.
+     * A conta entra em periodo de carencia de 30 dias. Se o usuario realizar
+     * login durante esse prazo, a conta e reativada automaticamente. Apos 30
+     * dias, o comando agendado accounts:purge-deleted executa o expurgo definitivo.
      */
-    public function destroy(ProfileDeleteRequest $request, AnonymizeUser $anonymize): RedirectResponse
+    public function destroy(ProfileDeleteRequest $request): RedirectResponse
     {
         $user = $request->user();
 
@@ -82,15 +79,13 @@ class ProfileController extends Controller
             abort(401);
         }
 
-        // Sai da sessao antes de anonimizar: `AnonymizeUser` apaga as sessoes
-        // abertas da conta, e a desta requisicao e uma delas.
-        Auth::logout();
+        $user->delete();
 
-        $anonymize($user);
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('status', __('account.delete.scheduled_notice'));
     }
 }

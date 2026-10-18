@@ -90,16 +90,17 @@ return [
 
     'delete' => [
         'title' => 'Eliminar cuenta',
-        'description' => 'Borra tus datos personales y termina tu acceso.',
+        'description' => 'Programa la eliminación de tu cuenta con un periodo de gracia de 30 días.',
         'warning_title' => 'Atención',
-        'warning' => 'Esta acción no tiene vuelta.',
+        'warning' => 'Tu cuenta entrará en un periodo de gracia de 30 días. Si inicias sesión durante este tiempo, se reactivará. Tras 30 días, todos tus datos personales se eliminarán definitivamente.',
         'action' => 'Eliminar cuenta',
         'dialog_title' => '¿Seguro que quieres eliminar tu cuenta?',
-        'dialog_description' => 'El nombre, el correo, la contraseña y los vínculos se borran, y la cuenta ya no entra. Los pagos se conservan durante el plazo fiscal. Descarga tus datos antes: después ya no se puede.',
+        'dialog_description' => 'Tu cuenta quedará programada para eliminación en 30 días. Puedes recuperarla en cualquier momento durante este plazo simplemente iniciando sesión. Tras 30 días, tu nombre, correo, contraseña y foto se eliminarán definitivamente, conservando solo los pagos por obligación fiscal.',
         'download' => 'Descargar mis datos',
         'password' => 'Contraseña',
         'password_placeholder' => 'Contraseña',
         'cancel' => 'Cancelar',
         'confirm' => 'Eliminar cuenta',
+        'scheduled_notice' => 'Tu cuenta ha sido programada para eliminación y se eliminará definitivamente en 30 días. Puedes reactivarla en cualquier momento iniciando sesión.',
     ],
 ];

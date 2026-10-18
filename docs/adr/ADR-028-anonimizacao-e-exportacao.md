@@ -71,7 +71,9 @@ proteger, e mais um lugar para esquecer de apagar.
 - **`DELETE` de verdade na linha**: quebraria a FK dos pagamentos ou levaria a
   cobranca junto; e o banco ja recusa.
 - **Soft delete (`deleted_at`)**: a linha sai da tela e o dado pessoal continua
-  no banco - nao atende ao pedido, so o esconde.
+  no banco - nao atende ao pedido, so o esconde (Emendado pela ADR-035: soft
+  delete passa a ser adotado como janela de carencia de 30 dias com reativacao,
+  antecedendo o expurgo definitivo por anonimizacao).
 - **Arquivar antes de apagar** (tabela de contas removidas): um segundo banco de
   dados pessoais, com menos protecao que o primeiro.
 - **Exportacao assincrona por e-mail**: mais um lugar com dado pessoal (a caixa
