@@ -11,6 +11,14 @@
 */
 
 return [
+    'template' => [
+        'greeting' => '¡Hola!',
+        'error_greeting' => '¡Ups!',
+        'salutation' => 'Saludos,',
+        'subcopy' => 'Si tienes problemas para hacer clic en el botón ":actionText", copia y pega la siguiente dirección en tu navegador:',
+        'rights' => 'Todos los derechos reservados.',
+    ],
+
     'reset' => [
         'subject' => 'Restablecer tu contraseña',
         'intro' => 'Pediste restablecer la contraseña de tu cuenta en :app.',
@@ -28,8 +36,7 @@ return [
 
     'newsletter' => [
         'subject' => 'Confirma tu suscripción a la newsletter',
-        'greeting' => 'Suscripción a la newsletter de :app',
-        'intro' => 'Falta un clic para empezar a recibir la newsletter: solo confirma que este correo es tuyo.',
+        'intro' => 'Falta un clic para empezar a recibir la newsletter de :app: solo confirma que este correo es tuyo.',
         'action' => 'Confirmar suscripción',
         'ignore' => 'Si no fuiste tú, ignora este correo: no se enviará nada.',
     ],

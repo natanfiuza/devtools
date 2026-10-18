@@ -30,8 +30,16 @@ function leafKeys(array $values, string $prefix = ''): array
     return $keys;
 }
 
+function allTranslatedNamespaces(): array
+{
+    return array_values(array_unique(array_merge(
+        (array) config('locales.namespaces'),
+        ['mail'],
+    )));
+}
+
 it('carrega todos os namespaces em todos os idiomas', function () {
-    $namespaces = config('locales.namespaces');
+    $namespaces = allTranslatedNamespaces();
 
     expect($namespaces)->toBeArray()->not->toBeEmpty();
 
@@ -51,7 +59,7 @@ it('carrega todos os namespaces em todos os idiomas', function () {
 it('tem as mesmas chaves nos 5 idiomas', function () {
     $fallback = Locales::fallback();
 
-    foreach (config('locales.namespaces') as $namespace) {
+    foreach (allTranslatedNamespaces() as $namespace) {
         $reference = leafKeys(require lang_path($fallback.'/'.$namespace.'.php'));
 
         foreach (Locales::codes() as $code) {
@@ -72,7 +80,7 @@ it('tem as mesmas chaves nos 5 idiomas', function () {
 
 it('nao tem traducao vazia', function () {
     foreach (Locales::codes() as $code) {
-        foreach (config('locales.namespaces') as $namespace) {
+        foreach (allTranslatedNamespaces() as $namespace) {
             foreach (leafKeys(require lang_path($code.'/'.$namespace.'.php')) as $key) {
                 $value = trans($namespace.'.'.$key, [], $code);
 

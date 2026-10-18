@@ -235,6 +235,27 @@ it('leva o idioma do inscrito para o link e para o e-mail', function () {
     });
 });
 
+it('renderiza o e-mail da newsletter com o mesmo layout de confirmacao de cadastro, wordmark devtools_ e subcopy traduzido', function () {
+    $subscriber = inscrito('leitor@exemplo.com', ['locale' => 'pt_BR']);
+
+    app()->setLocale('pt_BR');
+    $html = (new NewsletterConfirmation($subscriber))->render();
+    $actionText = trans('mail.newsletter.action', [], 'pt_BR');
+    $confirmUrl = route('newsletter.confirm', [
+        'locale' => 'pt-br',
+        'token' => $subscriber->token,
+    ]);
+
+    expect($html)
+        ->toContain('color: #0f7f8a;">_</span>')
+        ->toContain(trans('mail.template.greeting', [], 'pt_BR'))
+        ->toContain(trans('mail.template.salutation', [], 'pt_BR'))
+        ->toContain(trans('mail.template.rights', [], 'pt_BR'))
+        ->toContain(trans('mail.template.subcopy', ['actionText' => $actionText], 'pt_BR'))
+        ->toContain($confirmUrl)
+        ->not->toContain("If you're having trouble clicking");
+});
+
 it('inscreve pelo registro quando o checkbox vem marcado', function () {
     Mail::fake();
 

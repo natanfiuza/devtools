@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Support\Locales;
+use App\Support\MailBrand;
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,7 +24,7 @@ class ResetPassword extends BaseResetPassword implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(__('mail.reset.subject'))
-            ->line(__('mail.reset.intro', ['app' => config('app.name')]))
+            ->line(MailBrand::line('mail.reset.intro'))
             ->action(__('mail.reset.action'), $url)
             ->line(__('mail.reset.expire', ['minutes' => $this->expireMinutes()]))
             ->line(__('mail.reset.ignore'));

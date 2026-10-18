@@ -36,9 +36,16 @@ it('manda o reset de senha no idioma da conta', function () {
 
     $this->post('/en/forgot-password', ['email' => $user->email]);
 
+    $corpo = corpoEnviado();
+    $actionText = trans('mail.reset.action', [], 'fr');
+
     expect(mensagemEnviada()->getSubject())->toBe(trans('mail.reset.subject', [], 'fr'))
-        ->and(corpoEnviado())->toContain('/fr/reset-password/')
-        ->and(corpoEnviado())->not->toContain('/en/reset-password/');
+        ->and($corpo)->toContain('/fr/reset-password/')
+        ->and($corpo)->not->toContain('/en/reset-password/')
+        ->and($corpo)->toContain(trans('mail.template.greeting', [], 'fr'))
+        ->and($corpo)->toContain(trans('mail.template.salutation', [], 'fr'))
+        ->and($corpo)->toContain(trans('mail.template.subcopy', ['actionText' => $actionText], 'fr'))
+        ->and($corpo)->toContain('color: #0f7f8a;">_</span>');
 });
 
 it('manda a confirmacao de endereco no idioma da conta', function () {
@@ -46,8 +53,16 @@ it('manda a confirmacao de endereco no idioma da conta', function () {
 
     $user->sendEmailVerificationNotification();
 
+    $corpo = corpoEnviado();
+    $actionText = trans('mail.verify.action', [], 'pt_PT');
+
     expect(mensagemEnviada()->getSubject())->toBe(trans('mail.verify.subject', [], 'pt_PT'))
-        ->and(corpoEnviado())->toContain('/pt-pt/email/verify/'.$user->getKey().'/');
+        ->and($corpo)->toContain('/pt-pt/email/verify/'.$user->getKey().'/')
+        ->and($corpo)->toContain(trans('mail.template.greeting', [], 'pt_PT'))
+        ->and($corpo)->toContain(trans('mail.template.salutation', [], 'pt_PT'))
+        ->and($corpo)->toContain(trans('mail.template.subcopy', ['actionText' => $actionText], 'pt_PT'))
+        ->and($corpo)->not->toContain("If you're having trouble clicking")
+        ->and($corpo)->toContain('color: #0f7f8a;">_</span>');
 });
 
 it('usa o fallback do app quando a conta nao tem idioma', function () {
