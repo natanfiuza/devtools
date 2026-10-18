@@ -11,6 +11,14 @@
 */
 
 return [
+    'template' => [
+        'greeting' => 'Bonjour !',
+        'error_greeting' => 'Oups !',
+        'salutation' => 'Cordialement,',
+        'subcopy' => 'Si vous ne parvenez pas à cliquer sur le bouton « :actionText », copiez et collez l’adresse ci-dessous dans votre navigateur :',
+        'rights' => 'Tous droits réservés.',
+    ],
+
     'reset' => [
         'subject' => 'Réinitialiser votre mot de passe',
         'intro' => 'Vous avez demandé à réinitialiser le mot de passe de votre compte :app.',
@@ -28,8 +36,7 @@ return [
 
     'newsletter' => [
         'subject' => 'Confirmez votre abonnement à la newsletter',
-        'greeting' => 'Abonnement à la newsletter de :app',
-        'intro' => 'Un clic suffit pour commencer à recevoir la newsletter : confirmez simplement que cet e-mail est le vôtre.',
+        'intro' => 'Un clic suffit pour commencer à recevoir la newsletter de :app : confirmez simplement que cet e-mail est le vôtre.',
         'action' => 'Confirmer l’abonnement',
         'ignore' => 'Si ce n’est pas vous, ignorez cet e-mail : rien ne sera envoyé.',
     ],

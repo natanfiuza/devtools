@@ -11,6 +11,14 @@
 */
 
 return [
+    'template' => [
+        'greeting' => 'Olá!',
+        'error_greeting' => 'Ups!',
+        'salutation' => 'Com os melhores cumprimentos,',
+        'subcopy' => 'Se estiver a ter dificuldade em clicar no botão ":actionText", copie e cole o endereço abaixo no seu navegador:',
+        'rights' => 'Todos os direitos reservados.',
+    ],
+
     'reset' => [
         'subject' => 'Redefinir a sua palavra-passe',
         'intro' => 'Pediu para redefinir a palavra-passe da sua conta no :app.',
@@ -28,8 +36,7 @@ return [
 
     'newsletter' => [
         'subject' => 'Confirme a sua subscrição da newsletter',
-        'greeting' => 'Subscrição da newsletter do :app',
-        'intro' => 'Falta um clique para começar a receber a newsletter: basta confirmar que este e-mail é seu.',
+        'intro' => 'Falta um clique para começar a receber a newsletter do :app: basta confirmar que este e-mail é seu.',
         'action' => 'Confirmar subscrição',
         'ignore' => 'Se não foi você, ignore este e-mail: nada será enviado.',
     ],

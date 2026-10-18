@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Support\Locales;
+use App\Support\MailBrand;
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,7 +26,7 @@ class VerifyEmail extends BaseVerifyEmail implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(__('mail.verify.subject'))
-            ->line(__('mail.verify.intro', ['app' => config('app.name')]))
+            ->line(MailBrand::line('mail.verify.intro'))
             ->action(__('mail.verify.action'), $url)
             ->line(__('mail.verify.ignore'));
     }
