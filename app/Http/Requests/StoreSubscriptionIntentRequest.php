@@ -22,14 +22,23 @@ class StoreSubscriptionIntentRequest extends FormRequest
         }
 
         if ($this->has('phone') && is_string($this->input('phone'))) {
+            $phone = trim($this->input('phone'));
+            $countryCode = $this->input('country_code');
+
+            if (is_string($countryCode) && $countryCode !== '' && ! str_starts_with($phone, '+')) {
+                $phone = trim($countryCode).' '.$phone;
+            }
+
             $this->merge([
-                'phone' => trim($this->input('phone')),
+                'phone' => $phone,
             ]);
         }
 
-        if ($this->has('document') && is_string($this->input('document'))) {
+        if ($this->has('document')) {
+            $document = is_string($this->input('document')) ? trim($this->input('document')) : null;
+
             $this->merge([
-                'document' => trim($this->input('document')),
+                'document' => $document === '' ? null : $document,
             ]);
         }
     }
@@ -49,7 +58,8 @@ class StoreSubscriptionIntentRequest extends FormRequest
             ],
             'username' => $this->usernameRules($this->user()?->id, required: true),
             'phone' => ['required', 'string', 'min:8', 'max:32'],
-            'document' => ['required', 'string', 'min:11', 'max:32'],
+            'country_code' => ['nullable', 'string', 'max:8'],
+            'document' => ['nullable', 'string', 'max:32'],
             'payment_method' => ['required', Rule::enum(SubscriptionIntentPaymentMethod::class)],
             'notes' => ['nullable', 'string', 'max:500'],
         ];

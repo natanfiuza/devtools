@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, router } from '@inertiajs/vue3';
 import { AtSign, Check, Clock, Cpu, Percent, Sparkles } from '@lucide/vue';
-import { ref } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +39,134 @@ const routes = useRoutes();
 const planSlug = ref<string>(props.selectedPlan);
 const paymentMethod = ref<string>(props.pendingIntent?.paymentMethod ?? 'pix');
 
+type CountryCallingCode = {
+    code: string;
+    name: string;
+    flag: string;
+    iso: string;
+};
+
+const countryCodes: CountryCallingCode[] = [
+    { code: '+55', name: 'Brasil', flag: '🇧🇷', iso: 'BR' },
+    { code: '+351', name: 'Portugal', flag: '🇵🇹', iso: 'PT' },
+    { code: '+1', name: 'Estados Unidos / Canadá', flag: '🇺🇸', iso: 'US' },
+    { code: '+34', name: 'Espanha', flag: '🇪🇸', iso: 'ES' },
+    { code: '+33', name: 'França', flag: '🇫🇷', iso: 'FR' },
+    { code: '+44', name: 'Reino Unido', flag: '🇬🇧', iso: 'GB' },
+    { code: '+49', name: 'Alemanha', flag: '🇩🇪', iso: 'DE' },
+    { code: '+39', name: 'Itália', flag: '🇮🇹', iso: 'IT' },
+    { code: '+54', name: 'Argentina', flag: '🇦🇷', iso: 'AR' },
+    { code: '+56', name: 'Chile', flag: '🇨🇱', iso: 'CL' },
+    { code: '+57', name: 'Colômbia', flag: '🇨🇴', iso: 'CO' },
+    { code: '+52', name: 'México', flag: '🇲🇽', iso: 'MX' },
+    { code: '+598', name: 'Uruguai', flag: '🇺🇾', iso: 'UY' },
+    { code: '+595', name: 'Paraguai', flag: '🇵🇾', iso: 'PY' },
+    { code: '+244', name: 'Angola', flag: '🇦🇴', iso: 'AO' },
+    { code: '+258', name: 'Moçambique', flag: '🇲🇿', iso: 'MZ' },
+    { code: '+238', name: 'Cabo Verde', flag: '🇨🇻', iso: 'CV' },
+    { code: '+41', name: 'Suíça', flag: '🇨🇭', iso: 'CH' },
+    { code: '+32', name: 'Bélgica', flag: '🇧🇪', iso: 'BE' },
+    { code: '+31', name: 'Países Baixos', flag: '🇳🇱', iso: 'NL' },
+    { code: '+81', name: 'Japão', flag: '🇯🇵', iso: 'JP' },
+    { code: '+61', name: 'Austrália', flag: '🇦🇺', iso: 'AU' },
+];
+
+const defaultCountryByLocale: Record<string, string> = {
+    'pt-br': '+55',
+    'pt-pt': '+351',
+    en: '+1',
+    es: '+34',
+    fr: '+33',
+};
+
+function resolveInitialPhone(): { countryCode: string; number: string } {
+    const raw = props.pendingIntent?.phone?.trim() ?? '';
+    const defaultCode =
+        defaultCountryByLocale[routes.localeSlug.value] ?? '+55';
+
+    if (!raw) {
+        return { countryCode: defaultCode, number: '' };
+    }
+
+    const sorted = [...countryCodes].sort(
+        (a, b) => b.code.length - a.code.length,
+    );
+    for (const c of sorted) {
+        if (raw.startsWith(c.code)) {
+            return {
+                countryCode: c.code,
+                number: raw.slice(c.code.length).trim(),
+            };
+        }
+    }
+
+    if (raw.startsWith('+')) {
+        const parts = raw.split(/\s+/);
+        if (parts.length > 1 && parts[0]) {
+            return { countryCode: parts[0], number: parts.slice(1).join(' ') };
+        }
+    }
+
+    return { countryCode: defaultCode, number: raw };
+}
+
+const initialPhone = resolveInitialPhone();
+const selectedCountryCode = ref<string>(initialPhone.countryCode);
+const phoneNumber = ref<string>(initialPhone.number);
+
+const selectedCountry = computed(() =>
+    countryCodes.find((c) => c.code === selectedCountryCode.value),
+);
+
+/** Contador regressivo de 30 segundos apos submissao */
+const countdown = ref<number>(30);
+const redirectCanceled = ref<boolean>(false);
+let timer: ReturnType<typeof setInterval> | null = null;
+
+function cancelRedirect(): void {
+    redirectCanceled.value = true;
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+}
+
+function redirectNow(): void {
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+    router.visit(routes.home.value);
+}
+
+watch(
+    () => props.status,
+    (newStatus) => {
+        if (
+            newStatus === 'intent-submitted' &&
+            !redirectCanceled.value &&
+            timer === null
+        ) {
+            countdown.value = 30;
+            timer = setInterval(() => {
+                if (countdown.value > 1) {
+                    countdown.value--;
+                } else {
+                    countdown.value = 0;
+                    redirectNow();
+                }
+            }, 1000);
+        }
+    },
+    { immediate: true },
+);
+
+onUnmounted(() => {
+    if (timer !== null) {
+        clearInterval(timer);
+    }
+});
+
 const advantages = [
     { key: 'username', icon: AtSign },
     { key: 'history', icon: Clock },
@@ -66,19 +194,58 @@ const advantages = [
         <div
             v-if="status === 'intent-submitted' || pendingIntent !== null"
             data-test="subscribe-pending-banner"
-            class="mt-6 flex items-start gap-3 rounded-xl border border-brand/40 bg-brand/5 p-4 text-sm"
+            class="mt-6 flex flex-col gap-3 rounded-xl border border-brand/40 bg-brand/5 p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
         >
-            <Check
-                class="mt-0.5 size-4 shrink-0 text-brand"
-                aria-hidden="true"
-            />
-            <div>
-                <p class="font-medium text-foreground">
-                    {{ t('home.subscribe.pending_title') }}
-                </p>
-                <p class="mt-1 text-muted-foreground">
-                    {{ t('home.subscribe.pending_body') }}
-                </p>
+            <div class="flex items-start gap-3">
+                <Check
+                    class="mt-0.5 size-4 shrink-0 text-brand"
+                    aria-hidden="true"
+                />
+                <div>
+                    <p class="font-medium text-foreground">
+                        {{ t('home.subscribe.pending_title') }}
+                    </p>
+                    <p class="mt-1 text-muted-foreground">
+                        {{ t('home.subscribe.pending_body') }}
+                    </p>
+                    <p
+                        v-if="
+                            status === 'intent-submitted' && !redirectCanceled
+                        "
+                        data-test="subscribe-countdown"
+                        class="mt-2 font-mono text-xs font-medium text-brand"
+                    >
+                        {{
+                            t('home.subscribe.redirect_countdown', {
+                                seconds: countdown,
+                            })
+                        }}
+                    </p>
+                </div>
+            </div>
+
+            <div
+                v-if="status === 'intent-submitted' && !redirectCanceled"
+                class="flex shrink-0 items-center gap-2 self-start sm:self-center"
+            >
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    data-test="subscribe-redirect-now"
+                    @click="redirectNow"
+                >
+                    {{ t('home.subscribe.redirect_now') }}
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-test="subscribe-redirect-cancel"
+                    @click="cancelRedirect"
+                >
+                    {{ t('home.subscribe.redirect_cancel') }}
+                </Button>
             </div>
         </div>
 
@@ -177,17 +344,71 @@ const advantages = [
                             <Label for="phone">
                                 {{ t('home.subscribe.phone_label') }}
                             </Label>
-                            <Input
-                                id="phone"
-                                name="phone"
-                                type="tel"
-                                :default-value="pendingIntent?.phone ?? ''"
-                                required
-                                autocomplete="tel"
-                                :placeholder="
-                                    t('home.subscribe.phone_placeholder')
-                                "
+                            <input
+                                type="hidden"
+                                name="country_code"
+                                :value="selectedCountryCode"
                             />
+                            <div class="flex gap-2">
+                                <Select
+                                    v-model="selectedCountryCode"
+                                    name="country_code_select"
+                                >
+                                    <SelectTrigger
+                                        id="country_code"
+                                        class="w-[110px] shrink-0 font-mono text-xs"
+                                        :aria-label="
+                                            t(
+                                                'home.subscribe.phone_country_code',
+                                            )
+                                        "
+                                        data-test="subscribe-country-code"
+                                    >
+                                        <SelectValue>
+                                            {{
+                                                selectedCountry
+                                                    ? `${selectedCountry.flag} ${selectedCountry.code}`
+                                                    : selectedCountryCode
+                                            }}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="country in countryCodes"
+                                            :key="country.code"
+                                            :value="country.code"
+                                        >
+                                            <span
+                                                class="flex items-center gap-1.5"
+                                            >
+                                                <span aria-hidden="true">{{
+                                                    country.flag
+                                                }}</span>
+                                                <span class="font-mono">{{
+                                                    country.code
+                                                }}</span>
+                                                <span
+                                                    class="text-xs text-muted-foreground"
+                                                    >({{ country.name }})</span
+                                                >
+                                            </span>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Input
+                                    id="phone"
+                                    v-model="phoneNumber"
+                                    name="phone"
+                                    type="tel"
+                                    required
+                                    autocomplete="tel"
+                                    :placeholder="
+                                        t('home.subscribe.phone_placeholder')
+                                    "
+                                    class="flex-1"
+                                    @focus="cancelRedirect"
+                                />
+                            </div>
                             <InputError :message="errors.phone" />
                         </div>
 
@@ -200,11 +421,11 @@ const advantages = [
                                 name="document"
                                 class="font-mono"
                                 :default-value="pendingIntent?.document ?? ''"
-                                required
                                 autocomplete="off"
                                 :placeholder="
                                     t('home.subscribe.document_placeholder')
                                 "
+                                @focus="cancelRedirect"
                             />
                             <InputError :message="errors.document" />
                         </div>

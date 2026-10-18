@@ -26,7 +26,7 @@ use Illuminate\Support\Carbon;
  * @property int $plan_id
  * @property string $username
  * @property string $phone
- * @property string $document
+ * @property string|null $document
  * @property SubscriptionIntentPaymentMethod $payment_method
  * @property string|null $notes
  * @property SubscriptionIntentStatus $status

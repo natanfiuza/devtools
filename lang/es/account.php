@@ -55,6 +55,12 @@ return [
         'no_subscription' => 'Estás en el plan gratuito.',
         'free_hint' => 'Para cambiar de plan, habla con nosotros: el cobro por el sitio llega pronto.',
         'no_period' => 'Sin período',
+        'pending_intent' => [
+            'badge' => 'En revisión',
+            'title' => 'Intención de suscripción en revisión',
+            'description' => 'Tu intención de suscripción para el plan {plan} fue enviada el {date} y está en revisión por nuestro equipo. Nos pondremos en contacto para completar la activación.',
+            'view_details' => 'Ver o modificar solicitud',
+        ],
         'subscription_statuses' => [
             'active' => 'Activa',
             'canceled' => 'Terminada',

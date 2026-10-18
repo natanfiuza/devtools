@@ -1,12 +1,16 @@
 <?php
 
 use App\Enums\PaymentStatus;
+use App\Enums\SubscriptionIntentPaymentMethod;
+use App\Enums\SubscriptionIntentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\SubscriptionIntent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
@@ -157,4 +161,41 @@ it('mantem so assinaturas ativas no escopo de vigentes', function () {
 
     expect($vigentes)->toHaveCount(1)
         ->and($vigentes->first()?->status)->toBe(SubscriptionStatus::Active);
+});
+
+it('entrega as faturas sem intencao pendente quando a conta nao possui pedido', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get('/dashboard/billing')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/Billing')
+            ->where('pendingIntent', null)
+        );
+});
+
+it('entrega a intencao de assinatura em analise na aba faturas', function () {
+    $user = User::factory()->create();
+    $plan = Plan::query()->where('slug', 'pro-monthly')->sole();
+
+    SubscriptionIntent::query()->create([
+        'user_id' => $user->id,
+        'plan_id' => $plan->id,
+        'username' => 'natan_analise',
+        'phone' => '+55 11 99999-0000',
+        'document' => null,
+        'payment_method' => SubscriptionIntentPaymentMethod::Pix,
+        'status' => SubscriptionIntentStatus::Pending,
+    ]);
+
+    $this->actingAs($user)
+        ->get('/dashboard/billing')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/Billing')
+            ->where('pendingIntent.planSlug', 'pro-monthly')
+            ->where('pendingIntent.status', 'pending')
+            ->has('pendingIntent.createdAt')
+        );
 });

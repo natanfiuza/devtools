@@ -119,6 +119,13 @@ const traducoes = {
             no_subscription: 'PLANO_GRATUITO',
             free_hint: 'DICA_FREE',
             no_period: 'SEM_PERIODO',
+            pending_intent: {
+                badge: 'EM_ANALISE',
+                title: 'INTENCAO_EM_ANALISE',
+                description:
+                    'SUA INTENCAO DO PLANO {plan} EM {date} ESTA EM ANALISE',
+                view_details: 'VER_PEDIDO',
+            },
             subscription_statuses: {
                 active: 'ATIVA',
                 canceled: 'ENCERRADA',
@@ -356,6 +363,37 @@ describe('faturas', () => {
         // Sem fatura nao ha tabela nem paginacao.
         expect(wrapper.find('table').exists()).toBe(false);
         expect(wrapper.text()).not.toContain('ANTERIOR');
+        expect(wrapper.find('[data-test="intencao-pendente"]').exists()).toBe(
+            false,
+        );
+    });
+
+    it('mostra o banner de intencao de assinatura em analise quando pendente', () => {
+        const wrapper = montarFaturas({
+            plan: PLANO_FREE,
+            subscription: null,
+            pendingIntent: {
+                id: 1,
+                planName: 'Pro mensal',
+                planSlug: 'pro-monthly',
+                status: 'pending',
+                paymentMethod: 'pix',
+                createdAt: '18/10/2026',
+            },
+            payments: pagina([]),
+            total: 0,
+        });
+
+        const banner = wrapper.get('[data-test="intencao-pendente"]');
+        expect(banner.text()).toContain('INTENCAO_EM_ANALISE');
+        expect(banner.text()).toContain('EM_ANALISE');
+        expect(banner.text()).toContain(
+            'SUA INTENCAO DO PLANO Pro mensal EM 18/10/2026 ESTA EM ANALISE',
+        );
+        expect(banner.get('a').attributes('href')).toBe(
+            '/subscribe?plan=pro-monthly',
+        );
+        expect(banner.text()).toContain('VER_PEDIDO');
     });
 
     it('escreve a assinatura e a fatura na lingua do painel', () => {

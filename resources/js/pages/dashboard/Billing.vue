@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { Clock } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { subscribe } from '@/routes';
 import { billing } from '@/routes/dashboard';
 import type { AccountBillingProps, AccountPaymentRow } from '@/types';
 
@@ -59,6 +61,57 @@ function urlDaPagina(page: number): string {
                 {{ t('account.billing.description') }}
             </p>
         </header>
+
+        <section
+            v-if="pendingIntent"
+            data-test="intencao-pendente"
+            class="flex flex-col gap-3 rounded-lg border border-brand/40 bg-brand/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+            <div class="flex items-start gap-3">
+                <Clock
+                    class="mt-0.5 size-5 shrink-0 text-brand"
+                    aria-hidden="true"
+                />
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-foreground">
+                            {{ t('account.billing.pending_intent.title') }}
+                        </span>
+                        <Badge
+                            variant="outline"
+                            class="border-brand/40 text-brand"
+                        >
+                            {{ t('account.billing.pending_intent.badge') }}
+                        </Badge>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        {{
+                            t('account.billing.pending_intent.description', {
+                                plan: pendingIntent.planName,
+                                date: pendingIntent.createdAt ?? '',
+                            })
+                        }}
+                    </p>
+                </div>
+            </div>
+
+            <Button
+                variant="outline"
+                size="sm"
+                as-child
+                class="shrink-0 self-start sm:self-center"
+            >
+                <Link
+                    :href="
+                        subscribe.url({
+                            query: { plan: pendingIntent.planSlug },
+                        })
+                    "
+                >
+                    {{ t('account.billing.pending_intent.view_details') }}
+                </Link>
+            </Button>
+        </section>
 
         <section class="rounded-lg border border-border">
             <h3 class="border-b border-border px-4 py-2 text-sm font-medium">

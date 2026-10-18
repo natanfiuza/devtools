@@ -55,6 +55,12 @@ return [
         'no_subscription' => 'You are on the free plan.',
         'free_hint' => 'To change plans, talk to us: billing through the site is coming soon.',
         'no_period' => 'No period',
+        'pending_intent' => [
+            'badge' => 'Under review',
+            'title' => 'Subscription intent under review',
+            'description' => 'Your subscription intent for the {plan} plan was submitted on {date} and is under review by our team. We will reach out to complete activation.',
+            'view_details' => 'View or edit request',
+        ],
         'subscription_statuses' => [
             'active' => 'Active',
             'canceled' => 'Ended',

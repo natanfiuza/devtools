@@ -101,7 +101,7 @@ class SubscriptionIntentController extends Controller
                 'plan_id' => $plan->id,
                 'username' => $validated['username'],
                 'phone' => $validated['phone'],
-                'document' => $validated['document'],
+                'document' => $validated['document'] ?? null,
                 'payment_method' => SubscriptionIntentPaymentMethod::from($validated['payment_method']),
                 'notes' => $validated['notes'] ?? null,
                 'status' => SubscriptionIntentStatus::Pending,

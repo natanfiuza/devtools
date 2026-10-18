@@ -61,10 +61,21 @@ export type AccountOverviewProps = {
     payments: number;
 };
 
+/** Intencao de assinatura em analise exibida nas faturas (ADR-034). */
+export type AccountPendingIntent = {
+    id: number;
+    planName: string;
+    planSlug: string;
+    status: string;
+    paymentMethod: string;
+    createdAt: string | null;
+};
+
 /** Props das Faturas (`/dashboard/billing`). */
 export type AccountBillingProps = {
     plan: AccountPlan;
     subscription: AccountSubscription | null;
+    pendingIntent?: AccountPendingIntent | null;
     payments: Paginator<AccountPaymentRow>;
     total: number;
 };
