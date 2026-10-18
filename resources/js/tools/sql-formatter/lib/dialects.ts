@@ -1,4 +1,10 @@
-import { MSSQL, MySQL, PostgreSQL, SQLite, type SQLDialect } from '@codemirror/lang-sql';
+import {
+    MSSQL,
+    MySQL,
+    PostgreSQL,
+    SQLite,
+    type SQLDialect,
+} from '@codemirror/lang-sql';
 import type { SqlLanguage } from 'sql-formatter';
 
 /**

@@ -60,8 +60,7 @@ export interface DecodedToken {
 export type DecodeFailure = 'shape' | 'base64' | 'json';
 
 export type DecodeResult =
-    | { ok: true; token: DecodedToken }
-    | { ok: false; reason: DecodeFailure };
+    { ok: true; token: DecodedToken } | { ok: false; reason: DecodeFailure };
 
 /**
  * O valor de um cabecalho `Authorization` chega inteiro na area de
@@ -76,7 +75,10 @@ const BEARER = /^bearer\s+/i;
  * uma comparacao com o relogio de quem esta na tela, e um teste que dependesse
  * do relogio de verdade envelheceria sozinho.
  */
-export function decodeJwt(input: string, now: number = Date.now()): DecodeResult {
+export function decodeJwt(
+    input: string,
+    now: number = Date.now(),
+): DecodeResult {
     const parts = input.trim().replace(BEARER, '').split('.');
     const header = parts[0];
     const payload = parts[1];
@@ -84,7 +86,11 @@ export function decodeJwt(input: string, now: number = Date.now()): DecodeResult
 
     // Nao ha `?? ''` aqui de proposito: um token truncado perde a terceira
     // parte e vira duas, e inventar a parte que falta so esconderia o problema.
-    if (header === undefined || payload === undefined || signature === undefined) {
+    if (
+        header === undefined ||
+        payload === undefined ||
+        signature === undefined
+    ) {
         return { ok: false, reason: 'shape' };
     }
 
@@ -112,9 +118,9 @@ export function decodeJwt(input: string, now: number = Date.now()): DecodeResult
         return { ok: false, reason: 'base64' };
     }
 
-    const claims = TIME_CLAIMS.map((name) => readClaim(readPayload.value, name)).filter(
-        (claim): claim is TimeClaim => claim !== null,
-    );
+    const claims = TIME_CLAIMS.map((name) =>
+        readClaim(readPayload.value, name),
+    ).filter((claim): claim is TimeClaim => claim !== null);
 
     return {
         ok: true,
@@ -160,7 +166,11 @@ function readSegment(segment: string): SegmentResult {
         return { ok: false, reason: 'json' };
     }
 
-    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    if (
+        parsed === null ||
+        typeof parsed !== 'object' ||
+        Array.isArray(parsed)
+    ) {
         return { ok: false, reason: 'json' };
     }
 
@@ -171,7 +181,10 @@ function readSegment(segment: string): SegmentResult {
 | Os claims de tempo
 */
 
-function readClaim(payload: Record<string, unknown>, name: TimeClaimName): TimeClaim | null {
+function readClaim(
+    payload: Record<string, unknown>,
+    name: TimeClaimName,
+): TimeClaim | null {
     // `in` e nao `payload[name] === undefined`: um `"exp": null` esta la, e a
     // tela deve mostrar que o valor existe e nao serve - e nao sumir com ele.
     if (!(name in payload)) {

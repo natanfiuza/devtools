@@ -49,9 +49,9 @@ defineProps<{
         </div>
 
         <Form
+            v-slot="{ errors, processing }"
             v-bind="routes.form.login.value"
             :reset-on-success="['password']"
-            v-slot="{ errors, processing }"
             class="flex flex-col gap-5"
         >
             <div class="grid gap-4">
@@ -59,10 +59,10 @@ defineProps<{
                     <Label for="email">{{ t('auth.login.email') }}</Label>
                     <Input
                         id="email"
+                        v-focus
                         type="email"
                         name="email"
                         required
-                        v-focus
                         autocomplete="email"
                         :placeholder="t('auth.login.email_placeholder')"
                         :aria-invalid="errors.email ? 'true' : undefined"

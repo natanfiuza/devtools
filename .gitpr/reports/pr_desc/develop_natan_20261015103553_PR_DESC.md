@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: adiciona --force e install condicional de dependências no deploy
 ```
@@ -26,7 +27,6 @@ Torna o deploy mais resiliente e eficiente: evita reinstalações desnecessária
 - **Variáveis de ambiente**: nenhuma alteração.
 - **Operação**: a flag `--force` é manual e não deve ser usada pelo cron; ela força o deploy mesmo sem commit novo e falha explicitamente se outra execução estiver em andamento.
 - Os arquivos de hash não são versionados (adicionados ao `.gitignore`).
-
 
 close #15
 

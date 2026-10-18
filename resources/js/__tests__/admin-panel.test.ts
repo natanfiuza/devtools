@@ -99,6 +99,7 @@ const traducoes = {
         nav: {
             overview: 'VISAO_GERAL',
             users: 'USUARIOS',
+            subscriptions: 'ASSINATURAS',
             subscribers: 'ASSINANTES',
             plans: 'PLANOS',
             intents: 'INTENCOES',
@@ -150,7 +151,7 @@ beforeEach(() => {
 });
 
 describe('navegacao do painel', () => {
-    it('lista as sete secoes com o caminho de cada uma', () => {
+    it('lista as oito secoes com o caminho de cada uma', () => {
         const wrapper = montarPainel();
 
         const itens = wrapper.findAll('nav a');
@@ -158,6 +159,7 @@ describe('navegacao do painel', () => {
         expect(itens.map((item) => item.text())).toEqual([
             'VISAO_GERAL',
             'USUARIOS',
+            'ASSINATURAS',
             'ASSINANTES',
             'PLANOS',
             'INTENCOES',
@@ -167,6 +169,7 @@ describe('navegacao do painel', () => {
         expect(itens.map((item) => item.attributes('href'))).toEqual([
             '/admin',
             '/admin/users',
+            '/admin/subscriptions',
             '/admin/subscribers',
             '/admin/plans',
             '/admin/intents',

@@ -29,7 +29,12 @@ import { formatBytes } from '@/lib/bytes';
 import { downloadText } from '@/lib/download';
 import type { EditorError } from '@/lib/editor/createEditor';
 import { acceptAttribute, readTextFile, type FileRules } from '@/lib/file';
-import { analyzeJson, byteLength, hasBom, type ParseResult } from '@/lib/json/parse';
+import {
+    analyzeJson,
+    byteLength,
+    hasBom,
+    type ParseResult,
+} from '@/lib/json/parse';
 import type { JsonValue } from '@/lib/json/types';
 import {
     DEFAULT_ROOT_NAME,
@@ -107,7 +112,10 @@ const lastValue = shallowRef<JsonValue | null>(null);
 
 /** Nao ha analise valida para o texto atual: a saida na tela e a anterior. */
 const stale = computed(
-    () => !(outcome.value?.ok ?? false) && !isEmpty.value && lastValue.value !== null,
+    () =>
+        !(outcome.value?.ok ?? false) &&
+        !isEmpty.value &&
+        lastValue.value !== null,
 );
 
 /** O valor que a saida descreve: o de agora, ou o da ultima entrada valida. */
@@ -124,7 +132,10 @@ const value = computed<JsonValue | null>(() => {
 const generation = computed(() =>
     value.value === null
         ? null
-        : generate(value.value, { target: target.value, rootName: rootName.value }),
+        : generate(value.value, {
+              target: target.value,
+              rootName: rootName.value,
+          }),
 );
 
 const code = computed(() => generation.value?.code ?? '');
@@ -140,7 +151,10 @@ const errorMessage = computed(() => {
 
     return current.line === null || current.column === null
         ? t('tools.ui.states.invalid_no_position')
-        : t('tools.ui.states.invalid', { line: current.line, column: current.column });
+        : t('tools.ui.states.invalid', {
+              line: current.line,
+              column: current.column,
+          });
 });
 
 /**
@@ -262,7 +276,10 @@ function copyCode(): void {
 function download(): void {
     const extension = TARGET_EXTENSIONS[target.value];
 
-    downloadText(`${t('tools.json-to-code.download_name')}.${extension}`, code.value);
+    downloadText(
+        `${t('tools.json-to-code.download_name')}.${extension}`,
+        code.value,
+    );
 }
 
 /*
@@ -306,9 +323,12 @@ const statsMessage = computed(() => {
         t('tools.json-to-code.stats.types', { count: current.types }),
         // O tamanho do documento encostado no limite: e o que faz o numero do
         // rodape significar alguma coisa.
-        `${formatBytes(inputBytes.value, locale.value)} ${t('tools.ui.limits.of', {
-            limit: formatBytes(props.maxInputBytes, locale.value),
-        })}`,
+        `${formatBytes(inputBytes.value, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
     ].join(' · ');
 });
 
@@ -337,7 +357,10 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
 
     // Entrada valida que nao vira codigo: a raiz nao e um objeto com chaves.
     if (value.value !== null && generation.value === null) {
-        return { text: t('tools.json-to-code.states.root_object'), error: false };
+        return {
+            text: t('tools.json-to-code.states.root_object'),
+            error: false,
+        };
     }
 
     return null;
@@ -457,7 +480,11 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem v-for="item in TARGETS" :key="item" :value="item">
+                    <SelectItem
+                        v-for="item in TARGETS"
+                        :key="item"
+                        :value="item"
+                    >
                         {{ t(`tools.json-to-code.targets.${item}`) }}
                     </SelectItem>
                 </SelectContent>
@@ -494,7 +521,7 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                     class="p-3 font-mono text-sm transition-opacity"
                     :class="stale ? 'opacity-50' : ''"
                     data-test="json-to-code-output"
-                >{{ code }}</pre>
+                    >{{ code }}</pre>
 
                 <p
                     v-else-if="state !== null"

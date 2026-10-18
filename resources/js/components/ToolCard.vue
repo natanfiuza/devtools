@@ -53,7 +53,9 @@ const href = computed(() => toolPath(props.tool, routes.localeSlug.value));
                 >
                     {{ t(toolKeys.name(tool)) }}
                 </Link>
-                <template v-else>{{ t(toolKeys.name(tool)) }}</template>
+                <template v-else>
+                    {{ t(toolKeys.name(tool)) }}
+                </template>
             </h3>
             <Badge
                 v-if="tool.status !== 'available'"

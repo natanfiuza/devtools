@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { Copy, Eraser, FolderOpen, Sparkles, TriangleAlert } from '@lucide/vue';
 import { useDebounceFn } from '@vueuse/core';
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import {
+    computed,
+    onBeforeUnmount,
+    ref,
+    shallowRef,
+    useTemplateRef,
+    watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/tool/CodeEditor.vue';
 import FileDropzone from '@/components/tool/FileDropzone.vue';
@@ -77,9 +84,15 @@ const FILE_RULES: Pick<FileRules, 'extensions' | 'types'> = {
  * substituicao aparecer. A expressao le uma linha de log e nomeia o que
  * encontra; o texto que ela le esta em `sample.txt`.
  */
-const EXAMPLE_PATTERN = '^(?<quando>\\S+) (?<nivel>[A-Z]+)\\s+pedido (?<id>\\d+) (?<mensagem>.+)$';
+const EXAMPLE_PATTERN =
+    '^(?<quando>\\S+) (?<nivel>[A-Z]+)\\s+pedido (?<id>\\d+) (?<mensagem>.+)$';
 const EXAMPLE_REPLACEMENT = '$<nivel> #$<id>: $<mensagem>';
-const EXAMPLE_TOGGLES: Record<RegexFlag, boolean> = { i: false, m: true, s: false, u: false };
+const EXAMPLE_TOGGLES: Record<RegexFlag, boolean> = {
+    i: false,
+    m: true,
+    s: false,
+    u: false,
+};
 
 /** O que a linha da lista mostra no lugar de um valor que nao existe. */
 const AUSENTE = '—';
@@ -90,7 +103,12 @@ const text = ref('');
 const pattern = ref('');
 const replacement = ref('');
 /** As flags ligadas; `g` nao esta aqui porque nunca sai. */
-const toggles = ref<Record<RegexFlag, boolean>>({ i: false, m: false, s: false, u: false });
+const toggles = ref<Record<RegexFlag, boolean>>({
+    i: false,
+    m: false,
+    s: false,
+    u: false,
+});
 
 /** O resultado da busca. `shallowRef`: o resultado nao precisa ser reativo. */
 const outcome = shallowRef<RegexResult | null>(null);
@@ -277,7 +295,8 @@ function apply(next: ScreenChange): void {
     const changed =
         (next.text !== undefined && next.text !== text.value) ||
         (next.pattern !== undefined && next.pattern !== pattern.value) ||
-        (next.replacement !== undefined && next.replacement !== replacement.value) ||
+        (next.replacement !== undefined &&
+            next.replacement !== replacement.value) ||
         (next.toggles !== undefined && next.toggles !== toggles.value);
 
     // Sem mudanca nao ha `watch` para observar: deixar o `intake` armado faria a
@@ -369,12 +388,18 @@ function openFile(): void {
 | A saida
 */
 
-const matches = computed(() => (outcome.value?.ok === true ? outcome.value.matches : []));
+const matches = computed(() =>
+    outcome.value?.ok === true ? outcome.value.matches : [],
+);
 const hasResult = computed(() => outcome.value?.ok === true);
-const truncated = computed(() => outcome.value?.ok === true && outcome.value.truncated);
+const truncated = computed(
+    () => outcome.value?.ok === true && outcome.value.truncated,
+);
 
 /** O texto cortado nos casamentos, para a previa realcada. */
-const parts = computed(() => (hasResult.value ? highlight(text.value, matches.value) : []));
+const parts = computed(() =>
+    hasResult.value ? highlight(text.value, matches.value) : [],
+);
 
 /** O que a linha da lista mostra no lugar do casamento: o vazio e um valor, e o `''` o diz. */
 function excerptOf(match: RegexMatch): string {
@@ -389,7 +414,11 @@ function excerptOf(match: RegexMatch): string {
  * aparece quando **nao ha** leitura na tela - com o resultado de antes a vista,
  * a busca seguinte espera calada em vez de piscar por cima dele.
  */
-const state = computed<{ text: string; error: boolean; detail: string | null } | null>(() => {
+const state = computed<{
+    text: string;
+    error: boolean;
+    detail: string | null;
+} | null>(() => {
     if (tooLarge.value) {
         return {
             text: t('tools.ui.states.too_large', {
@@ -415,7 +444,9 @@ const state = computed<{ text: string; error: boolean; detail: string | null } |
 
     if (timedOut.value) {
         return {
-            text: t('tools.regex-tester.states.timeout', { seconds: timeoutSeconds.value }),
+            text: t('tools.regex-tester.states.timeout', {
+                seconds: timeoutSeconds.value,
+            }),
             error: true,
             detail: null,
         };
@@ -426,11 +457,19 @@ const state = computed<{ text: string; error: boolean; detail: string | null } |
     }
 
     if (pattern.value === '') {
-        return { text: t('tools.regex-tester.states.pattern_empty'), error: false, detail: null };
+        return {
+            text: t('tools.regex-tester.states.pattern_empty'),
+            error: false,
+            detail: null,
+        };
     }
 
     if (busy.value && !hasResult.value) {
-        return { text: t('tools.ui.states.parsing'), error: false, detail: null };
+        return {
+            text: t('tools.ui.states.parsing'),
+            error: false,
+            detail: null,
+        };
     }
 
     return null;
@@ -461,7 +500,9 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
 
     return hasResult.value
         ? {
-              text: t('tools.regex-tester.matches_count', { count: matches.value.length }),
+              text: t('tools.regex-tester.matches_count', {
+                  count: matches.value.length,
+              }),
               error: false,
           }
         : null;
@@ -481,7 +522,9 @@ onBeforeUnmount(() => {
                     flags no fim. As flags sao **sintaxe** - nao passam pelo i18n -,
                     e os alternadores logo ao lado dizem quais estao ligadas.
                 -->
-                <div class="flex min-w-40 flex-1 items-center gap-1 font-mono text-sm">
+                <div
+                    class="flex min-w-40 flex-1 items-center gap-1 font-mono text-sm"
+                >
                     <span class="text-subtle" aria-hidden="true">/</span>
                     <input
                         ref="patternInput"
@@ -495,7 +538,9 @@ onBeforeUnmount(() => {
                         :placeholder="t('tools.regex-tester.pattern')"
                         data-test="regex-tester-pattern"
                     />
-                    <span class="text-subtle" aria-hidden="true">/{{ activeFlags }}</span>
+                    <span class="text-subtle" aria-hidden="true"
+                        >/{{ activeFlags }}</span
+                    >
                 </div>
 
                 <div class="flex items-center gap-1">
@@ -587,7 +632,10 @@ onBeforeUnmount(() => {
         </template>
 
         <template #output>
-            <div class="relative min-h-0 flex-1 overflow-auto" data-test="regex-tester-output">
+            <div
+                class="relative min-h-0 flex-1 overflow-auto"
+                data-test="regex-tester-output"
+            >
                 <!-- O estado manda: sem leitura valida nao ha o que realcar. -->
                 <div
                     v-if="state !== null"
@@ -606,7 +654,8 @@ onBeforeUnmount(() => {
                         v-if="state.detail !== null"
                         class="max-w-full text-xs break-words text-subtle"
                         data-test="regex-tester-detail"
-                    >{{ state.detail }}</code>
+                        >{{ state.detail }}</code
+                    >
                 </div>
 
                 <template v-else>
@@ -617,7 +666,7 @@ onBeforeUnmount(() => {
                     -->
                     <pre
                         v-if="parts.length > 0"
-                        class="border-b px-3 py-2 font-mono text-sm whitespace-pre-wrap break-words"
+                        class="border-b px-3 py-2 font-mono text-sm break-words whitespace-pre-wrap"
                         data-test="regex-tester-preview"
                     ><span
                         v-for="(part, index) in parts"
@@ -638,53 +687,80 @@ onBeforeUnmount(() => {
                         class="border-b px-3 py-1.5 text-xs text-subtle"
                         data-test="regex-tester-truncated"
                     >
-                        {{ t('tools.regex-tester.truncated', { count: matches.length }) }}
+                        {{
+                            t('tools.regex-tester.truncated', {
+                                count: matches.length,
+                            })
+                        }}
                     </p>
 
-                    <ol v-if="matches.length > 0" data-test="regex-tester-matches">
+                    <ol
+                        v-if="matches.length > 0"
+                        data-test="regex-tester-matches"
+                    >
                         <li
                             v-for="(match, index) in matches"
                             :key="`${index}-${match.index}`"
                             class="border-b border-border/60 px-3 py-2 last:border-b-0"
                             data-test="regex-tester-match"
                         >
-                            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                                <span class="font-mono text-xs text-subtle">#{{ index + 1 }}</span>
+                            <div
+                                class="flex flex-wrap items-baseline gap-x-2 gap-y-1"
+                            >
+                                <span class="font-mono text-xs text-subtle"
+                                    >#{{ index + 1 }}</span
+                                >
                                 <span
                                     class="rounded-sm bg-surface-2 px-1 font-mono text-sm"
                                     data-test="regex-tester-match-text"
-                                >{{ excerptOf(match) }}</span>
-                                <span class="text-xs text-subtle" data-test="regex-tester-match-position">
-                                    {{ t('tools.regex-tester.position', { start: match.index }) }}
+                                    >{{ excerptOf(match) }}</span
+                                >
+                                <span
+                                    class="text-xs text-subtle"
+                                    data-test="regex-tester-match-position"
+                                >
+                                    {{
+                                        t('tools.regex-tester.position', {
+                                            start: match.index,
+                                        })
+                                    }}
                                 </span>
                             </div>
 
                             <div
-                                v-if="match.groups.length > 0 || match.named.length > 0"
+                                v-if="
+                                    match.groups.length > 0 ||
+                                    match.named.length > 0
+                                "
                                 class="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-subtle"
                             >
                                 <span
                                     v-for="(group, at) in match.groups"
                                     :key="`g${at}`"
                                     data-test="regex-tester-group"
-                                >${{ at + 1 }}: {{ group ?? AUSENTE }}</span>
+                                    >${{ at + 1 }}: {{ group ?? AUSENTE }}</span
+                                >
                                 <span
                                     v-for="group in match.named"
                                     :key="group.name"
                                     data-test="regex-tester-named-group"
-                                >$&lt;{{ group.name }}&gt;: {{ group.text ?? AUSENTE }}</span>
+                                    >$&lt;{{ group.name }}&gt;:
+                                    {{ group.text ?? AUSENTE }}</span
+                                >
                             </div>
                         </li>
                     </ol>
 
                     <section v-if="replaced !== null" class="px-3 py-2">
-                        <h3 class="text-[11px] font-medium tracking-wide text-subtle uppercase">
+                        <h3
+                            class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                        >
                             {{ t('tools.regex-tester.replaced_title') }}
                         </h3>
                         <pre
-                            class="mt-1 font-mono text-sm whitespace-pre-wrap break-words"
+                            class="mt-1 font-mono text-sm break-words whitespace-pre-wrap"
                             data-test="regex-tester-replaced"
-                        >{{ replaced }}</pre>
+                            >{{ replaced }}</pre>
                     </section>
                 </template>
             </div>

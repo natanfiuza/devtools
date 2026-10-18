@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { lineColumnAt, lineColumnFromMessage, positionAt, positionFromMessage } from '@/lib/position';
+import {
+    lineColumnAt,
+    lineColumnFromMessage,
+    positionAt,
+    positionFromMessage,
+} from '@/lib/position';
 
 /**
  * Linha e coluna: a conta (posicao <-> linha/coluna) e a leitura das mensagens
@@ -13,10 +18,14 @@ import { lineColumnAt, lineColumnFromMessage, positionAt, positionFromMessage } 
 
 describe('positionFromMessage', () => {
     it('le a posicao no formato do V8', () => {
-        expect(positionFromMessage('Unexpected number in JSON at position 7 (line 1 column 8)')).toBe(
-            7,
-        );
-        expect(positionFromMessage('Expected property name at position 1')).toBe(1);
+        expect(
+            positionFromMessage(
+                'Unexpected number in JSON at position 7 (line 1 column 8)',
+            ),
+        ).toBe(7);
+        expect(
+            positionFromMessage('Expected property name at position 1'),
+        ).toBe(1);
     });
 
     it('nao inventa posicao quando nao ha', () => {
@@ -27,10 +36,14 @@ describe('positionFromMessage', () => {
 
 describe('lineColumnFromMessage', () => {
     it('le linha e coluna no formato do SpiderMonkey', () => {
-        expect(lineColumnFromMessage('JSON.parse: unexpected character at line 3 column 5')).toEqual(
-            { line: 3, column: 5 },
-        );
-        expect(lineColumnFromMessage('JSON.parse: unexpected character at line 3')).toEqual({
+        expect(
+            lineColumnFromMessage(
+                'JSON.parse: unexpected character at line 3 column 5',
+            ),
+        ).toEqual({ line: 3, column: 5 });
+        expect(
+            lineColumnFromMessage('JSON.parse: unexpected character at line 3'),
+        ).toEqual({
             line: 3,
             column: null,
         });
@@ -49,7 +62,9 @@ describe('lineColumnFromMessage', () => {
             ),
         ).toEqual({ line: 1, column: 8 });
         expect(
-            lineColumnFromMessage('Parse error at token: «EOF» at line 3 column 1\nUnexpected EOF'),
+            lineColumnFromMessage(
+                'Parse error at token: «EOF» at line 3 column 1\nUnexpected EOF',
+            ),
         ).toEqual({ line: 3, column: 1 });
     });
 });
@@ -68,7 +83,10 @@ describe('lineColumnAt', () => {
 
     it('conta a coluna em caracteres, e nao em code units', () => {
         // O emoji ocupa dois code units; a coluna nao pode pular dois numeros.
-        expect(lineColumnAt('{"a":"😀" x}', 10)).toEqual({ line: 1, column: 10 });
+        expect(lineColumnAt('{"a":"😀" x}', 10)).toEqual({
+            line: 1,
+            column: 10,
+        });
     });
 
     it('prende a posicao ao texto', () => {
@@ -90,7 +108,9 @@ describe('positionAt', () => {
         for (let position = 0; position <= text.length; position += 1) {
             const { line, column } = lineColumnAt(text, position);
 
-            expect(positionAt(text, line, column), `posicao ${position}`).toBe(position);
+            expect(positionAt(text, line, column), `posicao ${position}`).toBe(
+                position,
+            );
         }
     });
 

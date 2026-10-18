@@ -4,5 +4,16 @@
     "category": "json",
     "icon": "file-code",
     "order": 30,
-    "keywords": ["json", "typescript", "interface", "type", "php", "dto", "pydantic", "python", "class", "model"]
+    "keywords": [
+        "json",
+        "typescript",
+        "interface",
+        "type",
+        "php",
+        "dto",
+        "pydantic",
+        "python",
+        "class",
+        "model"
+    ]
 }

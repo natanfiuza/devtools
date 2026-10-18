@@ -94,7 +94,9 @@ const removePhoto = () => {
         />
 
         <div class="relative">
-            <Avatar class="size-20 overflow-hidden rounded-full border border-border shadow-xs">
+            <Avatar
+                class="size-20 overflow-hidden rounded-full border border-border shadow-xs"
+            >
                 <AvatarImage
                     v-if="currentAvatarUrl"
                     :src="currentAvatarUrl"

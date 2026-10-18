@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { OVERSCAN, ROW_HEIGHT, windowRange } from '@/tools/json-viewer/lib/window';
+import {
+    OVERSCAN,
+    ROW_HEIGHT,
+    windowRange,
+} from '@/tools/json-viewer/lib/window';
 
 /**
  * A conta da virtualizacao. Sem layout: e justamente por isso que ela mora numa
@@ -39,7 +43,8 @@ describe('windowRange', () => {
             start: first - OVERSCAN,
             end: first + ROWS_IN_VIEWPORT + OVERSCAN,
             paddingTop: (first - OVERSCAN) * ROW_HEIGHT,
-            paddingBottom: (1000 - first - ROWS_IN_VIEWPORT - OVERSCAN) * ROW_HEIGHT,
+            paddingBottom:
+                (1000 - first - ROWS_IN_VIEWPORT - OVERSCAN) * ROW_HEIGHT,
         });
     });
 
@@ -85,9 +90,11 @@ describe('windowRange', () => {
             const range = windowRange(scrollTop, VIEWPORT, total);
             const renderizadas = range.end - range.start;
 
-            expect(range.paddingTop + renderizadas * ROW_HEIGHT + range.paddingBottom).toBe(
-                esperado,
-            );
+            expect(
+                range.paddingTop +
+                    renderizadas * ROW_HEIGHT +
+                    range.paddingBottom,
+            ).toBe(esperado);
             expect(range.start).toBeGreaterThanOrEqual(0);
             expect(range.end).toBeLessThanOrEqual(total);
             expect(range.start).toBeLessThanOrEqual(range.end);

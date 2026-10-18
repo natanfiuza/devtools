@@ -187,9 +187,9 @@ describe('banner', () => {
         expect(detalhes.text()).toContain('DETALHES');
         expect(detalhes.text()).toContain('NECESSARIOS');
         expect(detalhes.text()).toContain('MEDICAO');
-        expect(
-            botao(wrapper, 'consent-privacy').attributes('href'),
-        ).toBe('/pt-br/privacy');
+        expect(botao(wrapper, 'consent-privacy').attributes('href')).toBe(
+            '/pt-br/privacy',
+        );
     });
 
     it('nao aparece quando ja ha decisao', () => {

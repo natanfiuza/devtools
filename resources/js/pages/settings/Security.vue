@@ -29,6 +29,7 @@ const { t } = useI18n();
         />
 
         <Form
+            v-slot="{ errors, processing }"
             v-bind="SecurityController.update.form()"
             :options="{
                 preserveScroll: true,
@@ -40,7 +41,6 @@ const { t } = useI18n();
                 'current_password',
             ]"
             class="space-y-6"
-            v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
                 <Label for="current_password">

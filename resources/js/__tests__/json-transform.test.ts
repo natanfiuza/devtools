@@ -38,12 +38,16 @@ describe('prettyJson', () => {
 
 describe('minifyJson', () => {
     it('tira todo espaco que nao esta dentro de string', () => {
-        expect(minifyJson({ a: [1, 2], b: 'x y' })).toBe('{"a":[1,2],"b":"x y"}');
+        expect(minifyJson({ a: [1, 2], b: 'x y' })).toBe(
+            '{"a":[1,2],"b":"x y"}',
+        );
     });
 
     it('e o inverso do pretty', () => {
         expect(JSON.parse(prettyJson(DOC))).toEqual(DOC);
-        expect(minifyJson(JSON.parse(prettyJson(DOC)) as JsonValue)).toBe(minifyJson(DOC));
+        expect(minifyJson(JSON.parse(prettyJson(DOC)) as JsonValue)).toBe(
+            minifyJson(DOC),
+        );
     });
 });
 
@@ -66,11 +70,9 @@ describe('compareKeys', () => {
 
 describe('sortJson', () => {
     it('ordena as chaves de todos os objetos', () => {
-        expect(Object.keys(sortJson(DOC) as Record<string, JsonValue>)).toEqual([
-            'a',
-            'b',
-            'lista',
-        ]);
+        expect(Object.keys(sortJson(DOC) as Record<string, JsonValue>)).toEqual(
+            ['a', 'b', 'lista'],
+        );
     });
 
     it('ordena recursivamente, inclusive dentro de array', () => {
@@ -80,10 +82,11 @@ describe('sortJson', () => {
         // Array preserva a ordem dos itens...
         expect(interno).toEqual([3, 1, 2]);
         // ...mas o objeto dentro dele e ordenado.
-        expect(Object.keys((sorted.lista as JsonValue[])[0] as Record<string, JsonValue>)).toEqual([
-            'a',
-            'z',
-        ]);
+        expect(
+            Object.keys(
+                (sorted.lista as JsonValue[])[0] as Record<string, JsonValue>,
+            ),
+        ).toEqual(['a', 'z']);
     });
 
     it('nao muda o valor original', () => {

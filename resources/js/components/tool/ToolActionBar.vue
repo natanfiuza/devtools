@@ -16,7 +16,10 @@
     >
         <slot />
 
-        <div v-if="$slots.end" class="ml-auto flex flex-wrap items-center gap-2">
+        <div
+            v-if="$slots.end"
+            class="ml-auto flex flex-wrap items-center gap-2"
+        >
             <slot name="end" />
         </div>
     </div>

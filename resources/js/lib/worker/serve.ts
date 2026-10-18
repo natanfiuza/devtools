@@ -28,7 +28,9 @@ interface WorkerScope<Payload, Result> {
  * dele dentro da propria funcao, devolvendo-o como resultado (e o que o SQL
  * Formatter faz com o texto que nao e SQL).
  */
-export function serve<Payload, Result>(run: (payload: Payload) => Result): void {
+export function serve<Payload, Result>(
+    run: (payload: Payload) => Result,
+): void {
     const scope = self as unknown as WorkerScope<Payload, Result>;
 
     scope.addEventListener('message', (event) => {

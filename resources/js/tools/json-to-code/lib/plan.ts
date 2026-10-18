@@ -59,11 +59,19 @@ export function planTypes(root: TypeNode, rootName: string): TypePlan {
         const name = unique(item.name, used);
 
         names.set(item.node, name);
-        declarations.push({ name, fields: item.node.fields, depth: item.depth });
+        declarations.push({
+            name,
+            fields: item.node.fields,
+            depth: item.depth,
+        });
 
         for (const field of item.node.fields) {
             pending.push(
-                ...objects(field.type, typeNameFrom(field.key, NESTED_FALLBACK), item.depth + 1),
+                ...objects(
+                    field.type,
+                    typeNameFrom(field.key, NESTED_FALLBACK),
+                    item.depth + 1,
+                ),
             );
         }
     }
@@ -85,7 +93,9 @@ function objects(node: TypeNode, name: string, depth: number): NamedObject[] {
         case 'array':
             return objects(node.element, name, depth);
         case 'union':
-            return node.members.flatMap((member) => objects(member, name, depth));
+            return node.members.flatMap((member) =>
+                objects(member, name, depth),
+            );
         default:
             return [];
     }

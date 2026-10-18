@@ -41,7 +41,12 @@ const nodes = flatten(DOC);
 
 describe('flatten', () => {
     it('achata em pre-ordem, com o objeto antes dos filhos', () => {
-        expect(nodes.map((node) => node.key ?? (node.index === null ? '$' : `[${node.index}]`))).toEqual([
+        expect(
+            nodes.map(
+                (node) =>
+                    node.key ?? (node.index === null ? '$' : `[${node.index}]`),
+            ),
+        ).toEqual([
             '$',
             'store',
             'book',
@@ -204,9 +209,9 @@ describe('searchNodes', () => {
         const found = searchNodes(nodes, 'price');
 
         // O `[1]` esta colapsado por padrao; os pais dele precisam abrir.
-        expect([...found.ancestors].sort((left, right) => left - right)).toEqual([
-            0, 1, 2, 3, 6,
-        ]);
+        expect(
+            [...found.ancestors].sort((left, right) => left - right),
+        ).toEqual([0, 1, 2, 3, 6]);
     });
 
     it('para no teto de resultados e avisa', () => {

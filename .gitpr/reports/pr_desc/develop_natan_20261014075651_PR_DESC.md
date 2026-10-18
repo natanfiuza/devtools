@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: entrega home com tools, busca, precos e consentimento
 ```

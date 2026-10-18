@@ -118,7 +118,9 @@ function campo(): HTMLInputElement {
 }
 
 function opcoes(): HTMLElement[] {
-    return Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'));
+    return Array.from(
+        document.querySelectorAll<HTMLElement>('[role="option"]'),
+    );
 }
 
 /**
@@ -211,9 +213,9 @@ describe('resultados', () => {
 
         await digitar('kubernetes');
         expect(opcoes()).toHaveLength(0);
-        expect(
-            achar('[data-test="command-palette-empty"]')?.textContent,
-        ).toBe('VAZIO:kubernetes');
+        expect(achar('[data-test="command-palette-empty"]')?.textContent).toBe(
+            'VAZIO:kubernetes',
+        );
     });
 
     it('escreve nome, categoria, selo e dicas pelo i18n', async () => {

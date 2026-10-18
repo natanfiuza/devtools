@@ -51,27 +51,54 @@ describe('inferencia', () => {
     });
 
     it('nao inventa formato para o que veio vazio', () => {
-        expect(infer([])).toEqual({ kind: 'array', element: { kind: 'unknown' } });
+        expect(infer([])).toEqual({
+            kind: 'array',
+            element: { kind: 'unknown' },
+        });
         expect(infer({})).toEqual({ kind: 'open_object' });
     });
 
     it('junta os itens de um array num tipo so', () => {
-        expect(infer([1, 2, 3])).toEqual({ kind: 'array', element: { kind: 'int' } });
+        expect(infer([1, 2, 3])).toEqual({
+            kind: 'array',
+            element: { kind: 'int' },
+        });
         // Inteiro com decimal e o mesmo numero em JSON: o tipo e o mais largo.
-        expect(infer([1, 2.5])).toEqual({ kind: 'array', element: { kind: 'float' } });
-        expect(infer([1, 1])).toEqual({ kind: 'array', element: { kind: 'int' } });
+        expect(infer([1, 2.5])).toEqual({
+            kind: 'array',
+            element: { kind: 'float' },
+        });
+        expect(infer([1, 1])).toEqual({
+            kind: 'array',
+            element: { kind: 'int' },
+        });
     });
 
     it('faz uniao quando os itens nao se parecem', () => {
         expect(infer([1, 'a'])).toEqual({
             kind: 'array',
-            element: { kind: 'union', members: [{ kind: 'string' }, { kind: 'int' }] },
+            element: {
+                kind: 'union',
+                members: [{ kind: 'string' }, { kind: 'int' }],
+            },
         });
         expect(infer([{ a: 1 }, null])).toEqual({
             kind: 'array',
             element: {
                 kind: 'union',
-                members: [{ kind: 'object', fields: [{ key: 'a', type: { kind: 'int' }, optional: false }] }, { kind: 'null' }],
+                members: [
+                    {
+                        kind: 'object',
+                        fields: [
+                            {
+                                key: 'a',
+                                type: { kind: 'int' },
+                                optional: false,
+                            },
+                        ],
+                    },
+                    { kind: 'null' },
+                ],
             },
         });
     });
@@ -107,11 +134,15 @@ describe('inferencia', () => {
 
 describe('uniao e fusao', () => {
     it('nao faz uniao de um tipo so', () => {
-        expect(unionOf([{ kind: 'int' }, { kind: 'int' }])).toEqual({ kind: 'int' });
+        expect(unionOf([{ kind: 'int' }, { kind: 'int' }])).toEqual({
+            kind: 'int',
+        });
     });
 
     it('descarta o desconhecido quando ha informacao', () => {
-        expect(unionOf([{ kind: 'unknown' }, { kind: 'string' }])).toEqual({ kind: 'string' });
+        expect(unionOf([{ kind: 'unknown' }, { kind: 'string' }])).toEqual({
+            kind: 'string',
+        });
         expect(unionOf([{ kind: 'unknown' }])).toEqual({ kind: 'unknown' });
     });
 
@@ -123,12 +154,9 @@ describe('uniao e fusao', () => {
             { kind: 'string' },
         ]);
 
-        expect(node.kind === 'union' && node.members.map((member) => member.kind)).toEqual([
-            'string',
-            'bool',
-            'object',
-            'null',
-        ]);
+        expect(
+            node.kind === 'union' && node.members.map((member) => member.kind),
+        ).toEqual(['string', 'bool', 'object', 'null']);
     });
 
     it('achata uniao dentro de uniao', () => {
@@ -137,18 +165,19 @@ describe('uniao e fusao', () => {
             { kind: 'string' },
         );
 
-        expect(node.kind === 'union' && node.members.map((member) => member.kind)).toEqual([
-            'string',
-            'int',
-            'bool',
-        ]);
+        expect(
+            node.kind === 'union' && node.members.map((member) => member.kind),
+        ).toEqual(['string', 'int', 'bool']);
     });
 
     it('sabe quem ja aceita null', () => {
         expect(acceptsNull({ kind: 'null' })).toBe(true);
         expect(acceptsNull({ kind: 'unknown' })).toBe(true);
         expect(
-            acceptsNull({ kind: 'union', members: [{ kind: 'string' }, { kind: 'null' }] }),
+            acceptsNull({
+                kind: 'union',
+                members: [{ kind: 'string' }, { kind: 'null' }],
+            }),
         ).toBe(true);
         expect(acceptsNull({ kind: 'string' })).toBe(false);
     });
@@ -221,16 +250,25 @@ describe('plano das declaracoes', () => {
             'Root',
         );
 
-        expect(plan.declarations.map((entry) => entry.name)).toEqual(['Root', 'Cliente']);
+        expect(plan.declarations.map((entry) => entry.name)).toEqual([
+            'Root',
+            'Cliente',
+        ]);
     });
 
     it('desce por array e por uniao para achar o objeto do campo', () => {
         const plan = planTypes(
-            objeto(infer({ tags: [{ nome: 'a' }], outros: [{ x: 1 }, 'texto'] })),
+            objeto(
+                infer({ tags: [{ nome: 'a' }], outros: [{ x: 1 }, 'texto'] }),
+            ),
             'Root',
         );
 
-        expect(plan.declarations.map((entry) => entry.name)).toEqual(['Root', 'Tags', 'Outros']);
+        expect(plan.declarations.map((entry) => entry.name)).toEqual([
+            'Root',
+            'Tags',
+            'Outros',
+        ]);
     });
 
     it('nao repete nome quando duas chaves caem no mesmo', () => {
@@ -239,13 +277,20 @@ describe('plano das declaracoes', () => {
             'Root',
         );
 
-        expect(plan.declarations.map((entry) => entry.name)).toEqual(['Root', 'Tags', 'Tags2']);
+        expect(plan.declarations.map((entry) => entry.name)).toEqual([
+            'Root',
+            'Tags',
+            'Tags2',
+        ]);
     });
 
     it('nao repete nome ignorando a caixa', () => {
         // `Root` com `root` nao compila em PHP, que compara nome de classe sem
         // caixa - e a regra e uma so para os tres alvos.
-        const plan = planTypes(objeto(infer({ Cliente: { a: 1 }, cliente: { b: 2 } })), 'Root');
+        const plan = planTypes(
+            objeto(infer({ Cliente: { a: 1 }, cliente: { b: 2 } })),
+            'Root',
+        );
 
         expect(plan.declarations.map((entry) => entry.name)).toEqual([
             'Root',

@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 chore: altera fuso horário padrão para America/Recife
 ```

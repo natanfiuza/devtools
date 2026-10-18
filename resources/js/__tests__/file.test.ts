@@ -33,9 +33,12 @@ describe('acceptsFile', () => {
     });
 
     it('aceita pelo tipo quando a extensao nao ajuda', () => {
-        expect(acceptsFile(arquivo('consulta', 'select 1', 'application/json'), REGRAS)).toBe(
-            true,
-        );
+        expect(
+            acceptsFile(
+                arquivo('consulta', 'select 1', 'application/json'),
+                REGRAS,
+            ),
+        ).toBe(true);
     });
 
     it('aceita .sql sem tipo informado', () => {
@@ -43,23 +46,33 @@ describe('acceptsFile', () => {
         // recusaria arquivo legitimo.
         const regras: FileRules = { ...REGRAS, extensions: ['.sql'] };
 
-        expect(acceptsFile(arquivo('schema.sql', 'select 1'), regras)).toBe(true);
+        expect(acceptsFile(arquivo('schema.sql', 'select 1'), regras)).toBe(
+            true,
+        );
     });
 
     it('recusa o que nao e nem extensao nem tipo', () => {
-        expect(acceptsFile(arquivo('nota.csv', 'a;b', 'text/csv'), REGRAS)).toBe(false);
+        expect(
+            acceptsFile(arquivo('nota.csv', 'a;b', 'text/csv'), REGRAS),
+        ).toBe(false);
     });
 });
 
 describe('readTextFile', () => {
     it('devolve o texto do arquivo aceito', async () => {
-        const result = await readTextFile(arquivo('dados.json', '{"a":1}'), REGRAS);
+        const result = await readTextFile(
+            arquivo('dados.json', '{"a":1}'),
+            REGRAS,
+        );
 
         expect(result).toEqual({ ok: true, text: '{"a":1}' });
     });
 
     it('deixa passar o arquivo exatamente no limite', async () => {
-        const result = await readTextFile(arquivo('dados.txt', 'a'.repeat(1024)), REGRAS);
+        const result = await readTextFile(
+            arquivo('dados.txt', 'a'.repeat(1024)),
+            REGRAS,
+        );
 
         expect(result.ok).toBe(true);
     });
@@ -70,11 +83,18 @@ describe('readTextFile', () => {
         const grande = arquivo('planilha.csv', 'a'.repeat(2048), 'text/csv');
         const result = await readTextFile(grande, REGRAS);
 
-        expect(result).toEqual({ ok: false, kind: 'file_too_large', size: 2048 });
+        expect(result).toEqual({
+            ok: false,
+            kind: 'file_too_large',
+            size: 2048,
+        });
     });
 
     it('recusa pelo tipo', async () => {
-        const result = await readTextFile(arquivo('nota.csv', 'a;b', 'text/csv'), REGRAS);
+        const result = await readTextFile(
+            arquivo('nota.csv', 'a;b', 'text/csv'),
+            REGRAS,
+        );
 
         expect(result).toEqual({ ok: false, kind: 'file_type', size: 3 });
     });
@@ -82,7 +102,11 @@ describe('readTextFile', () => {
     it('recusa o arquivo que o navegador nao conseguiu ler', async () => {
         // Nao da para produzir um arquivo ilegivel de verdade no jsdom: um
         // objeto que nao e `Blob` derruba a leitura, que e o caminho do erro.
-        const quebrado = { name: 'dados.json', size: 4, type: '' } as unknown as File;
+        const quebrado = {
+            name: 'dados.json',
+            size: 4,
+            type: '',
+        } as unknown as File;
         const result = await readTextFile(quebrado, REGRAS);
 
         expect(result).toEqual({ ok: false, kind: 'file_unreadable', size: 4 });

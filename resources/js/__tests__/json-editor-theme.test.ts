@@ -16,7 +16,10 @@ const source = readFileSync(
     'utf8',
 );
 
-const css = readFileSync(resolve(process.cwd(), 'resources/css/app.css'), 'utf8');
+const css = readFileSync(
+    resolve(process.cwd(), 'resources/css/app.css'),
+    'utf8',
+);
 
 /** Os cinco tokens de sintaxe do DESIGN.md. */
 const SYNTAX_TOKENS = [
@@ -62,7 +65,9 @@ describe('tema do editor', () => {
     });
 
     it('declara as cinco cores de sintaxe e mais nenhuma', () => {
-        const syntax = [...tokensIn(source)].filter((token) => token.startsWith('--json-'));
+        const syntax = [...tokensIn(source)].filter((token) =>
+            token.startsWith('--json-'),
+        );
 
         expect(new Set(syntax)).toEqual(new Set(SYNTAX_TOKENS));
     });

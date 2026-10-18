@@ -4,5 +4,14 @@
     "category": "text",
     "icon": "regex",
     "order": 80,
-    "keywords": ["regex", "regexp", "pattern", "match", "replace", "groups", "capture", "test"]
+    "keywords": [
+        "regex",
+        "regexp",
+        "pattern",
+        "match",
+        "replace",
+        "groups",
+        "capture",
+        "test"
+    ]
 }

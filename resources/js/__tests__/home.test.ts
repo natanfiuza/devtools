@@ -50,7 +50,11 @@ vi.mock('@inertiajs/vue3', () => ({
         name: 'InertiaLink',
         props: { href: { type: String, default: '' } },
         render() {
-            return h('a', { href: this.href, class: this.$attrs.class }, this.$slots.default?.());
+            return h(
+                'a',
+                { href: this.href, class: this.$attrs.class },
+                this.$slots.default?.(),
+            );
         },
     }),
 }));
@@ -236,8 +240,8 @@ describe('grid de ferramentas', () => {
 
         expect(cartoes(wrapper)).toHaveLength(8);
         expect(
-            cartoes(wrapper).map(
-                (card) => card.attributes('data-test')?.replace('tool-card-', ''),
+            cartoes(wrapper).map((card) =>
+                card.attributes('data-test')?.replace('tool-card-', ''),
             ),
         ).toEqual(allTools.map((tool) => tool.slug));
     });
@@ -251,7 +255,9 @@ describe('grid de ferramentas', () => {
     it('linka o card inteiro das tools que funcionam e deixa a outra com o selo', () => {
         const wrapper = montar();
 
-        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(1);
+        expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(
+            1,
+        );
         expect(wrapper.text()).toContain('SELO_EM_BREVE');
         expect(wrapper.text()).not.toContain('SELO_DISPONIVEL');
 
@@ -268,9 +274,9 @@ describe('grid de ferramentas', () => {
         for (const link of links) {
             const slug = link.attributes('href')?.replace('/pt-br/tools/', '');
 
-            expect(
-                allTools.find((tool) => tool.slug === slug)?.status,
-            ).toBe('available');
+            expect(allTools.find((tool) => tool.slug === slug)?.status).toBe(
+                'available',
+            );
         }
 
         // O card sem link e o do AI SQL Builder - o segundo do grid.
@@ -316,10 +322,14 @@ describe('filtro por categoria', () => {
             cartoes(wrapper).map((card) => card.attributes('data-test')),
         ).toEqual(['tool-card-ai-sql-builder', 'tool-card-sql-formatter']);
         expect(
-            wrapper.get('[data-test="tool-chip-sql"]').attributes('aria-pressed'),
+            wrapper
+                .get('[data-test="tool-chip-sql"]')
+                .attributes('aria-pressed'),
         ).toBe('true');
         expect(
-            wrapper.get('[data-test="tool-chip-all"]').attributes('aria-pressed'),
+            wrapper
+                .get('[data-test="tool-chip-all"]')
+                .attributes('aria-pressed'),
         ).toBe('false');
 
         await wrapper.get('[data-test="tool-chip-all"]').trigger('click');
@@ -336,7 +346,11 @@ describe('precos (pagina dedicada)', () => {
             wrapper
                 .findAll('li[data-test^="plan-card-"]')
                 .map((card) => card.attributes('data-test')),
-        ).toEqual(['plan-card-free', 'plan-card-pro-monthly', 'plan-card-pro-yearly']);
+        ).toEqual([
+            'plan-card-free',
+            'plan-card-pro-monthly',
+            'plan-card-pro-yearly',
+        ]);
 
         expect(wrapper.text()).toContain('TITULO_PLANOS');
         expect(wrapper.text()).toContain('SUBTITULO_PLANOS');
@@ -381,7 +395,9 @@ describe('precos (pagina dedicada)', () => {
         const mensalCta = wrapper
             .get('[data-test="plan-card-pro-monthly"]')
             .get('[data-test="plan-subscribe-pro-monthly"]');
-        expect(mensalCta.attributes('href')).toBe('/subscribe?plan=pro-monthly');
+        expect(mensalCta.attributes('href')).toBe(
+            '/subscribe?plan=pro-monthly',
+        );
         expect(mensalCta.text()).toBe('ASSINAR_PLANO');
 
         const anualCta = wrapper
@@ -400,4 +416,3 @@ describe('precos (pagina dedicada)', () => {
         expect(texto).not.toContain('2000000');
     });
 });
-

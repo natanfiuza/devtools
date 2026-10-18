@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { HASH_ALGORITHMS, hashAll, hasWebCrypto } from '@/tools/base64-url-hash/lib/hash';
+import {
+    HASH_ALGORITHMS,
+    hashAll,
+    hasWebCrypto,
+} from '@/tools/base64-url-hash/lib/hash';
 
 /**
  * Os quatro digests da aba Hash.
@@ -23,13 +27,21 @@ const ESPERADO: Record<string, string> = {
 };
 
 /** Os comprimentos em hexadecimal de cada algoritmo. */
-const TAMANHO: Record<string, number> = { md5: 32, sha1: 40, sha256: 64, sha512: 128 };
+const TAMANHO: Record<string, number> = {
+    md5: 32,
+    sha1: 40,
+    sha256: 64,
+    sha512: 128,
+};
 
 /** Tira o `subtle` do caminho e devolve o que o poe de volta. */
 function semWebCrypto(): () => void {
     const original = Object.getOwnPropertyDescriptor(crypto, 'subtle');
 
-    Object.defineProperty(crypto, 'subtle', { value: undefined, configurable: true });
+    Object.defineProperty(crypto, 'subtle', {
+        value: undefined,
+        configurable: true,
+    });
 
     return () => {
         if (original === undefined) {
@@ -44,7 +56,12 @@ function semWebCrypto(): () => void {
 
 describe('hashAll', () => {
     it('devolve os quatro na ordem da tela', async () => {
-        expect([...HASH_ALGORITHMS]).toEqual(['md5', 'sha1', 'sha256', 'sha512']);
+        expect([...HASH_ALGORITHMS]).toEqual([
+            'md5',
+            'sha1',
+            'sha256',
+            'sha512',
+        ]);
 
         const linhas = await hashAll('abc');
 
@@ -78,7 +95,9 @@ describe('hashAll', () => {
     it('escreve tudo em hex minusculo, no comprimento de cada algoritmo', async () => {
         for (const linha of await hashAll('ação 🚀')) {
             expect(linha.hex, linha.algorithm).toMatch(/^[0-9a-f]+$/);
-            expect(linha.hex, linha.algorithm).toHaveLength(TAMANHO[linha.algorithm] ?? 0);
+            expect(linha.hex, linha.algorithm).toHaveLength(
+                TAMANHO[linha.algorithm] ?? 0,
+            );
         }
     });
 

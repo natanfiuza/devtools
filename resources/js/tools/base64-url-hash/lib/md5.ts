@@ -15,9 +15,10 @@
 
 /** O deslocamento de cada uma das 64 voltas, na ordem do RFC. */
 const SHIFTS = [
-    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9,
-    14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 6, 10, 15,
-    21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5,
+    9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11,
+    16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10,
+    15, 21,
 ];
 
 /**
@@ -27,8 +28,9 @@ const SHIFTS = [
  * seria escrever o resultado dela - com a chance de um digito trocado que
  * nenhum teste curto pegaria. O `>>> 0` traz cada um para 32 bits sem sinal.
  */
-const T = Array.from({ length: 64 }, (_, index) =>
-    Math.floor(Math.abs(Math.sin(index + 1)) * 2 ** 32) >>> 0,
+const T = Array.from(
+    { length: 64 },
+    (_, index) => Math.floor(Math.abs(Math.sin(index + 1)) * 2 ** 32) >>> 0,
 );
 
 /** O digest do texto, em hexadecimal minusculo: 32 caracteres. */
@@ -46,10 +48,16 @@ export function md5Bytes(bytes: Uint8Array): Uint8Array {
     let d = 0x10325476;
 
     for (let offset = 0; offset < padded.length; offset += 64) {
-        const view = new DataView(padded.buffer, padded.byteOffset + offset, 64);
+        const view = new DataView(
+            padded.buffer,
+            padded.byteOffset + offset,
+            64,
+        );
         // As dezesseis palavras do bloco sao lidas **little-endian** - e a
         // diferenca de MD5 para SHA, que le os mesmos bytes ao contrario.
-        const words = Array.from({ length: 16 }, (_, index) => view.getUint32(index * 4, true));
+        const words = Array.from({ length: 16 }, (_, index) =>
+            view.getUint32(index * 4, true),
+        );
 
         // Os acumuladores do bloco: o estado so muda depois das 64 voltas.
         let [aa, bb, cc, dd] = [a, b, c, d];
@@ -59,7 +67,12 @@ export function md5Bytes(bytes: Uint8Array): Uint8Array {
             const sum = (aa + f + at(T, step) + at(words, index)) >>> 0;
 
             // A volta do RFC: b recebe b + rotacao, e as outras tres giram.
-            [aa, dd, cc, bb] = [dd, cc, bb, (bb + rotateLeft(sum, at(SHIFTS, step))) >>> 0];
+            [aa, dd, cc, bb] = [
+                dd,
+                cc,
+                bb,
+                (bb + rotateLeft(sum, at(SHIFTS, step))) >>> 0,
+            ];
         }
 
         a = (a + aa) >>> 0;
@@ -79,7 +92,12 @@ export function md5Bytes(bytes: Uint8Array): Uint8Array {
  * outra: direto em `F`, multiplicado em `G` e `H`, e de tras para frente em
  * `I`.
  */
-function mix(b: number, c: number, d: number, step: number): { f: number; index: number } {
+function mix(
+    b: number,
+    c: number,
+    d: number,
+    step: number,
+): { f: number; index: number } {
     if (step < 16) {
         return { f: (b & c) | (~b & d), index: step };
     }
@@ -144,5 +162,7 @@ function wordsToBytes(words: number[]): Uint8Array {
 
 /** Bytes em hexadecimal minusculo - o mesmo formato das quatro linhas da aba Hash. */
 export function toHex(bytes: Uint8Array): string {
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+        '',
+    );
 }

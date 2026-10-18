@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: inicializa devtools com auth, i18n e tema claro/escuro
 ```
@@ -32,7 +33,6 @@ Materializa a fase F0 do SPEC/DESIGN ao criar a base do devtools: aplicação La
 - **Dependências novas de front**: reka-ui, vue-i18n, vue-sonner, vue-input-otp, @lucide/vue, @vueuse/core, class-variance-authority, tailwind-merge e clsx.
 - **Traduções**: há strings em inglês em telas de auth ainda não migradas para `lang/`, protegidas pelo teste `TranslationsParity`, que trava regressões de idioma.
 - **Deploy**: agora faz build no servidor e requer `supervisorctl` disponível e PATH/SSR configurados; releases antigas são podadas.
-
 
 close #1
 

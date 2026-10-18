@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 fix(deploy): corrige sintaxe do git pull e ignora scripts locais
 ```

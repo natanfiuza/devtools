@@ -1,4 +1,8 @@
-import { lineColumnAt, lineColumnFromMessage, positionFromMessage } from '@/lib/position';
+import {
+    lineColumnAt,
+    lineColumnFromMessage,
+    positionFromMessage,
+} from '@/lib/position';
 import type { JsonValue } from './types';
 
 /**
@@ -79,7 +83,13 @@ export function analyzeJson(text: string): ParseResult {
             // Posicao fora do texto e motor fora do combinado: melhor nao
             // mostrar numero nenhum do que mostrar um numero errado.
             if (position < 0 || position > source.length) {
-                return { ok: false, message, position: null, line: null, column: null };
+                return {
+                    ok: false,
+                    message,
+                    position: null,
+                    line: null,
+                    column: null,
+                };
             }
 
             const { line, column } = lineColumnAt(text, position + offset);

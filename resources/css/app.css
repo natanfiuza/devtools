@@ -214,7 +214,15 @@
     }
 
     /* DESIGN.md: foco visivel de 2px na cor de marca. */
-    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    :where(
+        a,
+        button,
+        input,
+        select,
+        textarea,
+        summary,
+        [tabindex]
+    ):focus-visible {
         outline: 2px solid var(--ring);
         outline-offset: 2px;
     }

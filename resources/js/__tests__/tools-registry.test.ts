@@ -128,23 +128,19 @@ describe('registro', () => {
     // O import carrega CodeMirror e o worker (ADR-018) e, com a suite inteira
     // em paralelo, passa dos 5s padrao do Vitest: o timeout e explicito para o
     // gate nao depender da carga da maquina.
-    it(
-        'carrega o componente da tool sob demanda',
-        async () => {
-            // O glob e lazy: o chunk da home nao pode carregar CodeMirror nem
-            // o worker (ADR-018). O carregador devolve o modulo so quando
-            // chamado.
-            const loader = toolComponentLoader('json-viewer');
+    it('carrega o componente da tool sob demanda', async () => {
+        // O glob e lazy: o chunk da home nao pode carregar CodeMirror nem
+        // o worker (ADR-018). O carregador devolve o modulo so quando
+        // chamado.
+        const loader = toolComponentLoader('json-viewer');
 
-            expect(loader).not.toBeNull();
+        expect(loader).not.toBeNull();
 
-            const component = await loader?.();
+        const component = await loader?.();
 
-            expect(component).toBeDefined();
-            expect(typeof component).toBe('object');
-        },
-        20000,
-    );
+        expect(component).toBeDefined();
+        expect(typeof component).toBe('object');
+    }, 20000);
 
     it('monta as chaves de traducao pelo slug', () => {
         const tool = toolAt(0);

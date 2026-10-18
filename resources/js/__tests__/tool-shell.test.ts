@@ -62,15 +62,23 @@ function montar(slots = true): VueWrapper {
     const Host = defineComponent({
         name: 'Host',
         render() {
-            return h(ToolShell, { splitKey: 'json-viewer' }, {
-                actions: slots ? () => h('button', 'ACAO') : undefined,
-                'input-header': slots ? () => h('button', 'FORMATAR') : undefined,
-                input: () => h(Probe),
-                'output-header': slots ? () => h('span', 'BUSCA') : undefined,
-                output: () => h('p', 'ARVORE'),
-                status: slots ? () => h('span', 'RODAPE') : undefined,
-                shortcuts: slots ? () => h('span', 'ATALHO') : undefined,
-            });
+            return h(
+                ToolShell,
+                { splitKey: 'json-viewer' },
+                {
+                    actions: slots ? () => h('button', 'ACAO') : undefined,
+                    'input-header': slots
+                        ? () => h('button', 'FORMATAR')
+                        : undefined,
+                    input: () => h(Probe),
+                    'output-header': slots
+                        ? () => h('span', 'BUSCA')
+                        : undefined,
+                    output: () => h('p', 'ARVORE'),
+                    status: slots ? () => h('span', 'RODAPE') : undefined,
+                    shortcuts: slots ? () => h('span', 'ATALHO') : undefined,
+                },
+            );
         },
     });
 
@@ -78,7 +86,10 @@ function montar(slots = true): VueWrapper {
 }
 
 /** O painel de entrada e o de saida, na ordem em que aparecem. */
-function paineis(wrapper: VueWrapper): { entrada: HTMLElement; saida: HTMLElement } {
+function paineis(wrapper: VueWrapper): {
+    entrada: HTMLElement;
+    saida: HTMLElement;
+} {
     const sections = wrapper.findAll('section');
 
     return {
@@ -92,7 +103,16 @@ function darRetangulo(wrapper: VueWrapper, left: number, width: number): void {
     const panes = wrapper.get('[data-test="tool-shell-panes"]').element;
 
     panes.getBoundingClientRect = () =>
-        ({ left, width, top: 0, height: 400, right: left + width, bottom: 400, x: left, y: 0 }) as DOMRect;
+        ({
+            left,
+            width,
+            top: 0,
+            height: 400,
+            right: left + width,
+            bottom: 400,
+            x: left,
+            y: 0,
+        }) as DOMRect;
 }
 
 function moverPonteiro(clientX: number): void {
@@ -134,8 +154,12 @@ describe('ToolShell no desktop', () => {
         const wrapper = montar();
         const divisor = wrapper.get('[data-test="tool-shell-splitter"]');
 
-        expect(wrapper.find('[data-test="tool-shell-panes"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="tool-shell-tabs"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="tool-shell-panes"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="tool-shell-tabs"]').exists()).toBe(
+            false,
+        );
         expect(largura(wrapper)).toBe('50%');
 
         // O divisor e um controle de verdade: quem usa leitor de tela sabe onde
@@ -213,9 +237,11 @@ describe('ToolShell no desktop', () => {
     it('lembra a divisao de cada tool', async () => {
         const wrapper = montar();
 
-        await wrapper.get('[data-test="tool-shell-splitter"]').trigger('keydown', {
-            key: 'End',
-        });
+        await wrapper
+            .get('[data-test="tool-shell-splitter"]')
+            .trigger('keydown', {
+                key: 'End',
+            });
 
         expect(localStorage.getItem('tool-split:json-viewer')).toBe('80');
 
@@ -234,8 +260,12 @@ describe('ToolShell no mobile', () => {
         const abas = wrapper.findAll('[role="tab"]');
         const conteudos = wrapper.findAll('[role="tabpanel"]');
 
-        expect(wrapper.find('[data-test="tool-shell-tabs"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="tool-shell-panes"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="tool-shell-tabs"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="tool-shell-panes"]').exists()).toBe(
+            false,
+        );
         expect(abas.map((aba) => aba.text())).toEqual(['ENTRADA', 'SAIDA']);
 
         // Entrada aberta, saida montada e fora da tela: `force-mount` mantem os
@@ -279,8 +309,12 @@ describe('ToolShell no mobile', () => {
     it('nao abre a faixa de acoes quando a tool nao tem nenhuma', () => {
         const wrapper = montar(false);
 
-        expect(wrapper.find('[data-test="tool-shell-input-header"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test="tool-shell-output-header"]').exists()).toBe(false);
+        expect(
+            wrapper.find('[data-test="tool-shell-input-header"]').exists(),
+        ).toBe(false);
+        expect(
+            wrapper.find('[data-test="tool-shell-output-header"]').exists(),
+        ).toBe(false);
     });
 });
 
@@ -288,14 +322,22 @@ describe('ToolShell sem conteudo', () => {
     it('esconde as faixas que ninguem preencheu', () => {
         const wrapper = montar(false);
 
-        expect(wrapper.find('[data-test="tool-shell-status"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test="tool-shell-shortcuts"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="tool-shell-status"]').exists()).toBe(
+            false,
+        );
+        expect(
+            wrapper.find('[data-test="tool-shell-shortcuts"]').exists(),
+        ).toBe(false);
     });
 
     it('mostra as faixas preenchidas', () => {
         const wrapper = montar();
 
-        expect(wrapper.get('[data-test="tool-shell-status"]').text()).toBe('RODAPE');
-        expect(wrapper.get('[data-test="tool-shell-shortcuts"]').text()).toBe('ATALHO');
+        expect(wrapper.get('[data-test="tool-shell-status"]').text()).toBe(
+            'RODAPE',
+        );
+        expect(wrapper.get('[data-test="tool-shell-shortcuts"]').text()).toBe(
+            'ATALHO',
+        );
     });
 });

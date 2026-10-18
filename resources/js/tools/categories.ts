@@ -15,7 +15,9 @@ export const categories: ToolCategory[] = [
     { id: 'text', icon: 'type' },
 ];
 
-export const categoryOrder: ToolCategoryId[] = categories.map((category) => category.id);
+export const categoryOrder: ToolCategoryId[] = categories.map(
+    (category) => category.id,
+);
 
 export function categoryById(id: ToolCategoryId): ToolCategory | undefined {
     return categories.find((category) => category.id === id);

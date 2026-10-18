@@ -68,7 +68,10 @@ const advantages = [
             data-test="subscribe-pending-banner"
             class="mt-6 flex items-start gap-3 rounded-xl border border-brand/40 bg-brand/5 p-4 text-sm"
         >
-            <Check class="mt-0.5 size-4 shrink-0 text-brand" aria-hidden="true" />
+            <Check
+                class="mt-0.5 size-4 shrink-0 text-brand"
+                aria-hidden="true"
+            />
             <div>
                 <p class="font-medium text-foreground">
                     {{ t('home.subscribe.pending_title') }}
@@ -82,10 +85,10 @@ const advantages = [
         <div class="mt-10 grid items-start gap-8 lg:grid-cols-12">
             <div class="rounded-xl border bg-card p-6 sm:p-8 lg:col-span-7">
                 <Form
+                    v-slot="{ errors, processing }"
                     v-bind="routes.form.subscribe.value"
                     class="space-y-6"
                     data-test="subscribe-form"
-                    v-slot="{ errors, processing }"
                 >
                     <div class="space-y-3">
                         <Label>{{ t('home.subscribe.plan_label') }}</Label>
@@ -105,12 +108,18 @@ const advantages = [
                                 ]"
                                 @click="planSlug = plan.slug"
                             >
-                                <div class="flex w-full items-center justify-between gap-2">
+                                <div
+                                    class="flex w-full items-center justify-between gap-2"
+                                >
                                     <span class="text-sm font-medium">
                                         {{ plan.name }}
                                         <template v-if="plan.interval !== null">
                                             &middot;
-                                            {{ t(`home.pricing.interval.${plan.interval}`) }}
+                                            {{
+                                                t(
+                                                    `home.pricing.interval.${plan.interval}`,
+                                                )
+                                            }}
                                         </template>
                                     </span>
                                     <Badge
@@ -120,7 +129,9 @@ const advantages = [
                                         {{ t('home.pricing.yearly_badge') }}
                                     </Badge>
                                 </div>
-                                <span class="mt-2 font-mono text-2xl font-semibold">
+                                <span
+                                    class="mt-2 font-mono text-2xl font-semibold"
+                                >
                                     {{ plan.price }}
                                 </span>
                             </button>
@@ -146,7 +157,9 @@ const advantages = [
                                 :default-value="username"
                                 required
                                 autocomplete="off"
-                                :placeholder="t('home.subscribe.username_placeholder')"
+                                :placeholder="
+                                    t('home.subscribe.username_placeholder')
+                                "
                                 aria-describedby="subscribe-username-help"
                             />
                         </div>
@@ -171,7 +184,9 @@ const advantages = [
                                 :default-value="pendingIntent?.phone ?? ''"
                                 required
                                 autocomplete="tel"
-                                :placeholder="t('home.subscribe.phone_placeholder')"
+                                :placeholder="
+                                    t('home.subscribe.phone_placeholder')
+                                "
                             />
                             <InputError :message="errors.phone" />
                         </div>
@@ -187,7 +202,9 @@ const advantages = [
                                 :default-value="pendingIntent?.document ?? ''"
                                 required
                                 autocomplete="off"
-                                :placeholder="t('home.subscribe.document_placeholder')"
+                                :placeholder="
+                                    t('home.subscribe.document_placeholder')
+                                "
                             />
                             <InputError :message="errors.document" />
                         </div>
@@ -203,13 +220,23 @@ const advantages = [
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="pix">
-                                    {{ t('home.subscribe.payment_methods.pix') }}
+                                    {{
+                                        t('home.subscribe.payment_methods.pix')
+                                    }}
                                 </SelectItem>
                                 <SelectItem value="credit_card">
-                                    {{ t('home.subscribe.payment_methods.credit_card') }}
+                                    {{
+                                        t(
+                                            'home.subscribe.payment_methods.credit_card',
+                                        )
+                                    }}
                                 </SelectItem>
                                 <SelectItem value="boleto">
-                                    {{ t('home.subscribe.payment_methods.boleto') }}
+                                    {{
+                                        t(
+                                            'home.subscribe.payment_methods.boleto',
+                                        )
+                                    }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
@@ -247,7 +274,9 @@ const advantages = [
                 </Form>
             </div>
 
-            <aside class="space-y-4 rounded-xl border bg-surface p-6 lg:col-span-5">
+            <aside
+                class="space-y-4 rounded-xl border bg-surface p-6 lg:col-span-5"
+            >
                 <h2 class="text-lg font-medium">
                     {{ t('home.pricing.advantages.title') }}
                 </h2>
@@ -268,10 +297,20 @@ const advantages = [
                         />
                         <div>
                             <h3 class="text-sm font-medium">
-                                {{ t(`home.pricing.advantages.items.${item.key}.title`) }}
+                                {{
+                                    t(
+                                        `home.pricing.advantages.items.${item.key}.title`,
+                                    )
+                                }}
                             </h3>
-                            <p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                                {{ t(`home.pricing.advantages.items.${item.key}.body`) }}
+                            <p
+                                class="mt-0.5 text-xs leading-relaxed text-muted-foreground"
+                            >
+                                {{
+                                    t(
+                                        `home.pricing.advantages.items.${item.key}.body`,
+                                    )
+                                }}
                             </p>
                         </div>
                     </li>

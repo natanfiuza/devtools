@@ -65,7 +65,10 @@ vi.mock('@/components/UserMenuContent.vue', () => ({
 }));
 
 vi.mock('@/components/LocaleSwitcher.vue', () => ({
-    default: defineComponent({ name: 'LocaleSwitcher', render: () => h('div') }),
+    default: defineComponent({
+        name: 'LocaleSwitcher',
+        render: () => h('div'),
+    }),
 }));
 
 vi.mock('@/components/ThemeToggle.vue', () => ({
@@ -149,7 +152,9 @@ function abrir(url: string, patch: Partial<AnalyticsProps> = {}): void {
         fakePage.current.props = {
             localeSlug: 'pt-br',
             sidebarOpen: true,
-            auth: { user: { id: 1, name: 'Ana Souza', email: 'ana@exemplo.com' } },
+            auth: {
+                user: { id: 1, name: 'Ana Souza', email: 'ana@exemplo.com' },
+            },
             analytics: propsDeAnalytics(patch),
         };
     }
@@ -202,7 +207,9 @@ describe('area da conta', () => {
     it('mostra o banner para quem ainda nao decidiu e nao injeta tag', () => {
         const wrapper = montarConta();
 
-        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(
+            true,
+        );
         expect(tags()).toHaveLength(0);
     });
 
@@ -219,7 +226,9 @@ describe('area da conta', () => {
     it('nao injeta nada com a decisao ja recusada', () => {
         const wrapper = montarConta({ consent: 'denied' });
 
-        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(
+            false,
+        );
         expect(tags()).toHaveLength(0);
     });
 });
@@ -228,7 +237,9 @@ describe('painel administrativo', () => {
     it('nao tem banner nem tag, nem com o aceite ja gravado', () => {
         const wrapper = montarPainel({ consent: 'granted' });
 
-        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="consent-banner"]').exists()).toBe(
+            false,
+        );
         expect(tags()).toHaveLength(0);
         expect(window.dataLayer).toBeUndefined();
     });

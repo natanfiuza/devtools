@@ -1,6 +1,10 @@
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language';
+import {
+    bracketMatching,
+    indentOnInput,
+    syntaxHighlighting,
+} from '@codemirror/language';
 import { lintGutter, setDiagnostics } from '@codemirror/lint';
 import { highlightSelectionMatches } from '@codemirror/search';
 import { EditorState, type Extension } from '@codemirror/state';
@@ -68,7 +72,10 @@ export interface EditorError {
     message: string;
 }
 
-export function createEditor(parent: HTMLElement, options: EditorOptions): EditorView {
+export function createEditor(
+    parent: HTMLElement,
+    options: EditorOptions,
+): EditorView {
     /*
     | As teclas da tela vem **antes** das do motor.
     |
@@ -105,7 +112,12 @@ export function createEditor(parent: HTMLElement, options: EditorOptions): Edito
         });
     }
 
-    const keymaps = [...command, ...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap];
+    const keymaps = [
+        ...command,
+        ...closeBracketsKeymap,
+        ...defaultKeymap,
+        ...historyKeymap,
+    ];
 
     const extensions: Extension[] = [
         lineNumbers(),
@@ -154,11 +166,16 @@ export function createEditor(parent: HTMLElement, options: EditorOptions): Edito
  * historico e o Ctrl+Z desfaz "formatar" como desfaz uma digitacao.
  */
 export function setEditorDoc(view: EditorView, doc: string): void {
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: doc } });
+    view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: doc },
+    });
 }
 
 /** Marca o erro na linha; `null` limpa a marca. */
-export function setEditorError(view: EditorView, error: EditorError | null): void {
+export function setEditorError(
+    view: EditorView,
+    error: EditorError | null,
+): void {
     if (error === null || error.position === null) {
         view.dispatch(setDiagnostics(view.state, []));
 
@@ -166,7 +183,10 @@ export function setEditorError(view: EditorView, error: EditorError | null): voi
     }
 
     const { doc } = view.state;
-    const from = Math.min(Math.max(error.position, 0), Math.max(doc.length - 1, 0));
+    const from = Math.min(
+        Math.max(error.position, 0),
+        Math.max(doc.length - 1, 0),
+    );
 
     view.dispatch(
         setDiagnostics(view.state, [

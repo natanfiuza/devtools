@@ -81,7 +81,9 @@ function goToPage(page: number): void {
 
     <div class="space-y-4">
         <header>
-            <h2 class="text-lg font-medium">{{ t('admin.users.title') }}</h2>
+            <h2 class="text-lg font-medium">
+                {{ t('admin.users.title') }}
+            </h2>
             <p class="mt-1 text-sm text-subtle">
                 {{ t('admin.users.description') }}
             </p>
@@ -163,7 +165,9 @@ function goToPage(page: number): void {
                 <span class="block text-sm text-subtle">{{ row.email }}</span>
             </template>
 
-            <template #cell-plan="{ row }">{{ row.plan }}</template>
+            <template #cell-plan="{ row }">
+                {{ row.plan }}
+            </template>
 
             <template #cell-role="{ row }">
                 {{ t(`admin.users.role_${row.role}`) }}
@@ -181,7 +185,9 @@ function goToPage(page: number): void {
                 </Badge>
             </template>
 
-            <template #cell-createdAt="{ row }">{{ row.createdAt }}</template>
+            <template #cell-createdAt="{ row }">
+                {{ row.createdAt }}
+            </template>
 
             <template #actions="{ row }">
                 <Button variant="outline" size="sm" as-child>

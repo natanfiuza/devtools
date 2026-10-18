@@ -35,18 +35,18 @@ defineProps<{
         </p>
 
         <Form
-            v-bind="routes.form.forgotPassword.value"
             v-slot="{ errors, processing }"
+            v-bind="routes.form.forgotPassword.value"
             class="flex flex-col gap-5"
         >
             <div class="grid gap-2">
                 <Label for="email">{{ t('auth.forgot.email') }}</Label>
                 <Input
                     id="email"
+                    v-focus
                     type="email"
                     name="email"
                     required
-                    v-focus
                     autocomplete="email"
                     :placeholder="t('auth.forgot.email_placeholder')"
                     :aria-invalid="errors.email ? 'true' : undefined"

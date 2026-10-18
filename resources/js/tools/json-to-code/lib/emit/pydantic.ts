@@ -38,7 +38,9 @@ export function emitPydantic(plan: TypePlan): string {
             return baseModel(name, entry.fields, context);
         });
 
-    const imports = plan.declarations.some((entry) => entry.fields.some((field) => usesAny(field.type)))
+    const imports = plan.declarations.some((entry) =>
+        entry.fields.some((field) => usesAny(field.type)),
+    )
         ? 'from typing import Any\n\nfrom pydantic import BaseModel'
         : 'from pydantic import BaseModel';
 
@@ -72,7 +74,11 @@ function pythonNames(plan: TypePlan): Map<string, string> {
     return renamed;
 }
 
-function baseModel(name: string, fields: Field[], context: PythonContext): string {
+function baseModel(
+    name: string,
+    fields: Field[],
+    context: PythonContext,
+): string {
     const used = new Set<string>();
     const lines = fields.map((field) => {
         const base = pythonField(field.key);
@@ -120,11 +126,15 @@ function render(node: TypeNode, context: PythonContext): string {
         case 'array':
             return `list[${render(node.element, context)}]`;
         case 'union':
-            return node.members.map((member) => render(member, context)).join(' | ');
+            return node.members
+                .map((member) => render(member, context))
+                .join(' | ');
         case 'object': {
             const planned = context.plan.names.get(node);
 
-            return planned === undefined ? 'dict[str, Any]' : (context.renamed.get(planned) ?? 'dict[str, Any]');
+            return planned === undefined
+                ? 'dict[str, Any]'
+                : (context.renamed.get(planned) ?? 'dict[str, Any]');
         }
     }
 }

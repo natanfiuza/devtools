@@ -14,7 +14,9 @@ defineProps<{
 
 <template>
     <div class="space-y-2 text-center">
-        <h1 class="text-xl font-medium tracking-tight">{{ title }}</h1>
+        <h1 class="text-xl font-medium tracking-tight">
+            {{ title }}
+        </h1>
         <p v-if="description" class="text-sm text-muted-foreground">
             {{ description }}
         </p>

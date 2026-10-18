@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: expõe limiar de virtualização e mantém árvore defasada
 ```
@@ -34,7 +35,6 @@ Além disso, os atalhos anunciados passam a corresponder ao que realmente funcio
 - **Atalhos exibidos mudaram**: `Ctrl+Z`/`Ctrl+V` saem da faixa de atalhos (seguem funcionando pelo keymap do CodeMirror, mas não são mais anunciados); entram `Cmd/Ctrl+Enter` e `Esc`.
 - **Sem migrações de banco, sem novas dependências** (nenhuma adição em `package.json`/`composer.json`).
 - Atenção ao registrar novos `KeyBinding` da tela: a ordem da lista importa — atalhos do produto devem vir antes dos keymaps do motor para não serem engolidos.
-
 
 close #10
 

@@ -31,10 +31,10 @@ const inputEmail = ref(props.email);
         :description="t('auth.reset.description')"
     >
         <Form
+            v-slot="{ errors, processing }"
             v-bind="routes.form.resetPassword.value"
             :transform="(data) => ({ ...data, token, email })"
             :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
             class="flex flex-col gap-5"
         >
             <div class="grid gap-4">
@@ -42,10 +42,10 @@ const inputEmail = ref(props.email);
                     <Label for="email">{{ t('auth.reset.email') }}</Label>
                     <Input
                         id="email"
+                        v-model="inputEmail"
                         type="email"
                         name="email"
                         autocomplete="email"
-                        v-model="inputEmail"
                         readonly
                     />
                     <InputError :message="errors.email" />

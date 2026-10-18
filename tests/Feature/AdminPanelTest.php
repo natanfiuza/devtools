@@ -317,7 +317,7 @@ it('mostra a auditoria e filtra por acao', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/Audit')
             ->has('entries.data', 2)
-            ->has('actionTypes', 18)
+            ->has('actionTypes', 19)
             ->where('entries.data.0.actor', $admin->email)
             ->where('entries.data.0.target', $user->name.' <'.$user->email.'>'));
 

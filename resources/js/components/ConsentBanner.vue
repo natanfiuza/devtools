@@ -54,7 +54,9 @@ const toggleAnalytics = (value: boolean | 'indeterminate'): void => {
                 aria-hidden="true"
             />
             <div class="flex flex-col gap-1">
-                <h2 class="font-medium">{{ t('app.consent.title') }}</h2>
+                <h2 class="font-medium">
+                    {{ t('app.consent.title') }}
+                </h2>
                 <p class="text-muted-foreground">
                     {{ t('app.consent.body') }}
                 </p>

@@ -222,7 +222,8 @@ onKeyStroke('/', (event) => {
                             tool.status === 'available'
                                 ? 'cursor-pointer'
                                 : 'cursor-default',
-                            index === activeIndex && 'bg-surface-2 text-foreground',
+                            index === activeIndex &&
+                                'bg-surface-2 text-foreground',
                         )
                     "
                     @click="openTool(tool)"

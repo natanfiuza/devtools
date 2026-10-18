@@ -20,7 +20,9 @@ export function createRunWorker(): Worker | null {
     }
 
     try {
-        return new Worker(new URL('./run.worker.ts', import.meta.url), { type: 'module' });
+        return new Worker(new URL('./run.worker.ts', import.meta.url), {
+            type: 'module',
+        });
     } catch {
         // CSP que bloqueia worker, navegador antigo: a busca continua na thread
         // principal, que da o mesmo resultado.

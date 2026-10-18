@@ -103,7 +103,10 @@ export function flatten(value: JsonValue): JsonNode[] {
             kind,
             key,
             index,
-            value: kind === 'object' || kind === 'array' ? null : (current as JsonPrimitive),
+            value:
+                kind === 'object' || kind === 'array'
+                    ? null
+                    : (current as JsonPrimitive),
             childCount: 0,
             subtreeSize: 1,
         };
@@ -114,12 +117,20 @@ export function flatten(value: JsonValue): JsonNode[] {
             const items = current as JsonValue[];
 
             for (let item = 0; item < items.length; item += 1) {
-                visit(items[item] as JsonValue, position, depth + 1, null, item);
+                visit(
+                    items[item] as JsonValue,
+                    position,
+                    depth + 1,
+                    null,
+                    item,
+                );
             }
 
             node.childCount = items.length;
         } else if (kind === 'object') {
-            const entries = Object.entries(current as Record<string, JsonValue>);
+            const entries = Object.entries(
+                current as Record<string, JsonValue>,
+            );
 
             for (const [childKey, childValue] of entries) {
                 visit(childValue, position, depth + 1, childKey, null);
@@ -142,7 +153,10 @@ export function flatten(value: JsonValue): JsonNode[] {
  * Colapsar um no esconde a subarvore inteira dele - que, em pre-ordem, sao os
  * indices logo depois dele.
  */
-export function visibleRows(nodes: JsonNode[], collapsed: Set<number>): number[] {
+export function visibleRows(
+    nodes: JsonNode[],
+    collapsed: Set<number>,
+): number[] {
     const visible: number[] = [];
 
     for (let index = 0; index < nodes.length; index += 1) {
@@ -234,7 +248,8 @@ export function searchNodes(
         }
 
         const inKey = node.key !== null && normalize(node.key).includes(needle);
-        const inValue = !isContainer(node) && normalize(leafText(node)).includes(needle);
+        const inValue =
+            !isContainer(node) && normalize(leafText(node)).includes(needle);
 
         if (!inKey && !inValue) {
             continue;

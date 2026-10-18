@@ -24,7 +24,10 @@ import { createParserWorker } from './parser.workerHost';
 export type AnalysisThread = 'worker' | 'main';
 
 export interface AnalyzeClient {
-    analyze(text: string, options?: Partial<AnalyzeOptions>): Promise<AnalyzeOutcome | null>;
+    analyze(
+        text: string,
+        options?: Partial<AnalyzeOptions>,
+    ): Promise<AnalyzeOutcome | null>;
     /** Onde a analise roda agora - util para a tela dizer, e para o teste. */
     thread(): AnalysisThread;
     dispose(): void;
@@ -48,7 +51,10 @@ function mainThreadClient(): AnalyzeClient {
         analyze(text, options = {}) {
             return released
                 ? Promise.resolve(null)
-                : analyzeLocally(text, { ...DEFAULT_ANALYZE_OPTIONS, ...options });
+                : analyzeLocally(text, {
+                      ...DEFAULT_ANALYZE_OPTIONS,
+                      ...options,
+                  });
         },
         thread: () => 'main',
         dispose() {
@@ -70,36 +76,46 @@ function workerClient(worker: Worker): AnalyzeClient {
     const waiting = new Map<number, Pending>();
 
     /** Resolve o que esta na fila; `producer` decide o que cada um recebe. */
-    const drain = (producer: (pending: Pending) => AnalyzeOutcome | null): void => {
+    const drain = (
+        producer: (pending: Pending) => AnalyzeOutcome | null,
+    ): void => {
         for (const [id, pending] of [...waiting]) {
             waiting.delete(id);
             pending.resolve(latestId === id ? producer(pending) : null);
         }
     };
 
-    worker.addEventListener('message', (event: MessageEvent<AnalyzeResponse>) => {
-        const { id, outcome } = event.data;
-        const pending = waiting.get(id);
+    worker.addEventListener(
+        'message',
+        (event: MessageEvent<AnalyzeResponse>) => {
+            const { id, outcome } = event.data;
+            const pending = waiting.get(id);
 
-        if (pending === undefined) {
-            return;
-        }
+            if (pending === undefined) {
+                return;
+            }
 
-        waiting.delete(id);
-        pending.resolve(latestId === id ? outcome : null);
-    });
+            waiting.delete(id);
+            pending.resolve(latestId === id ? outcome : null);
+        },
+    );
 
     worker.addEventListener('error', () => {
         // O worker morreu: o que estava na fila sai daqui mesmo. A tool perde
         // velocidade, nao a funcao.
         degraded = true;
         worker.terminate();
-        drain((pending) => analyzeDocument(pending.request.text, pending.request.options));
+        drain((pending) =>
+            analyzeDocument(pending.request.text, pending.request.options),
+        );
     });
 
     return {
         analyze(text, options = {}) {
-            const optionsResolved: AnalyzeOptions = { ...DEFAULT_ANALYZE_OPTIONS, ...options };
+            const optionsResolved: AnalyzeOptions = {
+                ...DEFAULT_ANALYZE_OPTIONS,
+                ...options,
+            };
 
             if (degraded) {
                 return analyzeLocally(text, optionsResolved);
@@ -114,7 +130,11 @@ function workerClient(worker: Worker): AnalyzeClient {
             drain(() => null);
 
             return new Promise((resolve) => {
-                const request: AnalyzeRequest = { id, text, options: optionsResolved };
+                const request: AnalyzeRequest = {
+                    id,
+                    text,
+                    options: optionsResolved,
+                };
 
                 waiting.set(id, { request, resolve });
                 worker.postMessage(request);
@@ -129,7 +149,9 @@ function workerClient(worker: Worker): AnalyzeClient {
     };
 }
 
-export function createAnalyzeClient(spawn: WorkerSpawner = createParserWorker): AnalyzeClient {
+export function createAnalyzeClient(
+    spawn: WorkerSpawner = createParserWorker,
+): AnalyzeClient {
     const worker = spawn();
 
     return worker === null ? mainThreadClient() : workerClient(worker);

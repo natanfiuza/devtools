@@ -50,15 +50,15 @@ function rank(t: TranslateFn, tool: ToolManifest, needle: string): number {
         return 1;
     }
 
-    const category = normalize(safeTranslate(t, `tools.categories.${tool.category}`));
+    const category = normalize(
+        safeTranslate(t, `tools.categories.${tool.category}`),
+    );
 
     if (category.includes(needle) || keywordsOf(t, tool).includes(needle)) {
         return 2;
     }
 
-    const description = normalize(
-        safeTranslate(t, toolKeys.description(tool)),
-    );
+    const description = normalize(safeTranslate(t, toolKeys.description(tool)));
 
     return description.includes(needle) ? 3 : -1;
 }

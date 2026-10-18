@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
@@ -193,7 +198,9 @@ async function esperarAnalise(): Promise<void> {
  * de um botao (exemplo, arquivo), que ja passou pela analise antes de escrever.
  */
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await esperarAnalise();
 }
@@ -204,7 +211,8 @@ async function clicar(wrapper: VueWrapper, rotulo: string): Promise<void> {
 }
 
 /** Texto valido e pequeno, com uma chave aninhada e um item de array. */
-const DOCUMENTO = '{\n  "autor": {\n    "nome": "Nataniel",\n    "site": "exemplo.dev"\n  },\n  "tags": ["json", "arvore"]\n}';
+const DOCUMENTO =
+    '{\n  "autor": {\n    "nome": "Nataniel",\n    "site": "exemplo.dev"\n  },\n  "tags": ["json", "arvore"]\n}';
 
 describe('JSON Viewer', () => {
     let clipboard: { writeText: ReturnType<typeof vi.fn> };
@@ -222,18 +230,33 @@ describe('JSON Viewer', () => {
         it('abre sem documento, com o convite no editor e sem arvore', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="json-editor"]').attributes('data-placeholder')).toBe(
-                'VAZIO',
+            expect(
+                wrapper
+                    .get('[data-test="json-editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(
+                false,
             );
-            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-viewer-state"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-viewer-status"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-viewer-state"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-viewer-status"]').exists(),
+            ).toBe(false);
         });
 
         it('desabilita o que precisa de documento', () => {
             const wrapper = montar();
 
-            for (const rotulo of ['LIMPAR', 'COPIAR', 'BAIXAR', 'FORMATAR', 'MINIFICAR', 'ORDENAR']) {
+            for (const rotulo of [
+                'LIMPAR',
+                'COPIAR',
+                'BAIXAR',
+                'FORMATAR',
+                'MINIFICAR',
+                'ORDENAR',
+            ]) {
                 expect(desabilitado(wrapper, rotulo), rotulo).toBe(true);
             }
         });
@@ -256,7 +279,9 @@ describe('JSON Viewer', () => {
         it('anuncia o atalho no proprio botao de formatar', () => {
             const wrapper = montar();
 
-            expect(botao(wrapper, 'FORMATAR').get('kbd').text()).toBe('Ctrl Enter');
+            expect(botao(wrapper, 'FORMATAR').get('kbd').text()).toBe(
+                'Ctrl Enter',
+            );
         });
     });
 
@@ -285,7 +310,9 @@ describe('JSON Viewer', () => {
 
             // Os dois filhos do `autor` entraram na tela.
             expect(linhas(wrapper)).toHaveLength(5);
-            expect(wrapper.get('[data-test="json-tree"]').text()).toContain('exemplo.dev');
+            expect(wrapper.get('[data-test="json-tree"]').text()).toContain(
+                'exemplo.dev',
+            );
 
             await autor?.get('[data-test="json-tree-toggle"]').trigger('click');
             await flushPromises();
@@ -338,65 +365,85 @@ describe('JSON Viewer', () => {
             const wrapper = montar();
 
             await digitar(wrapper, DOCUMENTO);
-            expect(wrapper.get('[data-test="json-tree"]').text()).not.toContain('Nataniel');
+            expect(wrapper.get('[data-test="json-tree"]').text()).not.toContain(
+                'Nataniel',
+            );
 
-            await wrapper.get('[data-test="json-viewer-search"]').setValue('Nataniel');
+            await wrapper
+                .get('[data-test="json-viewer-search"]')
+                .setValue('Nataniel');
             await flushPromises();
 
-            expect(wrapper.get('[data-test="json-viewer-search-count"]').text()).toBe(
-                'RESULTADOS:1',
-            );
+            expect(
+                wrapper.get('[data-test="json-viewer-search-count"]').text(),
+            ).toBe('RESULTADOS:1');
             // O `autor` estava fechado: a busca abriu o caminho ate a folha.
-            expect(wrapper.get('[data-test="json-tree"]').text()).toContain('Nataniel');
+            expect(wrapper.get('[data-test="json-tree"]').text()).toContain(
+                'Nataniel',
+            );
         });
 
         it('avisa quando nao ha resultado', async () => {
             const wrapper = montar();
 
             await digitar(wrapper, DOCUMENTO);
-            await wrapper.get('[data-test="json-viewer-search"]').setValue('nao-existe');
+            await wrapper
+                .get('[data-test="json-viewer-search"]')
+                .setValue('nao-existe');
             await flushPromises();
 
-            expect(wrapper.get('[data-test="json-viewer-search-count"]').text()).toBe(
-                'SEM_RESULTADO',
-            );
+            expect(
+                wrapper.get('[data-test="json-viewer-search-count"]').text(),
+            ).toBe('SEM_RESULTADO');
         });
 
         it('limpa a busca', async () => {
             const wrapper = montar();
 
             await digitar(wrapper, DOCUMENTO);
-            await wrapper.get('[data-test="json-viewer-search"]').setValue('Nataniel');
+            await wrapper
+                .get('[data-test="json-viewer-search"]')
+                .setValue('Nataniel');
             await flushPromises();
 
             await clicar(wrapper, 'LIMPAR_BUSCA');
 
-            expect(wrapper.find('[data-test="json-viewer-search-count"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-viewer-search-count"]').exists(),
+            ).toBe(false);
         });
 
         it('mostra o Esc junto do campo de busca', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="json-viewer-search-shortcut"]').text()).toBe('Esc');
+            expect(
+                wrapper.get('[data-test="json-viewer-search-shortcut"]').text(),
+            ).toBe('Esc');
         });
 
         it('limpa a busca no Esc', async () => {
             const wrapper = montar();
 
             await digitar(wrapper, DOCUMENTO);
-            await wrapper.get('[data-test="json-viewer-search"]').setValue('Nataniel');
+            await wrapper
+                .get('[data-test="json-viewer-search"]')
+                .setValue('Nataniel');
             await flushPromises();
 
             // O Esc vale com o foco onde estiver - quem digitou no editor logo
             // depois de um `Mod-f` tambem espera que ele desfaca a busca.
-            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+            window.dispatchEvent(
+                new KeyboardEvent('keydown', { key: 'Escape' }),
+            );
             await flushPromises();
 
             const campo = wrapper.get('[data-test="json-viewer-search"]')
                 .element as HTMLInputElement;
 
             expect(campo.value).toBe('');
-            expect(wrapper.find('[data-test="json-viewer-search-count"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-viewer-search-count"]').exists(),
+            ).toBe(false);
         });
     });
 
@@ -407,7 +454,9 @@ describe('JSON Viewer', () => {
             await digitar(wrapper, DOCUMENTO);
             await clicar(wrapper, 'EXPANDIR');
 
-            const linha = linhas(wrapper).find((node) => node.text().includes('exemplo.dev'));
+            const linha = linhas(wrapper).find((node) =>
+                node.text().includes('exemplo.dev'),
+            );
 
             await linha?.get('[data-test="json-tree-copy"]').trigger('click');
             await flushPromises();
@@ -420,14 +469,19 @@ describe('JSON Viewer', () => {
         });
 
         it('manda copiar na mao quando o navegador nao expoe a area de transferencia', async () => {
-            Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'clipboard', {
+                value: undefined,
+                configurable: true,
+            });
 
             const wrapper = montar();
 
             await digitar(wrapper, DOCUMENTO);
             await clicar(wrapper, 'COPIAR');
 
-            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toBe('COPIE_NA_MAO');
+            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toBe(
+                'COPIE_NA_MAO',
+            );
         });
     });
 
@@ -437,7 +491,9 @@ describe('JSON Viewer', () => {
 
             await digitar(wrapper, '{"a":[1,true,null]}');
 
-            const rodape = wrapper.get('[data-test="json-viewer-status"]').text();
+            const rodape = wrapper
+                .get('[data-test="json-viewer-status"]')
+                .text();
 
             expect(rodape).toContain('CHAVES:1');
             expect(rodape).toContain('ITENS:3');
@@ -453,7 +509,9 @@ describe('JSON Viewer', () => {
             await digitar(wrapper, '{"a":1,"b":[2,3]}');
             await clicar(wrapper, 'FORMATAR');
 
-            expect(textoDoEditor(wrapper)).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
+            expect(textoDoEditor(wrapper)).toBe(
+                '{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}',
+            );
         });
 
         it('formata o documento pelo atalho do editor', async () => {
@@ -467,7 +525,9 @@ describe('JSON Viewer', () => {
             wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('format');
             await flushPromises();
 
-            expect(textoDoEditor(wrapper)).toBe('{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}');
+            expect(textoDoEditor(wrapper)).toBe(
+                '{\n  "a": 1,\n  "b": [\n    2,\n    3\n  ]\n}',
+            );
         });
 
         it('minifica o documento', async () => {
@@ -496,13 +556,17 @@ describe('JSON Viewer', () => {
 
             // Sem nenhuma versao valida antes, nao ha arvore nenhuma para
             // mostrar: a faixa de estado ocupa o lugar dela.
-            expect(wrapper.get('[data-test="json-viewer-state"]').text()).toContain(
-                'INVALIDO:3:3',
+            expect(
+                wrapper.get('[data-test="json-viewer-state"]').text(),
+            ).toContain('INVALIDO:3:3');
+            expect(
+                wrapper
+                    .get('[data-test="json-editor"]')
+                    .attributes('data-error'),
+            ).toBe('INVALIDO:3:3');
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(
+                false,
             );
-            expect(wrapper.get('[data-test="json-editor"]').attributes('data-error')).toBe(
-                'INVALIDO:3:3',
-            );
-            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
         });
 
         it('mantem a ultima arvore valida na tela, marcada como defasada', async () => {
@@ -523,9 +587,9 @@ describe('JSON Viewer', () => {
             expect(wrapper.get('[data-test="json-viewer-stale"]').text()).toBe(
                 'SAIDA_DEFASADA',
             );
-            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toContain(
-                'INVALIDO:3:3',
-            );
+            expect(
+                wrapper.get('[data-test="json-viewer-status"]').text(),
+            ).toContain('INVALIDO:3:3');
         });
 
         it('larga a arvore defasada quando o documento e limpo', async () => {
@@ -534,13 +598,19 @@ describe('JSON Viewer', () => {
             await digitar(wrapper, DOCUMENTO);
             await digitar(wrapper, '{\n  "a": 1\n  "b": 2\n}');
 
-            expect(wrapper.find('[data-test="json-viewer-stale"]').exists()).toBe(true);
+            expect(
+                wrapper.find('[data-test="json-viewer-stale"]').exists(),
+            ).toBe(true);
 
             await digitar(wrapper, '');
 
             // Documento vazio nao tem "ultima versao valida".
-            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-viewer-stale"]').exists()).toBe(false);
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(
+                false,
+            );
+            expect(
+                wrapper.find('[data-test="json-viewer-stale"]').exists(),
+            ).toBe(false);
         });
 
         it('desliga a analise quando o texto passa do limite', async () => {
@@ -548,12 +618,16 @@ describe('JSON Viewer', () => {
 
             await digitar(wrapper, '{"a": 12345}');
 
-            const estado = wrapper.get('[data-test="json-viewer-state"]').text();
+            const estado = wrapper
+                .get('[data-test="json-viewer-state"]')
+                .text();
 
             expect(estado).toContain('GRANDE:');
             expect(estado).toMatch(/12\s*bytes/);
             expect(estado).toMatch(/10\s*bytes/);
-            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(
+                false,
+            );
         });
 
         it('carrega o exemplo', async () => {
@@ -572,8 +646,12 @@ describe('JSON Viewer', () => {
             await clicar(wrapper, 'LIMPAR');
 
             expect(textoDoEditor(wrapper)).toBe('');
-            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-viewer-status"]').exists()).toBe(false);
+            expect(wrapper.find('[data-test="json-tree"]').exists()).toBe(
+                false,
+            );
+            expect(
+                wrapper.find('[data-test="json-viewer-status"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'FORMATAR')).toBe(true);
         });
 
@@ -614,11 +692,16 @@ describe('JSON Viewer', () => {
             const wrapper = montar();
             const campo = wrapper.get('[data-test="json-viewer-file"]');
 
-            escolher(campo.element, new File(['oi'], 'nota.csv', { type: 'text/csv' }));
+            escolher(
+                campo.element,
+                new File(['oi'], 'nota.csv', { type: 'text/csv' }),
+            );
             await campo.trigger('change');
             await flushPromises();
 
-            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toBe('TIPO_NAO_ACEITO');
+            expect(wrapper.get('[data-test="json-viewer-status"]').text()).toBe(
+                'TIPO_NAO_ACEITO',
+            );
             expect(textoDoEditor(wrapper)).toBe('');
         });
 
@@ -630,7 +713,9 @@ describe('JSON Viewer', () => {
             await campo.trigger('change');
             await flushPromises();
 
-            const rodape = wrapper.get('[data-test="json-viewer-status"]').text();
+            const rodape = wrapper
+                .get('[data-test="json-viewer-status"]')
+                .text();
 
             expect(rodape).toContain('ARQUIVO_GRANDE:');
             expect(textoDoEditor(wrapper)).toBe('');
@@ -640,9 +725,11 @@ describe('JSON Viewer', () => {
             const wrapper = montar();
             const arquivo = new File([DOCUMENTO], 'dados.json');
 
-            await wrapper.get('[data-test="json-viewer-dropzone"]').trigger('drop', {
-                dataTransfer: { files: [arquivo] },
-            });
+            await wrapper
+                .get('[data-test="json-viewer-dropzone"]')
+                .trigger('drop', {
+                    dataTransfer: { files: [arquivo] },
+                });
             await esperarAnalise();
 
             expect(textoDoEditor(wrapper)).toBe(DOCUMENTO);
@@ -654,16 +741,19 @@ describe('JSON Viewer', () => {
             const url = vi.fn((_blob: Blob) => 'blob:teste');
             const baixados: string[] = [];
 
-            Object.defineProperty(URL, 'createObjectURL', { value: url, configurable: true });
+            Object.defineProperty(URL, 'createObjectURL', {
+                value: url,
+                configurable: true,
+            });
             Object.defineProperty(URL, 'revokeObjectURL', {
                 value: vi.fn(),
                 configurable: true,
             });
-            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
-                this: HTMLAnchorElement,
-            ) {
-                baixados.push(this.download);
-            });
+            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+                function (this: HTMLAnchorElement) {
+                    baixados.push(this.download);
+                },
+            );
 
             const wrapper = montar();
 
@@ -671,7 +761,9 @@ describe('JSON Viewer', () => {
             await clicar(wrapper, 'BAIXAR');
 
             expect(baixados).toEqual(['documento.json']);
-            expect(await (url.mock.calls[0]?.[0] as Blob).text()).toBe(DOCUMENTO);
+            expect(await (url.mock.calls[0]?.[0] as Blob).text()).toBe(
+                DOCUMENTO,
+            );
         });
     });
 });

@@ -133,7 +133,8 @@ const confirmTwoFactor = () => {
             onError: (errors) => {
                 confirming.value = false;
                 confirmationError.value =
-                    errors.code || t('settings.security.two_factor_invalid_code');
+                    errors.code ||
+                    t('settings.security.two_factor_invalid_code');
             },
         },
     );
@@ -205,7 +206,9 @@ const copyAllRecoveryCodes = async () => {
 
 <template>
     <div class="space-y-6 pt-6">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div
+            class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+        >
             <Heading
                 variant="small"
                 :title="t('settings.security.two_factor_title')"
@@ -234,18 +237,20 @@ const copyAllRecoveryCodes = async () => {
             class="rounded-lg border border-border bg-card p-4 text-card-foreground shadow-xs"
         >
             <div class="space-y-3">
-                <p class="text-sm text-muted-foreground leading-relaxed">
+                <p class="text-sm leading-relaxed text-muted-foreground">
                     {{ t('settings.security.two_factor_disabled_help') }}
                 </p>
 
                 <Button
                     type="button"
                     variant="outline"
-                    @click="enableTwoFactor"
                     data-test="enable-2fa-button"
+                    @click="enableTwoFactor"
                 >
                     <KeyRound class="mr-1.5 size-4" />
-                    <span>{{ t('settings.security.two_factor_enable_button') }}</span>
+                    <span>{{
+                        t('settings.security.two_factor_enable_button')
+                    }}</span>
                 </Button>
             </div>
         </div>
@@ -259,7 +264,7 @@ const copyAllRecoveryCodes = async () => {
                 <h4 class="font-medium text-foreground">
                     {{ t('settings.security.two_factor_scan_title') }}
                 </h4>
-                <p class="text-sm text-muted-foreground leading-relaxed">
+                <p class="text-sm leading-relaxed text-muted-foreground">
                     {{ t('settings.security.two_factor_scan_instructions') }}
                 </p>
             </div>
@@ -277,7 +282,9 @@ const copyAllRecoveryCodes = async () => {
                             {{ t('settings.security.two_factor_setup_key') }}
                         </Label>
                         <div class="flex items-center gap-2">
-                            <code class="rounded bg-muted px-2 py-1 font-mono text-xs font-semibold">
+                            <code
+                                class="rounded bg-muted px-2 py-1 font-mono text-xs font-semibold"
+                            >
                                 {{ setupKey }}
                             </code>
                             <Button
@@ -291,8 +298,12 @@ const copyAllRecoveryCodes = async () => {
                                 <span class="text-xs">
                                     {{
                                         copiedKey
-                                            ? t('settings.security.two_factor_copied')
-                                            : t('settings.security.two_factor_copy')
+                                            ? t(
+                                                  'settings.security.two_factor_copied',
+                                              )
+                                            : t(
+                                                  'settings.security.two_factor_copy',
+                                              )
                                     }}
                                 </span>
                             </Button>
@@ -320,11 +331,15 @@ const copyAllRecoveryCodes = async () => {
                     <div class="flex items-center gap-2">
                         <Button
                             type="button"
-                            :disabled="confirming || confirmationCode.length !== 6"
-                            @click="confirmTwoFactor"
+                            :disabled="
+                                confirming || confirmationCode.length !== 6
+                            "
                             data-test="confirm-2fa-button"
+                            @click="confirmTwoFactor"
                         >
-                            {{ t('settings.security.two_factor_confirm_button') }}
+                            {{
+                                t('settings.security.two_factor_confirm_button')
+                            }}
                         </Button>
 
                         <Button
@@ -332,7 +347,9 @@ const copyAllRecoveryCodes = async () => {
                             variant="secondary"
                             @click="cancelEnabling"
                         >
-                            {{ t('settings.security.two_factor_cancel_button') }}
+                            {{
+                                t('settings.security.two_factor_cancel_button')
+                            }}
                         </Button>
                     </div>
                 </div>
@@ -350,7 +367,7 @@ const copyAllRecoveryCodes = async () => {
                     <p class="text-sm font-medium text-foreground">
                         {{ t('settings.security.two_factor_active_title') }}
                     </p>
-                    <p class="text-xs text-muted-foreground leading-relaxed">
+                    <p class="text-xs leading-relaxed text-muted-foreground">
                         {{ t('settings.security.two_factor_active_help') }}
                     </p>
                 </div>
@@ -361,11 +378,13 @@ const copyAllRecoveryCodes = async () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    @click="openRecoveryCodes"
                     data-test="show-recovery-codes-button"
+                    @click="openRecoveryCodes"
                 >
                     <ShieldAlert class="mr-1.5 size-4" />
-                    <span>{{ t('settings.security.two_factor_recovery_codes_button') }}</span>
+                    <span>{{
+                        t('settings.security.two_factor_recovery_codes_button')
+                    }}</span>
                 </Button>
 
                 <Button
@@ -373,10 +392,12 @@ const copyAllRecoveryCodes = async () => {
                     variant="ghost"
                     size="sm"
                     class="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    @click="disableTwoFactor"
                     data-test="disable-2fa-button"
+                    @click="disableTwoFactor"
                 >
-                    <span>{{ t('settings.security.two_factor_disable_button') }}</span>
+                    <span>{{
+                        t('settings.security.two_factor_disable_button')
+                    }}</span>
                 </Button>
             </div>
         </div>
@@ -389,16 +410,22 @@ const copyAllRecoveryCodes = async () => {
                         {{ t('settings.security.two_factor_recovery_title') }}
                     </DialogTitle>
                     <DialogDescription>
-                        {{ t('settings.security.two_factor_recovery_description') }}
+                        {{
+                            t(
+                                'settings.security.two_factor_recovery_description',
+                            )
+                        }}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div class="space-y-4 py-2">
-                    <div class="grid grid-cols-2 gap-2 rounded-lg bg-muted p-4 font-mono text-xs">
+                    <div
+                        class="grid grid-cols-2 gap-2 rounded-lg bg-muted p-4 font-mono text-xs"
+                    >
                         <span
                             v-for="code in recoveryCodes"
                             :key="code"
-                            class="select-all font-semibold tracking-wider text-foreground"
+                            class="font-semibold tracking-wider text-foreground select-all"
                         >
                             {{ code }}
                         </span>
@@ -415,8 +442,12 @@ const copyAllRecoveryCodes = async () => {
                             <span>
                                 {{
                                     copiedCodes
-                                        ? t('settings.security.two_factor_copied')
-                                        : t('settings.security.two_factor_copy_codes')
+                                        ? t(
+                                              'settings.security.two_factor_copied',
+                                          )
+                                        : t(
+                                              'settings.security.two_factor_copy_codes',
+                                          )
                                 }}
                             </span>
                         </Button>
@@ -428,7 +459,11 @@ const copyAllRecoveryCodes = async () => {
                             @click="regenerateRecoveryCodes"
                         >
                             <RefreshCw class="mr-1.5 size-3.5" />
-                            <span>{{ t('settings.security.two_factor_regenerate_codes') }}</span>
+                            <span>{{
+                                t(
+                                    'settings.security.two_factor_regenerate_codes',
+                                )
+                            }}</span>
                         </Button>
                     </div>
                 </div>

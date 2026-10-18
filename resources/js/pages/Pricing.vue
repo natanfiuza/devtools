@@ -66,11 +66,17 @@ const advantages = [
                             aria-hidden="true"
                         />
                         <h3 class="text-base font-medium">
-                            {{ t(`home.pricing.advantages.items.${item.key}.title`) }}
+                            {{
+                                t(
+                                    `home.pricing.advantages.items.${item.key}.title`,
+                                )
+                            }}
                         </h3>
                     </div>
                     <p class="text-sm text-muted-foreground">
-                        {{ t(`home.pricing.advantages.items.${item.key}.body`) }}
+                        {{
+                            t(`home.pricing.advantages.items.${item.key}.body`)
+                        }}
                     </p>
                 </li>
             </ul>

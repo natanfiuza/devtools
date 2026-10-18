@@ -98,7 +98,9 @@ const tooLarge = computed(() => inputBytes.value > props.maxInputBytes);
  * Enquanto ela nao estiver valendo, os digests na tela sao de outro texto - e
  * um sha antigo ao lado de um texto novo e pior do que nenhum.
  */
-const hashActive = computed(() => mode.value === 'hash' && !isEmpty.value && !tooLarge.value);
+const hashActive = computed(
+    () => mode.value === 'hash' && !isEmpty.value && !tooLarge.value,
+);
 
 async function runHashes(): Promise<void> {
     const value = text.value;
@@ -159,7 +161,9 @@ const rows = computed<RowView[]>(() =>
 );
 
 /** Nenhuma linha da aba tem valor: a recusa e da entrada inteira. */
-const allRefused = computed(() => rows.value.length > 0 && rows.value.every((row) => row.refused));
+const allRefused = computed(
+    () => rows.value.length > 0 && rows.value.every((row) => row.refused),
+);
 
 /**
  * Por que a linha ficou sem valor.
@@ -211,7 +215,10 @@ function copyAll(): void {
 }
 
 function copyRow(row: RowView): void {
-    void copyFeedback.copy(row.text, t('tools.base64-url-hash.row_copied', { label: labelOf(row) }));
+    void copyFeedback.copy(
+        row.text,
+        t('tools.base64-url-hash.row_copied', { label: labelOf(row) }),
+    );
 }
 
 /** Troca o documento inteiro: e o caminho de colar, abrir, exemplo e limpar. */
@@ -251,10 +258,14 @@ function openFile(): void {
 | Os recados da tela
 */
 
-const statsMessage = computed(() =>
-    `${formatBytes(inputBytes.value, locale.value)} ${t('tools.ui.limits.of', {
-        limit: formatBytes(props.maxInputBytes, locale.value),
-    })}`,
+const statsMessage = computed(
+    () =>
+        `${formatBytes(inputBytes.value, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
 );
 
 /** O recado que ocupa o lugar das linhas, quando nao ha valor nenhum a mostrar. */
@@ -269,7 +280,9 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
         };
     }
 
-    return allRefused.value ? { text: refusalMessage.value, error: true } : null;
+    return allRefused.value
+        ? { text: refusalMessage.value, error: true }
+        : null;
 });
 
 /**
@@ -289,7 +302,9 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
         return { text: feedbackText, error: false };
     }
 
-    return isEmpty.value ? state.value : { text: statsMessage.value, error: false };
+    return isEmpty.value
+        ? state.value
+        : { text: statsMessage.value, error: false };
 });
 </script>
 
@@ -353,7 +368,11 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem v-for="item in DIRECTIONS" :key="item" :value="item">
+                    <SelectItem
+                        v-for="item in DIRECTIONS"
+                        :key="item"
+                        :value="item"
+                    >
                         {{ t(`tools.base64-url-hash.directions.${item}`) }}
                     </SelectItem>
                 </SelectContent>
@@ -399,7 +418,9 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                         v-if="state !== null"
                         role="status"
                         class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                        :class="state.error ? 'text-destructive' : 'text-subtle'"
+                        :class="
+                            state.error ? 'text-destructive' : 'text-subtle'
+                        "
                         data-test="base64-url-hash-state"
                     >
                         <TriangleAlert
@@ -419,10 +440,13 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                         <p
                             v-if="someRefused"
                             role="status"
-                            class="flex items-center gap-1.5 border-b border-border bg-surface-muted px-3 py-1.5 text-xs text-subtle"
+                            class="bg-surface-muted flex items-center gap-1.5 border-b border-border px-3 py-1.5 text-xs text-subtle"
                             data-test="base64-url-hash-no-crypto"
                         >
-                            <TriangleAlert class="size-3.5 shrink-0" aria-hidden="true" />
+                            <TriangleAlert
+                                class="size-3.5 shrink-0"
+                                aria-hidden="true"
+                            />
                             {{ refusalMessage }}
                         </p>
 
@@ -445,12 +469,15 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                                     <button
                                         v-if="!row.refused && row.text !== ''"
                                         type="button"
-                                        class="ml-auto rounded p-1 text-subtle transition-colors hover:bg-surface-muted hover:text-foreground"
+                                        class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
                                         :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
                                         data-test="base64-url-hash-row-copy"
                                         @click="copyRow(row)"
                                     >
-                                        <Copy class="size-3.5" aria-hidden="true" />
+                                        <Copy
+                                            class="size-3.5"
+                                            aria-hidden="true"
+                                        />
                                     </button>
                                 </div>
 
@@ -466,7 +493,9 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
                                     v-else
                                     class="mt-1 font-mono text-sm break-all whitespace-pre-wrap"
                                     data-test="base64-url-hash-value"
-                                >{{ row.text }}</p>
+                                >
+                                    {{ row.text }}
+                                </p>
                             </li>
                         </ul>
                     </template>

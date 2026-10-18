@@ -36,7 +36,8 @@ export const CODED_MODES = ['base64', 'url'] as const;
 export type CodedMode = (typeof CODED_MODES)[number];
 
 /** Os rotulos das linhas - os mesmos nomes das chaves em `rows.*`. */
-export type RowLabel = 'base64' | 'urlSafe' | 'component' | 'form' | HashAlgorithm;
+export type RowLabel =
+    'base64' | 'urlSafe' | 'component' | 'form' | HashAlgorithm;
 
 /**
  * A linha de chave/valor em que a saida e desenhada.
@@ -52,28 +53,42 @@ export interface ValueRow {
     result: ValueResult;
 }
 
-export function rowsFor(text: string, mode: CodedMode, direction: Direction): ValueRow[] {
+export function rowsFor(
+    text: string,
+    mode: CodedMode,
+    direction: Direction,
+): ValueRow[] {
     if (mode === 'base64') {
-        return direction === 'encode' ? base64Rows(text) : decodeBase64Rows(text);
+        return direction === 'encode'
+            ? base64Rows(text)
+            : decodeBase64Rows(text);
     }
 
     return direction === 'encode' ? urlRows(text) : decodeUrlRows(text);
 }
 
 /** Os quatro digests viram as quatro linhas da aba Hash. */
-export function digestRows(digests: { algorithm: HashAlgorithm; hex: string | null }[]): ValueRow[] {
+export function digestRows(
+    digests: { algorithm: HashAlgorithm; hex: string | null }[],
+): ValueRow[] {
     return digests.map((digest) => ({
         label: digest.algorithm,
         // Sem Web Crypto nao ha valor: a linha fica sem resultado, e a tela
         // explica uma vez em vez de repetir o mesmo aviso quatro vezes.
-        result: digest.hex === null ? { ok: false } : { ok: true, value: digest.hex },
+        result:
+            digest.hex === null
+                ? { ok: false }
+                : { ok: true, value: digest.hex },
     }));
 }
 
 function base64Rows(text: string): ValueRow[] {
     return [
         { label: 'base64', result: { ok: true, value: encodeBase64(text) } },
-        { label: 'urlSafe', result: { ok: true, value: encodeBase64Url(text) } },
+        {
+            label: 'urlSafe',
+            result: { ok: true, value: encodeBase64Url(text) },
+        },
     ];
 }
 

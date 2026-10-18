@@ -11,6 +11,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -131,6 +132,26 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function isAnonymized(): bool
     {
         return $this->anonymized_at !== null;
+    }
+
+    /**
+     * Contas em janela de carencia de 30 dias para expurgo definitivo (ADR-035).
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeInDeletionGracePeriod(Builder $query): void
+    {
+        $query->onlyTrashed()->where('deleted_at', '>', now()->subDays(30));
+    }
+
+    /**
+     * Contas anonimizadas pelo expurgo ou pelo usuario (ADR-028).
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeAnonymized(Builder $query): void
+    {
+        $query->withTrashed()->whereNotNull('anonymized_at');
     }
 
     /**

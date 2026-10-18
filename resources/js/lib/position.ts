@@ -32,9 +32,10 @@ export function positionFromMessage(message: string): number | null {
  * `line 3 column 5` do SpiderMonkey (`JSON.parse: unexpected character at line
  * 3 column 5`) e o `at line 1 column 8` do `sql-formatter`.
  */
-export function lineColumnFromMessage(
-    message: string,
-): { line: number | null; column: number | null } {
+export function lineColumnFromMessage(message: string): {
+    line: number | null;
+    column: number | null;
+} {
     const match = /line\s+(\d+)(?:\s*(?:column|col)\s+(\d+))?/i.exec(message);
 
     if (match === null || match[1] === undefined) {
@@ -53,7 +54,10 @@ export function lineColumnFromMessage(
  * A coluna conta **caracteres**, e nao code units: com um emoji antes do erro,
  * a coluna em code units apontaria dois lugares depois do que o olho ve.
  */
-export function lineColumnAt(text: string, position: number): { line: number; column: number } {
+export function lineColumnAt(
+    text: string,
+    position: number,
+): { line: number; column: number } {
     const limit = Math.min(Math.max(position, 0), text.length);
     let line = 1;
     let lineStart = 0;

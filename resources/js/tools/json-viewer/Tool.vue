@@ -15,7 +15,15 @@ import {
     X,
 } from '@lucide/vue';
 import { useDebounceFn } from '@vueuse/core';
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import {
+    computed,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    shallowRef,
+    useTemplateRef,
+    watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/tool/CodeEditor.vue';
 import FileDropzone from '@/components/tool/FileDropzone.vue';
@@ -98,7 +106,8 @@ const searchBox = ref<HTMLElement | null>(null);
 
 /** A tecla de comando muda com o teclado, nao com o idioma. */
 const commandKey =
-    typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent)
+    typeof navigator !== 'undefined' &&
+    /Mac|iPhone|iPad/.test(navigator.userAgent)
         ? '⌘'
         : 'Ctrl';
 
@@ -152,7 +161,10 @@ const errorMessage = computed(() => {
 
     return current.line === null || current.column === null
         ? t('tools.ui.states.invalid_no_position')
-        : t('tools.ui.states.invalid', { line: current.line, column: current.column });
+        : t('tools.ui.states.invalid', {
+              line: current.line,
+              column: current.column,
+          });
 });
 
 /**
@@ -186,7 +198,9 @@ type Intake = 'skip' | 'now' | 'debounced';
 
 let intake: Intake = 'debounced';
 
-async function runAnalysis(extra: Partial<AnalyzeOptions> = {}): Promise<AnalyzeOutcome | null> {
+async function runAnalysis(
+    extra: Partial<AnalyzeOptions> = {},
+): Promise<AnalyzeOutcome | null> {
     const value = text.value;
     const bytes = byteLength(value);
 
@@ -363,9 +377,12 @@ const statsMessage = computed(() => {
         t('tools.json-viewer.stats.items', { count: current.stats.items }),
         // O tamanho do documento encostado no limite: e o que faz o numero do
         // rodape significar alguma coisa.
-        `${formatBytes(current.stats.bytes, locale.value)} ${t('tools.ui.limits.of', {
-            limit: formatBytes(props.maxInputBytes, locale.value),
-        })}`,
+        `${formatBytes(current.stats.bytes, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
     ].join(' · ');
 });
 
@@ -392,7 +409,9 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
         return { text: error, error: true };
     }
 
-    return busy.value ? { text: t('tools.ui.states.parsing'), error: false } : null;
+    return busy.value
+        ? { text: t('tools.ui.states.parsing'), error: false }
+        : null;
 });
 
 /**

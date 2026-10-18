@@ -75,11 +75,7 @@ function fulfill(row: AdminIntentRow): void {
 }
 
 function cancel(row: AdminIntentRow): void {
-    router.post(
-        admin.intents.cancel.url(row.id),
-        {},
-        { preserveScroll: true },
-    );
+    router.post(admin.intents.cancel.url(row.id), {}, { preserveScroll: true });
 }
 </script>
 
@@ -141,10 +137,12 @@ function cancel(row: AdminIntentRow): void {
                 >
                     {{ row.userName }}
                 </Link>
-                <div class="text-xs text-subtle">{{ row.userEmail }}</div>
+                <div class="text-xs text-subtle">
+                    {{ row.userEmail }}
+                </div>
             </template>
 
-            <template #cell-username="{ row }">@{{ row.username }}</template>
+            <template #cell-username="{ row }"> @{{ row.username }} </template>
 
             <template #cell-plan="{ row }">
                 <span>{{ row.planName }}</span>
@@ -154,8 +152,12 @@ function cancel(row: AdminIntentRow): void {
             </template>
 
             <template #cell-contact="{ row }">
-                <div class="font-mono text-xs">{{ row.phone }}</div>
-                <div class="font-mono text-xs text-subtle">{{ row.document }}</div>
+                <div class="font-mono text-xs">
+                    {{ row.phone }}
+                </div>
+                <div class="font-mono text-xs text-subtle">
+                    {{ row.document }}
+                </div>
                 <div
                     v-if="row.notes"
                     class="mt-0.5 max-w-[14rem] truncate text-xs text-subtle"
@@ -183,7 +185,9 @@ function cancel(row: AdminIntentRow): void {
                 </Badge>
             </template>
 
-            <template #cell-createdAt="{ row }">{{ row.createdAt }}</template>
+            <template #cell-createdAt="{ row }">
+                {{ row.createdAt }}
+            </template>
 
             <template #actions="{ row }">
                 <div class="flex items-center justify-end gap-1">

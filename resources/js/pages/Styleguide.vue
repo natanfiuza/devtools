@@ -142,13 +142,15 @@ const dialect = ref<string>('');
                 <Button variant="outline">
                     {{ t('styleguide.labels.outline') }}
                 </Button>
-                <Button variant="ghost">{{
-                    t('styleguide.labels.ghost')
-                }}</Button>
+                <Button variant="ghost">
+                    {{ t('styleguide.labels.ghost') }}
+                </Button>
                 <Button variant="destructive">
                     {{ t('styleguide.labels.destructive') }}
                 </Button>
-                <Button disabled>{{ t('styleguide.labels.disabled') }}</Button>
+                <Button disabled>
+                    {{ t('styleguide.labels.disabled') }}
+                </Button>
             </div>
         </section>
 
@@ -179,10 +181,12 @@ const dialect = ref<string>('');
                             />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="mysql">MySQL</SelectItem>
-                            <SelectItem value="mariadb">MariaDB</SelectItem>
-                            <SelectItem value="postgres">PostgreSQL</SelectItem>
-                            <SelectItem value="sqlite">SQLite</SelectItem>
+                            <SelectItem value="mysql"> MySQL </SelectItem>
+                            <SelectItem value="mariadb"> MariaDB </SelectItem>
+                            <SelectItem value="postgres">
+                                PostgreSQL
+                            </SelectItem>
+                            <SelectItem value="sqlite"> SQLite </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -224,15 +228,15 @@ const dialect = ref<string>('');
             <div class="mt-4 grid gap-4 md:grid-cols-2">
                 <Card class="transition-colors hover:border-border-strong">
                     <CardHeader>
-                        <CardTitle>{{
-                            t('styleguide.labels.card_title')
-                        }}</CardTitle>
+                        <CardTitle>
+                            {{ t('styleguide.labels.card_title') }}
+                        </CardTitle>
                         <CardDescription>
                             {{ t('styleguide.labels.card_body') }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Badge variant="outline">no-shadow</Badge>
+                        <Badge variant="outline"> no-shadow </Badge>
                     </CardContent>
                     <CardFooter>
                         <Button variant="outline" size="sm">
@@ -250,9 +254,9 @@ const dialect = ref<string>('');
             <div class="mt-4 grid max-w-2xl gap-4">
                 <Alert>
                     <Info aria-hidden="true" />
-                    <AlertTitle>{{
-                        t('styleguide.labels.card_title')
-                    }}</AlertTitle>
+                    <AlertTitle>
+                        {{ t('styleguide.labels.card_title') }}
+                    </AlertTitle>
                     <AlertDescription>
                         {{ t('styleguide.labels.card_body') }}
                     </AlertDescription>
@@ -260,9 +264,9 @@ const dialect = ref<string>('');
 
                 <Alert variant="destructive">
                     <Info aria-hidden="true" />
-                    <AlertTitle>{{
-                        t('styleguide.labels.destructive')
-                    }}</AlertTitle>
+                    <AlertTitle>
+                        {{ t('styleguide.labels.destructive') }}
+                    </AlertTitle>
                     <AlertDescription>
                         {{ t('styleguide.labels.card_body') }}
                     </AlertDescription>

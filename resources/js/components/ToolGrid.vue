@@ -82,7 +82,11 @@ function chipClass(active: boolean): string {
         <ToolCard v-for="tool in visible" :key="tool.slug" :tool="tool" />
     </ul>
 
-    <p v-else class="mt-6 text-sm text-muted-foreground" data-test="tool-grid-empty">
+    <p
+        v-else
+        class="mt-6 text-sm text-muted-foreground"
+        data-test="tool-grid-empty"
+    >
         {{ t('home.tools.empty') }}
     </p>
 </template>

@@ -3,11 +3,7 @@ import { ref } from 'vue';
 import { useMediaQuery } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-    SPLIT_MAX,
-    SPLIT_MIN,
-    useSplitPane,
-} from '@/composables/useSplitPane';
+import { SPLIT_MAX, SPLIT_MIN, useSplitPane } from '@/composables/useSplitPane';
 
 /**
  * Casca de uma ferramenta (DESIGN: "Pagina de tool: 2 paineis (entrada |

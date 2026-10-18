@@ -58,9 +58,9 @@ const locales = computed<Locale[]>(() => page.props.locales ?? []);
         </div>
 
         <Form
+            v-slot="{ errors, processing }"
             v-bind="routes.form.register.value"
             :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
             class="flex flex-col gap-5"
         >
             <div class="grid gap-4">
@@ -68,10 +68,10 @@ const locales = computed<Locale[]>(() => page.props.locales ?? []);
                     <Label for="name">{{ t('auth.register.name') }}</Label>
                     <Input
                         id="name"
+                        v-focus
                         type="text"
                         name="name"
                         required
-                        v-focus
                         autocomplete="name"
                         :placeholder="t('auth.register.name_placeholder')"
                         :aria-invalid="errors.name ? 'true' : undefined"

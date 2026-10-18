@@ -82,12 +82,20 @@ describe('readInstant', () => {
     });
 
     it('le a data sem a hora', () => {
-        expect(ler('2026-10-01').date.toISOString()).toBe('2026-10-01T00:00:00.000Z');
+        expect(ler('2026-10-01').date.toISOString()).toBe(
+            '2026-10-01T00:00:00.000Z',
+        );
     });
 
     it('le o instante de um UUID v7 e de um ULID', () => {
-        expect(ler(uuidV7(AGORA))).toEqual({ source: 'uuid_v7', date: new Date(AGORA) });
-        expect(ler(ulid(AGORA))).toEqual({ source: 'ulid', date: new Date(AGORA) });
+        expect(ler(uuidV7(AGORA))).toEqual({
+            source: 'uuid_v7',
+            date: new Date(AGORA),
+        });
+        expect(ler(ulid(AGORA))).toEqual({
+            source: 'ulid',
+            date: new Date(AGORA),
+        });
     });
 
     it('recusa o que nao e um instante', () => {
@@ -111,9 +119,11 @@ describe('as seis leituras', () => {
             'long_date',
             'relative',
         ]);
-        expect(readingsFor(new Date(AGORA), AGORA, 'pt-BR').map((row) => row.label)).toEqual(
-            READING_LABELS,
-        );
+        expect(
+            readingsFor(new Date(AGORA), AGORA, 'pt-BR').map(
+                (row) => row.label,
+            ),
+        ).toEqual(READING_LABELS);
     });
 
     it('os dois Unix sao o mesmo instante em unidades diferentes', () => {
@@ -124,7 +134,9 @@ describe('as seis leituras', () => {
     });
 
     it('o ISO de cima e o UTC', () => {
-        expect(leituras(String(AGORA_S))['iso_utc']).toBe('2026-10-14T12:00:00.000Z');
+        expect(leituras(String(AGORA_S))['iso_utc']).toBe(
+            '2026-10-14T12:00:00.000Z',
+        );
     });
 
     it('o ISO local volta ao mesmo instante', () => {
@@ -134,7 +146,9 @@ describe('as seis leituras', () => {
         // A prova de que o deslocamento esta escrito certo: relido, ele da o
         // mesmo instante - e nao um na hora do fuso.
         expect(Date.parse(local)).toBe(AGORA);
-        expect(local).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+        expect(local).toMatch(
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/,
+        );
     });
 
     it('a data por extenso sai no idioma', () => {
@@ -149,7 +163,8 @@ describe('as seis leituras', () => {
 
 describe('relativeText', () => {
     const format = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
-    const em = (ms: number): string => relativeText(new Date(AGORA + ms), AGORA, 'pt-BR');
+    const em = (ms: number): string =>
+        relativeText(new Date(AGORA + ms), AGORA, 'pt-BR');
 
     it('escolhe a maior unidade que ainda diz algo', () => {
         expect(em(-2 * 31_557_600_000)).toBe(format.format(-2, 'year'));

@@ -27,7 +27,9 @@ export const availableTools: ToolManifest[] = allTools.filter(
  * A lista e parametro para o grid poder filtrar o que recebeu por prop; sem
  * argumento, vale o registro inteiro.
  */
-export function categoriesInUse(tools: ToolManifest[] = allTools): ToolCategoryId[] {
+export function categoriesInUse(
+    tools: ToolManifest[] = allTools,
+): ToolCategoryId[] {
     const used = new Set(tools.map((tool) => tool.category));
 
     return categoryOrder.filter((id) => used.has(id));

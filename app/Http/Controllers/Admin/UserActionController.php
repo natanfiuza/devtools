@@ -235,6 +235,20 @@ class UserActionController extends Controller
     }
 
     /**
+     * Restaura a conta em soft delete durante a janela de carencia (ADR-035).
+     */
+    public function restore(Request $request, User $user): RedirectResponse
+    {
+        Gate::authorize('restore', $user);
+
+        $user->restore();
+
+        $this->record($request, AdminActionType::UserRestored, $user);
+
+        return $this->toast('success', __('admin.toasts.user_restored'));
+    }
+
+    /**
      * Resposta padrao das acoes: volta para a tela de origem com um aviso.
      * Vale para quem esta na lista e para quem esta no detalhe.
      */

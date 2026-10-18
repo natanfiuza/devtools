@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: resolve metas de SEO no servidor e usa card OG quadrado
 ```
@@ -35,7 +36,6 @@ Esta mudança torna o card quadrado e move a resolução das metas para o servid
 - Páginas `noindex` (login, tokens) não recebem `description`/`og:*` e mantêm o título do site.
 
 ".gitpr.commit.md": "gitpr.commit.md"
-
 
 close #24
 ---

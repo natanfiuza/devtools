@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Select } from '@/components/ui/select';
@@ -129,7 +134,9 @@ function rotuloDoBotao(node: DOMWrapper<Element>): string {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => rotuloDoBotao(node) === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => rotuloDoBotao(node) === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -145,7 +152,10 @@ function desabilitado(wrapper: VueWrapper, rotulo: string): boolean {
 function saida(wrapper: VueWrapper): string {
     // `textContent`, e nao `text()`: o codigo termina em quebra de linha, e o
     // arquivo gerado e o texto inteiro - o `text()` do Vue Test Utils apara.
-    return wrapper.get('[data-test="json-to-code-output"]').element.textContent ?? '';
+    return (
+        wrapper.get('[data-test="json-to-code-output"]').element.textContent ??
+        ''
+    );
 }
 
 /** O aviso da tela, ou string vazia quando nao ha nenhum. */
@@ -172,7 +182,9 @@ async function esperarAnalise(): Promise<void> {
  * botao (exemplo, arquivo), que ja chega analisado.
  */
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await esperarAnalise();
 }
@@ -189,7 +201,10 @@ async function escolherAlvo(wrapper: VueWrapper, alvo: string): Promise<void> {
     await flushPromises();
 }
 
-async function escreverNomeDaRaiz(wrapper: VueWrapper, nome: string): Promise<void> {
+async function escreverNomeDaRaiz(
+    wrapper: VueWrapper,
+    nome: string,
+): Promise<void> {
     await wrapper.get('[data-test="json-to-code-root-name"]').setValue(nome);
     await flushPromises();
 }
@@ -221,10 +236,20 @@ describe('JSON to Code', () => {
         it('abre sem documento, com o convite no editor e sem saida', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="editor"]').attributes('data-placeholder')).toBe('VAZIO');
-            expect(wrapper.find('[data-test="json-to-code-output"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-to-code-state"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-to-code-status"]').exists()).toBe(false);
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
+            expect(
+                wrapper.find('[data-test="json-to-code-output"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-state"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-status"]').exists(),
+            ).toBe(false);
         });
 
         it('desabilita o que precisa de codigo', () => {
@@ -238,16 +263,22 @@ describe('JSON to Code', () => {
         it('abre no TypeScript, com a raiz chamada Root', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="json-to-code-root-name"]').attributes('placeholder')).toBe(
-                'Root',
-            );
+            expect(
+                wrapper
+                    .get('[data-test="json-to-code-root-name"]')
+                    .attributes('placeholder'),
+            ).toBe('Root');
             // O alvo padrao: o valor do `Select` e a opcao escolhida nele. O
             // texto da opcao so existe com o menu aberto, entao o que se le aqui
             // e o rotulo do gatilho.
-            expect(wrapper.findComponent(Select).props('modelValue')).toBe('typescript');
-            expect(wrapper.get('[data-test="json-to-code-target"]').attributes('aria-label')).toBe(
-                'ALVO',
+            expect(wrapper.findComponent(Select).props('modelValue')).toBe(
+                'typescript',
             );
+            expect(
+                wrapper
+                    .get('[data-test="json-to-code-target"]')
+                    .attributes('aria-label'),
+            ).toBe('ALVO');
         });
     });
 
@@ -343,8 +374,12 @@ export interface Itens {
             // Virgula sobrando antes do fecho: o motor informa onde.
             await digitar(wrapper, '{\n  "cliente": 1,\n}');
 
-            expect(wrapper.find('[data-test="json-to-code-stale"]').exists()).toBe(true);
-            expect(wrapper.get('[data-test="json-to-code-stale"]').text()).toBe('SAIDA_DEFASADA');
+            expect(
+                wrapper.find('[data-test="json-to-code-stale"]').exists(),
+            ).toBe(true);
+            expect(wrapper.get('[data-test="json-to-code-stale"]').text()).toBe(
+                'SAIDA_DEFASADA',
+            );
             // O codigo antigo continua na tela, e o erro aparece no rodape.
             expect(saida(wrapper)).toBe(valido);
             expect(rodape(wrapper)).toBe('INVALIDO:3:1');
@@ -357,7 +392,9 @@ export interface Itens {
             await digitar(wrapper, '{\n  "cliente": 1,\n}');
             await digitar(wrapper, '{ "cliente": { "nome": "Ana" } }');
 
-            expect(wrapper.find('[data-test="json-to-code-stale"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-stale"]').exists(),
+            ).toBe(false);
             expect(saida(wrapper)).toContain('export interface Cliente {');
         });
 
@@ -367,7 +404,9 @@ export interface Itens {
             await digitar(wrapper, '42');
 
             expect(estado(wrapper)).toBe('RAIZ_PRECISA_SER_OBJETO');
-            expect(wrapper.find('[data-test="json-to-code-output"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-output"]').exists(),
+            ).toBe(false);
         });
 
         it('nao analisa o que passa do limite', async () => {
@@ -376,7 +415,9 @@ export interface Itens {
             await digitar(wrapper, '{"cliente":"Ana"}');
 
             expect(estado(wrapper)).toContain('GRANDE:');
-            expect(wrapper.find('[data-test="json-to-code-output"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-output"]').exists(),
+            ).toBe(false);
         });
 
         it('limpa a tela e esquece a ultima saida valida', async () => {
@@ -385,8 +426,12 @@ export interface Itens {
             await digitar(wrapper, DOCUMENTO);
             await clicar(wrapper, 'LIMPAR');
 
-            expect(wrapper.find('[data-test="json-to-code-output"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="json-to-code-status"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-output"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="json-to-code-status"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
         });
     });
@@ -403,7 +448,10 @@ export interface Itens {
         });
 
         it('manda copiar na mao quando o navegador nao expoe a area de transferencia', async () => {
-            Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'clipboard', {
+                value: undefined,
+                configurable: true,
+            });
 
             const wrapper = montar();
 
@@ -420,12 +468,15 @@ export interface Itens {
                 value: vi.fn((_blob: Blob) => 'blob:teste'),
                 configurable: true,
             });
-            Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true });
-            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
-                this: HTMLAnchorElement,
-            ) {
-                baixados.push(this.download);
+            Object.defineProperty(URL, 'revokeObjectURL', {
+                value: vi.fn(),
+                configurable: true,
             });
+            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+                function (this: HTMLAnchorElement) {
+                    baixados.push(this.download);
+                },
+            );
 
             const wrapper = montar();
 

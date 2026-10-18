@@ -219,7 +219,10 @@ describe('o que o JSON nao diz', () => {
 
 describe('nomes que precisam de ajuste', () => {
     it('cita a chave no TypeScript sem renomear', () => {
-        const typescript = escrever({ 'first-name': 'a', nome: 'b' }).typescript;
+        const typescript = escrever({
+            'first-name': 'a',
+            nome: 'b',
+        }).typescript;
 
         expect(typescript).toContain('"first-name": string;');
         expect(typescript).toContain('nome: string;');
@@ -232,9 +235,15 @@ describe('nomes que precisam de ajuste', () => {
             first_name: 'c',
         };
 
-        expect(escrever(documento).php).toContain('public readonly string $class,');
-        expect(escrever(documento).php).toContain('public readonly string $first_name,');
-        expect(escrever(documento).php).toContain('public readonly string $first_name2,');
+        expect(escrever(documento).php).toContain(
+            'public readonly string $class,',
+        );
+        expect(escrever(documento).php).toContain(
+            'public readonly string $first_name,',
+        );
+        expect(escrever(documento).php).toContain(
+            'public readonly string $first_name2,',
+        );
         expect(escrever(documento).pydantic).toContain('class_: str');
         expect(escrever(documento).pydantic).toContain('first_name: str');
         expect(escrever(documento).pydantic).toContain('first_name2: str');
@@ -287,7 +296,10 @@ describe('generate', () => {
     });
 
     it('cai no nome padrao quando o campo esta vazio', () => {
-        const generation = generate({ nome: 'Ana' }, { target: 'php', rootName: '' });
+        const generation = generate(
+            { nome: 'Ana' },
+            { target: 'php', rootName: '' },
+        );
 
         expect(generation?.code).toContain('final class Root');
     });
@@ -295,26 +307,43 @@ describe('generate', () => {
     it('nao gera nada quando a raiz nao e um objeto com chaves', () => {
         // DTO de numero nao existe em PHP nem em Python, e classe sem campo nao
         // descreve nada: a tela diz o que precisa em vez de escrever vazio.
-        expect(generate(42, { target: 'typescript', rootName: 'Root' })).toBeNull();
-        expect(generate('texto', { target: 'php', rootName: 'Root' })).toBeNull();
-        expect(generate([1, 2], { target: 'pydantic', rootName: 'Root' })).toBeNull();
-        expect(generate({}, { target: 'typescript', rootName: 'Root' })).toBeNull();
-        expect(generate(null, { target: 'typescript', rootName: 'Root' })).toBeNull();
+        expect(
+            generate(42, { target: 'typescript', rootName: 'Root' }),
+        ).toBeNull();
+        expect(
+            generate('texto', { target: 'php', rootName: 'Root' }),
+        ).toBeNull();
+        expect(
+            generate([1, 2], { target: 'pydantic', rootName: 'Root' }),
+        ).toBeNull();
+        expect(
+            generate({}, { target: 'typescript', rootName: 'Root' }),
+        ).toBeNull();
+        expect(
+            generate(null, { target: 'typescript', rootName: 'Root' }),
+        ).toBeNull();
     });
 
     it('troca o alvo sem mudar a inferencia', () => {
         const documento: JsonValue = { tags: ['a'] };
 
-        expect(generate(documento, { target: 'typescript', rootName: 'Root' })?.code).toContain(
-            'string[]',
-        );
-        expect(generate(documento, { target: 'php', rootName: 'Root' })?.code).toContain('array $tags');
-        expect(generate(documento, { target: 'pydantic', rootName: 'Root' })?.code).toContain(
-            'list[str]',
-        );
+        expect(
+            generate(documento, { target: 'typescript', rootName: 'Root' })
+                ?.code,
+        ).toContain('string[]');
+        expect(
+            generate(documento, { target: 'php', rootName: 'Root' })?.code,
+        ).toContain('array $tags');
+        expect(
+            generate(documento, { target: 'pydantic', rootName: 'Root' })?.code,
+        ).toContain('list[str]');
     });
 
     it('da uma extensao de arquivo por alvo', () => {
-        expect(TARGET_EXTENSIONS).toEqual({ typescript: 'ts', php: 'php', pydantic: 'py' });
+        expect(TARGET_EXTENSIONS).toEqual({
+            typescript: 'ts',
+            php: 'php',
+            pydantic: 'py',
+        });
     });
 });

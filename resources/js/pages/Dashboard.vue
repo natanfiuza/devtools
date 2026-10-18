@@ -143,7 +143,9 @@ const cobranca = computed<string>(() => {
                 <p class="text-[12px] tracking-wide text-subtle uppercase">
                     {{ t('account.overview.payments') }}
                 </p>
-                <p class="mt-1 font-mono text-lg">{{ payments }}</p>
+                <p class="mt-1 font-mono text-lg">
+                    {{ payments }}
+                </p>
             </div>
 
             <div class="flex flex-wrap gap-2">

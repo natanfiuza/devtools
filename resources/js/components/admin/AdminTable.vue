@@ -40,7 +40,9 @@ const { t } = useI18n();
             <p class="text-sm font-medium">
                 {{ t('admin.common.empty_title') }}
             </p>
-            <p class="mt-1 text-sm text-subtle">{{ empty }}</p>
+            <p class="mt-1 text-sm text-subtle">
+                {{ empty }}
+            </p>
         </div>
 
         <div v-else class="overflow-x-auto">

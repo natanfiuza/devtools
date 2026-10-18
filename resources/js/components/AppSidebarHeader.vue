@@ -20,7 +20,9 @@ defineProps<{
     >
         <div class="flex items-center gap-2">
             <SidebarTrigger class="-ml-1" />
-            <h1 class="truncate text-sm font-medium">{{ title }}</h1>
+            <h1 class="truncate text-sm font-medium">
+                {{ title }}
+            </h1>
         </div>
     </header>
 </template>
