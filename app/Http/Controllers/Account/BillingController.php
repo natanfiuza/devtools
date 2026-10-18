@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\Enums\SubscriptionIntentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Models\SubscriptionIntent;
 use App\Support\Format;
 use App\Support\Quota;
 use Illuminate\Http\Request;
@@ -16,7 +18,8 @@ use Inertia\Response;
  *
  * A conta ve o que o admin registrou - o modelo de cobranca do bloco e a venda
  * manual (ADR-027), entao aqui nao ha botao de assinar nem de cancelar: isso
- * chega com o gateway, na F6. O que existe e a leitura do proprio historico.
+ * chega com o gateway, na F6. O que existe e a leitura do proprio historico,
+ * incluindo o aviso de intencao de assinatura em analise.
  */
 class BillingController extends Controller
 {
@@ -27,6 +30,13 @@ class BillingController extends Controller
         $user = $request->user();
         $quota = Quota::for($user);
         $subscription = $quota->subscription;
+
+        /** @var SubscriptionIntent|null $pendingIntent */
+        $pendingIntent = $user->subscriptionIntents()
+            ->with('plan')
+            ->where('status', SubscriptionIntentStatus::Pending->value)
+            ->latest('id')
+            ->first();
 
         $payments = $user->payments()
             ->with('plan')
@@ -41,6 +51,14 @@ class BillingController extends Controller
                 'price' => Format::money($quota->plan->price_cents, $quota->plan->currency),
             ],
             'subscription' => $this->subscription($subscription),
+            'pendingIntent' => $pendingIntent === null ? null : [
+                'id' => $pendingIntent->id,
+                'planName' => $pendingIntent->plan->name,
+                'planSlug' => $pendingIntent->plan->slug,
+                'status' => $pendingIntent->status->value,
+                'paymentMethod' => $pendingIntent->payment_method->value,
+                'createdAt' => Format::date($pendingIntent->created_at),
+            ],
             'payments' => $payments->through(fn (Payment $payment): array => [
                 'id' => $payment->id,
                 'plan' => $payment->plan?->name,

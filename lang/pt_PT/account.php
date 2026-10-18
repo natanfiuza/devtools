@@ -55,6 +55,12 @@ return [
         'no_subscription' => 'Está no plano gratuito.',
         'free_hint' => 'Para mudar de plano, fale connosco: a cobrança pelo site chega em breve.',
         'no_period' => 'Sem período',
+        'pending_intent' => [
+            'badge' => 'Em análise',
+            'title' => 'Intenção de subscrição em análise',
+            'description' => 'A sua intenção de subscrição para o plano {plan} foi enviada em {date} e está em análise pela nossa equipa. Entraremos em contacto para concluir a ativação.',
+            'view_details' => 'Ver ou alterar pedido',
+        ],
         'subscription_statuses' => [
             'active' => 'Ativa',
             'canceled' => 'Terminada',

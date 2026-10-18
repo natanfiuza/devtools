@@ -136,6 +136,42 @@ it('impede reservar um username ja usado por outra conta', function () {
         ->assertSessionHasErrors('username');
 });
 
+it('permite enviar intencao de assinatura sem documento de identificacao e com codigo de pais no telefone', function () {
+    Notification::fake();
+    config()->set('legal.contact_email', 'vendas@exemplo.com');
+
+    $user = User::factory()->create(['username' => null]);
+
+    $this->actingAs($user)
+        ->post(route('subscribe.store'), [
+            'plan' => 'pro-yearly',
+            'username' => 'natan_global',
+            'phone' => '912345678',
+            'country_code' => '+351',
+            'document' => '',
+            'payment_method' => SubscriptionIntentPaymentMethod::CreditCard->value,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('subscribe', ['plan' => 'pro-yearly']));
+
+    $intent = SubscriptionIntent::query()->sole();
+
+    expect($intent->document)->toBeNull()
+        ->and($intent->phone)->toBe('+351 912345678')
+        ->and($intent->username)->toBe('natan_global')
+        ->and($intent->payment_method)->toBe(SubscriptionIntentPaymentMethod::CreditCard);
+
+    Notification::assertSentOnDemand(
+        SubscriptionIntentSubmitted::class,
+        function (SubscriptionIntentSubmitted $notification) {
+            $mail = $notification->toMail((object) []);
+
+            return in_array('—', array_column($mail->introLines, 'line'), false)
+                || str_contains(implode(' ', $mail->introLines), '—');
+        }
+    );
+});
+
 it('permite ao admin listar, concluir e cancelar intencoes de assinatura com auditoria', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create(['username' => 'dev_pro']);

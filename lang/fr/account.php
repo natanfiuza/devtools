@@ -55,6 +55,12 @@ return [
         'no_subscription' => 'Vous êtes sur l’offre gratuite.',
         'free_hint' => 'Pour changer d’offre, parlez-nous : la facturation par le site arrive bientôt.',
         'no_period' => 'Sans période',
+        'pending_intent' => [
+            'badge' => 'En cours d\'examen',
+            'title' => 'Intention d\'abonnement en cours d\'examen',
+            'description' => 'Votre intention d\'abonnement pour le forfait {plan} a été soumise le {date} et est en cours d\'examen par notre équipe. Nous vous contacterons pour finaliser l\'activation.',
+            'view_details' => 'Voir ou modifier la demande',
+        ],
         'subscription_statuses' => [
             'active' => 'Actif',
             'canceled' => 'Terminé',

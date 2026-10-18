@@ -44,7 +44,7 @@ class SubscriptionIntentSubmitted extends Notification implements ShouldQueue
                 'plan' => $intent->plan->name.' ('.$intent->plan->slug.')',
                 'username' => '@'.$intent->username,
                 'phone' => $intent->phone,
-                'document' => $intent->document,
+                'document' => $intent->document ?: '—',
                 'method' => $intent->payment_method->value,
             ]));
 

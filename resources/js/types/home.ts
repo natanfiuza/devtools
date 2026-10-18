@@ -32,7 +32,7 @@ export type PendingSubscriptionIntent = {
     planSlug: string;
     username: string;
     phone: string;
-    document: string;
+    document: string | null;
     paymentMethod: 'pix' | 'credit_card' | 'boleto';
     notes: string;
     createdAt: string | null;
