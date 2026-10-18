@@ -34,7 +34,7 @@ function allTranslatedNamespaces(): array
 {
     return array_values(array_unique(array_merge(
         (array) config('locales.namespaces'),
-        ['mail'],
+        ['mail', 'passwords', 'validation'],
     )));
 }
 
