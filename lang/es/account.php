@@ -65,8 +65,8 @@ return [
         'paid_at' => 'Pagado el',
         'note' => 'Observación',
         'empty' => 'Ningún pago registrado.',
-        'total' => 'Total: :total',
-        'page_of' => 'Página :page de :last',
+        'total' => 'Total: {total}',
+        'page_of' => 'Página {page} de {last}',
         'previous' => 'Anterior',
         'next' => 'Siguiente',
         'statuses' => [

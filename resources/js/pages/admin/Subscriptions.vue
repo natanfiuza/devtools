@@ -489,7 +489,7 @@ function executeRestore(): void {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem :value="ALL">
-                            {{ t('admin.intents.filter_all') }}
+                            {{ t('admin.intents.status_all') }}
                         </SelectItem>
                         <SelectItem value="pending">
                             {{ t('admin.intents.status_pending') }}
@@ -627,7 +627,7 @@ function executeRestore(): void {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem :value="ALL">
-                                {{ t('admin.payments.filter_all') }}
+                                {{ t('admin.payments.status_all') }}
                             </SelectItem>
                             <SelectItem value="paid">
                                 {{ t('admin.payments.statuses.paid') }}
@@ -659,7 +659,7 @@ function executeRestore(): void {
                     {{
                         newPaymentOpen
                             ? t('admin.payments.cancel')
-                            : t('admin.payments.register_cta')
+                            : t('admin.payments.register')
                     }}
                 </Button>
             </div>
@@ -672,7 +672,7 @@ function executeRestore(): void {
             >
                 <div class="grid gap-2">
                     <Label for="hub-payment-email">
-                        {{ t('admin.payments.account_email') }}
+                        {{ t('admin.payments.email') }}
                     </Label>
                     <Input
                         id="hub-payment-email"

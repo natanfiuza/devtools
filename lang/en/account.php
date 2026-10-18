@@ -65,8 +65,8 @@ return [
         'paid_at' => 'Paid on',
         'note' => 'Note',
         'empty' => 'No payment recorded.',
-        'total' => 'Total: :total',
-        'page_of' => 'Page :page of :last',
+        'total' => 'Total: {total}',
+        'page_of' => 'Page {page} of {last}',
         'previous' => 'Previous',
         'next' => 'Next',
         'statuses' => [
