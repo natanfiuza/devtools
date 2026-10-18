@@ -15,6 +15,7 @@ return [
     'password' => 'La contraseña indicada es incorrecta.',
     'throttle' => 'Demasiados intentos. Vuelve a intentarlo en :seconds segundos.',
     'suspended' => 'Esta cuenta está suspendida. Escríbenos si crees que es un error.',
+    'reactivated' => '¡Te damos la bienvenida de nuevo! Se canceló la solicitud de eliminación y tu cuenta se ha reactivado con éxito.',
 
     'social' => [
         'divider' => 'o',
@@ -102,5 +103,17 @@ return [
         'set_password_confirmation' => 'Confirma la contraseña nueva',
         'set_submit' => 'Definir contraseña',
         'set_success' => 'Contraseña definida.',
+    ],
+
+    'two_factor' => [
+        'title' => 'Autenticación en dos pasos',
+        'description' => 'Confirma el acceso a tu cuenta introduciendo el código de autenticación facilitado por tu aplicación.',
+        'recovery_title' => 'Código de recuperación',
+        'recovery_description' => 'Confirma el acceso a tu cuenta introduciendo uno de tus códigos de recuperación de emergencia.',
+        'code_label' => 'Código de 6 dígitos',
+        'recovery_code_label' => 'Código de recuperación',
+        'submit' => 'Confirmar',
+        'use_recovery_code' => 'Usar un código de recuperación',
+        'use_auth_code' => 'Usar un código de la aplicación autenticadora',
     ],
 ];

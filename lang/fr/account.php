@@ -90,16 +90,17 @@ return [
 
     'delete' => [
         'title' => 'Supprimer le compte',
-        'description' => 'Efface vos données personnelles et met fin à votre accès.',
+        'description' => 'Programmez la suppression de votre compte avec un délai de grâce de 30 jours.',
         'warning_title' => 'Attention',
-        'warning' => 'Cette action est irréversible.',
+        'warning' => 'Votre compte entrera dans une période de grâce de 30 jours. Si vous vous connectez pendant ce délai, il sera réactivé. Après 30 jours, toutes vos données personnelles seront définitivement purgées.',
         'action' => 'Supprimer le compte',
         'dialog_title' => 'Voulez-vous vraiment supprimer votre compte ?',
-        'dialog_description' => 'Le nom, l’adresse e-mail, le mot de passe et les comptes liés sont effacés, et le compte ne peut plus se connecter. Les paiements sont conservés pendant la durée fiscale. Téléchargez vos données avant : ensuite, c’est perdu.',
+        'dialog_description' => 'Votre compte sera programmé pour suppression dans 30 jours. Vous pouvez le récupérer à tout moment pendant cette période en vous connectant. Après 30 jours, votre nom, e-mail, mot de passe et photo seront définitivement supprimés, seuls les enregistrements de paiement étant conservés pour obligation fiscale.',
         'download' => 'Télécharger mes données',
         'password' => 'Mot de passe',
         'password_placeholder' => 'Mot de passe',
         'cancel' => 'Annuler',
         'confirm' => 'Supprimer le compte',
+        'scheduled_notice' => 'Votre compte a été programmé pour suppression et sera définitivement éliminé dans 30 jours. Vous pouvez le réactiver à tout moment en vous connectant.',
     ],
 ];

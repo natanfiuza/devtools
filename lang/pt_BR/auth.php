@@ -15,6 +15,7 @@ return [
     'password' => 'A senha informada está incorreta.',
     'throttle' => 'Muitas tentativas. Tente de novo em :seconds segundos.',
     'suspended' => 'Esta conta está suspensa. Fale com a gente se achar que é engano.',
+    'reactivated' => 'Bem-vindo de volta! A solicitação de exclusão foi cancelada e sua conta foi reativada com sucesso.',
 
     'social' => [
         'divider' => 'ou',
@@ -102,5 +103,17 @@ return [
         'set_password_confirmation' => 'Confirme a nova senha',
         'set_submit' => 'Definir senha',
         'set_success' => 'Senha definida.',
+    ],
+
+    'two_factor' => [
+        'title' => 'Autenticação em dois fatores',
+        'description' => 'Confirme o acesso à sua conta informando o código de autenticação fornecido pelo seu aplicativo.',
+        'recovery_title' => 'Código de recuperação',
+        'recovery_description' => 'Confirme o acesso à sua conta informando um dos seus códigos de recuperação de emergência.',
+        'code_label' => 'Código de 6 dígitos',
+        'recovery_code_label' => 'Código de recuperação',
+        'submit' => 'Confirmar',
+        'use_recovery_code' => 'Usar um código de recuperação',
+        'use_auth_code' => 'Usar um código do aplicativo autenticador',
     ],
 ];

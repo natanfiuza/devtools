@@ -15,6 +15,7 @@ return [
     'password' => 'Le mot de passe fourni est incorrect.',
     'throttle' => 'Trop de tentatives. Réessayez dans :seconds secondes.',
     'suspended' => 'Ce compte est suspendu. Écrivez-nous si vous pensez qu\'il s\'agit d\'une erreur.',
+    'reactivated' => 'Bon retour parmi nous ! La demande de suppression a été annulée et votre compte a été réactivé avec succès.',
 
     'social' => [
         'divider' => 'ou',
@@ -102,5 +103,17 @@ return [
         'set_password_confirmation' => 'Confirmer le nouveau mot de passe',
         'set_submit' => 'Définir le mot de passe',
         'set_success' => 'Mot de passe défini.',
+    ],
+
+    'two_factor' => [
+        'title' => 'Authentification à deux facteurs',
+        'description' => 'Confirmez l’accès à votre compte en saisissant le code d’authentification fourni par votre application.',
+        'recovery_title' => 'Code de récupération',
+        'recovery_description' => 'Confirmez l’accès à votre compte en saisissant l’un de vos codes de récupération d’urgence.',
+        'code_label' => 'Code à 6 chiffres',
+        'recovery_code_label' => 'Code de récupération',
+        'submit' => 'Confirmer',
+        'use_recovery_code' => 'Utiliser un code de récupération',
+        'use_auth_code' => 'Utiliser un code de l’application d’authentification',
     ],
 ];

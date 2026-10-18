@@ -90,16 +90,17 @@ return [
 
     'delete' => [
         'title' => 'Delete account',
-        'description' => 'Erases your personal data and ends your access.',
+        'description' => 'Schedule account deletion with a 30-day grace period.',
         'warning_title' => 'Warning',
-        'warning' => 'This action cannot be undone.',
+        'warning' => 'Your account will enter a 30-day grace period. If you sign in during this time, it will be reactivated. After 30 days, all your personal data will be permanently purged.',
         'action' => 'Delete account',
         'dialog_title' => 'Are you sure you want to delete your account?',
-        'dialog_description' => 'Your name, e-mail, password and linked accounts are erased, and the account can no longer sign in. Payments are kept for the fiscal retention period. Download your data first: afterwards it is gone.',
+        'dialog_description' => 'Your account will be scheduled for deletion in 30 days. You can recover it at any time during this period simply by signing in. After 30 days, your name, email, password, and photo will be permanently deleted, retaining only payment records for fiscal compliance.',
         'download' => 'Download my data',
         'password' => 'Password',
         'password_placeholder' => 'Password',
         'cancel' => 'Cancel',
         'confirm' => 'Delete account',
+        'scheduled_notice' => 'Your account has been scheduled for deletion and will be permanently removed in 30 days. You may reactivate it at any time during this period by logging in.',
     ],
 ];

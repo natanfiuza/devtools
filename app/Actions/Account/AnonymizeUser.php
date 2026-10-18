@@ -6,6 +6,7 @@ use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 
 /**
  * Exclui a conta apagando o que identifica a pessoa e mantendo o que a
@@ -41,6 +42,13 @@ final class AnonymizeUser
                 ->current()
                 ->update(['status' => SubscriptionStatus::Canceled->value]);
 
+            if ($user->photo_uuid) {
+                $photoPath = storage_path('app/data/user_profile_image/'.$user->photo_uuid);
+                if (File::exists($photoPath)) {
+                    File::delete($photoPath);
+                }
+            }
+
             $user->forceFill([
                 'name' => '',
                 'username' => null,
@@ -49,6 +57,10 @@ final class AnonymizeUser
                 'remember_token' => null,
                 'email_verified_at' => null,
                 'suspended_at' => null,
+                'photo_uuid' => null,
+                'two_factor_secret' => null,
+                'two_factor_recovery_codes' => null,
+                'two_factor_confirmed_at' => null,
                 'role' => UserRole::User,
                 // Idioma e tema sao preferencia da pessoa, e nao estado da
                 // conta: vao junto.

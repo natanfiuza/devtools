@@ -87,6 +87,8 @@ class FortifyServiceProvider extends ServiceProvider
                 'passwordRules' => Password::defaults()->toPasswordRulesString(),
             ]);
         });
+
+        Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/TwoFactorChallenge'));
     }
 
     /**

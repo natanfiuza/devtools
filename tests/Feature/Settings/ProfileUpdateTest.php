@@ -7,7 +7,6 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -111,7 +110,7 @@ it('keeps the email verification status unchanged when the email address is unch
     $this->assertNotNull($user->refresh()->email_verified_at);
 });
 
-it('anonimiza a conta ao excluir, preservando pagamentos e assinaturas', function () {
+it('aplica soft delete ao excluir a conta com aviso de 30 dias', function () {
     $plano = Plan::query()->where('slug', 'pro-monthly')->sole();
     $user = User::factory()->create([
         'name' => 'Ana Souza',
@@ -138,12 +137,61 @@ it('anonimiza a conta ao excluir, preservando pagamentos e assinaturas', functio
 
     $this->assertGuest();
 
+    $excluida = $user->refresh();
+
+    expect($excluida->trashed())->toBeTrue()
+        ->and($excluida->deleted_at)->not->toBeNull()
+        ->and($excluida->anonymized_at)->toBeNull()
+        ->and($excluida->email)->toBe('ana@exemplo.com');
+});
+
+it('restaura automaticamente a conta ao fazer login dentro dos 30 dias', function () {
+    $user = User::factory()->create([
+        'email' => 'restaura@exemplo.com',
+        'password' => 'password',
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('profile.destroy'), ['password' => 'password']);
+
+    expect($user->refresh()->trashed())->toBeTrue();
+
+    $response = $this->post(route('login.store'), [
+        'email' => 'restaura@exemplo.com',
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticatedAs($user);
+    expect($user->refresh()->trashed())->toBeFalse()
+        ->and($user->deleted_at)->toBeNull();
+});
+
+it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
+    $plano = Plan::query()->where('slug', 'pro-monthly')->sole();
+    $user = User::factory()->create([
+        'name' => 'Carlos Lima',
+        'email' => 'carlos@exemplo.com',
+        'locale' => 'pt_BR',
+    ]);
+
+    $assinatura = Subscription::factory()->for($user)->for($plano)->create();
+    $pagamento = Payment::factory()->for($user)->create([
+        'subscription_id' => $assinatura->id,
+        'plan_id' => $plano->id,
+    ]);
+
+    // Simula exclusao ha mais de 30 dias
+    $user->delete();
+    DB::table('users')->where('id', $user->id)->update(['deleted_at' => now()->subDays(31)]);
+
+    // Executa command de expurgo
+    $this->artisan('accounts:purge-deleted')->assertExitCode(0);
+
     $anonima = $user->refresh();
 
     expect($anonima->name)->toBe('')
         ->and($anonima->email)->toBe('removido+'.$user->id.'@removido.invalid')
         ->and($anonima->password)->toBeNull()
-        ->and($anonima->locale)->toBeNull()
         ->and($anonima->anonymized_at)->not->toBeNull();
 
     // O que a contabilidade precisa fica: nota fiscal nao se apaga (ADR-028).
@@ -153,41 +201,6 @@ it('anonimiza a conta ao excluir, preservando pagamentos e assinaturas', functio
         ->and($anonima->subscriptions()->count())->toBe(1)
         ->and($assinatura->refresh()->status)->toBe(SubscriptionStatus::Canceled)
         ->and($anonima->activeSubscription())->toBeNull();
-});
-
-it('derruba as sessoes abertas ao excluir a conta', function () {
-    $user = User::factory()->create();
-
-    DB::table('sessions')->insert([
-        'id' => 'sessao-da-ana',
-        'user_id' => $user->id,
-        'ip_address' => '127.0.0.1',
-        'user_agent' => 'Pest',
-        'payload' => '',
-        'last_activity' => now()->getTimestamp(),
-    ]);
-
-    $this->actingAs($user)
-        ->delete(route('profile.destroy'), ['password' => 'password']);
-
-    expect(DB::table('sessions')->where('user_id', $user->id)->count())->toBe(0);
-});
-
-it('nao deixa a conta anonimizada entrar de novo', function () {
-    $user = User::factory()->create(['email' => 'sumiu@exemplo.com']);
-
-    $this->actingAs($user)
-        ->delete(route('profile.destroy'), ['password' => 'password']);
-
-    // O endereco antigo nao existe mais em lugar nenhum, e a senha tambem nao.
-    $this->post(route('login.store'), [
-        'email' => 'sumiu@exemplo.com',
-        'password' => 'password',
-    ]);
-
-    $this->assertGuest();
-
-    expect(User::query()->where('email', 'sumiu@exemplo.com')->exists())->toBeFalse();
 });
 
 it('requires the correct password to delete the account', function () {

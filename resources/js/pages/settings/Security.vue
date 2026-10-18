@@ -5,6 +5,7 @@ import SecurityController from '@/actions/App/Http/Controllers/Settings/Security
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
+import TwoFactorAuthentication from '@/components/TwoFactorAuthentication.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
@@ -98,5 +99,7 @@ const { t } = useI18n();
                 </Button>
             </div>
         </Form>
+
+        <TwoFactorAuthentication />
     </div>
 </template>

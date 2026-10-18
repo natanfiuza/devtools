@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PricingController;
+use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SubscriptionIntentController;
@@ -48,6 +49,10 @@ Route::prefix('{locale}')
 // vence a rota, no nginx e no `artisan serve`.
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
+
+// Foto de perfil publica servida por UUID direto de storage/app/data/user_profile_image:
+Route::get('users/profile/photo/{uuid}', [ProfilePhotoController::class, 'show'])
+    ->name('users.profile.photo');
 
 // Definir a primeira senha: contas criadas por login social (ADR-023) chegam
 // aqui quando o Fortify pede a senha em settings/security. O prefixo de idioma

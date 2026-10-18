@@ -15,6 +15,7 @@ return [
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many attempts. Please try again in :seconds seconds.',
     'suspended' => 'This account is suspended. Write to us if you think it is a mistake.',
+    'reactivated' => 'Welcome back! The deletion request has been canceled and your account was successfully reactivated.',
 
     'social' => [
         'divider' => 'or',
@@ -102,5 +103,17 @@ return [
         'set_password_confirmation' => 'Confirm the new password',
         'set_submit' => 'Set password',
         'set_success' => 'Password set.',
+    ],
+
+    'two_factor' => [
+        'title' => 'Two-factor authentication',
+        'description' => 'Confirm access to your account by entering the authentication code provided by your authenticator application.',
+        'recovery_title' => 'Recovery code',
+        'recovery_description' => 'Confirm access to your account by entering one of your emergency recovery codes.',
+        'code_label' => '6-digit code',
+        'recovery_code_label' => 'Recovery code',
+        'submit' => 'Confirm',
+        'use_recovery_code' => 'Use a recovery code',
+        'use_auth_code' => 'Use an authenticator app code',
     ],
 ];

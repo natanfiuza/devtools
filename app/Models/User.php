@@ -30,15 +30,30 @@ use Illuminate\Support\Carbon;
  * @property string|null $locale
  * @property string|null $appearance
  * @property string|null $remember_token
+ * @property string|null $photo_uuid
+ * @property-read string|null $avatar
+ * @property string|null $two_factor_secret
+ * @property string|null $two_factor_recovery_codes
+ * @property Carbon|null $two_factor_confirmed_at
+ * @property-read bool $two_factor_enabled
+ * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'username', 'email', 'password'])]
-#[Hidden(['password', 'appearance', 'remember_token', 'role', 'suspended_at'])]
+#[Fillable(['name', 'username', 'email', 'password', 'photo_uuid'])]
+#[Hidden(['password', 'appearance', 'remember_token', 'role', 'suspended_at', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
+
+    /**
+     * @var list<string>
+     */
+    protected $appends = [
+        'avatar',
+        'two_factor_enabled',
+    ];
 
     /**
      * Conta nova nasce usuario comum - o mesmo default da coluna, repetido aqui
@@ -50,6 +65,24 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     protected $attributes = [
         'role' => 'user',
     ];
+
+    /**
+     * URL publica da foto de perfil, quando houver.
+     */
+    public function getAvatarAttribute(): ?string
+    {
+        return $this->photo_uuid !== null
+            ? route('users.profile.photo', ['uuid' => $this->photo_uuid])
+            : null;
+    }
+
+    /**
+     * Indica se a conta possui autenticacao em dois fatores ativada e confirmada.
+     */
+    public function getTwoFactorEnabledAttribute(): bool
+    {
+        return $this->hasEnabledTwoFactorAuthentication();
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -64,6 +97,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'role' => UserRole::class,
             'suspended_at' => 'datetime',
             'anonymized_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
+            'deleted_at' => 'datetime',
         ];
     }
 

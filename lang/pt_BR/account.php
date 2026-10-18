@@ -90,16 +90,17 @@ return [
 
     'delete' => [
         'title' => 'Excluir conta',
-        'description' => 'Apaga os seus dados pessoais e encerra o acesso.',
+        'description' => 'Agende a exclusão da sua conta com período de carência de 30 dias.',
         'warning_title' => 'Atenção',
-        'warning' => 'Esta ação não tem volta.',
+        'warning' => 'Sua conta entrará em período de carência por 30 dias. Se você fizer login durante esse prazo, ela será reativada. Após 30 dias, todos os seus dados pessoais serão expurgados definitivamente.',
         'action' => 'Excluir conta',
         'dialog_title' => 'Tem certeza de que quer excluir a sua conta?',
-        'dialog_description' => 'O nome, o e-mail, a senha e os vínculos são apagados, e a conta não entra mais. Os pagamentos ficam guardados pelo prazo fiscal. Baixe os seus dados antes: depois não dá mais.',
+        'dialog_description' => 'A sua conta será agendada para exclusão em 30 dias. Durante esse prazo você pode recuperá-la fazendo login. Após os 30 dias, o nome, e-mail, senha e foto serão excluídos definitivamente, mantendo apenas registros de pagamento pelo prazo fiscal.',
         'download' => 'Baixar meus dados',
         'password' => 'Senha',
         'password_placeholder' => 'Senha',
         'cancel' => 'Cancelar',
         'confirm' => 'Excluir conta',
+        'scheduled_notice' => 'Sua conta foi agendada para exclusão e será eliminada definitivamente em 30 dias. Você pode reativá-la a qualquer momento durante esse período fazendo login.',
     ],
 ];

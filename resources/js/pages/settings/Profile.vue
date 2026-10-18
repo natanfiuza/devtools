@@ -7,6 +7,7 @@ import DeleteUser from '@/components/DeleteUser.vue';
 import ExportData from '@/components/ExportData.vue';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
+import ProfilePhoto from '@/components/ProfilePhoto.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,6 +45,8 @@ const locale = ref(user.value.locale ?? page.props.locale);
             :title="t('settings.profile.title')"
             :description="t('settings.profile.description')"
         />
+
+        <ProfilePhoto />
 
         <Form
             v-bind="ProfileController.update.form()"

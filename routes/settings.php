@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\Settings\ExportController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -15,6 +16,8 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('settings/profile/photo', [ProfilePhotoController::class, 'update'])->name('profile.photo.update');
+    Route::delete('settings/profile/photo', [ProfilePhotoController::class, 'destroy'])->name('profile.photo.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
