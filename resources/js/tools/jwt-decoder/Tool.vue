@@ -10,7 +10,12 @@ import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import { formatBytes } from '@/lib/bytes';
 import { byteLength } from '@/lib/json/parse';
 import { decodeJwt, type DecodeResult, type TimeClaim } from './lib/decode';
-import { paintJson, paintToText, type JsonToken, type JsonTokenKind } from './lib/paint';
+import {
+    paintJson,
+    paintToText,
+    type JsonToken,
+    type JsonTokenKind,
+} from './lib/paint';
 import sample from './sample.txt?raw';
 
 /*
@@ -70,7 +75,9 @@ const result = computed<DecodeResult | null>(() =>
     isEmpty.value || tooLarge.value ? null : decodeJwt(text.value),
 );
 
-const token = computed(() => (result.value !== null && result.value.ok ? result.value.token : null));
+const token = computed(() =>
+    result.value !== null && result.value.ok ? result.value.token : null,
+);
 
 const failure = computed(() =>
     result.value !== null && !result.value.ok ? result.value.reason : null,
@@ -148,8 +155,14 @@ const claimViews = computed<ClaimView[]>(() => {
 
     return claims.value.map((claim) => ({
         name: claim.name,
-        value: claim.date === null ? JSON.stringify(claim.raw) : dateFormat.value.format(claim.date),
-        badge: value === null ? null : badgeOf(claim, value.expired, value.notYetValid),
+        value:
+            claim.date === null
+                ? JSON.stringify(claim.raw)
+                : dateFormat.value.format(claim.date),
+        badge:
+            value === null
+                ? null
+                : badgeOf(claim, value.expired, value.notYetValid),
     }));
 });
 
@@ -177,7 +190,9 @@ function badgeOf(
 }
 
 const signatureText = computed(() =>
-    t('tools.jwt-decoder.signature_bytes', { count: token.value?.signatureBytes ?? 0 }),
+    t('tools.jwt-decoder.signature_bytes', {
+        count: token.value?.signatureBytes ?? 0,
+    }),
 );
 
 /*
@@ -218,7 +233,9 @@ function copyAll(): void {
 function copyBlock(block: Block): void {
     void copyFeedback.copy(
         block.text,
-        t('tools.jwt-decoder.block_copied', { label: t(`tools.jwt-decoder.${block.name}`) }),
+        t('tools.jwt-decoder.block_copied', {
+            label: t(`tools.jwt-decoder.${block.name}`),
+        }),
     );
 }
 
@@ -237,10 +254,14 @@ function applyText(next: string): void {
 | Os recados da tela
 */
 
-const statsMessage = computed(() =>
-    `${formatBytes(inputBytes.value, locale.value)} ${t('tools.ui.limits.of', {
-        limit: formatBytes(props.maxInputBytes, locale.value),
-    })}`,
+const statsMessage = computed(
+    () =>
+        `${formatBytes(inputBytes.value, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
 );
 
 /** O recado que ocupa o lugar dos blocos, quando nao ha token para mostrar. */
@@ -366,7 +387,7 @@ const status = computed<string>(
 
                                 <button
                                     type="button"
-                                    class="ml-auto rounded p-1 text-subtle transition-colors hover:bg-surface-muted hover:text-foreground"
+                                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
                                     :aria-label="`${t('tools.ui.actions.copy')} — ${t(`tools.jwt-decoder.${block.name}`)}`"
                                     data-test="jwt-decoder-block-copy"
                                     @click="copyBlock(block)"
@@ -387,7 +408,7 @@ const status = computed<string>(
                                 v-for="(piece, index) in block.tokens"
                                 :key="index"
                                 :class="KIND_CLASS[piece.kind]"
-                            >{{ piece.text }}</span></pre>
+              >{{ piece.text }}</span></pre>
                         </section>
 
                         <!--
@@ -400,7 +421,9 @@ const status = computed<string>(
                             class="border-b border-border px-3 py-2"
                             data-test="jwt-decoder-claims"
                         >
-                            <h3 class="text-[11px] font-medium tracking-wide text-subtle uppercase">
+                            <h3
+                                class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                            >
                                 {{ t('tools.jwt-decoder.claims_title') }}
                             </h3>
 
@@ -415,12 +438,14 @@ const status = computed<string>(
                                     <span
                                         class="font-mono text-xs text-subtle"
                                         data-test="jwt-decoder-claim-name"
-                                    >{{ claim.name }}</span>
+                                        >{{ claim.name }}</span
+                                    >
 
                                     <span
                                         class="font-mono text-xs"
                                         data-test="jwt-decoder-claim-value"
-                                    >{{ claim.value }}</span>
+                                        >{{ claim.value }}</span
+                                    >
 
                                     <span
                                         v-if="claim.badge !== null"
@@ -431,7 +456,8 @@ const status = computed<string>(
                                                 : 'border-border text-subtle'
                                         "
                                         data-test="jwt-decoder-claim-badge"
-                                    >{{ claim.badge.text }}</span>
+                                        >{{ claim.badge.text }}</span
+                                    >
                                 </li>
                             </ul>
                         </section>
@@ -446,11 +472,15 @@ const status = computed<string>(
                             class="flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2"
                             data-test="jwt-decoder-signature"
                         >
-                            <h3 class="text-[11px] font-medium tracking-wide text-subtle uppercase">
+                            <h3
+                                class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                            >
                                 {{ t('tools.jwt-decoder.signature') }}
                             </h3>
 
-                            <span class="font-mono text-xs">{{ signatureText }}</span>
+                            <span class="font-mono text-xs">{{
+                                signatureText
+                            }}</span>
                             <span class="text-xs text-subtle">
                                 {{ t('tools.jwt-decoder.not_verified') }}
                             </span>

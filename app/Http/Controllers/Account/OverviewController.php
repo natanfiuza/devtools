@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use App\Support\Format;
 use App\Support\Quota;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,9 +21,14 @@ use Inertia\Response;
  */
 class OverviewController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
+
+        if ($user !== null && $user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $quota = Quota::for($user);
         $subscription = $quota->subscription;
 

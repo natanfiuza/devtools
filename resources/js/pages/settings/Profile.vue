@@ -49,9 +49,9 @@ const locale = ref(user.value.locale ?? page.props.locale);
         <ProfilePhoto />
 
         <Form
+            v-slot="{ errors, processing }"
             v-bind="ProfileController.update.form()"
             class="space-y-6"
-            v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
                 <Label for="name">{{ t('settings.profile.name') }}</Label>
@@ -68,7 +68,9 @@ const locale = ref(user.value.locale ?? page.props.locale);
             </div>
 
             <div class="grid gap-2">
-                <Label for="username">{{ t('settings.profile.username') }}</Label>
+                <Label for="username">{{
+                    t('settings.profile.username')
+                }}</Label>
                 <div class="relative mt-1">
                     <span
                         class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 font-mono text-sm text-muted-foreground"
@@ -82,7 +84,9 @@ const locale = ref(user.value.locale ?? page.props.locale);
                         name="username"
                         :default-value="user.username ?? ''"
                         autocomplete="off"
-                        :placeholder="t('settings.profile.username_placeholder')"
+                        :placeholder="
+                            t('settings.profile.username_placeholder')
+                        "
                         aria-describedby="username-help"
                     />
                 </div>

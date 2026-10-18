@@ -34,7 +34,10 @@ const SUBTLE_NAMES: Record<Exclude<HashAlgorithm, 'md5'>, string> = {
 
 /** Ha Web Crypto nesta pagina? A pergunta e pela funcao, e nao pelo objeto. */
 export function hasWebCrypto(): boolean {
-    return typeof crypto !== 'undefined' && typeof crypto.subtle?.digest === 'function';
+    return (
+        typeof crypto !== 'undefined' &&
+        typeof crypto.subtle?.digest === 'function'
+    );
 }
 
 export async function hashAll(text: string): Promise<DigestLine[]> {
@@ -68,7 +71,11 @@ async function digestOf(
     }
 
     try {
-        return toHex(new Uint8Array(await crypto.subtle.digest(SUBTLE_NAMES[algorithm], bytes)));
+        return toHex(
+            new Uint8Array(
+                await crypto.subtle.digest(SUBTLE_NAMES[algorithm], bytes),
+            ),
+        );
     } catch {
         // Algoritmo recusado pela plataforma: a linha fica sem valor, e as
         // outras tres continuam de pe.

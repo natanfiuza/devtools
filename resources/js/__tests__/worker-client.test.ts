@@ -54,7 +54,10 @@ class FakeWorker {
             throw new Error(`pedido ${index} nao foi enviado`);
         }
 
-        const response: WorkerResponse<number> = { id: request.id, result: dobro(request.payload) };
+        const response: WorkerResponse<number> = {
+            id: request.id,
+            result: dobro(request.payload),
+        };
 
         this.emit('message', { data: response });
     }
@@ -71,10 +74,19 @@ class FakeWorker {
     }
 }
 
-function clientWithWorker(): { client: WorkerClient<Payload, number>; worker: FakeWorker } {
+function clientWithWorker(): {
+    client: WorkerClient<Payload, number>;
+    worker: FakeWorker;
+} {
     const worker = new FakeWorker();
 
-    return { client: createWorkerClient<Payload, number>(() => worker as unknown as Worker, dobro), worker };
+    return {
+        client: createWorkerClient<Payload, number>(
+            () => worker as unknown as Worker,
+            dobro,
+        ),
+        worker,
+    };
 }
 
 describe('cliente sem worker', () => {

@@ -6,8 +6,14 @@ import {
     type AnalyzeOutcome,
     type AnalyzeSuccess,
 } from '@/tools/json-viewer/lib/analyze';
-import { createAnalyzeClient, type AnalyzeClient } from '@/tools/json-viewer/lib/parseClient';
-import type { AnalyzeRequest, AnalyzeResponse } from '@/tools/json-viewer/lib/parser.protocol';
+import {
+    createAnalyzeClient,
+    type AnalyzeClient,
+} from '@/tools/json-viewer/lib/parseClient';
+import type {
+    AnalyzeRequest,
+    AnalyzeResponse,
+} from '@/tools/json-viewer/lib/parser.protocol';
 import { createParserWorker } from '@/tools/json-viewer/lib/parser.workerHost';
 
 /**
@@ -73,12 +79,17 @@ class FakeWorker {
 function clientWithWorker(): { client: AnalyzeClient; worker: FakeWorker } {
     const worker = new FakeWorker();
 
-    return { client: createAnalyzeClient(() => worker as unknown as Worker), worker };
+    return {
+        client: createAnalyzeClient(() => worker as unknown as Worker),
+        worker,
+    };
 }
 
 function expectOk(outcome: AnalyzeOutcome | null): AnalyzeSuccess {
     if (outcome === null || !outcome.ok) {
-        throw new Error(`esperava uma analise valida, veio ${JSON.stringify(outcome)}`);
+        throw new Error(
+            `esperava uma analise valida, veio ${JSON.stringify(outcome)}`,
+        );
     }
 
     return outcome;
@@ -88,7 +99,12 @@ describe('analyzeDocument', () => {
     it('devolve a arvore, as estatisticas e o colapso inicial', () => {
         const outcome = expectOk(analyzeDocument('{"a":{"b":1},"c":[1,2]}'));
 
-        expect(outcome.stats).toEqual({ bytes: 23, nodes: 6, keys: 3, items: 2 });
+        expect(outcome.stats).toEqual({
+            bytes: 23,
+            nodes: 6,
+            keys: 3,
+            items: 2,
+        });
         // A raiz nasce aberta; os dois containers do primeiro nivel, fechados.
         expect(outcome.collapsed).toEqual([1, 3]);
         expect(INITIAL_COLLAPSE_DEPTH).toBe(1);
@@ -100,10 +116,16 @@ describe('analyzeDocument', () => {
 
     it('reescreve o texto na forma pedida', () => {
         const pretty = expectOk(
-            analyzeDocument('{"a":1}', { ...DEFAULT_ANALYZE_OPTIONS, output: 'pretty' }),
+            analyzeDocument('{"a":1}', {
+                ...DEFAULT_ANALYZE_OPTIONS,
+                output: 'pretty',
+            }),
         );
         const minify = expectOk(
-            analyzeDocument('{\n  "a": 1\n}', { ...DEFAULT_ANALYZE_OPTIONS, output: 'minify' }),
+            analyzeDocument('{\n  "a": 1\n}', {
+                ...DEFAULT_ANALYZE_OPTIONS,
+                output: 'minify',
+            }),
         );
 
         expect(pretty.output).toBe('{\n  "a": 1\n}');
@@ -125,7 +147,10 @@ describe('analyzeDocument', () => {
     });
 
     it('devolve o erro do parse como veio', () => {
-        const outcome = analyzeDocument('{', { ...DEFAULT_ANALYZE_OPTIONS, output: 'pretty' });
+        const outcome = analyzeDocument('{', {
+            ...DEFAULT_ANALYZE_OPTIONS,
+            output: 'pretty',
+        });
 
         expect(outcome.ok).toBe(false);
     });
@@ -159,7 +184,9 @@ describe('cliente sem worker', () => {
 
     it('nao cria worker onde o ambiente nao tem Worker', () => {
         // No jsdom e no SSR nao existe `Worker`: e justamente o caminho da queda.
-        expect(typeof Worker === 'undefined' ? createParserWorker() : null).toBeNull();
+        expect(
+            typeof Worker === 'undefined' ? createParserWorker() : null,
+        ).toBeNull();
     });
 });
 

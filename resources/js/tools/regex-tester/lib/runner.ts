@@ -76,7 +76,10 @@ export function createRunner(options: RunnerOptions): Runner {
 
             let timer: ReturnType<typeof setTimeout> | undefined;
             const deadline = new Promise<{ status: 'timeout' }>((resolve) => {
-                timer = setTimeout(() => resolve({ status: 'timeout' }), options.timeoutMs);
+                timer = setTimeout(
+                    () => resolve({ status: 'timeout' }),
+                    options.timeoutMs,
+                );
             });
 
             try {

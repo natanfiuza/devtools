@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SubscriberController;
+use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SubscriptionIntentController;
 use App\Http\Controllers\Admin\UserActionController;
 use App\Http\Controllers\Admin\UserController;
@@ -60,6 +61,9 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
             ->name('users.quota');
         Route::delete('users/{user}', [UserActionController::class, 'destroy'])
             ->name('users.destroy');
+        Route::post('users/{user}/restore', [UserActionController::class, 'restore'])
+            ->withTrashed()
+            ->name('users.restore');
 
         Route::post('users/{user}/impersonate', [ImpersonationController::class, 'store'])
             ->name('users.impersonate');
@@ -72,6 +76,9 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
             ->name('subscribers.resubscribe');
         Route::delete('subscribers/{subscriber}', [SubscriberController::class, 'destroy'])
             ->name('subscribers.destroy');
+
+        // Hub unificado de assinaturas e cobranca.
+        Route::get('subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
 
         // Catalogo e cobranca.
         Route::get('plans', [PlanController::class, 'index'])->name('plans.index');

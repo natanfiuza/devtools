@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { Clock, Copy, Eraser, Hash, RefreshCw, Sparkles, TriangleAlert } from '@lucide/vue';
+import {
+    Clock,
+    Copy,
+    Eraser,
+    Hash,
+    RefreshCw,
+    Sparkles,
+    TriangleAlert,
+} from '@lucide/vue';
 import { computed, onUnmounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/tool/CodeEditor.vue';
@@ -24,7 +32,12 @@ import {
     ID_QUANTITIES,
     type IdKind,
 } from './lib/ids';
-import { readInstant, readingsFor, type Instant, type Reading } from './lib/time';
+import {
+    readInstant,
+    readingsFor,
+    type Instant,
+    type Reading,
+} from './lib/time';
 import sample from './sample.txt?raw';
 
 /*
@@ -98,18 +111,25 @@ const instant = computed<Instant | null>(() =>
 );
 
 /** O texto colado era um id, e nao um instante escrito. */
-const isId = computed(() => instant.value?.source === 'uuid_v7' || instant.value?.source === 'ulid');
+const isId = computed(
+    () =>
+        instant.value?.source === 'uuid_v7' || instant.value?.source === 'ulid',
+);
 
 const recognised = computed(() =>
     isId.value
         ? t('tools.timestamp-uuid.recognised', {
-              kind: t(`tools.timestamp-uuid.kinds.${instant.value?.source ?? 'ulid'}`),
+              kind: t(
+                  `tools.timestamp-uuid.kinds.${instant.value?.source ?? 'ulid'}`,
+              ),
           })
         : '',
 );
 
 const readings = computed<Reading[]>(() =>
-    instant.value === null ? [] : readingsFor(instant.value.date, now.value, dateLocale.value),
+    instant.value === null
+        ? []
+        : readingsFor(instant.value.date, now.value, dateLocale.value),
 );
 
 function labelOf(row: Reading): string {
@@ -187,10 +207,14 @@ function applyText(next: string): void {
 | Os recados da tela
 */
 
-const statsMessage = computed(() =>
-    `${formatBytes(inputBytes.value, locale.value)} ${t('tools.ui.limits.of', {
-        limit: formatBytes(props.maxInputBytes, locale.value),
-    })}`,
+const statsMessage = computed(
+    () =>
+        `${formatBytes(inputBytes.value, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
 );
 
 /** O recado que ocupa o lugar das leituras, quando nao ha leitura nenhuma. */
@@ -206,7 +230,10 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
     }
 
     if (!isEmpty.value && instant.value === null) {
-        return { text: t('tools.timestamp-uuid.states.unreadable'), error: true };
+        return {
+            text: t('tools.timestamp-uuid.states.unreadable'),
+            error: true,
+        };
     }
 
     return null;
@@ -307,7 +334,11 @@ const status = computed<string>(() => {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem v-for="kind in ID_KINDS" :key="kind" :value="kind">
+                        <SelectItem
+                            v-for="kind in ID_KINDS"
+                            :key="kind"
+                            :value="kind"
+                        >
                             {{ t(`tools.timestamp-uuid.kinds.${kind}`) }}
                         </SelectItem>
                     </SelectContent>
@@ -322,7 +353,11 @@ const status = computed<string>(() => {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem v-for="quantity in ID_QUANTITIES" :key="quantity" :value="quantity">
+                        <SelectItem
+                            v-for="quantity in ID_QUANTITIES"
+                            :key="quantity"
+                            :value="quantity"
+                        >
                             {{ quantity }}
                         </SelectItem>
                     </SelectContent>
@@ -368,7 +403,10 @@ const status = computed<string>(() => {
                         class="flex items-center gap-1.5 border-b border-accent/40 bg-accent/5 px-3 py-1.5 text-xs text-foreground"
                         data-test="timestamp-uuid-recognised"
                     >
-                        <Hash class="size-3.5 shrink-0 text-subtle" aria-hidden="true" />
+                        <Hash
+                            class="size-3.5 shrink-0 text-subtle"
+                            aria-hidden="true"
+                        />
                         {{ recognised }}
                     </p>
 
@@ -390,7 +428,7 @@ const status = computed<string>(() => {
 
                                 <button
                                     type="button"
-                                    class="ml-auto rounded p-1 text-subtle transition-colors hover:bg-surface-muted hover:text-foreground"
+                                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
                                     :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
                                     data-test="timestamp-uuid-reading-copy"
                                     @click="copyReading(row)"
@@ -418,12 +456,16 @@ const status = computed<string>(() => {
                                 class="text-[11px] font-medium tracking-wide text-subtle uppercase"
                                 data-test="timestamp-uuid-ids-title"
                             >
-                                {{ t('tools.timestamp-uuid.ids_title', { count: ids.length }) }}
+                                {{
+                                    t('tools.timestamp-uuid.ids_title', {
+                                        count: ids.length,
+                                    })
+                                }}
                             </h3>
 
                             <button
                                 type="button"
-                                class="ml-auto flex items-center gap-1 rounded px-1.5 py-1 text-xs text-subtle transition-colors hover:bg-surface-muted hover:text-foreground"
+                                class="hover:bg-surface-muted ml-auto flex items-center gap-1 rounded px-1.5 py-1 text-xs text-subtle transition-colors hover:text-foreground"
                                 :aria-label="t('tools.timestamp-uuid.copy_ids')"
                                 data-test="timestamp-uuid-ids-copy"
                                 @click="copyIds"
@@ -440,11 +482,13 @@ const status = computed<string>(() => {
                                 class="flex items-center gap-2 border-t border-border px-3 py-1.5"
                                 data-test="timestamp-uuid-id"
                             >
-                                <p class="font-mono text-sm break-all">{{ id }}</p>
+                                <p class="font-mono text-sm break-all">
+                                    {{ id }}
+                                </p>
 
                                 <button
                                     type="button"
-                                    class="ml-auto rounded p-1 text-subtle transition-colors hover:bg-surface-muted hover:text-foreground"
+                                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
                                     :aria-label="`${t('tools.ui.actions.copy')} — ${id}`"
                                     data-test="timestamp-uuid-id-copy"
                                     @click="copyId(id)"
@@ -459,10 +503,7 @@ const status = computed<string>(() => {
         </template>
 
         <template #status>
-            <p
-                class="text-xs text-subtle"
-                data-test="timestamp-uuid-status"
-            >
+            <p class="text-xs text-subtle" data-test="timestamp-uuid-status">
                 {{ status }}
             </p>
         </template>

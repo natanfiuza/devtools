@@ -80,7 +80,11 @@ export function formatSql(text: string, options: FormatOptions): FormatResult {
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
 
-        return { ok: false, message: firstLine(message), ...lineColumnFromMessage(message) };
+        return {
+            ok: false,
+            message: firstLine(message),
+            ...lineColumnFromMessage(message),
+        };
     }
 }
 

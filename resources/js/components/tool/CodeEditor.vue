@@ -129,5 +129,5 @@ watch(
         ref="host"
         class="h-full min-h-0 font-mono text-sm"
         :data-test="testid"
-    ></div>
+    />
 </template>

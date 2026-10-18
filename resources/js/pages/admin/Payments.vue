@@ -325,15 +325,21 @@ function refund(row: AdminPaymentRow): void {
             :empty="t('admin.payments.empty')"
             @page="goToPage"
         >
-            <template #cell-paidAt="{ row }">{{ row.paidAt }}</template>
-            <template #cell-account="{ row }">{{ row.account }}</template>
+            <template #cell-paidAt="{ row }">
+                {{ row.paidAt }}
+            </template>
+            <template #cell-account="{ row }">
+                {{ row.account }}
+            </template>
             <template #cell-plan="{ row }">
                 {{ row.plan ?? t('admin.payments.plan_none') }}
             </template>
             <template #cell-method="{ row }">
                 {{ t(`admin.payments.methods.${row.method}`) }}
             </template>
-            <template #cell-amount="{ row }">{{ row.amount }}</template>
+            <template #cell-amount="{ row }">
+                {{ row.amount }}
+            </template>
 
             <template #cell-status="{ row }">
                 <Badge

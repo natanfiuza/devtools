@@ -60,7 +60,11 @@ afterEach(() => {
 /** A tecla como o navegador a manda: `key` e os modificadores. */
 function teclar(view: EditorView, init: KeyboardEventInit): void {
     view.contentDOM.dispatchEvent(
-        new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }),
+        new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            ...init,
+        }),
     );
 }
 

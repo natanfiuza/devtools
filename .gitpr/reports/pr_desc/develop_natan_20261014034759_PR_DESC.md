@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: adiciona painel de conta e painel administrativo com papéis
 ```
@@ -20,6 +21,7 @@ As decisões estão registradas em ADR-022 a ADR-028.
 ## 🛠️ Mudanças Técnicas
 
 **Domínio e dados**
+
 - Novos modelos `Plan`, `Subscription`, `Payment`, `UsageLedger` (tabela singular `usage_ledger`, apenas insert) e `AdminAction`; `User` ganha `role`, `suspended_at`, `anonymized_at`, relations e helpers (`isAdmin`, `isSuspended`, `isAnonymized`, `activeSubscription`, `effectivePlan`), com `role` fora de `#[Fillable]`/`#[Hidden]`.
 - Enums: `UserRole`, `SubscriptionStatus` (sem `expired` gravado — vigência resolvida na leitura), `PaymentStatus`, `PaymentMethod`, `LedgerEntryType` (debit/refund/grant) e `AdminActionType`.
 - Cota derivada do livro-razão (`App\Support\Quota`), sem coluna de saldo: `usado = débitos − créditos`, em `uses` no Free e `tokens` nos planos pagos.
@@ -27,6 +29,7 @@ As decisões estão registradas em ADR-022 a ADR-028.
 - Migrações (role, admin_actions, plans com carga do catálogo, subscriptions, payments, usage_ledger, suspended_at, anonymized_at) e factories correspondentes.
 
 **Backend / rotas**
+
 - `routes/admin.php` com Gate `access-admin`: dashboard, users e ações (verificar, reenviar, reset de senha, alterar papel, suspend/unsuspend, plano, cota, exclusão), impersonation, subscribers com export CSV, plans, payments/refund e audit.
 - Controllers de conta (Overview, Billing, History, Export) e rotas legais via `LegalController`; área autenticada passa a usar `auth, verified, active`.
 - Controllers admin (Dashboard, Users, UserAction, Payments, Plans, Subscribers, Audit, Impersonation), auditoria via trait `RecordsAdminActions` e autorização via `UserPolicy` (manage/changeRole/impersonate).
@@ -35,11 +38,13 @@ As decisões estão registradas em ADR-022 a ADR-028.
 - Impersonation via chave de sessão (`Impersonation`), com banner compartilhado pelo Inertia e rota de saída fora do painel.
 
 **Idioma (ADR-026)**
+
 - `ResolveLocale` deixa de reescrever `users.locale` ao navegar por `/{locale}` — agora grava apenas cookie de navegação.
 - Ordem resolvida: cookie → idioma da conta → `Accept-Language` → fallback (`Locales::fallback()` aplicado em `preferredLocale()`).
 - Cadastro/perfil aceitam `locale` validado contra `Locales::codes()`.
 
 **Frontend**
+
 - Reestruturação em três áreas: `AccountLayout` (navegação única via novos composables `useAccountNav`/`useActiveSection`), `AdminLayout` próprio e `AuthLayout` reescrito como moldura única das telas de acesso (wordmark, `LocaleSwitcher`, `ThemeToggle`, rodapé legal); `PublicLayout` ganha `NewsletterForm` e links de privacidade/termos.
 - Remoção dos layouts genéricos do starter kit (`AppLayout`, `AppHeaderLayout`, `AppSidebarLayout`, `settings/Layout`, `layouts/auth/*`) e de componentes não usados (`AppHeader`, `Breadcrumbs`, `NavFooter`, `PlaceholderPattern`).
 - `useRoutes` centraliza todas as rotas com prefixo de idioma e expõe `routes.form.*` prontas para `v-bind` no `<Form>`.
@@ -50,6 +55,7 @@ As decisões estão registradas em ADR-022 a ADR-028.
 - Suporte: `App\Support\Format` (Intl, formatação server-side), `App\Support\Legal`, `Seo` com `dashboard`/`settings`/`admin` fora de indexação e `SocialProviders::emailIsVerified` restrito a `AbstractUser`.
 
 **Testes**
+
 - Novos: `AccountPanelTest`, `AdminAccountActionsTest`, `AdminBillingTest`, `AdminImpersonationTest`, `AdminPanelTest`, `AdminRoleTest`, `Auth/LocalizedAuthPagesTest`, `Auth/SetPasswordTest`, `Auth/SocialLoginTest`, `BillingTest`, `LegalPagesTest`, `MailLocaleTest`, `NewsletterTest`, `QuotaTest`, além dos testes de frontend (account-panel, admin-panel, auth-login, newsletter-form).
 - Ajustes em reset/verificação (notificações próprias do app), registro (locale), `ProfileUpdateTest` (anonimização, troca de idioma, cascata de sessão) e `TranslationsParityTest` (escape de `@`/`|` do vue-i18n).
 - `TestCase` passa a fixar `URL::defaults` de `{locale}`, evitando `UrlGenerationException` fora de requisição.

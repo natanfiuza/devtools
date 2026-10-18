@@ -30,7 +30,10 @@ export const codeHighlightStyle = HighlightStyle.define([
     { tag: tags.string, color: 'var(--json-string)' },
     { tag: tags.number, color: 'var(--json-number)' },
     { tag: [tags.bool, tags.null], color: 'var(--json-literal)' },
-    { tag: [tags.brace, tags.squareBracket, tags.separator], color: 'var(--json-punct)' },
+    {
+        tag: [tags.brace, tags.squareBracket, tags.separator],
+        color: 'var(--json-punct)',
+    },
     { tag: tags.keyword, color: 'var(--json-key)' },
     { tag: tags.typeName, color: 'var(--json-key)' },
     { tag: tags.className, color: 'var(--json-key)' },

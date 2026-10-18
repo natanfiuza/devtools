@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 fix: limpa cache de rotas antes de gerar rotas do Wayfinder
 ```

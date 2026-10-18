@@ -46,7 +46,9 @@ const passwordInput = useTemplateRef('passwordInput');
                 <p class="font-medium">
                     {{ t('account.delete.warning_title') }}
                 </p>
-                <p class="text-sm">{{ t('account.delete.warning') }}</p>
+                <p class="text-sm">
+                    {{ t('account.delete.warning') }}
+                </p>
             </div>
             <Dialog>
                 <DialogTrigger as-child>
@@ -59,14 +61,14 @@ const passwordInput = useTemplateRef('passwordInput');
                 </DialogTrigger>
                 <DialogContent>
                     <Form
+                        v-slot="{ errors, processing, reset, clearErrors }"
                         v-bind="ProfileController.destroy.form()"
                         reset-on-success
-                        @error="() => passwordInput?.focus()"
                         :options="{
                             preserveScroll: true,
                         }"
                         class="space-y-6"
-                        v-slot="{ errors, processing, reset, clearErrors }"
+                        @error="() => passwordInput?.focus()"
                     >
                         <DialogHeader class="space-y-3">
                             <DialogTitle>
@@ -83,8 +85,8 @@ const passwordInput = useTemplateRef('passwordInput');
                             </Label>
                             <PasswordInput
                                 id="password"
-                                name="password"
                                 ref="passwordInput"
+                                name="password"
                                 :placeholder="
                                     t('account.delete.password_placeholder')
                                 "

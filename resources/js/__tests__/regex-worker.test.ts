@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { search, type RegexRequest, type RegexResult } from '@/tools/regex-tester/lib/run';
+import {
+    search,
+    type RegexRequest,
+    type RegexResult,
+} from '@/tools/regex-tester/lib/run';
 import {
     createRunner,
     type Runner,
@@ -99,7 +103,10 @@ function comWorker(): { runner: Runner; worker: FakeWorker } {
     const worker = new FakeWorker();
 
     return {
-        runner: createRunner({ timeoutMs: LIMITE_MS, spawn: () => worker as unknown as Worker }),
+        runner: createRunner({
+            timeoutMs: LIMITE_MS,
+            spawn: () => worker as unknown as Worker,
+        }),
         worker,
     };
 }
@@ -121,18 +128,25 @@ afterEach(() => {
 
 describe('sem worker', () => {
     it('busca na thread principal', async () => {
-        const runner = createRunner({ timeoutMs: LIMITE_MS, spawn: () => null });
+        const runner = createRunner({
+            timeoutMs: LIMITE_MS,
+            spawn: () => null,
+        });
 
         expect(runner.thread()).toBe('main');
 
-        const outcome = await ok(runner.run(pedido({ pattern: 'a', text: 'banana' })));
+        const outcome = await ok(
+            runner.run(pedido({ pattern: 'a', text: 'banana' })),
+        );
 
         expect(outcome.ok).toBe(true);
     });
 
     it('nao cria worker onde o ambiente nao tem Worker', () => {
         // No jsdom e no SSR nao existe `Worker`: e justamente o caminho da queda.
-        expect(typeof Worker === 'undefined' ? createRunWorker() : null).toBeNull();
+        expect(
+            typeof Worker === 'undefined' ? createRunWorker() : null,
+        ).toBeNull();
     });
 });
 
@@ -190,7 +204,9 @@ describe('com worker', () => {
 
         runner.dispose();
 
-        expect(await runner.run(pedido({ pattern: 'a' }))).toEqual({ status: 'superseded' });
+        expect(await runner.run(pedido({ pattern: 'a' }))).toEqual({
+            status: 'superseded',
+        });
         expect(worker.posted).toHaveLength(0);
         expect(worker.terminated).toBe(true);
     });

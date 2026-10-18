@@ -49,9 +49,9 @@ defineProps<Props>();
             class="block w-full cursor-pointer"
             :href="routes.logout.value"
             method="post"
-            @click="handleLogout"
             as="button"
             data-test="logout-button"
+            @click="handleLogout"
         >
             <LogOut class="mr-2 h-4 w-4" />
             {{ t('app.actions.logout') }}

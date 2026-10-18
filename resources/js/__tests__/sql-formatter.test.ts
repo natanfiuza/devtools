@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Select } from '@/components/ui/select';
@@ -66,7 +71,11 @@ const traducoes = {
                 sqlsrv: 'DIALETO_SQLSRV',
                 sqlite: 'DIALETO_SQLITE',
             },
-            cases: { upper: 'CAIXA_ALTA', lower: 'CAIXA_BAIXA', preserve: 'CAIXA_DO_AUTOR' },
+            cases: {
+                upper: 'CAIXA_ALTA',
+                lower: 'CAIXA_BAIXA',
+                preserve: 'CAIXA_DO_AUTOR',
+            },
         },
     },
 };
@@ -78,7 +87,10 @@ const EditorStub = defineComponent({
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
         error: {
-            type: Object as PropType<{ position: number; message: string } | null>,
+            type: Object as PropType<{
+                position: number;
+                message: string;
+            } | null>,
             default: null,
         },
         extensions: { type: Array as PropType<unknown[]>, default: () => [] },
@@ -134,7 +146,9 @@ function rotuloDoBotao(node: DOMWrapper<Element>): string {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => rotuloDoBotao(node) === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => rotuloDoBotao(node) === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -150,7 +164,10 @@ function desabilitado(wrapper: VueWrapper, rotulo: string): boolean {
 function saida(wrapper: VueWrapper): string {
     // `textContent`, e nao `text()`: quem le a saida aqui e o rodape da tela, e
     // o `text()` do Vue Test Utils apara o comeco e o fim do SQL.
-    return wrapper.get('[data-test="sql-formatter-output"]').element.textContent ?? '';
+    return (
+        wrapper.get('[data-test="sql-formatter-output"]').element.textContent ??
+        ''
+    );
 }
 
 /** O aviso da tela, ou string vazia quando nao ha nenhum. */
@@ -184,7 +201,9 @@ async function esperarFormatacao(): Promise<void> {
  * botao (exemplo, arquivo), que ja chega formatado.
  */
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await esperarFormatacao();
 }
@@ -204,7 +223,9 @@ async function clicar(wrapper: VueWrapper, rotulo: string): Promise<void> {
 function seletor(wrapper: VueWrapper, testid: string) {
     const found = wrapper
         .findAllComponents(Select)
-        .find((component) => component.find(`[data-test="${testid}"]`).exists());
+        .find((component) =>
+            component.find(`[data-test="${testid}"]`).exists(),
+        );
 
     if (found === undefined) {
         throw new Error(`o seletor ${testid} nao esta na tela`);
@@ -214,7 +235,11 @@ function seletor(wrapper: VueWrapper, testid: string) {
 }
 
 /** Troca a escolha pelo caminho do `v-model`: o mesmo que o menu dispara. */
-async function escolher(wrapper: VueWrapper, testid: string, valor: string): Promise<void> {
+async function escolher(
+    wrapper: VueWrapper,
+    testid: string,
+    valor: string,
+): Promise<void> {
     seletor(wrapper, testid).vm.$emit('update:modelValue', valor);
 
     // A troca dispara formatacao nova, e ela e assincrona mesmo na thread
@@ -240,10 +265,20 @@ describe('SQL Formatter', () => {
         it('abre sem consulta, com o convite no editor e sem saida', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="editor"]').attributes('data-placeholder')).toBe('VAZIO');
-            expect(wrapper.find('[data-test="sql-formatter-output"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="sql-formatter-state"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="sql-formatter-status"]').exists()).toBe(false);
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
+            expect(
+                wrapper.find('[data-test="sql-formatter-output"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-state"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-status"]').exists(),
+            ).toBe(false);
         });
 
         it('desabilita o que precisa de SQL', () => {
@@ -260,14 +295,22 @@ describe('SQL Formatter', () => {
             // O valor do `Select` e a opcao escolhida nele. O texto da opcao so
             // existe com o menu aberto, entao o que se le aqui e o valor e o
             // rotulo do gatilho.
-            expect(seletor(wrapper, 'sql-formatter-dialect').props('modelValue')).toBe('mysql');
-            expect(seletor(wrapper, 'sql-formatter-case').props('modelValue')).toBe('upper');
-            expect(wrapper.get('[data-test="sql-formatter-dialect"]').attributes('aria-label')).toBe(
-                'DIALETO',
-            );
-            expect(wrapper.get('[data-test="sql-formatter-case"]').attributes('aria-label')).toBe(
-                'CAIXA',
-            );
+            expect(
+                seletor(wrapper, 'sql-formatter-dialect').props('modelValue'),
+            ).toBe('mysql');
+            expect(
+                seletor(wrapper, 'sql-formatter-case').props('modelValue'),
+            ).toBe('upper');
+            expect(
+                wrapper
+                    .get('[data-test="sql-formatter-dialect"]')
+                    .attributes('aria-label'),
+            ).toBe('DIALETO');
+            expect(
+                wrapper
+                    .get('[data-test="sql-formatter-case"]')
+                    .attributes('aria-label'),
+            ).toBe('CAIXA');
         });
 
         it('leva cada um dos quatro dialetos ate a formatacao', async () => {
@@ -281,10 +324,20 @@ describe('SQL Formatter', () => {
             // quatro e o que prova que o slug chega inteiro na biblioteca - os
             // itens do menu so existem com o menu aberto, entao nao da para
             // contar as opcoes da tela daqui.
-            for (const dialect of ['mysql', 'pgsql', 'sqlite', 'sqlsrv', 'mysql']) {
+            for (const dialect of [
+                'mysql',
+                'pgsql',
+                'sqlite',
+                'sqlsrv',
+                'mysql',
+            ]) {
                 await escolher(wrapper, 'sql-formatter-dialect', dialect);
 
-                expect(seletor(wrapper, 'sql-formatter-dialect').props('modelValue')).toBe(dialect);
+                expect(
+                    seletor(wrapper, 'sql-formatter-dialect').props(
+                        'modelValue',
+                    ),
+                ).toBe(dialect);
                 expect(saida(wrapper), dialect).toContain(
                     dialect === 'sqlsrv' ? 'TOP 10' : 'top 10',
                 );
@@ -347,7 +400,9 @@ describe('SQL Formatter', () => {
 
             // Sem `esperarFormatacao`: o botao entrega o texto pronto, e a
             // formatacao dele e imediata.
-            expect(saida(wrapper)).toContain('-- Faturamento por cliente no ultimo trimestre');
+            expect(saida(wrapper)).toContain(
+                '-- Faturamento por cliente no ultimo trimestre',
+            );
             // As palavras-chave sobem; o nome da funcao e do autor, e fica.
             expect(saida(wrapper)).toContain('count(p.id) AS pedidos');
             expect(saida(wrapper)).toContain('-- Os que nunca compraram');
@@ -365,8 +420,12 @@ describe('SQL Formatter', () => {
             // Aspa aberta: o motor informa onde.
             await digitar(wrapper, "select 'abc");
 
-            expect(wrapper.find('[data-test="sql-formatter-stale"]').exists()).toBe(true);
-            expect(wrapper.get('[data-test="sql-formatter-stale"]').text()).toBe('SAIDA_DEFASADA');
+            expect(
+                wrapper.find('[data-test="sql-formatter-stale"]').exists(),
+            ).toBe(true);
+            expect(
+                wrapper.get('[data-test="sql-formatter-stale"]').text(),
+            ).toBe('SAIDA_DEFASADA');
             // O SQL antigo continua na tela, e o erro aparece no rodape.
             expect(saida(wrapper)).toBe(valido);
             expect(rodape(wrapper)).toBe('INVALIDO:1:8');
@@ -378,10 +437,14 @@ describe('SQL Formatter', () => {
             await digitar(wrapper, "select 'abc");
 
             // Oitava coluna da primeira linha: a posicao 7 do texto.
-            expect(wrapper.get('[data-test="editor"]').attributes('data-error-position')).toBe('7');
-            expect(wrapper.get('[data-test="editor"]').attributes('data-error')).toBe(
-                'INVALIDO:1:8',
-            );
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-error-position'),
+            ).toBe('7');
+            expect(
+                wrapper.get('[data-test="editor"]').attributes('data-error'),
+            ).toBe('INVALIDO:1:8');
         });
 
         it('nao deixa a saida defasada depois de corrigir a consulta', async () => {
@@ -391,7 +454,9 @@ describe('SQL Formatter', () => {
             await digitar(wrapper, "select 'abc");
             await digitar(wrapper, "select 'abc' from clientes");
 
-            expect(wrapper.find('[data-test="sql-formatter-stale"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-stale"]').exists(),
+            ).toBe(false);
             expect(saida(wrapper)).toContain("'abc'");
         });
 
@@ -401,7 +466,9 @@ describe('SQL Formatter', () => {
             await digitar(wrapper, 'select id from clientes');
 
             expect(estado(wrapper)).toContain('GRANDE:');
-            expect(wrapper.find('[data-test="sql-formatter-output"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-output"]').exists(),
+            ).toBe(false);
         });
 
         it('limpa a tela e esquece a ultima saida valida', async () => {
@@ -410,8 +477,12 @@ describe('SQL Formatter', () => {
             await digitar(wrapper, 'select id from clientes');
             await clicar(wrapper, 'LIMPAR');
 
-            expect(wrapper.find('[data-test="sql-formatter-output"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="sql-formatter-status"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-output"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="sql-formatter-status"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
         });
     });
@@ -428,7 +499,10 @@ describe('SQL Formatter', () => {
         });
 
         it('manda copiar na mao quando o navegador nao expoe a area de transferencia', async () => {
-            Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'clipboard', {
+                value: undefined,
+                configurable: true,
+            });
 
             const wrapper = montar();
 
@@ -445,12 +519,15 @@ describe('SQL Formatter', () => {
                 value: vi.fn((_blob: Blob) => 'blob:teste'),
                 configurable: true,
             });
-            Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), configurable: true });
-            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
-                this: HTMLAnchorElement,
-            ) {
-                baixados.push(this.download);
+            Object.defineProperty(URL, 'revokeObjectURL', {
+                value: vi.fn(),
+                configurable: true,
             });
+            vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+                function (this: HTMLAnchorElement) {
+                    baixados.push(this.download);
+                },
+            );
 
             const wrapper = montar();
 

@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
@@ -58,7 +63,11 @@ const traducoes = {
             warning: 'AVISO',
             claims_title: 'DATAS',
             claims: { expired: 'EXPIRADO', not_yet: 'AINDA_NAO_VALE' },
-            states: { shape: 'ESTADO_FORMA', base64: 'ESTADO_BASE64', json: 'ESTADO_JSON' },
+            states: {
+                shape: 'ESTADO_FORMA',
+                base64: 'ESTADO_BASE64',
+                json: 'ESTADO_JSON',
+            },
         },
     },
 };
@@ -70,7 +79,10 @@ const EditorStub = defineComponent({
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
         error: {
-            type: Object as PropType<{ position: number; message: string } | null>,
+            type: Object as PropType<{
+                position: number;
+                message: string;
+            } | null>,
             default: null,
         },
         extensions: { type: Array as PropType<unknown[]>, default: () => [] },
@@ -104,7 +116,10 @@ function segment(value: unknown): string {
     const bytes = new TextEncoder().encode(JSON.stringify(value));
     const binary = String.fromCharCode(...bytes);
 
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
 }
 
 function token(payload: unknown, signature: string = 'YXNzaW5hdHVyYQ'): string {
@@ -135,7 +150,9 @@ function montar(maxInputBytes: number = LIMITE_FOLGADO): VueWrapper {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => node.text() === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => node.text() === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -149,7 +166,9 @@ function desabilitado(wrapper: VueWrapper, rotulo: string): boolean {
 }
 
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await flushPromises();
 }
@@ -180,12 +199,16 @@ function blocos(wrapper: VueWrapper): string[] {
 /** O JSON do bloco como a tela o desenha, sem espaco entre os pedacos. */
 function texto(wrapper: VueWrapper, name: string): string {
     return (
-        bloco(wrapper, name).get('[data-test="jwt-decoder-json"]').element.textContent ?? ''
+        bloco(wrapper, name).get('[data-test="jwt-decoder-json"]').element
+            .textContent ?? ''
     );
 }
 
 /** Os pedacos coloridos do bloco: o texto e as classes de cada um. */
-function pedacos(wrapper: VueWrapper, name: string): { text: string; classes: string[] }[] {
+function pedacos(
+    wrapper: VueWrapper,
+    name: string,
+): { text: string; classes: string[] }[] {
     return bloco(wrapper, name)
         .get('[data-test="jwt-decoder-json"]')
         .findAll('span')
@@ -197,7 +220,10 @@ function pedacos(wrapper: VueWrapper, name: string): { text: string; classes: st
 
 /** A cor de um pedaco do bloco, pelo texto dele. */
 function cor(wrapper: VueWrapper, name: string, texto: string): string[] {
-    return pedacos(wrapper, name).find((piece) => piece.text === texto)?.classes ?? [];
+    return (
+        pedacos(wrapper, name).find((piece) => piece.text === texto)?.classes ??
+        []
+    );
 }
 
 function claim(wrapper: VueWrapper, name: string): DOMWrapper<Element> {
@@ -213,17 +239,25 @@ function claim(wrapper: VueWrapper, name: string): DOMWrapper<Element> {
 }
 
 function valorDoClaim(wrapper: VueWrapper, name: string): string {
-    return claim(wrapper, name).get('[data-test="jwt-decoder-claim-value"]').text();
+    return claim(wrapper, name)
+        .get('[data-test="jwt-decoder-claim-value"]')
+        .text();
 }
 
 function selo(wrapper: VueWrapper, name: string): string {
-    const node = claim(wrapper, name).find('[data-test="jwt-decoder-claim-badge"]');
+    const node = claim(wrapper, name).find(
+        '[data-test="jwt-decoder-claim-badge"]',
+    );
 
     return node.exists() ? node.text() : '';
 }
 
 function classeDoSelo(wrapper: VueWrapper, name: string): string {
-    return claim(wrapper, name).get('[data-test="jwt-decoder-claim-badge"]').attributes('class') ?? '';
+    return (
+        claim(wrapper, name)
+            .get('[data-test="jwt-decoder-claim-badge"]')
+            .attributes('class') ?? ''
+    );
 }
 
 function estado(wrapper: VueWrapper): string {
@@ -274,9 +308,13 @@ describe('JWT Decoder', () => {
         it('abre com a faixa de aviso e sem bloco nenhum', () => {
             const wrapper = montar();
 
-            expect(wrapper.find('[data-test="jwt-decoder-warning"]').text()).toBe('AVISO');
+            expect(
+                wrapper.find('[data-test="jwt-decoder-warning"]').text(),
+            ).toBe('AVISO');
             expect(blocos(wrapper)).toEqual([]);
-            expect(wrapper.find('[data-test="jwt-decoder-claims"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="jwt-decoder-claims"]').exists(),
+            ).toBe(false);
             expect(assinatura(wrapper)).toBe('');
         });
 
@@ -295,20 +333,33 @@ describe('JWT Decoder', () => {
             await digitar(wrapper, token({ sub: '42' }));
 
             expect(blocos(wrapper)).toEqual(['header', 'payload']);
-            expect(texto(wrapper, 'header')).toBe('{\n  "alg": "HS256",\n  "typ": "JWT"\n}');
+            expect(texto(wrapper, 'header')).toBe(
+                '{\n  "alg": "HS256",\n  "typ": "JWT"\n}',
+            );
             expect(texto(wrapper, 'payload')).toBe('{\n  "sub": "42"\n}');
         });
 
         it('pinta cada pedaco do JSON com a cor do DESIGN', async () => {
             const wrapper = montar();
 
-            await digitar(wrapper, token({ texto: 'a', numero: 7, sim: true, nada: null }));
+            await digitar(
+                wrapper,
+                token({ texto: 'a', numero: 7, sim: true, nada: null }),
+            );
 
-            expect(cor(wrapper, 'payload', '"texto"')).toContain('text-json-key');
-            expect(cor(wrapper, 'payload', '"a"')).toContain('text-json-string');
+            expect(cor(wrapper, 'payload', '"texto"')).toContain(
+                'text-json-key',
+            );
+            expect(cor(wrapper, 'payload', '"a"')).toContain(
+                'text-json-string',
+            );
             expect(cor(wrapper, 'payload', '7')).toContain('text-json-number');
-            expect(cor(wrapper, 'payload', 'true')).toContain('text-json-literal');
-            expect(cor(wrapper, 'payload', 'null')).toContain('text-json-literal');
+            expect(cor(wrapper, 'payload', 'true')).toContain(
+                'text-json-literal',
+            );
+            expect(cor(wrapper, 'payload', 'null')).toContain(
+                'text-json-literal',
+            );
             expect(cor(wrapper, 'payload', '{')).toContain('text-json-punct');
         });
 
@@ -326,8 +377,12 @@ describe('JWT Decoder', () => {
 
             await clicar(wrapper, 'EXEMPLO');
 
-            expect(texto(wrapper, 'payload')).toContain('"name": "João da Silva"');
-            expect(assinatura(wrapper)).toBe('ASSINATURA BYTES:32 NAO_VERIFICADA');
+            expect(texto(wrapper, 'payload')).toContain(
+                '"name": "João da Silva"',
+            );
+            expect(assinatura(wrapper)).toBe(
+                'ASSINATURA BYTES:32 NAO_VERIFICADA',
+            );
         });
 
         it('mostra a assinatura so como comprimento em bytes', async () => {
@@ -335,7 +390,9 @@ describe('JWT Decoder', () => {
 
             await digitar(wrapper, token({ sub: '42' }, 'YWJjZGVm'));
 
-            expect(assinatura(wrapper)).toBe('ASSINATURA BYTES:6 NAO_VERIFICADA');
+            expect(assinatura(wrapper)).toBe(
+                'ASSINATURA BYTES:6 NAO_VERIFICADA',
+            );
         });
     });
 
@@ -367,7 +424,10 @@ describe('JWT Decoder', () => {
             const wrapper = montar();
             const agora = agoraEmSegundos();
 
-            await digitar(wrapper, token({ iat: agora - 60, exp: agora + 3600 }));
+            await digitar(
+                wrapper,
+                token({ iat: agora - 60, exp: agora + 3600 }),
+            );
 
             expect(selo(wrapper, 'exp')).toBe('');
         });
@@ -376,10 +436,15 @@ describe('JWT Decoder', () => {
             const wrapper = montar();
             const agora = agoraEmSegundos();
 
-            await digitar(wrapper, token({ nbf: agora + 3600, exp: agora + 7200 }));
+            await digitar(
+                wrapper,
+                token({ nbf: agora + 3600, exp: agora + 7200 }),
+            );
 
             expect(selo(wrapper, 'nbf')).toBe('AINDA_NAO_VALE');
-            expect(classeDoSelo(wrapper, 'nbf')).not.toContain('text-destructive');
+            expect(classeDoSelo(wrapper, 'nbf')).not.toContain(
+                'text-destructive',
+            );
             expect(selo(wrapper, 'exp')).toBe('');
         });
 
@@ -397,7 +462,9 @@ describe('JWT Decoder', () => {
 
             await digitar(wrapper, token({ sub: '42' }));
 
-            expect(wrapper.find('[data-test="jwt-decoder-claims"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="jwt-decoder-claims"]').exists(),
+            ).toBe(false);
         });
     });
 
@@ -438,7 +505,9 @@ describe('JWT Decoder', () => {
 
             await digitar(wrapper, linha);
 
-            expect(estado(wrapper)).toBe(`GRANDE:${linha.length} bytes:10 bytes`);
+            expect(estado(wrapper)).toBe(
+                `GRANDE:${linha.length} bytes:10 bytes`,
+            );
             expect(blocos(wrapper)).toEqual([]);
         });
     });
@@ -466,10 +535,14 @@ describe('JWT Decoder', () => {
             const wrapper = montar();
 
             await digitar(wrapper, token({ sub: '42' }));
-            await bloco(wrapper, 'payload').get('[data-test="jwt-decoder-block-copy"]').trigger('click');
+            await bloco(wrapper, 'payload')
+                .get('[data-test="jwt-decoder-block-copy"]')
+                .trigger('click');
             await flushPromises();
 
-            expect(clipboard.writeText).toHaveBeenCalledWith('{\n  "sub": "42"\n}');
+            expect(clipboard.writeText).toHaveBeenCalledWith(
+                '{\n  "sub": "42"\n}',
+            );
             expect(rodape(wrapper)).toBe('PAYLOAD copiado');
         });
 
@@ -479,7 +552,9 @@ describe('JWT Decoder', () => {
             await digitar(wrapper, 'nada');
 
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
-            expect(wrapper.find('[data-test="jwt-decoder-block-copy"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="jwt-decoder-block-copy"]').exists(),
+            ).toBe(false);
         });
     });
 
@@ -490,7 +565,9 @@ describe('JWT Decoder', () => {
             await clicar(wrapper, 'EXEMPLO');
 
             expect(wrapper.find('[data-test="editor"]').text()).toBe(EXEMPLO);
-            expect(texto(wrapper, 'header')).toBe('{\n  "alg": "HS256",\n  "typ": "JWT"\n}');
+            expect(texto(wrapper, 'header')).toBe(
+                '{\n  "alg": "HS256",\n  "typ": "JWT"\n}',
+            );
         });
 
         it('limpar volta ao vazio', async () => {

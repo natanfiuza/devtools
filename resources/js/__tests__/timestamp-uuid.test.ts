@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Select } from '@/components/ui/select';
@@ -83,7 +88,10 @@ const EditorStub = defineComponent({
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
         error: {
-            type: Object as PropType<{ position: number; message: string } | null>,
+            type: Object as PropType<{
+                position: number;
+                message: string;
+            } | null>,
             default: null,
         },
         extensions: { type: Array as PropType<unknown[]>, default: () => [] },
@@ -128,7 +136,9 @@ function montar(maxInputBytes: number = LIMITE_FOLGADO): VueWrapper {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => node.text() === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => node.text() === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -142,7 +152,9 @@ function desabilitado(wrapper: VueWrapper, rotulo: string): boolean {
 }
 
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await flushPromises();
 }
@@ -166,7 +178,9 @@ async function gerar(wrapper: VueWrapper): Promise<void> {
 function seletor(wrapper: VueWrapper, testid: string) {
     const found = wrapper
         .findAllComponents(Select)
-        .find((component) => component.find(`[data-test="${testid}"]`).exists());
+        .find((component) =>
+            component.find(`[data-test="${testid}"]`).exists(),
+        );
 
     if (found === undefined) {
         throw new Error(`o seletor ${testid} nao esta na tela`);
@@ -176,7 +190,11 @@ function seletor(wrapper: VueWrapper, testid: string) {
 }
 
 /** Troca a escolha pelo caminho do `v-model`: o mesmo que o menu dispara. */
-async function escolher(wrapper: VueWrapper, testid: string, valor: string | number): Promise<void> {
+async function escolher(
+    wrapper: VueWrapper,
+    testid: string,
+    valor: string | number,
+): Promise<void> {
     seletor(wrapper, testid).vm.$emit('update:modelValue', valor);
 
     await flushPromises();
@@ -196,11 +214,15 @@ function linha(wrapper: VueWrapper, label: string): DOMWrapper<Element> {
 
 /** O rotulo de uma leitura, em caixa alta, como o teste o escreve. */
 function etiqueta(wrapper: VueWrapper, label: string): string {
-    return linha(wrapper, label).get('[data-test="timestamp-uuid-reading-label"]').text();
+    return linha(wrapper, label)
+        .get('[data-test="timestamp-uuid-reading-label"]')
+        .text();
 }
 
 function valor(wrapper: VueWrapper, label: string): string {
-    return linha(wrapper, label).get('[data-test="timestamp-uuid-reading-value"]').text();
+    return linha(wrapper, label)
+        .get('[data-test="timestamp-uuid-reading-value"]')
+        .text();
 }
 
 /** As leituras na tela, na ordem em que aparecem, pelos `data-label`. */
@@ -211,8 +233,13 @@ function leituras(wrapper: VueWrapper): string[] {
 }
 
 /** O botao de copiar de uma leitura, pelo `data-label` dela. */
-async function copiarLeitura(wrapper: VueWrapper, label: string): Promise<void> {
-    await linha(wrapper, label).get('[data-test="timestamp-uuid-reading-copy"]').trigger('click');
+async function copiarLeitura(
+    wrapper: VueWrapper,
+    label: string,
+): Promise<void> {
+    await linha(wrapper, label)
+        .get('[data-test="timestamp-uuid-reading-copy"]')
+        .trigger('click');
     await flushPromises();
 }
 
@@ -251,23 +278,39 @@ describe('Timestamp e UUID', () => {
             const wrapper = montar();
 
             expect(leituras(wrapper)).toEqual([]);
-            expect(wrapper.find('[data-test="timestamp-uuid-ids"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="timestamp-uuid-state"]').exists()).toBe(false);
-
-            expect(seletor(wrapper, 'timestamp-uuid-kind').props('modelValue')).toBe('uuid_v4');
-            expect(seletor(wrapper, 'timestamp-uuid-quantity').props('modelValue')).toBe(5);
-            expect(wrapper.get('[data-test="timestamp-uuid-kind"]').attributes('aria-label')).toBe(
-                'TIPO',
-            );
             expect(
-                wrapper.get('[data-test="timestamp-uuid-quantity"]').attributes('aria-label'),
+                wrapper.find('[data-test="timestamp-uuid-ids"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="timestamp-uuid-state"]').exists(),
+            ).toBe(false);
+
+            expect(
+                seletor(wrapper, 'timestamp-uuid-kind').props('modelValue'),
+            ).toBe('uuid_v4');
+            expect(
+                seletor(wrapper, 'timestamp-uuid-quantity').props('modelValue'),
+            ).toBe(5);
+            expect(
+                wrapper
+                    .get('[data-test="timestamp-uuid-kind"]')
+                    .attributes('aria-label'),
+            ).toBe('TIPO');
+            expect(
+                wrapper
+                    .get('[data-test="timestamp-uuid-quantity"]')
+                    .attributes('aria-label'),
             ).toBe('QUANTIDADE');
         });
 
         it('convida a colar e nao oferece copiar', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="editor"]').attributes('data-placeholder')).toBe('VAZIO');
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
             expect(rodape(wrapper)).toBe('VAZIO');
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
             expect(desabilitado(wrapper, 'LIMPAR')).toBe(true);
@@ -321,17 +364,17 @@ describe('Timestamp e UUID', () => {
 
             await digitar(wrapper, uuidV7(AGORA));
 
-            expect(wrapper.get('[data-test="timestamp-uuid-recognised"]').text()).toContain(
-                'RECONHECIDO:V7',
-            );
+            expect(
+                wrapper.get('[data-test="timestamp-uuid-recognised"]').text(),
+            ).toContain('RECONHECIDO:V7');
             expect(valor(wrapper, 'unix_ms')).toBe(String(AGORA));
             expect(valor(wrapper, 'iso_utc')).toBe('2026-10-14T12:00:00.000Z');
 
             await digitar(wrapper, ulid(AGORA));
 
-            expect(wrapper.get('[data-test="timestamp-uuid-recognised"]').text()).toContain(
-                'RECONHECIDO:ULID',
-            );
+            expect(
+                wrapper.get('[data-test="timestamp-uuid-recognised"]').text(),
+            ).toContain('RECONHECIDO:ULID');
             expect(valor(wrapper, 'unix_ms')).toBe(String(AGORA));
         });
 
@@ -340,7 +383,11 @@ describe('Timestamp e UUID', () => {
 
             await digitar(wrapper, EXEMPLO);
 
-            expect(wrapper.find('[data-test="timestamp-uuid-recognised"]').exists()).toBe(false);
+            expect(
+                wrapper
+                    .find('[data-test="timestamp-uuid-recognised"]')
+                    .exists(),
+            ).toBe(false);
         });
 
         it('recusa o que nao e um instante', async () => {
@@ -429,7 +476,10 @@ describe('Timestamp e UUID', () => {
             // dos valores: o local e o relativo mudam com o fuso e o relogio de
             // quem roda a suite, e o que eles valem esta nos outros casos.
             const esperado = leituras(wrapper)
-                .map((label) => `${etiqueta(wrapper, label)}: ${valor(wrapper, label)}`)
+                .map(
+                    (label) =>
+                        `${etiqueta(wrapper, label)}: ${valor(wrapper, label)}`,
+                )
                 .join('\n');
 
             expect(clipboard.writeText).toHaveBeenCalledWith(esperado);
@@ -455,7 +505,9 @@ describe('Timestamp e UUID', () => {
 
             expect(idsNaTela(wrapper)).toHaveLength(5);
             for (const id of idsNaTela(wrapper)) {
-                expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+                expect(id).toMatch(
+                    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+                );
             }
 
             await escolher(wrapper, 'timestamp-uuid-kind', 'ulid');
@@ -486,7 +538,9 @@ describe('Timestamp e UUID', () => {
 
             await gerar(wrapper);
 
-            expect(wrapper.get('[data-test="timestamp-uuid-ids-title"]').text()).toBe('IDS:5');
+            expect(
+                wrapper.get('[data-test="timestamp-uuid-ids-title"]').text(),
+            ).toBe('IDS:5');
             expect(rodape(wrapper)).toBe('IDS:5');
         });
 
@@ -495,10 +549,14 @@ describe('Timestamp e UUID', () => {
 
             await escolher(wrapper, 'timestamp-uuid-quantity', 1);
             await gerar(wrapper);
-            await wrapper.get('[data-test="timestamp-uuid-ids-copy"]').trigger('click');
+            await wrapper
+                .get('[data-test="timestamp-uuid-ids-copy"]')
+                .trigger('click');
             await flushPromises();
 
-            expect(clipboard.writeText).toHaveBeenCalledWith(idsNaTela(wrapper).join('\n'));
+            expect(clipboard.writeText).toHaveBeenCalledWith(
+                idsNaTela(wrapper).join('\n'),
+            );
             expect(rodape(wrapper)).toBe('1 ids copiados');
         });
 
@@ -507,10 +565,14 @@ describe('Timestamp e UUID', () => {
 
             await escolher(wrapper, 'timestamp-uuid-quantity', 1);
             await gerar(wrapper);
-            await wrapper.get('[data-test="timestamp-uuid-id-copy"]').trigger('click');
+            await wrapper
+                .get('[data-test="timestamp-uuid-id-copy"]')
+                .trigger('click');
             await flushPromises();
 
-            expect(clipboard.writeText).toHaveBeenCalledWith(idsNaTela(wrapper)[0]);
+            expect(clipboard.writeText).toHaveBeenCalledWith(
+                idsNaTela(wrapper)[0],
+            );
             expect(rodape(wrapper)).toBe('ID_COPIADO');
         });
 

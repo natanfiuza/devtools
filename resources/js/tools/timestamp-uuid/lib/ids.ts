@@ -42,7 +42,8 @@ export interface IdInstant {
     ms: number;
 }
 
-const UUID_V7 = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const UUID_V7 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 /**
  * O ULID em maiusculas.
@@ -58,7 +59,9 @@ function randomBytes(length: number): Uint8Array {
 }
 
 function toHex(bytes: Uint8Array): string {
-    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(
+        '',
+    );
 }
 
 /**
@@ -108,7 +111,8 @@ function writeMilliseconds(bytes: Uint8Array, ms: number): void {
 }
 
 export function uuidV4(): string {
-    const primitive = typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : null;
+    const primitive =
+        typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : null;
 
     return primitive ?? formatUuid(stamp(randomBytes(16), 4));
 }
@@ -165,7 +169,11 @@ export function ulid(now: number): string {
 }
 
 /** Gera a lista que a tela mostra: mesma conta, `quantity` vezes. */
-export function generateIds(kind: IdKind, quantity: number, now: number): string[] {
+export function generateIds(
+    kind: IdKind,
+    quantity: number,
+    now: number,
+): string[] {
     return Array.from({ length: quantity }, () => {
         if (kind === 'uuid_v4') {
             return uuidV4();

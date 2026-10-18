@@ -9,7 +9,14 @@ import {
 } from '@lucide/vue';
 import { sql } from '@codemirror/lang-sql';
 import { useDebounceFn } from '@vueuse/core';
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import {
+    computed,
+    onBeforeUnmount,
+    ref,
+    shallowRef,
+    useTemplateRef,
+    watch,
+} from 'vue';
 import { useI18n } from 'vue-i18n';
 import CodeEditor from '@/components/tool/CodeEditor.vue';
 import FileDropzone from '@/components/tool/FileDropzone.vue';
@@ -32,7 +39,12 @@ import { acceptAttribute, readTextFile, type FileRules } from '@/lib/file';
 import { byteLength } from '@/lib/json/parse';
 import { positionAt } from '@/lib/position';
 import { createWorkerClient } from '@/lib/worker/client';
-import { DEFAULT_DIALECT, DIALECTS, highlighterOf, type Dialect } from './lib/dialects';
+import {
+    DEFAULT_DIALECT,
+    DIALECTS,
+    highlighterOf,
+    type Dialect,
+} from './lib/dialects';
 import {
     DEFAULT_KEYWORD_CASE,
     formatSql,
@@ -108,8 +120,9 @@ const dropzone = useTemplateRef<InstanceType<typeof FileDropzone>>('dropzone');
  * linguagem uma vez e nenhuma troca a reconstroi (o porque esta em
  * `lib/dialects`).
  */
-const client = createWorkerClient<FormatRequest, FormatResult>(createFormatWorker, (request) =>
-    formatSql(request.text, request.options),
+const client = createWorkerClient<FormatRequest, FormatResult>(
+    createFormatWorker,
+    (request) => formatSql(request.text, request.options),
 );
 
 const isEmpty = computed(() => text.value.trim() === '');
@@ -125,7 +138,10 @@ const lastText = shallowRef<string | null>(null);
 
 /** Nao ha formatacao valida para o texto atual: a saida na tela e a anterior. */
 const stale = computed(
-    () => !(outcome.value?.ok ?? false) && !isEmpty.value && lastText.value !== null,
+    () =>
+        !(outcome.value?.ok ?? false) &&
+        !isEmpty.value &&
+        lastText.value !== null,
 );
 
 /** O SQL que a saida mostra: o de agora, ou o da ultima entrada valida. */
@@ -150,7 +166,10 @@ const errorMessage = computed(() => {
 
     return current.line === null || current.column === null
         ? t('tools.ui.states.invalid_no_position')
-        : t('tools.ui.states.invalid', { line: current.line, column: current.column });
+        : t('tools.ui.states.invalid', {
+              line: current.line,
+              column: current.column,
+          });
 });
 
 /**
@@ -163,7 +182,12 @@ const errorMessage = computed(() => {
 const editorError = computed<EditorError | null>(() => {
     const current = outcome.value;
 
-    if (current === null || current.ok || current.line === null || current.column === null) {
+    if (
+        current === null ||
+        current.ok ||
+        current.line === null ||
+        current.column === null
+    ) {
         return null;
     }
 
@@ -332,10 +356,14 @@ function openFile(): void {
 | Os recados da tela
 */
 
-const statsMessage = computed(() =>
-    `${formatBytes(inputBytes.value, locale.value)} ${t('tools.ui.limits.of', {
-        limit: formatBytes(props.maxInputBytes, locale.value),
-    })}`,
+const statsMessage = computed(
+    () =>
+        `${formatBytes(inputBytes.value, locale.value)} ${t(
+            'tools.ui.limits.of',
+            {
+                limit: formatBytes(props.maxInputBytes, locale.value),
+            },
+        )}`,
 );
 
 /**
@@ -361,7 +389,9 @@ const state = computed<{ text: string; error: boolean } | null>(() => {
         return { text: error, error: true };
     }
 
-    return busy.value ? { text: t('tools.ui.states.parsing'), error: false } : null;
+    return busy.value
+        ? { text: t('tools.ui.states.parsing'), error: false }
+        : null;
 });
 
 /**
@@ -385,7 +415,9 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
         return state.value;
     }
 
-    return hasCode.value ? { text: statsMessage.value, error: false } : state.value;
+    return hasCode.value
+        ? { text: statsMessage.value, error: false }
+        : state.value;
 });
 
 onBeforeUnmount(() => {
@@ -462,7 +494,9 @@ onBeforeUnmount(() => {
                     class="absolute inset-0"
                     :placeholder="t('tools.ui.states.empty')"
                     :error="editorError"
-                    :extensions="[sql({ dialect: highlighterOf(DEFAULT_DIALECT) })]"
+                    :extensions="[
+                        sql({ dialect: highlighterOf(DEFAULT_DIALECT) }),
+                    ]"
                 />
             </FileDropzone>
         </template>
@@ -481,7 +515,11 @@ onBeforeUnmount(() => {
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem v-for="item in DIALECTS" :key="item" :value="item">
+                    <SelectItem
+                        v-for="item in DIALECTS"
+                        :key="item"
+                        :value="item"
+                    >
                         {{ t(`tools.sql-formatter.dialects.${item}`) }}
                     </SelectItem>
                 </SelectContent>
@@ -496,7 +534,11 @@ onBeforeUnmount(() => {
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem v-for="item in KEYWORD_CASES" :key="item" :value="item">
+                    <SelectItem
+                        v-for="item in KEYWORD_CASES"
+                        :key="item"
+                        :value="item"
+                    >
                         {{ t(`tools.sql-formatter.cases.${item}`) }}
                     </SelectItem>
                 </SelectContent>
@@ -525,7 +567,7 @@ onBeforeUnmount(() => {
                     class="p-3 font-mono text-sm transition-opacity"
                     :class="stale ? 'opacity-50' : ''"
                     data-test="sql-formatter-output"
-                >{{ code }}</pre>
+                    >{{ code }}</pre>
 
                 <p
                     v-else-if="state !== null"

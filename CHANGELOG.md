@@ -55,7 +55,7 @@ defeito.
 
 - `resources/js/lib/analytics.ts`: o shim `gtag` enfileira `arguments`, nao o
   rest parameter, e usa sobrecarga TypeScript (`function gtag(...command:
-  unknown[]): void; function gtag(): void`) para nao emitir `...e` no bundle JS
+unknown[]): void; function gtag(): void`) para nao emitir `...e` no bundle JS
   minificado. O tipo de `window.dataLayer` passa a representar o que o gtag.js
   aceita (`IArguments | Record<string, unknown>`), entao enfileirar um Array
   volta a ser **erro de compilacao**, com a razao no docblock e no ponto do
@@ -104,7 +104,7 @@ carregamento ja existia desde a F1 (ADR-013).
   passa a citar o Google tambem como medidor; `config/legal.php` foi para
   `2026-10-15`, a data que aparece no topo das paginas legais.
 - `resources/js/lib/analytics.ts`: `gtag('config', id, { allow_google_signals:
-  false, allow_ad_personalization_signals: false })` - o "Nada de anuncios" nao
+false, allow_ad_personalization_signals: false })` - o "Nada de anuncios" nao
   fica so por conta do Consent Mode.
 - `resources/js/layouts/account/AccountLayout.vue`: monta `ConsentBanner` e
   `AnalyticsScript`, como os layouts publico e de acesso. O `AdminLayout.vue`
@@ -172,7 +172,7 @@ em producao (passo a passo em `deploy/deploy-instaled.md`).
 - `docs/RUNBOOK.md` secao 2 e o tutorial: o comando manual documentado rodava
   como `www-data`, que nao escreve no `.git` do repositorio (do `root`) - o
   `git fetch` do script morria com `insufficient permission for adding an
-  object to repository database`; os dois passam a mandar rodar como o dono do
+object to repository database`; os dois passam a mandar rodar como o dono do
   repositorio, que e o usuario do cron.
 - `docs/RUNBOOK.md`, `docs/SPEC.md` e `docs/adr/ADR-014-deploy.md` diziam que o
   cron executa `deploy/deploy.sh`; ele executa a **copia instalada**
@@ -473,7 +473,7 @@ cada fase seguinte so troca o status. Aceite em `docs/acceptance/FASE-1.md`.
   desliga a medicao. Sem decisao, nenhuma linha de GA no HTML do servidor nem no
   SSR. Reabrir pelo botao "Cookies" no rodape.
 - **Sitemap e robots servidos pela aplicacao** (heranca da F0): `GET
-  /sitemap.xml` com home, Privacidade e Termos nos 5 idiomas e as alternates de
+/sitemap.xml` com home, Privacidade e Termos nos 5 idiomas e as alternates de
   cada pagina (com `x-default`), listando tool **apenas** quando ela for
   `available`; `GET /robots.txt` com o `Disallow` das areas privadas e a linha
   do `Sitemap:`. Os dois ficam fora do prefixo de idioma, porque sao do site

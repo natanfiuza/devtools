@@ -1,9 +1,18 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import type { WorkerRequest } from '@/lib/worker/client';
-import { search, type RegexRequest, type RegexResult } from '@/tools/regex-tester/lib/run';
+import {
+    search,
+    type RegexRequest,
+    type RegexResult,
+} from '@/tools/regex-tester/lib/run';
 import Tool from '@/tools/regex-tester/Tool.vue';
 
 /**
@@ -33,7 +42,8 @@ const ESPERA = 260;
 const LIMITE_MS = 1000;
 
 /** O texto do padrao e o da troca que o botao Exemplo escreve. */
-const EXEMPLO_PADRAO = '^(?<quando>\\S+) (?<nivel>[A-Z]+)\\s+pedido (?<id>\\d+) (?<mensagem>.+)$';
+const EXEMPLO_PADRAO =
+    '^(?<quando>\\S+) (?<nivel>[A-Z]+)\\s+pedido (?<id>\\d+) (?<mensagem>.+)$';
 const EXEMPLO_TROCA = '$<nivel> #$<id>: $<mensagem>';
 
 /** O que a lista mostra no lugar de um valor que nao existe. */
@@ -99,7 +109,10 @@ const EditorStub = defineComponent({
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
         error: {
-            type: Object as PropType<{ position: number; message: string } | null>,
+            type: Object as PropType<{
+                position: number;
+                message: string;
+            } | null>,
             default: null,
         },
         extensions: { type: Array as PropType<unknown[]>, default: () => [] },
@@ -187,7 +200,10 @@ class FakeWorker {
         // O `id` e o do pedido que chegou: e por ele que o cliente casa a
         // resposta, e inventa-lo aqui esconderia um erro do protocolo.
         this.emit('message', {
-            data: { id: request.id, result: search(request.payload) } satisfies WorkerResponse,
+            data: {
+                id: request.id,
+                result: search(request.payload),
+            } satisfies WorkerResponse,
         });
     }
 
@@ -251,7 +267,9 @@ function flagsNaBarra(wrapper: VueWrapper): string {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => node.text() === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => node.text() === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -264,7 +282,10 @@ function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
 function alternador(wrapper: VueWrapper, flag: string): DOMWrapper<Element> {
     const found = wrapper
         .findAll('button')
-        .find((node) => node.attributes('aria-label') === `FLAG_${flag.toUpperCase()}`);
+        .find(
+            (node) =>
+                node.attributes('aria-label') === `FLAG_${flag.toUpperCase()}`,
+        );
 
     if (found === undefined) {
         throw new Error(`o alternador da flag ${flag} nao esta na tela`);
@@ -311,31 +332,44 @@ function casamentos(wrapper: VueWrapper): DOMWrapper<Element>[] {
 }
 
 function trechos(wrapper: VueWrapper): string[] {
-    return wrapper.findAll('[data-test="regex-tester-match-text"]').map((node) => node.text());
+    return wrapper
+        .findAll('[data-test="regex-tester-match-text"]')
+        .map((node) => node.text());
 }
 
 function posicoes(wrapper: VueWrapper): string[] {
-    return wrapper.findAll('[data-test="regex-tester-match-position"]').map((node) => node.text());
+    return wrapper
+        .findAll('[data-test="regex-tester-match-position"]')
+        .map((node) => node.text());
 }
 
 function grupos(wrapper: VueWrapper): string[] {
-    return wrapper.findAll('[data-test="regex-tester-group"]').map((node) => node.text());
+    return wrapper
+        .findAll('[data-test="regex-tester-group"]')
+        .map((node) => node.text());
 }
 
 function nomeados(wrapper: VueWrapper): string[] {
-    return wrapper.findAll('[data-test="regex-tester-named-group"]').map((node) => node.text());
+    return wrapper
+        .findAll('[data-test="regex-tester-named-group"]')
+        .map((node) => node.text());
 }
 
 /** Os pedacos da previa, com a marca de quem foi pintado. */
 function pintadas(wrapper: VueWrapper): { text: string; match: boolean }[] {
-    return wrapper.findAll('[data-test="regex-tester-preview"] span').map((node) => ({
-        text: node.element.textContent ?? '',
-        match: (node.attributes('class') ?? '').includes('bg-accent-2/30'),
-    }));
+    return wrapper
+        .findAll('[data-test="regex-tester-preview"] span')
+        .map((node) => ({
+            text: node.element.textContent ?? '',
+            match: (node.attributes('class') ?? '').includes('bg-accent-2/30'),
+        }));
 }
 
 function textoDaPrevia(wrapper: VueWrapper): string {
-    return wrapper.get('[data-test="regex-tester-preview"]').element.textContent ?? '';
+    return (
+        wrapper.get('[data-test="regex-tester-preview"]').element.textContent ??
+        ''
+    );
 }
 
 function textoDaTroca(wrapper: VueWrapper): string {
@@ -348,7 +382,9 @@ function textoDaTroca(wrapper: VueWrapper): string {
 
 /** O texto entra pelo editor: o caminho de quem digita ou cola. */
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     await esperar();
 }
@@ -405,13 +441,25 @@ describe('Regex Tester', () => {
             const wrapper = montar();
 
             expect(campo(wrapper, 'regex-tester-pattern').value).toBe('');
-            expect(campo(wrapper, 'regex-tester-pattern').placeholder).toBe('PADRAO');
+            expect(campo(wrapper, 'regex-tester-pattern').placeholder).toBe(
+                'PADRAO',
+            );
             expect(flagsNaBarra(wrapper)).toBe('/g');
-            expect(wrapper.get('[data-test="editor"]').attributes('data-placeholder')).toBe('VAZIO');
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
             expect(estado(wrapper)).toBe('VAZIO');
-            expect(wrapper.find('[data-test="regex-tester-match"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="regex-tester-preview"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="regex-tester-replaced"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-match"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-preview"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-replaced"]').exists(),
+            ).toBe(false);
         });
 
         it('nao oferece copiar nem limpar sem texto de teste', () => {
@@ -426,10 +474,14 @@ describe('Regex Tester', () => {
             const wrapper = montar();
 
             for (const flag of ['i', 'm', 's', 'u']) {
-                expect(alternador(wrapper, flag).attributes('aria-pressed'), flag).toBe('false');
-                expect(alternador(wrapper, flag).attributes('aria-label'), flag).toBe(
-                    `FLAG_${flag.toUpperCase()}`,
-                );
+                expect(
+                    alternador(wrapper, flag).attributes('aria-pressed'),
+                    flag,
+                ).toBe('false');
+                expect(
+                    alternador(wrapper, flag).attributes('aria-label'),
+                    flag,
+                ).toBe(`FLAG_${flag.toUpperCase()}`);
             }
         });
     });
@@ -444,7 +496,9 @@ describe('Regex Tester', () => {
             expect(trechos(wrapper)).toEqual(['an', 'an']);
             expect(posicoes(wrapper)).toEqual(['POSICAO:1', 'POSICAO:3']);
             expect(rodape(wrapper)).toBe('CONTAGEM:2');
-            expect(wrapper.find('[data-test="regex-tester-truncated"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-truncated"]').exists(),
+            ).toBe(false);
         });
 
         it('pede o padrao quando so ha texto de teste', async () => {
@@ -453,7 +507,9 @@ describe('Regex Tester', () => {
             await digitar(wrapper, 'banana');
 
             expect(estado(wrapper)).toBe('PADRAO_VAZIO');
-            expect(wrapper.find('[data-test="regex-tester-match"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-match"]').exists(),
+            ).toBe(false);
         });
 
         it('diz o que o motor reclamou quando a expressao nao compila', async () => {
@@ -464,7 +520,9 @@ describe('Regex Tester', () => {
 
             expect(estado(wrapper)).toBe('PADRAO_INVALIDO');
             expect(detalhe(wrapper)).toContain('a(');
-            expect(wrapper.find('[data-test="regex-tester-match"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-match"]').exists(),
+            ).toBe(false);
             expect(rodape(wrapper)).toBe('PADRAO_INVALIDO');
         });
 
@@ -475,12 +533,16 @@ describe('Regex Tester', () => {
             await escrever(wrapper, 'a');
 
             expect(trechos(wrapper)).toEqual([]);
-            expect(wrapper.get('[data-test="regex-tester-none"]').text()).toBe('NENHUM');
+            expect(wrapper.get('[data-test="regex-tester-none"]').text()).toBe(
+                'NENHUM',
+            );
             expect(pintadas(wrapper).every((part) => !part.match)).toBe(true);
 
             await ligar(wrapper, 'i');
 
-            expect(alternador(wrapper, 'i').attributes('aria-pressed')).toBe('true');
+            expect(alternador(wrapper, 'i').attributes('aria-pressed')).toBe(
+                'true',
+            );
             expect(flagsNaBarra(wrapper)).toBe('/gi');
             expect(trechos(wrapper)).toEqual(['A', 'A', 'A']);
         });
@@ -504,7 +566,9 @@ describe('Regex Tester', () => {
             await escrever(wrapper, 'a');
 
             expect(trechos(wrapper)).toEqual(['a', 'a']);
-            expect(wrapper.get('[data-test="regex-tester-truncated"]').text()).toBe('CORTADO:2');
+            expect(
+                wrapper.get('[data-test="regex-tester-truncated"]').text(),
+            ).toBe('CORTADO:2');
             expect(rodape(wrapper)).toBe('CONTAGEM:2');
         });
 
@@ -515,7 +579,12 @@ describe('Regex Tester', () => {
             await escrever(wrapper, '(?<ano>\\d{4})(?<mes>-\\d{2})?');
 
             expect(trechos(wrapper)).toEqual(['2026-10', '2027']);
-            expect(grupos(wrapper)).toEqual(['$1: 2026', '$2: -10', '$1: 2027', `$2: ${AUSENTE}`]);
+            expect(grupos(wrapper)).toEqual([
+                '$1: 2026',
+                '$2: -10',
+                '$1: 2027',
+                `$2: ${AUSENTE}`,
+            ]);
             expect(nomeados(wrapper)).toEqual([
                 '$<ano>: 2026',
                 '$<mes>: -10',
@@ -574,7 +643,9 @@ describe('Regex Tester', () => {
             await trocar(wrapper, '$<mes>/$<ano>');
             await clicar(wrapper, 'COPIAR');
 
-            expect(clipboard.writeText).toHaveBeenCalledWith('10/2026 e 03/2027');
+            expect(clipboard.writeText).toHaveBeenCalledWith(
+                '10/2026 e 03/2027',
+            );
             expect(rodape(wrapper)).toBe('COPIADO');
         });
 
@@ -590,7 +661,9 @@ describe('Regex Tester', () => {
 
             await trocar(wrapper, '');
 
-            expect(wrapper.find('[data-test="regex-tester-replaced"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-replaced"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
         });
     });
@@ -601,10 +674,16 @@ describe('Regex Tester', () => {
 
             await clicar(wrapper, 'EXEMPLO');
 
-            expect(campo(wrapper, 'regex-tester-pattern').value).toBe(EXEMPLO_PADRAO);
-            expect(campo(wrapper, 'regex-tester-replacement').value).toBe(EXEMPLO_TROCA);
+            expect(campo(wrapper, 'regex-tester-pattern').value).toBe(
+                EXEMPLO_PADRAO,
+            );
+            expect(campo(wrapper, 'regex-tester-replacement').value).toBe(
+                EXEMPLO_TROCA,
+            );
             expect(flagsNaBarra(wrapper)).toBe('/gm');
-            expect(alternador(wrapper, 'm').attributes('aria-pressed')).toBe('true');
+            expect(alternador(wrapper, 'm').attributes('aria-pressed')).toBe(
+                'true',
+            );
 
             // Sem esperar o intervalo: o exemplo aplica os quatro de uma vez e a
             // busca sai com o conjunto novo. Se ela tivesse saido so com o texto,
@@ -620,7 +699,9 @@ describe('Regex Tester', () => {
 
             await flushPromises();
 
-            expect(document.activeElement).toBe(campo(wrapper, 'regex-tester-pattern'));
+            expect(document.activeElement).toBe(
+                campo(wrapper, 'regex-tester-pattern'),
+            );
         });
 
         it('limpa o texto de teste e deixa os controles da busca em pe', async () => {
@@ -629,11 +710,19 @@ describe('Regex Tester', () => {
             await clicar(wrapper, 'EXEMPLO');
             await clicar(wrapper, 'LIMPAR');
 
-            expect(wrapper.get('[data-test="editor"]').element.textContent).toBe('');
+            expect(
+                wrapper.get('[data-test="editor"]').element.textContent,
+            ).toBe('');
             expect(estado(wrapper)).toBe('VAZIO');
-            expect(campo(wrapper, 'regex-tester-pattern').value).toBe(EXEMPLO_PADRAO);
-            expect(campo(wrapper, 'regex-tester-replacement').value).toBe(EXEMPLO_TROCA);
-            expect(alternador(wrapper, 'm').attributes('aria-pressed')).toBe('true');
+            expect(campo(wrapper, 'regex-tester-pattern').value).toBe(
+                EXEMPLO_PADRAO,
+            );
+            expect(campo(wrapper, 'regex-tester-replacement').value).toBe(
+                EXEMPLO_TROCA,
+            );
+            expect(alternador(wrapper, 'm').attributes('aria-pressed')).toBe(
+                'true',
+            );
             expect(desabilitado(wrapper, 'LIMPAR')).toBe(true);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
         });
@@ -645,7 +734,9 @@ describe('Regex Tester', () => {
             await escrever(wrapper, 'a');
 
             expect(estado(wrapper)).toContain('GRANDE:6');
-            expect(wrapper.find('[data-test="regex-tester-match"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-match"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
         });
     });
@@ -663,14 +754,18 @@ describe('Regex Tester', () => {
 
             await escrever(wrapper, 'a');
 
-            const arquivo = new File(['banana e ananas'], 'notas.txt', { type: 'text/plain' });
+            const arquivo = new File(['banana e ananas'], 'notas.txt', {
+                type: 'text/plain',
+            });
             const entrada = wrapper.get('[data-test="regex-tester-file"]');
 
             escolher(entrada.element, arquivo);
             await entrada.trigger('change');
             await esperar();
 
-            expect(wrapper.get('[data-test="editor"]').element.textContent).toBe('banana e ananas');
+            expect(
+                wrapper.get('[data-test="editor"]').element.textContent,
+            ).toBe('banana e ananas');
             expect(trechos(wrapper)).toEqual(['a', 'a', 'a', 'a', 'a', 'a']);
         });
 
@@ -678,12 +773,17 @@ describe('Regex Tester', () => {
             const wrapper = montar();
             const entrada = wrapper.get('[data-test="regex-tester-file"]');
 
-            escolher(entrada.element, new File(['a;b'], 'notas.csv', { type: 'text/csv' }));
+            escolher(
+                entrada.element,
+                new File(['a;b'], 'notas.csv', { type: 'text/csv' }),
+            );
             await entrada.trigger('change');
             await flushPromises();
 
             expect(rodape(wrapper)).toBe('TIPO_NAO_ACEITO');
-            expect(wrapper.get('[data-test="editor"]').element.textContent).toBe('');
+            expect(
+                wrapper.get('[data-test="editor"]').element.textContent,
+            ).toBe('');
         });
     });
 
@@ -719,9 +819,15 @@ describe('Regex Tester', () => {
 
             expect(estado(wrapper)).toBe('TEMPO:1');
             expect(rodape(wrapper)).toBe('TEMPO:1');
-            expect(wrapper.find('[data-test="regex-tester-match"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="regex-tester-preview"]').exists()).toBe(false);
-            expect(wrapper.find('[data-test="regex-tester-replaced"]').exists()).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-match"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-preview"]').exists(),
+            ).toBe(false);
+            expect(
+                wrapper.find('[data-test="regex-tester-replaced"]').exists(),
+            ).toBe(false);
             expect(desabilitado(wrapper, 'COPIAR')).toBe(true);
             expect(worker.terminated).toBe(true);
         });

@@ -117,7 +117,11 @@ describe('decodeUrl', () => {
         // variante de formulario, e isso e a norma, nao um defeito.
         const original = 'ação & café? sim/nao = 100%';
 
-        expect(texto(decodeUrl(encodeUrl(original, 'component'), 'component'))).toBe(original);
-        expect(texto(decodeUrl(encodeUrl(original, 'form'), 'form'))).toBe(original);
+        expect(
+            texto(decodeUrl(encodeUrl(original, 'component'), 'component')),
+        ).toBe(original);
+        expect(texto(decodeUrl(encodeUrl(original, 'form'), 'form'))).toBe(
+            original,
+        );
     });
 });

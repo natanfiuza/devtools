@@ -43,7 +43,12 @@ export function windowRange(
     overscan: number = OVERSCAN,
 ): WindowRange {
     if (total <= 0 || rowHeight <= 0) {
-        return { start: 0, end: Math.max(total, 0), paddingTop: 0, paddingBottom: 0 };
+        return {
+            start: 0,
+            end: Math.max(total, 0),
+            paddingTop: 0,
+            paddingBottom: 0,
+        };
     }
 
     const top = Math.max(scrollTop, 0);

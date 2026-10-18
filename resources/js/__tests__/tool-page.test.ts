@@ -103,7 +103,13 @@ function montar(
     applyTranslations(i18n, { locale: 'pt-br', translations: traducoes });
 
     return mount(Show, {
-        props: { slug, maxInputBytes, virtualizeFrom, regexTimeoutMs, regexMaxMatches },
+        props: {
+            slug,
+            maxInputBytes,
+            virtualizeFrom,
+            regexTimeoutMs,
+            regexMaxMatches,
+        },
         global: { plugins: [i18n] },
     });
 }
@@ -126,7 +132,9 @@ describe('Pagina da tool', () => {
 
         // O titulo vem do servidor pelas props compartilhadas, no mesmo idioma
         // da pagina; as metas sao escritas pela view.
-        expect(wrapper.get('[data-test="title-prop"]').text()).toBe('JSON_VIEWER');
+        expect(wrapper.get('[data-test="title-prop"]').text()).toBe(
+            'JSON_VIEWER',
+        );
         expect(wrapper.findAll('meta')).toHaveLength(0);
     });
 
@@ -149,7 +157,9 @@ describe('Pagina da tool', () => {
         // Os limites sao do servidor (`config/tools.php`) e descem por prop:
         // quem decide o que e grande demais - para analisar, para virtualizar e
         // para o tempo do regex - nao e a tela.
-        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe('1234/77/321/12');
+        expect(wrapper.get('[data-test="tool-stub"]').text()).toBe(
+            '1234/77/321/12',
+        );
     });
 
     it('avisa quando o diretorio da tool nao tem componente', async () => {

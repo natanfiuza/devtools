@@ -60,7 +60,9 @@ function mainThreadClient<Payload, Result>(
 
     return {
         run(payload) {
-            return released ? Promise.resolve(null) : Promise.resolve(run(payload));
+            return released
+                ? Promise.resolve(null)
+                : Promise.resolve(run(payload));
         },
         thread: () => 'main',
         dispose() {
@@ -81,24 +83,29 @@ function workerClient<Payload, Result>(
     const waiting = new Map<number, Pending<Payload, Result>>();
 
     /** Resolve o que esta na fila; `producer` decide o que cada um recebe. */
-    const drain = (producer: (pending: Pending<Payload, Result>) => Result | null): void => {
+    const drain = (
+        producer: (pending: Pending<Payload, Result>) => Result | null,
+    ): void => {
         for (const [id, pending] of [...waiting]) {
             waiting.delete(id);
             pending.resolve(latestId === id ? producer(pending) : null);
         }
     };
 
-    worker.addEventListener('message', (event: MessageEvent<WorkerResponse<Result>>) => {
-        const { id, result } = event.data;
-        const pending = waiting.get(id);
+    worker.addEventListener(
+        'message',
+        (event: MessageEvent<WorkerResponse<Result>>) => {
+            const { id, result } = event.data;
+            const pending = waiting.get(id);
 
-        if (pending === undefined) {
-            return;
-        }
+            if (pending === undefined) {
+                return;
+            }
 
-        waiting.delete(id);
-        pending.resolve(latestId === id ? result : null);
-    });
+            waiting.delete(id);
+            pending.resolve(latestId === id ? result : null);
+        },
+    );
 
     worker.addEventListener('error', () => {
         // O worker morreu: o que estava na fila sai daqui mesmo.

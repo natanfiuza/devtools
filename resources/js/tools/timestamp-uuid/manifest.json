@@ -4,5 +4,16 @@
     "category": "time",
     "icon": "clock",
     "order": 70,
-    "keywords": ["timestamp", "unix", "epoch", "date", "timezone", "iso8601", "uuid", "ulid", "guid", "id"]
+    "keywords": [
+        "timestamp",
+        "unix",
+        "epoch",
+        "date",
+        "timezone",
+        "iso8601",
+        "uuid",
+        "ulid",
+        "guid",
+        "id"
+    ]
 }

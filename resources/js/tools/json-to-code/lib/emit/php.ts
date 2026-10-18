@@ -94,7 +94,11 @@ function phpClass(name: string, fields: Field[], context: PhpContext): string {
     ].join('\n');
 }
 
-function property(field: Field, context: PhpContext, used: Set<string>): string {
+function property(
+    field: Field,
+    context: PhpContext,
+    used: Set<string>,
+): string {
     // A chave pode virar o mesmo nome que outra (`first-name` e `first_name`):
     // a segunda ganha um sufixo, senao a classe teria a propriedade duas vezes.
     const base = phpProperty(field.key);
@@ -142,7 +146,9 @@ function docblock(field: Field, context: PhpContext): string {
     }
 
     const complete =
-        field.optional && !acceptsNull(field.type) && doc !== 'mixed' ? `${doc}|null` : doc;
+        field.optional && !acceptsNull(field.type) && doc !== 'mixed'
+            ? `${doc}|null`
+            : doc;
 
     return `        /** @var ${complete} */\n`;
 }
@@ -170,7 +176,11 @@ function render(node: TypeNode, context: PhpContext): string {
             const nulled = members.filter((member) => member.kind === 'null');
             const rest = members.filter((member) => member.kind !== 'null');
 
-            if (nulled.length === 1 && rest.length === 1 && rest[0] !== undefined) {
+            if (
+                nulled.length === 1 &&
+                rest.length === 1 &&
+                rest[0] !== undefined
+            ) {
                 // `int | null` e escrito `?int`, que e o mesmo tipo com a
                 // forma que todo mundo le.
                 return nullable(render(rest[0], context), rest[0]);
@@ -181,7 +191,9 @@ function render(node: TypeNode, context: PhpContext): string {
         case 'object': {
             const planned = context.plan.names.get(node);
 
-            return planned === undefined ? 'array' : (context.renamed.get(planned) ?? 'array');
+            return planned === undefined
+                ? 'array'
+                : (context.renamed.get(planned) ?? 'array');
         }
     }
 }
@@ -196,10 +208,14 @@ function phpDocType(node: TypeNode, context: PhpContext): string {
         case 'array': {
             const element = phpDocType(node.element, context);
 
-            return node.element.kind === 'union' ? `(${element})[]` : `${element}[]`;
+            return node.element.kind === 'union'
+                ? `(${element})[]`
+                : `${element}[]`;
         }
         case 'union':
-            return node.members.map((member) => phpDocType(member, context)).join('|');
+            return node.members
+                .map((member) => phpDocType(member, context))
+                .join('|');
         default:
             return render(node, context);
     }

@@ -67,7 +67,9 @@ export function infer(value: JsonValue): TypeNode {
             element:
                 value.length === 0
                     ? { kind: 'unknown' }
-                    : value.map(infer).reduce((left, right) => merge(left, right)),
+                    : value
+                          .map(infer)
+                          .reduce((left, right) => merge(left, right)),
         };
     }
 
@@ -89,7 +91,9 @@ export function infer(value: JsonValue): TypeNode {
         optional: false,
     }));
 
-    return fields.length === 0 ? { kind: 'open_object' } : { kind: 'object', fields };
+    return fields.length === 0
+        ? { kind: 'open_object' }
+        : { kind: 'object', fields };
 }
 
 /**
@@ -121,7 +125,9 @@ export function unionOf(members: TypeNode[]): TypeNode {
 
     if (others.length !== known.length) {
         others.push(
-            known.some((member) => member.kind === 'float') ? { kind: 'float' } : { kind: 'int' },
+            known.some((member) => member.kind === 'float')
+                ? { kind: 'float' }
+                : { kind: 'int' },
         );
     }
 
@@ -158,7 +164,10 @@ export function merge(left: TypeNode, right: TypeNode): TypeNode {
 
     if (left.kind === right.kind) {
         if (left.kind === 'array' && right.kind === 'array') {
-            return { kind: 'array', element: merge(left.element, right.element) };
+            return {
+                kind: 'array',
+                element: merge(left.element, right.element),
+            };
         }
 
         if (left.kind === 'object' && right.kind === 'object') {
@@ -188,7 +197,10 @@ function mergeObjects(
 
     // A ordem e a do primeiro objeto que trouxe a chave: o codigo gerado sai na
     // ordem do documento, que e a ordem que quem le o JSON espera reencontrar.
-    for (const key of new Set([...left.fields.map((field) => field.key), ...right.fields.map((field) => field.key)])) {
+    for (const key of new Set([
+        ...left.fields.map((field) => field.key),
+        ...right.fields.map((field) => field.key),
+    ])) {
         const here = left.fields.find((field) => field.key === key);
         const there = right.fields.find((field) => field.key === key);
 
@@ -225,7 +237,10 @@ export function acceptsNull(node: TypeNode): boolean {
         return true;
     }
 
-    return node.kind === 'union' && node.members.some((member) => member.kind === 'null');
+    return (
+        node.kind === 'union' &&
+        node.members.some((member) => member.kind === 'null')
+    );
 }
 
 /**
@@ -241,7 +256,10 @@ export function canonical(node: TypeNode): string {
             return `[${canonical(node.element)}]`;
         case 'object':
             return `{${node.fields
-                .map((field) => `${field.key}${field.optional ? '?' : ''}:${canonical(field.type)}`)
+                .map(
+                    (field) =>
+                        `${field.key}${field.optional ? '?' : ''}:${canonical(field.type)}`,
+                )
                 .join(',')}}`;
         case 'union':
             return `(${node.members.map(canonical).sort().join('|')})`;

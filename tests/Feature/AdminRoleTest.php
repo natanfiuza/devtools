@@ -52,11 +52,18 @@ it('protege as acoes destrutivas sobre admin e sobre a propria conta', function 
     expect(Gate::forUser($user)->allows('manage', $user))->toBeFalse();
 });
 
+it('redireciona admin do dashboard do usuario para o painel administrativo', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)->get(route('dashboard'))
+        ->assertRedirect(route('admin.dashboard'));
+});
+
 it('conta ao frontend se quem esta logado e admin', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create();
 
-    $this->actingAs($admin)->get(route('dashboard'))
+    $this->actingAs($admin)->get(route('admin.dashboard'))
         ->assertInertia(fn (Assert $page) => $page->where('auth.isAdmin', true));
 
     $this->actingAs($user)->get(route('dashboard'))
@@ -66,7 +73,7 @@ it('conta ao frontend se quem esta logado e admin', function () {
 it('nao expoe o papel no payload do usuario', function () {
     $admin = User::factory()->admin()->create();
 
-    $this->actingAs($admin)->get(route('dashboard'))
+    $this->actingAs($admin)->get(route('admin.dashboard'))
         ->assertInertia(fn (Assert $page) => $page->missing('auth.user.role'));
 });
 

@@ -30,8 +30,10 @@ export const REFUSED: ValueResult = { ok: false };
 | Base64
 */
 
-const STANDARD = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-const URL_SAFE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const STANDARD =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const URL_SAFE =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 
 /**
  * As duas variantes sao as da norma: a **padrao** (secao 4, `+` e `/`, com
@@ -70,7 +72,10 @@ export function decodeBase64(value: string): ValueResult {
     try {
         // `fatal` e o ponto: bytes que nao formam UTF-8 **nao** viram U+FFFD em
         // silencio, viram recusa.
-        return { ok: true, value: new TextDecoder('utf-8', { fatal: true }).decode(digits) };
+        return {
+            ok: true,
+            value: new TextDecoder('utf-8', { fatal: true }).decode(digits),
+        };
     } catch {
         return REFUSED;
     }
@@ -90,7 +95,11 @@ export function decodeBase64Bytes(value: string): Uint8Array | null {
 }
 
 /** Bytes para base64, tres bytes por quatro caracteres. */
-function toBase64(bytes: Uint8Array, alphabet: string, padding: boolean): string {
+function toBase64(
+    bytes: Uint8Array,
+    alphabet: string,
+    padding: boolean,
+): string {
     // O `??` e so para o compilador: o indice e mascarado em 6 bits e as duas
     // tabelas tem 64 caracteres, entao nunca falta.
     const digit = (index: number): string => alphabet[index] ?? '';
@@ -239,7 +248,10 @@ function percentEncode(text: string, form: boolean): string {
 
         // O `+` e o unico caso em que a variante muda o caractere, e nao so a
         // decisao: no formulario ele e o espaco.
-        out += form && byte === 0x20 ? '+' : `%${byte.toString(16).toUpperCase().padStart(2, '0')}`;
+        out +=
+            form && byte === 0x20
+                ? '+'
+                : `%${byte.toString(16).toUpperCase().padStart(2, '0')}`;
     }
 
     return out;

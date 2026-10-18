@@ -75,7 +75,9 @@ defineExpose({ pick });
             class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-ring bg-surface/90 p-4 text-center"
             :data-test="`${testid}-dropzone-overlay`"
         >
-            <p class="text-sm font-medium">{{ t('tools.ui.drop') }}</p>
+            <p class="text-sm font-medium">
+                {{ t('tools.ui.drop') }}
+            </p>
             <p class="text-xs text-subtle">
                 {{ t('tools.ui.states.drop_hint') }}
             </p>

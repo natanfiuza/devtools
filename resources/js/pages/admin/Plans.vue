@@ -14,7 +14,9 @@ const { t } = useI18n();
 
     <div class="space-y-4">
         <header>
-            <h2 class="text-lg font-medium">{{ t('admin.plans.title') }}</h2>
+            <h2 class="text-lg font-medium">
+                {{ t('admin.plans.title') }}
+            </h2>
             <p class="mt-1 text-sm text-subtle">
                 {{ t('admin.plans.description') }}
             </p>

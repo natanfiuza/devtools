@@ -50,7 +50,9 @@ function features(plan: PublicPlan): string[] {
             class="flex flex-col rounded-xl border bg-card p-6"
         >
             <div class="flex items-center justify-between gap-2">
-                <h3 class="text-base font-medium">{{ plan.name }}</h3>
+                <h3 class="text-base font-medium">
+                    {{ plan.name }}
+                </h3>
                 <Badge
                     v-if="plan.interval === 'year'"
                     variant="secondary"
@@ -60,7 +62,9 @@ function features(plan: PublicPlan): string[] {
                 </Badge>
             </div>
 
-            <p class="mt-2 text-[32px] leading-tight font-semibold tracking-[-0.02em]">
+            <p
+                class="mt-2 text-[32px] leading-tight font-semibold tracking-[-0.02em]"
+            >
                 {{ plan.isFree ? t('home.pricing.free') : plan.price }}
             </p>
             <p v-if="plan.interval !== null" class="text-sm text-subtle">

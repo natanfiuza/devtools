@@ -39,7 +39,9 @@ const cards = computed<Array<{ label: string; value: string }>>(() => [
 
     <div class="space-y-6">
         <header>
-            <h2 class="text-lg font-medium">{{ t('admin.overview.title') }}</h2>
+            <h2 class="text-lg font-medium">
+                {{ t('admin.overview.title') }}
+            </h2>
             <p class="mt-1 text-sm text-subtle">
                 {{ t('admin.overview.description') }}
             </p>
@@ -54,7 +56,9 @@ const cards = computed<Array<{ label: string; value: string }>>(() => [
                 <dt class="text-[12px] tracking-wide text-subtle uppercase">
                     {{ card.label }}
                 </dt>
-                <dd class="mt-2 font-mono text-2xl">{{ card.value }}</dd>
+                <dd class="mt-2 font-mono text-2xl">
+                    {{ card.value }}
+                </dd>
             </div>
         </dl>
 

@@ -10,7 +10,8 @@
 /** Ciclo de vida da tool: `hidden` nao aparece em lugar nenhum. */
 export type ToolStatus = 'soon' | 'available' | 'hidden';
 
-export type ToolCategoryId = 'json' | 'sql' | 'encode' | 'security' | 'time' | 'text';
+export type ToolCategoryId =
+    'json' | 'sql' | 'encode' | 'security' | 'time' | 'text';
 
 export interface ToolManifest {
     /** Identificador da tool; e tambem o nome do diretorio e o prefixo das chaves de traducao. */

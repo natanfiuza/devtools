@@ -71,7 +71,9 @@ function label(value: string): string {
 
     <div class="space-y-4">
         <header>
-            <h2 class="text-lg font-medium">{{ t('admin.audit.title') }}</h2>
+            <h2 class="text-lg font-medium">
+                {{ t('admin.audit.title') }}
+            </h2>
             <p class="mt-1 text-sm text-subtle">
                 {{ t('admin.audit.description') }}
             </p>
@@ -113,8 +115,12 @@ function label(value: string): string {
             :empty="t('admin.audit.empty')"
             @page="goToPage"
         >
-            <template #cell-at="{ row }">{{ row.at }}</template>
-            <template #cell-action="{ row }">{{ label(row.action) }}</template>
+            <template #cell-at="{ row }">
+                {{ row.at }}
+            </template>
+            <template #cell-action="{ row }">
+                {{ label(row.action) }}
+            </template>
             <template #cell-actor="{ row }">
                 {{ row.actor ?? t('admin.audit.system') }}
             </template>
@@ -126,7 +132,9 @@ function label(value: string): string {
                         : `#${row.targetId}`)
                 }}
             </template>
-            <template #cell-ip="{ row }">{{ row.ip }}</template>
+            <template #cell-ip="{ row }">
+                {{ row.ip }}
+            </template>
         </AdminTable>
     </div>
 </template>

@@ -3,6 +3,7 @@
 Leia SEMPRE: `docs/SPEC.md`, `docs/glossario.md`, `docs/adr/*`, `docs/design/DESIGN.md`, `docs/RUNBOOK.md`.
 
 ## Regras
+
 - Stack: PHP 8.3, Laravel 13, Inertia 3 (com SSR), Vue 3 + TypeScript estrito, Tailwind 4, shadcn-vue, MariaDB/MySQL (SQLite `:memory:` nos testes), Pest 4, Vitest 5.
 - Trabalhe por FASE (`docs/SPEC.md` secao 9). Ao fim de cada fase: rodar `composer test`, `npm run test` e `npm run types:check`, atualizar docs e parar para revisao.
 - Nunca fixe nomes de modelo de IA, precos ou limites no codigo: use `config/`, `.env` ou tabelas (`plans`, `output_targets`).
@@ -17,6 +18,7 @@ Leia SEMPRE: `docs/SPEC.md`, `docs/glossario.md`, `docs/adr/*`, `docs/design/DES
 - Toda vez que um plano de implementação for gerado ele deve ser salvo em `docs/gemini/plans/{branch}/{dataatual}_{branch}_{planname}.md`, onde {dataatual} deve ser substituida pelo data atual, e onde {branch} deve ser substituida pela branch atual, onde {planname} deve ser uma descrição curta do plano, sem espaços ou caracteres especiais, apenas letras minusculas, separados por underscore.
 
 ## Comandos Principais
+
 - `composer dev` — Sobe ambiente local (`php artisan serve`, Vite HMR, fila e `pail`).
 - `composer test` — Executa `config:clear`, Pint (`--test`), PHPStan e Pest.
 - `npm run test` — Executa testes unitarios do frontend (Vitest).
@@ -25,6 +27,7 @@ Leia SEMPRE: `docs/SPEC.md`, `docs/glossario.md`, `docs/adr/*`, `docs/design/DES
 - `npm run build` / `npm run build:ssr` — Build de producao do cliente e bundle SSR.
 
 ## Arquitetura e Convencoes Rapidas
+
 - **Idiomas e Rotas**: Paginas publicas e de autenticacao vivem sob `/{locale}` (`en`, `pt-br`, `pt-pt`, `fr`, `es`). Area autenticada (`dashboard`, `settings`) e rotas de maquina (`/api`, `/webhooks`, `/admin`, `/auth/{provider}/*`, `/sitemap.xml`, `/robots.txt`) nao usam prefixo de idioma. Traducoes ficam em `lang/{locale}/*.php`.
 - **Registro de Tools**: Fonte unica em `resources/js/tools/<slug>/manifest.json` (`slug`, `status: soon|available|hidden`, `category`, `icon`, `order`, `keywords`), lida no frontend por `resources/js/tools/registry.ts` e no backend por `App\Support\Tools`. Nenhum texto visivel fica no `manifest.json` (usar chaves `tools.<slug>.*` nas traducoes).
 - **Pagina Generica de Tool**: `resources/js/pages/tools/Show.vue` renderiza cabecalho, metas/SEO e `ToolShell.vue`, carregando `resources/js/tools/<slug>/Tool.vue` via lazy glob (`resources/js/tools/components.ts`). Componentes e utilitarios compartilhados entre tools ficam em `resources/js/components/tool/`, `resources/js/lib/` e `resources/js/composables/`.

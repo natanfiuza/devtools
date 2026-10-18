@@ -34,13 +34,13 @@ const description = computed<string | undefined>(() =>
 
     <AuthCard :title="title" :description="description">
         <Form
+            v-slot="{ errors, processing }"
             v-bind="
                 hasPassword
                     ? routes.form.confirmPassword.value
                     : routes.form.setPassword.value
             "
             reset-on-success
-            v-slot="{ errors, processing }"
             class="flex flex-col gap-5"
         >
             <div class="grid gap-4">

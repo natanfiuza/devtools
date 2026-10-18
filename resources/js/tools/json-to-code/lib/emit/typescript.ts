@@ -49,10 +49,14 @@ function render(node: TypeNode, plan: TypePlan): string {
         case 'array': {
             const element = render(node.element, plan);
 
-            return node.element.kind === 'union' ? `(${element})[]` : `${element}[]`;
+            return node.element.kind === 'union'
+                ? `(${element})[]`
+                : `${element}[]`;
         }
         case 'union':
-            return node.members.map((member) => render(member, plan)).join(' | ');
+            return node.members
+                .map((member) => render(member, plan))
+                .join(' | ');
         case 'object':
             return plan.names.get(node) ?? 'Record<string, unknown>';
     }

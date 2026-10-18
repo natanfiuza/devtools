@@ -4,5 +4,15 @@
     "category": "security",
     "icon": "key-round",
     "order": 60,
-    "keywords": ["jwt", "token", "decode", "claims", "header", "payload", "bearer", "signature", "oauth"]
+    "keywords": [
+        "jwt",
+        "token",
+        "decode",
+        "claims",
+        "header",
+        "payload",
+        "bearer",
+        "signature",
+        "oauth"
+    ]
 }

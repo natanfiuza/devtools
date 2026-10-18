@@ -47,7 +47,9 @@ describe('md5', () => {
     });
 
     it('acerta o milhao de `a`', () => {
-        expect(md5('a'.repeat(1_000_000))).toBe('7707d6ae4e027c70eea2a935c2296f21');
+        expect(md5('a'.repeat(1_000_000))).toBe(
+            '7707d6ae4e027c70eea2a935c2296f21',
+        );
     });
 
     it('conta o texto acentuado pelos bytes UTF-8', () => {
@@ -80,6 +82,8 @@ describe('md5Bytes', () => {
     it('da o mesmo digest do caminho de texto', () => {
         const texto = 'ação 🚀';
 
-        expect(toHex(md5Bytes(new TextEncoder().encode(texto)))).toBe(md5(texto));
+        expect(toHex(md5Bytes(new TextEncoder().encode(texto)))).toBe(
+            md5(texto),
+        );
     });
 });

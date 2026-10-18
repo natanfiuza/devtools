@@ -123,8 +123,12 @@ function submitDelete(): void {
                 >
                     {{ t('admin.user.back') }}
                 </Link>
-                <h2 class="mt-1 text-lg font-medium">{{ account.name }}</h2>
-                <p class="text-sm text-subtle">{{ account.email }}</p>
+                <h2 class="mt-1 text-lg font-medium">
+                    {{ account.name }}
+                </h2>
+                <p class="text-sm text-subtle">
+                    {{ account.email }}
+                </p>
             </div>
 
             <div class="flex flex-wrap gap-2">
@@ -269,15 +273,21 @@ function submitDelete(): void {
                 </h3>
                 <dl class="mt-3 space-y-2 text-sm">
                     <div class="flex justify-between gap-4">
-                        <dt class="text-subtle">{{ t('admin.user.name') }}</dt>
+                        <dt class="text-subtle">
+                            {{ t('admin.user.name') }}
+                        </dt>
                         <dd>{{ account.name }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-subtle">{{ t('admin.user.email') }}</dt>
+                        <dt class="text-subtle">
+                            {{ t('admin.user.email') }}
+                        </dt>
                         <dd>{{ account.email }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-subtle">{{ t('admin.user.role') }}</dt>
+                        <dt class="text-subtle">
+                            {{ t('admin.user.role') }}
+                        </dt>
                         <dd>{{ t(`admin.users.role_${account.role}`) }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">

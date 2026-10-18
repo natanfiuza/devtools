@@ -26,8 +26,10 @@ import {
 const AGORA = Date.UTC(2026, 9, 14, 12, 0, 0);
 
 /** As quatro formas que a RFC 9562 fixa, uma por versao. */
-const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-const UUID_V7 = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const UUID_V4 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const UUID_V7 =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const ULID = /^[0-9A-HJKMNP-TV-Z]{26}$/;
 
 describe('os tipos oferecidos', () => {
@@ -72,7 +74,10 @@ describe('uuid v4', () => {
         // em qualquer uma, e o caminho de reserva e o que fica.
         const original = Object.getOwnPropertyDescriptor(crypto, 'randomUUID');
 
-        Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true });
+        Object.defineProperty(crypto, 'randomUUID', {
+            value: undefined,
+            configurable: true,
+        });
 
         try {
             const id = uuidV4();

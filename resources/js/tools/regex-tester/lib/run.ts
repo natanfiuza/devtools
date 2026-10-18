@@ -31,7 +31,9 @@ export const REGEX_FLAGS: readonly RegexFlag[] = ['i', 'm', 's', 'u'];
  * nunca recusa esta string.
  */
 export function flagsOf(toggles: Partial<Record<RegexFlag, boolean>>): string {
-    return ['g', ...REGEX_FLAGS.filter((flag) => toggles[flag] === true)].join('');
+    return ['g', ...REGEX_FLAGS.filter((flag) => toggles[flag] === true)].join(
+        '',
+    );
 }
 
 export interface RegexRequest {
@@ -87,7 +89,10 @@ export function search(request: RegexRequest): RegexResult {
     try {
         pattern = new RegExp(request.pattern, request.flags);
     } catch (error) {
-        return { ok: false, detail: error instanceof Error ? error.message : '' };
+        return {
+            ok: false,
+            detail: error instanceof Error ? error.message : '',
+        };
     }
 
     const unicode = pattern.unicode;
@@ -113,7 +118,11 @@ export function search(request: RegexRequest): RegexResult {
         });
 
         if (found[0] === '') {
-            pattern.lastIndex = nextPosition(request.text, pattern.lastIndex, unicode);
+            pattern.lastIndex = nextPosition(
+                request.text,
+                pattern.lastIndex,
+                unicode,
+            );
         }
 
         found = pattern.exec(request.text);

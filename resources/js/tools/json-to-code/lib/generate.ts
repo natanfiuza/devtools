@@ -73,14 +73,23 @@ const EMITTERS: Record<Target, (plan: TypePlan) => string> = {
  * descreve nada - entao a tela diz que precisa de um objeto com chaves, em vez
  * de escrever um tipo vazio que pareceria resposta.
  */
-export function generate(value: JsonValue, options: GenerateOptions): Generation | null {
+export function generate(
+    value: JsonValue,
+    options: GenerateOptions,
+): Generation | null {
     const root = infer(value);
 
     if (root.kind !== 'object') {
         return null;
     }
 
-    const plan = planTypes(root, identifier(options.rootName, DEFAULT_ROOT_NAME));
+    const plan = planTypes(
+        root,
+        identifier(options.rootName, DEFAULT_ROOT_NAME),
+    );
 
-    return { code: EMITTERS[options.target](plan), types: plan.declarations.length };
+    return {
+        code: EMITTERS[options.target](plan),
+        types: plan.declarations.length,
+    };
 }

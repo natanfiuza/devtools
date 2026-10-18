@@ -1,4 +1,9 @@
-import { flushPromises, mount, type DOMWrapper, type VueWrapper } from '@vue/test-utils';
+import {
+    flushPromises,
+    mount,
+    type DOMWrapper,
+    type VueWrapper,
+} from '@vue/test-utils';
 import { defineComponent, h, type PropType } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Select } from '@/components/ui/select';
@@ -84,7 +89,10 @@ const EditorStub = defineComponent({
         modelValue: { type: String, default: '' },
         placeholder: { type: String, default: '' },
         error: {
-            type: Object as PropType<{ position: number; message: string } | null>,
+            type: Object as PropType<{
+                position: number;
+                message: string;
+            } | null>,
             default: null,
         },
         extensions: { type: Array as PropType<unknown[]>, default: () => [] },
@@ -130,7 +138,9 @@ function rotuloDoBotao(node: DOMWrapper<Element>): string {
 }
 
 function botao(wrapper: VueWrapper, rotulo: string): DOMWrapper<Element> {
-    const found = wrapper.findAll('button').find((node) => rotuloDoBotao(node) === rotulo);
+    const found = wrapper
+        .findAll('button')
+        .find((node) => rotuloDoBotao(node) === rotulo);
 
     if (found === undefined) {
         throw new Error(`o botao ${rotulo} nao esta na tela`);
@@ -144,7 +154,9 @@ function desabilitado(wrapper: VueWrapper, rotulo: string): boolean {
 }
 
 async function digitar(wrapper: VueWrapper, value: string): Promise<void> {
-    wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('update:modelValue', value);
+    wrapper
+        .findComponent({ name: 'CodeEditor' })
+        .vm.$emit('update:modelValue', value);
 
     // A conta das abas de codificacao e sincrona, mas a dos hashes nao: o
     // `flush` e o que espera os dois caminhos.
@@ -160,7 +172,9 @@ async function clicar(wrapper: VueWrapper, rotulo: string): Promise<void> {
 function seletor(wrapper: VueWrapper, testid: string) {
     const found = wrapper
         .findAllComponents(Select)
-        .find((component) => component.find(`[data-test="${testid}"]`).exists());
+        .find((component) =>
+            component.find(`[data-test="${testid}"]`).exists(),
+        );
 
     if (found === undefined) {
         throw new Error(`o seletor ${testid} nao esta na tela`);
@@ -169,7 +183,11 @@ function seletor(wrapper: VueWrapper, testid: string) {
     return found;
 }
 
-async function escolher(wrapper: VueWrapper, testid: string, valor: string): Promise<void> {
+async function escolher(
+    wrapper: VueWrapper,
+    testid: string,
+    valor: string,
+): Promise<void> {
     seletor(wrapper, testid).vm.$emit('update:modelValue', valor);
     await flushPromises();
 }
@@ -183,7 +201,10 @@ async function escolher(wrapper: VueWrapper, testid: string, valor: string): Pro
 function painel(wrapper: VueWrapper) {
     const found = wrapper
         .findAllComponents(Tabs)
-        .find((component) => component.attributes('data-test') !== 'tool-shell-tabs');
+        .find(
+            (component) =>
+                component.attributes('data-test') !== 'tool-shell-tabs',
+        );
 
     if (found === undefined) {
         throw new Error('as abas do painel nao estao na tela');
@@ -224,12 +245,17 @@ function linha(wrapper: VueWrapper, label: string): DOMWrapper<Element> {
  * espaco.
  */
 function valor(wrapper: VueWrapper, label: string): string {
-    return linha(wrapper, label).get('[data-test="base64-url-hash-value"]').element.textContent ?? '';
+    return (
+        linha(wrapper, label).get('[data-test="base64-url-hash-value"]').element
+            .textContent ?? ''
+    );
 }
 
 /** A linha ficou sem valor? */
 function recusada(wrapper: VueWrapper, label: string): boolean {
-    return linha(wrapper, label).find('[data-test="base64-url-hash-refused"]').exists();
+    return linha(wrapper, label)
+        .find('[data-test="base64-url-hash-refused"]')
+        .exists();
 }
 
 function estado(wrapper: VueWrapper): string {
@@ -248,7 +274,10 @@ function rodape(wrapper: VueWrapper): string {
 function semWebCrypto(): () => void {
     const original = Object.getOwnPropertyDescriptor(crypto, 'subtle');
 
-    Object.defineProperty(crypto, 'subtle', { value: undefined, configurable: true });
+    Object.defineProperty(crypto, 'subtle', {
+        value: undefined,
+        configurable: true,
+    });
 
     return () => {
         if (original === undefined) {
@@ -277,9 +306,17 @@ describe('Base64, URL e Hash', () => {
         it('abre sem texto, na aba Base64 e codificando', () => {
             const wrapper = montar();
 
-            expect(wrapper.get('[data-test="editor"]').attributes('data-placeholder')).toBe('VAZIO');
+            expect(
+                wrapper
+                    .get('[data-test="editor"]')
+                    .attributes('data-placeholder'),
+            ).toBe('VAZIO');
             expect(painel(wrapper).props('modelValue')).toBe('base64');
-            expect(seletor(wrapper, 'base64-url-hash-direction').props('modelValue')).toBe('encode');
+            expect(
+                seletor(wrapper, 'base64-url-hash-direction').props(
+                    'modelValue',
+                ),
+            ).toBe('encode');
             expect(rotulos(wrapper)).toEqual([]);
             expect(estado(wrapper)).toBe('');
         });
@@ -295,7 +332,9 @@ describe('Base64, URL e Hash', () => {
             const wrapper = montar();
 
             expect(
-                wrapper.findAll('button').some((node) => rotuloDoBotao(node) === 'BAIXAR'),
+                wrapper
+                    .findAll('button')
+                    .some((node) => rotuloDoBotao(node) === 'BAIXAR'),
             ).toBe(false);
         });
 
@@ -307,11 +346,17 @@ describe('Base64, URL e Hash', () => {
                 ['url', 'ABA_URL'],
                 ['hash', 'ABA_HASH'],
             ]) {
-                expect(wrapper.get(`[data-test="base64-url-hash-mode-${mode}"]`).text()).toBe(rotulo);
+                expect(
+                    wrapper
+                        .get(`[data-test="base64-url-hash-mode-${mode}"]`)
+                        .text(),
+                ).toBe(rotulo);
             }
 
             expect(
-                wrapper.get('[data-test="base64-url-hash-direction"]').attributes('aria-label'),
+                wrapper
+                    .get('[data-test="base64-url-hash-direction"]')
+                    .attributes('aria-label'),
             ).toBe('DIRECAO');
         });
     });
@@ -397,9 +442,18 @@ describe('Base64, URL e Hash', () => {
             await digitar(wrapper, 'abc');
             await abrir(wrapper, 'hash');
 
-            expect(rotulos(wrapper)).toEqual(['md5', 'sha1', 'sha256', 'sha512']);
-            expect(valor(wrapper, 'md5')).toBe('900150983cd24fb0d6963f7d28e17f72');
-            expect(valor(wrapper, 'sha1')).toBe('a9993e364706816aba3e25717850c26c9cd0d89d');
+            expect(rotulos(wrapper)).toEqual([
+                'md5',
+                'sha1',
+                'sha256',
+                'sha512',
+            ]);
+            expect(valor(wrapper, 'md5')).toBe(
+                '900150983cd24fb0d6963f7d28e17f72',
+            );
+            expect(valor(wrapper, 'sha1')).toBe(
+                'a9993e364706816aba3e25717850c26c9cd0d89d',
+            );
             expect(valor(wrapper, 'sha256')).toBe(
                 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
             );
@@ -409,15 +463,27 @@ describe('Base64, URL e Hash', () => {
         it('nao oferece direcao: hash nao tem volta', async () => {
             const wrapper = montar();
 
-            expect(wrapper.find('[data-test="base64-url-hash-direction"]').exists()).toBe(true);
+            expect(
+                wrapper
+                    .find('[data-test="base64-url-hash-direction"]')
+                    .exists(),
+            ).toBe(true);
 
             await abrir(wrapper, 'hash');
 
-            expect(wrapper.find('[data-test="base64-url-hash-direction"]').exists()).toBe(false);
+            expect(
+                wrapper
+                    .find('[data-test="base64-url-hash-direction"]')
+                    .exists(),
+            ).toBe(false);
 
             await abrir(wrapper, 'base64');
 
-            expect(wrapper.find('[data-test="base64-url-hash-direction"]').exists()).toBe(true);
+            expect(
+                wrapper
+                    .find('[data-test="base64-url-hash-direction"]')
+                    .exists(),
+            ).toBe(true);
         });
 
         it('recalcula quando o texto muda com a aba aberta', async () => {
@@ -426,11 +492,15 @@ describe('Base64, URL e Hash', () => {
             await abrir(wrapper, 'hash');
             await digitar(wrapper, 'abc');
 
-            expect(valor(wrapper, 'md5')).toBe('900150983cd24fb0d6963f7d28e17f72');
+            expect(valor(wrapper, 'md5')).toBe(
+                '900150983cd24fb0d6963f7d28e17f72',
+            );
 
             await digitar(wrapper, 'a');
 
-            expect(valor(wrapper, 'md5')).toBe('0cc175b9c0f1b6a831c399e269772661');
+            expect(valor(wrapper, 'md5')).toBe(
+                '0cc175b9c0f1b6a831c399e269772661',
+            );
         });
 
         it('nao deixa digest antigo na tela depois de limpar', async () => {
@@ -456,13 +526,19 @@ describe('Base64, URL e Hash', () => {
 
                 // O MD5 e a conta da casa: ele sai de qualquer jeito.
                 expect(recusada(wrapper, 'md5')).toBe(false);
-                expect(valor(wrapper, 'md5')).toBe('900150983cd24fb0d6963f7d28e17f72');
+                expect(valor(wrapper, 'md5')).toBe(
+                    '900150983cd24fb0d6963f7d28e17f72',
+                );
                 expect(recusada(wrapper, 'sha256')).toBe(true);
                 // O aviso aparece uma vez, e nao tres.
-                expect(wrapper.findAll('[data-test="base64-url-hash-no-crypto"]')).toHaveLength(1);
-                expect(wrapper.get('[data-test="base64-url-hash-no-crypto"]').text()).toBe(
-                    'SEM_CRYPTO',
-                );
+                expect(
+                    wrapper.findAll('[data-test="base64-url-hash-no-crypto"]'),
+                ).toHaveLength(1);
+                expect(
+                    wrapper
+                        .get('[data-test="base64-url-hash-no-crypto"]')
+                        .text(),
+                ).toBe('SEM_CRYPTO');
             } finally {
                 restaurar();
             }
@@ -525,14 +601,20 @@ describe('Base64, URL e Hash', () => {
             const copiado = clipboard.writeText.mock.calls[0]?.[0] as string;
 
             expect(copiado.split('\n')).toHaveLength(4);
-            expect(copiado.startsWith('LINHA_MD5: 900150983cd24fb0d6963f7d28e17f72')).toBe(true);
+            expect(
+                copiado.startsWith(
+                    'LINHA_MD5: 900150983cd24fb0d6963f7d28e17f72',
+                ),
+            ).toBe(true);
         });
 
         it('copia so o valor pelo botao da linha, e diz qual foi', async () => {
             const wrapper = montar();
 
             await digitar(wrapper, '???');
-            await linha(wrapper, 'urlSafe').get('[data-test="base64-url-hash-row-copy"]').trigger('click');
+            await linha(wrapper, 'urlSafe')
+                .get('[data-test="base64-url-hash-row-copy"]')
+                .trigger('click');
             await flushPromises();
 
             expect(clipboard.writeText).toHaveBeenCalledWith('Pz8_');
@@ -565,10 +647,14 @@ describe('Base64, URL e Hash', () => {
                 // A linha sem valor nao tem o que copiar - e nao adianta o botao
                 // ao lado das outras, que tem.
                 expect(
-                    linha(wrapper, 'sha256').find('[data-test="base64-url-hash-row-copy"]').exists(),
+                    linha(wrapper, 'sha256')
+                        .find('[data-test="base64-url-hash-row-copy"]')
+                        .exists(),
                 ).toBe(false);
                 expect(
-                    linha(wrapper, 'md5').find('[data-test="base64-url-hash-row-copy"]').exists(),
+                    linha(wrapper, 'md5')
+                        .find('[data-test="base64-url-hash-row-copy"]')
+                        .exists(),
                 ).toBe(true);
             } finally {
                 restaurar();
@@ -576,7 +662,10 @@ describe('Base64, URL e Hash', () => {
         });
 
         it('manda copiar na mao quando o navegador nao expoe a area de transferencia', async () => {
-            Object.defineProperty(navigator, 'clipboard', { value: undefined, configurable: true });
+            Object.defineProperty(navigator, 'clipboard', {
+                value: undefined,
+                configurable: true,
+            });
 
             const wrapper = montar();
 
@@ -593,7 +682,9 @@ describe('Base64, URL e Hash', () => {
 
             await clicar(wrapper, 'EXEMPLO');
 
-            expect(valor(wrapper, 'base64')).toContain('UGFkYXJpYSBkbyBCYWlycm8gLSBwZWRpZG8gIzQy');
+            expect(valor(wrapper, 'base64')).toContain(
+                'UGFkYXJpYSBkbyBCYWlycm8gLSBwZWRpZG8gIzQy',
+            );
 
             // O exemplo tem o que as tres abas querem mostrar: acento (UTF-8 de
             // verdade), espaco, e os caracteres que a URL escapa.
@@ -613,7 +704,9 @@ describe('Base64, URL e Hash', () => {
             await clicar(wrapper, 'LIMPAR');
 
             expect(rotulos(wrapper)).toEqual([]);
-            expect(wrapper.get('[data-test="editor"]').element.textContent).toBe('');
+            expect(
+                wrapper.get('[data-test="editor"]').element.textContent,
+            ).toBe('');
         });
     });
 });

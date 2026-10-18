@@ -56,4 +56,13 @@ final class UserPolicy
     {
         return $this->manage($actor, $target) && ! $target->isSuspended();
     }
+
+    /**
+     * Restaurar conta em soft delete. Vale para qualquer conta comum que
+     * esteja em soft delete e nao anonimizada, e nunca sobre a propria conta.
+     */
+    public function restore(User $actor, User $target): bool
+    {
+        return $this->manage($actor, $target) && $target->trashed() && ! $target->isAnonymized();
+    }
 }

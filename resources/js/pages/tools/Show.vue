@@ -105,8 +105,12 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
                     {{ name }}
                 </h1>
             </div>
-            <p class="mt-3 text-muted-foreground">{{ description }}</p>
-            <p class="mt-2 text-sm text-subtle">{{ intro }}</p>
+            <p class="mt-3 text-muted-foreground">
+                {{ description }}
+            </p>
+            <p class="mt-2 text-sm text-subtle">
+                {{ intro }}
+            </p>
         </header>
 
         <div class="mt-8">

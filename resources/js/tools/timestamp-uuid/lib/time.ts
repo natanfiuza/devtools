@@ -22,7 +22,8 @@
 import { instantOfId } from './ids';
 
 /** O que o texto colado era. */
-export type InstantSource = 'seconds' | 'milliseconds' | 'date' | 'uuid_v7' | 'ulid';
+export type InstantSource =
+    'seconds' | 'milliseconds' | 'date' | 'uuid_v7' | 'ulid';
 
 export interface Instant {
     source: InstantSource;
@@ -86,7 +87,10 @@ export function readInstant(input: string): Instant | null {
         const value = Number(text);
         const seconds = Math.abs(value) < MILLISECONDS_FROM;
 
-        return instantFrom(seconds ? value * 1000 : value, seconds ? 'seconds' : 'milliseconds');
+        return instantFrom(
+            seconds ? value * 1000 : value,
+            seconds ? 'seconds' : 'milliseconds',
+        );
     }
 
     const parsed = Date.parse(text);
@@ -151,9 +155,16 @@ export function relativeText(date: Date, now: number, locale: string): string {
 }
 
 /** As seis leituras do instante, na ordem de `READING_LABELS`. */
-export function readingsFor(date: Date, now: number, locale: string): Reading[] {
+export function readingsFor(
+    date: Date,
+    now: number,
+    locale: string,
+): Reading[] {
     const ms = date.getTime();
-    const long = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'long' });
+    const long = new Intl.DateTimeFormat(locale, {
+        dateStyle: 'full',
+        timeStyle: 'long',
+    });
 
     const texts: Record<ReadingLabel, string> = {
         unix_seconds: String(Math.floor(ms / 1000)),

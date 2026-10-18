@@ -29,9 +29,9 @@ const routes = useRoutes();
         </p>
 
         <Form
+            v-slot="{ errors, processing }"
             v-bind="routes.form.newsletter.value"
             :reset-on-success="['email']"
-            v-slot="{ errors, processing }"
             class="mt-3 flex items-start gap-2"
         >
             <div class="grid flex-1 gap-1">

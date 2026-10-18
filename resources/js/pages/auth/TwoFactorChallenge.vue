@@ -62,10 +62,12 @@ const description = computed(() =>
     <Head :title="title" />
 
     <AuthCard :title="title" :description="description">
-        <form @submit.prevent="submit" class="flex flex-col gap-5">
+        <form class="flex flex-col gap-5" @submit.prevent="submit">
             <div class="grid gap-4">
                 <div v-if="!recovery" class="grid gap-2">
-                    <Label for="code">{{ t('auth.two_factor.code_label') }}</Label>
+                    <Label for="code">{{
+                        t('auth.two_factor.code_label')
+                    }}</Label>
                     <Input
                         id="code"
                         ref="codeInput"
@@ -76,7 +78,7 @@ const description = computed(() =>
                         autocomplete="one-time-code"
                         placeholder="123456"
                         maxlength="6"
-                        class="font-mono text-center text-lg tracking-widest"
+                        class="text-center font-mono text-lg tracking-widest"
                         :aria-invalid="form.errors.code ? 'true' : undefined"
                         aria-describedby="code-error"
                     />
@@ -95,8 +97,10 @@ const description = computed(() =>
                         autofocus
                         autocomplete="one-time-code"
                         placeholder="abcdef-98765"
-                        class="font-mono text-center tracking-wider"
-                        :aria-invalid="form.errors.recovery_code ? 'true' : undefined"
+                        class="text-center font-mono tracking-wider"
+                        :aria-invalid="
+                            form.errors.recovery_code ? 'true' : undefined
+                        "
                         aria-describedby="recovery-code-error"
                     />
                     <InputError

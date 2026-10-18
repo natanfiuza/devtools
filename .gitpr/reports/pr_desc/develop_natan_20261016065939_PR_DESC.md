@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 fix: enfileira comandos do gtag como arguments para o gtag.js
 ```
@@ -16,13 +17,13 @@ A correção troca o `push(command)` por `push(arguments)` e ajusta a tipagem da
 ## 🛠️ Mudanças Técnicas
 
 - `resources/js/lib/analytics.ts`
-  - Adiciona o tipo `GtagQueueItem = IArguments | Record<string, unknown>`, cobrindo tanto comandos (`arguments`) quanto eventos simples que o próprio gtag.js enfileira (ex.: `gtm.dom`).
-  - Altera `window.dataLayer` de `unknown[][]` para `GtagQueueItem[]`.
-  - `gtag()` passa a enfileirar o objeto `arguments` em vez do rest parameter `command`, com `eslint-disable-next-line prefer-rest-params` justificado em comentário (o rest seria exatamente o Array que o gtag.js ignora).
-  - Documenta a causa raiz e o sintoma (falha silenciosa, sem erro no console e sem hits) em docblock.
+    - Adiciona o tipo `GtagQueueItem = IArguments | Record<string, unknown>`, cobrindo tanto comandos (`arguments`) quanto eventos simples que o próprio gtag.js enfileira (ex.: `gtm.dom`).
+    - Altera `window.dataLayer` de `unknown[][]` para `GtagQueueItem[]`.
+    - `gtag()` passa a enfileirar o objeto `arguments` em vez do rest parameter `command`, com `eslint-disable-next-line prefer-rest-params` justificado em comentário (o rest seria exatamente o Array que o gtag.js ignora).
+    - Documenta a causa raiz e o sintoma (falha silenciosa, sem erro no console e sem hits) em docblock.
 - `resources/js/__tests__/consent-banner.test.ts`
-  - Adiciona os helpers `comando(indice)` e `comandos()`, que normalizam itens `arguments` em listas para comparação, substituindo os acessos diretos a `window.dataLayer[i]`.
-  - Novo teste que executa o ciclo completo de consentimento (aceite, reabertura e recusa) e verifica que **todos** os itens da fila são `[object Arguments]` e não Arrays — a asserção que falharia no defeito original.
+    - Adiciona os helpers `comando(indice)` e `comandos()`, que normalizam itens `arguments` em listas para comparação, substituindo os acessos diretos a `window.dataLayer[i]`.
+    - Novo teste que executa o ciclo completo de consentimento (aceite, reabertura e recusa) e verifica que **todos** os itens da fila são `[object Arguments]` e não Arrays — a asserção que falharia no defeito original.
 
 ## ⚠️ Impacto/Avisos
 
@@ -31,7 +32,6 @@ A correção troca o `push(command)` por `push(arguments)` e ajusta a tipagem da
 - **Compatibilidade:** a assinatura pública de `gtag()` não muda; o comportamento observável externo passa a ser o correto. Nenhum consumidor existente precisa de ajuste.
 - **Regressão:** coberta em dois níveis — o tipo `GtagQueueItem` rejeita Arrays em tempo de compilação e o novo teste valida o formato real dos itens em runtime.
 - **Atenção em revisão:** o uso de `arguments` é intencional e não deve ser "modernizado" para rest parameters sem revalidar o comportamento do gtag.js.
-
 
 close #21
 

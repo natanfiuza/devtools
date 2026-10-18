@@ -144,10 +144,7 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                                     class="justify-start"
                                     @click="openSearchFromMenu()"
                                 >
-                                    <Search
-                                        class="size-4"
-                                        aria-hidden="true"
-                                    />
+                                    <Search class="size-4" aria-hidden="true" />
                                     {{ t('app.actions.search') }}
                                 </Button>
                                 <Button

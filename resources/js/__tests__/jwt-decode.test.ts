@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { decodeJwt, TIME_CLAIMS, type DecodedToken } from '@/tools/jwt-decoder/lib/decode';
+import {
+    decodeJwt,
+    TIME_CLAIMS,
+    type DecodedToken,
+} from '@/tools/jwt-decoder/lib/decode';
 import sample from '@/tools/jwt-decoder/sample.txt?raw';
 
 /**
@@ -29,7 +33,10 @@ function segment(value: unknown): string {
     const bytes = new TextEncoder().encode(JSON.stringify(value));
     const binary = String.fromCharCode(...bytes);
 
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
 }
 
 function token(
@@ -60,10 +67,17 @@ function motivo(input: string): string {
 
 describe('leitura do token', () => {
     it('le o cabecalho e o payload', () => {
-        const lido = ler(token({ sub: '42', admin: true, tags: ['a', 'b'], nada: null }));
+        const lido = ler(
+            token({ sub: '42', admin: true, tags: ['a', 'b'], nada: null }),
+        );
 
         expect(lido.header).toEqual({ alg: 'HS256', typ: 'JWT' });
-        expect(lido.payload).toEqual({ sub: '42', admin: true, tags: ['a', 'b'], nada: null });
+        expect(lido.payload).toEqual({
+            sub: '42',
+            admin: true,
+            tags: ['a', 'b'],
+            nada: null,
+        });
     });
 
     it('tolera o prefixo Bearer, em qualquer caixa', () => {
@@ -91,9 +105,18 @@ describe('leitura do token', () => {
     });
 
     it('nao valida nada do conteudo: o cabecalho vem cru', () => {
-        const lido = ler(token({ sub: '1' }, { alg: 'nenhum-algoritmo', typ: 'JWT', extra: 7 }));
+        const lido = ler(
+            token(
+                { sub: '1' },
+                { alg: 'nenhum-algoritmo', typ: 'JWT', extra: 7 },
+            ),
+        );
 
-        expect(lido.header).toEqual({ alg: 'nenhum-algoritmo', typ: 'JWT', extra: 7 });
+        expect(lido.header).toEqual({
+            alg: 'nenhum-algoritmo',
+            typ: 'JWT',
+            extra: 7,
+        });
     });
 });
 
@@ -106,24 +129,34 @@ describe('o que nao e um JWT', () => {
     });
 
     it('recusa o segmento com caractere fora do alfabeto', () => {
-        expect(motivo(`!!!.${segment({ sub: '1' })}.${ASSINATURA}`)).toBe('base64');
-        expect(motivo(`${segment(CABECALHO)}.${segment({ sub: '1' })}.***`)).toBe('base64');
+        expect(motivo(`!!!.${segment({ sub: '1' })}.${ASSINATURA}`)).toBe(
+            'base64',
+        );
+        expect(
+            motivo(`${segment(CABECALHO)}.${segment({ sub: '1' })}.***`),
+        ).toBe('base64');
     });
 
     it('recusa o segmento com comprimento que o base64 nao fecha', () => {
         // 21 caracteres: base64 nenhum tem esse tamanho - sobram 6 bits soltos
         // no fim, que nao chegam a formar um byte.
-        expect(motivo(`${segment(CABECALHO)}.${segment({ sub: '1' })}.qualquer-coisa-valida`)).toBe(
+        expect(
+            motivo(
+                `${segment(CABECALHO)}.${segment({ sub: '1' })}.qualquer-coisa-valida`,
+            ),
+        ).toBe('base64');
+    });
+
+    it('recusa o segmento cujos bytes nao sao UTF-8', () => {
+        expect(motivo(`_w.${segment({ sub: '1' })}.${ASSINATURA}`)).toBe(
             'base64',
         );
     });
 
-    it('recusa o segmento cujos bytes nao sao UTF-8', () => {
-        expect(motivo(`_w.${segment({ sub: '1' })}.${ASSINATURA}`)).toBe('base64');
-    });
-
     it('recusa o segmento que nao guarda JSON', () => {
-        expect(motivo(`${segment(CABECALHO)}.b25kYQ.${ASSINATURA}`)).toBe('json');
+        expect(motivo(`${segment(CABECALHO)}.b25kYQ.${ASSINATURA}`)).toBe(
+            'json',
+        );
     });
 
     it('recusa o JSON que nao e um objeto', () => {
@@ -142,7 +175,9 @@ describe('a assinatura', () => {
         // assinatura HS256 de verdade.
         const completa = 'BCP_2bylQ6tinXehvIuJek2eA0lOvAss9vDRFAr4thw';
 
-        expect(ler(token({ sub: '1' }, CABECALHO, completa)).signatureBytes).toBe(32);
+        expect(
+            ler(token({ sub: '1' }, CABECALHO, completa)).signatureBytes,
+        ).toBe(32);
     });
 
     it('aceita a assinatura vazia do alg none', () => {
@@ -165,10 +200,19 @@ describe('os claims de tempo', () => {
         expect(TIME_CLAIMS).toEqual(['iat', 'nbf', 'exp']);
 
         const lido = ler(
-            token({ exp: AGORA_S + 60, iat: AGORA_S - 60, nbf: AGORA_S - 30, sub: '1' }),
+            token({
+                exp: AGORA_S + 60,
+                iat: AGORA_S - 60,
+                nbf: AGORA_S - 30,
+                sub: '1',
+            }),
         );
 
-        expect(lido.claims.map((claim) => claim.name)).toEqual(['iat', 'nbf', 'exp']);
+        expect(lido.claims.map((claim) => claim.name)).toEqual([
+            'iat',
+            'nbf',
+            'exp',
+        ]);
     });
 
     it('so lista os que existem no payload', () => {
@@ -208,8 +252,16 @@ describe('os claims de tempo', () => {
     it('guarda o valor cru quando ele nao vira data', () => {
         const lido = ler(token({ exp: 'amanha', nbf: null, iat: 1e20 }));
 
-        expect(lido.claims.map((claim) => claim.date)).toEqual([null, null, null]);
-        expect(lido.claims.map((claim) => claim.raw)).toEqual([1e20, null, 'amanha']);
+        expect(lido.claims.map((claim) => claim.date)).toEqual([
+            null,
+            null,
+            null,
+        ]);
+        expect(lido.claims.map((claim) => claim.raw)).toEqual([
+            1e20,
+            null,
+            'amanha',
+        ]);
         // Sem data nao ha como dizer que venceu - e dizer que venceu seria pior
         // do que dizer que nao deu para ler.
         expect(lido.expired).toBe(false);

@@ -191,3 +191,38 @@ export type AdminIntentRow = {
     status: 'pending' | 'fulfilled' | 'canceled';
     createdAt: string | null;
 };
+
+export type AdminSubscriptionRow = {
+    id: number;
+    userId: number;
+    userName: string;
+    userEmail: string;
+    isUserTrashed: boolean;
+    planId: number;
+    planName: string;
+    interval: string | null;
+    gateway: string;
+    status: string;
+    start: string | null;
+    end: string | null;
+    createdAt: string | null;
+};
+
+export type AdminDeletedAccountRow = {
+    id: number;
+    name: string;
+    email: string;
+    isAnonymized: boolean;
+    isTrashed: boolean;
+    deletedAt: string | null;
+    anonymizedAt: string | null;
+    daysRemaining: number;
+    canRestore: boolean;
+};
+
+export type AdminSubscriptionsStats = {
+    active: number;
+    pendingIntents: number;
+    revenueMonth: { cents: number; formatted: string };
+    gracePeriod: number;
+};

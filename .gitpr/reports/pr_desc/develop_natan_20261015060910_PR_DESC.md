@@ -1,6 +1,7 @@
 # 🚀 Sugestão de Pull Request
 
 **Mensagem de Commit Recomendada:**
+
 ```text
 feat: entrega Fase 3 com seis novas tools e infra compartilhada
 ```
@@ -39,7 +40,6 @@ O ganho não é só de vitrine: cada tool nova expôs necessidades que eram priv
 - **SEO:** o sitemap passa a ter 7 URLs indexáveis; o AI SQL Builder permanece fora por depender de servidor.
 - **Documentação:** o diff toca CHANGELOG, SPEC, ADRs (007, 029, 031) e DESIGN, mas o conteúdo foi excluído do diff e não foi auditado nesta revisão.
 - **Performance:** a formatação SQL tem custo medido de ~9 s por MB, o que justifica o uso de worker com `terminate` por relógio — em arquivos muito grandes a UI cairá para processamento em background.
-
 
 close #13
 

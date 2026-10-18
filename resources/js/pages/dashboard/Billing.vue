@@ -83,14 +83,18 @@ function urlDaPagina(page: number): string {
                     <dt class="text-sm text-subtle">
                         {{ t('account.billing.plan') }}
                     </dt>
-                    <dd class="text-sm">{{ subscription.plan }}</dd>
+                    <dd class="text-sm">
+                        {{ subscription.plan }}
+                    </dd>
                 </div>
 
                 <div class="flex items-center justify-between gap-4 px-4 py-2">
                     <dt class="text-sm text-subtle">
                         {{ t('account.billing.period') }}
                     </dt>
-                    <dd class="font-mono text-[13px]">{{ periodo }}</dd>
+                    <dd class="font-mono text-[13px]">
+                        {{ periodo }}
+                    </dd>
                 </div>
 
                 <div class="flex items-center justify-between gap-4 px-4 py-2">
@@ -118,7 +122,9 @@ function urlDaPagina(page: number): string {
                     <dt class="text-sm text-subtle">
                         {{ t('account.billing.gateway') }}
                     </dt>
-                    <dd class="text-sm">{{ cobranca }}</dd>
+                    <dd class="text-sm">
+                        {{ cobranca }}
+                    </dd>
                 </div>
             </dl>
         </section>
@@ -189,13 +195,17 @@ function urlDaPagina(page: number): string {
                                 <td class="px-3 py-1 font-mono text-[13px]">
                                     {{ row.paidAt }}
                                 </td>
-                                <td class="px-3 py-1">{{ row.plan ?? '' }}</td>
+                                <td class="px-3 py-1">
+                                    {{ row.plan ?? '' }}
+                                </td>
                                 <td
                                     class="px-3 py-1 text-right font-mono text-[13px]"
                                 >
                                     {{ row.amount }}
                                 </td>
-                                <td class="px-3 py-1">{{ metodo(row) }}</td>
+                                <td class="px-3 py-1">
+                                    {{ metodo(row) }}
+                                </td>
                                 <td class="px-3 py-1">
                                     <Badge
                                         :variant="

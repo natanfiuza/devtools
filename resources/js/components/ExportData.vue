@@ -29,7 +29,9 @@ const { t } = useI18n();
                 </a>
             </Button>
 
-            <p class="text-sm text-subtle">{{ t('account.export.hint') }}</p>
+            <p class="text-sm text-subtle">
+                {{ t('account.export.hint') }}
+            </p>
         </div>
     </div>
 </template>

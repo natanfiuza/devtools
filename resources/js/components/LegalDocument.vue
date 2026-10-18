@@ -27,7 +27,9 @@ const { t } = useI18n();
         <h1 class="text-3xl font-medium tracking-tight">
             {{ t(`legal.${props.namespace}.title`) }}
         </h1>
-        <p class="mt-2 text-sm text-muted-foreground">{{ updatedLabel }}</p>
+        <p class="mt-2 text-sm text-muted-foreground">
+            {{ updatedLabel }}
+        </p>
 
         <p class="mt-6 leading-relaxed">
             {{ t(`legal.${props.namespace}.intro`, { app: t('app.brand') }) }}

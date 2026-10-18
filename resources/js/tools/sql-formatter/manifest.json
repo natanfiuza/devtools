@@ -4,5 +4,15 @@
     "category": "sql",
     "icon": "database",
     "order": 40,
-    "keywords": ["sql", "format", "formatter", "beautify", "mysql", "postgresql", "sqlserver", "sqlite", "dialect"]
+    "keywords": [
+        "sql",
+        "format",
+        "formatter",
+        "beautify",
+        "mysql",
+        "postgresql",
+        "sqlserver",
+        "sqlite",
+        "dialect"
+    ]
 }

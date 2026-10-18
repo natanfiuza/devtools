@@ -38,8 +38,8 @@ defineProps<{
         </p>
 
         <Form
-            v-bind="routes.form.resendVerification.value"
             v-slot="{ processing }"
+            v-bind="routes.form.resendVerification.value"
             class="flex flex-col gap-3"
         >
             <Button

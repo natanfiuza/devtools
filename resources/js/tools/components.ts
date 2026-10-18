@@ -33,7 +33,5 @@ export function toolComponentLoader(
     }
 
     return () =>
-        loader().then(
-            (module) => (module as { default: Component }).default,
-        );
+        loader().then((module) => (module as { default: Component }).default);
 }

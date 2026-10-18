@@ -157,9 +157,15 @@ function unsubscribe(row: AdminSubscriberRow): void {
             :empty="t('admin.subscribers.empty')"
             @page="goToPage"
         >
-            <template #cell-email="{ row }">{{ row.email }}</template>
-            <template #cell-locale="{ row }">{{ row.locale }}</template>
-            <template #cell-source="{ row }">{{ row.source }}</template>
+            <template #cell-email="{ row }">
+                {{ row.email }}
+            </template>
+            <template #cell-locale="{ row }">
+                {{ row.locale }}
+            </template>
+            <template #cell-source="{ row }">
+                {{ row.source }}
+            </template>
 
             <template #cell-status="{ row }">
                 <Badge
@@ -171,7 +177,9 @@ function unsubscribe(row: AdminSubscriberRow): void {
                 </Badge>
             </template>
 
-            <template #cell-createdAt="{ row }">{{ row.createdAt }}</template>
+            <template #cell-createdAt="{ row }">
+                {{ row.createdAt }}
+            </template>
 
             <template #actions="{ row }">
                 <Button
