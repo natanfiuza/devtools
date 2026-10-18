@@ -95,10 +95,37 @@ final class Format
             self::locale(),
             $dateType,
             $timeType,
-            $value->getTimezone()->getName(),
+            self::timezone($value),
         );
 
         return $formatter->format($value->getTimestamp()) ?: $value->toDateTimeString();
+    }
+
+    /**
+     * Fuso horario compativel com o ICU/IntlDateFormatter.
+     *
+     * O IntlDateFormatter nao aceita deslocamentos crus como "+00:00" ou "-03:00"
+     * (dispara IntlException com U_ILLEGAL_ARGUMENT_ERROR). ICU exige identificadores
+     * IANA (UTC, America/Recife) ou deslocamentos prefixados por GMT ("GMT+00:00").
+     */
+    private static function timezone(CarbonInterface $value): string
+    {
+        $name = $value->getTimezone()->getName();
+
+        if ($name === 'Z' || $name === '+00:00' || $name === '-00:00' || $name === '+0000') {
+            return 'UTC';
+        }
+
+        if (preg_match('/^[+-]\d{2}(:?\d{2})?$/', $name)) {
+            return 'GMT'.$name;
+        }
+
+        $tz = \IntlTimeZone::createTimeZone($name);
+        if ($tz->getID() === 'Etc/Unknown' && $name !== 'Etc/Unknown') {
+            return 'UTC';
+        }
+
+        return $name;
     }
 
     private static function locale(): string

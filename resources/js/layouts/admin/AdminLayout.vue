@@ -14,6 +14,7 @@ import {
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
+import AppLogo from '@/components/AppLogo.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Toaster } from '@/components/ui/sonner';
 import UserInfo from '@/components/UserInfo.vue';
@@ -91,9 +92,9 @@ const { activeHref, activeTitle } = useActiveSection(navItems, () =>
             <div class="flex h-14 items-center px-4">
                 <Link
                     :href="admin.dashboard.url()"
-                    class="font-mono text-sm font-medium"
+                    class="flex items-center gap-2"
                 >
-                    devtools<span class="text-accent"> admin</span>
+                    <AppLogo />
                 </Link>
             </div>
 

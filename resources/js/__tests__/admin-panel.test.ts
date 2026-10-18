@@ -178,6 +178,21 @@ describe('navegacao do painel', () => {
         ]);
     });
 
+    it('renderiza o logotipo devtools_ com link para o dashboard admin', () => {
+        const wrapper = montarPainel();
+        const logoLink = wrapper
+            .findAll('a')
+            .find(
+                (a) =>
+                    a.attributes('href') === '/admin' &&
+                    a.text().includes('devtools'),
+            );
+
+        expect(logoLink).toBeDefined();
+        expect(logoLink?.text()).toContain('devtools');
+        expect(logoLink?.text()).toContain('_');
+    });
+
     it('da nome acessivel a navegacao e uma saida para o site', () => {
         const wrapper = montarPainel();
 
