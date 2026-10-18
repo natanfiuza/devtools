@@ -195,9 +195,10 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - `sql-formatter` e a **unica dependencia nova de runtime** da fase; o MD5 e do repositorio (`lib/md5.ts`, conferido contra o RFC 1321), porque a Web Crypto nao tem MD5, e os tres SHA saem dela. Os slugs de dialeto (`mysql`, `pgsql`, `sqlsrv`, `sqlite`) sao o vocabulario compartilhado com o AI SQL Builder: a traducao para o nome de cada biblioteca mora so no mapeamento.
 - **"Ultima saida valida" e um estado geral**, e nao do `json-viewer`: `json-to-code` e `sql-formatter` mostram a ultima saida boa com aviso e opacidade reduzida enquanto a entrada nao fecha (glossario, ADR-029 emendado).
 - A base comum das tools (casca, editor parametrizado por linguagem, copiar, abrir arquivo com arrastar-e-soltar, baixar, tamanho em bytes, parse e tipos do JSON, cliente de worker) mora em `resources/js/components/tool/`, `resources/js/lib/` e `resources/js/composables/`, e nao dentro de uma tool: a fase seguinte acrescenta ferramenta sem copiar cola.
+- Mensagens de validacao nos 5 idiomas: arquivos `validation.php` em `lang/` para `en`, `pt_BR`, `pt_PT`, `fr` e `es`, com todas as regras padrao do Laravel e atributos traduzidos (fecha o item correspondente da 11.2).
 
 ### 11.2 Abertas (com a fase onde precisam ser resolvidas)
-- F4: mensagens de validacao nos 5 idiomas. O Laravel so traz `validation.php` em ingles; nas telas traduzidas o erro de formulario ainda sai em ingles ("The email field is required"), junto com nomes de campo em ingles.
 - F5: nome da coluna de dialetos em `output_targets` (ADR-011 diz `dialetos`; secao 6 diz `supported_dialects(json)` + `sort`).
 - F5: Laravel AI SDK x cliente HTTP fino (diferido pelo ADR-003).
 - Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek) - a do GA4 saiu desta lista e esta no guia (`docs/guides/google-analytics.md`, secao 5).
+
