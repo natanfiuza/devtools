@@ -1,12 +1,13 @@
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { defineComponent, h } from 'vue';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import {
     countChars,
     countWords,
     parseMarkdown,
 } from '@/tools/markdown-to-pdf/lib/markdown';
+import { exportToPdf } from '@/tools/markdown-to-pdf/lib/pdf';
 import {
     getFontFamilyCss,
     getFontSizeClasses,
@@ -19,6 +20,32 @@ import {
 } from '@/tools/markdown-to-pdf/lib/themes';
 import { DEFAULT_CONFIG } from '@/tools/markdown-to-pdf/lib/types';
 import Tool from '@/tools/markdown-to-pdf/Tool.vue';
+
+const mockSave = vi.fn();
+const mockAddPage = vi.fn();
+const mockAddImage = vi.fn();
+let capturedOnclone: ((doc: Document, el: HTMLElement) => void) | undefined;
+
+vi.mock('html2canvas-pro', () => ({
+    default: vi.fn(async (_el, opts) => {
+        if (opts?.onclone) {
+            capturedOnclone = opts.onclone;
+        }
+
+        return {
+            width: 800,
+            height: 1200,
+        };
+    }),
+}));
+
+vi.mock('jspdf', () => ({
+    jsPDF: class {
+        save = mockSave;
+        addPage = mockAddPage;
+        addImage = mockAddImage;
+    },
+}));
 
 describe('markdown parser', () => {
     it('renderiza titulos, paragrafos e enfase', () => {
@@ -304,5 +331,38 @@ describe('componente Tool.vue', () => {
         expect(
             wrapper.find('[data-test="markdown-pdf-preview"]').exists(),
         ).toBe(true);
+    });
+});
+
+describe('exportToPdf utilitario', () => {
+    it('executa o fatiamento de paginas e chama o save do jsPDF com nome higienizado', async () => {
+        mockSave.mockClear();
+        mockAddPage.mockClear();
+        mockAddImage.mockClear();
+
+        const el = document.createElement('div');
+        el.className =
+            'markdown-pdf-document rounded border border-neutral-200/80 shadow-md';
+        el.innerHTML = '<p>Conteudo de teste</p>';
+
+        await exportToPdf(el, 'relatorio', DEFAULT_CONFIG);
+
+        expect(mockSave).toHaveBeenCalledWith('relatorio.pdf');
+
+        if (capturedOnclone) {
+            const cloned = document.createElement('div');
+            cloned.className =
+                'rounded border border-neutral-200/80 shadow-md dark:border-neutral-700/80';
+            capturedOnclone(document, cloned);
+            expect(cloned.style.boxShadow).toBe('none');
+            expect(
+                cloned.style.border === 'none' ||
+                    cloned.style.borderStyle === 'none',
+            ).toBe(true);
+            expect(cloned.classList.contains('shadow-md')).toBe(false);
+            expect(cloned.classList.contains('border-neutral-200/80')).toBe(
+                false,
+            );
+        }
     });
 });

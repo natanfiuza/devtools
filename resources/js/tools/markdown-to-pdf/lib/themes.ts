@@ -89,14 +89,14 @@ export function getFontSizeClasses(size: FontSize): string {
 export function getThemeClasses(theme: ColorTheme): string {
     switch (theme) {
         case 'editorial':
-            return 'theme-editorial bg-white text-stone-900';
+            return 'theme-editorial bg-white';
         case 'minimal':
-            return 'theme-minimal bg-white text-black';
+            return 'theme-minimal bg-white';
         case 'academic':
-            return 'theme-academic bg-white text-neutral-900';
+            return 'theme-academic bg-white';
         case 'modern':
         default:
-            return 'theme-modern bg-white text-slate-800';
+            return 'theme-modern bg-white';
     }
 }
 
@@ -127,6 +127,7 @@ export function getDocumentTypographyCss(theme: ColorTheme): string {
     switch (theme) {
         case 'editorial':
             return `
+.markdown-pdf-document { color: #1c1917; background-color: #ffffff; }
 .markdown-pdf-document h1 { color: #1e3a8a; font-size: 2rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.8rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.4rem; }
 .markdown-pdf-document h2 { color: #1e3a8a; font-size: 1.5rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.6rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 0.3rem; }
 .markdown-pdf-document h3 { color: #1e40af; font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
@@ -143,6 +144,7 @@ export function getDocumentTypographyCss(theme: ColorTheme): string {
 `;
         case 'minimal':
             return `
+.markdown-pdf-document { color: #000000; background-color: #ffffff; }
 .markdown-pdf-document h1 { color: #000; font-size: 1.85rem; font-weight: 700; margin-top: 1.4rem; margin-bottom: 0.7rem; border-bottom: 1.5px solid #000; padding-bottom: 0.3rem; }
 .markdown-pdf-document h2 { color: #000; font-size: 1.4rem; font-weight: 700; margin-top: 1.2rem; margin-bottom: 0.5rem; border-bottom: 1px solid #000; padding-bottom: 0.2rem; }
 .markdown-pdf-document h3 { color: #000; font-size: 1.15rem; font-weight: 700; margin-top: 0.9rem; margin-bottom: 0.4rem; }
@@ -159,6 +161,7 @@ export function getDocumentTypographyCss(theme: ColorTheme): string {
 `;
         case 'academic':
             return `
+.markdown-pdf-document { color: #171717; background-color: #ffffff; }
 .markdown-pdf-document h1 { color: #171717; font-size: 1.75rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; text-align: center; }
 .markdown-pdf-document h2 { color: #262626; font-size: 1.35rem; font-weight: 600; margin-top: 1.3rem; margin-bottom: 0.6rem; }
 .markdown-pdf-document h3 { color: #404040; font-size: 1.15rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
@@ -176,6 +179,7 @@ export function getDocumentTypographyCss(theme: ColorTheme): string {
         case 'modern':
         default:
             return `
+.markdown-pdf-document { color: #1e293b; background-color: #ffffff; }
 .markdown-pdf-document h1 { color: #0f172a; font-size: 1.9rem; font-weight: 700; margin-top: 1.4rem; margin-bottom: 0.75rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.4rem; }
 .markdown-pdf-document h2 { color: #1e293b; font-size: 1.45rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.6rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.3rem; }
 .markdown-pdf-document h3 { color: #334155; font-size: 1.2rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }

@@ -1,12 +1,14 @@
-import html2pdf from 'html2pdf.js';
-import { getPaperDimensions, getPrintCss, MARGIN_VALUES_MM } from './themes';
+import html2canvas from 'html2canvas-pro';
+import { jsPDF } from 'jspdf';
+import { getPaperDimensions, getPrintCss } from './themes';
 import type { DocumentConfig } from './types';
 
 /**
  * Utilitarios de exportacao e impressao para o conversor de Markdown para PDF.
  *
- * Processamento 100% no cliente (ADR-002):
- * - `exportToPdf`: Gera o arquivo binario `.pdf` localmente no navegador e dispara o download.
+ * Processamento 100% no cliente (ADR-002, ADR-037):
+ * - `exportToPdf`: Renderiza o documento via html2canvas-pro (com suporte nativo a oklab/oklch do Tailwind 4)
+ *   e gera o arquivo binario `.pdf` localmente no navegador atraves do jsPDF.
  * - `printDocument`: Dispara o dialogo nativo de impressao (`window.print`) atraves de um iframe
  *   isolado, aplicando regras CSS `@page` e `@media print` para renderizacao vetorial de alta nitidez.
  */
@@ -16,7 +18,6 @@ export async function exportToPdf(
     filename: string,
     config: DocumentConfig,
 ): Promise<void> {
-    const marginMm = MARGIN_VALUES_MM[config.margin];
     const { widthMm, minHeightMm } = getPaperDimensions(
         config.format,
         config.orientation,
@@ -26,40 +27,93 @@ export async function exportToPdf(
         ? filename.trim()
         : `${filename.trim() || 'documento'}.pdf`;
 
-    const opt = {
-        margin: marginMm,
-        filename: cleanFilename,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        enableLinks: true,
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            letterRendering: true,
-            logging: false,
+    // Renderiza o elemento em canvas de alta resolucao (scale: 2)
+    const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        onclone: (_clonedDoc: Document, clonedElement: HTMLElement) => {
+            // Remove estilizacao visual de card do preview antes de fotografar a folha
+            clonedElement.style.boxShadow = 'none';
+            clonedElement.style.border = 'none';
+            clonedElement.style.borderRadius = '0';
+            clonedElement.style.backgroundColor = '#ffffff';
+            clonedElement.classList.remove(
+                'rounded',
+                'border',
+                'border-neutral-200/80',
+                'shadow-md',
+                'transition-all',
+                'duration-150',
+                'dark:border-neutral-700/80',
+            );
         },
-        jsPDF: {
-            unit: 'mm' as const,
-            format: [widthMm, minHeightMm] as [number, number],
-            orientation: config.orientation,
-            compress: true,
-        },
-        pagebreak: {
-            mode: ['avoid-all', 'css', 'legacy'],
-            avoid: [
-                'h1',
-                'h2',
-                'h3',
-                'h4',
-                'pre',
-                'table',
-                'blockquote',
-                'tr',
-                'img',
-            ],
-        },
-    };
+    });
 
-    await html2pdf().from(element).set(opt).save();
+    const pdf = new jsPDF({
+        unit: 'mm',
+        format: [widthMm, minHeightMm],
+        orientation: config.orientation,
+        compress: true,
+    });
+
+    const pxFullHeight = canvas.height;
+    const pxPageHeight = Math.floor(canvas.width * (minHeightMm / widthMm));
+    const nPages = Math.max(1, Math.ceil(pxFullHeight / pxPageHeight));
+
+    for (let page = 0; page < nPages; page++) {
+        const sourceY = page * pxPageHeight;
+        const currentSliceHeight = Math.min(
+            pxPageHeight,
+            pxFullHeight - sourceY,
+        );
+
+        if (currentSliceHeight <= 0) {
+            break;
+        }
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = currentSliceHeight;
+
+        const pageCtx = pageCanvas.getContext('2d');
+        if (pageCtx) {
+            pageCtx.fillStyle = '#ffffff';
+            pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            pageCtx.drawImage(
+                canvas,
+                0,
+                sourceY,
+                canvas.width,
+                currentSliceHeight,
+                0,
+                0,
+                canvas.width,
+                currentSliceHeight,
+            );
+        }
+
+        const sliceHeightMm = (currentSliceHeight / pxPageHeight) * minHeightMm;
+        const imgData = pageCanvas.toDataURL('image/jpeg', 0.98);
+
+        if (page > 0) {
+            pdf.addPage([widthMm, minHeightMm], config.orientation);
+        }
+
+        pdf.addImage(
+            imgData,
+            'JPEG',
+            0,
+            0,
+            widthMm,
+            sliceHeightMm,
+            undefined,
+            'FAST',
+        );
+    }
+
+    pdf.save(cleanFilename);
 }
 
 export function printDocument(

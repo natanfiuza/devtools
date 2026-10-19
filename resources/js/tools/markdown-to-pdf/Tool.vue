@@ -519,6 +519,27 @@ function handlePrint(): void {
 /* Estilos fundamentais do documento renderizado */
 .markdown-pdf-document {
     box-sizing: border-box;
+    background-color: #ffffff;
+}
+
+.markdown-pdf-document.theme-modern {
+    color: #1e293b;
+    background-color: #ffffff;
+}
+
+.markdown-pdf-document.theme-editorial {
+    color: #1c1917;
+    background-color: #ffffff;
+}
+
+.markdown-pdf-document.theme-minimal {
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.markdown-pdf-document.theme-academic {
+    color: #171717;
+    background-color: #ffffff;
 }
 
 .markdown-pdf-document p {
