@@ -71,6 +71,8 @@ const traducoes = {
         },
         social: {
             continue_with: 'COM {provider}',
+            login_with: 'ENTRAR COM {provider}',
+            register_with: 'CADASTRAR COM {provider}',
             divider: 'DIVISOR',
             providers: { google: 'GOOGLE', github: 'GITHUB' },
         },
@@ -186,10 +188,10 @@ describe('login social', () => {
         const wrapper = montarLogin();
 
         expect(wrapper.get('[data-test="social-google"]').text()).toBe(
-            'COM GOOGLE',
+            'ENTRAR COM GOOGLE',
         );
         expect(wrapper.get('[data-test="social-github"]').text()).toBe(
-            'COM GITHUB',
+            'ENTRAR COM GITHUB',
         );
     });
 

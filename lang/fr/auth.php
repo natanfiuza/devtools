@@ -24,6 +24,8 @@ return [
             'github' => 'GitHub',
         ],
         'continue_with' => 'Continuer avec {provider}',
+        'login_with' => 'Se connecter avec {provider}',
+        'register_with' => 'Créer un compte avec {provider}',
         'unavailable' => 'La connexion avec :provider n’est pas encore disponible.',
         'failed' => 'Nous n’avons pas pu terminer la connexion avec :provider. Réessayez.',
         'email_missing' => ':provider n’a pas partagé d’adresse e-mail. Créez plutôt un compte avec e-mail et mot de passe.',
