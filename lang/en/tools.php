@@ -303,4 +303,71 @@ return [
         ],
     ],
 
+    'markdown-to-pdf' => [
+        'name' => 'Markdown to PDF',
+        'description' => 'Convert Markdown to styled PDF documents with real-time preview, custom page formats, fonts and themes.',
+        'keywords' => 'markdown, pdf, converter, document, export, gfm, print',
+        'intro' => 'Paste or open Markdown to preview formatted documents in real time. Customise page sizes, fonts and themes, then download your PDF or print with vector precision. Everything runs in your browser: nothing you paste here is sent to the server.',
+
+        'download_name' => 'document',
+        'file_types' => 'MD or TXT',
+
+        'controls' => [
+            'format' => 'Format',
+            'orientation' => 'Orientation',
+            'margin' => 'Margin',
+            'font' => 'Font',
+            'font_size' => 'Size',
+            'theme' => 'Theme',
+        ],
+
+        'formats' => [
+            'a4' => 'A4',
+            'letter' => 'Letter',
+            'a5' => 'A5',
+        ],
+
+        'orientations' => [
+            'portrait' => 'Portrait',
+            'landscape' => 'Landscape',
+        ],
+
+        'margins' => [
+            'normal' => 'Normal (20mm)',
+            'compact' => 'Compact (10mm)',
+            'wide' => 'Wide (30mm)',
+        ],
+
+        'fonts' => [
+            'sans' => 'Sans-serif',
+            'serif' => 'Serif',
+            'mono' => 'Monospace',
+            'fira-code' => 'Fira Code',
+        ],
+
+        'font_sizes' => [
+            'sm' => 'Small',
+            'md' => 'Medium',
+            'lg' => 'Large',
+        ],
+
+        'themes' => [
+            'modern' => 'Modern',
+            'editorial' => 'Editorial',
+            'minimal' => 'Minimalist B&W',
+            'academic' => 'Academic',
+        ],
+
+        'actions' => [
+            'download_pdf' => 'Download PDF',
+            'print' => 'Print / Save as PDF',
+            'generating' => 'Generating...',
+        ],
+
+        'stats' => [
+            'words' => 'Words: {count}',
+            'chars' => 'Characters: {count}',
+        ],
+    ],
+
 ];

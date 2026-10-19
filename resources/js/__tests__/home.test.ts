@@ -4,7 +4,7 @@ import { defineComponent, h } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Home from '@/pages/Home.vue';
 import Pricing from '@/pages/Pricing.vue';
-import { allTools } from '@/tools/registry';
+import { allTools, availableTools } from '@/tools/registry';
 import type { PublicPlan } from '@/types';
 
 /**
@@ -235,10 +235,10 @@ describe('hero e destaque', () => {
 });
 
 describe('grid de ferramentas', () => {
-    it('mostra as oito tools do registro, na ordem de exibicao', () => {
+    it('mostra as tools do registro, na ordem de exibicao', () => {
         const wrapper = montar();
 
-        expect(cartoes(wrapper)).toHaveLength(8);
+        expect(cartoes(wrapper)).toHaveLength(allTools.length);
         expect(
             cartoes(wrapper).map((card) =>
                 card.attributes('data-test')?.replace('tool-card-', ''),
@@ -247,9 +247,8 @@ describe('grid de ferramentas', () => {
     });
 
     /*
-    | F3: sete tools funcionam, entao sete cards viram link para a propria pagina
-    | (a F2 entregou a primeira, a F3 as seis simples). O selo "em breve" fica so
-    | com o AI SQL Builder - e card que nao funciona nao linka, senao seria um
+    | F3: tools que funcionam viram link para a propria pagina. O selo "em breve"
+    | fica so com o AI SQL Builder - e card que nao funciona nao linka, senao seria um
     | link morto no indice (ADR-007).
     */
     it('linka o card inteiro das tools que funcionam e deixa a outra com o selo', () => {
@@ -263,7 +262,7 @@ describe('grid de ferramentas', () => {
 
         const links = wrapper.get('[data-test="tool-grid"]').findAll('a');
 
-        expect(links).toHaveLength(7);
+        expect(links).toHaveLength(availableTools.length);
 
         // O primeiro do grid e o JSON Viewer, a primeira da ordem de exibicao,
         // com stretched link (`after:inset-0`) cobrindo o card todo.
@@ -334,7 +333,7 @@ describe('filtro por categoria', () => {
 
         await wrapper.get('[data-test="tool-chip-all"]').trigger('click');
 
-        expect(cartoes(wrapper)).toHaveLength(8);
+        expect(cartoes(wrapper)).toHaveLength(allTools.length);
     });
 });
 

@@ -303,4 +303,71 @@ return [
         ],
     ],
 
+    'markdown-to-pdf' => [
+        'name' => 'Markdown to PDF',
+        'description' => 'Convierte Markdown en documentos PDF estilizados con vista previa en tiempo real, formatos de página, fuentes y temas.',
+        'keywords' => 'markdown, pdf, convertidor, documento, exportar, gfm, imprimir',
+        'intro' => 'Pega o abre Markdown para previsualizar el documento formateado en tiempo real. Personaliza tamaños de página, fuentes y temas, y luego descarga tu PDF o imprime con precisión vectorial. Todo funciona en tu navegador: nada de lo que pegues aquí se envía al servidor.',
+
+        'download_name' => 'documento',
+        'file_types' => 'MD o TXT',
+
+        'controls' => [
+            'format' => 'Formato',
+            'orientation' => 'Orientación',
+            'margin' => 'Margen',
+            'font' => 'Fuente',
+            'font_size' => 'Tamaño',
+            'theme' => 'Tema',
+        ],
+
+        'formats' => [
+            'a4' => 'A4',
+            'letter' => 'Carta',
+            'a5' => 'A5',
+        ],
+
+        'orientations' => [
+            'portrait' => 'Vertical',
+            'landscape' => 'Horizontal',
+        ],
+
+        'margins' => [
+            'normal' => 'Normal (20mm)',
+            'compact' => 'Compacto (10mm)',
+            'wide' => 'Ancho (30mm)',
+        ],
+
+        'fonts' => [
+            'sans' => 'Sans-serif',
+            'serif' => 'Serif',
+            'mono' => 'Monospace',
+            'fira-code' => 'Fira Code',
+        ],
+
+        'font_sizes' => [
+            'sm' => 'Pequeño',
+            'md' => 'Mediano',
+            'lg' => 'Grande',
+        ],
+
+        'themes' => [
+            'modern' => 'Moderno',
+            'editorial' => 'Editorial',
+            'minimal' => 'Minimalista B&N',
+            'academic' => 'Académico',
+        ],
+
+        'actions' => [
+            'download_pdf' => 'Descargar PDF',
+            'print' => 'Imprimir / Guardar como PDF',
+            'generating' => 'Generando...',
+        ],
+
+        'stats' => [
+            'words' => 'Palabras: {count}',
+            'chars' => 'Caracteres: {count}',
+        ],
+    ],
+
 ];

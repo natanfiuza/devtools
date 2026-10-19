@@ -22,6 +22,7 @@ function mvpToolSlugs(): array
         'jwt-decoder',
         'timestamp-uuid',
         'regex-tester',
+        'markdown-to-pdf',
     ];
 }
 
@@ -91,6 +92,7 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'jwt-decoder',
         'timestamp-uuid',
         'regex-tester',
+        'markdown-to-pdf',
     ]);
 });
 

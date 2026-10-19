@@ -303,4 +303,71 @@ return [
         ],
     ],
 
+    'markdown-to-pdf' => [
+        'name' => 'Markdown to PDF',
+        'description' => 'Convertissez Markdown en documents PDF stylisés avec aperçu en temps réel, formats de page, polices et thèmes.',
+        'keywords' => 'markdown, pdf, convertisseur, document, exporter, gfm, imprimer',
+        'intro' => 'Collez ou ouvrez du Markdown pour prévisualiser le document formaté en temps réel. Personnalisez les formats de page, les polices et les thèmes, puis téléchargez votre PDF ou imprimez avec une précision vectorielle. Tout fonctionne dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'download_name' => 'document',
+        'file_types' => 'MD ou TXT',
+
+        'controls' => [
+            'format' => 'Format',
+            'orientation' => 'Orientation',
+            'margin' => 'Marge',
+            'font' => 'Police',
+            'font_size' => 'Taille',
+            'theme' => 'Thème',
+        ],
+
+        'formats' => [
+            'a4' => 'A4',
+            'letter' => 'Lettre',
+            'a5' => 'A5',
+        ],
+
+        'orientations' => [
+            'portrait' => 'Portrait',
+            'landscape' => 'Paysage',
+        ],
+
+        'margins' => [
+            'normal' => 'Normale (20mm)',
+            'compact' => 'Compacte (10mm)',
+            'wide' => 'Large (30mm)',
+        ],
+
+        'fonts' => [
+            'sans' => 'Sans-serif',
+            'serif' => 'Serif',
+            'mono' => 'Monospace',
+            'fira-code' => 'Fira Code',
+        ],
+
+        'font_sizes' => [
+            'sm' => 'Petite',
+            'md' => 'Moyenne',
+            'lg' => 'Grande',
+        ],
+
+        'themes' => [
+            'modern' => 'Moderne',
+            'editorial' => 'Éditorial',
+            'minimal' => 'Minimaliste N&B',
+            'academic' => 'Académique',
+        ],
+
+        'actions' => [
+            'download_pdf' => 'Télécharger le PDF',
+            'print' => 'Imprimer / Enregistrer en PDF',
+            'generating' => 'Génération...',
+        ],
+
+        'stats' => [
+            'words' => 'Mots : {count}',
+            'chars' => 'Caractères : {count}',
+        ],
+    ],
+
 ];

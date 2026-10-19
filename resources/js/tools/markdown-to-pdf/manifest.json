@@ -1,0 +1,17 @@
+{
+    "slug": "markdown-to-pdf",
+    "status": "available",
+    "category": "text",
+    "icon": "file-text",
+    "order": 90,
+    "keywords": [
+        "markdown",
+        "pdf",
+        "converter",
+        "document",
+        "export",
+        "md",
+        "gfm",
+        "print"
+    ]
+}
