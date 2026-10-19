@@ -29,6 +29,7 @@ const MVP = [
     'jwt-decoder',
     'timestamp-uuid',
     'regex-tester',
+    'markdown-to-pdf',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */
@@ -43,11 +44,11 @@ function toolAt(index: number): ToolManifest {
 }
 
 describe('registro', () => {
-    it('le as 8 tools do MVP na ordem de exibicao', () => {
+    it('le as tools registradas na ordem de exibicao', () => {
         expect(allTools.map((tool) => tool.slug)).toEqual(MVP);
     });
 
-    it('deixa sete tools funcionando, e so o AI SQL Builder no ciclo "soon"', () => {
+    it('deixa as tools disponiveis funcionando, e so o AI SQL Builder no ciclo "soon"', () => {
         // F2 entregou a primeira (o JSON Viewer); a F3 virou as seis simples de
         // uma vez. O AI SQL Builder depende de servidor: segue com selo e sem
         // link.
@@ -59,6 +60,7 @@ describe('registro', () => {
             'jwt-decoder',
             'timestamp-uuid',
             'regex-tester',
+            'markdown-to-pdf',
         ]);
         expect(allTools.filter((tool) => tool.status === 'soon')).toHaveLength(
             1,
