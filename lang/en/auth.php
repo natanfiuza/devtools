@@ -24,6 +24,8 @@ return [
             'github' => 'GitHub',
         ],
         'continue_with' => 'Continue with {provider}',
+        'login_with' => 'Sign in with {provider}',
+        'register_with' => 'Sign up with {provider}',
         'unavailable' => 'Sign in with :provider is not available yet.',
         'failed' => 'We could not complete the sign in with :provider. Please try again.',
         'email_missing' => ':provider did not share an email address. Create an account with email and password instead.',

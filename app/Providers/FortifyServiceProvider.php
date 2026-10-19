@@ -73,7 +73,8 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        Fortify::registerView(fn () => Inertia::render('auth/Register', [
+        Fortify::registerView(fn (Request $request) => Inertia::render('auth/Register', [
+            'status' => $request->session()->get('status'),
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]));
 

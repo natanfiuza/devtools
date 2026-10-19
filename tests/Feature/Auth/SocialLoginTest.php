@@ -170,3 +170,27 @@ it('volta ao login quando o provedor recusa a autorizacao', function () {
 
     $this->assertGuest();
 });
+
+it('volta ao cadastro com aviso quando iniciado pelo cadastro e o provedor nao esta configurado', function () {
+    config()->set('services.google.client_id', null);
+    config()->set('services.google.client_secret', null);
+
+    $this->get(route('auth.redirect', ['provider' => 'google', 'from' => 'register']))
+        ->assertRedirect(route('register'))
+        ->assertSessionHas('status', trans('auth.social.unavailable', [
+            'provider' => SocialProviders::label('google'),
+        ]));
+});
+
+it('volta ao cadastro quando o provedor recusa a autorizacao originada no cadastro', function () {
+    fakeProvider('google', fn () => throw new InvalidArgumentException('acesso negado'));
+
+    $this->withSession(['auth.social.from' => 'register'])
+        ->get(callbackUrl('google'))
+        ->assertRedirect(route('register'))
+        ->assertSessionHas('status', trans('auth.social.failed', [
+            'provider' => SocialProviders::label('google'),
+        ]));
+
+    $this->assertGuest();
+});

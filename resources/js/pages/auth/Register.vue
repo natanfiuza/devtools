@@ -27,6 +27,7 @@ const routes = useRoutes();
 const page = usePage();
 
 defineProps<{
+    status?: string;
     passwordRules: string;
 }>();
 
@@ -47,7 +48,16 @@ const locales = computed<Locale[]>(() => page.props.locales ?? []);
         :title="t('auth.register.title')"
         :description="t('auth.register.description')"
     >
-        <SocialAuthButtons />
+        <p
+            v-if="status"
+            class="mb-5 rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm"
+            role="status"
+            aria-live="polite"
+        >
+            {{ status }}
+        </p>
+
+        <SocialAuthButtons action="register" />
 
         <div class="my-5 flex items-center gap-3">
             <span class="h-px flex-1 bg-border" aria-hidden="true" />

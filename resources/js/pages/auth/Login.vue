@@ -38,7 +38,7 @@ defineProps<{
             {{ status }}
         </p>
 
-        <SocialAuthButtons />
+        <SocialAuthButtons action="login" />
 
         <div class="my-5 flex items-center gap-3">
             <span class="h-px flex-1 bg-border" aria-hidden="true" />

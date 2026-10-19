@@ -23,8 +23,11 @@ class SocialAuthController extends Controller
     /**
      * Manda o visitante para o provedor.
      */
-    public function redirect(string $provider): RedirectResponse
+    public function redirect(Request $request, string $provider): RedirectResponse
     {
+        $from = $request->query('from') === 'register' ? 'register' : 'login';
+        $request->session()->put('auth.social.from', $from);
+
         if (! SocialProviders::isConfigured($provider)) {
             return $this->backWithStatus('auth.social.unavailable', $provider);
         }
@@ -125,13 +128,15 @@ class SocialAuthController extends Controller
     }
 
     /**
-     * Volta para o login com um aviso no idioma do visitante (a sessao guarda
-     * o idioma resolvido na ida ao provedor).
+     * Volta para a tela de origem (cadastro ou login) com um aviso no idioma do
+     * visitante (a sessao guarda o idioma e a origem resolvida na ida ao provedor).
      */
     private function backWithStatus(string $key, string $provider): RedirectResponse
     {
+        $targetRoute = session('auth.social.from') === 'register' ? 'register' : 'login';
+
         return redirect()
-            ->route('login')
+            ->route($targetRoute)
             ->with('status', trans($key, ['provider' => SocialProviders::label($provider)]));
     }
 }
