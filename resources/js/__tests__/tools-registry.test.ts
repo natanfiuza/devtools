@@ -48,22 +48,14 @@ describe('registro', () => {
         expect(allTools.map((tool) => tool.slug)).toEqual(MVP);
     });
 
-    it('deixa as tools disponiveis funcionando, e so o AI SQL Builder no ciclo "soon"', () => {
+    it('entrega as nove tools do MVP como disponiveis', () => {
         // F2 entregou a primeira (o JSON Viewer); a F3 virou as seis simples de
-        // uma vez. O AI SQL Builder depende de servidor: segue com selo e sem
+        // uma vez. O AI SQL Builder, a ultima que dependia de servidor, entrou
+        // na F5: o catalogo inteiro fica `available`, sem selo e sem card sem
         // link.
-        expect(availableTools.map((tool) => tool.slug)).toEqual([
-            'json-viewer',
-            'json-to-code',
-            'sql-formatter',
-            'base64-url-hash',
-            'jwt-decoder',
-            'timestamp-uuid',
-            'regex-tester',
-            'markdown-to-pdf',
-        ]);
+        expect(availableTools.map((tool) => tool.slug)).toEqual(MVP);
         expect(allTools.filter((tool) => tool.status === 'soon')).toHaveLength(
-            1,
+            0,
         );
     });
 
@@ -99,9 +91,12 @@ describe('registro', () => {
 
     it('so devolve caminho para tool que funciona', () => {
         // O caminho e o mesmo do card: quem funciona vira link, quem nao
-        // funciona fica sem - e o slug e o da rota.
+        // funciona fica sem - e o slug e o da rota. Com o catalogo inteiro
+        // disponivel, o `null` e cobrado no registro de mentira da busca.
         expect(toolPath(toolAt(0), 'pt-br')).toBe('/pt-br/tools/json-viewer');
-        expect(toolPath(toolAt(1), 'pt-br')).toBeNull();
+        expect(toolPath(toolAt(1), 'pt-br')).toBe(
+            '/pt-br/tools/ai-sql-builder',
+        );
 
         for (const tool of allTools) {
             expect(toolPath(tool, 'en'), tool.slug).toBe(
@@ -154,7 +149,9 @@ describe('registro', () => {
         expect(toolKeys.keywords(tool)).toBe(`tools.${tool.slug}.keywords`);
         // O selo segue o status: a tool que funciona nao mostra "em breve".
         expect(statusKey(tool)).toBe('tools.status.available');
-        expect(statusKey(toolAt(1))).toBe('tools.status.soon');
+        expect(statusKey({ ...toolAt(1), status: 'soon' })).toBe(
+            'tools.status.soon',
+        );
     });
 });
 

@@ -79,13 +79,14 @@ it('nao repete slug nem ordem de exibicao', function () {
 });
 
 /*
-| F3: as seis tools simples viram `available` de uma vez. O selo "em breve" fica
-| so com o AI SQL Builder, que depende de servidor, e o sitemap - que lista so o
-| que funciona - passa a ter as sete paginas.
+| F3 virou as seis tools simples `available`; a F5 fechou o AI SQL Builder, a
+| ultima que dependia de servidor. O sitemap - que lista so o que funciona -
+| passa a ter as nove paginas do MVP.
 */
 it('lista para o sitemap apenas as tools que funcionam', function () {
     expect(array_column(Tools::available(), 'slug'))->toBe([
         'json-viewer',
+        'ai-sql-builder',
         'json-to-code',
         'sql-formatter',
         'base64-url-hash',

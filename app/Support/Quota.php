@@ -90,6 +90,34 @@ final class Quota
     }
 
     /**
+     * Representacao da cota para a API e para as props da tool. As datas saem
+     * em ISO 8601; a traducao do periodo e da tela.
+     *
+     * @return array{
+     *     unit: string,
+     *     limit: int,
+     *     used: int,
+     *     remaining: int,
+     *     exhausted: bool,
+     *     window: array{start: string|null, end: string|null}
+     * }
+     */
+    public function toArray(): array
+    {
+        return [
+            'unit' => $this->unit(),
+            'limit' => $this->limit(),
+            'used' => $this->used(),
+            'remaining' => $this->remaining(),
+            'exhausted' => $this->exhausted(),
+            'window' => [
+                'start' => $this->windowStart()?->toIso8601String(),
+                'end' => $this->windowEnd()?->toIso8601String(),
+            ],
+        ];
+    }
+
+    /**
      * Inicio da janela contada. Nulo no Free: o limite dele e vitalicio.
      *
      * A interface (e nao uma classe) porque a data do cast e a do `Date::use`

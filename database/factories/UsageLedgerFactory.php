@@ -24,6 +24,7 @@ class UsageLedgerFactory extends Factory
         return [
             'user_id' => User::factory(),
             'ai_request_id' => null,
+            'ai_request_ulid' => null,
             'type' => LedgerEntryType::Debit,
             'tokens' => 1000,
             'uses' => 1,

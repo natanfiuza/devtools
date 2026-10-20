@@ -3,20 +3,28 @@
 - Registro de tools: lista central que alimenta home, busca e sitemap.
 - Schema / Fonte de schema (DDL, JSON, migration, SQLModel).
 - Dialeto: mysql, pgsql, sqlsrv, sqlite.
-- Output target: formato de saida cadastrado em output_targets.
+- Output target: formato de saida cadastrado em `output_targets` (slug, dialetos aceitos, prompt proprio, plano minimo e `enabled`); sao nove na carga inicial - `sql`, `laravel_query_builder`, `eloquent`, `sqlmodel`, `sqlalchemy`, `django_orm`, `prisma`, `drizzle` e `typeorm` -, e o alvo e parte do hash da solicitacao.
 - Linguagem de destino: a linguagem em que a tool JSON para codigo escreve o modelo de tipos - TypeScript, PHP (DTO) ou Pydantic; e escolha de tela, e nao formato cadastrado, por isso nao se confunde com o Output target, que e do AI SQL Builder.
 - Premissas: suposicoes do modelo mostradas ao usuario.
 - Provider LLM: implementacao de LlmProvider (DeepSeek).
 - Processamento local: roda no navegador.
-- Solicitacao de IA (ai_request): registro de um job.
-- AICache: cache de respostas, chave MD5 do payload canonico.
-- Prompt hash: MD5 do payload canonico + target + dialeto + modelo + versao do prompt.
+- Solicitacao de IA (ai_request): registro de um pedido ao provedor, com ULID como id, estado (`queued`, `processing`, `done`, `failed`), o par `prompt_hash`/`prompt_version` que o gerou, os tokens reais e a reserva feita (`quota_unit`, `reserved_tokens`, `reserved_uses`). O schema e a descricao ficam nela comprimidos so enquanto a solicitacao esta em voo; ao terminar, o payload e apagado.
+- Solicitacao em voo: solicitacao da mesma conta, com o mesmo `prompt_hash`, ainda em `queued` ou `processing` dentro de `AI_INFLIGHT_TTL_SECONDS` (600 s); um POST igual e deduplicado para ela, sem novo debito e sem novo job.
+- Reserva: debito imediato que abre a solicitacao - 1 uso no Free, a estimativa de tokens no plano pago - e que sera ajustado ou estornado na liquidacao. Nao ha coluna de saldo: a reserva e uma linha do ledger.
+- Liquidacao: fechamento da solicitacao com os tokens reais do provedor; no plano pago debita a diferenca se o real passou da reserva e estorna se ficou abaixo. E idempotente: uma solicitacao terminal nao e liquidada duas vezes.
+- Estorno: linha do ledger no sentido contrario ao debito, com a mesma unidade e o mesmo `created_at` da solicitacao; acontece na liquidacao abaixo da reserva, no cache hit dentro do job e em toda falha.
+- Cache hit: resposta servida do AICache sem chamar o provedor; chega como 200 imediato no POST ou como `cache_hit = true` no job, e **nunca** debita cota (no job, a reserva e estornada).
+- AICache: cache global de respostas, com chave no `prompt_hash` e TTL de 30 dias; guarda o payload canonico comprimido e a resposta validada, serve qualquer conta e nao e fonte de cobranca - `hits` e `last_hit_at` sao operacao.
+- Prompt hash: MD5 do payload canonico + target + dialeto + modelo + versao do prompt; e **chave de busca, nao prova de identidade** - no hit, o payload guardado e comparado inteiro com o pedido (ADR-016), e a linha que nao bater e ignorada.
+- Needs clarification: resposta do modelo que nao gera o alvo porque falta informacao (`needs_clarification = true`, `sql` vazio e `clarification` preenchida); e uma solicitacao `done` e consome a reserva, porque o trabalho foi feito.
+- Gate do SQL: verificacao lexical do SQL gerado para o alvo `sql` (ADR-041) - uma unica instrucao `SELECT`/`WITH`, sem DDL/DML, `;` interno ou funcoes perigosas; o SQL nunca e executado, e os alvos de ORM passam so pelo contrato.
+- Privacidade da IA: schema e descricao saem do navegador apenas nesta tool (ADR-002), vao ao provedor configurado, podem ficar no cache por ate 30 dias e **nunca** entram em log; a solicitacao apaga o payload ao terminar.
 - Cota: quanto a conta ainda pode consumir - usos vitalicios no Free, tokens da franquia nos planos pagos - sempre calculada do livro-razao, sem coluna de saldo.
 - Franquia de tokens: limite de tokens do plano pago dentro do periodo corrente da assinatura; e a unidade da Cota quando ha assinatura vigente.
 - Ledger de uso: livro-razao de debitos, estornos e concessoes; nao guarda saldo.
 - Plano: linha de `plans` com preco e limites (Free, Pro mensal, Pro anual); o admin edita pela tela de Planos e o codigo nunca fixa valores.
 - Consentimento: estado do banner de cookies.
-- Medicao: a categoria opcional do banner de consentimento - e o que liga o Google Analytics, que so carrega depois do aceite e nunca no painel administrativo. A frase que o banner mostra sobre ela e uma afirmacao factual: descreve os cookies que a medicao usa e o aceite que a libera (ADR-013, ADR-032).
+- Medicao: a categoria opcional do banner de consentimento - e o que liga o Google Analytics, que so carrega depois do aceite e nunca no painel administrativo. A frase que o banner mostra sobre ela e uma afirmacao factual: descreve os cookies que a medicao usa e o aceite que a libera (ADR-013, ADR-032, ADR-038).
 - Worker: processo queue:work sob Supervisor.
 - Tema (aparicao): claro, escuro ou sistema; resolvido no servidor para a pagina nao piscar.
 - Codigo de idioma x slug de idioma: `pt_BR` e o diretorio em lang/; `pt-br` e a URL e o cookie.

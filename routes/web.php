@@ -3,6 +3,7 @@
 use App\Http\Controllers\Account\BillingController;
 use App\Http\Controllers\Account\HistoryController;
 use App\Http\Controllers\Account\OverviewController;
+use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
@@ -49,6 +50,23 @@ Route::prefix('{locale}')
 // vence a rota, no nginx e no `artisan serve`.
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
+
+// API do AI SQL Builder (ADR-042). Fica fora do prefixo de idioma porque o
+// cliente manda `Accept: application/json` e o idioma nao muda o recurso. Usa
+// a sessao e o CSRF do grupo `web`; nao ha token de API nesta fase.
+Route::prefix('api/ai')
+    ->name('api.ai.')
+    ->middleware(['auth', 'verified', 'active'])
+    ->group(function (): void {
+        Route::post('queries', [AiQueryController::class, 'store'])
+            ->middleware('throttle:ai-post')
+            ->name('queries.store');
+
+        Route::get('queries/{aiRequest}', [AiQueryController::class, 'show'])
+            ->whereUlid('aiRequest')
+            ->middleware('throttle:ai-poll')
+            ->name('queries.show');
+    });
 
 // Foto de perfil publica servida por UUID direto de storage/app/data/user_profile_image:
 Route::get('users/profile/photo/{uuid}', [ProfilePhotoController::class, 'show'])

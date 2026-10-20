@@ -115,6 +115,7 @@ return [
         'name' => 'AI SQL Builder',
         'description' => 'Descreva a consulta em linguagem natural e receba o SQL pronto para o seu dialeto.',
         'keywords' => 'linguagem natural, gerar consulta, banco de dados',
+        'intro' => 'Descreva a consulta, cole o schema e escolha a saída: SQL, Eloquent, Prisma e mais. Esta é a única ferramenta que sai do navegador: o schema e a descrição vão para o provedor de IA e consomem a cota do plano. O SQL gerado nunca é executado aqui.',
     ],
 
     'json-to-code' => [

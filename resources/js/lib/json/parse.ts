@@ -3,7 +3,12 @@ import {
     lineColumnFromMessage,
     positionFromMessage,
 } from '@/lib/position';
+import { byteLength } from '@/lib/bytes';
 import type { JsonValue } from './types';
+
+// O contador nasceu aqui e hoje mora em `lib/bytes` (o AI SQL Builder tambem o
+// usa). O reexport mantem os caminhos antigos funcionando.
+export { byteLength } from '@/lib/bytes';
 
 /**
  * Validacao do JSON com **linha e coluna**.
@@ -55,10 +60,6 @@ const BOM_CODE_POINT = 0xfeff;
 /** `true` quando o texto comeca com a marca de ordem de bytes. */
 export function hasBom(text: string): boolean {
     return text.length > 0 && text.charCodeAt(0) === BOM_CODE_POINT;
-}
-
-export function byteLength(text: string): number {
-    return new TextEncoder().encode(text).length;
 }
 
 /**

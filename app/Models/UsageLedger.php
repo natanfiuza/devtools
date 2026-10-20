@@ -17,13 +17,14 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $user_id
  * @property int|null $ai_request_id
+ * @property string|null $ai_request_ulid
  * @property LedgerEntryType $type
  * @property int $tokens
  * @property int $uses
  * @property Carbon|null $created_at
  * @property-read User $user
  */
-#[Fillable(['user_id', 'ai_request_id', 'type', 'tokens', 'uses'])]
+#[Fillable(['user_id', 'ai_request_id', 'ai_request_ulid', 'type', 'tokens', 'uses'])]
 class UsageLedger extends Model
 {
     /** @use HasFactory<UsageLedgerFactory> */

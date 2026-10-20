@@ -13,23 +13,23 @@ return [
 
     'privacy' => [
         'title' => 'Política de Privacidade',
-        'intro' => 'Esta página explica quais dados o {app} guarda, por quê e por quanto tempo. Resumindo: as ferramentas rodam no seu navegador e só guardamos o que a conta precisa.',
+        'intro' => 'Esta página explica quais dados o {app} guarda, por quê e por quanto tempo. A maioria das ferramentas roda no seu navegador; o AI SQL Builder é a exceção e envia o schema e a descrição que você fornece para um provedor de IA.',
         'sections' => [
             'data' => [
                 'title' => 'O que guardamos',
-                'body' => 'O mínimo para uma conta: nome, e-mail, senha (como hash) e o idioma que você usa. Se você entra com Google ou GitHub, guardamos o id da conta no provedor e o seu e-mail — nunca a sua senha lá. Se você assina a newsletter, guardamos o e-mail e o idioma da inscrição.',
+                'body' => 'O mínimo para uma conta: nome, e-mail, senha (como hash) e o idioma que você usa. Se você entra com Google ou GitHub, guardamos o id da conta no provedor e o seu e-mail — nunca a sua senha lá. Se você assina a newsletter, guardamos o e-mail e o idioma da inscrição. Quando você usa o AI SQL Builder, guardamos os metadados da solicitação, o resultado gerado e, por até 30 dias, uma cópia comprimida do schema e da descrição para reaproveitar pedidos idênticos.',
             ],
             'purpose' => [
                 'title' => 'Para que usamos',
-                'body' => 'Para manter sua conta funcionando, enviar os e-mails que você pediu (redefinição de senha, confirmação de e-mail, newsletter) e proteger o site contra abuso.',
+                'body' => 'Para manter sua conta funcionando, enviar os e-mails que você pediu (redefinição de senha, confirmação de e-mail, newsletter), gerar os resultados de IA que você pede e proteger o site contra abuso.',
             ],
             'browser' => [
-                'title' => 'As ferramentas rodam no seu navegador',
-                'body' => 'O que você cola em uma ferramenta é processado no seu navegador e não é enviado para os nossos servidores. Os dados de conta acima são a única coisa que guardamos.',
+                'title' => 'Onde seus dados são processados',
+                'body' => 'As ferramentas do cliente rodam no seu navegador: o que você cola nelas é processado na sua máquina e não é enviado para os nossos servidores. O AI SQL Builder é a exceção: o schema e a descrição que você envia vão para o nosso provedor de IA (atualmente DeepSeek) para o modelo gerar o resultado. Não enviamos os dados da sua conta ao provedor, e o SQL gerado nunca é executado nos nossos servidores.',
             ],
             'sharing' => [
                 'title' => 'Com quem compartilhamos',
-                'body' => 'Não vendemos nem alugamos seus dados. Compartilhamos apenas com quem faz o site funcionar: hospedagem e envio de e-mails, além do Google ou GitHub quando você escolhe entrar com eles. Se você aceitar a medição, as páginas vistas também vão para o Google Analytics.',
+                'body' => 'Não vendemos nem alugamos seus dados. Compartilhamos apenas com quem faz o site funcionar: hospedagem e envio de e-mails, o provedor de IA usado pelo AI SQL Builder (atualmente DeepSeek), além do Google ou GitHub quando você escolhe entrar com eles. Se você aceitar a medição, as páginas vistas também vão para o Google Analytics.',
             ],
             'cookies' => [
                 'title' => 'Cookies',
@@ -37,7 +37,7 @@ return [
             ],
             'retention' => [
                 'title' => 'Por quanto tempo',
-                'body' => 'Os dados da conta ficam enquanto a conta existir e vão embora quando você exclui a conta. Os dados da newsletter ficam até você se descadastrar.',
+                'body' => 'Os dados da conta ficam enquanto a conta existir e vão embora quando você exclui a conta. Os dados da newsletter ficam até você se descadastrar. Os pedidos de IA e seus resultados ficam guardados para a ferramenta mostrar o andamento da solicitação; a cópia comprimida do schema e da descrição fica no cache por até 30 dias.',
             ],
             'rights' => [
                 'title' => 'Seus direitos',
@@ -60,7 +60,7 @@ return [
         'sections' => [
             'service' => [
                 'title' => 'O que é o serviço',
-                'body' => 'O {app} é um conjunto de ferramentas de desenvolvimento que rodam no seu navegador, oferecido como está e de graça, para uso pessoal ou profissional.',
+                'body' => 'O {app} é um conjunto de ferramentas de desenvolvimento. A maioria roda no seu navegador e é oferecida como está e de graça, para uso pessoal ou profissional; o AI SQL Builder usa um provedor de IA e a cota do plano. Os resultados gerados são apoio: a decisão final é sua.',
             ],
             'account' => [
                 'title' => 'Sua conta',
@@ -72,7 +72,7 @@ return [
             ],
             'content' => [
                 'title' => 'Conteúdo',
-                'body' => 'O que você cola nas ferramentas continua seu. O site, a marca e o código continuam nossos.',
+                'body' => 'O que você cola nas ferramentas continua seu. Ao usar o AI SQL Builder, você autoriza o envio do schema e da descrição ao provedor de IA para gerar o resultado. O site, a marca e o código continuam nossos.',
             ],
             'availability' => [
                 'title' => 'Disponibilidade',

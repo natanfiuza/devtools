@@ -13,23 +13,23 @@ return [
 
     'privacy' => [
         'title' => 'Privacy Policy',
-        'intro' => 'This page explains which data {app} keeps, why and for how long. In short: the tools run in your browser and we only keep what the account needs.',
+        'intro' => 'This page explains which data {app} keeps, why and for how long. Most tools run in your browser; the AI SQL Builder is the exception and sends the schema and description you provide to an AI provider.',
         'sections' => [
             'data' => [
                 'title' => 'What we keep',
-                'body' => 'The minimum for an account: name, email, password (as a hash) and the language you use. If you sign in with Google or GitHub, we keep the provider account id and your email — never your password there. If you subscribe to the newsletter, we keep your email and the language of the subscription.',
+                'body' => 'The minimum for an account: name, email, password (as a hash) and the language you use. If you sign in with Google or GitHub, we keep the provider account id and your email — never your password there. If you subscribe to the newsletter, we keep your email and the language of the subscription. When you use the AI SQL Builder, we keep the request metadata, the generated result and, for up to 30 days, a compressed copy of the schema and description so identical requests can be reused.',
             ],
             'purpose' => [
                 'title' => 'What we use it for',
-                'body' => 'To keep your account working, to send the emails you asked for (password reset, email confirmation, newsletter) and to keep the site safe against abuse.',
+                'body' => 'To keep your account working, to send the emails you asked for (password reset, email confirmation, newsletter), to generate the AI results you request and to keep the site safe against abuse.',
             ],
             'browser' => [
-                'title' => 'The tools run in your browser',
-                'body' => 'What you paste into a tool is processed in your browser and is not sent to our servers. The account data above is the only thing we store.',
+                'title' => 'Where your data is processed',
+                'body' => 'The client tools run in your browser: what you paste into them is processed on your machine and is not sent to our servers. The AI SQL Builder is the exception: the schema and the description you submit go to our AI provider (currently DeepSeek) so the model can generate the result. We do not send your account data to the provider, and the generated SQL is never executed on our servers.',
             ],
             'sharing' => [
                 'title' => 'With whom we share',
-                'body' => 'We do not sell or rent your data. We share only with the providers that keep the site running: hosting and email delivery, plus Google or GitHub when you choose to sign in with them. If you accept measurement, page views also go to Google Analytics.',
+                'body' => 'We do not sell or rent your data. We share only with the providers that keep the site running: hosting and email delivery, the AI provider used by the AI SQL Builder (currently DeepSeek), plus Google or GitHub when you choose to sign in with them. If you accept measurement, page views also go to Google Analytics.',
             ],
             'cookies' => [
                 'title' => 'Cookies',
@@ -37,7 +37,7 @@ return [
             ],
             'retention' => [
                 'title' => 'How long we keep it',
-                'body' => 'Account data stays while the account exists and goes away when you delete the account. Newsletter data stays until you unsubscribe.',
+                'body' => 'Account data stays while the account exists and goes away when you delete the account. Newsletter data stays until you unsubscribe. AI requests and their results are kept so the tool can show the request status; the compressed copy of the schema and description stays in the cache for up to 30 days.',
             ],
             'rights' => [
                 'title' => 'Your rights',
@@ -60,7 +60,7 @@ return [
         'sections' => [
             'service' => [
                 'title' => 'What the service is',
-                'body' => '{app} is a set of development tools that run in your browser, offered as is and free of charge, for personal or professional use.',
+                'body' => '{app} is a set of development tools. Most of them run in your browser and are offered as is and free of charge, for personal or professional use; the AI SQL Builder uses an AI provider and the plan quota. Generated results are aids: the final call is yours.',
             ],
             'account' => [
                 'title' => 'Your account',
@@ -72,7 +72,7 @@ return [
             ],
             'content' => [
                 'title' => 'Content',
-                'body' => 'What you paste into the tools stays yours. The site, the brand and the code stay ours.',
+                'body' => 'What you paste into the tools stays yours. When you use the AI SQL Builder, you authorize us to send the schema and the description to the AI provider to generate the result. The site, the brand and the code stay ours.',
             ],
             'availability' => [
                 'title' => 'Availability',

@@ -60,7 +60,7 @@ Regex Tester como prop, do mesmo jeito que o teto de entrada ja e entregue.
 ## Fora do escopo da F3
 
 - **Qualquer coisa que precise do servidor**: as seis tools rodam no navegador;
-  upload, historico de uso e cota ficam para depois (F4/F7).
+  upload, historico de uso e cota ficam para depois (F5/F7).
 - **AI SQL Builder** (F5), gateway e doacao (F6), SEO final e hardening (F7).
 - HMAC no `base64-url-hash`, verificacao de assinatura no `jwt-decoder`
   (chave publica, JWKS ou HS256), e o `regex-tester` com `y` (sticky) ou

@@ -36,6 +36,9 @@ it('entrega a pagina da tool nos cinco idiomas', function () {
                 ->has('virtualizeFrom')
                 ->has('regexTimeoutMs')
                 ->has('regexMaxMatches')
+                // Tool de navegador nao declara pacote nenhum: a prop existe
+                // sempre, com objeto vazio (ADR-043).
+                ->where('toolProps', [])
             );
     }
 });
@@ -56,7 +59,8 @@ it('manda os limites que vem da configuracao', function () {
             ->where('maxInputBytes', 1234)
             ->where('virtualizeFrom', 77)
             ->where('regexTimeoutMs', 321)
-            ->where('regexMaxMatches', 12),
+            ->where('regexMaxMatches', 12)
+            ->where('toolProps', []),
     );
 });
 

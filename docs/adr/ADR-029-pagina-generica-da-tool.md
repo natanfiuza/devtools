@@ -142,3 +142,24 @@ corrigir aqui:
   o que e dela. O `json-viewer` passou a consumir os mesmos ajudantes **sem
   mudanca de comportamento** - o ADR nao prometia isso, e o custo entrou na
   fase: extrair mexeu em codigo ja commitado, e a suite do viewer foi a rede.
+
+## Emenda da F5 (2026-10-20)
+
+A F5 corrigiu a previsao do fim das consequencias - "o AI SQL Builder entra pela
+pagina propria dela" - e mudou o contrato de props da pagina:
+
+- **Nao houve pagina propria**: o AI SQL Builder abre na **mesma**
+  `/{locale}/tools/{slug}`, com a mesma rota, o mesmo 404 do servidor e o mesmo
+  glob lazy. O que muda e o **layout da tool**: ela nao usa o `ToolShell` de
+  entrada | saida, e sim formulario | resultado, por ser um pedido que volta
+  depois por polling (DESIGN, ADR-043). E a segunda excecao de layout, depois do
+  Regex Tester, e a primeira que e da **tela**, nao de um campo.
+- **Props sao tres**: `slug`, os **quatro** limites de `config/tools.php` (eram
+  um) e o pacote **`toolProps`** por tool (`App\Support\ToolProps`), vazio para
+  as tools de navegador (ADR-043). A pagina continua sem conhecer ferramenta
+  nenhuma; ela repassa o pacote com `v-bind`.
+- **O `ClientOnly` continua**: o formulario, o editor e o polling montam no
+  cliente; o SSR entrega cabecalho, metas e o pacote de props. Nada de
+  CodeMirror no processo do servidor.
+- **As oito tools antigas nao mudaram**: recebem `{}` em `toolProps` e seguem
+  com o mesmo shell e os mesmos testes.

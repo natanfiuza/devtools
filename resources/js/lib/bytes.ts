@@ -11,6 +11,17 @@
  * dizer "passou do limite de 5 MB", nao para medir.
  */
 
+/**
+ * Tamanho da string em bytes UTF-8.
+ *
+ * `TextEncoder` e a conta do proprio navegador: contar `length` daria uma
+ * unidade por code unit UTF-16, e "ção" e "😀" sao maiores que isso - o limite
+ * da tool e de bytes, como o `Content-Length` que o servidor recebe.
+ */
+export function byteLength(text: string): number {
+    return new TextEncoder().encode(text).length;
+}
+
 export const BYTE_UNITS = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
 
 export type ByteUnit = (typeof BYTE_UNITS)[number];

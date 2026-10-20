@@ -17,3 +17,8 @@ resources/views/mail
 .env.example
 *_plansfacts.md
 *_surveyfacts.md
+# Saida das ferramentas locais (gitpr): gerada, nao versionada como fonte.
+.gitpr
+# Prompts sao texto de entrada do modelo: as quebras de linha sao autorais.
+resources/prompts
+

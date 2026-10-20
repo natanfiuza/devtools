@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Support\ApiError;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,12 @@ class EnsureAccountIsActive
 
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
+            // O cliente da API precisa de um 403 com codigo, e nao do redirect
+            // de navegacao: quem chamou ja perdeu a sessao.
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return ApiError::response('account_suspended', __('auth.suspended'), 403);
+            }
 
             return redirect()
                 ->route('login')

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { Sparkles } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -8,7 +9,7 @@ import ToolGrid from '@/components/ToolGrid.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRoutes } from '@/composables/useRoutes';
-import { allTools } from '@/tools/registry';
+import { allTools, toolPath } from '@/tools/registry';
 
 /**
  * Home publica (DESIGN): hero com a busca, grid de ferramentas por categoria
@@ -23,6 +24,17 @@ const routes = useRoutes();
 
 /** O registro inteiro: a F1 nao tem filtro de visibilidade a fazer aqui. */
 const tools = allTools;
+
+/**
+ * O CTA do destaque leva a pagina da tool - visitante recebe o recado de login
+ * la. O caminho sai do registro, como nos cards: enquanto o manifest nao disser
+ * `available`, o destaque volta ao cadastro em vez de linkar para um 404.
+ */
+const aiTool = allTools.find((tool) => tool.slug === 'ai-sql-builder') ?? null;
+
+const aiHref = computed(() =>
+    aiTool === null ? null : toolPath(aiTool, routes.localeSlug.value),
+);
 </script>
 
 <template>
@@ -78,7 +90,12 @@ const tools = allTools;
                     </p>
 
                     <div class="mt-6 flex flex-wrap items-center gap-3">
-                        <Button as-child>
+                        <Button v-if="aiHref" as-child>
+                            <Link :href="aiHref" data-test="home-ai-cta">
+                                {{ t('home.ai.cta') }}
+                            </Link>
+                        </Button>
+                        <Button v-else as-child>
                             <Link :href="routes.register.value">
                                 {{ t('home.cta.register') }}
                             </Link>
@@ -91,8 +108,9 @@ const tools = allTools;
                     </div>
                 </div>
 
-                <!-- Preview estatico do que a tool faz: texto, nao uma demo -
-                     a ferramenta de verdade entra na F5. -->
+                <!-- Exemplo estatico do que a tool faz (o pedido e o SQL que
+                     ela devolve). A ferramenta de verdade vive em
+                     `/{locale}/tools/ai-sql-builder`. -->
                 <figure class="rounded-lg border bg-surface-2 p-4">
                     <p class="text-sm text-subtle">
                         {{ t('home.ai.preview_prompt') }}

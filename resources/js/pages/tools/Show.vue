@@ -40,6 +40,12 @@ const props = defineProps<{
     regexTimeoutMs: number;
     /** Quantos resultados o Regex Tester devolve antes de cortar. */
     regexMaxMatches: number;
+    /**
+     * O pacote que a tool da vez declara (ADR-043). Tools que rodam so no
+     * navegador recebem `{}`; o AI SQL Builder recebe estado, catalogo e
+     * limites. A pagina repassa sem interpretar.
+     */
+    toolProps?: Record<string, unknown>;
 }>();
 
 const { t } = useI18n();
@@ -122,6 +128,7 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
                     :virtualize-from="virtualizeFrom"
                     :regex-timeout-ms="regexTimeoutMs"
                     :regex-max-matches="regexMaxMatches"
+                    v-bind="toolProps"
                 />
                 <p v-else class="text-sm text-destructive">
                     {{ t('tools.ui.states.unavailable') }}

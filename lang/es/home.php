@@ -2,21 +2,22 @@
 
 return [
     'title' => 'Herramientas para desarrolladores que no estorban',
-    'subtitle' => 'Formatea, convierte e inspecciona datos en el navegador. Sin registro y sin enviar nada al servidor.',
+    'subtitle' => 'Formatea, convierte e inspecciona datos en el navegador. Sin registro para las herramientas locales.',
 
     'tools' => [
         'title' => 'Herramientas',
-        'subtitle' => 'Todo corre en tu navegador: lo que pegues aquí no sale de la máquina.',
+        'subtitle' => 'Las herramientas corren en tu navegador: lo que pegues aquí no sale de la máquina — excepto en AI SQL Builder, que envía el esquema y la descripción al proveedor de IA.',
         'filter' => 'Filtrar por categoría',
         'all' => 'Todas',
         'empty' => 'Todavía no hay herramientas en esta categoría.',
     ],
 
     'ai' => [
-        'badge' => 'Próximamente',
+        'badge' => 'Disponible',
         'title' => 'AI SQL Builder',
         'body' => 'Describe la consulta en lenguaje natural y recibe el SQL de tu base de datos, además de Eloquent, Prisma y el resto de tu stack.',
         'note' => 'Requiere cuenta verificada: la consulta pasa por el modelo y consume la cuota del plan.',
+        'cta' => 'Abrir AI SQL Builder',
         'preview_prompt' => 'Lista los 10 clientes que más compraron en los últimos 30 días',
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],

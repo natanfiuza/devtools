@@ -186,9 +186,10 @@ it('usa a versao de cache da config na URL do og:image', function () {
 });
 
 /*
-| Imagem por tool (F2, ampliada na F3): a pagina de uma ferramenta que funciona
-| mostra o card dela, e nao o padrao - e agora sao sete. Todas as imagens saem
-| do mesmo desenho, entao as metas de tamanho valem para todas.
+| Imagem por tool (F2, ampliada na F3 e fechada na F5): a pagina de uma
+| ferramenta que funciona mostra o card dela, e nao o padrao - e agora sao as
+| nove do MVP. Todas as imagens saem do mesmo desenho, entao as metas de tamanho
+| valem para todas.
 */
 
 it('usa a imagem da propria tool na pagina dela', function () {

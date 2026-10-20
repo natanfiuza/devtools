@@ -3,6 +3,78 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Fase 5: AI SQL Builder - 2026-10-20
+
+A nona tool abriu. E a unica que depende do servidor (ADR-002) e agora tem
+conta obrigatoria, cota, fila, provedor de IA, cache e polling. O SQL gerado
+continua **nunca** sendo executado.
+
+### Adicionado
+
+- Banco: `output_targets` (nove alvos com `supported_dialects`),
+  `ai_requests` (ULID, estado, reserva, payload comprimido, resposta),
+  `ai_cache` (hash unico, TTL) e `usage_ledger.ai_request_ulid`. Migrations
+  aditivas e retrocompativeis, com carga inicial por migration.
+- `app/Support/Ai/`: canonicalizador e `prompt_hash`, codec comprimido,
+  `PromptLoader`/`PromptBuilder` com prompt versionado por alvo, estimador de
+  tokens, `ContractValidator`, gate lexical `SqlGuard` (ADR-041), cache e
+  resultado.
+- `start`/`settle`/`fail` transacionais: reserva no POST, dedupe de 600 s,
+  cache hit sem debito, ajuste pelo `usage` real no pago e estorno integral em
+  toda falha (ADR-040).
+- `ProcessAiQuery` (so o ULID no job, `tries=2`, `timeout=90`, backoff),
+  `ai:prune-cache` e `ai:reconcile`, ambos com `--dry-run`.
+- API de sessao em `routes/web.php`: `POST /api/ai/queries` e
+  `GET /api/ai/queries/{ulid}`, com CSRF, throttles, envelope de erro e
+  `docs/API.md` (ADR-042).
+- Tela `/{locale}/tools/ai-sql-builder`: formulario | resultado, abas de fonte
+  e alvo, editor com realce, polling com backoff e timeout, copiar/baixar,
+  premissas/avisos/tabelas, selo de cache e estado de esclarecimento.
+- `toolProps` na pagina generica: o pacote da tool com disponibilidade,
+  motivo de bloqueio, cota, alvos, limites, polling e endpoints (ADR-043).
+- `docs/ARQUITETURA.md`, `docs/API.md`, ADRs 039 a 043 e aceite em
+  `docs/acceptance/FASE-5.md`.
+
+### Alterado
+
+- `docs/SPEC.md` secao 6: fluxo, gate, API, cache, fila, modelo de dados e
+  limites reais da F5; item 11.2 resolvido (gate lexical e cliente fino).
+- Manifesto: `ai-sql-builder` virou `available`; home, busca, sitemap, metas e
+  imagem OG refletem a nona tool (o PNG `public/og/ai-sql-builder.png` foi
+  gerado e entra comitado).
+- Privacidade: os cinco idiomas agora dizem que esta tool envia schema e
+  descricao ao provedor, que a resposta pode ficar em cache por 30 dias e que
+  o SQL nao e executado; data de atualizacao em `config/legal.php`.
+- `.env.example` e `config/ai.php`: todas as variaveis `AI_*` e
+  `DB_QUEUE_RETRY_AFTER=150` (a ordem provedor < job < worker < retry_after).
+- Home: o destaque do AI deixa de ser "em breve" e leva a tool; visitante ve o
+  CTA de login.
+
+### Corrigido
+
+- `AiCacheRepository::find()` passou a comparar o **payload inteiro** guardado
+  com o pedido, e nao confiar so no MD5: colisao de hash virou cache miss
+  (ADR-016, agora implementado como decidido).
+
+### Documentacao
+
+- **ADR-039** (cliente fino + DeepSeek), **ADR-040** (reserva/liquidacao/cache
+  sem debito), **ADR-041** (gate lexical), **ADR-042** (contrato HTTP) e
+  **ADR-043** (`toolProps`); emendas nas ADRs 002, 004, 006, 011, 016, 029 e
+  030.
+- RUNBOOK: worker e `retry_after`, cron de `ai:prune-cache`/`ai:reconcile`,
+  rotacao da chave DeepSeek e diagnostico de 503/timeout/fila presa.
+- DESIGN: layout formulario | resultado, estados e acessibilidade; glossario
+  com Solicitacao de IA, reserva, liquidacao, cache hit, gate e privacidade.
+
+### Notas
+
+- **Smoke real com o DeepSeek pendente**: as variaveis `AI_*` do `.env` local
+  estao vazias. O roteiro esta em `docs/acceptance/FASE-5.md`; a chave deve ser
+  digitada localmente pelo dono, nunca no chat, e o smoke nao commita nada.
+- Historico de uso e retencao de 90 dias ficaram para a F7; gateway para a F6.
+- Nenhum commit ou push foi feito nesta fase.
+
 ## Preview do WhatsApp: card quadrado e metas no servidor - 2026-10-17
 
 Um link colado no WhatsApp mostrava a imagem horizontal pequena/cortada e so o

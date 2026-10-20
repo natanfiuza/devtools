@@ -22,14 +22,14 @@ const { pageProps } = vi.hoisted(() => ({
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: pageProps }),
     Head: defineComponent({
-        name: 'Head',
+        name: 'InertiaHead',
         props: { title: { type: String, default: '' } },
         render: () => null,
     }),
     // O <Link> de verdade navega pelo Inertia; aqui vira um <a> comum, que e o
     // que o navegador (e o teste) ve no HTML.
     Link: defineComponent({
-        name: 'Link',
+        name: 'InertiaLink',
         props: { href: { type: String, default: '' } },
         render() {
             return h('a', { href: this.href }, this.$slots.default?.());
@@ -38,7 +38,7 @@ vi.mock('@inertiajs/vue3', () => ({
     // O <Form> de verdade faz POST via Inertia; aqui basta um formulario que
     // exponha as mesmas slots (errors, processing) para a tela renderizar.
     Form: defineComponent({
-        name: 'Form',
+        name: 'InertiaForm',
         props: {
             action: { type: String, default: '' },
             method: { type: String, default: 'post' },
