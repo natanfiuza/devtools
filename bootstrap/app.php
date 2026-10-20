@@ -7,6 +7,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveLocale;
 use App\Jobs\ExecuteCommand;
 use App\Models\TaskSchedule;
+use App\Support\ApiError;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
@@ -60,6 +61,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Envelope unico da API de IA: o `code` e o contrato que a tela traduz.
+        $exceptions->render(function (Throwable $exception, Request $request) {
+            if (! $request->is('api/ai/*')) {
+                return null;
+            }
+
+            return ApiError::from($exception);
+        });
     })
     ->withSchedule(function (Schedule $schedule): void {
         try {

@@ -220,6 +220,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Solicitacoes do AI SQL Builder feitas por esta conta.
+     *
+     * @return HasMany<AiRequest, $this>
+     */
+    public function aiRequests(): HasMany
+    {
+        return $this->hasMany(AiRequest::class);
+    }
+
+    /**
      * @return HasMany<SubscriptionIntent, $this>
      */
     public function subscriptionIntents(): HasMany

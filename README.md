@@ -1,14 +1,18 @@
 # devtools.natanfiuza.dev.br
 
-Ferramentas para desenvolvedores que rodam **100% no navegador**: nenhuma
-ferramenta envia dado do usuario para o servidor. O servidor existe para
-entregar a pagina, o SEO e (a partir da F5) as funcoes que precisam de conta.
+Ferramentas para desenvolvedores. Oito rodam **100% no navegador** e nao enviam
+dado do usuario para o servidor; o **AI SQL Builder** e a excecao (ADR-002):
+ele manda schema e descricao ao provedor de IA e devolve a consulta gerada -
+sem nunca executar o SQL. O servidor entrega as paginas, o SEO e o backend
+dessa tool.
 
 - Especificacao: [docs/SPEC.md](docs/SPEC.md)
 - Decisoes: [docs/adr/](docs/adr/)
 - Design system: [docs/design/DESIGN.md](docs/design/DESIGN.md)
 - Glossario: [docs/glossario.md](docs/glossario.md)
 - Operacao no servidor: [docs/RUNBOOK.md](docs/RUNBOOK.md)
+- Arquitetura do AI SQL Builder: [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+- API da IA: [docs/API.md](docs/API.md)
 
 ## Stack
 
@@ -63,6 +67,27 @@ composer dev
 Um comando so: `php artisan serve` (http://localhost:8000), `npm run dev`
 (Vite com HMR), a fila e o `pail` (logs). Para rodar separado, `php artisan
 serve` e `npm run dev` em dois terminais.
+
+### AI SQL Builder local
+
+A tool fica **desligada** enquanto `AI_BASE_URL`, `AI_MODEL` e `AI_API_KEY`
+estiverem vazios (a pagina abre e o formulario diz "indisponivel"). Para ligar,
+preencha as tres no `.env` com a chave da sua conta DeepSeek e rode:
+
+```bash
+php artisan optimize:clear && php artisan optimize
+php artisan queue:work --tries=2 --timeout=90
+```
+
+- A chave e **local** e nao entra no git, no chat, em issue ou em log.
+- O worker e obrigatorio: sem ele, a solicitacao fica `queued`. O `composer
+  dev` ja sobe um, mas nao com `--tries=2 --timeout=90`; para o smoke, use o
+  comando acima em um terminal separado.
+- `DB_QUEUE_RETRY_AFTER` deve ser **150** (o `.env.example` ja traz), acima do
+  timeout do job (90) e do worker (120).
+- Para limpar o estado: `php artisan ai:prune-cache --dry-run` e `php artisan
+  ai:reconcile --dry-run`; sem `--dry-run`, o primeiro apaga cache expirado e o
+  segundo encerra solicitacoes presas.
 
 ## Comandos
 

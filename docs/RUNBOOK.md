@@ -233,6 +233,63 @@ php artisan queue:flush             # limpa os falhados
 tail -f storage/logs/worker.log
 ```
 
+### Fila do AI SQL Builder
+
+O job `ProcessAiQuery` leva so o ULID; o schema fica comprimido no banco e e
+apagado quando a solicitacao termina. O worker e o mesmo `devtools-worker` da
+F0 (`queue:work --tries=2 --timeout=120`), mas os tempos precisam estar nesta
+ordem:
+
+| Etapa | Valor | Onde |
+| ----- | ----- | ---- |
+| Requisicao ao provedor | 60 s | `AI_TIMEOUT` |
+| Job | 90 s | `AI_JOB_TIMEOUT` |
+| Worker | 120 s | supervisor (`--timeout=120`) |
+| `retry_after` da fila | **150 s** | `DB_QUEUE_RETRY_AFTER` |
+
+**O `.env` de producao precisa de `DB_QUEUE_RETRY_AFTER=150`.** Se ficar o
+valor antigo (menor que o timeout do job), o mesmo job pode ser entregue a
+outro worker enquanto o primeiro ainda espera o provedor - duas chamadas e dois
+debitos. Depois de mudar, reinicie os workers:
+
+```bash
+php artisan queue:restart
+sudo supervisorctl restart devtools-worker
+```
+
+Operacao dos comandos (rodam no cron, nao no scheduler):
+
+```bash
+# Antes da primeira execucao em producao, conferir o volume:
+php artisan ai:prune-cache --dry-run
+php artisan ai:reconcile --dry-run
+
+# Limpeza diaria do cache expirado (TTL de 30 dias):
+5 4 * * * cd /var/www/devtools && flock -n /tmp/ai-prune.lock php artisan ai:prune-cache >> storage/logs/ai.log 2>&1
+
+# Solicitacoes presas (worker morto, deploy no meio de um job):
+*/10 * * * * cd /var/www/devtools && flock -n /tmp/ai-reconcile.lock php artisan ai:reconcile >> storage/logs/ai.log 2>&1
+```
+
+- `ai:prune-cache` remove as linhas de `ai_cache` com `expires_at` no passado.
+  A leitura ja as ignora; o comando so libera espaco.
+- `ai:reconcile` fecha `queued|processing` mais antigas que `AI_JOB_TIMEOUT` +
+  `AI_RECONCILE_GRACE_SECONDS` (90 s + 30 s por padrao), marca `timeout` e
+  **estorna a reserva**. Sem ele, um worker morto deixaria a cota debitada para
+  sempre e o dedupe bloquearia o mesmo pedido ate o TTL.
+
+Conferir o estado sem abrir o banco:
+
+```bash
+php artisan tinker --execute="dump(App\\Models\\AiRequest::query()->whereIn('status', ['queued','processing'])->count());"
+grep 'ai_request_id' storage/logs/laravel.log | tail -n 20
+grep 'AI request failed' storage/logs/laravel.log | tail -n 20
+```
+
+Os logs trazem `ai_request_id`, `error_code`, `tokens_in/out` e a classe da
+excecao. **Nunca** trazem schema, descricao ou prompt - se aparecer texto de
+schema num log, e bug e vazamento: abra incidente e limpe o arquivo.
+
 ## 6. Backup
 
 Banco (diario, 3h da manha, guardando 14 dias):
@@ -271,10 +328,38 @@ php artisan up
 Se houver coluna criptografada, o caminho e descriptografar com a chave antiga
 e recriptografar com a nova (comando proprio, nao improvisar em producao).
 
-**Credenciais de terceiros** (a partir da F5: banco, IA, e-mail): trocar no
-`.env` e rodar `php artisan optimize:clear && php artisan optimize` (o deploy
-seguinte faz isso sozinho). `AI_API_KEY` e `AI_MODEL` vivem no `.env`/tabelas
-por regra do projeto — nunca no codigo.
+**Credenciais de terceiros** (banco, IA, e-mail): trocar no `.env` e rodar
+`php artisan optimize:clear && php artisan optimize` (o deploy seguinte faz
+isso sozinho). `AI_API_KEY` e `AI_MODEL` vivem no `.env`/tabelas por regra do
+projeto — nunca no codigo.
+
+**Chave do provedor de IA (DeepSeek)** — o provedor e o modelo vem de
+`AI_BASE_URL` e `AI_MODEL`; a chave, de `AI_API_KEY`. Para rotacionar:
+
+```bash
+# 1. Gere a chave nova no painel do DeepSeek e guarde-a fora do servidor.
+# 2. Troque APENAS essa linha no .env (nao imprima o arquivo no terminal):
+sed -i 's|^AI_API_KEY=.*|AI_API_KEY=<chave-nova>|' .env
+
+# 3. Recarregue a config e reinicie o worker para o novo processo nascer com ela:
+php artisan optimize:clear && php artisan optimize
+php artisan queue:restart
+
+# 4. Confirme que o worker voltou e nao ha job preso:
+sudo supervisorctl status devtools-worker
+php artisan queue:monitor database:default --max=50
+```
+
+- O `queue:restart` e obrigatorio: o worker em memoria continua com a chave
+  antiga ate terminar o job atual e sair.
+- A chave antiga deve ser **revogada no painel** logo depois do smoke da nova.
+  Se a antiga tiver vazado, revogue primeiro e rotacione depois: as
+  solicitacoes em voo falham com `provider_unavailable` e sao estornadas.
+- Nunca cole a chave em ticket, chat, log ou PR. Se aparecer em log, trate como
+  vazamento: revogue, rotacione e limpe o arquivo.
+- Trocar `AI_MODEL` **muda os hashes do cache** (o modelo entra no payload
+  canonico): as respostas antigas continuam validas para os pedidos antigos,
+  mas os novos chamam o provedor. Nao e preciso limpar o cache.
 
 **Senha do banco**: `ALTER USER 'devtools'@'localhost' IDENTIFIED BY '...'`,
 atualiza o `.env` e `optimize:clear`.
@@ -314,6 +399,13 @@ Problemas que ja sabemos diagnosticar:
 | Assets antigos servidos | release ainda na janela das 3 guardadas: normal; a limpeza e por data |
 | Medicao nao aparece no GA | id vazio no `.env` (medicao desligada), banner sem aceite, ou config em cache: `optimize:clear && optimize` (secao 9) |
 | Teste do Google ("Teste sua tag", Tag Assistant) acusa tag ausente | **Esperado** quando o banner nao foi aceito naquela sessao: o teste abre o site sem o cookie `consent`, e sem aceite nao ha tag (ADR-013). Aceite o banner na sessao do teste; a prova real e o Tempo real (secao 9) |
+| AI SQL Builder responde 503 `ai_unavailable` | Falta `AI_BASE_URL`, `AI_MODEL` ou `AI_API_KEY` no `.env`, ou a config esta em cache: `php artisan about` mostra o provedor? `optimize:clear && optimize` (secao 7) |
+| Solicitacao fica em `queued` e nunca sai | Worker parado (`supervisorctl status devtools-worker`), fila errada (`QUEUE_CONNECTION`) ou `retry_after` menor que o timeout do job; veja `tail -f storage/logs/worker.log` e `php artisan queue:failed` |
+| Solicitacao presa em `queued\|processing` por mais de ~3 min | Worker morreu no meio: `ai:reconcile --dry-run` primeiro, depois sem `--dry-run`; a reserva e estornada e a solicitacao vira `timeout`. Antes, veja se o job esta em `failed_jobs` |
+| `provider_unavailable` em massa | Chave revogada/expirada, `AI_BASE_URL` errado ou provedor fora. Teste o provedor a parte; a resposta HTTP nao vai para o log - use a mensagem da excecao (sem corpo) e o status |
+| `unsafe_sql` com SQL que parece leitura | O gate lexical (ADR-041) barrou: `;` interno, DDL/DML misturado ou funcao perigosa. Confira o SQL gerado na resposta; nao afrouxe o gate sem ADR |
+| Cache cresce sem parar | `ai:prune-cache` nao esta no cron (secao 5); confira `SELECT COUNT(*) FROM ai_cache WHERE expires_at < NOW()` (nunca apague na mao com o worker rodando) |
+| Resposta veio do cache para outro schema | Nao deve acontecer: o hit compara o payload inteiro (ADR-016), nao so o MD5. Se acontecer, e bug - guarde o `prompt_hash` e abra incidente; a linha expira em 30 dias |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 
@@ -324,7 +416,7 @@ php artisan optimize:clear && php artisan optimize
 
 ## 9. Medicao (Google Analytics)
 
-O carregamento ja existe no codigo (ADR-013/ADR-032): ativar e preencher uma
+O carregamento ja existe no codigo (ADR-013, ADR-032 e ADR-038): ativar e preencher uma
 variavel. **O passo a passo completo - criar a propriedade, conferir e o que nao
 ligar na console - esta em [guides/google-analytics.md](guides/google-analytics.md)**.
 O que segue e a parte de operacao.

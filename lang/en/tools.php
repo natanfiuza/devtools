@@ -115,6 +115,7 @@ return [
         'name' => 'AI SQL Builder',
         'description' => 'Describe the query in plain language and get SQL ready for your dialect.',
         'keywords' => 'natural language, generate query, database',
+        'intro' => 'Describe the query, paste the schema and pick the output: SQL, Eloquent, Prisma and more. This is the one tool that leaves the browser: the schema and the description go to the AI provider and spend the plan quota. The generated SQL is never executed here.',
     ],
 
     'json-to-code' => [

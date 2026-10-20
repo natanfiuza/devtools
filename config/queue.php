@@ -40,7 +40,9 @@ return [
             'connection' => env('DB_QUEUE_CONNECTION'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
-            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            // Acima do timeout do worker (120s): um job de 90s nao pode ser
+            // reservado de novo enquanto ainda esta rodando.
+            'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 150),
             'after_commit' => false,
         ],
 

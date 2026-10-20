@@ -80,7 +80,7 @@ for (const tool of allTools) {
 
 const traducoes = {
     app: {
-        nav: { tools: 'NAV_FERRAMENTAS' },
+        nav: { tools: 'NAV_FERRAMENTAS', pricing: 'PLANOS' },
         search: { trigger: 'BUSCAR' },
     },
     tools: toolTraducoes,
@@ -99,6 +99,7 @@ const traducoes = {
             title: 'TITULO_IA',
             body: 'CORPO_IA',
             note: 'NOTA_IA',
+            cta: 'ABRIR_IA',
             preview_prompt: 'PEDIDO_IA',
             preview_sql: 'SQL_IA',
         },
@@ -232,6 +233,18 @@ describe('hero e destaque', () => {
         expect(texto).toContain('PEDIDO_IA');
         expect(wrapper.get('pre').text()).toBe('SQL_IA');
     });
+
+    it('leva o CTA do destaque para a pagina da tool e o secundario para os planos', () => {
+        const wrapper = montar();
+        const cta = wrapper.get('[data-test="home-ai-cta"]');
+
+        // O destaque deixou de ser "em breve" na F5: o CTA abre a pagina da
+        // ferramenta, e o visitante encontra o login la. O caminho sai do
+        // registro, como nos cards.
+        expect(cta.text()).toBe('ABRIR_IA');
+        expect(cta.attributes('href')).toBe('/pt-br/tools/ai-sql-builder');
+        expect(wrapper.get('a[href="/pt-br/pricing"]').text()).toBe('PLANOS');
+    });
 });
 
 describe('grid de ferramentas', () => {
@@ -247,29 +260,39 @@ describe('grid de ferramentas', () => {
     });
 
     /*
-    | F3: tools que funcionam viram link para a propria pagina. O selo "em breve"
-    | fica so com o AI SQL Builder - e card que nao funciona nao linka, senao seria um
-    | link morto no indice (ADR-007).
+    | A F5 fechou a ultima tool do catalogo: nao ha mais card "em breve", e todo
+    | card linka para a propria pagina. Um card sem link so voltaria a existir
+    | se alguma tool regredisse para `soon` - e o sitemap deixaria de lista-la
+    | junto (ADR-007).
     */
-    it('linka o card inteiro das tools que funcionam e deixa a outra com o selo', () => {
+    it('linka o card inteiro de todas as tools do registro', () => {
         const wrapper = montar();
 
         expect(wrapper.findAll('[data-test="tool-card-badge"]')).toHaveLength(
-            1,
+            0,
         );
-        expect(wrapper.text()).toContain('SELO_EM_BREVE');
+        expect(wrapper.text()).not.toContain('SELO_EM_BREVE');
         expect(wrapper.text()).not.toContain('SELO_DISPONIVEL');
 
         const links = wrapper.get('[data-test="tool-grid"]').findAll('a');
 
         expect(links).toHaveLength(availableTools.length);
+        expect(availableTools).toHaveLength(allTools.length);
 
         // O primeiro do grid e o JSON Viewer, a primeira da ordem de exibicao,
         // com stretched link (`after:inset-0`) cobrindo o card todo.
         expect(links[0]?.attributes('href')).toBe('/pt-br/tools/json-viewer');
         expect(links[0]?.attributes('class')).toContain('after:inset-0');
 
-        // E nenhum link aponta para tool que nao funciona.
+        // O segundo e o AI SQL Builder, que a F5 tornou navegavel.
+        expect(cartoes(wrapper)[1]?.attributes('data-test')).toBe(
+            'tool-card-ai-sql-builder',
+        );
+        expect(links[1]?.attributes('href')).toBe(
+            '/pt-br/tools/ai-sql-builder',
+        );
+
+        // E todo link aponta para a pagina de uma tool do registro.
         for (const link of links) {
             const slug = link.attributes('href')?.replace('/pt-br/tools/', '');
 
@@ -277,14 +300,6 @@ describe('grid de ferramentas', () => {
                 'available',
             );
         }
-
-        // O card sem link e o do AI SQL Builder - o segundo do grid.
-        const semLink = cartoes(wrapper)[1];
-
-        expect(semLink?.attributes('data-test')).toBe(
-            'tool-card-ai-sql-builder',
-        );
-        expect(semLink?.find('a').exists()).toBe(false);
     });
 
     it('escreve nome e descricao de cada card pelo i18n', () => {

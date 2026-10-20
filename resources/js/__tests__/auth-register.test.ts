@@ -18,7 +18,12 @@ const { pageProps } = vi.hoisted(() => ({
         locale: 'pt_BR',
         localeSlug: 'pt-br',
         locales: [
-            { code: 'pt_BR', slug: 'pt-br', name: 'Português (Brasil)', html: 'pt-BR' },
+            {
+                code: 'pt_BR',
+                slug: 'pt-br',
+                name: 'Português (Brasil)',
+                html: 'pt-BR',
+            },
             { code: 'en', slug: 'en', name: 'English', html: 'en' },
         ],
     },
@@ -27,19 +32,19 @@ const { pageProps } = vi.hoisted(() => ({
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: pageProps }),
     Head: defineComponent({
-        name: 'Head',
+        name: 'InertiaHead',
         props: { title: { type: String, default: '' } },
         render: () => null,
     }),
     Link: defineComponent({
-        name: 'Link',
+        name: 'InertiaLink',
         props: { href: { type: String, default: '' } },
         render() {
             return h('a', { href: this.href }, this.$slots.default?.());
         },
     }),
     Form: defineComponent({
-        name: 'Form',
+        name: 'InertiaForm',
         props: {
             action: { type: String, default: '' },
             method: { type: String, default: 'post' },
@@ -122,7 +127,9 @@ describe('textos e status', () => {
     });
 
     it('mostra o aviso de status quando presente', () => {
-        const wrapper = montarRegister({ status: 'Entrar com Google ainda não está disponível.' });
+        const wrapper = montarRegister({
+            status: 'Entrar com Google ainda não está disponível.',
+        });
 
         expect(wrapper.get('[role="status"]').text()).toBe(
             'Entrar com Google ainda não está disponível.',

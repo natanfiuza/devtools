@@ -2,21 +2,22 @@
 
 return [
     'title' => 'Developer tools that stay out of your way',
-    'subtitle' => 'Format, convert and inspect data right in the browser. No sign-up, nothing sent to a server.',
+    'subtitle' => 'Format, convert, and inspect data right in your browser. No sign-up for the local tools.',
 
     'tools' => [
         'title' => 'Tools',
-        'subtitle' => 'Everything runs in your browser: whatever you paste here never leaves the machine.',
+        'subtitle' => 'Tools run in your browser: whatever you paste here never leaves the machine — except in AI SQL Builder, which sends the schema and description to the AI provider.',
         'filter' => 'Filter by category',
         'all' => 'All',
         'empty' => 'No tool in this category yet.',
     ],
 
     'ai' => [
-        'badge' => 'Coming soon',
+        'badge' => 'Available',
         'title' => 'AI SQL Builder',
         'body' => 'Describe the query in plain language and get SQL for your database, plus Eloquent, Prisma and the rest of your stack.',
         'note' => 'Needs a verified account: the query goes through the model and spends the plan quota.',
+        'cta' => 'Open AI SQL Builder',
         'preview_prompt' => 'List the 10 customers who bought the most in the last 30 days',
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],

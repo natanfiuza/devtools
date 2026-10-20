@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Support\ToolProps;
 use App\Support\Tools;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,12 +41,20 @@ class ToolController extends Controller
 
         abort_if($tool === null || $tool['status'] !== 'available', 404);
 
+        $user = $request->user();
+
         return Inertia::render('tools/Show', [
             'slug' => $tool['slug'],
             'maxInputBytes' => (int) config('tools.limits.input_bytes'),
             'virtualizeFrom' => (int) config('tools.limits.virtualize_from'),
             'regexTimeoutMs' => (int) config('tools.limits.regex_timeout_ms'),
             'regexMaxMatches' => (int) config('tools.limits.regex_max_matches'),
+            // O pacote da tool da vez (ADR-043). Tools de navegador recebem um
+            // objeto vazio; o AI SQL Builder recebe estado, catalogo e limites.
+            'toolProps' => ToolProps::for(
+                $tool['slug'],
+                $user instanceof User ? $user : null,
+            ),
         ]);
     }
 }

@@ -1,6 +1,6 @@
 {
     "slug": "ai-sql-builder",
-    "status": "soon",
+    "status": "available",
     "category": "sql",
     "icon": "sparkles",
     "order": 20,

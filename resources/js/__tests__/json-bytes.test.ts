@@ -12,6 +12,9 @@ import { byteUnit, formatBytes } from '@/lib/bytes';
 const MB = 1024 * 1024;
 
 function plain(text: string): string {
+    // O alvo sao justamente os espacos que o `Intl` usa (comum, nao quebravel
+    // e fino); por isso a regra de espaco irregular fica desligada aqui.
+    // eslint-disable-next-line no-irregular-whitespace
     return text.replace(/[   ]/g, ' ');
 }
 

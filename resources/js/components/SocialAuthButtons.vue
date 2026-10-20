@@ -46,9 +46,10 @@ function buttonUrl(provider: Provider): string {
 }
 
 function buttonText(provider: Provider): string {
-    const key = props.action === 'register'
-        ? 'auth.social.register_with'
-        : 'auth.social.login_with';
+    const key =
+        props.action === 'register'
+            ? 'auth.social.register_with'
+            : 'auth.social.login_with';
 
     const targetKey = te(key) ? key : 'auth.social.continue_with';
 
@@ -67,10 +68,7 @@ function buttonText(provider: Provider): string {
             class="w-full"
             as-child
         >
-            <a
-                :href="buttonUrl(provider)"
-                :data-test="`social-${provider}`"
-            >
+            <a :href="buttonUrl(provider)" :data-test="`social-${provider}`">
                 <svg
                     viewBox="0 0 24 24"
                     class="size-4 fill-current"

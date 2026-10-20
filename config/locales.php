@@ -59,6 +59,7 @@ return [
         'styleguide',
         'locales',
         'auth',
+        'ai',
         'legal',
         'newsletter',
     ],

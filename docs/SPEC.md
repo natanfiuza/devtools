@@ -18,7 +18,7 @@ Textos de interface sao escritos com acentuacao correta (o produto e traduzido);
 ## 4. Registro de tools
 Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.json`: `slug`, `status` (`soon|available|hidden`), `category`, `icon`, `order` e `keywords` (termos tecnicos de busca). O manifesto guarda so identidade e ciclo de vida - **nenhum texto visivel mora ali**: o nome, a descricao e as palavras-chave traduzidas vem de `tools.<slug>.*` nos 5 idiomas, por convencao a partir do slug.
 O manifesto e a **fonte unica** do registro, com dois leitores: o TypeScript (`resources/js/tools/registry.ts`, via `import.meta.glob`) monta a home, os chips de categoria e a busca; o PHP (`App\Support\Tools`) le os mesmos arquivos para o sitemap, que lista so as tools `available` (ADR-007). `hidden` nao aparece para o visitante em leitor nenhum: os dois leitores a excluem - o TypeScript em `allTools`, e o PHP em `Tools::all()`, que e a lista que desenha o cartao de compartilhamento; `Tools::available()` continua sendo a lista menor, a do sitemap e das imagens por tool.
-Rota generica `/{locale}/tools/{slug}` (entrou na F2, junto com a primeira tool `available`). A pagina e **generica**: `pages/tools/Show.vue` traz so o cabecalho (nome, descricao e icone do registro), as metas e o shell; o componente da tool vem de `resources/js/tools/<slug>/Tool.vue`, resolvido por um glob **lazy** (`tools/components.ts`) - a F3 acrescenta ferramentas sem tocar no shell. Quem decide se a pagina existe e o servidor: **slug desconhecido, tool `soon` e tool `hidden` dao o mesmo 404** (ADR-007), porque um 200 de "em breve" seria uma segunda representacao do status e um link morto no indice. As props sao duas: `slug` (do registro, nunca da URL) e `maxInputBytes` (de `config/tools.php`).
+Rota generica `/{locale}/tools/{slug}` (entrou na F2, junto com a primeira tool `available`). A pagina e **generica**: `pages/tools/Show.vue` traz so o cabecalho (nome, descricao e icone do registro), as metas e o shell; o componente da tool vem de `resources/js/tools/<slug>/Tool.vue`, resolvido por um glob **lazy** (`tools/components.ts`) - a F3 acrescenta ferramentas sem tocar no shell. Quem decide se a pagina existe e o servidor: **slug desconhecido, tool `soon` e tool `hidden` dao o mesmo 404** (ADR-007), porque um 200 de "em breve" seria uma segunda representacao do status e um link morto no indice. As props sao `slug` (do registro, nunca da URL), os quatro limites de `config/tools.php` (`maxInputBytes`, `virtualizeFrom`, `regexTimeoutMs` e `regexMaxMatches`) e, para tools que dependem do servidor, um pacote `toolProps` - a F5 acrescenta o do AI SQL Builder e as demais recebem objeto vazio (ADR-043).
 SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, canonical, hreflang e `og:image` da tool) - o titulo e a descricao saem do Blade (`Seo::pageMeta()`) e nao dependem de o SSR estar no ar; o editor e a arvore montam no cliente (`ClientOnly`), porque CodeMirror e Web Worker dependem do DOM (ADR-029, ADR-033).
 
 ## 5. Tools
@@ -35,7 +35,14 @@ SSR para SEO: o HTML do servidor traz a casca e as metas (title, description, ca
    - **Parse em Web Worker** com **queda para a thread principal** quando `Worker` nao existe ou a criacao falha, e descarte de resposta velha (a digitacao tem debounce).
    - Nao entrou (e nao estava na linha do SPEC): o painel de busca do proprio CodeMirror (Cmd+F), a indentacao por Tab (`indentWithTab`) e a validacao por schema.
 
-2. AI SQL Builder (secao 6). **Nao entregue**: depende de servidor (fila, cota, provider) e fica na F5. E a unica tool do MVP que continua `soon`.
+2. AI SQL Builder (secao 6). **Entregue na F5** (aceite em docs/acceptance/FASE-5.md), na pagina generica da secao 4:
+
+   - **E a unica tool que fala com o servidor** (ADR-002): exige conta com e-mail verificado, tem 5 usos vitalicios no Free e franquia de tokens nos planos pagos.
+   - **Layout proprio, e nao o `ToolShell`**: formulario a esquerda e resultado a direita, empilhados em tela estreita. E a segunda excecao de layout depois do Regex Tester, e a primeira tool com a forma "entrada -> espera -> saida" em vez de "entrada -> saida imediata"; o porque esta no DESIGN.
+   - **Formulario** (`SchemaForm.vue`): fonte do schema em abas (DDL, JSON, migration Laravel, SQLModel), editor com realce para SQL/JSON, dialeto, alvo de saida (os nove de `output_targets`), descricao com contador e os limites do plano. O botao de gerar so habilita com o pedido completo.
+   - **Estados** (`StateNotice.vue`): visitante (CTA de login), e-mail nao verificado (CTA de reenviar), conta suspensa, cota esgotada (CTA de planos), IA indisponivel e falha. A tela desenha o motivo que veio do servidor; ela nao decide autorizacao.
+   - **Resultado** (`ResultPanel.vue`): SQL em `<pre>` mono com rolagem, abas dos targets devolvidos, copiar e baixar, premissas, avisos, tabelas usadas, tokens e selo de cache hit; `needs_clarification` mostra a pergunta do modelo em vez de um SQL. A espera e por polling, com o prazo e backoff da secao 6.
+   - **Privacidade**: o schema e a descricao saem do navegador **so nesta tool** e so para o provedor configurado; a politica de privacidade e o aviso da tela dizem isso nos 5 idiomas (secao 8).
 3. JSON -> TypeScript / PHP DTO / Pydantic (`json-to-code`). **Entregue na F3** (aceite em docs/acceptance/FASE-3.md), na pagina generica descrita na secao 4:
 
    - **Alvo e nome da raiz** no cabecalho da **saida**: um `Select` com as tres linguagens de destino (TypeScript, PHP (DTO) e Pydantic) e, ao lado, o campo do nome da raiz (padrao `Root`), usado literal nas tres saidas - sem sufixo, sem pluralizacao, sem "s" de array.
@@ -88,40 +95,62 @@ Base comum das tools da F3 (o que duas ou mais usam saiu do `json-viewer`, Q8): 
 Diff texto/JSON; Cron explainer; YAML/JSON/TOML/XML; DDL -> migration Laravel; explicador de EXPLAIN; mock data/seeder/factory a partir do schema; cURL -> Http/fetch; gerador .env.example; cheatsheets; API publica; historico compartilhavel; anuncios.
 
 ## 6. AI SQL Builder
+E a unica tool que depende do servidor (ADR-002) e o motivo de existir conta no site: exige login e e-mail verificado, e a conta Free tem 5 usos vitalicios. O SQL gerado **nunca e executado** (secao 8).
+
 ### Entrada
 - Fonte do schema: DDL | JSON | migration Laravel | models SQLModel (campo `schema_source`).
 - Dialeto: mysql | pgsql | sqlsrv | sqlite.
 - Descricao em linguagem natural.
-- Output target: slug da tabela `output_targets` (sql, laravel_query_builder, eloquent, sqlmodel, sqlalchemy, django_orm, prisma, drizzle, typeorm).
+- Output target: slug da tabela `output_targets` (os nove da carga inicial: sql, laravel_query_builder, eloquent, sqlmodel, sqlalchemy, django_orm, prisma, drizzle, typeorm).
 ### Limites
-- Free: schema <= 8 KB, descricao <= 500 caracteres, 5 usos vitalicios por conta com e-mail verificado.
-- Pro: limites em `plans` (sugestao inicial schema 64 KB, descricao 4000 chars) + franquia mensal de tokens.
+- Tecnicos (servidor, `config/ai.php`): schema <= 64 KB, descricao <= 4000 caracteres, resposta <= 32 KB. Sao tetos que nenhum plano fura.
+- Comerciais (`plans`): Free = 5 usos vitalicios, schema <= 8 KB e descricao <= 500 caracteres; Pro = franquia mensal de tokens, 64 KB e 4000 caracteres. O limite efetivo e o **menor** entre o teto tecnico e a linha do plano.
+- Precos, limites e nome do modelo vivem em `plans`, `config/` e `.env`; nunca no codigo (CLAUDE.md).
 ### Fluxo
-1. POST /api/ai/queries valida (auth, e-mail verificado, tamanho, cota).
-2. Normaliza payload -> calcula `prompt_hash` (MD5, ADR-016). Cache hit => retorna resultado imediato, SEM debitar cota (decidido; ver secao 11).
-3. Cache miss: estima tokens (chars/4), reserva cota, cria `ai_requests` (status queued), despacha Job `ProcessAiQuery` na fila.
-4. Job chama DeepSeek (modelo flash, config `ai.model`), JSON mode, valida JSON de saida, valida SQL (parser; somente SELECT; bloquear DDL/DML), grava `ai_cache`, ajusta debito com `usage` real da API, status done/failed (estorno em falha).
-5. Frontend faz polling GET /api/ai/queries/{id} a cada 1.5s (backoff ate 5s, timeout 120s).
-6. Resultado mostra SQL + tab do target + premissas + tokens usados.
+1. `POST /api/ai/queries` valida sessao, CSRF, e-mail verificado, conta ativa, forma e tamanho do pedido e dialeto aceito pelo alvo. Limite de plano e cota sao checados na acao (402/422).
+2. Normaliza o payload (CRLF -> LF, espacos no fim da linha, trim) e calcula `prompt_hash` = MD5 do JSON canonico com fonte, dialeto, alvo, schema, descricao, modelo e `prompt_version` (ADR-016). O hash e chave de busca, nao prova de identidade: o payload guardado e comparado antes de servir, e uma colisao vira cache miss.
+3. **Dedupe**: se a mesma conta ja tem solicitacao `queued|processing` com o mesmo hash dentro de `inflight_ttl_seconds` (600 s), devolve a mesma (202), sem novo debito e sem novo job.
+4. **Cache hit**: cria uma solicitacao `done` com `cache_hit=true` e os tokens guardados, **sem linha no ledger**, e responde **200** com o resultado.
+5. **Cache miss**: estima tokens (`chars/4` na entrada + `estimate_output_tokens` na saida), reserva a cota (Free: 1 uso; pago: tokens estimados), cria `ai_requests` `queued` com o payload comprimido e despacha `ProcessAiQuery` (`afterCommit`).
+6. **Job**: recebe so o ULID, recarrega a solicitacao, consulta o cache de novo (duas contas com o mesmo pedido: a segunda encontra a resposta e recebe estorno integral), chama o provedor em JSON mode, valida o contrato e, no alvo `sql`, o gate lexical. Contrato invalido, SQL recusado, timeout ou provedor fora viram `failed` com estorno; erro retentavel tenta de novo (2 tentativas).
+7. **Liquidacao**: grava tokens reais e a resposta, limpa o payload comprimido da solicitacao e grava o cache (TTL 30 dias). No pago, a reserva e ajustada pelo `usage` real - debita a diferenca para cima, estorna para baixo; no Free nao ha ajuste, porque a unidade e o uso.
+8. **Polling**: `GET /api/ai/queries/{ulid}` a cada 1,5 s (primeiro atraso vem do servidor), dobrando ate 5 s, com desistencia em 120 s e botao "consultar novamente" na tela.
+9. Resultado mostra SQL + abas dos targets devolvidos + premissas + avisos + tabelas usadas + tokens. `needs_clarification=true` e `done` (consome a reserva) e mostra a pergunta do modelo, sem SQL.
+### Gate do SQL (ADR-041)
+O SQL do alvo `sql` passa por um **gate lexical**, e nao por um parser por dialeto (emenda deliberada a decisao original; ver 11.2). O texto e dividido por `;` no cru - o ponto e virgula final e permitido, duas instrucoes nao passam -, strings e comentarios sao removidos, a instrucao precisa comecar em `SELECT`/`WITH`, e verbos de escrita/administracao (`INSERT`, `UPDATE`, `DELETE`, `DROP`, `ALTER`, `CREATE`, `TRUNCATE`, `CALL`, `EXEC`, ...) e funcoes perigosas (`LOAD_FILE`, `pg_sleep`, `xp_cmdshell`, ...) sao recusados. O `/*! ... */` do MySQL/MariaDB e recusado antes de tudo, porque ele **executa** o conteudo. O SQL nunca e executado; o gate existe para nao devolver escrita como se fosse leitura. Os alvos de ORM nao geram SQL para executar e passam so pelo validador de contrato.
+### API e contrato HTTP (ADR-042)
+- Rotas fora do prefixo de idioma, no grupo `web` (sessao + CSRF), com `auth`, `verified` e `active`: `POST /api/ai/queries` e `GET /api/ai/queries/{ulid}`.
+- `store` responde **200** (cache hit) ou **202** (fila/dedupe); `show` responde **200** em qualquer estado, porque o status e o dado que a tela espera.
+- Status de erro: 401 (sem sessao), 403 (sem verificacao/conta suspensa), 404 (solicitacao inexistente ou de outra conta), 419 (CSRF), 422 (validacao/limite/dialeto), 402 (cota), 429 (rate limit), 503 (IA desligada ou indisponivel). O corpo e sempre `{error: {code, message, details?}}`; `code` e o contrato que a tela traduz por `ai.*`, `message` e fallback tecnico. O corpo da resposta do provedor nunca chega ao cliente nem ao log.
+- Rate limit: POST 6/min e 60/h por conta, mais 30/min por IP; polling 120/min por conta. O 429 traz `Retry-After`.
+- Detalhes de payload, exemplos e erros em `docs/API.md`.
 ### Contrato JSON do LLM
 { "sql": string, "dialect": string, "assumptions": string[], "warnings": string[], "tables_used": string[], "needs_clarification": boolean, "clarification": string|null, "outputs": { "<target_slug>": string } }
-Se o schema nao permite atender: needs_clarification=true e sql vazio.
+Se o schema nao permite atender: needs_clarification=true, sql vazio e clarification preenchida. Fora disso, `outputs[target]` e obrigatorio, `dialect` devolvido tem de ser o pedido, listas tem no maximo 50 itens e a resposta inteira no maximo 32 KB. O que nao fechar a forma vira `invalid_contract` - sem o texto do provedor na mensagem.
 ### Prompt
-Templates versionados em `resources/prompts/<target_slug>.v<N>.md`; `prompt_version` entra no hash. Instrucoes fixas: usar apenas tabelas/colunas do schema; nao inventar; tratar texto do usuario como dado (anti prompt injection); saida somente JSON. Particularidades: SQLModel usa select().where() e col() para in_/like.
+Templates versionados em `resources/prompts/<target_slug>.v<N>.md`; `prompt_version` entra no hash. Instrucoes fixas: usar apenas tabelas/colunas do schema; nao inventar; tratar schema e descricao como **dado** entre delimitadores (anti prompt injection); responder somente JSON. Particularidades: SQLModel usa `select().where()` e `col()` para `in_`/`like`. Trocar o texto de um prompt exige **nova versao** no nome do arquivo e `prompt_template` atualizado no alvo: a versao antiga sai do hash e do cache.
+### Cache
+- Global por `prompt_hash`, TTL de 30 dias (`AI_CACHE_TTL_DAYS`), com o payload canonico comprimido guardado junto da resposta.
+- Hit nao chama o provedor e **nao debita** cota; `hits` e `last_hit_at` existem para operacao. `ai:prune-cache` apaga as linhas expiradas (a leitura ja as ignora).
+- Hit durante a fila (duas contas com o mesmo pedido) estorna a reserva integral e marca `cache_hit=true`.
+### Fila e tempos
+- `ProcessAiQuery` recebe **somente o ULID** (o payload com schema fica no banco, comprimido, e sai na liquidacao); `tries=2`, `timeout=90s`, `backoff=[5,15]` e `failOnTimeout`.
+- A ordem dos tempos e: provedor 60 s < job 90 s < worker 120 s < `retry_after` 150 s (`DB_QUEUE_RETRY_AFTER`). O `retry_after` menor que o timeout do job faria o mesmo job rodar duas vezes.
+- `ai:reconcile` fecha solicitacoes presas em `queued|processing` alem de `timeout + 30 s` - cobre worker morto sem `failed()` -, marcando `timeout` e estornando. `ai:prune-cache` e `ai:reconcile` aceitam `--dry-run`; o cron e o RUNBOOK.
 ### Modelo de dados
 - users (+ username unico anulavel, role(user|admin), locale, suspended_at, anonymized_at, email_verified_at, password anulavel para conta sem senha), social_accounts (user_id, provider, provider_id), newsletter_subscribers (email, token, locale, source, confirmed_at, unsubscribed_at).
 - plans: id, slug, name, price_cents, currency, interval(month|year|nulo), monthly_tokens, max_schema_bytes, max_prompt_chars, lifetime_free_uses, active, sort - catalogo em tabela, editavel no painel e carregado por migracao, nunca fixo no codigo (ADR-027, ADR-034).
 - subscription_intents: user_id (`cascadeOnDelete`), plan_id (`restrictOnDelete`), username, phone, document, payment_method(pix|credit_card|boleto), notes, status(pending|fulfilled|canceled), handled_by (`nullOnDelete`), handled_at - fila de pedidos de assinatura (ADR-034).
 - subscriptions: user_id, plan_id, gateway (`manual` hoje; Mercado Pago na F6), gateway_ref, status(active|canceled), current_period_start/end. Vigencia resolvida na leitura, sem estado `expirada` gravado.
 - payments: user_id (`restrictOnDelete`: guarda fiscal, ADR-028), subscription_id (`nullOnDelete`), plan_id (`restrictOnDelete`), amount_cents, currency, method(pix|transfer|cash|other), status(paid|refunded), paid_at, note, gateway, gateway_ref.
-- usage_ledger: user_id, ai_request_id, type(debit|refund|grant), tokens, uses, created_at - a Cota e calculada daqui, sem coluna de saldo.
+- usage_ledger: user_id, ai_request_ulid(char 26, nullable), type(debit|refund|grant), tokens, uses, created_at - a Cota e calculada daqui, sem coluna de saldo. O `ai_request_id` bigint e **legado obsoleto** (nunca foi escrito) e sai na F7; toda linha de uma solicitacao usa o ULID e o `created_at` da solicitacao, inclusive estornos, para a janela do plano nao desalinhar.
 - admin_actions: actor_id (nulo no comando, `nullOnDelete` no resto), action, target_type/target_id, meta(json), ip, created_at - auditoria do painel; nunca guarda conteudo de schema ou prompt (ADR-025).
-- ai_requests: id(ulid), user_id, status, dialect, schema_source, output_target_id, prompt_hash, tokens_in, tokens_out, cache_hit, error_code, history_visible, created_at.
+- ai_requests: id(ulid), user_id (`cascadeOnDelete`), output_target_id (`restrictOnDelete`), status(queued|processing|done|failed), dialect, schema_source, prompt_hash(char 32), prompt_version, prompt_template, model, estimated_tokens, reserved_tokens, reserved_uses, quota_unit(uses|tokens), tokens_in, tokens_out, cache_hit, error_code, history_visible (false na F5), canonical_payload (comprimido, limpo na liquidacao), response_json, timestamps. Indices: `(user_id, created_at)`, `prompt_hash`, `(status, created_at)` e `(user_id, prompt_hash, status)` para o dedupe.
 - ai_cache: id, prompt_hash CHAR(32) UNIQUE, canonical_payload (comprimido), response_json, model, prompt_version, tokens_in, tokens_out, hits, last_hit_at, created_at, expires_at.
-- output_targets: slug, label, language, supported_dialects(json), prompt_template, enabled, plan_required, sort.
+- output_targets: id, slug unico, label, language, supported_dialects(json), prompt_template, enabled, plan_required (FK `plans` nulavel), sort - os nove alvos sao carga de migracao (`insertOrIgnore`), e o admin pode desligar um sem deploy (ADR-011).
 - donations, webhook_events (idempotencia) - F6.
 ### Historico
-Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apagar. Retencao padrao 90 dias.
+Fica na F7: `history_visible` nasce `false` e nenhuma tela de historico existe na F5. Entao: salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apagar. Retencao padrao 90 dias.
 
 ## 7. Contas e planos
 - Login: e-mail/senha, Google e GitHub, sob `/{locale}` (ADR-022); verificacao de e-mail obrigatoria antes de qualquer uso de IA.
@@ -148,8 +177,9 @@ Salvo apenas para usuarios que optam (checkbox) e planos pagos; usuario pode apa
 - F1 Registro de tools + home + busca Cmd+K + banner LGPD + GA: concluida em 2026-10-14. As 8 tools do MVP entram **registradas** com `status: "soon"` (nenhuma funciona ainda): grid, busca, sitemap e testes ja sao reais e cada fase seguinte so troca o status. Vieram junto o sitemap/robots servidos pela aplicacao e as tags OG com imagem padrao (heranca da F0, ADR-007/013). Aceite em docs/acceptance/FASE-1.md.
 - F2 JSON Viewer (com CodeMirror 6 e testes): concluida em 2026-10-14. O `json-viewer` e a primeira tool `available` - o card da home passa a linkar e o sitemap a listar -, na **pagina generica da tool** (secao 4, ADR-029), com CodeMirror 6 minimo e o realce por tokens do DESIGN (ADR-018) e o parse em Web Worker. Veio junto a **imagem OG por tool** (ADR-030). Aceite em docs/acceptance/FASE-2.md.
 - F3 Tools simples (3 a 8 do MVP): concluida em 2026-10-14. As seis tools viram `available` de uma vez e a pagina generica da F2 nao mudou de forma - cada uma so acrescentou o proprio `Tool.vue` e os `lib/` (ADR-029, emendado). O que duas ou mais usam saiu do `json-viewer` para `components/tool/`, `lib/` e `composables/`, e o `json-viewer` passou a consumir os mesmos sem mudanca de comportamento. O AI SQL Builder, unico dependente de servidor, e o unico card que continua com o selo "em breve". Veio junto o **modelo de seguranca do Regex Tester** (execucao em Web Worker com prazo, ADR-031). Aceite em docs/acceptance/FASE-3.md.
-- F4 Auth: concluida. O ciclo principal - login e-mail/senha, OAuth Google/GitHub, verificacao, definir senha, newsletter e paginas legais - entrou junto da F0 (ADR-022/023/024), e as telas de settings traduzidas e o ciclo de conta (exportar e excluir conta, secao 8) entraram no bloco de 2026-10-14 (ADR-026/028).
-- F5 AI SQL Builder: output_targets, cache, fila, DeepSeek, polling, cota free. O estado da cota (`App\Support/Quota`) e o livro-razao ja existem (ADR-027); falta o consumo.
+- F4 Auth: concluida. O ciclo principal - login e-mail/senha, OAuth Google/GitHub, verificacao, definir senha, newsletter e paginas legais - entrou junto da F0 (ADR-022/023/024), e as telas de settings traduzidas e o ciclo de conta (exportar e excluir conta, secao 8) entraram no bloco de 2026-10-14 (ADR-026/028). Aceite em docs/acceptance/FASE-4.md (backfill em 2026-10-20).
+- F5 AI SQL Builder: concluida em 2026-10-20. A tool deixou de ser `soon`: `output_targets` com os nove alvos, cache global com hit sem debito, fila `database` com job de payload minimo e `retry_after` alinhado, provedor DeepSeek por cliente HTTP fino, polling com backoff e a reserva/liquidacao da cota Free e paga. Veio junto o gate lexical do SQL (ADR-041), a API de sessao com CSRF e envelope de erro (ADR-042) e o pacote `toolProps` da pagina generica (ADR-043). O modelo comercial (`plans`, ledger e `Quota`) ja existia desde a F4 e passou a ser **consumido**, nao alterado. O historico de uso continua na F7 (`history_visible=false`). Aceite em docs/acceptance/FASE-5.md.
+
 - F6 Planos/pagamento/doacao/webhooks. O modelo comercial (catalogo de planos, assinaturas, pagamentos e cota) foi adiantado em 2026-10-14 com a venda manual (ADR-027); o gateway (Mercado Pago, interface PaymentGateway) e a renovacao por periodo continuam aqui.
 - F7 Admin, historico, SEO final, hardening, documentacao final. O painel administrativo foi adiantado em 2026-10-14 (ADR-025); historico de uso e SEO final continuam aqui.
 - Adiantado em 2026-10-14 (bloco de papeis, modelo comercial e paineis): papeis `user`/`admin` com policy e auditoria, painel administrativo, painel do usuario, modelo comercial com venda manual, idioma da conta e exclusao por anonimizacao. Aceite em docs/acceptance/FASE-0.md (secao antecipada); ADRs 025 a 028.
@@ -157,7 +187,7 @@ Criterios de aceite por fase em docs/acceptance/FASE-N.md (gerar ao iniciar cada
 
 ## 10. Documentacao a manter
 README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/guides/ (passo a passo de operacao, hoje o do GA4), docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves), CHANGELOG.md.
-Escrito ate aqui (F0): README, RUNBOOK, DESIGN, docs/adr/, docs/glossario.md, CHANGELOG. ARQUITETURA.md e API.md entram quando houver o que documentar (fila e IA na F5; endpoints publicos na F7).
+Escrito ate aqui: README, RUNBOOK, DESIGN, docs/adr/, docs/glossario.md e CHANGELOG desde a F0; **docs/ARQUITETURA.md e docs/API.md** entraram na F5, com o fluxo da solicitacao de IA e o contrato HTTP que a tela consome. Endpoints publicos de terceiros continuam na F7.
 Tambem fazem parte do repo: docs/acceptance/ (criterios por fase), docs/plans/ e docs/survey/ (plano e levantamento de cada sessao de grill) e docs/claude-code/reports/{branch}/ (relatorio ao fim de cada tarefa, regra do CLAUDE.md).
 Texto de produto que se atualiza sem deploy de codigo: paginas legais em `lang/{locale}/legal.php` e contato/data de revisao em `config/legal.php`; limites, precos e nomes de modelo de IA em `config/` e nas tabelas, nunca no codigo.
 
@@ -196,9 +226,13 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - **"Ultima saida valida" e um estado geral**, e nao do `json-viewer`: `json-to-code` e `sql-formatter` mostram a ultima saida boa com aviso e opacidade reduzida enquanto a entrada nao fecha (glossario, ADR-029 emendado).
 - A base comum das tools (casca, editor parametrizado por linguagem, copiar, abrir arquivo com arrastar-e-soltar, baixar, tamanho em bytes, parse e tipos do JSON, cliente de worker) mora em `resources/js/components/tool/`, `resources/js/lib/` e `resources/js/composables/`, e nao dentro de uma tool: a fase seguinte acrescenta ferramenta sem copiar cola.
 - Mensagens de validacao nos 5 idiomas: arquivos `validation.php` em `lang/` para `en`, `pt_BR`, `pt_PT`, `fr` e `es`, com todas as regras padrao do Laravel e atributos traduzidos (fecha o item correspondente da 11.2).
+- AI SQL Builder no servidor com **cliente HTTP fino** (`DeepSeekProvider` sobre `Http` do Laravel) e sem o Laravel AI SDK: a API e um POST JSON, o SDK nao pagaria o proprio peso (ADR-039, fecha o item correspondente da 11.2).
+- A coluna de dialetos de `output_targets` e **`supported_dialects`** (json), e nao `dialetos`: o nome esta no vocabulario da API e do modelo; `plan_required` e `sort` completam a tabela (ADR-011 emendado; fecha o item da 11.2).
+- Ciclo da solicitacao de IA com **reserva e liquidacao**: o debito acontece no POST (uso no Free, estimativa de tokens no pago), o job ajusta pelo `usage` real e toda falha estorna. **Cache hit nao debita** em nenhum caminho - nem no POST, nem quando o job encontra a resposta de outra conta (ADR-040).
+- O SQL do alvo `sql` passa por **gate lexical**, e nao por um parser por dialeto: o SQL nunca e executado, e o custo de um parser correto por dialeto nao se paga para um gerador de consultas (ADR-041, emenda a ADR-006).
+- API da IA **de sessao**, no grupo `web`: cookie + CSRF, sem token de API; polling com `Retry-After` e envelope unico de erro (`{error:{code,message,details}}`), com o codigo como contrato da traducao (ADR-042).
+- A pagina generica da tool ganhou **`toolProps`**: um pacote por tool que depende de servidor, vazio para as demais, para o `Show.vue` nao aprender nada sobre ferramenta nenhuma (ADR-043).
 
 ### 11.2 Abertas (com a fase onde precisam ser resolvidas)
-- F5: nome da coluna de dialetos em `output_targets` (ADR-011 diz `dialetos`; secao 6 diz `supported_dialects(json)` + `sort`).
-- F5: Laravel AI SDK x cliente HTTP fino (diferido pelo ADR-003).
 - Operacao (fora de fase): confirmar PHP 8.3 e usuario do cron no VPS; rotacao de chaves (SMTP, Turnstile, DeepSeek) - a do GA4 saiu desta lista e esta no guia (`docs/guides/google-analytics.md`, secao 5).
 

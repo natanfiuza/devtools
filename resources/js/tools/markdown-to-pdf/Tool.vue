@@ -167,352 +167,334 @@ function handlePrint(): void {
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-html -->
-  <ToolShell
-    split-key="markdown-to-pdf"
-    data-test="markdown-to-pdf-shell"
-  >
-    <template #actions>
-      <ToolActionBar>
-        <ToolButton
-          :label="t('tools.ui.actions.example')"
-          data-test="action-example"
-          @click="loadExample"
-        >
-          <template #icon>
-            <Sparkles class="size-3.5" />
-          </template>
-        </ToolButton>
+    <!-- eslint-disable vue/no-v-html -->
+    <ToolShell split-key="markdown-to-pdf" data-test="markdown-to-pdf-shell">
+        <template #actions>
+            <ToolActionBar>
+                <ToolButton
+                    :label="t('tools.ui.actions.example')"
+                    data-test="action-example"
+                    @click="loadExample"
+                >
+                    <template #icon>
+                        <Sparkles class="size-3.5" />
+                    </template>
+                </ToolButton>
 
-        <ToolButton
-          :label="t('tools.ui.actions.open')"
-          data-test="action-open"
-          @click="openFile"
-        >
-          <template #icon>
-            <FolderOpen class="size-3.5" />
-          </template>
-        </ToolButton>
+                <ToolButton
+                    :label="t('tools.ui.actions.open')"
+                    data-test="action-open"
+                    @click="openFile"
+                >
+                    <template #icon>
+                        <FolderOpen class="size-3.5" />
+                    </template>
+                </ToolButton>
 
-        <ToolButton
-          :label="t('tools.ui.actions.clear')"
-          :disabled="isEmpty"
-          data-test="action-clear"
-          @click="clear"
-        >
-          <template #icon>
-            <Eraser class="size-3.5" />
-          </template>
-        </ToolButton>
+                <ToolButton
+                    :label="t('tools.ui.actions.clear')"
+                    :disabled="isEmpty"
+                    data-test="action-clear"
+                    @click="clear"
+                >
+                    <template #icon>
+                        <Eraser class="size-3.5" />
+                    </template>
+                </ToolButton>
 
-        <template #end>
-          <ToolButton
-            :label="t('tools.ui.actions.copy')"
-            :disabled="isEmpty"
-            data-test="action-copy"
-            @click="copyMarkdown"
-          >
-            <template #icon>
-              <Copy class="size-3.5" />
-            </template>
-          </ToolButton>
+                <template #end>
+                    <ToolButton
+                        :label="t('tools.ui.actions.copy')"
+                        :disabled="isEmpty"
+                        data-test="action-copy"
+                        @click="copyMarkdown"
+                    >
+                        <template #icon>
+                            <Copy class="size-3.5" />
+                        </template>
+                    </ToolButton>
 
-          <ToolButton
-            :label="t('tools.markdown-to-pdf.actions.print')"
-            :disabled="isEmpty"
-            data-test="action-print"
-            @click="handlePrint"
-          >
-            <template #icon>
-              <Printer class="size-3.5" />
-            </template>
-          </ToolButton>
+                    <ToolButton
+                        :label="t('tools.markdown-to-pdf.actions.print')"
+                        :disabled="isEmpty"
+                        data-test="action-print"
+                        @click="handlePrint"
+                    >
+                        <template #icon>
+                            <Printer class="size-3.5" />
+                        </template>
+                    </ToolButton>
 
-          <ToolButton
-            :label="
-              isExporting
-                ? t('tools.markdown-to-pdf.actions.generating')
-                : t(
-                  'tools.markdown-to-pdf.actions.download_pdf',
-                )
-            "
-            :disabled="isEmpty || isExporting"
-            variant="default"
-            data-test="action-download-pdf"
-            @click="downloadPdf"
-          >
-            <template #icon>
-              <Loader2
-                v-if="isExporting"
-                class="size-3.5 animate-spin"
-              />
-              <Download
-                v-else
-                class="size-3.5"
-              />
-            </template>
-          </ToolButton>
+                    <ToolButton
+                        :label="
+                            isExporting
+                                ? t('tools.markdown-to-pdf.actions.generating')
+                                : t(
+                                      'tools.markdown-to-pdf.actions.download_pdf',
+                                  )
+                        "
+                        :disabled="isEmpty || isExporting"
+                        variant="default"
+                        data-test="action-download-pdf"
+                        @click="downloadPdf"
+                    >
+                        <template #icon>
+                            <Loader2
+                                v-if="isExporting"
+                                class="size-3.5 animate-spin"
+                            />
+                            <Download v-else class="size-3.5" />
+                        </template>
+                    </ToolButton>
+                </template>
+            </ToolActionBar>
         </template>
-      </ToolActionBar>
-    </template>
 
-    <!-- Painel Esquerdo: Editor Markdown e Dropzone -->
-    <template #input>
-      <FileDropzone
-        ref="dropzone"
-        :accept="acceptAttribute(FILE_RULES)"
-        testid="markdown-to-pdf"
-        @file="onFile"
-      >
-        <CodeEditor
-          v-model="text"
-          testid="markdown-to-pdf-editor"
-          class="absolute inset-0"
-          :placeholder="t('tools.ui.states.empty')"
-          :extensions="[markdown()]"
-        />
-      </FileDropzone>
-    </template>
-
-    <!-- Topo do Painel Direito: Opcoes de formato, fontes, padroes de cores e botao de download -->
-    <template #output-header>
-      <div
-        class="flex flex-wrap items-center gap-1.5"
-        data-test="markdown-to-pdf-controls"
-      >
-        <!-- Formato da folha -->
-        <Select v-model="config.format">
-          <SelectTrigger
-            class="h-7 w-[78px] px-2 text-xs"
-            :aria-label="t('tools.markdown-to-pdf.controls.format')"
-            data-test="select-format"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="fmt in PAPER_FORMATS"
-              :key="fmt"
-              :value="fmt"
-              class="text-xs"
+        <!-- Painel Esquerdo: Editor Markdown e Dropzone -->
+        <template #input>
+            <FileDropzone
+                ref="dropzone"
+                :accept="acceptAttribute(FILE_RULES)"
+                testid="markdown-to-pdf"
+                @file="onFile"
             >
-              {{ t(`tools.markdown-to-pdf.formats.${fmt}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+                <CodeEditor
+                    v-model="text"
+                    testid="markdown-to-pdf-editor"
+                    class="absolute inset-0"
+                    :placeholder="t('tools.ui.states.empty')"
+                    :extensions="[markdown()]"
+                />
+            </FileDropzone>
+        </template>
 
-        <!-- Orientacao -->
-        <Select v-model="config.orientation">
-          <SelectTrigger
-            class="h-7 w-[96px] px-2 text-xs"
-            :aria-label="
-              t('tools.markdown-to-pdf.controls.orientation')
-            "
-            data-test="select-orientation"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="ori in PAGE_ORIENTATIONS"
-              :key="ori"
-              :value="ori"
-              class="text-xs"
+        <!-- Topo do Painel Direito: Opcoes de formato, fontes, padroes de cores e botao de download -->
+        <template #output-header>
+            <div
+                class="flex flex-wrap items-center gap-1.5"
+                data-test="markdown-to-pdf-controls"
             >
-              {{ t(`tools.markdown-to-pdf.orientations.${ori}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+                <!-- Formato da folha -->
+                <Select v-model="config.format">
+                    <SelectTrigger
+                        class="h-7 w-[78px] px-2 text-xs"
+                        :aria-label="t('tools.markdown-to-pdf.controls.format')"
+                        data-test="select-format"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="fmt in PAPER_FORMATS"
+                            :key="fmt"
+                            :value="fmt"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.formats.${fmt}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
 
-        <!-- Margem -->
-        <Select v-model="config.margin">
-          <SelectTrigger
-            class="h-7 w-[105px] px-2 text-xs"
-            :aria-label="t('tools.markdown-to-pdf.controls.margin')"
-            data-test="select-margin"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="m in MARGIN_SIZES"
-              :key="m"
-              :value="m"
-              class="text-xs"
+                <!-- Orientacao -->
+                <Select v-model="config.orientation">
+                    <SelectTrigger
+                        class="h-7 w-[96px] px-2 text-xs"
+                        :aria-label="
+                            t('tools.markdown-to-pdf.controls.orientation')
+                        "
+                        data-test="select-orientation"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="ori in PAGE_ORIENTATIONS"
+                            :key="ori"
+                            :value="ori"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.orientations.${ori}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Margem -->
+                <Select v-model="config.margin">
+                    <SelectTrigger
+                        class="h-7 w-[105px] px-2 text-xs"
+                        :aria-label="t('tools.markdown-to-pdf.controls.margin')"
+                        data-test="select-margin"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="m in MARGIN_SIZES"
+                            :key="m"
+                            :value="m"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.margins.${m}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Fonte -->
+                <Select v-model="config.font">
+                    <SelectTrigger
+                        class="h-7 w-[105px] px-2 text-xs"
+                        :aria-label="t('tools.markdown-to-pdf.controls.font')"
+                        data-test="select-font"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="f in FONT_FAMILIES"
+                            :key="f"
+                            :value="f"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.fonts.${f}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Tamanho da fonte -->
+                <Select v-model="config.fontSize">
+                    <SelectTrigger
+                        class="h-7 w-[85px] px-2 text-xs"
+                        :aria-label="
+                            t('tools.markdown-to-pdf.controls.font_size')
+                        "
+                        data-test="select-font-size"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="sz in FONT_SIZES"
+                            :key="sz"
+                            :value="sz"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.font_sizes.${sz}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Padrao de cores / Tema -->
+                <Select v-model="config.theme">
+                    <SelectTrigger
+                        class="h-7 w-[100px] px-2 text-xs"
+                        :aria-label="t('tools.markdown-to-pdf.controls.theme')"
+                        data-test="select-theme"
+                    >
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="th in COLOR_THEMES"
+                            :key="th"
+                            :value="th"
+                            class="text-xs"
+                        >
+                            {{ t(`tools.markdown-to-pdf.themes.${th}`) }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <!-- Botao de download do PDF no topo do painel direito -->
+                <Button
+                    type="button"
+                    size="sm"
+                    class="h-7 gap-1 px-2.5 text-xs"
+                    :disabled="isEmpty || isExporting"
+                    data-test="top-download-pdf-button"
+                    @click="downloadPdf"
+                >
+                    <Loader2 v-if="isExporting" class="size-3 animate-spin" />
+                    <Download v-else class="size-3" />
+                    <span>{{
+                        isExporting
+                            ? t('tools.markdown-to-pdf.actions.generating')
+                            : t('tools.markdown-to-pdf.actions.download_pdf')
+                    }}</span>
+                </Button>
+            </div>
+        </template>
+
+        <!-- Painel Direito: Preview renderizado em tempo real simulando folha de papel -->
+        <template #output>
+            <div
+                class="relative flex min-h-[380px] flex-1 flex-col overflow-auto bg-neutral-100/70 p-3 sm:p-5 dark:bg-neutral-900/50"
             >
-              {{ t(`tools.markdown-to-pdf.margins.${m}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+                <div
+                    v-if="isEmpty"
+                    class="flex flex-1 items-center justify-center p-8 text-center text-sm text-subtle"
+                    data-test="markdown-to-pdf-empty"
+                >
+                    {{ t('tools.ui.states.empty') }}
+                </div>
 
-        <!-- Fonte -->
-        <Select v-model="config.font">
-          <SelectTrigger
-            class="h-7 w-[105px] px-2 text-xs"
-            :aria-label="t('tools.markdown-to-pdf.controls.font')"
-            data-test="select-font"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="f in FONT_FAMILIES"
-              :key="f"
-              :value="f"
-              class="text-xs"
+                <div v-else class="flex flex-1 justify-center">
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <article
+                        ref="documentSheet"
+                        class="markdown-pdf-document rounded border border-neutral-200/80 shadow-md transition-all duration-150 dark:border-neutral-700/80"
+                        :class="[
+                            getThemeClasses(config.theme),
+                            getFontSizeClasses(config.fontSize),
+                        ]"
+                        :style="getPageSheetStyle(config)"
+                        data-test="markdown-pdf-preview"
+                        v-html="renderedHtml"
+                    />
+                </div>
+            </div>
+        </template>
+
+        <!-- Status Bar -->
+        <template #status>
+            <div
+                class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtle"
+                data-test="markdown-to-pdf-status"
             >
-              {{ t(`tools.markdown-to-pdf.fonts.${f}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-
-        <!-- Tamanho da fonte -->
-        <Select v-model="config.fontSize">
-          <SelectTrigger
-            class="h-7 w-[85px] px-2 text-xs"
-            :aria-label="
-              t('tools.markdown-to-pdf.controls.font_size')
-            "
-            data-test="select-font-size"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="sz in FONT_SIZES"
-              :key="sz"
-              :value="sz"
-              class="text-xs"
-            >
-              {{ t(`tools.markdown-to-pdf.font_sizes.${sz}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-
-        <!-- Padrao de cores / Tema -->
-        <Select v-model="config.theme">
-          <SelectTrigger
-            class="h-7 w-[100px] px-2 text-xs"
-            :aria-label="t('tools.markdown-to-pdf.controls.theme')"
-            data-test="select-theme"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="th in COLOR_THEMES"
-              :key="th"
-              :value="th"
-              class="text-xs"
-            >
-              {{ t(`tools.markdown-to-pdf.themes.${th}`) }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-
-        <!-- Botao de download do PDF no topo do painel direito -->
-        <Button
-          type="button"
-          size="sm"
-          class="h-7 gap-1 px-2.5 text-xs"
-          :disabled="isEmpty || isExporting"
-          data-test="top-download-pdf-button"
-          @click="downloadPdf"
-        >
-          <Loader2
-            v-if="isExporting"
-            class="size-3 animate-spin"
-          />
-          <Download
-            v-else
-            class="size-3"
-          />
-          <span>{{
-            isExporting
-              ? t('tools.markdown-to-pdf.actions.generating')
-              : t('tools.markdown-to-pdf.actions.download_pdf')
-          }}</span>
-        </Button>
-      </div>
-    </template>
-
-    <!-- Painel Direito: Preview renderizado em tempo real simulando folha de papel -->
-    <template #output>
-      <div
-        class="relative flex min-h-[380px] flex-1 flex-col overflow-auto bg-neutral-100/70 p-3 sm:p-5 dark:bg-neutral-900/50"
-      >
-        <div
-          v-if="isEmpty"
-          class="flex flex-1 items-center justify-center p-8 text-center text-sm text-subtle"
-          data-test="markdown-to-pdf-empty"
-        >
-          {{ t('tools.ui.states.empty') }}
-        </div>
-
-        <div
-          v-else
-          class="flex flex-1 justify-center"
-        >
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <article
-            ref="documentSheet"
-            class="markdown-pdf-document rounded border border-neutral-200/80 shadow-md transition-all duration-150 dark:border-neutral-700/80"
-            :class="[
-              getThemeClasses(config.theme),
-              getFontSizeClasses(config.fontSize),
-            ]"
-            :style="getPageSheetStyle(config)"
-            data-test="markdown-pdf-preview"
-            v-html="renderedHtml"
-          />
-        </div>
-      </div>
-    </template>
-
-    <!-- Status Bar -->
-    <template #status>
-      <div
-        class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-subtle"
-        data-test="markdown-to-pdf-status"
-      >
-        <span>{{
-          t('tools.markdown-to-pdf.stats.words', {
-            count: wordsCount,
-          })
-        }}</span>
-        <span>{{
-          t('tools.markdown-to-pdf.stats.chars', {
-            count: charsCount,
-          })
-        }}</span>
-        <span :class="tooLarge ? 'font-medium text-destructive' : ''">
-          {{ formatBytes(inputBytes, locale) }}
-          {{
-            t('tools.ui.limits.of', {
-              limit: formatBytes(props.maxInputBytes, locale),
-            })
-          }}
-        </span>
-        <span
-          v-if="tooLarge"
-          class="font-medium text-destructive"
-        >
-          {{
-            t('tools.ui.states.too_large', {
-              size: formatBytes(inputBytes, locale),
-              limit: formatBytes(props.maxInputBytes, locale),
-            })
-          }}
-        </span>
-        <span
-          v-if="fileError.message.value"
-          class="font-medium text-destructive"
-        >
-          {{ fileError.message.value }}
-        </span>
-      </div>
-    </template>
-  </ToolShell>
+                <span>{{
+                    t('tools.markdown-to-pdf.stats.words', {
+                        count: wordsCount,
+                    })
+                }}</span>
+                <span>{{
+                    t('tools.markdown-to-pdf.stats.chars', {
+                        count: charsCount,
+                    })
+                }}</span>
+                <span :class="tooLarge ? 'font-medium text-destructive' : ''">
+                    {{ formatBytes(inputBytes, locale) }}
+                    {{
+                        t('tools.ui.limits.of', {
+                            limit: formatBytes(props.maxInputBytes, locale),
+                        })
+                    }}
+                </span>
+                <span v-if="tooLarge" class="font-medium text-destructive">
+                    {{
+                        t('tools.ui.states.too_large', {
+                            size: formatBytes(inputBytes, locale),
+                            limit: formatBytes(props.maxInputBytes, locale),
+                        })
+                    }}
+                </span>
+                <span
+                    v-if="fileError.message.value"
+                    class="font-medium text-destructive"
+                >
+                    {{ fileError.message.value }}
+                </span>
+            </div>
+        </template>
+    </ToolShell>
 </template>
 
 <style>

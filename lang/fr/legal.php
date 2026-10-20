@@ -13,23 +13,23 @@ return [
 
     'privacy' => [
         'title' => 'Politique de confidentialité',
-        'intro' => 'Cette page explique quelles données {app} conserve, pourquoi et pendant combien de temps. En bref : les outils fonctionnent dans votre navigateur et nous ne gardons que ce dont le compte a besoin.',
+        'intro' => 'Cette page explique quelles données {app} conserve, pourquoi et pendant combien de temps. La plupart des outils fonctionnent dans votre navigateur ; AI SQL Builder est l’exception et envoie le schéma et la description que vous fournissez à un fournisseur d’IA.',
         'sections' => [
             'data' => [
                 'title' => 'Ce que nous conservons',
-                'body' => 'Le minimum pour un compte : nom, e-mail, mot de passe (sous forme de hash) et la langue que vous utilisez. Si vous vous connectez avec Google ou GitHub, nous conservons l’identifiant du compte chez le fournisseur et votre e-mail — jamais votre mot de passe chez lui. Si vous vous abonnez à la newsletter, nous conservons l’e-mail et la langue de l’abonnement.',
+                'body' => 'Le minimum pour un compte : nom, e-mail, mot de passe (sous forme de hash) et la langue que vous utilisez. Si vous vous connectez avec Google ou GitHub, nous conservons l’identifiant du compte chez le fournisseur et votre e-mail — jamais votre mot de passe chez lui. Si vous vous abonnez à la newsletter, nous conservons l’e-mail et la langue de l’abonnement. Lorsque vous utilisez AI SQL Builder, nous conservons les métadonnées de la requête, le résultat généré et, pendant 30 jours au maximum, une copie compressée du schéma et de la description afin de réutiliser les requêtes identiques.',
             ],
             'purpose' => [
                 'title' => 'Ce que nous en faisons',
-                'body' => 'Faire fonctionner votre compte, envoyer les e-mails que vous avez demandés (réinitialisation du mot de passe, confirmation d’e-mail, newsletter) et protéger le site contre les abus.',
+                'body' => 'Faire fonctionner votre compte, envoyer les e-mails que vous avez demandés (réinitialisation du mot de passe, confirmation d’e-mail, newsletter), générer les résultats d’IA que vous demandez et protéger le site contre les abus.',
             ],
             'browser' => [
-                'title' => 'Les outils fonctionnent dans votre navigateur',
-                'body' => 'Ce que vous collez dans un outil est traité dans votre navigateur et n’est pas envoyé à nos serveurs. Les données de compte ci-dessus sont la seule chose que nous conservons.',
+                'title' => 'Où vos données sont traitées',
+                'body' => 'Les outils client fonctionnent dans votre navigateur : ce que vous y collez est traité sur votre machine et n’est pas envoyé à nos serveurs. AI SQL Builder est l’exception : le schéma et la description que vous envoyez partent chez notre fournisseur d’IA (actuellement DeepSeek) pour que le modèle génère le résultat. Nous n’envoyons pas les données de votre compte au fournisseur, et le SQL généré n’est jamais exécuté sur nos serveurs.',
             ],
             'sharing' => [
                 'title' => 'Avec qui nous partageons',
-                'body' => 'Nous ne vendons ni ne louons vos données. Nous partageons uniquement avec ce qui fait tourner le site : hébergement et envoi d’e-mails, plus Google ou GitHub lorsque vous choisissez de vous connecter avec eux. Si vous acceptez la mesure, les pages vues vont aussi à Google Analytics.',
+                'body' => 'Nous ne vendons ni ne louons vos données. Nous partageons uniquement avec ce qui fait tourner le site : hébergement et envoi d’e-mails, le fournisseur d’IA utilisé par AI SQL Builder (actuellement DeepSeek), ainsi que Google ou GitHub lorsque vous choisissez de vous connecter avec eux. Si vous acceptez la mesure, les pages vues vont aussi à Google Analytics.',
             ],
             'cookies' => [
                 'title' => 'Cookies',
@@ -37,7 +37,7 @@ return [
             ],
             'retention' => [
                 'title' => 'Pendant combien de temps',
-                'body' => 'Les données du compte restent tant que le compte existe et disparaissent lorsque vous supprimez le compte. Les données de la newsletter restent jusqu’à votre désabonnement.',
+                'body' => 'Les données du compte restent tant que le compte existe et disparaissent lorsque vous supprimez le compte. Les données de la newsletter restent jusqu’à votre désabonnement. Les requêtes d’IA et leurs résultats sont conservés pour que l’outil affiche l’état de la demande ; la copie compressée du schéma et de la description reste en cache pendant 30 jours au maximum.',
             ],
             'rights' => [
                 'title' => 'Vos droits',
@@ -60,7 +60,7 @@ return [
         'sections' => [
             'service' => [
                 'title' => 'Le service',
-                'body' => '{app} est un ensemble d’outils de développement qui fonctionnent dans votre navigateur, fournis tels quels et gratuitement, pour un usage personnel ou professionnel.',
+                'body' => '{app} est un ensemble d’outils de développement. La plupart fonctionnent dans votre navigateur et sont fournis tels quels et gratuitement, pour un usage personnel ou professionnel ; AI SQL Builder utilise un fournisseur d’IA et le quota du forfait. Les résultats générés sont une aide : la décision finale vous revient.',
             ],
             'account' => [
                 'title' => 'Votre compte',
@@ -72,7 +72,7 @@ return [
             ],
             'content' => [
                 'title' => 'Contenu',
-                'body' => 'Ce que vous collez dans les outils reste à vous. Le site, la marque et le code restent à nous.',
+                'body' => 'Ce que vous collez dans les outils reste à vous. En utilisant AI SQL Builder, vous autorisez l’envoi du schéma et de la description au fournisseur d’IA pour générer le résultat. Le site, la marque et le code restent à nous.',
             ],
             'availability' => [
                 'title' => 'Disponibilité',

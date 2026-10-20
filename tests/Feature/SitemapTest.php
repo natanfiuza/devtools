@@ -133,11 +133,10 @@ it('deixa de fora o que nao entra no indice', function () {
         ->not->toContain('/login')
         ->not->toContain('/register')
         ->not->toContain('/styleguide')
-        ->not->toContain('/dashboard')
-        // As tools que funcionam entram no indice (F2 levou a primeira, a F3
-        // levou as seis seguintes); a que depende de servidor fica de fora,
-        // mesmo com o manifest no registro.
-        ->not->toContain('/tools/ai-sql-builder');
+        ->not->toContain('/dashboard');
+    // Todas as tools do MVP entram no indice desde a F5: nao ha mais manifest
+    // `soon` no catalogo, e o teste `lista a pagina de cada tool que funciona`
+    // cobra as nove.
 });
 
 it('lista a tool que funciona nos cinco idiomas', function () {
@@ -158,12 +157,14 @@ it('lista a pagina de cada tool que funciona', function () {
     // continua verde e este cai.
     $slugs = [
         'json-viewer',
+        'ai-sql-builder',
         'json-to-code',
         'sql-formatter',
         'base64-url-hash',
         'jwt-decoder',
         'timestamp-uuid',
         'regex-tester',
+        'markdown-to-pdf',
     ];
 
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();

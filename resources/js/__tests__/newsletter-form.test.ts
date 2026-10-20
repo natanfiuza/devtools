@@ -20,7 +20,7 @@ const { pageProps, formErrors } = vi.hoisted(() => ({
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: pageProps }),
     Form: defineComponent({
-        name: 'Form',
+        name: 'InertiaForm',
         props: {
             action: { type: String, default: '' },
             method: { type: String, default: 'post' },

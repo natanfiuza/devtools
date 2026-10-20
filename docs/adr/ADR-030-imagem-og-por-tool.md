@@ -80,3 +80,12 @@ imagem por tool `available`, sem idioma, com o nome traduzido no
 `og:image:alt`, e queda para a padrao quando o arquivo nao existe. A URL da
 imagem ganhou `?v=` de cache, e o arquivo em disco continua sendo procurado
 sem a query.
+
+## Emenda da F5 (2026-10-20)
+
+A nona tool virou `available` e ganhou a imagem dela: `public/og/ai-sql-builder.png`,
+gerada pelo mesmo `seo:og-image` (canvas 1200x1200 da ADR-033, desenho na faixa
+central, sem idioma) e comitada. O comando passou a produzir **nove** PNGs de
+tool; em producao ele continua sem rodar (sem GD/rede no VPS). O teste de SEO
+confere o arquivo e as dimensoes, e a pagina cai na imagem padrao se o arquivo
+sumir.

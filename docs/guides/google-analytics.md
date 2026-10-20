@@ -1,7 +1,7 @@
 # Guia - Google Analytics (GA4)
 
-Como ligar a medicao do site. **O carregamento ja existe no codigo** (ADR-013 e
-ADR-032): ativar e criar a propriedade no Google e preencher **uma variavel** no
+Como ligar a medicao do site. **O carregamento ja existe no codigo** (ADR-013,
+ADR-032 e ADR-038): ativar e criar a propriedade no Google e preencher **uma variavel** no
 `.env` de producao. Nao ha codigo para escrever.
 
 Tres regras valem em todos os passos daqui:
@@ -56,10 +56,8 @@ A validade do cookie de consentimento (180 dias) sai de
 
 ## 3. Conferir
 
-1. Abrir `https://devtools.natanfiuza.dev.br/pt-br` numa **aba anonima** (sem
-   cookie `consent`).
-2. DevTools -> **Network**, filtrar por `googletagmanager`: **nenhuma** requisicao
-   enquanto o banner estiver sem resposta. Recusar: continua nenhuma. Aceitar:
+1. Abrir `https://devtools.natanfiuza.dev.br/pt-br` numa **aba anonima** (sem cookie `consent`).
+2. DevTools -> **Network**, filtrar por `googletagmanager`: **nenhuma** requisicao enquanto o banner estiver sem resposta. Recusar: continua nenhuma. Aceitar:
    uma requisicao `gtag/js?id=G-...`, **uma vez so** (reabrir o banner pelo
    rodape e aceitar de novo nao cria uma segunda).
 3. Ainda no **Network**, filtrar por `collect`: depois do aceite sai um
