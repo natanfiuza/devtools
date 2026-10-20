@@ -279,6 +279,11 @@ por regra do projeto — nunca no codigo.
 **Senha do banco**: `ALTER USER 'devtools'@'localhost' IDENTIFIED BY '...'`,
 atualiza o `.env` e `optimize:clear`.
 
+**Login social (Google e GitHub)**: criar os apps OAuth nos consoles de cada
+provedor, preencher as credenciais no `.env` e rodar `php artisan optimize:clear && php artisan optimize`.
+O passo a passo completo esta em [guides/google-auth.md](guides/google-auth.md) e
+[guides/github-auth.md](guides/github-auth.md).
+
 **Medicao (GA4)**: criar a propriedade nova no Google, trocar
 `ANALYTICS_GA4_ID` no `.env` e rodar `php artisan optimize:clear && php artisan optimize`.
 Sem redeploy e sem migracao: o historico fica na propriedade antiga. O passo a

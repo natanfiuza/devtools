@@ -1,6 +1,6 @@
 # Guia - Autenticacao com Google (OAuth 2.0)
 
-Como configurar e ativar o cadastro e login com a conta Google no site. **Todo o codigo necessario ja existe na aplicacao** (Laravel Socialite, `SocialAuthController`, `SocialProviders`, ADR-023 e ADR-036): ativar o Google exige apenas criar o app OAuth 2.0 no Google Cloud Console e preencher **duas variaveis** no arquivo `.env`. Nao ha codigo PHP ou TypeScript para escrever.
+Como configurar e ativar o cadastro e login com a conta Google no site. **Todo o codigo necessario ja existe na aplicacao** (Laravel Socialite, `SocialAuthController`, `SocialProviders`, ADR-023 e ADR-036): ativar o Google exige apenas criar o app OAuth 2.0 no Google Cloud Console e preencher **duas variaveis** no arquivo `.env`. Nao ha codigo PHP ou TypeScript para escrever. (Para configurar o GitHub, consulte [docs/guides/github-auth.md](github-auth.md)).
 
 ---
 
