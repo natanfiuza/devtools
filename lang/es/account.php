@@ -27,7 +27,7 @@ return [
         'quota_remaining' => 'Restante',
         'quota_window' => 'Período',
         'quota_lifetime' => 'Vitalicio',
-        'quota_until' => 'hasta :date',
+        'quota_until' => 'hasta {date}',
         'quota_exhausted' => 'La franquicia de este plan se agotó.',
         'unit_tokens' => 'tokens',
         'unit_uses' => 'usos',

@@ -27,7 +27,7 @@ return [
         'quota_remaining' => 'Remaining',
         'quota_window' => 'Period',
         'quota_lifetime' => 'Lifetime',
-        'quota_until' => 'until :date',
+        'quota_until' => 'until {date}',
         'quota_exhausted' => 'This plan allowance is used up.',
         'unit_tokens' => 'tokens',
         'unit_uses' => 'uses',

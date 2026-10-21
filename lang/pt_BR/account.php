@@ -27,7 +27,7 @@ return [
         'quota_remaining' => 'Restante',
         'quota_window' => 'Período',
         'quota_lifetime' => 'Vitalício',
-        'quota_until' => 'até :date',
+        'quota_until' => 'até {date}',
         'quota_exhausted' => 'A franquia deste plano acabou.',
         'unit_tokens' => 'tokens',
         'unit_uses' => 'usos',
