@@ -79,3 +79,26 @@ export type AccountBillingProps = {
     payments: Paginator<AccountPaymentRow>;
     total: number;
 };
+
+/** Linha do historico de execucao/consultas da conta. */
+export type AccountHistoryItem = {
+    id: string;
+    tool: string;
+    dialect: string;
+    status: 'queued' | 'processing' | 'done' | 'failed';
+    quotaUnit: 'tokens' | 'uses';
+    tokensUsed: number;
+    tokensIn: number | null;
+    tokensOut: number | null;
+    cacheHit: boolean;
+    createdAt: string;
+    sql: string | null;
+    summary: string | null;
+    errorCode: string | null;
+};
+
+/** Props do Historico (`/dashboard/history`). */
+export type AccountHistoryProps = {
+    history?: Paginator<AccountHistoryItem>;
+    total?: number;
+};

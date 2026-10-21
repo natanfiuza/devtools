@@ -1,6 +1,9 @@
 <?php
 
+use App\Enums\AiRequestStatus;
 use App\Enums\NewsletterSource;
+use App\Enums\SqlDialect;
+use App\Models\AiRequest;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\Plan;
@@ -149,7 +152,39 @@ it('entrega o historico vazio enquanto nao ha consumo para listar', function () 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard/History')
-            ->has('localeSlug'));
+            ->where('history.data', [])
+            ->where('total', 0));
+});
+
+it('lista o historico de consultas da propria conta e nao de outras contas', function () {
+    $user = User::factory()->create();
+    $outroUser = User::factory()->create();
+
+    AiRequest::factory()->for($user)->create([
+        'dialect' => SqlDialect::Mysql,
+        'status' => AiRequestStatus::Done,
+        'tokens_in' => 120,
+        'tokens_out' => 80,
+        'cache_hit' => false,
+        'response_json' => json_encode(['sql' => 'SELECT 1;', 'summary' => 'Consulta de teste']),
+    ]);
+
+    // Requisicao de outro usuario nao deve aparecer
+    AiRequest::factory()->for($outroUser)->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard.history'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/History')
+            ->has('history.data', 1)
+            ->where('total', 1)
+            ->where('history.data.0.dialect', 'MySQL')
+            ->where('history.data.0.status', 'done')
+            ->where('history.data.0.tokensUsed', 200)
+            ->where('history.data.0.cacheHit', false)
+            ->where('history.data.0.sql', 'SELECT 1;')
+            ->where('history.data.0.summary', 'Consulta de teste'));
 });
 
 it('lista so as faturas da propria conta', function () {
