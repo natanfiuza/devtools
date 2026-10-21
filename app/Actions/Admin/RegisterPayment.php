@@ -7,7 +7,9 @@ use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
+use App\Notifications\PaymentConfirmed;
 use Carbon\CarbonInterface;
+use Throwable;
 
 /**
  * Registra um pagamento recebido por fora do site (venda manual, ADR-027).
@@ -38,7 +40,7 @@ final class RegisterPayment
             ? ($this->grantPlan)($user, $plan)
             : null;
 
-        return $user->payments()->create([
+        $payment = $user->payments()->create([
             'subscription_id' => $subscription?->getKey(),
             'plan_id' => $plan?->getKey(),
             'amount_cents' => $amountCents,
@@ -49,5 +51,29 @@ final class RegisterPayment
             'note' => $note,
             'gateway' => 'manual',
         ]);
+
+        $this->notifyConfirmation($payment);
+
+        return $payment;
+    }
+
+    /**
+     * Avisa a conta dona do pagamento (ADR-044). Best-effort: o registro fiscal
+     * ja esta gravado, e falha de e-mail nao pode desfaze-lo nem derrubar o
+     * admin. Conta anonimizada ou excluida nao recebe.
+     */
+    private function notifyConfirmation(Payment $payment): void
+    {
+        try {
+            $account = $payment->user;
+
+            if ($account === null || $account->isAnonymized()) {
+                return;
+            }
+
+            $account->notify(new PaymentConfirmed($payment));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 }

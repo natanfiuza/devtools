@@ -48,4 +48,30 @@ return [
         'notes' => 'Notes: :notes',
         'action' => 'Open intents in admin panel',
     ],
+
+    'payment' => [
+        'confirmed' => [
+            'subject' => 'Payment confirmed',
+            'greeting' => 'Hello, :name!',
+            'intro' => 'We received your payment on :app.',
+            'amount' => 'Amount: :amount',
+            'method' => 'Payment method: :method',
+            'paid_at' => 'Payment date: :date',
+            'plan' => 'Plan: :plan',
+            'period_end' => 'Your subscription is valid until :date.',
+            'action' => 'View invoices',
+        ],
+        'refunded' => [
+            'subject' => 'Payment refunded',
+            'greeting' => 'Hello, :name!',
+            'intro' => 'Your payment on :app has been refunded.',
+            'amount' => 'Refunded amount: :amount',
+            'method' => 'Original payment method: :method',
+            'paid_at' => 'Original payment date: :date',
+            'refunded_at' => 'Refund date: :date',
+            'plan' => 'Plan: :plan',
+            'subscription_canceled' => 'The subscription linked to this payment has ended.',
+            'action' => 'View invoices',
+        ],
+    ],
 ];

@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $gateway_ref
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read User $user
+ * @property-read User|null $user
  * @property-read Subscription|null $subscription
  * @property-read Plan|null $plan
  */

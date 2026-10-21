@@ -48,4 +48,30 @@ return [
         'notes' => 'Observações: :notes',
         'action' => 'Abrir intenções no painel',
     ],
+
+    'payment' => [
+        'confirmed' => [
+            'subject' => 'Pagamento confirmado',
+            'greeting' => 'Olá, :name!',
+            'intro' => 'Recebemos o seu pagamento no :app.',
+            'amount' => 'Valor: :amount',
+            'method' => 'Forma de pagamento: :method',
+            'paid_at' => 'Data do pagamento: :date',
+            'plan' => 'Plano: :plan',
+            'period_end' => 'A sua subscrição é válida até :date.',
+            'action' => 'Ver faturas',
+        ],
+        'refunded' => [
+            'subject' => 'Pagamento devolvido',
+            'greeting' => 'Olá, :name!',
+            'intro' => 'O seu pagamento no :app foi devolvido.',
+            'amount' => 'Valor devolvido: :amount',
+            'method' => 'Forma de pagamento original: :method',
+            'paid_at' => 'Data do pagamento original: :date',
+            'refunded_at' => 'Data da devolução: :date',
+            'plan' => 'Plano: :plan',
+            'subscription_canceled' => 'A subscrição associada a este pagamento foi terminada.',
+            'action' => 'Ver faturas',
+        ],
+    ],
 ];

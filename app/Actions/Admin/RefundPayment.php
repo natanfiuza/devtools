@@ -5,6 +5,8 @@ namespace App\Actions\Admin;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\Payment;
+use App\Notifications\PaymentRefunded;
+use Throwable;
 
 /**
  * Estorna um pagamento registrado a mao (ADR-027).
@@ -25,16 +27,45 @@ final class RefundPayment
 {
     public function __invoke(Payment $payment): Payment
     {
-        if ($payment->status === PaymentStatus::Paid) {
+        $wasPaid = $payment->status === PaymentStatus::Paid;
+
+        if ($wasPaid) {
             $payment->forceFill(['status' => PaymentStatus::Refunded])->save();
         }
 
         $subscription = $payment->subscription;
+        $canceledSubscription = false;
 
         if ($subscription !== null && $subscription->isCurrent()) {
             $subscription->forceFill(['status' => SubscriptionStatus::Canceled])->save();
+            $canceledSubscription = true;
+        }
+
+        if ($wasPaid) {
+            $this->notifyRefund($payment, $canceledSubscription);
         }
 
         return $payment;
+    }
+
+    /**
+     * Avisa a conta dona do pagamento (ADR-044). Best-effort: o estorno ja esta
+     * gravado, e falha de e-mail nao pode desfaze-lo nem derrubar o admin.
+     * Conta anonimizada ou excluida nao recebe. Estorno repetido nao avisa de
+     * novo - o status so muda na primeira vez.
+     */
+    private function notifyRefund(Payment $payment, bool $canceledSubscription): void
+    {
+        try {
+            $account = $payment->user;
+
+            if ($account === null || $account->isAnonymized()) {
+                return;
+            }
+
+            $account->notify(new PaymentRefunded($payment, $canceledSubscription, now()));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 }
