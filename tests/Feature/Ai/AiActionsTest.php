@@ -402,15 +402,15 @@ it('estorna a reserva em tokens quando o plano pago falha', function () {
         ->and(Quota::for($user)->used())->toBe(0);
 });
 
-it('mantem a solicitacao fora do historico enquanto a fase nao expoe historico', function () {
+it('registra a solicitacao como visivel no historico', function () {
     $user = User::factory()->create();
 
     $start = aiStart($user);
 
-    expect($start->request->history_visible)->toBeFalse();
+    expect($start->request->history_visible)->toBeTrue();
 
     app(SettleAiQuery::class)($start->request, aiActionResult(), 10, 5);
 
-    expect(AiRequest::query()->sole()->history_visible)->toBeFalse()
+    expect(AiRequest::query()->sole()->history_visible)->toBeTrue()
         ->and(AiCache::query()->count())->toBe(1);
 });

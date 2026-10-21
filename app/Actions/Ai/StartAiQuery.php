@@ -130,7 +130,7 @@ final class StartAiQuery
                     'tokens_out' => max(0, $hit->cache->tokens_out),
                     'cache_hit' => true,
                     'error_code' => null,
-                    'history_visible' => false,
+                    'history_visible' => true,
                     'canonical_payload' => null,
                     'response_json' => $hit->result->json(),
                 ]);
@@ -160,7 +160,7 @@ final class StartAiQuery
                 'tokens_out' => null,
                 'cache_hit' => false,
                 'error_code' => null,
-                'history_visible' => false,
+                'history_visible' => true,
                 'canonical_payload' => $this->codec->encode($payload),
                 'response_json' => null,
             ]);

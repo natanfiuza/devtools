@@ -7,6 +7,8 @@ import Billing from '@/pages/dashboard/Billing.vue';
 import History from '@/pages/dashboard/History.vue';
 import type {
     AccountBillingProps,
+    AccountHistoryItem,
+    AccountHistoryProps,
     AccountPaymentRow,
     AccountPlan,
     AccountSubscription,
@@ -106,6 +108,40 @@ const traducoes = {
             description: 'DESCRICAO_HISTORICO',
             empty_title: 'NADA_POR_AQUI',
             empty: 'DICA_HISTORICO',
+            table: {
+                date: 'DATA',
+                tool: 'FERRAMENTA',
+                dialect: 'DIALETO',
+                usage: 'CONSUMO',
+                cache: 'CACHE',
+                cache_hit: 'HIT',
+                cache_miss: 'CHAMADA_IA',
+                status: 'SITUACAO',
+                actions: 'ACOES',
+                view_details: 'VER_DETALHES',
+            },
+            statuses: {
+                done: 'CONCLUIDO',
+                processing: 'PROCESSANDO',
+                queued: 'NA_FILA',
+                failed: 'FALHOU',
+            },
+            modal: {
+                title: 'TITULO_MODAL',
+                description: 'DESCRICAO_MODAL',
+                sql: 'SQL_GERADO',
+                summary: 'RESUMO_MODAL',
+                copy_sql: 'COPIAR_SQL',
+                copied: 'COPIADO',
+                close: 'FECHAR',
+                error: 'CODIGO_ERRO',
+                tokens_in: 'TOKENS_IN',
+                tokens_out: 'TOKENS_OUT',
+            },
+            total: 'TOTAL {total}',
+            page_of: 'PAGINA {page} DE {last}',
+            previous: 'ANTERIOR',
+            next: 'PROXIMA',
         },
         billing: {
             title: 'TITULO_FATURAS',
@@ -312,10 +348,10 @@ const ASSINATURA: AccountSubscription = {
     current: true,
 };
 
-function pagina(
-    rows: AccountPaymentRow[],
-    extra: Partial<Paginator<AccountPaymentRow>> = {},
-): Paginator<AccountPaymentRow> {
+function pagina<T>(
+    rows: T[],
+    extra: Partial<Paginator<T>> = {},
+): Paginator<T> {
     return {
         data: rows,
         current_page: 1,
@@ -449,5 +485,82 @@ describe('faturas', () => {
 
         expect(wrapper.text()).toContain('TOTAL 21');
         expect(proxima?.attributes('href')).toBe('/dashboard/billing?page=2');
+    });
+});
+
+describe('historico', () => {
+    function itemHistorico(id: string): AccountHistoryItem {
+        return {
+            id,
+            tool: 'AI SQL Builder',
+            dialect: 'MySQL',
+            status: 'done',
+            quotaUnit: 'tokens',
+            tokensUsed: 150,
+            tokensIn: 100,
+            tokensOut: 50,
+            cacheHit: false,
+            createdAt: '20/10/2026 14:00',
+            sql: 'SELECT * FROM users;',
+            summary: 'Busca todos os usuários.',
+            errorCode: null,
+        };
+    }
+
+    function montarHistorico(props: AccountHistoryProps): VueWrapper {
+        return mount(History, {
+            props,
+            global: { plugins: [i18nDoTeste()] },
+        });
+    }
+
+    it('mostra o estado vazio quando nao ha registros', () => {
+        const wrapper = montarHistorico({
+            history: pagina([]),
+            total: 0,
+        });
+
+        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(false);
+        expect(wrapper.text()).toContain('NADA_POR_AQUI');
+        expect(wrapper.text()).toContain('DICA_HISTORICO');
+    });
+
+    it('renderiza as linhas da tabela e botao de detalhes quando ha consultas', () => {
+        const item = itemHistorico('ulid-123');
+        const wrapper = montarHistorico({
+            history: pagina([item]),
+            total: 1,
+        });
+
+        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="historico-linha-ulid-123"]').exists()).toBe(true);
+
+        const linha = wrapper.get('[data-test="historico-linha-ulid-123"]');
+        expect(linha.text()).toContain('20/10/2026 14:00');
+        expect(linha.text()).toContain('AI SQL Builder');
+        expect(linha.text()).toContain('MySQL');
+        expect(linha.text()).toContain('150 tokens');
+        expect(linha.text()).toContain('CHAMADA_IA');
+        expect(linha.text()).toContain('CONCLUIDO');
+        expect(linha.find('[data-test="detalhes-btn-ulid-123"]').exists()).toBe(true);
+    });
+
+    it('abre o modal com sql e resumo ao clicar em detalhes', async () => {
+        const item = itemHistorico('ulid-456');
+        const wrapper = montarHistorico({
+            history: pagina([item]),
+            total: 1,
+        });
+
+        const btn = wrapper.get('[data-test="detalhes-btn-ulid-456"]');
+        await btn.trigger('click');
+
+        // Modal aberto deve conter os dados da consulta
+        const bodyText = document.body.innerHTML;
+        expect(bodyText).toContain('TITULO_MODAL');
+        expect(bodyText).toContain('SELECT * FROM users;');
+        expect(bodyText).toContain('Busca todos os usuários.');
     });
 });

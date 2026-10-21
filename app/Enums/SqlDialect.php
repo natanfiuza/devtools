@@ -15,6 +15,16 @@ enum SqlDialect: string
     case Sqlsrv = 'sqlsrv';
     case Sqlite = 'sqlite';
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::Mysql => 'MySQL',
+            self::Pgsql => 'PostgreSQL',
+            self::Sqlsrv => 'SQL Server',
+            self::Sqlite => 'SQLite',
+        };
+    }
+
     /**
      * @return list<string>
      */
