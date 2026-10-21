@@ -48,4 +48,30 @@ return [
         'notes' => 'Observações: :notes',
         'action' => 'Abrir intenções no painel',
     ],
+
+    'payment' => [
+        'confirmed' => [
+            'subject' => 'Pagamento confirmado',
+            'greeting' => 'Olá, :name!',
+            'intro' => 'Recebemos seu pagamento no :app.',
+            'amount' => 'Valor: :amount',
+            'method' => 'Forma de pagamento: :method',
+            'paid_at' => 'Data do pagamento: :date',
+            'plan' => 'Plano: :plan',
+            'period_end' => 'Sua assinatura vale até :date.',
+            'action' => 'Ver faturas',
+        ],
+        'refunded' => [
+            'subject' => 'Pagamento estornado',
+            'greeting' => 'Olá, :name!',
+            'intro' => 'Seu pagamento no :app foi estornado.',
+            'amount' => 'Valor estornado: :amount',
+            'method' => 'Forma de pagamento original: :method',
+            'paid_at' => 'Data do pagamento original: :date',
+            'refunded_at' => 'Data do estorno: :date',
+            'plan' => 'Plano: :plan',
+            'subscription_canceled' => 'A assinatura vinculada a este pagamento foi encerrada.',
+            'action' => 'Ver faturas',
+        ],
+    ],
 ];

@@ -44,6 +44,7 @@
 - Suspensao: conta marcada em `users.suspended_at`; nao entra mais e a sessao aberta cai no primeiro request autenticado.
 - Assinatura: vinculo entre conta e plano com periodo (`subscriptions`); "vigente" e resolvido na leitura (ativa e sem periodo vencido), sem estado `expirada` gravado.
 - Pagamento manual: cobranca registrada pelo admin por dinheiro recebido fora do site (`gateway = manual`), com forma (pix, transferencia, dinheiro, outro), nota opcional e sem valor negativo - estorno e `status = refunded`.
+- Confirmacao de pagamento: e-mail enviado a conta dona do pagamento quando o admin registra a cobranca e, com o mesmo papel, quando a estorna; sai no idioma da conta e e best-effort - o registro fiscal existe com ou sem ele (ADR-044).
 - Idioma da conta: preferencia duradoura gravada em `users.locale` (codigo, ex. `pt_BR`), escolhida no cadastro e no perfil; e tambem o idioma dos e-mails que saem para ela.
 - Idioma de navegacao: o idioma da pagina aberta agora (prefixo da URL ou cookie `locale`, ex. `pt-br`); pode diferir do idioma da conta.
 - Anonimizacao: exclusao que apaga o que identifica a pessoa e mantem a cobranca (guarda fiscal); a linha fica marcada por `anonymized_at` e nao volta.

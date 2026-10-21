@@ -11,8 +11,13 @@ use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
+
+// Registrar e estornar agora avisa a conta por e-mail (ADR-044); estes testes
+// sao de faturamento e nao do e-mail, entao o canal fica dublado.
+beforeEach(fn () => Notification::fake());
 
 /*
 | Catalogo, cobranca manual e lista de assinantes (ADR-027 e ADR-024).

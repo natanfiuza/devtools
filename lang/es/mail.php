@@ -48,4 +48,30 @@ return [
         'notes' => 'Observaciones: :notes',
         'action' => 'Abrir intenciones en el panel',
     ],
+
+    'payment' => [
+        'confirmed' => [
+            'subject' => 'Pago confirmado',
+            'greeting' => '¡Hola, :name!',
+            'intro' => 'Recibimos tu pago en :app.',
+            'amount' => 'Importe: :amount',
+            'method' => 'Forma de pago: :method',
+            'paid_at' => 'Fecha del pago: :date',
+            'plan' => 'Plan: :plan',
+            'period_end' => 'Tu suscripción es válida hasta el :date.',
+            'action' => 'Ver facturas',
+        ],
+        'refunded' => [
+            'subject' => 'Pago reembolsado',
+            'greeting' => '¡Hola, :name!',
+            'intro' => 'Tu pago en :app ha sido reembolsado.',
+            'amount' => 'Importe reembolsado: :amount',
+            'method' => 'Forma de pago original: :method',
+            'paid_at' => 'Fecha del pago original: :date',
+            'refunded_at' => 'Fecha del reembolso: :date',
+            'plan' => 'Plan: :plan',
+            'subscription_canceled' => 'La suscripción vinculada a este pago ha terminado.',
+            'action' => 'Ver facturas',
+        ],
+    ],
 ];

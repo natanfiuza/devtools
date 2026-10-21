@@ -48,4 +48,30 @@ return [
         'notes' => 'Remarques : :notes',
         'action' => 'Ouvrir les intentions dans l’administration',
     ],
+
+    'payment' => [
+        'confirmed' => [
+            'subject' => 'Paiement confirmé',
+            'greeting' => 'Bonjour, :name !',
+            'intro' => 'Nous avons bien reçu votre paiement sur :app.',
+            'amount' => 'Montant : :amount',
+            'method' => 'Moyen de paiement : :method',
+            'paid_at' => 'Date du paiement : :date',
+            'plan' => 'Forfait : :plan',
+            'period_end' => 'Votre abonnement est valable jusqu’au :date.',
+            'action' => 'Voir les factures',
+        ],
+        'refunded' => [
+            'subject' => 'Paiement remboursé',
+            'greeting' => 'Bonjour, :name !',
+            'intro' => 'Votre paiement sur :app a été remboursé.',
+            'amount' => 'Montant remboursé : :amount',
+            'method' => 'Moyen de paiement d’origine : :method',
+            'paid_at' => 'Date du paiement d’origine : :date',
+            'refunded_at' => 'Date du remboursement : :date',
+            'plan' => 'Forfait : :plan',
+            'subscription_canceled' => 'L’abonnement lié à ce paiement est terminé.',
+            'action' => 'Voir les factures',
+        ],
+    ],
 ];
