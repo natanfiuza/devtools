@@ -27,7 +27,7 @@ return [
         'quota_remaining' => 'Restant',
         'quota_window' => 'Période',
         'quota_lifetime' => 'À vie',
-        'quota_until' => 'jusqu’au :date',
+        'quota_until' => 'jusqu’au {date}',
         'quota_exhausted' => 'Le forfait de cette offre est épuisé.',
         'unit_tokens' => 'jetons',
         'unit_uses' => 'utilisations',
