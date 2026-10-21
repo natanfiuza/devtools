@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import { downloadText } from '@/lib/download';
+import { formatDownloadContent } from './formatDownload';
 import StateNotice from './StateNotice.vue';
 import type { AiQueryResult, QueryViewStatus, TokenUsage } from './types';
 
@@ -114,9 +115,22 @@ function downloadOutput(): void {
 
     const extension = EXTENSIONS[activeSlug.value] ?? '.txt';
 
+    const content = formatDownloadContent({
+        target: activeSlug.value,
+        code: activeText.value,
+        assumptions: props.result?.assumptions ?? [],
+        warnings: props.result?.warnings ?? [],
+        tablesUsed: props.result?.tables_used ?? [],
+        labels: {
+            assumptions: t('ai.result.assumptions'),
+            warnings: t('ai.result.warnings'),
+            tables: t('ai.result.tables'),
+        },
+    });
+
     downloadText(
         `${t('ai.result.download_name')}${extension}`,
-        activeText.value,
+        content,
         'text/plain;charset=utf-8',
     );
 }
@@ -129,7 +143,9 @@ function downloadOutput(): void {
         :data-status="status"
     >
         <div class="flex flex-wrap items-start justify-between gap-3">
-            <h2 class="text-sm font-medium">{{ t('ai.result.title') }}</h2>
+            <h2 class="text-sm font-medium">
+                {{ t('ai.result.title') }}
+            </h2>
 
             <div v-if="hasOutput" class="flex flex-wrap items-center gap-2">
                 <span
@@ -170,7 +186,9 @@ function downloadOutput(): void {
             data-test="ai-pending"
         >
             <Spinner class="size-5 text-brand" />
-            <p class="text-sm font-medium">{{ pendingLabel }}</p>
+            <p class="text-sm font-medium">
+                {{ pendingLabel }}
+            </p>
             <p class="max-w-xs text-xs text-subtle">
                 {{ t('ai.states.poll_hint') }}
             </p>
@@ -258,7 +276,9 @@ function downloadOutput(): void {
                 </div>
 
                 <div v-if="result.warnings.length > 0">
-                    <dt class="font-medium">{{ t('ai.result.warnings') }}</dt>
+                    <dt class="font-medium">
+                        {{ t('ai.result.warnings') }}
+                    </dt>
                     <dd class="mt-1">
                         <ul
                             class="list-disc space-y-1 pl-5 text-muted-foreground"
@@ -274,7 +294,9 @@ function downloadOutput(): void {
                 </div>
 
                 <div v-if="result.tables_used.length > 0">
-                    <dt class="font-medium">{{ t('ai.result.tables') }}</dt>
+                    <dt class="font-medium">
+                        {{ t('ai.result.tables') }}
+                    </dt>
                     <dd class="mt-1 font-mono text-xs text-muted-foreground">
                         {{ result.tables_used.join(', ') }}
                     </dd>
@@ -301,6 +323,8 @@ function downloadOutput(): void {
             </div>
         </template>
 
-        <p v-else class="text-sm text-subtle">{{ t('ai.result.empty') }}</p>
+        <p v-else class="text-sm text-subtle">
+            {{ t('ai.result.empty') }}
+        </p>
     </section>
 </template>

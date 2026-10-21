@@ -22,6 +22,11 @@ import type {
  */
 
 const { post } = vi.hoisted(() => ({ post: vi.fn() }));
+const { downloadText } = vi.hoisted(() => ({ downloadText: vi.fn() }));
+
+vi.mock('@/lib/download', () => ({
+    downloadText,
+}));
 
 vi.mock('@inertiajs/vue3', () => ({
     usePage: () => ({ props: { localeSlug: 'pt-br' } }),
@@ -479,6 +484,26 @@ describe('ResultPanel', () => {
             'GERANDO',
         );
         expect(wrapper.text()).toContain('AGUARDE');
+    });
+
+    it('ao baixar o resultado, inclui os metadados como comentarios', async () => {
+        const wrapper = montarResultado({
+            result: RESULTADO,
+            status: 'done',
+        });
+
+        await wrapper.get('[data-test="ai-download"]').trigger('click');
+
+        expect(downloadText).toHaveBeenCalledWith(
+            expect.stringContaining('.php'),
+            expect.stringContaining('PREMISSAS'),
+            'text/plain;charset=utf-8',
+        );
+        expect(downloadText).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.stringContaining('User::query()->get();'),
+            'text/plain;charset=utf-8',
+        );
     });
 });
 
