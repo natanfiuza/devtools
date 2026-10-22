@@ -6,6 +6,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Notifications\PaymentConfirmed;
 use Carbon\CarbonInterface;
@@ -27,6 +28,11 @@ final class RegisterPayment
 {
     public function __construct(private readonly GrantPlan $grantPlan) {}
 
+    /**
+     * O pagamento do gateway chega aqui pela mesma porta do manual: a diferenca
+     * esta no `gateway`, na referencia e no periodo ja aberto pela action de
+     * aprovacao (`subscription`).
+     */
     public function __invoke(
         User $user,
         int $amountCents,
@@ -35,8 +41,13 @@ final class RegisterPayment
         ?CarbonInterface $paidAt = null,
         ?string $note = null,
         bool $grantPlan = false,
+        string $gateway = 'manual',
+        ?string $gatewayRef = null,
+        ?Subscription $subscription = null,
+        ?string $gatewayMethod = null,
+        ?string $currency = null,
     ): Payment {
-        $subscription = $grantPlan && $plan !== null
+        $subscription ??= $grantPlan && $plan !== null
             ? ($this->grantPlan)($user, $plan)
             : null;
 
@@ -44,12 +55,14 @@ final class RegisterPayment
             'subscription_id' => $subscription?->getKey(),
             'plan_id' => $plan?->getKey(),
             'amount_cents' => $amountCents,
-            'currency' => $plan->currency ?? config('billing.currency'),
+            'currency' => $currency ?? $plan->currency ?? config('billing.currency'),
             'method' => $method,
             'status' => PaymentStatus::Paid,
             'paid_at' => $paidAt ?? now(),
             'note' => $note,
-            'gateway' => 'manual',
+            'gateway' => $gateway,
+            'gateway_ref' => $gatewayRef,
+            'gateway_method' => $gatewayMethod,
         ]);
 
         $this->notifyConfirmation($payment);

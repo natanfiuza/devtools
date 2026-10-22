@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import AccountLayout from '@/layouts/account/AccountLayout.vue';
 import Billing from '@/pages/dashboard/Billing.vue';
@@ -31,8 +31,16 @@ type FakePage = { url: string; props: Record<string, unknown> };
  * `useCurrentUrl` guarda um computed de modulo, que so se recalcula quando a
  * URL muda por dentro dele.
  */
-const { fakePage } = vi.hoisted(() => ({
+const { fakePage, routerMock } = vi.hoisted(() => ({
     fakePage: { current: null } as { current: FakePage | null },
+    // O router do Inertia e espiado, nao importado: importar o modulo mockado
+    // aqui dispararia a fabrica antes de os imports do topo existirem.
+    routerMock: {
+        get: vi.fn(),
+        post: vi.fn(),
+        delete: vi.fn(),
+        patch: vi.fn(),
+    },
 }));
 
 vi.mock('@inertiajs/vue3', async () => {
@@ -53,12 +61,7 @@ vi.mock('@inertiajs/vue3', async () => {
 
     return {
         usePage: () => fakePage.current,
-        router: {
-            get: vi.fn(),
-            post: vi.fn(),
-            delete: vi.fn(),
-            patch: vi.fn(),
-        },
+        router: routerMock,
         Head: defineComponent({
             name: 'InertiaHead',
             props: { title: { type: String, default: '' } },
@@ -106,6 +109,23 @@ const traducoes = {
         history: {
             title: 'TITULO_HISTORICO',
             description: 'DESCRICAO_HISTORICO',
+            opt_in: {
+                label: 'SALVAR_NO_HISTORICO',
+                hint: 'DICA_OPT_IN',
+            },
+            retention: 'RETENCAO {days}',
+            delete: {
+                action: 'APAGAR_HISTORICO',
+                title: 'TITULO_APAGAR',
+                description: 'DESCRICAO_APAGAR',
+                confirm: 'CONFIRMAR_APAGAR',
+                cancel: 'CANCELAR_APAGAR',
+            },
+            locked: {
+                title: 'TITULO_BLOQUEADO',
+                description: 'DESCRICAO_BLOQUEADO',
+                cta: 'VER_PLANOS',
+            },
             empty_title: 'NADA_POR_AQUI',
             empty: 'DICA_HISTORICO',
             table: {
@@ -155,6 +175,33 @@ const traducoes = {
             no_subscription: 'PLANO_GRATUITO',
             free_hint: 'DICA_FREE',
             no_period: 'SEM_PERIODO',
+            next_period: 'PROXIMO_PERIODO',
+            next_period_value: '{plan}: {start} – {end}',
+            renewal: {
+                label: 'RENOVACAO',
+                status_active: 'AUTOMATICA',
+                status_canceled: 'CANCELADA',
+                status_failed: 'FALHOU',
+                status_none: 'NAO_SE_APLICA',
+                cancel: 'CANCELAR_RENOVACAO',
+                cancel_hint: 'ACESSO ATE {end}',
+                cancel_confirm: 'CONFIRMA_CANCELAMENTO',
+                canceled_toast: 'CANCELADA_TOAST',
+                nothing_to_cancel: 'NADA_PARA_CANCELAR',
+                cancel_failed: 'FALHA_AO_CANCELAR',
+                canceled_title: 'RENOVACAO_CANCELADA',
+                canceled_description: 'SEM COBRANCA NOVA; ACESSO ATE {end}',
+                failed_title: 'RENOVACAO_FALHOU',
+                failed_description:
+                    'COBRANCA DE {date} RECUSADA; ACESSO ATE {end}',
+            },
+            checkout: {
+                pending_title: 'PAGAMENTO_EM_ANDAMENTO',
+                processing_title: 'PAGAMENTO_PROCESSANDO',
+                description: 'PAGAMENTO DO PLANO {plan} EM {date}',
+                processing_hint: 'DICA_PROCESSAMENTO',
+                view_details: 'VER_DETALHES',
+            },
             pending_intent: {
                 badge: 'EM_ANALISE',
                 title: 'INTENCAO_EM_ANALISE',
@@ -190,6 +237,7 @@ const traducoes = {
             profile: 'PERFIL',
             security: 'SEGURANCA',
             appearance: 'APARENCIA',
+            api_tokens: 'TOKENS_DE_API',
         },
     },
 };
@@ -220,6 +268,7 @@ function itemAberto(wrapper: VueWrapper) {
 
 beforeEach(() => {
     abrir('/dashboard');
+    vi.clearAllMocks();
 });
 
 describe('navegacao da conta', () => {
@@ -237,7 +286,7 @@ describe('navegacao da conta', () => {
             secoes.map((grupo) => grupo.findAll('a').map((a) => a.text())),
         ).toEqual([
             ['VISAO_GERAL', 'HISTORICO', 'FATURAS'],
-            ['PERFIL', 'SEGURANCA', 'APARENCIA'],
+            ['PERFIL', 'SEGURANCA', 'APARENCIA', 'TOKENS_DE_API'],
         ]);
 
         // As URLs de settings continuam as mesmas do starter kit.
@@ -252,6 +301,7 @@ describe('navegacao da conta', () => {
             '/settings/profile',
             '/settings/security',
             '/settings/appearance',
+            '/settings/api-tokens',
         ]);
     });
 
@@ -276,6 +326,7 @@ describe('navegacao da conta', () => {
         ['/settings/profile', 'PERFIL'],
         ['/settings/security', 'SEGURANCA'],
         ['/settings/appearance', 'APARENCIA'],
+        ['/settings/api-tokens', 'TOKENS_DE_API'],
     ];
 
     it.each(TELAS)('marca so a secao aberta em %s', (url, esperado) => {
@@ -346,12 +397,12 @@ const ASSINATURA: AccountSubscription = {
     start: '01/10/2026',
     end: '31/10/2026',
     current: true,
+    renewalCanceledAt: null,
+    renewalFailedAt: null,
+    renewable: false,
 };
 
-function pagina<T>(
-    rows: T[],
-    extra: Partial<Paginator<T>> = {},
-): Paginator<T> {
+function pagina<T>(rows: T[], extra: Partial<Paginator<T>> = {}): Paginator<T> {
     return {
         data: rows,
         current_page: 1,
@@ -467,6 +518,115 @@ describe('faturas', () => {
         expect(wrapper.get('tbody tr').text()).toContain('ESTORNADO');
     });
 
+    it('mostra o cancelamento so quando a renovacao esta viva', () => {
+        const comRenovacao = montarFaturas({
+            plan: { ...PLANO_FREE, name: 'Pro mensal', isFree: false },
+            subscription: {
+                ...ASSINATURA,
+                gateway: 'mercadopago',
+                renewable: true,
+            },
+            payments: pagina([]),
+            total: 0,
+        });
+
+        expect(
+            comRenovacao.find('[data-test="cancelar-renovacao"]').exists(),
+        ).toBe(true);
+        expect(comRenovacao.get('[data-test="assinatura"]').text()).toContain(
+            'AUTOMATICA',
+        );
+
+        const semRenovacao = montarFaturas({
+            plan: { ...PLANO_FREE, name: 'Pro mensal', isFree: false },
+            subscription: ASSINATURA,
+            payments: pagina([]),
+            total: 0,
+        });
+
+        expect(
+            semRenovacao.find('[data-test="cancelar-renovacao"]').exists(),
+        ).toBe(false);
+        expect(semRenovacao.get('[data-test="assinatura"]').text()).toContain(
+            'NAO_SE_APLICA',
+        );
+    });
+
+    it('mostra os avisos de falha e de cancelamento da renovacao', () => {
+        const falha = montarFaturas({
+            plan: { ...PLANO_FREE, name: 'Pro mensal', isFree: false },
+            subscription: {
+                ...ASSINATURA,
+                gateway: 'mercadopago',
+                renewable: true,
+                renewalFailedAt: '20/10/2026',
+            },
+            payments: pagina([]),
+            total: 0,
+        });
+
+        expect(falha.get('[data-test="renovacao-falhou"]').text()).toContain(
+            'RENOVACAO_FALHOU',
+        );
+        expect(falha.get('[data-test="renovacao-falhou"]').text()).toContain(
+            'COBRANCA DE 20/10/2026 RECUSADA; ACESSO ATE 31/10/2026',
+        );
+
+        const cancelada = montarFaturas({
+            plan: { ...PLANO_FREE, name: 'Pro mensal', isFree: false },
+            subscription: {
+                ...ASSINATURA,
+                gateway: 'mercadopago',
+                renewable: false,
+                renewalCanceledAt: '21/10/2026',
+            },
+            payments: pagina([]),
+            total: 0,
+        });
+
+        expect(
+            cancelada.get('[data-test="renovacao-cancelada"]').text(),
+        ).toContain('RENOVACAO_CANCELADA');
+        expect(
+            cancelada.get('[data-test="renovacao-cancelada"]').text(),
+        ).toContain('SEM COBRANCA NOVA; ACESSO ATE 31/10/2026');
+    });
+
+    it('mostra o proximo periodo e o checkout pendente', () => {
+        const wrapper = montarFaturas({
+            plan: { ...PLANO_FREE, name: 'Pro mensal', isFree: false },
+            subscription: ASSINATURA,
+            nextSubscription: {
+                plan: 'Pro anual',
+                start: '01/11/2026',
+                end: '01/11/2027',
+            },
+            lastCheckout: {
+                ulid: '01AB',
+                mode: 'recurring',
+                status: 'pending',
+                planName: 'Pro mensal',
+                planSlug: 'pro-monthly',
+                processing: true,
+                createdAt: '21/10/2026',
+            },
+            payments: pagina([]),
+            total: 0,
+        });
+
+        expect(wrapper.get('[data-test="proximo-periodo"]').text()).toContain(
+            'Pro anual',
+        );
+
+        const checkout = wrapper.get('[data-test="checkout-pendente"]');
+
+        expect(checkout.text()).toContain('PAGAMENTO_PROCESSANDO');
+        expect(checkout.text()).toContain('DICA_PROCESSAMENTO');
+        expect(checkout.get('a').attributes('href')).toBe(
+            '/subscribe?plan=pro-monthly&checkout=01AB',
+        );
+    });
+
     it('leva o numero da pagina seguinte para a URL', () => {
         const wrapper = montarFaturas({
             plan: PLANO_FREE,
@@ -520,8 +680,12 @@ describe('historico', () => {
             total: 0,
         });
 
-        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(
+            false,
+        );
         expect(wrapper.text()).toContain('NADA_POR_AQUI');
         expect(wrapper.text()).toContain('DICA_HISTORICO');
     });
@@ -533,9 +697,15 @@ describe('historico', () => {
             total: 1,
         });
 
-        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="historico-linha-ulid-123"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="historico-vazio"]').exists()).toBe(
+            false,
+        );
+        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(
+            true,
+        );
+        expect(
+            wrapper.find('[data-test="historico-linha-ulid-123"]').exists(),
+        ).toBe(true);
 
         const linha = wrapper.get('[data-test="historico-linha-ulid-123"]');
         expect(linha.text()).toContain('20/10/2026 14:00');
@@ -544,7 +714,96 @@ describe('historico', () => {
         expect(linha.text()).toContain('150 tokens');
         expect(linha.text()).toContain('CHAMADA_IA');
         expect(linha.text()).toContain('CONCLUIDO');
-        expect(linha.find('[data-test="detalhes-btn-ulid-123"]').exists()).toBe(true);
+        expect(linha.find('[data-test="detalhes-btn-ulid-123"]').exists()).toBe(
+            true,
+        );
+    });
+
+    it('mostra o CTA de upgrade no plano gratuito e esconde as preferencias', () => {
+        const wrapper = montarHistorico({
+            history: pagina([]),
+            total: 0,
+            locked: true,
+            upgradeUrl: '/pt-br/pricing',
+        });
+
+        const bloqueado = wrapper.get('[data-test="historico-bloqueado"]');
+
+        expect(bloqueado.text()).toContain('TITULO_BLOQUEADO');
+        expect(bloqueado.text()).toContain('DESCRICAO_BLOQUEADO');
+        expect(bloqueado.get('a').attributes('href')).toBe('/pt-br/pricing');
+        expect(
+            wrapper.find('[data-test="historico-preferencias"]').exists(),
+        ).toBe(false);
+        expect(wrapper.find('[data-test="historico-tabela"]').exists()).toBe(
+            false,
+        );
+    });
+
+    it('liga o opt-in e mostra a retencao configurada', async () => {
+        const wrapper = montarHistorico({
+            history: pagina([]),
+            total: 0,
+            locked: false,
+            enabled: false,
+            retentionDays: 30,
+        });
+
+        expect(wrapper.text()).toContain('SALVAR_NO_HISTORICO');
+        expect(wrapper.text()).toContain('RETENCAO 30');
+
+        await wrapper.get('[data-test="historico-toggle"]').trigger('click');
+
+        expect(routerMock.patch).toHaveBeenCalledWith(
+            '/dashboard/history/preference',
+            { history_enabled: true },
+            expect.anything(),
+        );
+    });
+
+    it('apaga o historico so depois da confirmacao', async () => {
+        const item = itemHistorico('ulid-789');
+        const wrapper = montarHistorico({
+            history: pagina([item]),
+            total: 1,
+            locked: false,
+            enabled: true,
+            retentionDays: 90,
+        });
+
+        await wrapper.get('[data-test="historico-apagar"]').trigger('click');
+        await nextTick();
+
+        const confirmar = document.querySelector<HTMLElement>(
+            '[data-test="historico-apagar-confirmar"]',
+        );
+
+        expect(confirmar).not.toBeNull();
+        expect(confirmar?.textContent).toContain('CONFIRMAR_APAGAR');
+
+        confirmar?.click();
+        await nextTick();
+
+        expect(routerMock.delete).toHaveBeenCalledWith(
+            '/dashboard/history',
+            expect.anything(),
+        );
+    });
+
+    it('nao deixa apagar quando nao ha historico', () => {
+        const wrapper = montarHistorico({
+            history: pagina([]),
+            total: 0,
+            locked: false,
+            enabled: false,
+            retentionDays: 90,
+        });
+
+        expect(
+            wrapper
+                .get('[data-test="historico-apagar"]')
+                .attributes('disabled'),
+        ).toBeDefined();
     });
 
     it('abre o modal com sql e resumo ao clicar em detalhes', async () => {

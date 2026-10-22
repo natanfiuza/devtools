@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Support\Format;
 use App\Support\MailBrand;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -18,7 +18,7 @@ use Illuminate\Notifications\Notification;
  * registra o pagamento e quem dispara: registro fiscal e aviso sao coisas
  * separadas, e o aviso e best-effort.
  */
-final class PaymentConfirmed extends Notification implements ShouldQueue
+final class PaymentConfirmed extends Notification implements ShouldQueueAfterCommit
 {
     use Queueable;
 

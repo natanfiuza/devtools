@@ -26,10 +26,14 @@ class EnsureAccountIsActive
         $user = $request->user();
 
         if ($user instanceof User && $user->isSuspended()) {
-            Auth::guard('web')->logout();
+            // O cliente da API usa Bearer token e nao tem sessao; invalidar
+            // sem checar estouraria antes de o envelope 403 ser montado.
+            if ($request->hasSession()) {
+                Auth::guard('web')->logout();
 
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
 
             // O cliente da API precisa de um 403 com codigo, e nao do redirect
             // de navegacao: quem chamou ja perdeu a sessao.

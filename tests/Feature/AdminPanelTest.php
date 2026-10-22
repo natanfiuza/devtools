@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdminActionType;
 use App\Enums\NewsletterSource;
 use App\Enums\PaymentStatus;
 use App\Models\NewsletterSubscriber;
@@ -291,7 +292,9 @@ it('lista os pagamentos e filtra por situacao', function () {
             ->component('admin/Payments')
             ->has('payments.data', 2)
             ->has('options.plans', 3)
-            ->has('options.methods', 4));
+            // Pix, transferencia, dinheiro, cartao, boleto e outro: a F6
+            // acrescentou as duas formas que o provedor tambem devolve.
+            ->has('options.methods', 6));
 
     $this->actingAs($admin)
         ->get(route('admin.payments.index', ['status' => 'refunded']))
@@ -317,7 +320,8 @@ it('mostra a auditoria e filtra por acao', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/Audit')
             ->has('entries.data', 2)
-            ->has('actionTypes', 19)
+            // O filtro lista o enum inteiro: crescer o enum nao quebra o teste.
+            ->has('actionTypes', count(AdminActionType::cases()))
             ->where('entries.data.0.actor', $admin->email)
             ->where('entries.data.0.target', $user->name.' <'.$user->email.'>'));
 

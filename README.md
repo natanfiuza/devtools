@@ -81,12 +81,12 @@ php artisan queue:work --tries=2 --timeout=90
 
 - A chave e **local** e nao entra no git, no chat, em issue ou em log.
 - O worker e obrigatorio: sem ele, a solicitacao fica `queued`. O `composer
-  dev` ja sobe um, mas nao com `--tries=2 --timeout=90`; para o smoke, use o
+dev` ja sobe um, mas nao com `--tries=2 --timeout=90`; para o smoke, use o
   comando acima em um terminal separado.
 - `DB_QUEUE_RETRY_AFTER` deve ser **150** (o `.env.example` ja traz), acima do
   timeout do job (90) e do worker (120).
 - Para limpar o estado: `php artisan ai:prune-cache --dry-run` e `php artisan
-  ai:reconcile --dry-run`; sem `--dry-run`, o primeiro apaga cache expirado e o
+ai:reconcile --dry-run`; sem `--dry-run`, o primeiro apaga cache expirado e o
   segundo encerra solicitacoes presas.
 
 ## Comandos

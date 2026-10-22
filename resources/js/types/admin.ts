@@ -75,6 +75,41 @@ export type AdminPaymentOption = {
     price: string;
 };
 
+/** Aba Doacoes: o registro publico visto por inteiro pelo admin (F6). */
+export type AdminDonationRow = {
+    id: number;
+    ulid: string;
+    donor: string | null;
+    email: string | null;
+    account: string | null;
+    amount: string;
+    status: 'pending' | 'paid' | 'expired' | 'refunded' | 'failed';
+    gateway: string;
+    locale: string;
+    createdAt: string | null;
+    paidAt: string | null;
+    expiresAt: string | null;
+    qrCode: string | null;
+    ticketUrl: string | null;
+};
+
+/** Evento cru do gateway, retido por 30 dias (ADR-047). */
+export type AdminWebhookEventRow = {
+    id: number;
+    gateway: string;
+    eventId: string;
+    topic: string | null;
+    action: string | null;
+    resourceId: string | null;
+    requestId: string | null;
+    status: 'pending' | 'processing' | 'processed' | 'failed' | 'ignored';
+    attempts: number;
+    error: string | null;
+    processedAt: string | null;
+    createdAt: string | null;
+    payload: Record<string, unknown>;
+};
+
 export type AdminPlanRow = {
     id: number;
     slug: string;
@@ -225,4 +260,30 @@ export type AdminSubscriptionsStats = {
     pendingIntents: number;
     revenueMonth: { cents: number; formatted: string };
     gracePeriod: number;
+};
+
+/** Alvo de saida do AI SQL Builder (F7): so o estado ligado/desligado edita. */
+export type AdminOutputTargetRow = {
+    id: number;
+    slug: string;
+    label: string;
+    language: string;
+    dialects: string[];
+    plan: string | null;
+    enabled: boolean;
+    sort: number;
+};
+
+/** Metadados do cache de IA; prompt, schema e resposta nunca saem do servidor. */
+export type AdminAiCacheRow = {
+    id: number;
+    hash: string;
+    model: string;
+    promptVersion: number;
+    tokensIn: number;
+    tokensOut: number;
+    hits: number;
+    createdAt: string | null;
+    expiresAt: string | null;
+    expired: boolean;
 };

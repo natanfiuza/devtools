@@ -56,6 +56,7 @@ final class StartAiQuery
         SqlDialect $dialect,
         string $schema,
         string $description,
+        ?int $apiTokenId = null,
     ): StartResult {
         AiConfiguration::ensureAvailable();
         $model = AiConfiguration::model();
@@ -86,6 +87,7 @@ final class StartAiQuery
             $payload,
             $prompt,
             $estimatedTokens,
+            $apiTokenId,
         ): StartResult {
             $lockedUser = User::query()
                 ->whereKey($user->getKey())
@@ -99,6 +101,11 @@ final class StartAiQuery
 
             $existing = AiRequest::query()
                 ->where('user_id', $lockedUser->getKey())
+                // O dedupe nao cruza canais: um token da API so reaproveita a
+                // propria solicitacao em voo, e a web so as da web. Sem isto,
+                // um token receberia o ULID de uma consulta que o outro canal
+                // (ou outro token) nao pode ler depois.
+                ->where('api_token_id', $apiTokenId)
                 ->where('prompt_hash', $payload->hash())
                 ->pending()
                 ->where('created_at', '>=', $cutoff)
@@ -114,6 +121,7 @@ final class StartAiQuery
             if ($hit !== null) {
                 $request = AiRequest::query()->create([
                     'user_id' => $lockedUser->getKey(),
+                    'api_token_id' => $apiTokenId,
                     'output_target_id' => $outputTarget->getKey(),
                     'status' => AiRequestStatus::Done,
                     'dialect' => $dialect,
@@ -130,7 +138,7 @@ final class StartAiQuery
                     'tokens_out' => max(0, $hit->cache->tokens_out),
                     'cache_hit' => true,
                     'error_code' => null,
-                    'history_visible' => true,
+                    'history_visible' => (bool) $lockedUser->history_enabled,
                     'canonical_payload' => null,
                     'response_json' => $hit->result->json(),
                 ]);
@@ -144,6 +152,7 @@ final class StartAiQuery
 
             $request = AiRequest::query()->create([
                 'user_id' => $lockedUser->getKey(),
+                'api_token_id' => $apiTokenId,
                 'output_target_id' => $outputTarget->getKey(),
                 'status' => AiRequestStatus::Queued,
                 'dialect' => $dialect,
@@ -160,7 +169,7 @@ final class StartAiQuery
                 'tokens_out' => null,
                 'cache_hit' => false,
                 'error_code' => null,
-                'history_visible' => true,
+                'history_visible' => (bool) $lockedUser->history_enabled,
                 'canonical_payload' => $this->codec->encode($payload),
                 'response_json' => null,
             ]);

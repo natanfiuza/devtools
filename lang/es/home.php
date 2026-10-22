@@ -81,6 +81,53 @@ return [
         'pending_body' => "Recibimos tu intención de suscripción y tu {'@'}nombredeusuario ya está reservado en tu cuenta. Nos pondremos en contacto para completar la activación.",
         'submitted_toast' => 'Intención de suscripción registrada con éxito.',
         'plan_label' => 'Elige tu plan',
+        'checkout' => [
+            'unavailable' => 'El pago en línea no está disponible en este momento. Puedes registrar tu interés abajo y te contactaremos.',
+            'path_label' => '¿Cómo quieres suscribirte?',
+            'paths' => [
+                'one_time' => [
+                    'title' => 'Pagar ahora',
+                    'body' => 'Pix, tarjeta o boleto pagados al contado. Desbloquea un período en cuanto se aprueba el pago.',
+                ],
+                'recurring' => [
+                    'title' => 'Renovación automática con tarjeta',
+                    'body' => 'La tarjeta se cobra en cada período. El acceso se desbloquea al confirmarse el primer pago.',
+                ],
+                'manual' => [
+                    'title' => 'Prefiero atención manual',
+                    'body' => 'Registra tu solicitud y acordamos contigo la forma de pago.',
+                ],
+            ],
+            'recurring_badge' => 'Renovación activa',
+            'recurring_blocked' => 'Ya hay una renovación automática activa en este plan. Cancélala en el área de facturas antes de crear otra.',
+            'redirect_note' => 'Serás redirigido a Mercado Pago para completar el pago. Nada se desbloquea hasta la confirmación.',
+            'one_time_action' => 'Pagar ahora',
+            'recurring_action' => 'Activar renovación automática',
+            'errors' => [
+                'unavailable' => 'El pago en línea no está disponible. Usa la atención manual para completar la suscripción.',
+                'recurring_active' => 'Ya hay una renovación automática activa en este plan. Cancélala antes de crear otra.',
+                'plan_unavailable' => 'Este plan no está disponible para el pago en línea.',
+                'gateway' => 'No pudimos abrir el pago ahora. Inténtalo de nuevo en unos instantes o usa la atención manual.',
+            ],
+            'status' => [
+                'processing' => [
+                    'title' => 'Pago en procesamiento',
+                    'body' => 'Estamos esperando la confirmación del proveedor. El acceso se desbloquea automáticamente en cuanto se apruebe el pago.',
+                ],
+                'approved' => [
+                    'title' => 'Pago aprobado',
+                    'body' => 'Tu nuevo período ya está disponible en la cuenta. Puedes seguirlo todo en el área de facturas.',
+                ],
+                'expired' => [
+                    'title' => 'Checkout expirado',
+                    'body' => 'Este intento de pago expiró sin confirmación. Elige un plan e inténtalo de nuevo.',
+                ],
+                'failed' => [
+                    'title' => 'Pago no completado',
+                    'body' => 'No pudimos completar este intento. No se desbloqueó ningún acceso; puedes intentarlo de nuevo o usar la atención manual.',
+                ],
+            ],
+        ],
         'username_label' => 'Tu nombre de usuario exclusivo',
         'username_placeholder' => 'nombredeusuario',
         'username_help' => 'Solo letras minúsculas, números y guion bajo (de 3 a 30 caracteres). Reservado de inmediato en tu cuenta.',

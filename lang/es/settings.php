@@ -8,6 +8,7 @@ return [
         'profile' => 'Perfil',
         'security' => 'Seguridad',
         'appearance' => 'Apariencia',
+        'api_tokens' => 'Tokens de API',
     ],
 
     'profile' => [
@@ -68,6 +69,32 @@ return [
         'two_factor_copy_codes' => 'Copiar todos los códigos',
         'two_factor_regenerate_codes' => 'Generar nuevos códigos',
         'two_factor_close' => 'Cerrar',
+    ],
+
+    'api_tokens' => [
+        'title' => 'Tokens de API',
+        'description' => 'Tokens para integrar tus sistemas con la API pública de consultas.',
+        'create' => [
+            'name' => 'Nombre del token',
+            'name_placeholder' => 'Ej.: integracion-despliegue',
+            'submit' => 'Crear token',
+        ],
+        'once' => [
+            'title' => 'Token creado',
+            'description' => 'Cópialo ahora: este valor no se volverá a mostrar.',
+            'copy' => 'Copiar',
+            'copied' => '¡Copiado!',
+        ],
+        'created' => 'Creado',
+        'last_used' => 'Último uso',
+        'never' => 'nunca',
+        'revoke' => 'Revocar',
+        'revoke_title' => 'Revocar token',
+        'revoke_description' => 'La integración que usa este token pierde el acceso de inmediato. Esta acción no se puede deshacer.',
+        'confirm' => 'Revocar',
+        'cancel' => 'Cancelar',
+        'empty_title' => 'Ningún token creado',
+        'empty' => 'Crea un token para llamar a la API pública desde otro sistema.',
     ],
 
     'appearance' => [

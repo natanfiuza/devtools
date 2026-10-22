@@ -62,6 +62,8 @@ return [
         'ai',
         'legal',
         'newsletter',
+        'donations',
+        'errors',
     ],
 
 ];

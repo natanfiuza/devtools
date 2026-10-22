@@ -1,0 +1,498 @@
+openapi: 3.1.0
+info:
+  title: devtools API publica
+  version: 1.0.0
+  summary: AI SQL Builder por Bearer token.
+  description: |
+    API publica v1 do devtools (ADR-050). Autenticacao por Personal Access
+    Token do Sanctum com a ability `ai:query`, criado em
+    `/settings/api-tokens`. A criacao e assincrona: o POST responde 200 em
+    cache hit ou 202 na fila, e o cliente acompanha o `poll_url`.
+
+    A cota e a do plano (`usage_ledger`), nao uma cota paralela. Toda leitura e
+    escopada pelo token que criou a consulta: consultas da tela ou de outro
+    token da mesma conta respondem 404.
+  contact:
+    name: devtools
+    url: https://devtools.natanfiuza.dev.br
+servers:
+  - url: https://devtools.natanfiuza.dev.br/api/v1
+    description: Producao
+  - url: http://localhost:8000/api/v1
+    description: Desenvolvimento local
+security:
+  - bearerAuth: []
+tags:
+  - name: conta
+  - name: catalogo
+  - name: consultas
+paths:
+  /me:
+    get:
+      tags: [conta]
+      operationId: getMe
+      summary: Conta, plano e cota do dono do token
+      responses:
+        '200':
+          description: Dados da conta autenticada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Me'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /output-targets:
+    get:
+      tags: [catalogo]
+      operationId: listOutputTargets
+      summary: Alvos de saida habilitados
+      responses:
+        '200':
+          description: Lista de alvos com `enabled = true`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OutputTarget'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /sql-queries:
+    get:
+      tags: [consultas]
+      operationId: listSqlQueries
+      summary: Consultas criadas por aquele token
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [queued, processing, done, failed]
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Lista paginada, da mais nova para a mais antiga.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlQueryList'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags: [consultas]
+      operationId: createSqlQuery
+      summary: Cria (ou reaproveita) uma consulta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreSqlQueryRequest'
+      responses:
+        '200':
+          description: Cache hit; a solicitacao ja nasceu `done` e nao debita cota.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlQueryResponse'
+        '202':
+          description: Na fila, ou deduplicada para uma solicitacao em voo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlQueryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '402':
+          $ref: '#/components/responses/QuotaExceeded'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/AiUnavailable'
+  /sql-queries/{ulid}:
+    get:
+      tags: [consultas]
+      operationId: getSqlQuery
+      summary: Estado e resultado de uma consulta
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+      responses:
+        '200':
+          description: Consulta do token autenticado, em qualquer estado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SqlQueryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Personal Access Token do Sanctum com a ability `ai:query`, criado em
+        `/settings/api-tokens`. O valor em texto puro aparece uma unica vez.
+  responses:
+    Unauthenticated:
+      description: Token ausente, invalido ou revogado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: unauthenticated
+              message: Unauthenticated.
+    Forbidden:
+      description: Token sem a ability `ai:query`, ou conta suspensa.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            semAbility:
+              value:
+                error:
+                  code: forbidden
+                  message: This action is unauthorized.
+            contaSuspensa:
+              value:
+                error:
+                  code: account_suspended
+                  message: Sua conta esta suspensa.
+    NotFound:
+      description: Consulta inexistente, de outra conta, de outro token ou alvo desligado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: not_found
+              message: Resource not found.
+    ValidationError:
+      description: Corpo ou parametro invalido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: validation_error
+              message: The given data was invalid.
+              details:
+                errors:
+                  description:
+                    - The description field is required.
+    QuotaExceeded:
+      description: Cota do plano esgotada; nada e enfileirado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: quota_exceeded
+              message: The AI quota is exhausted.
+              details:
+                unit: uses
+                required: 1
+    RateLimited:
+      description: Limite de taxa por token.
+      headers:
+        Retry-After:
+          description: Segundos ate a proxima tentativa.
+          schema:
+            type: integer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: rate_limited
+              message: Too many requests.
+    AiUnavailable:
+      description: Provedor de IA nao configurado; nada e enfileirado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: ai_unavailable
+              message: The AI provider is not configured.
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Contrato estavel; o cliente programa por ele.
+            message:
+              type: string
+              description: Fallback tecnico em ingles; nao exibir cru.
+            details:
+              type: object
+              additionalProperties: true
+              description: Dados para corrigir o pedido (campo, unidade da cota).
+    Quota:
+      type: object
+      required: [unit, limit, used, remaining, exhausted, window]
+      properties:
+        unit:
+          type: string
+          enum: [uses, tokens]
+        limit:
+          type: integer
+        used:
+          type: integer
+        remaining:
+          type: integer
+        exhausted:
+          type: boolean
+        window:
+          type: object
+          required: [start, end]
+          properties:
+            start:
+              type: [string, 'null']
+              format: date-time
+            end:
+              type: [string, 'null']
+              format: date-time
+    Plan:
+      type: object
+      required: [slug, name, is_free]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        is_free:
+          type: boolean
+    Me:
+      type: object
+      required: [id, name, email, locale, plan, quota]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        locale:
+          type: string
+          enum: [pt_BR, en, pt_PT, es, fr]
+        plan:
+          $ref: '#/components/schemas/Plan'
+        quota:
+          $ref: '#/components/schemas/Quota'
+    OutputTarget:
+      type: object
+      required: [slug, label, language, supported_dialects]
+      properties:
+        slug:
+          type: string
+        label:
+          type: string
+        language:
+          type: [string, 'null']
+        supported_dialects:
+          type: array
+          items:
+            type: string
+            enum: [mysql, pgsql, sqlsrv, sqlite]
+    StoreSqlQueryRequest:
+      type: object
+      required: [schema_source, dialect, output_target, schema, description]
+      properties:
+        schema_source:
+          type: string
+          enum: [ddl, json, migration, models]
+        dialect:
+          type: string
+          enum: [mysql, pgsql, sqlsrv, sqlite]
+        output_target:
+          type: string
+          description: Slug de um alvo habilitado em `/output-targets`.
+        schema:
+          type: string
+        description:
+          type: string
+    QueryResult:
+      type: object
+      properties:
+        sql:
+          type: string
+        dialect:
+          type: string
+          enum: [mysql, pgsql, sqlsrv, sqlite]
+        assumptions:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        tables_used:
+          type: array
+          items:
+            type: string
+        needs_clarification:
+          type: boolean
+        clarification:
+          type: [string, 'null']
+        outputs:
+          type: object
+          additionalProperties:
+            type: string
+    SqlQuery:
+      type: object
+      required:
+        - id
+        - status
+        - cache_hit
+        - result
+        - tokens
+        - poll_after_ms
+        - quota
+        - error_code
+        - output_target
+        - poll_url
+        - created_at
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+        status:
+          type: string
+          enum: [queued, processing, done, failed]
+        cache_hit:
+          type: boolean
+        result:
+          oneOf:
+            - $ref: '#/components/schemas/QueryResult'
+            - type: 'null'
+        tokens:
+          type: object
+          required: [in, out]
+          properties:
+            in:
+              type: [integer, 'null']
+            out:
+              type: [integer, 'null']
+        poll_after_ms:
+          type: [integer, 'null']
+        quota:
+          $ref: '#/components/schemas/Quota'
+        error_code:
+          type: [string, 'null']
+          enum:
+            - provider_unavailable
+            - invalid_response
+            - unsafe_sql
+            - invalid_contract
+            - timeout
+            - internal
+            - null
+        output_target:
+          type: [string, 'null']
+        poll_url:
+          type: [string, 'null']
+          format: uri
+          description: Nulo em `done`/`failed`; e o sinal para parar de consultar.
+        created_at:
+          type: [string, 'null']
+          format: date-time
+    SqlQueryResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/SqlQuery'
+    SqlQueryList:
+      type: object
+      required: [data, meta, links, quota]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SqlQuery'
+        meta:
+          type: object
+          required: [current_page, per_page, total, last_page]
+          properties:
+            current_page:
+              type: integer
+            per_page:
+              type: integer
+            total:
+              type: integer
+            last_page:
+              type: integer
+        links:
+          type: object
+          required: [next, previous]
+          properties:
+            next:
+              type: [string, 'null']
+              format: uri
+            previous:
+              type: [string, 'null']
+              format: uri
+        quota:
+          $ref: '#/components/schemas/Quota'

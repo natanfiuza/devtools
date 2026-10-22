@@ -4,6 +4,8 @@ use App\Support\Locales;
 use App\Support\Seo;
 use App\Support\Tools;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -38,9 +40,29 @@ it('escreve as metas de compartilhamento na home', function () {
         ->toContain('<meta name="twitter:card" content="summary_large_image">');
 });
 
+it('completa o card do Twitter com titulo, descricao e imagem', function () {
+    $html = $this->get('/pt-br')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<meta name="twitter:card" content="summary_large_image">')
+        ->toContain('<meta name="twitter:title" content="'.e((string) trans('app.nav.tools')).'">')
+        ->toContain('<meta name="twitter:description" content="'.e((string) trans('home.subtitle')).'">')
+        ->toContain('<meta name="twitter:image" content="'.seoOgUrl((string) config('seo.image.file')).'">')
+        ->toContain('<meta name="twitter:image:alt" content="'.e(trans('app.brand').' - '.trans('app.tagline')).'">');
+});
+
+it('aponta o card do Twitter para a imagem da propria tool', function () {
+    $relative = trim((string) config('seo.image.tools_dir'), '/').'/json-viewer.png';
+    $html = $this->get('/pt-br/tools/json-viewer')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<meta name="twitter:title" content="'.e((string) trans('tools.json-viewer.name')).'">')
+        ->toContain('<meta name="twitter:image" content="'.seoOgUrl($relative).'">');
+});
+
 it('escreve titulo e descricao de cada pagina indexavel no HTML do servidor', function () {
     // Sem SSR, o <Head> do Inertia nao chega ao robo do WhatsApp: o titulo e a
-    // descricao precisam sair do Blade. Este teste varre as quatro paginas
+    // descricao precisam sair do Blade. Este teste varre as cinco paginas
     // publicas nos cinco idiomas.
     foreach (Locales::all() as $code => $locale) {
         $paginas = [
@@ -59,6 +81,10 @@ it('escreve titulo e descricao de cada pagina indexavel no HTML do servidor', fu
             '/'.$locale['slug'].'/terms' => [
                 (string) trans('legal.terms.title', [], $code),
                 str_replace('{app}', (string) trans('app.brand', [], $code), (string) trans('legal.terms.intro', [], $code)),
+            ],
+            '/'.$locale['slug'].'/donate' => [
+                (string) trans('donations.meta.title', [], $code),
+                (string) trans('donations.meta.description', [], $code),
             ],
         ];
 
@@ -255,4 +281,44 @@ it('cai na imagem padrao quando a tool nao tem PNG proprio', function () {
     expect($this->get('/pt-br/tools/zeta-tool')->assertOk()->getContent())
         ->toContain('<meta property="og:image" content="'.seoOgUrl((string) config('seo.image.file')).'">')
         ->not->toContain('zeta-tool.png');
+});
+
+/*
+| Telas de conta (F7): os nomes de rota do starter kit nao usam o prefixo
+| `settings.`; por isso o NOINDEX lista cada um. A regra e conferida pelo nome
+| da rota, sem depender de sessao, 2FA ou dados de conta.
+*/
+
+it('marca como noindex as telas de conta e o desafio de dois fatores', function () {
+    $rotas = [
+        'profile.edit',
+        'security.edit',
+        'appearance.edit',
+        'two-factor.login',
+        'api-tokens.index',
+    ];
+
+    foreach ($rotas as $name) {
+        $route = Route::getRoutes()->getByName($name);
+
+        expect($route)->not->toBeNull("Rota ausente: {$name}");
+
+        $request = Request::create('/'.$route->uri(), 'GET');
+        $request->setRouteResolver(fn () => $route);
+
+        expect(Seo::noindex($request))->toBeTrue("Rota indexavel: {$name}");
+    }
+});
+
+it('mantem as paginas publicas fora da lista de noindex', function () {
+    foreach (['home', 'pricing', 'privacy', 'terms', 'donate', 'tools.show'] as $name) {
+        $route = Route::getRoutes()->getByName($name);
+
+        expect($route)->not->toBeNull("Rota ausente: {$name}");
+
+        $request = Request::create('/'.$route->uri(), 'GET');
+        $request->setRouteResolver(fn () => $route);
+
+        expect(Seo::noindex($request))->toBeFalse("Rota noindex: {$name}");
+    }
 });

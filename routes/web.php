@@ -5,6 +5,8 @@ use App\Http\Controllers\Account\HistoryController;
 use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PricingController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\ToolController;
 use App\Support\Locales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 // A raiz manda o visitante para o idioma dele (docs/SPEC.md secao 3).
 Route::get('/', function (Request $request) {
@@ -37,6 +40,15 @@ Route::prefix('{locale}')
         // hreflang normal. Ficam linkadas no rodape do site.
         Route::get('privacy', [LegalController::class, 'privacy'])->name('privacy');
         Route::get('terms', [LegalController::class, 'terms'])->name('terms');
+
+        // Doacao por Pix (F6): publica e indexavel, porque e conteudo do site.
+        // O status usa ULID e fica fora do indice (e uma pagina de pagamento).
+        Route::get('donate', [DonationController::class, 'index'])->name('donate');
+        Route::post('donate', [DonationController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('donate.store');
+        Route::get('donate/{donation}', [DonationController::class, 'status'])
+            ->name('donate.status');
 
         // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
         // so, e o componente de cada tool entra por dentro dela. Sem restricao
@@ -93,6 +105,16 @@ Route::post('subscribe', [SubscriptionIntentController::class, 'store'])
     ->middleware(['auth', 'active'])
     ->name('subscribe.store');
 
+// Checkout online (F6): o POST cria a sessao e manda o navegador ao provedor;
+// o GET de retorno e so a porta de volta. Nenhum dos dois confirma pagamento -
+// isso e trabalho do webhook.
+Route::post('subscribe/checkout', [CheckoutController::class, 'store'])
+    ->middleware(['auth', 'active'])
+    ->name('subscribe.checkout.store');
+Route::get('subscribe/checkout/{checkoutSession}/return', [CheckoutController::class, 'return'])
+    ->middleware(['auth', 'active'])
+    ->name('subscribe.checkout.return');
+
 // Area da conta: uma navegacao so - visao geral, historico, faturas - com as
 // URLs de sempre (`/dashboard` continua sendo `/dashboard`).
 //
@@ -100,11 +122,38 @@ Route::post('subscribe', [SubscriptionIntentController::class, 'store'])
 // e nao so barra o proximo login (ADR-025).
 Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
     Route::get('dashboard', OverviewController::class)->name('dashboard');
-    Route::get('dashboard/history', HistoryController::class)->name('dashboard.history');
+    Route::get('dashboard/history', [HistoryController::class, 'index'])->name('dashboard.history');
+
+    // Escritas do historico: so plano pago (ADR-051). O GET acima fica aberto
+    // para o Free ver o CTA de upgrade.
+    Route::middleware('history.paid')->group(function (): void {
+        Route::patch('dashboard/history/preference', [HistoryController::class, 'updatePreference'])
+            ->name('dashboard.history.preference');
+        Route::delete('dashboard/history', [HistoryController::class, 'destroy'])
+            ->name('dashboard.history.destroy');
+    });
     Route::get('dashboard/billing', BillingController::class)->name('dashboard.billing');
+
+    // Encerrar a renovacao automatica (F6): o gateway e chamado antes do banco,
+    // entao a recusa dele nao deixa a conta achando que cancelou.
+    Route::post('dashboard/billing/cancel-recurring', [BillingController::class, 'cancelRecurring'])
+        ->name('dashboard.billing.cancel-recurring');
 });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth-social.php';
 require __DIR__.'/newsletter.php';
 require __DIR__.'/admin.php';
+require __DIR__.'/webhooks.php';
+
+// Ultimo recurso para um caminho que nao casou com rota nenhuma. Passa pelo
+// grupo web (idioma, props compartilhadas), entao a 404 sai inteira e no idioma
+// do prefixo da URL (ResolveLocale le o primeiro segmento). A API nunca cai
+// aqui: o abort vira o envelope JSON pelo handler.
+Route::fallback(function (Request $request) {
+    abort_if($request->is('api/*'), 404);
+
+    return Inertia::render('Error', ['status' => 404])
+        ->toResponse($request)
+        ->setStatusCode(404);
+})->name('fallback.root');

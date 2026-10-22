@@ -7,6 +7,7 @@ import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import SocialAuthButtons from '@/components/SocialAuthButtons.vue';
 import TextLink from '@/components/TextLink.vue';
+import TurnstileWidget from '@/components/TurnstileWidget.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -39,6 +40,13 @@ defineProps<{
 const locale = ref(page.props.locale);
 
 const locales = computed<Locale[]>(() => page.props.locales ?? []);
+
+/**
+ * O token do Turnstile e de uso unico. Quando o cadastro volta com erro, o
+ * widget precisa de um desafio novo - senao o proximo envio carrega um token
+ * ja consumido e falha de novo (ADR-052).
+ */
+const turnstile = ref<{ reset: () => void } | null>(null);
 </script>
 
 <template>
@@ -72,6 +80,7 @@ const locales = computed<Locale[]>(() => page.props.locales ?? []);
             v-bind="routes.form.register.value"
             :reset-on-success="['password', 'password_confirmation']"
             class="flex flex-col gap-5"
+            @error="turnstile?.reset()"
         >
             <div class="grid gap-4">
                 <div class="grid gap-2">
@@ -192,6 +201,8 @@ const locales = computed<Locale[]>(() => page.props.locales ?? []);
                     <span>{{ t('auth.register.newsletter') }}</span>
                 </Label>
             </div>
+
+            <TurnstileWidget ref="turnstile" />
 
             <Button
                 type="submit"

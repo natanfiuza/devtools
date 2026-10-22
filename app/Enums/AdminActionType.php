@@ -22,6 +22,8 @@ enum AdminActionType: string
     case UserDeleted = 'user.deleted';
     case UserImpersonated = 'user.impersonated';
     case PlanUpdated = 'plan.updated';
+    case OutputTargetUpdated = 'output_target.updated';
+    case AiCachePruned = 'ai_cache.pruned';
     case PaymentRegistered = 'payment.registered';
     case PaymentRefunded = 'payment.refunded';
     case SubscriberRemoved = 'subscriber.removed';

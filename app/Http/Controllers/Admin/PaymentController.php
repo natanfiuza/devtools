@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Actions\Admin\RefundPayment;
 use App\Actions\Admin\RegisterPayment;
+use App\Actions\Payments\RefundGatewayPayment;
 use App\Enums\AdminActionType;
+use App\Enums\DonationStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Exceptions\Payments\PaymentGatewayException;
+use App\Exceptions\Payments\PaymentVerificationException;
 use App\Http\Controllers\Admin\Concerns\RecordsAdminActions;
 use App\Http\Controllers\Controller;
+use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
@@ -16,16 +21,18 @@ use App\Support\Format;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Pagamentos: a lista e o registro manual (ADR-027).
+ * Pagamentos: a lista e o registro manual (ADR-027), com a aba de doacoes (F6).
  *
- * O gateway entra na F6; ate la, quem recebe por pix ou transferencia registra
- * aqui. E o unico lugar do sistema onde dinheiro entra sem passar por um
- * provedor, entao tudo o que se registra sai com `gateway = manual`.
+ * O registro manual continua sendo o unico lugar do sistema onde dinheiro entra
+ * sem passar por um provedor, entao tudo o que se registra sai com
+ * `gateway = manual`. A doacao nao compra plano nem consome cota: por isso ela
+ * mora em `donations` e aparece aqui so para leitura.
  */
 class PaymentController extends Controller
 {
@@ -33,33 +40,35 @@ class PaymentController extends Controller
 
     private const PER_PAGE = 20;
 
+    /**
+     * Abas da tela: pagamentos (fiscal) e doacoes (leitura).
+     *
+     * @var list<string>
+     */
+    private const TABS = ['payments', 'donations'];
+
     public function index(Request $request): Response
     {
+        $tab = $request->string('tab')->trim()->value();
+        $tab = in_array($tab, self::TABS, true) ? $tab : 'payments';
+
         $search = $request->string('q')->trim()->value();
         $status = $request->string('status')->value();
 
-        $payments = $this->query($search, $status)
-            ->with(['user', 'plan'])
-            ->orderByDesc('paid_at')
-            ->paginate(self::PER_PAGE)
-            ->withQueryString();
+        $payments = $tab === 'payments' ? $this->paymentRows($search, $status) : null;
+        $donations = $tab === 'donations' ? $this->donationRows($search, $status) : null;
 
         return Inertia::render('admin/Payments', [
-            'payments' => $payments->through(fn (Payment $payment): array => [
-                'id' => $payment->id,
-                'account' => $payment->user->email,
-                'plan' => $payment->plan?->name,
-                'amount' => Format::money($payment->amount_cents, $payment->currency),
-                'method' => $payment->method->value,
-                'status' => $payment->status->value,
-                'paidAt' => Format::dateTime($payment->paid_at),
-                'note' => $payment->note,
-            ]),
+            'tab' => $tab,
+            'payments' => $payments,
+            'donations' => $donations,
             'filters' => [
                 'q' => $search,
                 'status' => $status,
             ],
-            'total' => $payments->total(),
+            'total' => $tab === 'payments'
+                ? ($payments?->total() ?? 0)
+                : ($donations?->total() ?? 0),
             'options' => [
                 'plans' => Plan::query()->active()->orderBy('sort')->get()
                     ->map(fn (Plan $plan): array => [
@@ -140,14 +149,33 @@ class PaymentController extends Controller
 
     /**
      * Estorna: o dinheiro voltou e a assinatura que o pagamento abriu acaba.
+     *
+     * No pagamento que veio do gateway, o provedor vem primeiro: a recusa dele
+     * deixa tudo como estava, e a tela mostra o erro sem mentir sobre o estado
+     * local. O manual segue direto para o estorno local (ADR-027).
      */
-    public function refund(Request $request, Payment $payment, RefundPayment $refund): RedirectResponse
-    {
+    public function refund(
+        Request $request,
+        Payment $payment,
+        RefundPayment $refund,
+        RefundGatewayPayment $refundGateway,
+    ): RedirectResponse {
         if ($payment->status === PaymentStatus::Refunded) {
             return $this->back('info', __('admin.toasts.payment_already_refunded'));
         }
 
-        $refund($payment);
+        try {
+            if ($payment->gateway === 'manual') {
+                $refund($payment);
+            } else {
+                $refundGateway($payment);
+            }
+        } catch (PaymentGatewayException|PaymentVerificationException $exception) {
+            // Nenhuma das duas carrega corpo de resposta nem token.
+            report($exception);
+
+            return $this->back('error', __('admin.toasts.payment_refund_failed'));
+        }
 
         $this->record($request, AdminActionType::PaymentRefunded, $payment, [
             'valor' => $payment->amount_cents,
@@ -172,6 +200,103 @@ class PaymentController extends Controller
                 PaymentStatus::tryFrom($status) !== null,
                 fn (Builder $query) => $query->where('status', $status),
             );
+    }
+
+    /**
+     * Aba Pagamentos: o registro fiscal, sem a sessao de checkout pendente.
+     *
+     * @return LengthAwarePaginator<int, mixed>
+     */
+    private function paymentRows(string $search, string $status): LengthAwarePaginator
+    {
+        return $this->query($search, $status)
+            ->with(['user', 'plan'])
+            ->orderByDesc('paid_at')
+            ->paginate(self::PER_PAGE)
+            ->withQueryString()
+            ->through(fn (Payment $payment): array => [
+                'id' => $payment->id,
+                'account' => $payment->user->email,
+                'plan' => $payment->plan?->name,
+                'amount' => Format::money($payment->amount_cents, $payment->currency),
+                'method' => $payment->method->value,
+                'status' => $payment->status->value,
+                'paidAt' => Format::dateTime($payment->paid_at),
+                'note' => $payment->note,
+            ]);
+    }
+
+    /**
+     * Aba Doacoes: nome, e-mail, QR e comprovante ficam com o admin; a pagina
+     * publica de status nao mostra nenhum deles (F6).
+     *
+     * @return LengthAwarePaginator<int, mixed>
+     */
+    private function donationRows(string $search, string $status): LengthAwarePaginator
+    {
+        return Donation::query()
+            ->with('user')
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $query) use ($search): void {
+                    $query->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%')
+                        ->orWhere('ulid', 'like', '%'.$search.'%');
+                });
+            })
+            ->when(
+                DonationStatus::tryFrom($status) !== null,
+                fn (Builder $query) => $this->filterDonationStatus($query, $status),
+            )
+            ->orderByDesc('id')
+            ->paginate(self::PER_PAGE)
+            ->withQueryString()
+            ->through(fn (Donation $donation): array => [
+                'id' => $donation->id,
+                'ulid' => $donation->ulid,
+                'donor' => $donation->name,
+                'email' => $donation->email,
+                'account' => $donation->user?->email,
+                'amount' => Format::money($donation->amount_cents, $donation->currency),
+                'status' => $donation->effectiveStatus()->value,
+                'gateway' => $donation->gateway,
+                'locale' => $donation->locale,
+                'createdAt' => Format::dateTime($donation->created_at),
+                'paidAt' => Format::dateTime($donation->paid_at),
+                'expiresAt' => Format::dateTime($donation->expires_at),
+                'qrCode' => $donation->qr_code,
+                'ticketUrl' => $donation->ticket_url,
+            ]);
+    }
+
+    /**
+     * O filtro de situacao enxerga a expiracao preguicosa: um Pix dinamico
+     * pendente com prazo vencido conta como `expired` (e nao aparece em
+     * `pending`), mesmo antes da varredura de `payments:expire`.
+     *
+     * @param  Builder<Donation>  $query
+     */
+    private function filterDonationStatus(Builder $query, string $status): void
+    {
+        $expired = function (Builder $query): void {
+            $query->where('status', DonationStatus::Expired->value)
+                ->orWhere(function (Builder $query): void {
+                    $query->where('status', DonationStatus::Pending->value)
+                        ->where('gateway', '!=', 'manual')
+                        ->whereNotNull('expires_at')
+                        ->where('expires_at', '<=', now());
+                });
+        };
+
+        match ($status) {
+            DonationStatus::Expired->value => $query->where($expired),
+            DonationStatus::Pending->value => $query->where('status', 'pending')
+                ->where(function (Builder $query): void {
+                    $query->where('gateway', 'manual')
+                        ->orWhereNull('expires_at')
+                        ->orWhere('expires_at', '>', now());
+                }),
+            default => $query->where('status', $status),
+        };
     }
 
     private function back(string $type, string $message): RedirectResponse

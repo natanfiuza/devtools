@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 use App\Notifications\VerifyEmail as VerifyEmailNotification;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property int $id
@@ -30,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $anonymized_at
  * @property string|null $locale
  * @property string|null $appearance
+ * @property bool $history_enabled
  * @property string|null $remember_token
  * @property string|null $photo_uuid
  * @property-read string|null $avatar
@@ -41,12 +44,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'username', 'email', 'password', 'photo_uuid'])]
+#[Fillable(['name', 'username', 'email', 'password', 'photo_uuid', 'history_enabled'])]
 #[Hidden(['password', 'appearance', 'remember_token', 'role', 'suspended_at', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
+    use HasApiTokens, HasFactory, \Illuminate\Database\Eloquent\SoftDeletes, \Laravel\Fortify\TwoFactorAuthenticatable, Notifiable;
 
     /**
      * @var list<string>
@@ -99,6 +102,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'suspended_at' => 'datetime',
             'anonymized_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
+            'history_enabled' => 'boolean',
             'deleted_at' => 'datetime',
         ];
     }
@@ -185,6 +189,26 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             ->current()
             ->with('plan')
             ->orderByDesc('current_period_start')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /**
+     * O proximo periodo empilhado, ainda no futuro.
+     *
+     * Um pagamento antecipado abre uma linha que comeca quando a atual
+     * termina; ela nao vale agora, mas a tela de faturas precisa mostra-la para
+     * a conta saber que a renovacao ja esta paga.
+     */
+    public function nextSubscription(): ?Subscription
+    {
+        return $this->subscriptions()
+            ->where('status', SubscriptionStatus::Active->value)
+            ->whereNotNull('current_period_start')
+            ->where('current_period_start', '>', now())
+            ->with('plan')
+            ->orderBy('current_period_start')
+            ->orderBy('id')
             ->first();
     }
 
@@ -235,6 +259,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function subscriptionIntents(): HasMany
     {
         return $this->hasMany(SubscriptionIntent::class);
+    }
+
+    /**
+     * Checkouts pagos iniciados por esta conta, aprovados ou nao (F6).
+     *
+     * @return HasMany<CheckoutSession, $this>
+     */
+    public function checkoutSessions(): HasMany
+    {
+        return $this->hasMany(CheckoutSession::class);
     }
 
     /**

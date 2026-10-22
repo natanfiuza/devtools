@@ -55,8 +55,27 @@ DB_PASSWORD=senha-forte
 INERTIA_SSR_ENABLED=true
 
 # Medicao (GA4). Vazio desliga a medicao - e o que se quer em local e em teste:
-# so este .env carrega o id. Passo a passo na secao 9.
+# so este .env carrega o id. Passo a passo na secao 10.
 ANALYTICS_GA4_ID=
+
+# Mercado Pago (F6). Sem access token o checkout online nao aparece e a
+# assinatura cai no atendimento manual; sem webhook secret o endpoint responde
+# 503 e nenhuma notificacao e aceita. Nenhum dos dois vai para o repositorio.
+PAYMENTS_GATEWAY=mercadopago
+MERCADO_PAGO_ACCESS_TOKEN=
+MERCADO_PAGO_WEBHOOK_SECRET=
+MERCADO_PAGO_BASE_URL=https://api.mercadopago.com
+PAYMENTS_CHECKOUT_EXPIRES_MINUTES=60
+
+# Doacao: valores em centavos e Pix estatico de fallback (sem gateway).
+DONATIONS_SUGGESTED_CENTS=500,1000,2500,5000
+DONATIONS_MIN_CENTS=100
+DONATIONS_MAX_CENTS=100000
+DONATIONS_EXPIRES_MINUTES=60
+DONATIONS_SEND_RECEIPTS=true
+DONATIONS_PIX_KEY=
+DONATIONS_PIX_HOLDER=
+DONATIONS_PIX_CITY=
 ```
 
 Permissoes e a primeira carga:
@@ -186,6 +205,11 @@ Na pratica: adicionar coluna com default ou nullable; renomear em dois passos
 (coluna nova + copia, depois remocao numa fase seguinte); nunca `DROP` no
 mesmo deploy que para de usar a coluna.
 
+**Pendencia conhecida (F7)**: `usage_ledger.ai_request_id` nao e mais lida nem
+escrita desde 2026-10-22, mas continua na tabela. O `DROP` fica para o deploy
+**seguinte**: enquanto um worker antigo puder estar de pe entre o `migrate` e o
+`queue:restart`, ele ainda insere a coluna e o lancamento do ledger falharia.
+
 ## 4. Supervisor (fila e SSR)
 
 ```bash
@@ -286,9 +310,80 @@ grep 'ai_request_id' storage/logs/laravel.log | tail -n 20
 grep 'AI request failed' storage/logs/laravel.log | tail -n 20
 ```
 
-Os logs trazem `ai_request_id`, `error_code`, `tokens_in/out` e a classe da
-excecao. **Nunca** trazem schema, descricao ou prompt - se aparecer texto de
-schema num log, e bug e vazamento: abra incidente e limpe o arquivo.
+Os logs trazem `ai_request_id` (o **ULID** da solicitacao, nao a coluna legada
+bigint), `error_code`, `tokens_in/out` e a classe da excecao. **Nunca** trazem
+schema, descricao ou prompt - se aparecer texto de schema num log, e bug e
+vazamento: abra incidente e limpe o arquivo.
+
+### Agendador (task_schedules) e manutencao de pagamentos
+
+As rotinas de conta e de pagamento vivem na tabela `task_schedules`, lida pelo
+framework em `bootstrap/app.php`; cada execucao vira um job `ExecuteCommand` na
+fila. Isso exige **duas coisas ligadas**: o worker (secao 4) e o cron do
+scheduler:
+
+```cron
+* * * * * cd /var/www/devtools && php artisan schedule:run >> storage/logs/schedule.log 2>&1
+```
+
+Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune` e
+`history:prune` nunca rodam. As linhas semeadas pelas migrations (fuso
+`America/Recife`, `APP_TIMEZONE`):
+
+| Comando | Expressao | Para que |
+| ------- | --------- | -------- |
+| `accounts:purge-deleted --days=30` | `dailyAt:03:00` | expurga contas com 30 dias de carencia |
+| `payments:expire` | `*/5 * * * *` | marca `pending -> expired` em checkout e doacao vencidos |
+| `webhooks:prune --days=30` | `30 3 * * *` | apaga eventos de webhook com mais de 30 dias |
+| `history:prune` | `45 3 * * *` | apaga historico de consultas com mais de 90 dias (F7) |
+
+`last_run_at` existe na tabela mas **nao e atualizada**: confira a execucao
+pelos logs (`schedule.log`, `worker.log`) ou pelo efeito no banco. Nao ha tela
+de agendamentos; mudar horario e migration ou SQL.
+
+```bash
+# Antes da primeira execucao em producao (nao altera nada):
+php artisan payments:expire --dry-run
+php artisan webhooks:prune --dry-run
+php artisan history:prune --dry-run
+
+# Execucao manual, se precisar:
+php artisan accounts:purge-deleted --days=30
+php artisan payments:expire
+php artisan webhooks:prune --days=30
+php artisan history:prune
+```
+
+O guia completo das tres pecas (deploy, agendador e worker) esta em
+[guides/cron.md](guides/cron.md).
+
+- `payments:expire` so toca `pending`; pago, estornado ou falho nunca regridem.
+  A leitura ja expira de forma preguicosa, entao a tela nao depende do job.
+- `webhooks:prune` apaga **somente** `webhook_events`; `payments`,
+  `subscriptions` e `donations` ficam para sempre. `--days` tem piso de 1.
+- `ExecuteCommand` tem `tries=1`: uma execucao perdida so volta no proximo
+  horario. Se o worker estiver parado, os jobs de agendamento acumulam na fila.
+
+### Historico: opt-in, retencao e exclusao (F7)
+
+O historico e **opt-in e desligado por padrao** (`users.history_enabled`): com o
+toggle desligado, novas solicitacoes nao aparecem na tela; as antigas continuam
+ate o usuario apagar. So planos pagos veem a tela e usam as rotas de preferencia
+e exclusao (o Free recebe 403 e ve o CTA de upgrade).
+
+- A exclusao (`DELETE /dashboard/history`) apaga **somente** `ai_requests` com
+  status terminal (`done`/`failed`) daquela conta. Job em voo termina e pode ser
+  apagado depois.
+- `history:prune` usa `AI_HISTORY_RETENTION_DAYS` (90 por padrao) e o mesmo
+  criterio; `usage_ledger` e `ai_cache` **nao** sao tocados - o primeiro sustenta
+  a cota, o segundo e cache compartilhado.
+- A anonimizacao de conta apaga `ai_requests` e revoga todos os tokens Sanctum.
+- Suporte nao restaura historico apagado; o backup do banco e a unica copia.
+
+```bash
+php artisan history:prune --dry-run          # lista o que sairia
+php artisan history:prune --days=30          # janela menor, em manutencao
+```
 
 ## 6. Backup
 
@@ -369,12 +464,123 @@ provedor, preencher as credenciais no `.env` e rodar `php artisan optimize:clear
 O passo a passo completo esta em [guides/google-auth.md](guides/google-auth.md) e
 [guides/github-auth.md](guides/github-auth.md).
 
+**Mercado Pago (F6)**: `MERCADO_PAGO_ACCESS_TOKEN` e a chave da API e
+`MERCADO_PAGO_WEBHOOK_SECRET` e o segredo que assina as notificacoes. Para
+rotacionar o token:
+
+1. gere o token novo no painel do provedor (producao ou sandbox);
+2. troque **apenas** a linha no `.env`, sem imprimir o arquivo;
+3. `php artisan optimize:clear && php artisan optimize` e `php artisan queue:restart`;
+4. confirme em `/admin/webhooks` que as notificacoes seguintes chegam
+   `processed`.
+
+Trocar o webhook secret exige atualizar o segredo na configuracao de
+notificacao do provedor **na mesma janela**: enquanto os dois nao baterem, o
+endpoint responde 401 e a notificacao se perde ate o reenvio. Nunca cole token
+ou segredo em ticket, chat, log ou PR; se aparecer em log, revogue e rotacione.
+
 **Medicao (GA4)**: criar a propriedade nova no Google, trocar
 `ANALYTICS_GA4_ID` no `.env` e rodar `php artisan optimize:clear && php artisan optimize`.
 Sem redeploy e sem migracao: o historico fica na propriedade antiga. O passo a
 passo esta em [guides/google-analytics.md](guides/google-analytics.md#5-rotacao-do-id).
 
-## 8. Logs e diagnostico
+## 8. Seguranca HTTP, Turnstile e API
+
+### Checklist de producao
+
+| Variavel | Valor esperado | Se faltar/errar |
+| -------- | -------------- | --------------- |
+| `APP_ENV` | `production` | debug e cache de config errados |
+| `APP_DEBUG` | `false` | stack trace e caminhos expostos |
+| `APP_URL` | `https://` do site | canonical, OG, sitemap e robots em http |
+| `SESSION_SECURE_COOKIE` | `true` | cookie de sessao trafega em http |
+| `TRUSTED_PROXIES` | IP do nginx (`127.0.0.1` no VPS) | IP real e `https` errados |
+| `CSP_MODE` | `enforce` | `report-only` para diagnosticar; `off` so em local |
+| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | os dois preenchidos | cadastro fica **sem** Turnstile (desativado) |
+
+Depois de qualquer mudanca no `.env`:
+`php artisan optimize:clear && php artisan optimize`.
+
+### CSP e cabecalhos
+
+O middleware `SecurityHeaders` gera um **nonce por resposta**, injeta no
+`@vite` e no script inline do tema e emite:
+
+- `Content-Security-Policy` (ou `-Report-Only`) com `default-src 'self'`,
+  `script-src` com o nonce e os hosts do GA/Turnstile, `style-src 'self'
+  'unsafe-inline'`, `frame-ancestors 'none'`, `base-uri 'self'`,
+  `form-action 'self'`, `object-src 'none'`; `upgrade-insecure-requests` em
+  HTTPS;
+- `Strict-Transport-Security` **so em requisicao segura**;
+- `X-Content-Type-Options: nosniff`, `Referrer-Policy:
+  strict-origin-when-cross-origin`, `Permissions-Policy` sem camera,
+  microfone, geolocalizacao e pagamento, `X-Frame-Options: DENY`.
+
+```bash
+curl -sI https://devtools.natanfiuza.dev.br | grep -iE 'content-security|strict-transport|x-content-type|referrer|permissions|x-frame'
+```
+
+**Se a CSP quebrar uma tela** (script ou estilo bloqueado no console):
+
+1. troque `CSP_MODE=enforce` por `CSP_MODE=report-only` no `.env`;
+2. `php artisan optimize:clear && php artisan optimize`;
+3. reproduza com o console aberto e identifique a origem bloqueada;
+4. corrija no codigo (novo nonce/host) e volte para `enforce`.
+
+Nao acrescente `'unsafe-eval'` nem host novo sem ADR: a politica e parte do
+contrato de seguranca (ADR-052).
+
+### TrustProxies
+
+Atras do nginx, sem `TRUSTED_PROXIES`, o Laravel ve o IP e o esquema do proxy -
+e o canonical/OG saem em `http://`. Preencha com o IP ou a faixa **do proxy**
+(no VPS com nginx local, `127.0.0.1`), nunca com `*`: aceitar qualquer origem
+permite forjar `X-Forwarded-For` e `X-Forwarded-Proto`. Cookies `secure` e HSTS
+dependem do esquema correto.
+
+### Turnstile no cadastro
+
+- Ativo **somente** quando `TURNSTILE_SITE_KEY` e `TURNSTILE_SECRET_KEY` existem.
+  Faltando um dos dois, o widget nao aparece e a regra do servidor passa: e o
+  modo desativado, explicito.
+- Com as chaves, o servidor valida o token em `siteverify` (timeout de 5 s). Token
+  ausente, invalido ou expirado falha o cadastro com erro de validacao; falha de
+  rede tambem **fecha** (fail closed).
+- Rotacao: troque as duas chaves juntas no `.env`, `optimize:clear && optimize`
+  e teste um cadastro real. Cloudflare fora do ar impede cadastro enquanto as
+  chaves estiverem ativas - desligar e remover as duas variaveis.
+
+### API publica v1
+
+- Tokens sao criados em `/settings/api-tokens` (aba Conta), com a ability
+  `ai:query`; o valor em texto puro aparece **uma vez**. O banco guarda so o
+  hash: token perdido e revogado, nunca recuperado.
+- O cliente usa `Authorization: Bearer <token>`. Nao ha CSRF nem cookie: a API
+  e servidor-a-servidor.
+- A cota e a do plano (`usage_ledger`): esgotada responde 402; os limites por
+  token (`config/api.php`, env `API_RATE_*`) respondem 429 com `Retry-After`.
+- Revogar em `/settings/api-tokens` ou apagar a conta (a anonimizacao revoga
+  todos). Revogacao e imediata; requisicoes em voo terminam.
+- Diagnostico:
+
+```bash
+curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/api/v1/me
+curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/api/v1/output-targets
+```
+
+| Resposta | Causa |
+| -------- | ----- |
+| 401 | token ausente, invalido ou revogado |
+| 403 | conta sem verificacao, suspensa ou token sem a ability `ai:query` |
+| 404 | solicitacao de outro token; a lista e escopada por token |
+| 402 | cota do plano esgotada |
+| 429 | rate limit do token; respeite o `Retry-After` |
+
+O contrato completo (payloads, exemplos, erros e versionamento) esta em
+[API.md](API.md) e em [openapi.yaml](openapi.yaml). Nao existe pagina publica de
+documentacao.
+
+## 9. Logs e diagnostico
 
 ```bash
 tail -f storage/logs/laravel.log     # aplicacao
@@ -397,8 +603,8 @@ Problemas que ja sabemos diagnosticar:
 | "command not found" no cron | binario fora do PATH do `deploy.sh` (o log diz qual) |
 | Deploy nao roda | `flock` preso: `fuser storage/framework/locks/deploy.lock` |
 | Assets antigos servidos | release ainda na janela das 3 guardadas: normal; a limpeza e por data |
-| Medicao nao aparece no GA | id vazio no `.env` (medicao desligada), banner sem aceite, ou config em cache: `optimize:clear && optimize` (secao 9) |
-| Teste do Google ("Teste sua tag", Tag Assistant) acusa tag ausente | **Esperado** quando o banner nao foi aceito naquela sessao: o teste abre o site sem o cookie `consent`, e sem aceite nao ha tag (ADR-013). Aceite o banner na sessao do teste; a prova real e o Tempo real (secao 9) |
+| Medicao nao aparece no GA | id vazio no `.env` (medicao desligada), banner sem aceite, ou config em cache: `optimize:clear && optimize` (secao 10) |
+| Teste do Google ("Teste sua tag", Tag Assistant) acusa tag ausente | **Esperado** quando o banner nao foi aceito naquela sessao: o teste abre o site sem o cookie `consent`, e sem aceite nao ha tag (ADR-013). Aceite o banner na sessao do teste; a prova real e o Tempo real (secao 10) |
 | AI SQL Builder responde 503 `ai_unavailable` | Falta `AI_BASE_URL`, `AI_MODEL` ou `AI_API_KEY` no `.env`, ou a config esta em cache: `php artisan about` mostra o provedor? `optimize:clear && optimize` (secao 7) |
 | Solicitacao fica em `queued` e nunca sai | Worker parado (`supervisorctl status devtools-worker`), fila errada (`QUEUE_CONNECTION`) ou `retry_after` menor que o timeout do job; veja `tail -f storage/logs/worker.log` e `php artisan queue:failed` |
 | Solicitacao presa em `queued\|processing` por mais de ~3 min | Worker morreu no meio: `ai:reconcile --dry-run` primeiro, depois sem `--dry-run`; a reserva e estornada e a solicitacao vira `timeout`. Antes, veja se o job esta em `failed_jobs` |
@@ -406,6 +612,13 @@ Problemas que ja sabemos diagnosticar:
 | `unsafe_sql` com SQL que parece leitura | O gate lexical (ADR-041) barrou: `;` interno, DDL/DML misturado ou funcao perigosa. Confira o SQL gerado na resposta; nao afrouxe o gate sem ADR |
 | Cache cresce sem parar | `ai:prune-cache` nao esta no cron (secao 5); confira `SELECT COUNT(*) FROM ai_cache WHERE expires_at < NOW()` (nunca apague na mao com o worker rodando) |
 | Resposta veio do cache para outro schema | Nao deve acontecer: o hit compara o payload inteiro (ADR-016), nao so o MD5. Se acontecer, e bug - guarde o `prompt_hash` e abra incidente; a linha expira em 30 dias |
+| Checkout online nao aparece em `/subscribe` | Falta `MERCADO_PAGO_ACCESS_TOKEN` (ou a config esta em cache): `php artisan about` e `optimize:clear && optimize`. Sem token, o manual continua |
+| Webhook responde **503** | `MERCADO_PAGO_WEBHOOK_SECRET` vazio ou config em cache. O endpoint fica desligado de proposito |
+| Webhook responde **401** | Segredo diferente do configurado no painel do provedor, `data.id` ausente ou URL reescrita por proxy. O manifesto assinado e `id/request-id/ts` |
+| Evento em `/admin/webhooks` fica `failed` | O recurso nao foi encontrado na API, valor/moeda divergiu da sessao ou o provedor recusou: o `error` e o payload explicam. Corrigir a causa e esperar o reenvio do provedor; nao ha botao de reprocessar (ADR-047) |
+| Doacao mostra Pix estatico sem confirmacao | Sem credenciais do provedor: e o fallback previsto (ADR-048). Com token, confira `DONATIONS_PAYER_EMAIL` - o provedor exige e-mail de pagador |
+| Renovacao nao acontece e o acesso segue | Preapproval cancelada (`renewal_canceled_at`) ou cartao recusado (`renewal_failed_at`); o acesso vale ate `current_period_end`. O aviso sai uma vez por periodo |
+| `webhook_events` cresce sem parar | `webhooks:prune` nao roda: falta o cron do `schedule:run` (secao 5) ou o worker esta parado |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 
@@ -414,7 +627,7 @@ chown -R www-data:www-data storage bootstrap/cache
 php artisan optimize:clear && php artisan optimize
 ```
 
-## 9. Medicao (Google Analytics)
+## 10. Medicao (Google Analytics)
 
 O carregamento ja existe no codigo (ADR-013, ADR-032 e ADR-038): ativar e preencher uma
 variavel. **O passo a passo completo - criar a propriedade, conferir e o que nao

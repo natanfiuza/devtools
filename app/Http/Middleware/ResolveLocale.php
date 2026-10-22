@@ -26,7 +26,9 @@ class ResolveLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $slug = $request->route('locale');
+        // Rotas sem {locale} (fallback da 404) ainda podem estar sob um prefixo
+        // de idioma: o primeiro segmento decide o idioma da pagina de erro.
+        $slug = $request->route('locale') ?? $request->segment(1);
         $localized = is_string($slug) ? Locales::fromSlug($slug) : null;
 
         if ($localized !== null) {

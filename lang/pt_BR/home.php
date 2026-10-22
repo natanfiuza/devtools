@@ -81,6 +81,53 @@ return [
         'pending_body' => "Recebemos sua intenção de assinatura e seu {'@'}nomedeusuario já está reservado na sua conta. Entraremos em contato para concluir a ativação.",
         'submitted_toast' => 'Intenção de assinatura registrada com sucesso.',
         'plan_label' => 'Escolha o seu plano',
+        'checkout' => [
+            'unavailable' => 'O pagamento online está indisponível no momento. Você pode registrar seu interesse abaixo e falaremos com você.',
+            'path_label' => 'Como você quer assinar?',
+            'paths' => [
+                'one_time' => [
+                    'title' => 'Pagar agora',
+                    'body' => 'Pix, cartão ou boleto à vista. Libera um período assim que o pagamento for aprovado.',
+                ],
+                'recurring' => [
+                    'title' => 'Renovação automática no cartão',
+                    'body' => 'O cartão é cobrado a cada período. A liberação acontece na confirmação do primeiro pagamento.',
+                ],
+                'manual' => [
+                    'title' => 'Prefiro atendimento manual',
+                    'body' => 'Registre seu pedido e combine a forma de pagamento com a gente.',
+                ],
+            ],
+            'recurring_badge' => 'Renovação ativa',
+            'recurring_blocked' => 'Já existe uma renovação automática ativa neste plano. Cancele-a na área de faturas antes de criar outra.',
+            'redirect_note' => 'Você será levado ao Mercado Pago para concluir o pagamento. Nada é liberado até a confirmação.',
+            'one_time_action' => 'Pagar agora',
+            'recurring_action' => 'Ativar renovação automática',
+            'errors' => [
+                'unavailable' => 'O pagamento online está indisponível. Use o atendimento manual para concluir a assinatura.',
+                'recurring_active' => 'Já existe uma renovação automática ativa neste plano. Cancele-a antes de criar outra.',
+                'plan_unavailable' => 'Este plano não está disponível para pagamento online.',
+                'gateway' => 'Não foi possível abrir o pagamento agora. Tente novamente em instantes ou use o atendimento manual.',
+            ],
+            'status' => [
+                'processing' => [
+                    'title' => 'Pagamento em processamento',
+                    'body' => 'Estamos aguardando a confirmação do provedor. A liberação acontece automaticamente assim que o pagamento for aprovado.',
+                ],
+                'approved' => [
+                    'title' => 'Pagamento aprovado',
+                    'body' => 'Seu novo período já está liberado na conta. Você pode acompanhar tudo na área de faturas.',
+                ],
+                'expired' => [
+                    'title' => 'Checkout expirado',
+                    'body' => 'Esta tentativa de pagamento expirou sem confirmação. Escolha um plano e tente novamente.',
+                ],
+                'failed' => [
+                    'title' => 'Pagamento não concluído',
+                    'body' => 'Não foi possível concluir esta tentativa. Nenhuma cobrança foi liberada; você pode tentar novamente ou usar o atendimento manual.',
+                ],
+            ],
+        ],
         'username_label' => 'Seu nome de usuário exclusivo',
         'username_placeholder' => 'nomedeusuario',
         'username_help' => 'Apenas letras minúsculas, números e sublinhado (3 a 30 caracteres). Reservado imediatamente na sua conta.',

@@ -7,14 +7,14 @@ import type { AccountOverviewProps } from '@/types';
 
 vi.mock('@inertiajs/vue3', () => ({
     Head: defineComponent({
-        name: 'Head',
+        name: 'HeadStub',
         props: ['title'],
         render() {
             return null;
         },
     }),
     Link: defineComponent({
-        name: 'Link',
+        name: 'LinkStub',
         props: ['href'],
         template: '<a :href="href"><slot /></a>',
     }),
@@ -86,6 +86,9 @@ function baseProps(): AccountOverviewProps {
             start: '01/10/2026',
             end: '31/10/2026',
             current: true,
+            renewalCanceledAt: null,
+            renewalFailedAt: null,
+            renewable: false,
         },
         payments: 1,
     };

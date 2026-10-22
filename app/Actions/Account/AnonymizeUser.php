@@ -66,11 +66,18 @@ final class AnonymizeUser
                 // conta: vao junto.
                 'locale' => null,
                 'appearance' => null,
+                'history_enabled' => false,
                 'anonymized_at' => now(),
             ])->save();
 
             $user->socialAccounts()->delete();
             $user->subscriptionIntents()->delete();
+
+            // O historico contem schema e descricao (dado da pessoa) e os
+            // tokens de API dão acesso a conta: os dois saem na exclusao. O
+            // `usage_ledger` fica - e consumo, nao identificacao.
+            $user->aiRequests()->delete();
+            $user->tokens()->delete();
 
             DB::table('sessions')->where('user_id', $id)->delete();
         });

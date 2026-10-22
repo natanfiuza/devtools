@@ -28,8 +28,8 @@ import { dashboard } from '@/routes';
  * Layout do site publico (DESIGN.md): container 1120px, header de 56px
  * sticky com blur, footer minimo.
  *
- * Os links do header sao Tools, Planos e Styleguide. "Planos" e ancora da
- * secao de precos da home (nao ha pagina de precos); Docs entra na F7.
+ * Os links do header sao Tools e Planos. Nao ha link para uma pagina publica
+ * de documentacao: a API tem docs/API.md e docs/openapi.yaml no repositorio.
  *
  * A palette de busca e montada aqui, uma vez por pagina: o gatilho do header,
  * o do hero e o item do menu mobile abrem a mesma.
@@ -225,6 +225,13 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
                             class="hover:text-foreground"
                         >
                             {{ t('app.footer.terms') }}
+                        </Link>
+                        <Link
+                            :href="routes.donate.value"
+                            class="hover:text-foreground"
+                            data-test="footer-donate"
+                        >
+                            {{ t('app.footer.donate') }}
                         </Link>
                         <button
                             type="button"

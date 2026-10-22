@@ -1,6 +1,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import {
+    donate,
     home,
     login,
     logout,
@@ -11,9 +12,12 @@ import {
     subscribe,
     terms,
 } from '@/routes';
+import { store as donateStore } from '@/routes/donate';
+import { status as donationStatusRoute } from '@/routes/donate';
 import { store as loginStore } from '@/routes/login';
 import { store as registerStore } from '@/routes/register';
 import { store as subscribeStore } from '@/routes/subscribe';
+import { store as subscribeCheckoutStore } from '@/routes/subscribe/checkout';
 import {
     email as forgotPasswordAction,
     request as forgotPassword,
@@ -39,7 +43,10 @@ export type UseRoutesReturn = {
     styleguide: ComputedRef<string>;
     privacy: ComputedRef<string>;
     terms: ComputedRef<string>;
+    donate: ComputedRef<string>;
     subscribe: (plan?: string) => string;
+    /** Pagina de status da doacao: o ULID e o identificador publico. */
+    donationStatus: (ulid: string) => string;
 
     login: ComputedRef<string>;
     register: ComputedRef<string>;
@@ -55,7 +62,9 @@ export type UseRoutesReturn = {
         setPassword: FormAction;
         resendVerification: FormAction;
         newsletter: FormAction;
+        donate: FormAction;
         subscribe: ComputedRef<RouteFormDefinition<'post'>>;
+        subscribeCheckout: ComputedRef<RouteFormDefinition<'post'>>;
         /** O token do e-mail faz parte da URL, entao vem por parametro. */
         newsletterConfirm: (token: string) => RouteFormDefinition<'post'>;
         newsletterUnsubscribe: (token: string) => RouteFormDefinition<'post'>;
@@ -77,7 +86,10 @@ export type UseRoutesReturn = {
 export function useRoutes(): UseRoutesReturn {
     const page = usePage();
 
-    const slug = computed<string>(() => page.props.localeSlug);
+    // Fallback defensivo: a pagina de erro pode ser a primeira renderizacao de
+    // uma requisicao que nao passou pelo middleware do Inertia. O ingles e o
+    // idioma de fallback do site (config/locales.php).
+    const slug = computed<string>(() => page.props.localeSlug ?? 'en');
 
     const url = (
         route: (args: { locale: string }) => { url: string },
@@ -99,8 +111,14 @@ export function useRoutes(): UseRoutesReturn {
         styleguide: url(styleguide),
         privacy: url(privacy),
         terms: url(terms),
+        donate: url(donate),
         subscribe: (plan?: string) =>
             subscribe.url(plan ? { query: { plan } } : undefined),
+        donationStatus: (ulid: string) =>
+            donationStatusRoute.url({
+                locale: slug.value,
+                donation: ulid,
+            }),
 
         login: url(login),
         register: url(register),
@@ -116,8 +134,12 @@ export function useRoutes(): UseRoutesReturn {
             setPassword: form(setPasswordAction),
             resendVerification: form(resendVerificationAction),
             newsletter: form(newsletterAction),
+            donate: form(donateStore),
             subscribe: computed<RouteFormDefinition<'post'>>(() =>
                 subscribeStore.form(),
+            ),
+            subscribeCheckout: computed<RouteFormDefinition<'post'>>(() =>
+                subscribeCheckoutStore.form(),
             ),
             newsletterConfirm: (token: string) =>
                 newsletterConfirmAction.form({ locale: slug.value, token }),

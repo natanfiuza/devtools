@@ -16,6 +16,9 @@ return [
     'throttle' => 'Trop de tentatives. Réessayez dans :seconds secondes.',
     'suspended' => 'Ce compte est suspendu. Écrivez-nous si vous pensez qu\'il s\'agit d\'une erreur.',
     'reactivated' => 'Bon retour parmi nous ! La demande de suppression a été annulée et votre compte a été réactivé avec succès.',
+    'turnstile' => [
+        'failed' => 'Nous n’avons pas pu confirmer que vous n’êtes pas un robot. Réessayez.',
+    ],
 
     'social' => [
         'divider' => 'ou',

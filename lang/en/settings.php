@@ -8,6 +8,7 @@ return [
         'profile' => 'Profile',
         'security' => 'Security',
         'appearance' => 'Appearance',
+        'api_tokens' => 'API tokens',
     ],
 
     'profile' => [
@@ -68,6 +69,32 @@ return [
         'two_factor_copy_codes' => 'Copy all codes',
         'two_factor_regenerate_codes' => 'Regenerate codes',
         'two_factor_close' => 'Close',
+    ],
+
+    'api_tokens' => [
+        'title' => 'API tokens',
+        'description' => 'Tokens to integrate your systems with the public query API.',
+        'create' => [
+            'name' => 'Token name',
+            'name_placeholder' => 'e.g. deploy-integration',
+            'submit' => 'Create token',
+        ],
+        'once' => [
+            'title' => 'Token created',
+            'description' => 'Copy it now: this value will not be shown again.',
+            'copy' => 'Copy',
+            'copied' => 'Copied!',
+        ],
+        'created' => 'Created',
+        'last_used' => 'Last used',
+        'never' => 'never',
+        'revoke' => 'Revoke',
+        'revoke_title' => 'Revoke token',
+        'revoke_description' => 'The integration using this token loses access immediately. This action cannot be undone.',
+        'confirm' => 'Revoke',
+        'cancel' => 'Cancel',
+        'empty_title' => 'No tokens yet',
+        'empty' => 'Create a token to call the public API from another system.',
     ],
 
     'appearance' => [

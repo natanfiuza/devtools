@@ -82,6 +82,9 @@ class HandleInertiaRequests extends Middleware
             'impersonation' => $impersonator === null
                 ? null
                 : ['email' => $impersonator->email],
+            // Chave publica do Turnstile; nula desliga o widget no cliente
+            // (a regra do servidor tambem passa sem segredo). ADR-052.
+            'turnstileSiteKey' => config('services.turnstile.site_key') ?: null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

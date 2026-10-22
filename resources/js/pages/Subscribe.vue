@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { Form, Head, router } from '@inertiajs/vue3';
-import { AtSign, Check, Clock, Cpu, Percent, Sparkles } from '@lucide/vue';
+import {
+    AtSign,
+    Check,
+    Clock,
+    Cpu,
+    CreditCard,
+    MessageCircle,
+    Percent,
+    Repeat,
+    Sparkles,
+} from '@lucide/vue';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InputError from '@/components/InputError.vue';
@@ -16,14 +26,21 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useRoutes } from '@/composables/useRoutes';
-import type { PendingSubscriptionIntent, PublicPlan } from '@/types';
+import type {
+    CheckoutSummary,
+    PendingSubscriptionIntent,
+    PublicPlan,
+} from '@/types';
 
 /**
- * Formulario de intencao de assinatura Pro (`/subscribe`, ADR-033).
+ * Assinatura Pro (`/subscribe`, ADR-033 e F6).
  *
- * Acessivel apenas para contas cadastradas (visitante que tenta entrar por aqui
- * e levado ao cadastro e volta pelo `url.intended`). Reserva imediatamente o
- * `@nomedeusuario` em `users.username` e registra o pedido na fila do admin.
+ * A pagina e uma decisao unica: pagar agora (Checkout Pro), renovacao automatica
+ * no cartao (preapproval) ou atendimento manual. Sem credenciais do provedor, as
+ * duas primeiras ficam desabilitadas e o formulario manual continua.
+ *
+ * Nenhum caminho libera cota aqui: o periodo nasce apenas na aprovacao do
+ * pagamento, que chega por webhook.
  */
 const props = defineProps<{
     plans: PublicPlan[];
@@ -31,13 +48,129 @@ const props = defineProps<{
     username: string;
     pendingIntent: PendingSubscriptionIntent | null;
     status: string | null;
+    onlineCheckoutAvailable: boolean;
+    recurringPlanSlugs: string[];
+    checkout: CheckoutSummary | null;
 }>();
 
 const { t } = useI18n();
 const routes = useRoutes();
 
+const pathKeys = ['one_time', 'recurring', 'manual'] as const;
+type CheckoutPath = (typeof pathKeys)[number];
+
+const pathIcons = {
+    one_time: CreditCard,
+    recurring: Repeat,
+    manual: MessageCircle,
+} as const;
+
 const planSlug = ref<string>(props.selectedPlan);
+const path = ref<CheckoutPath>(
+    props.onlineCheckoutAvailable ? 'one_time' : 'manual',
+);
 const paymentMethod = ref<string>(props.pendingIntent?.paymentMethod ?? 'pix');
+const checkoutProcessing = ref<boolean>(false);
+const checkoutError = ref<string | null>(null);
+
+const recurringOnSelectedPlan = computed<boolean>(() =>
+    props.recurringPlanSlugs.includes(planSlug.value),
+);
+
+const pathOptions = computed(() =>
+    pathKeys.map((key) => ({
+        key,
+        icon: pathIcons[key],
+        title: t(`home.subscribe.checkout.paths.${key}.title`),
+        body: t(`home.subscribe.checkout.paths.${key}.body`),
+    })),
+);
+
+const checkoutStatusKey = computed<string>(() => {
+    const status = props.checkout?.status;
+
+    if (status === 'approved') {
+        return 'approved';
+    }
+
+    if (status === 'expired') {
+        return 'expired';
+    }
+
+    if (status === 'failed' || status === 'canceled') {
+        return 'failed';
+    }
+
+    return 'processing';
+});
+
+const checkoutTone = computed<string>(() => {
+    const status = props.checkout?.status;
+
+    if (status === 'approved') {
+        return 'border-emerald-500/40 bg-emerald-500/5';
+    }
+
+    if (status === 'pending') {
+        return 'border-brand/40 bg-brand/5';
+    }
+
+    return 'border-amber-500/40 bg-amber-500/5';
+});
+
+function pathDisabled(target: CheckoutPath): boolean {
+    if (target === 'manual') {
+        return false;
+    }
+
+    if (!props.onlineCheckoutAvailable) {
+        return true;
+    }
+
+    return target === 'recurring' && recurringOnSelectedPlan.value;
+}
+
+function selectPlan(slug: string): void {
+    planSlug.value = slug;
+    checkoutError.value = null;
+
+    if (path.value === 'recurring' && recurringOnSelectedPlan.value) {
+        path.value = props.onlineCheckoutAvailable ? 'one_time' : 'manual';
+    }
+}
+
+function selectPath(target: CheckoutPath): void {
+    if (pathDisabled(target)) {
+        return;
+    }
+
+    path.value = target;
+    checkoutError.value = null;
+}
+
+function startCheckout(): void {
+    if (path.value === 'manual' || pathDisabled(path.value)) {
+        return;
+    }
+
+    checkoutError.value = null;
+    checkoutProcessing.value = true;
+
+    router.post(
+        routes.form.subscribeCheckout.value.action,
+        { plan: planSlug.value, mode: path.value },
+        {
+            onFinish: () => {
+                checkoutProcessing.value = false;
+            },
+            onError: () => {
+                checkoutError.value = t(
+                    'home.subscribe.checkout.errors.gateway',
+                );
+            },
+        },
+    );
+}
 
 type CountryCallingCode = {
     code: string;
@@ -192,6 +325,44 @@ const advantages = [
         </header>
 
         <div
+            v-if="checkout !== null"
+            data-test="subscribe-checkout-banner"
+            :data-status="checkout.status"
+            :data-mode="checkout.mode"
+            :class="[
+                'mt-6 flex items-start gap-3 rounded-xl border p-4 text-sm',
+                checkoutTone,
+            ]"
+        >
+            <Check
+                v-if="checkout.status === 'approved'"
+                class="mt-0.5 size-4 shrink-0 text-emerald-600"
+                aria-hidden="true"
+            />
+            <Clock
+                v-else
+                class="mt-0.5 size-4 shrink-0 text-brand"
+                aria-hidden="true"
+            />
+            <div>
+                <p class="font-medium text-foreground">
+                    {{
+                        t(
+                            `home.subscribe.checkout.status.${checkoutStatusKey}.title`,
+                        )
+                    }}
+                </p>
+                <p class="mt-1 text-muted-foreground">
+                    {{
+                        t(
+                            `home.subscribe.checkout.status.${checkoutStatusKey}.body`,
+                        )
+                    }}
+                </p>
+            </div>
+        </div>
+
+        <div
             v-if="status === 'intent-submitted' || pendingIntent !== null"
             data-test="subscribe-pending-banner"
             class="mt-6 flex flex-col gap-3 rounded-xl border border-brand/40 bg-brand/5 p-4 text-sm sm:flex-row sm:items-start sm:justify-between"
@@ -251,60 +422,158 @@ const advantages = [
 
         <div class="mt-10 grid items-start gap-8 lg:grid-cols-12">
             <div class="rounded-xl border bg-card p-6 sm:p-8 lg:col-span-7">
-                <Form
-                    v-slot="{ errors, processing }"
-                    v-bind="routes.form.subscribe.value"
-                    class="space-y-6"
-                    data-test="subscribe-form"
-                >
-                    <div class="space-y-3">
-                        <Label>{{ t('home.subscribe.plan_label') }}</Label>
-                        <input type="hidden" name="plan" :value="planSlug" />
+                <div class="space-y-3">
+                    <Label>{{ t('home.subscribe.plan_label') }}</Label>
 
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <button
-                                v-for="plan in plans"
-                                :key="plan.slug"
-                                type="button"
-                                :data-test="`subscribe-plan-${plan.slug}`"
-                                :class="[
-                                    'flex flex-col items-start rounded-xl border p-4 text-left transition-colors',
-                                    planSlug === plan.slug
-                                        ? 'border-brand bg-brand/5'
-                                        : 'border-border bg-surface hover:border-border-strong',
-                                ]"
-                                @click="planSlug = plan.slug"
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <button
+                            v-for="plan in plans"
+                            :key="plan.slug"
+                            type="button"
+                            :data-test="`subscribe-plan-${plan.slug}`"
+                            :class="[
+                                'flex flex-col items-start rounded-xl border p-4 text-left transition-colors',
+                                planSlug === plan.slug
+                                    ? 'border-brand bg-brand/5'
+                                    : 'border-border bg-surface hover:border-border-strong',
+                            ]"
+                            @click="selectPlan(plan.slug)"
+                        >
+                            <div
+                                class="flex w-full items-center justify-between gap-2"
                             >
-                                <div
-                                    class="flex w-full items-center justify-between gap-2"
-                                >
-                                    <span class="text-sm font-medium">
-                                        {{ plan.name }}
-                                        <template v-if="plan.interval !== null">
-                                            &middot;
-                                            {{
-                                                t(
-                                                    `home.pricing.interval.${plan.interval}`,
-                                                )
-                                            }}
-                                        </template>
-                                    </span>
+                                <span class="text-sm font-medium">
+                                    {{ plan.name }}
+                                    <template v-if="plan.interval !== null">
+                                        &middot;
+                                        {{
+                                            t(
+                                                `home.pricing.interval.${plan.interval}`,
+                                            )
+                                        }}
+                                    </template>
+                                </span>
+                                <span class="flex items-center gap-1">
                                     <Badge
                                         v-if="plan.interval === 'year'"
                                         variant="secondary"
                                     >
                                         {{ t('home.pricing.yearly_badge') }}
                                     </Badge>
-                                </div>
-                                <span
-                                    class="mt-2 font-mono text-2xl font-semibold"
-                                >
-                                    {{ plan.price }}
+                                    <Badge
+                                        v-if="
+                                            recurringPlanSlugs.includes(
+                                                plan.slug,
+                                            )
+                                        "
+                                        variant="outline"
+                                        data-test="subscribe-recurring-badge"
+                                    >
+                                        {{
+                                            t(
+                                                'home.subscribe.checkout.recurring_badge',
+                                            )
+                                        }}
+                                    </Badge>
                                 </span>
-                            </button>
-                        </div>
-                        <InputError :message="errors.plan" />
+                            </div>
+                            <span class="mt-2 font-mono text-2xl font-semibold">
+                                {{ plan.price }}
+                            </span>
+                        </button>
                     </div>
+                </div>
+
+                <div class="mt-8 space-y-3">
+                    <Label>
+                        {{ t('home.subscribe.checkout.path_label') }}
+                    </Label>
+
+                    <div class="grid gap-3 sm:grid-cols-3">
+                        <button
+                            v-for="option in pathOptions"
+                            :key="option.key"
+                            type="button"
+                            :data-test="`subscribe-path-${option.key}`"
+                            :disabled="pathDisabled(option.key)"
+                            :aria-pressed="path === option.key"
+                            :class="[
+                                'flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-colors',
+                                path === option.key
+                                    ? 'border-brand bg-brand/5'
+                                    : 'border-border bg-surface hover:border-border-strong',
+                                pathDisabled(option.key)
+                                    ? 'cursor-not-allowed opacity-50 hover:border-border'
+                                    : '',
+                            ]"
+                            @click="selectPath(option.key)"
+                        >
+                            <component
+                                :is="option.icon"
+                                class="size-4 text-brand"
+                                aria-hidden="true"
+                            />
+                            <span class="mt-1 text-sm font-medium">
+                                {{ option.title }}
+                            </span>
+                            <span
+                                class="text-xs leading-relaxed text-muted-foreground"
+                            >
+                                {{ option.body }}
+                            </span>
+                        </button>
+                    </div>
+
+                    <p
+                        v-if="!onlineCheckoutAvailable"
+                        data-test="subscribe-online-unavailable"
+                        class="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground"
+                    >
+                        {{ t('home.subscribe.checkout.unavailable') }}
+                    </p>
+                    <p
+                        v-else-if="
+                            path === 'recurring' && recurringOnSelectedPlan
+                        "
+                        data-test="subscribe-recurring-blocked"
+                        class="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-muted-foreground"
+                    >
+                        {{ t('home.subscribe.checkout.recurring_blocked') }}
+                    </p>
+                </div>
+
+                <div
+                    v-if="path !== 'manual'"
+                    data-test="subscribe-online-panel"
+                    class="mt-6 space-y-4"
+                >
+                    <p class="text-sm text-muted-foreground">
+                        {{ t('home.subscribe.checkout.redirect_note') }}
+                    </p>
+                    <Button
+                        type="button"
+                        class="w-full sm:w-auto"
+                        :disabled="checkoutProcessing || pathDisabled(path)"
+                        data-test="subscribe-checkout-submit"
+                        @click="startCheckout"
+                    >
+                        {{
+                            path === 'recurring'
+                                ? t('home.subscribe.checkout.recurring_action')
+                                : t('home.subscribe.checkout.one_time_action')
+                        }}
+                    </Button>
+                    <InputError :message="checkoutError ?? undefined" />
+                </div>
+
+                <Form
+                    v-else
+                    v-slot="{ errors, processing }"
+                    v-bind="routes.form.subscribe.value"
+                    class="mt-8 space-y-6"
+                    data-test="subscribe-form"
+                >
+                    <input type="hidden" name="plan" :value="planSlug" />
 
                     <div class="grid gap-2">
                         <Label for="username">

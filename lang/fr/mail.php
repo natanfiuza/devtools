@@ -73,5 +73,25 @@ return [
             'subscription_canceled' => 'L’abonnement lié à ce paiement est terminé.',
             'action' => 'Voir les factures',
         ],
+        'renewal_failed' => [
+            'subject' => 'Nous n’avons pas pu renouveler votre abonnement',
+            'greeting' => 'Bonjour, :name !',
+            'intro' => 'Le prélèvement automatique de votre abonnement sur :app n’a pas été approuvé par la carte.',
+            'plan' => 'Forfait : :plan',
+            'period_end' => 'Votre accès reste actif jusqu’au :date.',
+            'action' => 'Mettre à jour le paiement',
+        ],
+    ],
+
+    'donation' => [
+        'receipt' => [
+            'subject' => 'Nous avons reçu votre don',
+            'greeting' => 'Bonjour, :name !',
+            'greeting_anonymous' => 'Bonjour !',
+            'intro' => 'Merci de soutenir :app. Votre don est confirmé.',
+            'amount' => 'Montant donné : :amount',
+            'paid_at' => 'Confirmé le : :date',
+            'note' => 'Un don ne donne pas accès aux forfaits et ne consomme pas de quota : c\'est un soutien au projet.',
+        ],
     ],
 ];

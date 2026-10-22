@@ -83,6 +83,15 @@ return [
         'timeout_ms' => (int) env('AI_POLL_TIMEOUT_MS', 120000),
     ],
 
+    /*
+    | Historico de consultas. A retencao vale para o comando `history:prune`; a
+    | tela mostra ao usuario quantos dias ficam guardados. Nao e o TTL do cache
+    | (que e outro numero, `cache_ttl_days`).
+    */
+    'history' => [
+        'retention_days' => (int) env('AI_HISTORY_RETENTION_DAYS', 90),
+    ],
+
     // Arquivos versionados: `<target_slug>.v<N>.md` (ADR-016).
     'prompt_path' => resource_path('prompts'),
 

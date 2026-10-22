@@ -30,7 +30,7 @@ const SITEMAP_XHTML_NS = 'http://www.w3.org/1999/xhtml';
 function sitemapGroups(): array
 {
     /** @var list<array{string, array<string, string>}> $pages */
-    $pages = [['home', []], ['pricing', []], ['privacy', []], ['terms', []]];
+    $pages = [['home', []], ['pricing', []], ['privacy', []], ['terms', []], ['donate', []]];
 
     foreach (Tools::available() as $tool) {
         $pages[] = ['tools.show', ['slug' => (string) $tool['slug']]];

@@ -3,6 +3,7 @@
 Status: Aceito
 Data: 2026-10-20
 Relacionados: ADR-002 (excecao de servidor), ADR-008 (abuso e custo), ADR-019 (filas), ADR-040 (ciclo da solicitacao)
+Emendado por: ADR-050 (API publica v1 como superficie separada, com Sanctum)
 
 ## Contexto
 
@@ -123,7 +124,8 @@ aplicados por rate limiters nomeados; o 429 traz `Retry-After`.
 
 ### Negativas / trade-offs
 
-- A API nao serve terceiros; a API publica (com token) fica para a F7.
+- Esta API nao serve terceiros; a API publica com token e uma superficie
+  separada (`/api/v1`, ADR-050), com contrato assincrono equivalente.
 - Sem SSE/WebSocket: a resposta tem ate 1,5-5 s de atraso no pior caso, e a
   tela precisa do timeout de 120 s.
 - O 419 depende de o cliente ler o cookie cru e decodificar uma vez; errar isso

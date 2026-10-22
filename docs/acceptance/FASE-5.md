@@ -1,10 +1,11 @@
 # Criterios de aceite - FASE 5 (AI SQL Builder)
 
-**Aceite de codigo em 2026-10-20.** A F5 entregou a nona tool e o unico backend
-do site (ADR-002): conta obrigatoria, cota, fila, provedor de IA, cache e
-polling. O **smoke real com o DeepSeek** ainda depende da chave ser digitada no
-`.env` local pelo dono - as variaveis `AI_*` estavam vazias na data deste
-aceite. O roteiro esta no fim deste arquivo e nao commita nada.
+**Aceite de codigo em 2026-10-20; revalidado e fechado em 2026-10-21.** A F5
+entregou a nona tool e o unico backend do site (ADR-002): conta obrigatoria,
+cota, fila, provedor de IA, cache e polling. O **smoke real com o DeepSeek**
+foi executado em 2026-10-21 em banco dedicado, com HTTP, sessao, CSRF, fila e
+worker reais; a secao "Revalidacao 2026-10-21" registra as evidencias e fecha o
+criterio 20. O roteiro original permanece abaixo como registro historico.
 
 Fonte: `docs/SPEC.md` secao 6, `docs/API.md`, `docs/ARQUITETURA.md` e as ADRs
 039 a 043, com emendas nas ADRs 002, 004, 006, 011, 016, 029 e 030.
@@ -43,7 +44,7 @@ tool; politica de privacidade reescrita nos cinco idiomas.
 | 17 | A nona tool aparece como `available` na home, busca, sitemap e metas, com imagem OG propria | Testes de registro/home/SEO/sitemap; `public/og/ai-sql-builder.png` 1200x1200 |
 | 18 | Gates da fase | `composer test` (424 testes, 10.664 assercoes), `npm run test` (730 testes, 53 arquivos), `types:check`, `lint:check` (0 erros), `format:check`, `build`, `build:ssr`, `migrate:fresh --seed`, `route:list`, os dois `--dry-run` e `seo:og-image` |
 | 19 | Nenhum commit ou push feito pelo assistente | O historico e do usuario; esta fase nao commita |
-| 20 | Smoke real com o DeepSeek | **Pendente**: a chave nao estava no `.env` local na data. Roteiro abaixo |
+| 20 | Smoke real com o DeepSeek | **Concluido em 2026-10-21**: matriz completa em banco dedicado, com worker e HTTP reais; evidencias na secao "Revalidacao 2026-10-21" |
 
 ## Evidencias dos gates (2026-10-20)
 
@@ -94,11 +95,70 @@ smoke existe para validar a chave e o provedor reais, que nenhum teste toca
 
 ## Fora de escopo e riscos
 
-- Historico de uso, retencao de 90 dias e apagar historico: F7
-  (`history_visible` nasce `false`). Gateway de pagamento e renovacao: F6.
-- O smoke pendente e o unico criterio em aberto; nenhuma outra pendencia
-  bloqueia a revisao da fase.
+- O historico de consultas foi **adiantado** em 2026-10-21 (commit `7f0fc2d`,
+  tela `dashboard/History`, filtro `history_visible`): a F5 entrega a lista
+  somente leitura. O opt-in do usuario, a retencao de 90 dias e o "apagar
+  historico" continuam na F7.
+- Gateway de pagamento e renovacao: F6.
 - Em producao, o `.env` precisa de `DB_QUEUE_RETRY_AFTER=150` e do worker
   reiniciado; sem isso, um job de 90 s pode rodar duas vezes (RUNBOOK secao 5).
 - A chave antiga do DeepSeek deve ser revogada depois do smoke da nova.
 - Nenhum commit ou push: o usuario revisa e aprova pelo `gitpr`.
+
+## Revalidacao 2026-10-21
+
+Os 19 criterios de codigo foram reauditados pelos testes da fase e pelo smoke
+real. O criterio 20 foi cumprido com DeepSeek real. A chave nunca foi impressa
+em chat, log ou documento.
+
+### Gates da revalidacao
+
+```text
+composer test       -> 440 testes, 440 passaram, 10.973 assercoes (Pint + PHPStan 0)
+npm run test        -> 730 testes, 53 arquivos
+npm run types:check -> vue-tsc limpo
+AiApiTest + AiActionsTest + AiToolPropsTest + ProcessAiQueryTest            -> 107 testes verdes
+AccountPanelTest (historico corrigido)                                      -> 14 testes, 237 assercoes
+```
+
+### Smoke real (criterio 20)
+
+Ambiente: SQLite dedicado `storage/smoke.sqlite` (`pdo_sqlite`), `migrate:fresh
+--seed --force`, `DB_CONNECTION=sqlite`, `QUEUE_CONNECTION=database`,
+`MAIL_MAILER=array` e `CACHE_STORE=file` injetados por variavel de processo.
+`php artisan serve` em `127.0.0.1:8000` e `queue:work --tries=2 --timeout=90`
+com a mesma configuracao. Login pela rota Fortify real (`/en/login`) com cookie
+jar e `X-XSRF-TOKEN`; nenhuma sessao foi forjada. Banco `devtools` intocado.
+
+| Passo | Evidencia | Resultado |
+| --- | --- | --- |
+| 1 | Login da conta Free verificada | sessao valida; `/dashboard` 200 |
+| 2 | POST DDL valido | 202 `queued`, ULID `01m5geak6bzc4fk0hs6g3wnjq6`, cache miss, cota 1/5 |
+| 3 | GET ate estado terminal | 200 `done`, SQL `SELECT ... JOIN`, tokens in 694 / out 423 |
+| 4 | Repetir o mesmo POST | 200 `cache_hit=true`; ledger da conta continuou com 1 linha |
+| 5 | Schema de 48.907 bytes (limite Free 8.192) | 422 `schema_too_large` |
+| 6 | Conta paga: 7 POSTs distintos e rapidos | 6x 202 e 7o 429 com `Retry-After: 53` |
+| 7 | Conta Free 2: 5 payloads distintos + 6o | 5x 202 e 6o 402 `quota_exceeded` |
+| 8 | Conta paga: reserva e liquidacao | reserva 1.561; sucesso 705+767=1.472, estorno 89 (net 1.472). Segunda consulta reservou 1.556 e gastou 1.572: debito extra de 16. Ajuste para baixo **e** para cima comprovados |
+| 9 | Worker com `AI_API_KEY=invalid-key-for-smoke` (variavel de processo, `.env` intacto) | POST 202 com debito 1.551; log `ProviderException reason=http_401 retryable=false`; request `failed`/`provider_unavailable`; ledger debito 1.551 + estorno 1.551 (net 0); cota voltou de 4.595 para 3.044; `failed_jobs` 0 (falha tratada, sem retry) |
+| 10 | GET de consulta de outra conta | 404 |
+| 11 | POST sem sessao (com CSRF valido) | 401 |
+| 12 | POST de conta nao verificada | 403 |
+| 13 | POST com cookie e sem `X-XSRF-TOKEN` | 419 |
+| 14 | GET da tool como visitante | 200; `toolProps.canUse={"allowed":false,"reason":"guest"}`; CTA "Sign in to use the AI SQL Builder" |
+| 15 | Busca por `SMOKE_MARKER_20261021` em `laravel.log` e nos logs dos workers | 0 ocorrencias |
+| 16 | OG, metas e sitemap | `public/og/ai-sql-builder.png` (42.571 bytes); `og:image ...?v=2`; 5 URLs no sitemap; hreflang e canonical corretos |
+| 17 | Revisao visual | Edge headless via CDP: desktop 1440x1400 e mobile 390x1200 (`mobile=true`, viewport meta honrado). Medido `scrollWidth=390`, **sem overflow horizontal**; CTA visivel e empilhado |
+
+O passo 9 usou um worker separado com a chave invalida apenas no ambiente do
+processo; os workers e o servidor foram encerrados ao fim e a chave real voltou
+a valer no worker seguinte. `failed_jobs=0` porque a falha 401 e nao
+retentavel: `ProcessAiQuery` registra `provider_unavailable`, estorna a reserva
+e encerra o job sem relancar a excecao.
+
+### Limpeza
+
+`storage/smoke.sqlite`, cookie jars, payloads e respostas temporarias foram
+removidos; `php artisan config:clear` executado; servidor, workers e Edge
+headless encerrados; banco `devtools` nao foi tocado. Os logs de smoke foram
+mantidos apenas ate a extracao destas evidencias.

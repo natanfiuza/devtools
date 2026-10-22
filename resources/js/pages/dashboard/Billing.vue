@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import { Clock } from '@lucide/vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Clock, RefreshCw, TriangleAlert } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { subscribe } from '@/routes';
 import { billing } from '@/routes/dashboard';
+import { cancelRecurring } from '@/routes/dashboard/billing';
 import type { AccountBillingProps, AccountPaymentRow } from '@/types';
 
 /**
- * Faturas: a assinatura vigente e o que ja foi pago.
+ * Faturas: a assinatura vigente, o que ja foi pago e o estado da renovacao.
  *
- * O modelo do bloco e a venda manual (ADR-027), entao nao ha botao de assinar,
- * trocar de plano ou cancelar - isso chega com o gateway, na F6. O que existe e
- * a leitura do proprio historico, na mesma lingua do painel administrativo.
+ * O modelo do bloco continua sendo a venda manual (ADR-027), mas com o gateway
+ * (F6) a conta pode encerrar a propria renovacao automatica: o periodo pago
+ * segue ate o fim e o que para e a cobranca seguinte. A tela tambem mostra o
+ * proximo periodo empilhado, a falha de renovacao e o checkout em andamento.
  */
 const props = defineProps<AccountBillingProps>();
 
@@ -34,6 +36,37 @@ const cobranca = computed<string>(() =>
         ? t('account.billing.gateway_manual')
         : (props.subscription?.gateway ?? ''),
 );
+
+/** Estado da renovacao automatica; `manual` nunca teve preapproval. */
+const renovacao = computed<string | null>(() => {
+    const subscription = props.subscription;
+
+    if (subscription == null) {
+        return null;
+    }
+
+    if (subscription.renewalCanceledAt != null) {
+        return t('account.billing.renewal.status_canceled');
+    }
+
+    if (subscription.renewalFailedAt != null) {
+        return t('account.billing.renewal.status_failed');
+    }
+
+    if (subscription.renewable) {
+        return t('account.billing.renewal.status_active');
+    }
+
+    return t('account.billing.renewal.status_none');
+});
+
+function cancelarRenovacao(): void {
+    if (!window.confirm(t('account.billing.renewal.cancel_confirm'))) {
+        return;
+    }
+
+    router.post(cancelRecurring.url(), {}, { preserveScroll: true });
+}
 
 /** Mesmo rotulo do painel administrativo, pela mesma chave. */
 function metodo(row: AccountPaymentRow): string {
@@ -61,6 +94,103 @@ function urlDaPagina(page: number): string {
                 {{ t('account.billing.description') }}
             </p>
         </header>
+
+        <section
+            v-if="subscription?.renewalFailedAt"
+            data-test="renovacao-falhou"
+            class="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4"
+        >
+            <TriangleAlert
+                class="mt-0.5 size-5 shrink-0 text-destructive"
+                aria-hidden="true"
+            />
+            <div class="space-y-1">
+                <p class="font-medium text-foreground">
+                    {{ t('account.billing.renewal.failed_title') }}
+                </p>
+                <p class="text-sm text-muted-foreground">
+                    {{
+                        t('account.billing.renewal.failed_description', {
+                            date: subscription.renewalFailedAt,
+                            end: subscription.end ?? '',
+                        })
+                    }}
+                </p>
+            </div>
+        </section>
+
+        <section
+            v-if="subscription?.renewalCanceledAt"
+            data-test="renovacao-cancelada"
+            class="rounded-lg border border-border bg-muted/40 p-4"
+        >
+            <p class="font-medium text-foreground">
+                {{ t('account.billing.renewal.canceled_title') }}
+            </p>
+            <p class="mt-1 text-sm text-muted-foreground">
+                {{
+                    t('account.billing.renewal.canceled_description', {
+                        end: subscription.end ?? '',
+                    })
+                }}
+            </p>
+        </section>
+
+        <section
+            v-if="lastCheckout"
+            data-test="checkout-pendente"
+            class="flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+            <div class="flex items-start gap-3">
+                <RefreshCw
+                    class="mt-0.5 size-5 shrink-0 text-amber-600"
+                    aria-hidden="true"
+                />
+                <div class="space-y-1">
+                    <p class="font-medium text-foreground">
+                        {{
+                            lastCheckout.processing
+                                ? t('account.billing.checkout.processing_title')
+                                : t('account.billing.checkout.pending_title')
+                        }}
+                    </p>
+                    <p class="text-sm text-muted-foreground">
+                        {{
+                            t('account.billing.checkout.description', {
+                                plan: lastCheckout.planName,
+                                date: lastCheckout.createdAt ?? '',
+                            })
+                        }}
+                    </p>
+                    <p
+                        v-if="lastCheckout.processing"
+                        class="text-sm text-muted-foreground"
+                    >
+                        {{ t('account.billing.checkout.processing_hint') }}
+                    </p>
+                </div>
+            </div>
+
+            <Button
+                variant="outline"
+                size="sm"
+                as-child
+                class="shrink-0 self-start sm:self-center"
+            >
+                <Link
+                    :href="
+                        subscribe.url({
+                            query: {
+                                plan: lastCheckout.planSlug,
+                                checkout: lastCheckout.ulid,
+                            },
+                        })
+                    "
+                >
+                    {{ t('account.billing.checkout.view_details') }}
+                </Link>
+            </Button>
+        </section>
 
         <section
             v-if="pendingIntent"
@@ -131,55 +261,116 @@ function urlDaPagina(page: number): string {
                 </p>
             </div>
 
-            <dl v-else class="divide-y divide-border" data-test="assinatura">
-                <div class="flex items-center justify-between gap-4 px-4 py-2">
-                    <dt class="text-sm text-subtle">
-                        {{ t('account.billing.plan') }}
-                    </dt>
-                    <dd class="text-sm">
-                        {{ subscription.plan }}
-                    </dd>
-                </div>
+            <div v-else data-test="assinatura">
+                <dl class="divide-y divide-border">
+                    <div
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.plan') }}
+                        </dt>
+                        <dd class="text-sm">
+                            {{ subscription.plan }}
+                        </dd>
+                    </div>
 
-                <div class="flex items-center justify-between gap-4 px-4 py-2">
-                    <dt class="text-sm text-subtle">
-                        {{ t('account.billing.period') }}
-                    </dt>
-                    <dd class="font-mono text-[13px]">
-                        {{ periodo }}
-                    </dd>
-                </div>
+                    <div
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.period') }}
+                        </dt>
+                        <dd class="font-mono text-[13px]">
+                            {{ periodo }}
+                        </dd>
+                    </div>
 
-                <div class="flex items-center justify-between gap-4 px-4 py-2">
-                    <dt class="text-sm text-subtle">
-                        {{ t('account.billing.status') }}
-                    </dt>
-                    <dd>
-                        <Badge
-                            :variant="
-                                subscription.status === 'active'
-                                    ? 'secondary'
-                                    : 'outline'
-                            "
-                        >
+                    <div
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.status') }}
+                        </dt>
+                        <dd>
+                            <Badge
+                                :variant="
+                                    subscription.status === 'active'
+                                        ? 'secondary'
+                                        : 'outline'
+                                "
+                            >
+                                {{
+                                    t(
+                                        `account.billing.subscription_statuses.${subscription.status}`,
+                                    )
+                                }}
+                            </Badge>
+                        </dd>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.gateway') }}
+                        </dt>
+                        <dd class="text-sm">
+                            {{ cobranca }}
+                        </dd>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.renewal.label') }}
+                        </dt>
+                        <dd class="text-sm">
+                            {{ renovacao }}
+                        </dd>
+                    </div>
+
+                    <div
+                        v-if="nextSubscription"
+                        class="flex items-center justify-between gap-4 px-4 py-2"
+                        data-test="proximo-periodo"
+                    >
+                        <dt class="text-sm text-subtle">
+                            {{ t('account.billing.next_period') }}
+                        </dt>
+                        <dd class="text-sm">
                             {{
-                                t(
-                                    `account.billing.subscription_statuses.${subscription.status}`,
-                                )
+                                t('account.billing.next_period_value', {
+                                    plan: nextSubscription.plan,
+                                    start: nextSubscription.start ?? '',
+                                    end: nextSubscription.end ?? '',
+                                })
                             }}
-                        </Badge>
-                    </dd>
-                </div>
+                        </dd>
+                    </div>
+                </dl>
 
-                <div class="flex items-center justify-between gap-4 px-4 py-2">
-                    <dt class="text-sm text-subtle">
-                        {{ t('account.billing.gateway') }}
-                    </dt>
-                    <dd class="text-sm">
-                        {{ cobranca }}
-                    </dd>
+                <div
+                    v-if="subscription.renewable"
+                    class="border-t border-border px-4 py-3"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        data-test="cancelar-renovacao"
+                        @click="cancelarRenovacao"
+                    >
+                        {{ t('account.billing.renewal.cancel') }}
+                    </Button>
+                    <p class="mt-2 text-xs text-subtle">
+                        {{
+                            t('account.billing.renewal.cancel_hint', {
+                                end: subscription.end ?? '',
+                            })
+                        }}
+                    </p>
                 </div>
-            </dl>
+            </div>
         </section>
 
         <section class="space-y-2">

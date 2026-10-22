@@ -34,7 +34,6 @@ final class AiLedger
 
         UsageLedger::query()->forceCreate([
             'user_id' => $request->user_id,
-            'ai_request_id' => null,
             'ai_request_ulid' => $request->id,
             'type' => $type,
             'tokens' => $tokens,

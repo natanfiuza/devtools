@@ -7,6 +7,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Enums\NewsletterSource;
 use App\Models\User;
+use App\Rules\ValidTurnstile;
 use App\Support\Locales;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -28,6 +29,9 @@ class CreateNewUser implements CreatesNewUsers
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
             'newsletter' => ['sometimes', 'boolean'],
+            // Implicita: sem token nao passa quando o Turnstile esta ligado;
+            // desligado (sem chave), a regra e transparente (ADR-052).
+            'turnstile' => [new ValidTurnstile],
         ])->validate();
 
         $user = User::create([
