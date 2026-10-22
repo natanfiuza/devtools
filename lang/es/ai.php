@@ -103,6 +103,8 @@ return [
         'copied' => 'Copiado',
         'download' => 'Descargar',
         'download_name' => 'consulta',
+        'explanation' => 'Cómo se construyó la consulta',
+        'tip' => 'Consejo de buenas prácticas',
         'assumptions' => 'Supuestos',
         'warnings' => 'Avisos',
         'tables' => 'Tablas usadas',
@@ -111,6 +113,18 @@ return [
         'cache_hit' => 'Resultado en caché',
         'clarification' => 'El modelo necesita más información',
         'empty' => 'Nada generado todavía.',
+    ],
+
+    'tips' => [
+        'sql' => 'Asegúrate de que las columnas utilizadas en cláusulas WHERE, JOIN y ORDER BY tengan índices adecuados. Ejecuta EXPLAIN para revisar el plan de ejecución.',
+        'laravel_query_builder' => 'Es preferible iniciar consultas desde el Model (ej: User::query()) en lugar de DB::table(\'users\'). Esto preserva conversiones de atributos, scopes locales, relaciones y autocompletado en el IDE.',
+        'eloquent' => 'Para evitar el problema de N+1 consultas, utiliza siempre carga previa (eager loading) con with() al acceder a relaciones en colecciones.',
+        'sqlmodel' => 'Utiliza la sesión de SQLModel con select(Model) para mantener activas la validación de Pydantic y la integración con SQLAlchemy al mismo tiempo.',
+        'sqlalchemy' => 'En SQLAlchemy 2.0+, adopta el estilo moderno session.scalars(select(Model)) en lugar de la sintaxis heredada session.query(Model).',
+        'django_orm' => 'Utiliza select_related() para relaciones ForeignKey/OneToOne y prefetch_related() para ManyToMany con el fin de optimizar las consultas.',
+        'prisma' => 'Prefiere usar select en lugar de include cuando sea posible para devolver solo los campos necesarios y reducir el volumen de datos.',
+        'drizzle' => 'Drizzle permite consultas relacionales (db.query.*) con mayor ergonomía e inferencia de tipos completa, o la sintaxis clásica SQL core.',
+        'typeorm' => 'Al usar QueryBuilder de TypeORM, define alias únicos y selecciona solo las columnas estrictamente requeridas para evitar sobrecarga.',
     ],
 
     'errors' => [

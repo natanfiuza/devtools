@@ -103,6 +103,8 @@ return [
         'copied' => 'Copiado',
         'download' => 'Transferir',
         'download_name' => 'consulta',
+        'explanation' => 'Como a consulta foi construída',
+        'tip' => 'Dica de boas práticas',
         'assumptions' => 'Pressupostos',
         'warnings' => 'Avisos',
         'tables' => 'Tabelas utilizadas',
@@ -111,6 +113,18 @@ return [
         'cache_hit' => 'Resultado em cache',
         'clarification' => 'O modelo precisa de mais informação',
         'empty' => 'Nada gerado ainda.',
+    ],
+
+    'tips' => [
+        'sql' => 'Certifique-se de que as colunas presentes em cláusulas WHERE, JOIN e ORDER BY possuem índices apropriados. Use EXPLAIN para avaliar o plano de execução.',
+        'laravel_query_builder' => 'Prefira iniciar consultas a partir do Model (ex: User::query()) em vez de DB::table(\'users\'). Isto preserva conversão de atributos, âmbitos locais, relações e conclusão automática no IDE.',
+        'eloquent' => 'Para evitar o problema de N+1 consultas, utilize sempre o carregamento adiantado (eager loading) com with() ao aceder a relações na listagem.',
+        'sqlmodel' => 'Utilize a sessão do SQLModel com select(Model) para manter a validação do Pydantic e a integração com SQLAlchemy em simultâneo.',
+        'sqlalchemy' => 'No SQLAlchemy 2.0+, utilize o estilo moderno session.scalars(select(Model)) em vez do método legado session.query(Model).',
+        'django_orm' => 'Utilize select_related() para relações ForeignKey/OneToOne e prefetch_related() para ManyToMany de modo a otimizar acessos e evitar consultas adicionais.',
+        'prisma' => 'Prefira utilizar select para devolver apenas os campos necessários na consulta, reduzindo a carga de dados transmitida.',
+        'drizzle' => 'O Drizzle permite consultas relacionais (db.query.*) com melhor ergonomia e inferência de tipos completa, ou a sintaxe clássica em formato SQL core.',
+        'typeorm' => 'Ao utilizar o QueryBuilder do TypeORM, defina identificadores únicos e selecione apenas as colunas estritamente necessárias.',
     ],
 
     'errors' => [

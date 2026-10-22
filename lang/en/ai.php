@@ -103,6 +103,8 @@ return [
         'copied' => 'Copied',
         'download' => 'Download',
         'download_name' => 'query',
+        'explanation' => 'How this query was built',
+        'tip' => 'Best practice tip',
         'assumptions' => 'Assumptions',
         'warnings' => 'Warnings',
         'tables' => 'Tables used',
@@ -111,6 +113,18 @@ return [
         'cache_hit' => 'Cached result',
         'clarification' => 'The model needs more information',
         'empty' => 'Nothing generated yet.',
+    ],
+
+    'tips' => [
+        'sql' => 'Ensure columns used in WHERE, JOIN, and ORDER BY clauses have appropriate indexes. Run EXPLAIN to inspect execution plans.',
+        'laravel_query_builder' => 'Prefer starting queries from the Model (e.g. User::query()) rather than DB::table(\'users\'). This preserves attribute casting, local query scopes, relationships, and IDE autocompletion.',
+        'eloquent' => 'To avoid the N+1 query problem, always use eager loading with with() when accessing relationships in collections.',
+        'sqlmodel' => 'Use SQLModel sessions with select(Model) to keep Pydantic data validation and SQLAlchemy integration active simultaneously.',
+        'sqlalchemy' => 'In SQLAlchemy 2.0+, adopt the modern session.scalars(select(Model)) style rather than the legacy session.query(Model) syntax.',
+        'django_orm' => 'Use select_related() for ForeignKey/OneToOne relations and prefetch_related() for ManyToMany to optimize query counts.',
+        'prisma' => 'Prefer using select over include when possible to return only needed fields, minimizing database and network payload.',
+        'drizzle' => 'Drizzle offers relational queries (db.query.*) for ergonomic nesting and full type inference, alongside core SQL-like builders.',
+        'typeorm' => 'When using TypeORM QueryBuilder, define unique table aliases and select only required columns to reduce hydration overhead.',
     ],
 
     'errors' => [

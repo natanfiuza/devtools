@@ -103,6 +103,8 @@ return [
         'copied' => 'Copié',
         'download' => 'Télécharger',
         'download_name' => 'requete',
+        'explanation' => 'Comment la requête a été construite',
+        'tip' => 'Conseil de bonne pratique',
         'assumptions' => 'Hypothèses',
         'warnings' => 'Avertissements',
         'tables' => 'Tables utilisées',
@@ -111,6 +113,18 @@ return [
         'cache_hit' => 'Résultat en cache',
         'clarification' => 'Le modèle a besoin de plus d\'informations',
         'empty' => 'Rien de généré pour l\'instant.',
+    ],
+
+    'tips' => [
+        'sql' => 'Assurez-vous que les colonnes présentes dans WHERE, JOIN et ORDER BY disposent d\'index appropriés. Utilisez EXPLAIN pour analyser le plan d\'exécution.',
+        'laravel_query_builder' => 'Privilégiez le démarrage des requêtes depuis le Model (ex : User::query()) plutôt que DB::table(\'users\'). Cela préserve le typage, les scopes locaux, les relations et l\'autocomplétion.',
+        'eloquent' => 'Pour éviter le problème de requêtes N+1, utilisez toujours le chargement précoce (eager loading) avec with() pour accéder aux relations.',
+        'sqlmodel' => 'Utilisez la session SQLModel avec select(Model) afin de conserver la validation Pydantic et l\'intégration SQLAlchemy actives en même temps.',
+        'sqlalchemy' => 'Dans SQLAlchemy 2.0+, adoptez le style moderne session.scalars(select(Model)) plutôt que la méthode obsolète session.query(Model).',
+        'django_orm' => 'Utilisez select_related() pour les relations ForeignKey/OneToOne et prefetch_related() pour ManyToMany afin d\'optimiser les requêtes.',
+        'prisma' => 'Préférez utiliser select plutôt qu\'include pour renvoyer uniquement les champs requis et limiter la charge de données.',
+        'drizzle' => 'Drizzle permet des requêtes relationnelles (db.query.*) très ergonomiques avec inférence de type complète, ou la syntaxe SQL core.',
+        'typeorm' => 'Avec le QueryBuilder de TypeORM, définissez des alias uniques et sélectionnez uniquement les colonnes nécessaires afin d\'éviter la surcharge d\'hydratation.',
     ],
 
     'errors' => [

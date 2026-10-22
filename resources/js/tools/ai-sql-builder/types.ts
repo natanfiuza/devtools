@@ -94,6 +94,7 @@ export interface AiHistoryItem {
 
 export interface AiQueryResult {
     title?: string | null;
+    explanation?: string | null;
     sql: string;
     dialect: SqlDialect;
     assumptions: string[];

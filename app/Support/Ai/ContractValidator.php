@@ -62,6 +62,7 @@ final class ContractValidator
         $clarification = $this->clarification($data['clarification']);
         $outputs = $this->outputs($data['outputs']);
         $title = $this->title($data['title'] ?? null);
+        $explanation = $this->explanation($data['explanation'] ?? null);
 
         $sql = trim($sql);
 
@@ -97,6 +98,7 @@ final class ContractValidator
             $clarification,
             $outputs,
             $title,
+            $explanation,
         );
     }
 
@@ -239,5 +241,28 @@ final class ContractValidator
         }
 
         return $title;
+    }
+
+    private function explanation(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_string($value)) {
+            throw InvalidContractException::because('explanation_not_string');
+        }
+
+        $explanation = trim($value);
+
+        if ($explanation === '') {
+            return null;
+        }
+
+        if (mb_strlen($explanation, 'UTF-8') > 4000) {
+            throw InvalidContractException::because('explanation_too_long');
+        }
+
+        return $explanation;
     }
 }

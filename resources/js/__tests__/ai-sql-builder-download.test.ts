@@ -3,6 +3,8 @@ import { formatDownloadContent } from '@/tools/ai-sql-builder/formatDownload';
 
 describe('formatDownloadContent', () => {
     const labels = {
+        explanation: 'Como a consulta foi construída',
+        tip: 'Dica de boas práticas',
         assumptions: 'Premissas',
         warnings: 'Avisos',
         tables: 'Tabelas usadas',
@@ -22,11 +24,13 @@ describe('formatDownloadContent', () => {
         expect(result).toBe(code);
     });
 
-    it('formata cabecalho em bloco C-style para SQL com todas as secoes', () => {
+    it('formata cabecalho em bloco C-style para SQL com todas as secoes incluindo explicacao e dica', () => {
         const code = 'SELECT id, name FROM users;';
         const result = formatDownloadContent({
             target: 'sql',
             code,
+            explanation: 'Consulta simples com filtro por status.',
+            tip: 'Verifique os índices.',
             assumptions: ['Tabela users possui id e name', 'Ativos apenas'],
             warnings: ['Sem paginacao'],
             tablesUsed: ['users'],
@@ -35,6 +39,12 @@ describe('formatDownloadContent', () => {
 
         expect(result).toBe(
             `/*\n` +
+                ` * Como a consulta foi construída:\n` +
+                ` * Consulta simples com filtro por status.\n` +
+                ` *\n` +
+                ` * Dica de boas práticas:\n` +
+                ` * Verifique os índices.\n` +
+                ` *\n` +
                 ` * Premissas:\n` +
                 ` * - Tabela users possui id e name\n` +
                 ` * - Ativos apenas\n` +

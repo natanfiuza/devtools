@@ -103,6 +103,8 @@ return [
         'copied' => 'Copiado',
         'download' => 'Baixar',
         'download_name' => 'consulta',
+        'explanation' => 'Como a consulta foi construída',
+        'tip' => 'Dica de boas práticas',
         'assumptions' => 'Premissas',
         'warnings' => 'Avisos',
         'tables' => 'Tabelas usadas',
@@ -111,6 +113,18 @@ return [
         'cache_hit' => 'Resultado em cache',
         'clarification' => 'O modelo precisa de mais informação',
         'empty' => 'Nada gerado ainda.',
+    ],
+
+    'tips' => [
+        'sql' => 'Certifique-se de que colunas presentes em cláusulas WHERE, JOIN e ORDER BY possuam índices apropriados. Use EXPLAIN para avaliar o plano de execução.',
+        'laravel_query_builder' => 'Prefira iniciar queries a partir do Model (ex: User::query()) em vez de DB::table(\'users\'). Isso preserva cast de atributos, scopes locais, relacionamentos e autocompletion no IDE.',
+        'eloquent' => 'Para evitar o problema de N+1 queries, use sempre o carregamento adiantado (eager loading) com with() ao acessar relacionamentos na listagem.',
+        'sqlmodel' => 'Utilize a sessão do SQLModel com select(Model) para manter a validação do Pydantic e a integração com SQLAlchemy ao mesmo tempo.',
+        'sqlalchemy' => 'No SQLAlchemy 2.0+, use o estilo moderno session.scalars(select(Model)) em vez do método legado session.query(Model).',
+        'django_orm' => 'Use select_related() para relacionamentos ForeignKey/OneToOne e prefetch_related() para ManyToMany para otimizar acessos e evitar consultas extras.',
+        'prisma' => 'Prefira usar select para retornar apenas os campos necessários na consulta, reduzindo o payload trafegado entre o banco e a aplicação.',
+        'drizzle' => 'O Drizzle permite queries relacionais (db.query.*) com melhor ergonomia e inferência de tipos completa, ou a sintaxe clássica em formato SQL core.',
+        'typeorm' => 'Ao usar o QueryBuilder do TypeORM, defina aliases únicos e selecione apenas as colunas estritamente necessárias para evitar sobrecarga de hidratação.',
     ],
 
     'errors' => [
