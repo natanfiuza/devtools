@@ -272,3 +272,64 @@ it('devolve 200 com poll_after no estado em fila', function () {
         ->assertJsonPath('data.status', 'queued')
         ->assertJsonPath('data.poll_after_ms', 1500);
 });
+
+it('lista o historico do usuario com suporte a busca por schema e prompt', function () {
+    $user = User::factory()->create(['history_enabled' => true]);
+
+    $req1 = AiRequest::factory()->done()->for($user)->create([
+        'history_visible' => true,
+        'title' => 'Busca de Clientes no formato TypeORM',
+        'prompt' => 'Encontre clientes com mais de 5 pedidos',
+        'schema' => 'CREATE TABLE clients (id int); CREATE TABLE orders (id int, client_id int);',
+    ]);
+
+    $req2 = AiRequest::factory()->done()->for($user)->create([
+        'history_visible' => true,
+        'title' => 'Relatório de Produtos',
+        'prompt' => 'Produtos sem estoque',
+        'schema' => 'CREATE TABLE products (id int, stock int);',
+    ]);
+
+    $reqInvisivel = AiRequest::factory()->done()->for($user)->create([
+        'history_visible' => false,
+        'title' => 'Invisivel',
+    ]);
+
+    $outroUser = User::factory()->create(['history_enabled' => true]);
+    AiRequest::factory()->done()->for($outroUser)->create([
+        'history_visible' => true,
+        'title' => 'Outra Conta',
+    ]);
+
+    $resp = $this->actingAs($user)
+        ->getJson('/api/ai/history')
+        ->assertStatus(200);
+
+    expect($resp->json('data'))->toHaveCount(2)
+        ->and($resp->json('data.0.id'))->toBe($req2->id)
+        ->and($resp->json('data.1.id'))->toBe($req1->id);
+
+    // Busca por termo no schema
+    $respSearchSchema = $this->actingAs($user)
+        ->getJson('/api/ai/history?q=clients')
+        ->assertStatus(200);
+
+    expect($respSearchSchema->json('data'))->toHaveCount(1)
+        ->and($respSearchSchema->json('data.0.id'))->toBe($req1->id);
+
+    // Busca por termo no prompt
+    $respSearchPrompt = $this->actingAs($user)
+        ->getJson('/api/ai/history?q=estoque')
+        ->assertStatus(200);
+
+    expect($respSearchPrompt->json('data'))->toHaveCount(1)
+        ->and($respSearchPrompt->json('data.0.id'))->toBe($req2->id);
+
+    // Busca por termo no titulo
+    $respSearchTitle = $this->actingAs($user)
+        ->getJson('/api/ai/history?q=TypeORM')
+        ->assertStatus(200);
+
+    expect($respSearchTitle->json('data'))->toHaveCount(1)
+        ->and($respSearchTitle->json('data.0.id'))->toBe($req1->id);
+});

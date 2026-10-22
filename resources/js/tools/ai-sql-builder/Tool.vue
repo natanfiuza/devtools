@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoutes } from '@/composables/useRoutes';
 import { formatBytes } from '@/lib/bytes';
+import QueryHistory from './QueryHistory.vue';
 import ResultPanel from './ResultPanel.vue';
 import SchemaForm from './SchemaForm.vue';
 import StateNotice from './StateNotice.vue';
 import { useAiQuery } from './useAiQuery';
 import type { AiApiError } from './api';
-import type { AiQueryInput, AiToolProps, BlockReason } from './types';
+import type { AiHistoryItem, AiQueryInput, AiToolProps, BlockReason } from './types';
 
 /**
  * O AI SQL Builder (docs/SPEC.md secao 6, ADR-039 a ADR-043).
@@ -41,11 +42,15 @@ const {
     busy,
     submit,
     retry,
+    restore,
 } = useAiQuery({
     endpoints: props.endpoints,
     poll: props.poll,
     initialQuota: props.quota,
 });
+
+const schemaFormRef = ref<InstanceType<typeof SchemaForm> | null>(null);
+const queryHistoryRef = ref<InstanceType<typeof QueryHistory> | null>(null);
 
 /** O motivo do servidor no vocabulario do `StateNotice`. */
 const NOTICE_KINDS: Record<
@@ -134,52 +139,76 @@ const failureMessage = computed<string | null>(() => {
 });
 
 function onSubmit(input: AiQueryInput): void {
-    void submit(input);
+    void submit(input).then(() => {
+        queryHistoryRef.value?.reload();
+    });
+}
+
+function onSelectHistory(item: AiHistoryItem): void {
+    schemaFormRef.value?.populate({
+        source: item.schema_source,
+        dialect: item.dialect,
+        target: item.output_target,
+        schema: item.schema ?? '',
+        description: item.description ?? '',
+    });
+
+    restore(item.result);
 }
 </script>
 
 <template>
-    <div
-        :class="
-            blockedKind === null
-                ? 'grid gap-6 lg:grid-cols-2 lg:items-start'
-                : 'max-w-2xl'
-        "
-    >
-        <section class="rounded-lg border p-4 sm:p-5">
-            <h2 class="text-base font-medium">{{ t('ai.form.title') }}</h2>
+    <div class="space-y-6">
+        <div
+            :class="
+                blockedKind === null
+                    ? 'grid gap-6 lg:grid-cols-2 lg:items-start'
+                    : 'max-w-2xl'
+            "
+        >
+            <section class="rounded-lg border p-4 sm:p-5">
+                <h2 class="text-base font-medium">{{ t('ai.form.title') }}</h2>
 
-            <StateNotice
-                v-if="blockedKind !== null"
-                class="mt-4"
-                :kind="blockedKind"
-                :quota="liveQuota"
-                :login-href="routes.login.value"
-                :pricing-href="routes.pricing.value"
-                :resend-href="routes.form.resendVerification.value.action"
+                <StateNotice
+                    v-if="blockedKind !== null"
+                    class="mt-4"
+                    :kind="blockedKind"
+                    :quota="liveQuota"
+                    :login-href="routes.login.value"
+                    :pricing-href="routes.pricing.value"
+                    :resend-href="routes.form.resendVerification.value.action"
+                />
+
+                <SchemaForm
+                    v-else
+                    ref="schemaFormRef"
+                    class="mt-4"
+                    :sources="sources"
+                    :dialects="dialects"
+                    :targets="targets"
+                    :limits="limits"
+                    :quota="liveQuota"
+                    :busy="busy"
+                    @submit="onSubmit"
+                />
+            </section>
+
+            <ResultPanel
+                v-if="blockedKind === null"
+                :status="status"
+                :result="result"
+                :tokens="tokens"
+                :cache-hit="cacheHit"
+                :failure-message="failureMessage"
+                @retry="retry"
             />
+        </div>
 
-            <SchemaForm
-                v-else
-                class="mt-4"
-                :sources="sources"
-                :dialects="dialects"
-                :targets="targets"
-                :limits="limits"
-                :quota="liveQuota"
-                :busy="busy"
-                @submit="onSubmit"
-            />
-        </section>
-
-        <ResultPanel
-            v-if="blockedKind === null"
-            :status="status"
-            :result="result"
-            :tokens="tokens"
-            :cache-hit="cacheHit"
-            :failure-message="failureMessage"
-            @retry="retry"
+        <QueryHistory
+            v-if="props.endpoints.history"
+            ref="queryHistoryRef"
+            :history-endpoint="props.endpoints.history"
+            @select="onSelectHistory"
         />
     </div>
 </template>

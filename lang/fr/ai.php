@@ -141,4 +141,16 @@ return [
         'review' => 'Relisez le résultat avant de l\'utiliser. La requête n\'est jamais exécutée ici.',
         'sensitive' => 'Ne collez pas de mots de passe, de tokens ni de données personnelles dans le schéma.',
     ],
+
+    'history' => [
+        'title' => 'Requêtes Précédentes',
+        'search_placeholder' => 'Rechercher dans le schéma, prompt ou titre...',
+        'loading' => 'Chargement de l\'historique...',
+        'error' => 'Impossible de charger l\'historique des requêtes.',
+        'empty' => 'Aucune requête effectuée pour le moment.',
+        'no_search_results' => 'Aucune requête trouvée pour "{query}".',
+        'untitled' => 'Requête sans titre',
+        'collapse' => 'Réduire l\'historique',
+        'expand' => 'Développer l\'historique',
+    ],
 ];

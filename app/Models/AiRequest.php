@@ -47,6 +47,9 @@ use Illuminate\Support\Carbon;
  * @property bool $cache_hit
  * @property AiFailureCode|null $error_code
  * @property bool $history_visible
+ * @property string|null $title
+ * @property string|null $prompt
+ * @property string|null $schema
  * @property string|null $canonical_payload
  * @property string|null $response_json
  * @property Carbon|null $created_at
@@ -74,6 +77,9 @@ use Illuminate\Support\Carbon;
     'cache_hit',
     'error_code',
     'history_visible',
+    'title',
+    'prompt',
+    'schema',
     'canonical_payload',
     'response_json',
 ])]

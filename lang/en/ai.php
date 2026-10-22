@@ -141,4 +141,16 @@ return [
         'review' => 'Review the result before using it. The query is never executed here.',
         'sensitive' => 'Do not paste passwords, tokens or personal data into the schema.',
     ],
+
+    'history' => [
+        'title' => 'Previous Queries',
+        'search_placeholder' => 'Search in schema, prompt or title...',
+        'loading' => 'Loading history...',
+        'error' => 'Unable to load query history.',
+        'empty' => 'No queries made yet.',
+        'no_search_results' => 'No queries found for "{query}".',
+        'untitled' => 'Untitled query',
+        'collapse' => 'Collapse history',
+        'expand' => 'Expand history',
+    ],
 ];

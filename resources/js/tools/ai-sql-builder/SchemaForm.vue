@@ -135,6 +135,25 @@ function onSubmit(): void {
         description: description.value,
     });
 }
+
+function populate(input: {
+    source: SchemaSource;
+    dialect: SqlDialect;
+    target: string;
+    schema: string;
+    description: string;
+}): void {
+    source.value = input.source;
+    dialect.value = input.dialect;
+    target.value = input.target;
+    schema.value = input.schema;
+    description.value = input.description;
+    touched.value = false;
+}
+
+defineExpose({
+    populate,
+});
 </script>
 
 <template>

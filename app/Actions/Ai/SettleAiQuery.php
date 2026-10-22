@@ -87,6 +87,7 @@ final class SettleAiQuery
                 'tokens_out' => $tokensOut,
                 'cache_hit' => false,
                 'error_code' => null,
+                'title' => $locked->history_visible ? $result->title : null,
                 'canonical_payload' => null,
                 'response_json' => $result->json(),
             ])->save();

@@ -119,6 +119,8 @@ final class StartAiQuery
             $hit = $this->cache->find($payload, $dialect, $outputTarget->slug);
 
             if ($hit !== null) {
+                $historyVisible = (bool) $lockedUser->history_enabled;
+
                 $request = AiRequest::query()->create([
                     'user_id' => $lockedUser->getKey(),
                     'api_token_id' => $apiTokenId,
@@ -138,7 +140,10 @@ final class StartAiQuery
                     'tokens_out' => max(0, $hit->cache->tokens_out),
                     'cache_hit' => true,
                     'error_code' => null,
-                    'history_visible' => (bool) $lockedUser->history_enabled,
+                    'history_visible' => $historyVisible,
+                    'title' => $historyVisible ? $hit->result->title : null,
+                    'prompt' => $historyVisible ? $payload->description : null,
+                    'schema' => $historyVisible ? $payload->schema : null,
                     'canonical_payload' => null,
                     'response_json' => $hit->result->json(),
                 ]);
@@ -149,6 +154,8 @@ final class StartAiQuery
             }
 
             $this->assertWithinPlanLimits($quota, $payload, $estimatedTokens, $unit);
+
+            $historyVisible = (bool) $lockedUser->history_enabled;
 
             $request = AiRequest::query()->create([
                 'user_id' => $lockedUser->getKey(),
@@ -169,7 +176,10 @@ final class StartAiQuery
                 'tokens_out' => null,
                 'cache_hit' => false,
                 'error_code' => null,
-                'history_visible' => (bool) $lockedUser->history_enabled,
+                'history_visible' => $historyVisible,
+                'title' => null,
+                'prompt' => $historyVisible ? $payload->description : null,
+                'schema' => $historyVisible ? $payload->schema : null,
                 'canonical_payload' => $this->codec->encode($payload),
                 'response_json' => null,
             ]);

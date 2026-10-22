@@ -50,6 +50,7 @@ it('entrega o pacote do visitante com os limites do Free', function () {
         ->and($props['endpoints'])->toBe([
             'store' => '/api/ai/queries',
             'show' => '/api/ai/queries/__ID__',
+            'history' => '/api/ai/history',
         ]);
 });
 

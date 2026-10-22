@@ -11,6 +11,7 @@ use App\Enums\SqlDialect;
  * esta forma, nunca o texto cru do provedor.
  *
  * @phpstan-type ResultArray array{
+ *     title: string|null,
  *     sql: string,
  *     dialect: string,
  *     assumptions: list<string>,
@@ -38,6 +39,7 @@ final readonly class AiResult
         public bool $needsClarification,
         public ?string $clarification,
         public array $outputs,
+        public ?string $title = null,
     ) {}
 
     /**
@@ -46,6 +48,7 @@ final readonly class AiResult
     public function toArray(): array
     {
         return [
+            'title' => $this->title,
             'sql' => $this->sql,
             'dialect' => $this->dialect->value,
             'assumptions' => $this->assumptions,
