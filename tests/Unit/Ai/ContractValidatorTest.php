@@ -132,3 +132,44 @@ it('recusa resposta maior que o teto de bytes', function () {
         'sql',
     ))->toThrow(InvalidContractException::class);
 });
+
+it('aceita e normaliza o campo explanation opcional', function () {
+    $validator = new ContractValidator;
+
+    $resultWithExplanation = $validator->validate(
+        aiContractFixture(['explanation' => '  Esta consulta busca usuarios ativos agrupados por data.  ']),
+        SqlDialect::Mysql,
+        'sql',
+    );
+    expect($resultWithExplanation->explanation)->toBe('Esta consulta busca usuarios ativos agrupados por data.');
+
+    $resultWithoutExplanation = $validator->validate(
+        aiContractFixture(['explanation' => null]),
+        SqlDialect::Mysql,
+        'sql',
+    );
+    expect($resultWithoutExplanation->explanation)->toBeNull();
+
+    $resultEmptyExplanation = $validator->validate(
+        aiContractFixture(['explanation' => '   ']),
+        SqlDialect::Mysql,
+        'sql',
+    );
+    expect($resultEmptyExplanation->explanation)->toBeNull();
+});
+
+it('recusa explanation com tipo invalido ou longo demais', function () {
+    $validator = new ContractValidator;
+
+    expect(fn () => $validator->validate(
+        aiContractFixture(['explanation' => 12345]),
+        SqlDialect::Mysql,
+        'sql',
+    ))->toThrow(InvalidContractException::class);
+
+    expect(fn () => $validator->validate(
+        aiContractFixture(['explanation' => str_repeat('a', 4001)]),
+        SqlDialect::Mysql,
+        'sql',
+    ))->toThrow(InvalidContractException::class);
+});

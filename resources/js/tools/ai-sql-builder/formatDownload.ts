@@ -9,10 +9,14 @@
 export interface FormatDownloadOptions {
     target: string;
     code: string;
+    explanation?: string | null;
+    tip?: string | null;
     assumptions?: string[];
     warnings?: string[];
     tablesUsed?: string[];
     labels: {
+        explanation?: string;
+        tip?: string;
         assumptions: string;
         warnings: string;
         tables: string;
@@ -25,6 +29,8 @@ export function formatDownloadContent(options: FormatDownloadOptions): string {
     const {
         target,
         code,
+        explanation = null,
+        tip = null,
         assumptions = [],
         warnings = [],
         tablesUsed = [],
@@ -32,6 +38,16 @@ export function formatDownloadContent(options: FormatDownloadOptions): string {
     } = options;
 
     const sections: string[] = [];
+
+    if (explanation && explanation.trim() !== '') {
+        const title = labels.explanation ?? 'Explanation';
+        sections.push(`${title}:\n${explanation.trim()}`);
+    }
+
+    if (tip && tip.trim() !== '') {
+        const title = labels.tip ?? 'Tip';
+        sections.push(`${title}:\n${tip.trim()}`);
+    }
 
     if (assumptions.length > 0) {
         const lines = [labels.assumptions + ':'];

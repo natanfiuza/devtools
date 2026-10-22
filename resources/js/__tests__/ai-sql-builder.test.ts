@@ -144,6 +144,8 @@ const TRADUCOES = {
             copied: 'COPIADO_RESULTADO',
             download: 'BAIXAR',
             download_name: 'consulta',
+            explanation: 'COMO_FOI_CONSTRUIDA',
+            tip: 'DICA_BOAS_PRATICAS',
             assumptions: 'PREMISSAS',
             warnings: 'AVISOS',
             tables: 'TABELAS',
@@ -152,6 +154,11 @@ const TRADUCOES = {
             cache_hit: 'CACHE',
             clarification: 'CLARIFICACAO',
             empty: 'VAZIO_RESULTADO',
+        },
+        tips: {
+            sql: 'DICA_SQL_INDICES',
+            eloquent: 'DICA_ELOQUENT_EAGER',
+            laravel_query_builder: 'DICA_LARAVEL_MODEL',
         },
         errors: { generic: 'ERRO_GENERICO' },
     },
@@ -504,6 +511,22 @@ describe('ResultPanel', () => {
             expect.stringContaining('User::query()->get();'),
             'text/plain;charset=utf-8',
         );
+    });
+
+    it('exibe explicacao didatica e dica de boas praticas do target na secao de metadados', () => {
+        const wrapper = montarResultado({
+            result: {
+                ...RESULTADO,
+                explanation: 'A query faz um join simples entre usuarios e pedidos.',
+            },
+            status: 'done',
+        });
+
+        const meta = wrapper.get('[data-test="ai-meta"]');
+        expect(meta.text()).toContain('COMO_FOI_CONSTRUIDA');
+        expect(meta.text()).toContain('A query faz um join simples entre usuarios e pedidos.');
+        expect(meta.text()).toContain('DICA_BOAS_PRATICAS');
+        expect(meta.text()).toContain('DICA_ELOQUENT_EAGER');
     });
 });
 

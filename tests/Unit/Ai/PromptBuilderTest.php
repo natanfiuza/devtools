@@ -42,6 +42,7 @@ it('monta regras fixas, prompt do alvo e dados delimitados', function () {
         ->and($messages[0]['content'])->toContain('Target: SQL instructions.')
         ->and($messages[0]['content'])->toContain('untrusted data')
         ->and($messages[0]['content'])->toContain('"sql": "string"')
+        ->and($messages[0]['content'])->toContain('"explanation": "string"')
         ->and($messages[1]['role'])->toBe('user')
         ->and($messages[1]['content'])->toContain('DIALECT: mysql')
         ->and($messages[1]['content'])->toContain('<schema>')

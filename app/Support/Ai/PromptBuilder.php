@@ -69,6 +69,7 @@ HARD RULES
 JSON SHAPE
 {
   "title": "string",
+  "explanation": "string",
   "sql": "string",
   "dialect": "mysql",
   "assumptions": ["string"],
@@ -81,9 +82,9 @@ JSON SHAPE
   }
 }
 
-The dialect value must be exactly the one in DIALECT. Provide a short, informative title for the query reflecting what is being queried and the output target (e.g. "Busca por Pedidos de Clientes no formato TypeORM"). Write the title in the same language as the request. When needs_clarification is
+The dialect value must be exactly the one in DIALECT. Provide a short, informative title for the query reflecting what is being queried and the output target (e.g. "Busca por Pedidos de Clientes no formato TypeORM"). Provide a concise and didactic explanation (1-2 short paragraphs) of how the query was constructed, highlighting key joins, filters, groupings or design decisions so a developer can immediately understand it. Write title, explanation, assumptions, warnings and clarification in the same language as the request. When needs_clarification is
 false, outputs.{$target->slug} is required and non-empty, and sql contains the
-equivalent SQL. When needs_clarification is true, sql and outputs must be empty and
+equivalent SQL. When needs_clarification is true, sql, outputs and explanation must be empty and
 clarification must be non-empty.
 PROMPT;
     }
