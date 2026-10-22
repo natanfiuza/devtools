@@ -141,4 +141,16 @@ return [
         'review' => 'Revise o resultado antes de usar. A consulta nunca é executada aqui.',
         'sensitive' => 'Não cole senhas, tokens nem dados pessoais no schema.',
     ],
+
+    'history' => [
+        'title' => 'Consultas Anteriores',
+        'search_placeholder' => 'Buscar no schema, prompt ou título...',
+        'loading' => 'Carregando histórico...',
+        'error' => 'Não foi possível carregar o histórico de consultas.',
+        'empty' => 'Nenhuma consulta realizada ainda.',
+        'no_search_results' => 'Nenhuma consulta encontrada para "{query}".',
+        'untitled' => 'Consulta sem título',
+        'collapse' => 'Recolher histórico',
+        'expand' => 'Expandir histórico',
+    ],
 ];

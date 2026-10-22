@@ -143,9 +143,18 @@ function downloadOutput(): void {
         :data-status="status"
     >
         <div class="flex flex-wrap items-start justify-between gap-3">
-            <h2 class="text-sm font-medium">
-                {{ t('ai.result.title') }}
-            </h2>
+            <div>
+                <h2 class="text-sm font-medium">
+                    {{ t('ai.result.title') }}
+                </h2>
+                <p
+                    v-if="result?.title"
+                    class="mt-0.5 text-xs font-semibold text-brand"
+                    data-test="ai-result-title"
+                >
+                    {{ result.title }}
+                </p>
+            </div>
 
             <div v-if="hasOutput" class="flex flex-wrap items-center gap-2">
                 <span

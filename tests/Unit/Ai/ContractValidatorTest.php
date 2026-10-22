@@ -31,13 +31,15 @@ beforeEach(function () {
 
 it('aceita e normaliza o contrato completo', function () {
     $result = (new ContractValidator)->validate(aiContractFixture([
+        'title' => ' Busca por Usuários ',
         'sql' => "  SELECT id FROM users;\n",
         'dialect' => ' MYSQL ',
         'assumptions' => [' um ', '', 'dois'],
         'outputs' => ['sql' => " SELECT id FROM users; \n"],
     ]), SqlDialect::Mysql, 'sql');
 
-    expect($result->sql)->toBe('SELECT id FROM users;')
+    expect($result->title)->toBe('Busca por Usuários')
+        ->and($result->sql)->toBe('SELECT id FROM users;')
         ->and($result->dialect)->toBe(SqlDialect::Mysql)
         ->and($result->assumptions)->toBe(['um', 'dois'])
         ->and($result->warnings)->toBe([])

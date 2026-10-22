@@ -49,6 +49,7 @@ export interface UseAiQuery {
     /** Retoma o polling de um pedido que estourou o tempo. */
     retry: () => void;
     reset: () => void;
+    restore: (restoredResult: AiQueryResult | null) => void;
 }
 
 function emptyTokens(): TokenUsage {
@@ -171,6 +172,18 @@ export function useAiQuery(options: UseAiQueryOptions): UseAiQuery {
         quota.value = options.initialQuota;
     }
 
+    function restore(restoredResult: AiQueryResult | null): void {
+        poller?.cancel();
+        poller = null;
+        queryId = null;
+        status.value = restoredResult !== null ? 'done' : 'idle';
+        result.value = restoredResult;
+        tokens.value = emptyTokens();
+        cacheHit.value = false;
+        error.value = null;
+        errorCode.value = null;
+    }
+
     onBeforeUnmount(() => {
         poller?.cancel();
     });
@@ -187,5 +200,6 @@ export function useAiQuery(options: UseAiQueryOptions): UseAiQuery {
         submit,
         retry,
         reset,
+        restore,
     };
 }

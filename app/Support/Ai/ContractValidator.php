@@ -61,6 +61,7 @@ final class ContractValidator
         $tablesUsed = $this->stringList($data['tables_used'], 'tables_used');
         $clarification = $this->clarification($data['clarification']);
         $outputs = $this->outputs($data['outputs']);
+        $title = $this->title($data['title'] ?? null);
 
         $sql = trim($sql);
 
@@ -95,6 +96,7 @@ final class ContractValidator
             $needsClarification,
             $clarification,
             $outputs,
+            $title,
         );
     }
 
@@ -214,5 +216,28 @@ final class ContractValidator
         }
 
         return $outputs;
+    }
+
+    private function title(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_string($value)) {
+            throw InvalidContractException::because('title_not_string');
+        }
+
+        $title = trim($value);
+
+        if ($title === '') {
+            return null;
+        }
+
+        if (mb_strlen($title, 'UTF-8') > 255) {
+            throw InvalidContractException::because('title_too_long');
+        }
+
+        return $title;
     }
 }

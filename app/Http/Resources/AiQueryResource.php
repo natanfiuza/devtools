@@ -37,6 +37,7 @@ final class AiQueryResource extends JsonResource
 
         return [
             'id' => $model->id,
+            'title' => $model->title,
             'status' => $model->status->value,
             'cache_hit' => $model->cache_hit,
             'result' => $model->result(),

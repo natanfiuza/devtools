@@ -73,4 +73,48 @@ final class AiQueryController extends Controller
 
         return (new AiQueryResource($model, Quota::for($user)))->response();
     }
+
+    public function history(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user instanceof User) {
+            throw new AuthenticationException;
+        }
+
+        $search = trim((string) $request->query('q', ''));
+
+        $query = $user->aiRequests()
+            ->where('history_visible', true)
+            ->with('outputTarget')
+            ->latest('created_at');
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search): void {
+                $term = "%{$search}%";
+                $builder->where('title', 'like', $term)
+                    ->orWhere('prompt', 'like', $term)
+                    ->orWhere('schema', 'like', $term);
+            });
+        }
+
+        $items = $query->limit(30)->get()->map(function (AiRequest $req): array {
+            return [
+                'id' => $req->id,
+                'title' => $req->title,
+                'status' => $req->status->value,
+                'dialect' => $req->dialect->value,
+                'output_target' => $req->outputTarget->slug,
+                'schema_source' => $req->schema_source->value,
+                'schema' => $req->schema,
+                'description' => $req->prompt,
+                'result' => $req->result(),
+                'created_at' => $req->created_at?->toIso8601String(),
+            ];
+        });
+
+        return response()->json([
+            'data' => $items,
+        ]);
+    }
 }

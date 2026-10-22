@@ -67,6 +67,7 @@ final class AiToolProps
                 'store' => route('api.ai.queries.store', absolute: false),
                 // O cliente troca o marcador pelo ULID devolvido no POST.
                 'show' => route('api.ai.queries.show', ['aiRequest' => '__ID__'], absolute: false),
+                'history' => route('api.ai.history', absolute: false),
             ],
         ];
     }

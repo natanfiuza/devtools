@@ -75,10 +75,25 @@ export interface AiToolProps {
         store: string;
         /** Marcador `__ID__` que o cliente troca pelo ULID. */
         show: string;
+        history?: string;
     };
 }
 
+export interface AiHistoryItem {
+    id: string;
+    title: string | null;
+    status: QueryStatus;
+    dialect: SqlDialect;
+    output_target: string;
+    schema_source: SchemaSource;
+    schema: string | null;
+    description: string | null;
+    result: AiQueryResult | null;
+    created_at: string | null;
+}
+
 export interface AiQueryResult {
+    title?: string | null;
     sql: string;
     dialect: SqlDialect;
     assumptions: string[];

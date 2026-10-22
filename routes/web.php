@@ -74,6 +74,9 @@ Route::prefix('api/ai')
             ->middleware('throttle:ai-post')
             ->name('queries.store');
 
+        Route::get('history', [AiQueryController::class, 'history'])
+            ->name('history');
+
         Route::get('queries/{aiRequest}', [AiQueryController::class, 'show'])
             ->whereUlid('aiRequest')
             ->middleware('throttle:ai-poll')

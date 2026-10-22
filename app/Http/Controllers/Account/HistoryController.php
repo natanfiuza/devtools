@@ -64,6 +64,7 @@ class HistoryController extends Controller
 
             return [
                 'id' => $req->id,
+                'title' => $req->title,
                 'tool' => $req->outputTarget->label,
                 'dialect' => $req->dialect->label(),
                 'status' => $req->status->value,
@@ -74,7 +75,7 @@ class HistoryController extends Controller
                 'cacheHit' => (bool) $req->cache_hit,
                 'createdAt' => Format::dateTime($req->created_at) ?? '',
                 'sql' => is_array($result) && isset($result['sql']) && is_string($result['sql']) ? $result['sql'] : null,
-                'summary' => $this->summary($result),
+                'summary' => $req->title ?? $this->summary($result),
                 'errorCode' => $req->error_code?->value,
             ];
         }, $paginator->items());
