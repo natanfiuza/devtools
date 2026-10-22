@@ -56,4 +56,19 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/auth/github/callback'),
     ],
 
+    /*
+    | Cloudflare Turnstile no cadastro (ADR-052). Sem as duas chaves o recurso
+    | fica desligado: o widget nao aparece e a regra passa, explicitamente.
+    | Com as chaves, a verificacao falha fechada (ver docs/RUNBOOK.md).
+    |
+    | A `site_key` e publica; a `secret_key` nunca sai do servidor.
+    */
+
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'verify_url' => env('TURNSTILE_VERIFY_URL', 'https://challenges.cloudflare.com/turnstile/v0/siteverify'),
+        'timeout' => (int) env('TURNSTILE_TIMEOUT', 5),
+    ],
+
 ];

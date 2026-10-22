@@ -2,6 +2,7 @@
 
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
+use App\Models\AiRequest;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -180,6 +181,10 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
         'plan_id' => $plano->id,
     ]);
 
+    // Historico e token de API sao dado da pessoa e nao sobrevivem ao expurgo.
+    AiRequest::factory()->for($user)->done()->create(['history_visible' => true]);
+    $user->createToken('cli', ['ai:query']);
+
     // Simula exclusao ha mais de 30 dias
     $user->delete();
     DB::table('users')->where('id', $user->id)->update(['deleted_at' => now()->subDays(31)]);
@@ -200,7 +205,10 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
         ->and($anonima->payments()->count())->toBe(1)
         ->and($anonima->subscriptions()->count())->toBe(1)
         ->and($assinatura->refresh()->status)->toBe(SubscriptionStatus::Canceled)
-        ->and($anonima->activeSubscription())->toBeNull();
+        ->and($anonima->activeSubscription())->toBeNull()
+        ->and($anonima->history_enabled)->toBeFalse()
+        ->and($anonima->aiRequests()->count())->toBe(0)
+        ->and($anonima->tokens()->count())->toBe(0);
 });
 
 it('requires the correct password to delete the account', function () {

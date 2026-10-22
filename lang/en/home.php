@@ -81,6 +81,53 @@ return [
         'pending_body' => "We received your subscription intent and your {'@'}username is already reserved on your account. We will reach out to complete activation.",
         'submitted_toast' => 'Subscription intent registered successfully.',
         'plan_label' => 'Choose your plan',
+        'checkout' => [
+            'unavailable' => 'Online payment is currently unavailable. You can register your interest below and we will contact you.',
+            'path_label' => 'How would you like to subscribe?',
+            'paths' => [
+                'one_time' => [
+                    'title' => 'Pay now',
+                    'body' => 'Pix, card or bank slip paid upfront. Unlocks one period as soon as the payment is approved.',
+                ],
+                'recurring' => [
+                    'title' => 'Automatic card renewal',
+                    'body' => 'Your card is charged every period. Access unlocks when the first payment is confirmed.',
+                ],
+                'manual' => [
+                    'title' => 'I prefer manual support',
+                    'body' => 'Register your request and we will arrange the payment method with you.',
+                ],
+            ],
+            'recurring_badge' => 'Renewal active',
+            'recurring_blocked' => 'Automatic renewal is already active on this plan. Cancel it in the billing area before creating another one.',
+            'redirect_note' => 'You will be taken to Mercado Pago to complete the payment. Nothing is unlocked until confirmation.',
+            'one_time_action' => 'Pay now',
+            'recurring_action' => 'Enable automatic renewal',
+            'errors' => [
+                'unavailable' => 'Online payment is unavailable. Use the manual support option to complete your subscription.',
+                'recurring_active' => 'Automatic renewal is already active on this plan. Cancel it before creating another one.',
+                'plan_unavailable' => 'This plan is not available for online payment.',
+                'gateway' => 'We could not open the payment right now. Try again shortly or use the manual support option.',
+            ],
+            'status' => [
+                'processing' => [
+                    'title' => 'Payment processing',
+                    'body' => 'We are waiting for the provider to confirm. Access unlocks automatically as soon as the payment is approved.',
+                ],
+                'approved' => [
+                    'title' => 'Payment approved',
+                    'body' => 'Your new period is already available on your account. You can follow everything in the billing area.',
+                ],
+                'expired' => [
+                    'title' => 'Checkout expired',
+                    'body' => 'This payment attempt expired without confirmation. Choose a plan and try again.',
+                ],
+                'failed' => [
+                    'title' => 'Payment not completed',
+                    'body' => 'We could not complete this attempt. No access was unlocked; you can try again or use the manual support option.',
+                ],
+            ],
+        ],
         'username_label' => 'Your exclusive username',
         'username_placeholder' => 'username',
         'username_help' => 'Lowercase letters, numbers, and underscores only (3 to 30 characters). Reserved immediately on your account.',

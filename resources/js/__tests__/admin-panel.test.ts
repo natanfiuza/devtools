@@ -1,11 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import AdminTable from '@/components/admin/AdminTable.vue';
+import AiCache from '@/pages/admin/AiCache.vue';
+import OutputTargets from '@/pages/admin/OutputTargets.vue';
 import Users from '@/pages/admin/Users.vue';
-import type { AdminColumn, AdminUserRow, Paginator } from '@/types';
+import type {
+    AdminAiCacheRow,
+    AdminColumn,
+    AdminOutputTargetRow,
+    AdminUserRow,
+    Paginator,
+} from '@/types';
 
 /**
  * Painel administrativo: navegacao, tabela densa e filtros (ADR-025).
@@ -22,9 +30,11 @@ type FakePage = { url: string; props: Record<string, unknown> };
  * `useCurrentUrl` guarda um computed de modulo, que so se recalcula quando a
  * URL muda por dentro dele.
  */
-const { fakePage, routerGet } = vi.hoisted(() => ({
+const { fakePage, routerGet, routerPatch, routerDelete } = vi.hoisted(() => ({
     fakePage: { current: null } as { current: FakePage | null },
     routerGet: vi.fn(),
+    routerPatch: vi.fn(),
+    routerDelete: vi.fn(),
 }));
 
 vi.mock('@inertiajs/vue3', async () => {
@@ -45,8 +55,8 @@ vi.mock('@inertiajs/vue3', async () => {
         router: {
             get: routerGet,
             post: vi.fn(),
-            delete: vi.fn(),
-            patch: vi.fn(),
+            delete: routerDelete,
+            patch: routerPatch,
         },
         Head: defineComponent({
             name: 'InertiaHead',
@@ -104,6 +114,9 @@ const traducoes = {
             plans: 'PLANOS',
             intents: 'INTENCOES',
             payments: 'PAGAMENTOS',
+            webhooks: 'EVENTOS_DE_WEBHOOK',
+            output_targets: 'ALVOS_DE_SAIDA',
+            ai_cache: 'CACHE_DE_IA',
             audit: 'AUDITORIA',
             panel: 'PAINEL',
             back_to_site: 'VOLTAR_AO_SITE',
@@ -117,6 +130,47 @@ const traducoes = {
             next: 'PROXIMA',
             search: 'BUSCAR',
             clear: 'LIMPAR',
+            cancel: 'CANCELAR',
+        },
+        output_targets: {
+            title: 'ALVOS_DE_SAIDA',
+            description: 'DESCRICAO_ALVOS',
+            readonly: 'SOMENTE_LEITURA_ALVOS',
+            slug: 'IDENTIFICADOR',
+            label: 'ROTULO',
+            language: 'IDIOMA',
+            dialects: 'DIALETOS',
+            plan: 'PLANO_EXIGIDO',
+            free: 'GRATUITO',
+            enabled: 'ATIVO',
+            disabled: 'DESLIGADO',
+            toggle: 'ALTERNAR_ALVO',
+            empty: 'VAZIO_ALVOS',
+        },
+        ai_cache: {
+            title: 'CACHE_DE_IA',
+            description: 'DESCRICAO_CACHE',
+            readonly: 'SOMENTE_LEITURA_CACHE',
+            hash: 'HASH',
+            model: 'MODELO',
+            prompt_version: 'VERSAO_PROMPT',
+            tokens: 'TOKENS',
+            hits: 'ACERTOS',
+            created: 'CRIADA_EM',
+            expires: 'EXPIRA_EM',
+            state: 'SITUACAO',
+            state_all: 'TODAS',
+            state_valid: 'VALIDAS',
+            state_expired: 'EXPIRADAS',
+            valid: 'VALIDA',
+            expired: 'EXPIRADA',
+            tokens_count: '{in} ENTRADA / {out} SAIDA',
+            prune: 'REMOVER_EXPIRADAS',
+            prune_confirm_title: 'TITULO_PODA',
+            prune_confirm_description: 'DESCRICAO_PODA',
+            prune_confirm_button: 'CONFIRMAR_PODA',
+            expired_count: '{count} EXPIRADA(S)',
+            empty: 'VAZIO_CACHE',
         },
         users: {
             title: 'CONTAS',
@@ -148,10 +202,12 @@ function montarPainel(): VueWrapper {
 beforeEach(() => {
     abrir('/admin');
     routerGet.mockClear();
+    routerPatch.mockClear();
+    routerDelete.mockClear();
 });
 
 describe('navegacao do painel', () => {
-    it('lista as oito secoes com o caminho de cada uma', () => {
+    it('lista as onze secoes com o caminho de cada uma', () => {
         const wrapper = montarPainel();
 
         const itens = wrapper.findAll('nav a');
@@ -164,6 +220,9 @@ describe('navegacao do painel', () => {
             'PLANOS',
             'INTENCOES',
             'PAGAMENTOS',
+            'EVENTOS_DE_WEBHOOK',
+            'ALVOS_DE_SAIDA',
+            'CACHE_DE_IA',
             'AUDITORIA',
         ]);
         expect(itens.map((item) => item.attributes('href'))).toEqual([
@@ -174,6 +233,9 @@ describe('navegacao do painel', () => {
             '/admin/plans',
             '/admin/intents',
             '/admin/payments',
+            '/admin/webhooks',
+            '/admin/output-targets',
+            '/admin/ai-cache',
             '/admin/audit',
         ]);
     });
@@ -446,5 +508,186 @@ describe('lista de contas', () => {
 
         expect(wrapper.text()).toContain('NADA_AQUI');
         expect(wrapper.text()).toContain('VAZIO_CONTAS');
+    });
+});
+
+function paginaDe<T extends { id: number }>(
+    rows: T[],
+    extra: Partial<Paginator<T>> = {},
+): Paginator<T> {
+    return {
+        data: rows,
+        current_page: 1,
+        last_page: 1,
+        total: rows.length,
+        ...extra,
+    };
+}
+
+function alvo(
+    overrides: Partial<AdminOutputTargetRow> = {},
+): AdminOutputTargetRow {
+    return {
+        id: 1,
+        slug: 'mysql',
+        label: 'MySQL',
+        language: 'pt_BR',
+        dialects: ['mysql'],
+        plan: null,
+        enabled: true,
+        sort: 1,
+        ...overrides,
+    };
+}
+
+describe('alvos de saida', () => {
+    function montarAlvos(targets: AdminOutputTargetRow[]): VueWrapper {
+        return mount(OutputTargets, {
+            props: { targets },
+            global: { plugins: [i18nDoTeste()] },
+        });
+    }
+
+    it('mostra o catalogo como leitura, com o plano exigido', () => {
+        const wrapper = montarAlvos([
+            alvo(),
+            alvo({
+                id: 2,
+                slug: 'postgres',
+                label: 'PostgreSQL',
+                dialects: ['postgresql'],
+                plan: 'Pro',
+                enabled: false,
+            }),
+        ]);
+
+        const mysql = wrapper.get('[data-test="alvo-mysql"]');
+        expect(mysql.text()).toContain('MySQL');
+        expect(mysql.text()).toContain('mysql');
+        expect(mysql.text()).toContain('GRATUITO');
+        expect(mysql.text()).toContain('ATIVO');
+
+        const postgres = wrapper.get('[data-test="alvo-postgres"]');
+        expect(postgres.text()).toContain('Pro');
+        expect(postgres.text()).toContain('DESLIGADO');
+    });
+
+    it('alterna so o estado ligado/desligado do alvo', async () => {
+        const wrapper = montarAlvos([alvo({ enabled: true })]);
+
+        await wrapper
+            .get('[data-test="alvo-mysql"] [role="checkbox"]')
+            .trigger('click');
+
+        expect(routerPatch).toHaveBeenCalledWith(
+            '/admin/output-targets/1',
+            { enabled: false },
+            { preserveScroll: true, preserveState: true },
+        );
+    });
+});
+
+function entradaCache(
+    overrides: Partial<AdminAiCacheRow> = {},
+): AdminAiCacheRow {
+    return {
+        id: 1,
+        hash: 'a1b2c3d4e5f6',
+        model: 'modelo-x',
+        promptVersion: 3,
+        tokensIn: 120,
+        tokensOut: 80,
+        hits: 4,
+        createdAt: '20/10/2026 10:00',
+        expiresAt: '19/01/2027 10:00',
+        expired: false,
+        ...overrides,
+    };
+}
+
+describe('cache de IA', () => {
+    function montarCache(
+        entries: Paginator<AdminAiCacheRow>,
+        extra: { state?: string; expired?: number } = {},
+    ): VueWrapper {
+        return mount(AiCache, {
+            props: {
+                entries,
+                filters: { state: extra.state ?? '' },
+                expired: extra.expired ?? 0,
+                total: entries.total,
+            },
+            global: { plugins: [i18nDoTeste()] },
+        });
+    }
+
+    it('mostra so metadados da entrada', () => {
+        const wrapper = montarCache(paginaDe([entradaCache()]));
+
+        const texto = wrapper.text();
+        expect(texto).toContain('a1b2c3d4e5f6');
+        expect(texto).toContain('modelo-x');
+        expect(texto).toContain('120 ENTRADA / 80 SAIDA');
+        expect(texto).toContain('VALIDA');
+    });
+
+    it('nao deixa podar quando nao ha linha expirada', () => {
+        const wrapper = montarCache(paginaDe([entradaCache()]), {
+            expired: 0,
+        });
+
+        expect(
+            wrapper.get('[data-test="ai-cache-prune"]').attributes('disabled'),
+        ).toBeDefined();
+    });
+
+    it('leva o filtro de situacao junto com a pagina pedida', async () => {
+        const wrapper = montarCache(
+            paginaDe([entradaCache({ expired: true })], {
+                current_page: 1,
+                last_page: 2,
+                total: 30,
+            }),
+            { state: 'expired', expired: 30 },
+        );
+
+        const proxima = wrapper
+            .findAll('button')
+            .find((botao) => botao.text() === 'PROXIMA');
+
+        await proxima?.trigger('click');
+
+        expect(routerGet).toHaveBeenCalledWith(
+            '/admin/ai-cache',
+            { state: 'expired', page: 2 },
+            { preserveState: true, preserveScroll: true },
+        );
+    });
+
+    it('poda as expiradas so depois da confirmacao', async () => {
+        const wrapper = montarCache(
+            paginaDe([entradaCache({ expired: true })]),
+            {
+                expired: 1,
+            },
+        );
+
+        await wrapper.get('[data-test="ai-cache-prune"]').trigger('click');
+        await nextTick();
+
+        const confirmar = document.querySelector<HTMLElement>(
+            '[data-test="ai-cache-prune-confirm"]',
+        );
+
+        expect(confirmar).not.toBeNull();
+        expect(confirmar?.textContent).toContain('CONFIRMAR_PODA');
+
+        confirmar?.click();
+        await nextTick();
+
+        expect(routerDelete).toHaveBeenCalledWith(
+            '/admin/ai-cache/expired',
+            expect.objectContaining({ preserveScroll: true }),
+        );
     });
 });

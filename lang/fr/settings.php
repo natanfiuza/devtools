@@ -8,6 +8,7 @@ return [
         'profile' => 'Profil',
         'security' => 'Sécurité',
         'appearance' => 'Apparence',
+        'api_tokens' => 'Jetons API',
     ],
 
     'profile' => [
@@ -68,6 +69,32 @@ return [
         'two_factor_copy_codes' => 'Copier tous les codes',
         'two_factor_regenerate_codes' => 'Générer de nouveaux codes',
         'two_factor_close' => 'Fermer',
+    ],
+
+    'api_tokens' => [
+        'title' => 'Jetons API',
+        'description' => 'Jetons pour intégrer vos systèmes à l’API publique de requêtes.',
+        'create' => [
+            'name' => 'Nom du jeton',
+            'name_placeholder' => 'Ex. : intégration-déploiement',
+            'submit' => 'Créer le jeton',
+        ],
+        'once' => [
+            'title' => 'Jeton créé',
+            'description' => 'Copiez-le maintenant : cette valeur ne sera plus affichée.',
+            'copy' => 'Copier',
+            'copied' => 'Copié !',
+        ],
+        'created' => 'Créé le',
+        'last_used' => 'Dernière utilisation',
+        'never' => 'jamais',
+        'revoke' => 'Révoquer',
+        'revoke_title' => 'Révoquer le jeton',
+        'revoke_description' => 'L’intégration qui utilise ce jeton perd l’accès immédiatement. Cette action est irréversible.',
+        'confirm' => 'Révoquer',
+        'cancel' => 'Annuler',
+        'empty_title' => 'Aucun jeton créé',
+        'empty' => 'Créez un jeton pour appeler l’API publique depuis un autre système.',
     ],
 
     'appearance' => [

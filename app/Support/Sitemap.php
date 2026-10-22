@@ -29,6 +29,7 @@ final class Sitemap
         'pricing',
         'privacy',
         'terms',
+        'donate',
     ];
 
     /**

@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property int $amount_cents
  * @property string $currency
  * @property PaymentMethod $method
+ * @property string|null $gateway_method
  * @property PaymentStatus $status
  * @property Carbon|null $paid_at
  * @property string|null $note
@@ -40,6 +41,7 @@ use Illuminate\Support\Carbon;
     'amount_cents',
     'currency',
     'method',
+    'gateway_method',
     'status',
     'paid_at',
     'note',

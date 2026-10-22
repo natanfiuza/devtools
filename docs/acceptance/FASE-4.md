@@ -55,3 +55,46 @@ de 2026-10-14 e tambem ficam registrados na FASE-0.
   encerrado.
 - O consumo real da cota e as telas de IA ficam para a F5; gateway, doacao e
   webhooks para a F6; historico, SEO final e hardening para a F7.
+
+## Auditoria 2026-10-21
+
+Reauditoria completa de fechamento, sem implementacao nova. Nenhum bloqueio
+foi encontrado; os 15 criterios continuam atendidos e os carry-overs foram
+conferidos no codigo.
+
+### Gates no inicio da auditoria
+
+```text
+composer test       -> 440 testes, 440 passaram, 10.973 assercoes (Pint + PHPStan 0)
+npm run test        -> 730 testes, 53 arquivos, todos verdes
+npm run types:check -> vue-tsc limpo
+npm run lint:check  -> falha pre-existente de baseline: 4 erros e avisos de estilo
+npm run format:check-> falha pre-existente de baseline (arquivos fora do Prettier)
+```
+
+Os dois ultimos nao eram regressao da F4: eram divida de estilo anterior
+(stubs de teste com nomes reservados, imports sem uso e quatro arquivos fora do
+Prettier), corrigida nesta sessao; a reexecucao final deixou `lint:check` e
+`format:check` verdes. Os testes direcionados da fase somaram **209 testes e
+8.371 assercoes**, todos verdes.
+
+### Mapa criterio -> prova reexecutada
+
+| Criterios | Evidencia reexecutada |
+| --- | --- |
+| 1-4 | `AuthenticationTest`, `RegistrationTest`, `LocalizedAuthPagesTest`, `EmailVerificationTest`, `VerificationNotificationTest`, `PasswordResetTest`, `PasswordConfirmationTest`, `SocialLoginTest`, `SetPasswordTest`, `TranslationsParityTest` |
+| 5-6 | `config/fortify.php` (`twoFactorAuthentication` com `confirm` e `confirmPassword`), migration de 2FA presente, `AppServiceProvider` com `Passkeys::ignoreRoutes()`; 2FA segue sem teste dedicado (carry-over) e passkeys seguem desligadas |
+| 7-8 | `SecurityTest`, `ProfileUpdateTest`, `ProfilePhotoTest`, `AppearanceTest`, `AccountPanelTest`; `users.appearance` continua somente leitura (carry-over) |
+| 9 e 13 | `AdminAccountActionsTest`, `AdminRoleTest`, `AdminPanelTest`, `AdminImpersonationTest` |
+| 10-12 | `NewsletterTest`, `LegalPagesTest`, `LocaleRoutingTest`, `MailLocaleTest` |
+| 14-15 | Gates acima e `git status`/historico; nenhum commit ou push do assistente |
+
+### Carry-overs preservados
+
+- `users.appearance` somente leitura; o tema continua no cookie.
+- 2FA habilitado no Fortify sem teste dedicado.
+- Passkeys desligadas de proposito.
+- Middleware `verified` nas rotas autenticadas; o POST de `/subscribe` usa
+  apenas `auth` + `active` por decisao de produto.
+- Historico, SEO final e hardening seguem para a F7; gateway, doacao e
+  webhooks para a F6.

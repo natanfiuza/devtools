@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  *
  * @property string $id
  * @property int $user_id
+ * @property int|null $api_token_id
  * @property int $output_target_id
  * @property AiRequestStatus $status
  * @property SqlDialect $dialect
@@ -55,6 +56,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'user_id',
+    'api_token_id',
     'output_target_id',
     'status',
     'dialect',
@@ -105,6 +107,7 @@ class AiRequest extends Model
             'schema_source' => SchemaSource::class,
             'quota_unit' => QuotaUnit::class,
             'error_code' => AiFailureCode::class,
+            'api_token_id' => 'integer',
             'prompt_version' => 'integer',
             'estimated_tokens' => 'integer',
             'reserved_tokens' => 'integer',

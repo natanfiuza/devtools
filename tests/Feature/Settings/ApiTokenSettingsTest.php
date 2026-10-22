@@ -1,0 +1,123 @@
+<?php
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
+
+uses(RefreshDatabase::class);
+
+/*
+| Tokens da API publica (ADR-050).
+|
+| O texto puro so existe uma vez: no flash do POST. A lista mostra nome,
+| abilities e datas, nunca o valor. Revogar e definitivo e so alcanca os
+| tokens da propria conta.
+*/
+
+it('lista os tokens da conta sem expor o valor', function () {
+    $user = User::factory()->create();
+    $user->createToken('integracao', ['ai:query']);
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('settings/ApiTokens')
+            ->where('plainTextToken', null)
+            ->has('tokens', 1)
+            ->where('tokens.0.name', 'integracao')
+            ->where('tokens.0.abilities', ['ai:query'])
+            ->missing('tokens.0.plainTextToken'));
+});
+
+it('cria o token e mostra o texto puro apenas na requisicao seguinte', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('api-tokens.store'), [
+        'name' => 'integracao',
+    ]);
+
+    $response->assertRedirect(route('api-tokens.index'));
+
+    $plainTextToken = $response->getSession()->get('api_token');
+
+    expect($plainTextToken)->toBeString()
+        ->and($plainTextToken)->toContain('|');
+
+    $this->assertDatabaseHas('personal_access_tokens', [
+        'tokenable_id' => $user->id,
+        'tokenable_type' => $user->getMorphClass(),
+        'name' => 'integracao',
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('plainTextToken', $plainTextToken)
+            ->has('tokens', 1));
+
+    // O flash vale uma vez: recarregar a tela nao devolve o valor.
+    $this->actingAs($user)
+        ->get(route('api-tokens.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('plainTextToken', null));
+});
+
+it('nao aceita nome repetido na mesma conta', function () {
+    $user = User::factory()->create();
+    $user->createToken('integracao', ['ai:query']);
+
+    $this->actingAs($user)
+        ->from(route('api-tokens.index'))
+        ->post(route('api-tokens.store'), ['name' => 'integracao'])
+        ->assertSessionHasErrors('name');
+
+    expect($user->tokens()->count())->toBe(1);
+});
+
+it('permite o mesmo nome em contas diferentes', function () {
+    User::factory()->create()->createToken('integracao', ['ai:query']);
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('api-tokens.store'), ['name' => 'integracao'])
+        ->assertSessionHasNoErrors();
+
+    expect($user->tokens()->count())->toBe(1);
+});
+
+it('revoga somente um token da propria conta', function () {
+    $user = User::factory()->create();
+    $proprio = $user->createToken('proprio', ['ai:query'])->accessToken;
+    $outro = User::factory()->create()->createToken('alheio', ['ai:query'])->accessToken;
+
+    $this->actingAs($user)
+        ->delete(route('api-tokens.destroy', ['token' => $outro->id]))
+        ->assertNotFound();
+
+    $this->actingAs($user)
+        ->delete(route('api-tokens.destroy', ['token' => $proprio->id]))
+        ->assertSessionHasNoErrors();
+
+    expect($user->tokens()->count())->toBe(0)
+        ->and($outro->fresh())->not->toBeNull();
+});
+
+it('token revogado deixa de autenticar', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('cli', ['ai:query']);
+
+    $this->withToken($token->plainTextToken)
+        ->getJson('/api/v1/me')
+        ->assertOk();
+
+    $token->accessToken->delete();
+
+    // O guard guarda o usuario resolvido entre requisicoes no mesmo teste.
+    app('auth')->forgetGuards();
+
+    $this->withToken($token->plainTextToken)
+        ->getJson('/api/v1/me')
+        ->assertUnauthorized()
+        ->assertJsonPath('error.code', 'unauthenticated');
+});

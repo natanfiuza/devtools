@@ -3,13 +3,16 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     BadgePercent,
+    Boxes,
     ClipboardList,
     CreditCard,
+    Database,
     LayoutGrid,
     Mail,
     ScrollText,
     Tag,
     Users,
+    Webhook,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -67,6 +70,21 @@ const navItems = computed<NavItem[]>(() => [
         title: t('admin.nav.payments'),
         href: admin.payments.index.url(),
         icon: CreditCard,
+    },
+    {
+        title: t('admin.nav.webhooks'),
+        href: admin.webhooks.index.url(),
+        icon: Webhook,
+    },
+    {
+        title: t('admin.nav.output_targets'),
+        href: admin.outputTargets.index.url(),
+        icon: Boxes,
+    },
+    {
+        title: t('admin.nav.ai_cache'),
+        href: admin.aiCache.index.url(),
+        icon: Database,
     },
     {
         title: t('admin.nav.audit'),

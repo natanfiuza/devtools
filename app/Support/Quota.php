@@ -140,7 +140,9 @@ final class Quota
 
     /**
      * Lancamentos que entram na conta: os da conta e, quando ha periodo, so os
-     * de dentro dele.
+     * de dentro dele. O fim da janela importa com periodos empilhados: o
+     * consumo ja lancado com data do periodo seguinte nao pode encolher a cota
+     * do periodo que ainda esta valendo.
      *
      * @return HasMany<UsageLedger, User>
      */
@@ -148,9 +150,14 @@ final class Quota
     {
         $query = $this->user->usageLedger();
         $start = $this->windowStart();
+        $end = $this->windowEnd();
 
         if ($start !== null) {
             $query->where('created_at', '>=', $start);
+        }
+
+        if ($end !== null) {
+            $query->where('created_at', '<', $end);
         }
 
         return $query;

@@ -14,9 +14,12 @@ use Illuminate\Support\Carbon;
  * Lancamento do livro-razao do consumo. A cota e sempre somada a partir daqui
  * (App\Support\Quota) - nunca lida de uma coluna de saldo.
  *
+ * O `ai_request_id` bigint legado ainda existe na tabela, mas nao e mais lido
+ * nem escrito (F7). A coluna sai no deploy seguinte, quando nenhum worker
+ * antigo puder tentar grava-la entre o `migrate` e o `queue:restart`.
+ *
  * @property int $id
  * @property int $user_id
- * @property int|null $ai_request_id
  * @property string|null $ai_request_ulid
  * @property LedgerEntryType $type
  * @property int $tokens
@@ -24,7 +27,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property-read User $user
  */
-#[Fillable(['user_id', 'ai_request_id', 'ai_request_ulid', 'type', 'tokens', 'uses'])]
+#[Fillable(['user_id', 'ai_request_ulid', 'type', 'tokens', 'uses'])]
 class UsageLedger extends Model
 {
     /** @use HasFactory<UsageLedgerFactory> */

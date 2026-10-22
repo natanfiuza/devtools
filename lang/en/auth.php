@@ -16,6 +16,11 @@ return [
     'throttle' => 'Too many attempts. Please try again in :seconds seconds.',
     'suspended' => 'This account is suspended. Write to us if you think it is a mistake.',
     'reactivated' => 'Welcome back! The deletion request has been canceled and your account was successfully reactivated.',
+    // Turnstile (server and widget). One generic message on purpose: it does
+    // not reveal whether the token was missing, expired, or the service down.
+    'turnstile' => [
+        'failed' => 'We could not confirm that you are not a robot. Please try again.',
+    ],
 
     'social' => [
         'divider' => 'or',

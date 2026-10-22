@@ -2,6 +2,8 @@
 
 namespace App\Actions\Account;
 
+use App\Exceptions\Ai\PayloadCodecException;
+use App\Models\AiRequest;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\SocialAccount;
@@ -9,6 +11,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionIntent;
 use App\Models\UsageLedger;
 use App\Models\User;
+use App\Support\Ai\PayloadCodec;
 
 /**
  * Tudo o que o sistema guarda sobre uma conta, num array pronto para virar
@@ -26,6 +29,8 @@ use App\Models\User;
  */
 final class ExportUserData
 {
+    public function __construct(private readonly PayloadCodec $codec) {}
+
     /**
      * @return array<string, mixed>
      */
@@ -39,6 +44,7 @@ final class ExportUserData
                 'email' => $user->email,
                 'locale' => $user->locale,
                 'appearance' => $user->appearance,
+                'history_enabled' => (bool) $user->history_enabled,
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 'created_at' => $user->created_at?->toIso8601String(),
             ],
@@ -92,6 +98,17 @@ final class ExportUserData
                     'note' => $payment->note,
                 ])
                 ->all(),
+            // O historico de consultas: e o que a pessoa gerou (ADR-028). O
+            // schema e a descricao so aparecem enquanto o payload canonico
+            // ainda esta no banco - depois da liquidacao ele e limpo e o que
+            // resta e o resultado.
+            'ai_requests' => $user->aiRequests()
+                ->with('outputTarget')
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (AiRequest $request): array => $this->aiRequest($request))
+                ->all(),
             // O livro-razao do consumo: e da conta, e nao estado do sistema.
             'usage' => $user->usageLedger()
                 ->orderBy('id')
@@ -103,6 +120,42 @@ final class ExportUserData
                     'at' => $entry->created_at?->toIso8601String(),
                 ])
                 ->all(),
+        ];
+    }
+
+    /**
+     * Uma consulta do historico, sem credencial e sem o prompt montado.
+     *
+     * @return array<string, mixed>
+     */
+    private function aiRequest(AiRequest $request): array
+    {
+        $payload = null;
+
+        if ($request->canonical_payload !== null) {
+            try {
+                $payload = $this->codec->decode($request->canonical_payload);
+            } catch (PayloadCodecException) {
+                // Payload corrompido nao pode derrubar o resto da exportacao.
+                $payload = null;
+            }
+        }
+
+        return [
+            'id' => $request->id,
+            'tool' => $request->outputTarget->label,
+            'tool_slug' => $request->outputTarget->slug,
+            'schema_source' => $request->schema_source->value,
+            'dialect' => $request->dialect->value,
+            'status' => $request->status->value,
+            'schema' => $payload?->schema,
+            'description' => $payload?->description,
+            'result' => $request->result(),
+            'tokens_in' => $request->tokens_in,
+            'tokens_out' => $request->tokens_out,
+            'cache_hit' => (bool) $request->cache_hit,
+            'error_code' => $request->error_code?->value,
+            'created_at' => $request->created_at?->toIso8601String(),
         ];
     }
 

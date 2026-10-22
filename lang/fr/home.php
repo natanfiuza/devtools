@@ -81,6 +81,53 @@ return [
         'pending_body' => "Nous avons bien reçu votre intention d'abonnement et votre {'@'}nomdutilisateur est déjà réservé sur votre compte. Nous vous contacterons pour finaliser l'activation.",
         'submitted_toast' => 'Intention d\'abonnement enregistrée avec succès.',
         'plan_label' => 'Choisissez votre forfait',
+        'checkout' => [
+            'unavailable' => 'Le paiement en ligne est actuellement indisponible. Vous pouvez enregistrer votre intérêt ci-dessous et nous vous contacterons.',
+            'path_label' => 'Comment souhaitez-vous vous abonner ?',
+            'paths' => [
+                'one_time' => [
+                    'title' => 'Payer maintenant',
+                    'body' => 'Pix, carte ou boleto payés comptant. Débloque une période dès que le paiement est approuvé.',
+                ],
+                'recurring' => [
+                    'title' => 'Renouvellement automatique par carte',
+                    'body' => 'La carte est débitée à chaque période. L\'accès se débloque à la confirmation du premier paiement.',
+                ],
+                'manual' => [
+                    'title' => 'Je préfère un accompagnement manuel',
+                    'body' => 'Enregistrez votre demande et nous conviendrons du moyen de paiement avec vous.',
+                ],
+            ],
+            'recurring_badge' => 'Renouvellement actif',
+            'recurring_blocked' => 'Un renouvellement automatique est déjà actif sur ce forfait. Annulez-le dans l\'espace factures avant d\'en créer un autre.',
+            'redirect_note' => 'Vous serez redirigé vers Mercado Pago pour finaliser le paiement. Rien n\'est débloqué avant la confirmation.',
+            'one_time_action' => 'Payer maintenant',
+            'recurring_action' => 'Activer le renouvellement automatique',
+            'errors' => [
+                'unavailable' => 'Le paiement en ligne est indisponible. Utilisez l\'accompagnement manuel pour finaliser l\'abonnement.',
+                'recurring_active' => 'Un renouvellement automatique est déjà actif sur ce forfait. Annulez-le avant d\'en créer un autre.',
+                'plan_unavailable' => 'Ce forfait n\'est pas disponible pour le paiement en ligne.',
+                'gateway' => 'Impossible d\'ouvrir le paiement pour le moment. Réessayez dans un instant ou utilisez l\'accompagnement manuel.',
+            ],
+            'status' => [
+                'processing' => [
+                    'title' => 'Paiement en cours de traitement',
+                    'body' => 'Nous attendons la confirmation du prestataire. L\'accès se débloque automatiquement dès que le paiement est approuvé.',
+                ],
+                'approved' => [
+                    'title' => 'Paiement approuvé',
+                    'body' => 'Votre nouvelle période est déjà disponible sur le compte. Vous pouvez tout suivre dans l\'espace factures.',
+                ],
+                'expired' => [
+                    'title' => 'Paiement expiré',
+                    'body' => 'Cette tentative de paiement a expiré sans confirmation. Choisissez un forfait et réessayez.',
+                ],
+                'failed' => [
+                    'title' => 'Paiement non finalisé',
+                    'body' => 'Nous n\'avons pas pu finaliser cette tentative. Aucun accès n\'a été débloqué ; vous pouvez réessayer ou utiliser l\'accompagnement manuel.',
+                ],
+            ],
+        ],
         'username_label' => 'Votre nom d\'utilisateur exclusif',
         'username_placeholder' => 'nomdutilisateur',
         'username_help' => 'Lettres minuscules, chiffres et tiret bas uniquement (3 à 30 caractères). Réservé immédiatement sur votre compte.',

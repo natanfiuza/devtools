@@ -8,7 +8,6 @@ return [
         'tools' => 'Ferramentas',
         'styleguide' => 'Guia de estilo',
         'pricing' => 'Planos',
-        'docs' => 'Documentação',
     ],
 
     'actions' => [

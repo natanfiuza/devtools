@@ -94,12 +94,16 @@ class Plan extends Model
     /**
      * Fim do periodo que comeca em `$start`, ou nulo para plano sem periodo
      * (o Free, que nao expira).
+     *
+     * Sem overflow de proposito: assinar em 31/01 da um periodo que termina em
+     * 28/02 (ou 29/02 em ano bissexto), nao em 03/03. Um mes "pulado" pelo
+     * calendario encurtaria a franquia de quem pagou o mes inteiro.
      */
     public function periodEndFrom(CarbonInterface $start): ?CarbonInterface
     {
         return match ($this->interval) {
-            'month' => $start->addMonth(),
-            'year' => $start->addYear(),
+            'month' => $start->addMonthNoOverflow(),
+            'year' => $start->addYearNoOverflow(),
             default => null,
         };
     }

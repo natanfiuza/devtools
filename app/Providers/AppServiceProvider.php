@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passkeys\Passkeys;
@@ -39,6 +40,12 @@ class AppServiceProvider extends ServiceProvider
         $this->configureAuthorization();
 
         $this->configureDefaults();
+
+        // Em producao, toda URL gerada sai em https - inclusive as que nascem
+        // fora de um request (sitemap, e-mails). Ver ADR-052.
+        if (config('security.force_https', false)) {
+            URL::forceScheme('https');
+        }
     }
 
     /**

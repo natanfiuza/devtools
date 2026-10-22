@@ -26,6 +26,16 @@ export type PublicPlan = {
     schemaSize: string;
 };
 
+/** Sessao de checkout online devolvida em `?checkout=<ulid>` (F6). */
+export type CheckoutSummary = {
+    ulid: string;
+    /** Estado efetivo: pendente vencido ja chega como `expired`. */
+    status: 'pending' | 'approved' | 'failed' | 'expired' | 'canceled';
+    mode: 'one_time' | 'recurring';
+    planSlug: string;
+    createdAt: string | null;
+};
+
 /** Pedido de intencao de assinatura ja registrado pelo usuario (ADR-033). */
 export type PendingSubscriptionIntent = {
     id: number;

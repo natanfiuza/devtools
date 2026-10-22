@@ -73,5 +73,25 @@ return [
             'subscription_canceled' => 'A subscrição associada a este pagamento foi terminada.',
             'action' => 'Ver faturas',
         ],
+        'renewal_failed' => [
+            'subject' => 'Não conseguimos renovar a sua subscrição',
+            'greeting' => 'Olá, :name!',
+            'intro' => 'A cobrança automática da sua subscrição no :app não foi aprovada pelo cartão.',
+            'plan' => 'Plano: :plan',
+            'period_end' => 'O seu acesso mantém-se até :date.',
+            'action' => 'Atualizar pagamento',
+        ],
+    ],
+
+    'donation' => [
+        'receipt' => [
+            'subject' => 'Recebemos a sua doação',
+            'greeting' => 'Olá, :name!',
+            'greeting_anonymous' => 'Olá!',
+            'intro' => 'Obrigado por apoiar o :app. A sua doação foi confirmada.',
+            'amount' => 'Valor doado: :amount',
+            'paid_at' => 'Confirmada em: :date',
+            'note' => 'A doação não dá acesso a planos nem consome cota: é um apoio ao projeto.',
+        ],
     ],
 ];

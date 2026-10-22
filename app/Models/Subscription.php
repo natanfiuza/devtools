@@ -23,6 +23,8 @@ use Illuminate\Support\Carbon;
  * @property SubscriptionStatus $status
  * @property Carbon|null $current_period_start
  * @property Carbon|null $current_period_end
+ * @property Carbon|null $renewal_canceled_at
+ * @property Carbon|null $renewal_failed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -36,6 +38,8 @@ use Illuminate\Support\Carbon;
     'status',
     'current_period_start',
     'current_period_end',
+    'renewal_canceled_at',
+    'renewal_failed_at',
 ])]
 class Subscription extends Model
 {
@@ -51,12 +55,18 @@ class Subscription extends Model
             'status' => SubscriptionStatus::class,
             'current_period_start' => 'datetime',
             'current_period_end' => 'datetime',
+            'renewal_canceled_at' => 'datetime',
+            'renewal_failed_at' => 'datetime',
         ];
     }
 
     /**
-     * Vale agora? Periodo sem fim (nulo) vale sempre - e o caso da concessao
-     * vitalicia.
+     * Vale agora? O periodo precisa ter comecado e nao ter acabado. Periodo
+     * sem inicio ou sem fim vale sempre - e o caso da concessao vitalicia.
+     *
+     * Com periodos empilhados (F6), a linha futura de um plano renovado tem
+     * status ativo desde que nasce; sem a checagem de inicio ela apareceria
+     * como vigente antes da hora e reiniciaria a cota.
      */
     public function isCurrent(): bool
     {
@@ -64,7 +74,29 @@ class Subscription extends Model
             return false;
         }
 
-        return $this->current_period_end === null || $this->current_period_end->isFuture();
+        $now = now();
+
+        if ($this->current_period_start !== null && $this->current_period_start->isAfter($now)) {
+            return false;
+        }
+
+        return $this->current_period_end === null || $this->current_period_end->isAfter($now);
+    }
+
+    /**
+     * Assinatura ativa que ainda nao comecou: o proximo periodo empilhado.
+     */
+    public function isScheduled(): bool
+    {
+        if ($this->status !== SubscriptionStatus::Active) {
+            return false;
+        }
+
+        if ($this->current_period_start === null || ! $this->current_period_start->isAfter(now())) {
+            return false;
+        }
+
+        return $this->current_period_end === null || $this->current_period_end->isAfter(now());
     }
 
     /**
@@ -77,6 +109,11 @@ class Subscription extends Model
     {
         $query
             ->where('status', SubscriptionStatus::Active->value)
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereNull('current_period_start')
+                    ->orWhere('current_period_start', '<=', now());
+            })
             ->where(function (Builder $query): void {
                 $query
                     ->whereNull('current_period_end')

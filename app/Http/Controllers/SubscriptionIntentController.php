@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Payments\CancelRecurring;
+use App\Contracts\Payments\PaymentGateway;
 use App\Enums\SubscriptionIntentPaymentMethod;
 use App\Enums\SubscriptionIntentStatus;
 use App\Http\Requests\StoreSubscriptionIntentRequest;
+use App\Models\CheckoutSession;
 use App\Models\Plan;
 use App\Models\SubscriptionIntent;
 use App\Models\User;
@@ -30,6 +33,11 @@ use Inertia\Response;
  */
 class SubscriptionIntentController extends Controller
 {
+    public function __construct(
+        private readonly PaymentGateway $gateway,
+        private readonly CancelRecurring $cancelRecurring,
+    ) {}
+
     public function create(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
@@ -73,6 +81,9 @@ class SubscriptionIntentController extends Controller
                 'createdAt' => Format::date($pending->created_at),
             ],
             'status' => $request->session()->get('status'),
+            'onlineCheckoutAvailable' => $this->gateway->isAvailable(),
+            'recurringPlanSlugs' => $this->recurringPlanSlugs($user),
+            'checkout' => $this->checkoutState($request, $user),
         ]);
     }
 
@@ -159,5 +170,59 @@ class SubscriptionIntentController extends Controller
             ->all();
 
         return array_values($plans);
+    }
+
+    /**
+     * Planos com renovacao automatica viva. A tela bloqueia uma segunda
+     * recorrencia no mesmo plano e avisa antes de trocar de plano.
+     *
+     * @return list<string>
+     */
+    private function recurringPlanSlugs(User $user): array
+    {
+        $slugs = $this->cancelRecurring
+            ->recurringSubscriptions($user)
+            ->loadMissing('plan')
+            ->pluck('plan.slug')
+            ->filter(fn (mixed $slug): bool => is_string($slug) && $slug !== '')
+            ->unique()
+            ->all();
+
+        return array_values($slugs);
+    }
+
+    /**
+     * Sessao de checkout devolvida na URL (`?checkout=<ulid>`), somente se for
+     * da propria conta. O status e o efetivo: pendente vencido aparece expirado
+     * sem alterar o banco - a varredura de `payments:expire` e quem persiste.
+     *
+     * @return array{ulid: string, status: string, mode: string, planSlug: string, createdAt: string|null}|null
+     */
+    private function checkoutState(Request $request, User $user): ?array
+    {
+        $ulid = $request->query('checkout');
+
+        if (! is_string($ulid) || $ulid === '') {
+            return null;
+        }
+
+        $session = $user->checkoutSessions()
+            ->where('ulid', $ulid)
+            ->with('plan')
+            ->first();
+
+        if (! $session instanceof CheckoutSession) {
+            return null;
+        }
+
+        return [
+            'ulid' => $session->ulid,
+            'status' => $session->effectiveStatus()->value,
+            'mode' => $session->mode->value,
+            'planSlug' => $session->plan->slug,
+            'createdAt' => $session->created_at !== null
+                ? Format::date($session->created_at)
+                : null,
+        ];
     }
 }

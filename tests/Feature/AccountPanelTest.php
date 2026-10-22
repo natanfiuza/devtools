@@ -44,6 +44,19 @@ function inscricaoDaConta(string $email, array $estado = []): NewsletterSubscrib
     return $subscriber;
 }
 
+/**
+ * Assinatura vigente num plano pago: o historico so abre para quem paga.
+ */
+function contaPaga(User $user): void
+{
+    $plano = Plan::query()->where('slug', 'pro-monthly')->sole();
+
+    Subscription::factory()->for($user)->for($plano)->create([
+        'current_period_start' => now()->subWeek(),
+        'current_period_end' => now()->addWeeks(3),
+    ]);
+}
+
 it('fecha a area da conta para visitante', function () {
     $this->get(route('dashboard.history'))->assertRedirect(route('login'));
     $this->get(route('dashboard.billing'))->assertRedirect(route('login'));
@@ -144,20 +157,43 @@ it('nao conta o consumo de fora do periodo da assinatura', function () {
         ->assertInertia(fn (Assert $page) => $page->where('quota.used', 300));
 });
 
-it('entrega o historico vazio enquanto nao ha consumo para listar', function () {
+it('entrega o historico bloqueado no plano gratuito', function () {
     $user = User::factory()->create();
+
+    // Linha visivel nao basta: no Free a tela nao consulta o historico.
+    AiRequest::factory()->for($user)->create(['history_visible' => true]);
 
     $this->actingAs($user)
         ->get(route('dashboard.history'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard/History')
+            ->where('locked', true)
+            ->where('enabled', false)
+            ->where('history.data', [])
+            ->where('total', 0)
+            ->where('retentionDays', 90)
+            ->where('upgradeUrl', fn (mixed $url): bool => is_string($url) && str_contains($url, '/pricing')));
+});
+
+it('entrega o historico vazio no plano pago enquanto nao ha consumo', function () {
+    $user = User::factory()->create();
+    contaPaga($user);
+
+    $this->actingAs($user)
+        ->get(route('dashboard.history'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/History')
+            ->where('locked', false)
+            ->where('enabled', false)
             ->where('history.data', [])
             ->where('total', 0));
 });
 
-it('lista o historico de consultas da propria conta e nao de outras contas', function () {
+it('lista o historico de consultas visiveis da propria conta e nao de outras contas', function () {
     $user = User::factory()->create();
+    contaPaga($user);
     $outroUser = User::factory()->create();
 
     AiRequest::factory()->for($user)->create([
@@ -166,11 +202,23 @@ it('lista o historico de consultas da propria conta e nao de outras contas', fun
         'tokens_in' => 120,
         'tokens_out' => 80,
         'cache_hit' => false,
-        'response_json' => json_encode(['sql' => 'SELECT 1;', 'summary' => 'Consulta de teste']),
+        'history_visible' => true,
+        'response_json' => json_encode([
+            'sql' => "SELECT o.id, o.total\nFROM orders o",
+            'dialect' => SqlDialect::Mysql->value,
+            'assumptions' => ['Considera apenas pedidos pagos'],
+            'warnings' => [],
+            'tables_used' => ['orders'],
+            'needs_clarification' => false,
+            'clarification' => null,
+            'outputs' => ['sql' => 'SELECT o.id, o.total FROM orders o'],
+        ]),
     ]);
 
-    // Requisicao de outro usuario nao deve aparecer
-    AiRequest::factory()->for($outroUser)->create();
+    // Solicitacao oculta (history_visible = false) e de outra conta: nenhuma
+    // das duas entra na lista.
+    AiRequest::factory()->for($user)->create(['history_visible' => false]);
+    AiRequest::factory()->for($outroUser)->create(['history_visible' => true]);
 
     $this->actingAs($user)
         ->get(route('dashboard.history'))
@@ -183,8 +231,139 @@ it('lista o historico de consultas da propria conta e nao de outras contas', fun
             ->where('history.data.0.status', 'done')
             ->where('history.data.0.tokensUsed', 200)
             ->where('history.data.0.cacheHit', false)
-            ->where('history.data.0.sql', 'SELECT 1;')
-            ->where('history.data.0.summary', 'Consulta de teste'));
+            ->where('history.data.0.sql', "SELECT o.id, o.total\nFROM orders o")
+            ->where('history.data.0.summary', 'Considera apenas pedidos pagos'));
+});
+
+it('deriva o resumo do contrato, do esclarecimento as tabelas e ao SQL', function () {
+    $user = User::factory()->create();
+    contaPaga($user);
+
+    $base = [
+        'dialect' => SqlDialect::Mysql->value,
+        'assumptions' => [],
+        'warnings' => [],
+        'tables_used' => [],
+        'outputs' => ['sql' => 'SELECT 1'],
+    ];
+
+    AiRequest::factory()->for($user)->create([
+        'history_visible' => true,
+        'created_at' => now()->subMinutes(2),
+        'response_json' => json_encode(array_merge($base, [
+            'sql' => '',
+            'needs_clarification' => true,
+            'clarification' => 'Qual período deve ser considerado?',
+        ])),
+    ]);
+
+    AiRequest::factory()->for($user)->create([
+        'history_visible' => true,
+        'created_at' => now()->subMinute(),
+        'response_json' => json_encode(array_merge($base, [
+            'sql' => "SELECT u.id\nFROM users u",
+            'needs_clarification' => false,
+            'clarification' => null,
+            'tables_used' => ['users', 'orders'],
+        ])),
+    ]);
+
+    AiRequest::factory()->for($user)->create([
+        'history_visible' => true,
+        'created_at' => now(),
+        'response_json' => json_encode(array_merge($base, [
+            'sql' => "\n\nSELECT 1;",
+            'needs_clarification' => false,
+            'clarification' => null,
+        ])),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard.history'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('history.data', 3)
+            ->where('history.data.0.summary', 'SELECT 1;')
+            ->where('history.data.1.summary', 'users, orders')
+            ->where('history.data.2.summary', 'Qual período deve ser considerado?'));
+});
+
+it('recusa escritas do historico no plano gratuito', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->patch(route('dashboard.history.preference'), ['history_enabled' => true])
+        ->assertForbidden();
+
+    $this->actingAs($user)
+        ->delete(route('dashboard.history.destroy'))
+        ->assertForbidden();
+
+    expect($user->fresh()->history_enabled)->toBeFalse();
+});
+
+it('liga e desliga o opt-in sem apagar o que ja foi gravado', function () {
+    $user = User::factory()->create();
+    contaPaga($user);
+
+    $visivel = AiRequest::factory()->for($user)->create(['history_visible' => true]);
+
+    $this->actingAs($user)
+        ->patch(route('dashboard.history.preference'), ['history_enabled' => true])
+        ->assertRedirect(route('dashboard.history'));
+
+    expect($user->fresh()->history_enabled)->toBeTrue();
+
+    $this->actingAs($user)
+        ->patch(route('dashboard.history.preference'), ['history_enabled' => false])
+        ->assertRedirect(route('dashboard.history'));
+
+    expect($user->fresh()->history_enabled)->toBeFalse()
+        ->and(AiRequest::query()->whereKey($visivel->id)->exists())->toBeTrue();
+});
+
+it('valida o toggle do historico', function () {
+    $user = User::factory()->create();
+    contaPaga($user);
+
+    $this->actingAs($user)
+        ->patch(route('dashboard.history.preference'), [])
+        ->assertSessionHasErrors('history_enabled');
+});
+
+it('apaga o historico terminal da propria conta e preserva fila e ledger', function () {
+    $user = User::factory()->create();
+    contaPaga($user);
+    $outroUser = User::factory()->create();
+    contaPaga($outroUser);
+
+    $done = AiRequest::factory()->for($user)->create([
+        'status' => AiRequestStatus::Done,
+        'history_visible' => true,
+    ]);
+    $failed = AiRequest::factory()->for($user)->create([
+        'status' => AiRequestStatus::Failed,
+        'history_visible' => true,
+    ]);
+    $queued = AiRequest::factory()->for($user)->create([
+        'status' => AiRequestStatus::Queued,
+        'history_visible' => true,
+    ]);
+    $deOutro = AiRequest::factory()->for($outroUser)->create([
+        'status' => AiRequestStatus::Done,
+        'history_visible' => true,
+    ]);
+    UsageLedger::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->delete(route('dashboard.history.destroy'))
+        ->assertRedirect(route('dashboard.history'));
+
+    $this->assertDatabaseMissing('ai_requests', ['id' => $done->id]);
+    $this->assertDatabaseMissing('ai_requests', ['id' => $failed->id]);
+    $this->assertDatabaseHas('ai_requests', ['id' => $queued->id]);
+    $this->assertDatabaseHas('ai_requests', ['id' => $deOutro->id]);
+    $this->assertDatabaseCount('usage_ledger', 1);
 });
 
 it('lista so as faturas da propria conta', function () {
@@ -276,6 +455,7 @@ it('exporta os dados da conta em JSON para download', function () {
     ]);
 
     UsageLedger::factory()->for($user)->create(['tokens' => 300]);
+    AiRequest::factory()->for($user)->done()->create(['history_visible' => true]);
     inscricaoDaConta('ana@exemplo.com', ['confirmed_at' => now()]);
 
     $response = $this->actingAs($user)->get(route('profile.export'));
@@ -294,6 +474,11 @@ it('exporta os dados da conta em JSON para download', function () {
         ->and($data['account']['appearance'])->toBe('dark')
         // Credencial nao sai no arquivo: nao ha copia da senha fora do banco.
         ->and($data['account'])->not->toHaveKeys(['password', 'remember_token'])
+        ->and($data['account']['history_enabled'])->toBeFalse()
+        ->and($data['ai_requests'])->toHaveCount(1)
+        ->and($data['ai_requests'][0]['status'])->toBe('done')
+        ->and($data['ai_requests'][0]['tokens_in'])->toBe(800)
+        ->and($data['ai_requests'][0]['result']['sql'])->toBe('SELECT id, name FROM users')
         ->and($data['newsletter']['email'])->toBe('ana@exemplo.com')
         ->and($data['subscriptions'])->toHaveCount(1)
         ->and($data['subscriptions'][0]['plan'])->toBe($plano->name)
@@ -315,5 +500,6 @@ it('exporta os dados de quem nao tem inscricao nem vinculo social', function () 
         ->and($data['newsletter'])->toBeNull()
         ->and($data['subscriptions'])->toBe([])
         ->and($data['payments'])->toBe([])
+        ->and($data['ai_requests'])->toBe([])
         ->and($data['usage'])->toBe([]);
 });

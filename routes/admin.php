@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AiCacheController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\OutputTargetController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\SubscriberController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\Admin\SubscriptionController;
 use App\Http\Controllers\Admin\SubscriptionIntentController;
 use App\Http\Controllers\Admin\UserActionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WebhookEventController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -94,6 +97,20 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
         Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
         Route::post('payments/{payment}/refund', [PaymentController::class, 'refund'])
             ->name('payments.refund');
+
+        // Notificacoes do gateway: leitura so, e nada aqui reprocessa um evento.
+        Route::get('webhooks', WebhookEventController::class)->name('webhooks.index');
+
+        // Catalogo do AI SQL Builder e cache de respostas (F7).
+        Route::get('output-targets', [OutputTargetController::class, 'index'])
+            ->name('output-targets.index');
+        Route::patch('output-targets/{target}', [OutputTargetController::class, 'update'])
+            ->name('output-targets.update');
+
+        // O cache e leitura so, exceto pela poda das linhas vencidas.
+        Route::get('ai-cache', [AiCacheController::class, 'index'])->name('ai-cache.index');
+        Route::delete('ai-cache/expired', [AiCacheController::class, 'destroyExpired'])
+            ->name('ai-cache.destroy-expired');
 
         Route::get('audit', AuditController::class)->name('audit.index');
     });

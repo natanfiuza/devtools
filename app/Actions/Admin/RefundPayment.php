@@ -36,7 +36,9 @@ final class RefundPayment
         $subscription = $payment->subscription;
         $canceledSubscription = false;
 
-        if ($subscription !== null && $subscription->isCurrent()) {
+        // Futura tambem conta: o pagamento estornado era o que abria o proximo
+        // periodo, e deixa-lo ativo daria acesso pago que nao existe mais.
+        if ($subscription !== null && ($subscription->isCurrent() || $subscription->isScheduled())) {
             $subscription->forceFill(['status' => SubscriptionStatus::Canceled])->save();
             $canceledSubscription = true;
         }

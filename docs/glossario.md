@@ -38,13 +38,33 @@
 - Pagina legal: Politica de Privacidade e Termos de Uso; conteudo proprio do site, sob `/{locale}`, indexavel e com hreflang normal (ao contrario das telas de acesso).
 - Papel: `user` ou `admin` (`users.role`); diz o que a pessoa pode fazer no site, e nao quem ela e.
 - Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Planos, Intencoes, Pagamentos e Auditoria -, acessiveis so com o papel `admin`.
-- Painel do usuario: area autenticada sob uma navegacao unica - Visao geral, Historico, Faturas e Conta (Perfil, Seguranca, Aparencia).
+- Painel do usuario: area autenticada sob uma navegacao unica - Visao geral, Historico (planos pagos), Faturas, Tokens de API e Conta (Perfil, Seguranca, Aparencia).
 - Auditoria: registro em `admin_actions` de toda acao administrativa sobre uma conta ou sobre o catalogo; nao e log de aplicacao e nunca guarda conteudo de schema ou prompt.
 - Impersonacao (entrar como): sessao em que o admin passa a ver o site como o alvo, para dar suporte; a faixa no topo nao pode ser dispensada e a saida e uma rota propria (`DELETE /impersonation`).
 - Suspensao: conta marcada em `users.suspended_at`; nao entra mais e a sessao aberta cai no primeiro request autenticado.
 - Assinatura: vinculo entre conta e plano com periodo (`subscriptions`); "vigente" e resolvido na leitura (ativa e sem periodo vencido), sem estado `expirada` gravado.
 - Pagamento manual: cobranca registrada pelo admin por dinheiro recebido fora do site (`gateway = manual`), com forma (pix, transferencia, dinheiro, outro), nota opcional e sem valor negativo - estorno e `status = refunded`.
 - Confirmacao de pagamento: e-mail enviado a conta dona do pagamento quando o admin registra a cobranca e, com o mesmo papel, quando a estorna; sai no idioma da conta e e best-effort - o registro fiscal existe com ou sem ele (ADR-044).
+- Checkout Pro: tela de pagamento hospedada pela Mercado Pago, aberta por redirecionamento, onde o pagador escolhe Pix, cartao ou boleto; o site nao ve nem guarda dado de cartao (ADR-045).
+- Checkout (sessao de checkout): registro em `checkout_sessions` de uma intencao de compra, com ULID publico, plano, modo (`one_time` ou `recurring`), valor e moeda congelados, estado (`pending`, `approved`, `failed`, `expired`, `canceled`) e prazo; nao e receita e nao entra em fatura.
+- Preapproval: autorizacao dada pelo pagador no provedor para cobranca recorrente no cartao, mensal ou a cada 12 meses, sem plano pre-aprovado; o valor e o periodo continuam nossos (ADR-045).
+- Cobranca autorizada (authorized payment): cada cobranca que o provedor faz ao abrigo de uma preapproval, com o pagamento correspondente; e o evento que abre ou empilha o periodo de uma renovacao.
+- Periodo empilhado: linha de `subscriptions` que comeca no maior `current_period_end` futuro do mesmo plano, em vez de esticar o periodo atual; cada pagamento aprovado compra um ciclo com inicio e fim proprios (ADR-046).
+- Assinatura vigente: a linha de `subscriptions` que cobre o instante atual (`current_period_start <= agora < current_period_end`); uma linha futura ja paga nao e vigente e nao abre franquia nova (ADR-046).
+- Renovacao automatica: cobranca recorrente por preapproval; pode ser cancelada pelo cliente a qualquer momento e mantem o acesso ate o fim do periodo pago (ADR-049).
+- Cancelamento de renovacao: parar a cobranca futura sem encerrar o periodo pago - grava `renewal_canceled_at`, cancela a preapproval no provedor e nao muda o `status` da assinatura (ADR-049).
+- Falha de renovacao: cobranca recorrente recusada; grava `renewal_failed_at`, avisa a conta **uma vez por periodo** e nao bloqueia o acesso ja pago, sem dunning (ADR-049).
+- Estorno de gateway: devolucao de um pagamento feito pelo provedor - `POST /v1/payments/{id}/refunds` **antes** de mudar o banco, seguida de `RefundPayment`; `404`/`409` de "ja estornado" contam como sucesso (ADR-049).
+- Webhook: notificacao HTTP que o provedor envia quando algo muda (pagamento, preapproval, cobranca autorizada); o corpo so aponta para o recurso, e a autenticidade vem da assinatura (ADR-047).
+- Evento de webhook: linha em `webhook_events` com o payload cru, topico, recurso, status de processamento, tentativas e erro; unique `(gateway, event_id)` e retencao de 30 dias.
+- Assinatura do webhook (x-signature): HMAC-SHA256 sobre `id:<data.id>;request-id:<x-request-id>;ts:<ts>;` com o segredo do provedor, comparado em tempo constante; sem ela o endpoint responde 401.
+- Idempotencia: repetir a mesma operacao nao produz efeito novo - evento por `(gateway, event_id)`, pagamento por `(gateway, gateway_ref)`, doacao so na transicao `pending -> paid` e periodo conferido antes de criar.
+- Busca antes de cumprir (fetch-before-fulfill): o webhook sempre consulta o recurso na API do provedor antes de liberar acesso, porque o corpo da notificacao nao e fonte de verdade.
+- Doacao: valor enviado por qualquer pessoa pela pagina publica `/donate`, sem conta obrigatoria e com doador anonimo permitido; fica em `donations`, nao entra em `payments`, nao vira fatura e nao consome cota (ADR-048).
+- Pix dinamico: cobranca Pix criada pelo provedor com QR, copia e cola, expiracao e confirmacao por webhook; e o modo usado quando ha credenciais (ADR-048).
+- Pix estatico: QR e copia e cola montados localmente a partir de chave, titular e cidade de `config/donations.php`; funciona sem provedor, mas **nao tem confirmacao automatica** (ADR-048).
+- Copia e cola (Pix): texto EMV do Pix, com chave, valor e identificador, que o banco le; no dinamico vem do provedor e no estatico e gerado por `PixPayload`.
+- Recibo de doacao: e-mail enviado so quando a doacao transita `pending -> paid`, tem e-mail de doador e `DONATIONS_SEND_RECEIPTS` esta ligado; doacao anonima e valida sem recibo (ADR-048).
 - Idioma da conta: preferencia duradoura gravada em `users.locale` (codigo, ex. `pt_BR`), escolhida no cadastro e no perfil; e tambem o idioma dos e-mails que saem para ela.
 - Idioma de navegacao: o idioma da pagina aberta agora (prefixo da URL ou cookie `locale`, ex. `pt-br`); pode diferir do idioma da conta.
 - Anonimizacao: exclusao que apaga o que identifica a pessoa e mantem a cobranca (guarda fiscal); a linha fica marcada por `anonymized_at` e nao volta.
@@ -68,4 +88,22 @@
 - Soft delete de conta (carencia de 30 dias): solicitacao de exclusao que marca `users.deleted_at`; durante 30 dias a conta fica inativa mas pode ser reativada no login; apos 30 dias a rotina de expurgo anonimiza os dados (ADR-028) e remove fotos fisicas (ADR-035).
 - TaskSchedule / Agendador assincrono: rotina cadastrada em `task_schedules`, lida no scheduler de `bootstrap/app.php` e executada de forma assincrona via `ExecuteCommand` na fila de jobs (padrao SIG-Novo).
 - Foto de perfil (UUID): imagem do usuario armazenada em `storage/app/data/user_profile_image/{uuid}`, vinculada a `users.photo_uuid` e servida pela rota publica `/users/profile/photo/{uuid}`.
+- API publica v1: superficie HTTP em `/api/v1` para integracoes fora do navegador, autenticada por Bearer token e com a cota do plano; documentada em `docs/API.md` e `docs/openapi.yaml` (ADR-050).
+- Personal Access Token (PAT): token do Sanctum criado em `Configuracoes > Tokens de API`; o texto puro aparece uma vez e o banco guarda so o hash. Revogar e definitivo e a anonimizacao da conta revoga todos.
+- Ability: permissao gravada no token do Sanctum; a API exige `ai:query`, e um token sem ela responde 403 mesmo sendo valido.
+- Escopo por token: consulta da API pertence ao token que a criou (`ai_requests.api_token_id`), e nao so a conta; outro token ou a tela nao enxergam a consulta (404).
+- Rate limit por token: limite de taxa da API contado por token, separado do limite da tela; o 429 traz `Retry-After` e os numeros vivem em `config/api.php`.
+- Versao da API: numero no caminho (`/api/v1`); mudanca compativel continua na mesma versao, e quebra de contrato exige uma nova, com janela de migracao anunciada no CHANGELOG.
+- Historico (opt-in): consultas de IA ficam visiveis na tela de Historico so quando a conta liga o toggle em `users.history_enabled`; nasce desligado, vale so para planos pagos e desligar impede novas gravacoes sem apagar as antigas (ADR-051).
+- Retencao do historico: prazo de `AI_HISTORY_RETENTION_DAYS` (padrao 90 dias) depois do qual `history:prune` apaga a consulta terminal; o ledger de cota e o cache de IA nao sao tocados.
+- Apagar historico: acao explicita da conta que remove todas as consultas terminais (`done`/`failed`) do usuario, sem tocar nas que ainda estao em voo nem na contabilidade (ADR-051).
+- Coluna legada `ai_request_id`: coluna bigint de `usage_ledger` que ligava o debito a solicitacao antes do ULID; desde a F7 nao e lida nem escrita e sera removida no deploy seguinte. O `ai_request_id` que aparece no log e o ULID, nao essa coluna.
+- CSP (Content-Security-Policy): cabecalho que lista de onde a pagina pode carregar script, estilo, imagem e conexao; no site sai por nonce e tem modo `enforce`, `report-only` ou `off` (`CSP_MODE`), com `frame-ancestors 'none'` (ADR-052).
+- Nonce de CSP: valor aleatorio gerado por resposta e repetido no cabecalho e nos scripts permitidos; script sem o nonce daquela resposta nao executa.
+- HSTS (Strict-Transport-Security): cabecalho que manda o navegador so falar com o site por HTTPS por um prazo; so sai em requisicao ja segura, entao depende de `TRUSTED_PROXIES` e `APP_URL` em producao (ADR-052).
+- TrustProxies: lista `TRUSTED_PROXIES` de proxies cujos cabecalhos `X-Forwarded-*` sao aceitos; sem ela, o Laravel ve o IP do proxy e o esquema `http`, o que quebra HTTPS, HSTS, canonical e rate limit por IP (ADR-052).
+- Turnstile: desafio anti-bot da Cloudflare no cadastro; o servidor valida o token na siteverify e, sem as chaves `TURNSTILE_*`, o recurso fica desativado por completo (ADR-052).
+- JSON-LD: bloco `<script type="application/ld+json">` com dados estruturados que o buscador le; o site emite Organization e WebSite na home e SoftwareApplication com BreadcrumbList na pagina de tool, so em pagina indexavel (ADR-053).
+- BreadcrumbList: tipo de JSON-LD que descreve a trilha de navegacao (Inicio -> ferramenta) na pagina da tool; acompanha a meta `breadcrumb` da tela.
+- Pagina 404 customizada: componente `Error` do Inertia com o layout publico, textos do namespace `errors` e `noindex`; qualquer rota inexistente cai nela com status 404 (ADR-053).
 

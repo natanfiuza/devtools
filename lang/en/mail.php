@@ -73,5 +73,25 @@ return [
             'subscription_canceled' => 'The subscription linked to this payment has ended.',
             'action' => 'View invoices',
         ],
+        'renewal_failed' => [
+            'subject' => 'We could not renew your subscription',
+            'greeting' => 'Hello, :name!',
+            'intro' => 'The automatic charge for your subscription on :app was not approved by the card.',
+            'plan' => 'Plan: :plan',
+            'period_end' => 'Your access remains until :date.',
+            'action' => 'Update payment',
+        ],
+    ],
+
+    'donation' => [
+        'receipt' => [
+            'subject' => 'We received your donation',
+            'greeting' => 'Hello, :name!',
+            'greeting_anonymous' => 'Hello!',
+            'intro' => 'Thank you for supporting :app. Your donation is confirmed.',
+            'amount' => 'Donated amount: :amount',
+            'paid_at' => 'Confirmed on: :date',
+            'note' => 'A donation does not grant plan access or consume quota: it is support for the project.',
+        ],
     ],
 ];

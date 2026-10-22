@@ -6,6 +6,7 @@ use App\Enums\AdminActionType;
 use App\Http\Controllers\Controller;
 use App\Models\AdminAction;
 use App\Models\NewsletterSubscriber;
+use App\Models\OutputTarget;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
@@ -93,6 +94,10 @@ class AuditController extends Controller
             ->whereIn('id', $ids[NewsletterSubscriber::class] ?? [])
             ->get()
             ->keyBy('id');
+        $targets = OutputTarget::query()
+            ->whereIn('id', $ids[OutputTarget::class] ?? [])
+            ->get()
+            ->keyBy('id');
 
         $labels = [];
 
@@ -101,6 +106,7 @@ class AuditController extends Controller
                 User::class => $this->userLabel($users->get($entry->target_id), $entry),
                 Plan::class => $plans->get($entry->target_id)?->name,
                 NewsletterSubscriber::class => $subscribers->get($entry->target_id)?->email,
+                OutputTarget::class => $targets->get($entry->target_id)?->label,
                 Payment::class => $entry->target_id === null
                     ? null
                     : '#'.$entry->target_id,

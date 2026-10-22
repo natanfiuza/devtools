@@ -26,6 +26,7 @@ use App\Support\Ai\CanonicalPayload;
 use App\Support\Ai\StartResult;
 use App\Support\Quota;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
@@ -134,6 +135,9 @@ it('debita um uso do Free ao criar a solicitacao', function () {
         ->and($debit->tokens)->toBe(0)
         ->and($debit->ai_request_ulid)->toBe($start->request->id)
         ->and($debit->created_at?->equalTo($start->request->created_at))->toBeTrue()
+        // A coluna bigint legada continua na tabela ate o deploy seguinte, mas
+        // nenhum lancamento a escreve desde a F7.
+        ->and(DB::table('usage_ledger')->value('ai_request_id'))->toBeNull()
         ->and(Quota::for($user)->used())->toBe(1);
 });
 
@@ -402,15 +406,58 @@ it('estorna a reserva em tokens quando o plano pago falha', function () {
         ->and(Quota::for($user)->used())->toBe(0);
 });
 
-it('registra a solicitacao como visivel no historico', function () {
+it('grava a visibilidade do historico conforme o opt-in da conta', function () {
     $user = User::factory()->create();
 
+    // Desligado por padrao: a solicitacao nasce fora do historico.
     $start = aiStart($user);
 
-    expect($start->request->history_visible)->toBeTrue();
+    expect($start->request->history_visible)->toBeFalse();
 
     app(SettleAiQuery::class)($start->request, aiActionResult(), 10, 5);
 
-    expect(AiRequest::query()->sole()->history_visible)->toBeTrue()
+    expect(AiRequest::query()->whereKey($start->request->id)->sole()->history_visible)->toBeFalse()
         ->and(AiCache::query()->count())->toBe(1);
+
+    $user->forceFill(['history_enabled' => true])->save();
+
+    $habilitada = aiStart($user, null, 'CREATE TABLE users (id int);', 'Liste os usuarios ativos');
+
+    expect($habilitada->request->history_visible)->toBeTrue();
+});
+
+it('grava o token da API na solicitacao e nao deduplica entre canais', function () {
+    $user = User::factory()->create();
+    $tokenA = $user->createToken('a', ['ai:query'])->accessToken;
+    $tokenB = $user->createToken('b', ['ai:query'])->accessToken;
+
+    $startWeb = aiStart($user);
+    $startApi = app(StartAiQuery::class)(
+        $user,
+        aiActionTarget(),
+        SchemaSource::Ddl,
+        SqlDialect::Mysql,
+        'CREATE TABLE users (id int);',
+        'Liste os usuarios',
+        $tokenA->id,
+    );
+
+    // Mesmo payload, mas o canal/token e outro: nao pode reaproveitar a
+    // solicitacao da web (nem devolver um ULID que o token nao le).
+    expect($startApi->deduplicated)->toBeFalse()
+        ->and($startApi->request->api_token_id)->toBe($tokenA->id)
+        ->and($startWeb->request->api_token_id)->toBeNull();
+
+    $startTokenB = app(StartAiQuery::class)(
+        $user,
+        aiActionTarget(),
+        SchemaSource::Ddl,
+        SqlDialect::Mysql,
+        'CREATE TABLE users (id int);',
+        'Liste os usuarios',
+        $tokenB->id,
+    );
+
+    expect($startTokenB->request->id)->not->toBe($startApi->request->id)
+        ->and($startTokenB->request->api_token_id)->toBe($tokenB->id);
 });

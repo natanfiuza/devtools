@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfilePhotoController;
+use App\Http\Controllers\Settings\ApiTokenController;
 use App\Http\Controllers\Settings\ExportController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -35,4 +36,14 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/Appearance')->name('appearance.edit');
+
+    // Tokens da API publica (ADR-050): criar, listar e revogar. O texto puro
+    // aparece uma vez, logo depois do POST.
+    Route::get('settings/api-tokens', [ApiTokenController::class, 'index'])
+        ->name('api-tokens.index');
+    Route::post('settings/api-tokens', [ApiTokenController::class, 'store'])
+        ->name('api-tokens.store');
+    Route::delete('settings/api-tokens/{token}', [ApiTokenController::class, 'destroy'])
+        ->whereNumber('token')
+        ->name('api-tokens.destroy');
 });

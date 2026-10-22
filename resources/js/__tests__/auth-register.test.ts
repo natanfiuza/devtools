@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mount, type VueWrapper } from '@vue/test-utils';
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { defineComponent, h } from 'vue';
 import { registerDirectives } from '@/lib/directives';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
@@ -17,6 +17,7 @@ const { pageProps } = vi.hoisted(() => ({
     pageProps: {
         locale: 'pt_BR',
         localeSlug: 'pt-br',
+        turnstileSiteKey: null as string | null,
         locales: [
             {
                 code: 'pt_BR',
@@ -114,6 +115,28 @@ function montarRegister(
 beforeEach(() => {
     pageProps.locale = 'pt_BR';
     pageProps.localeSlug = 'pt-br';
+    pageProps.turnstileSiteKey = null;
+});
+
+describe('Turnstile', () => {
+    it('nao renderiza o widget quando a chave publica nao esta configurada', () => {
+        const wrapper = montarRegister();
+
+        expect(wrapper.find('[data-test="turnstile"]').exists()).toBe(false);
+        expect(wrapper.find('input[name="turnstile"]').exists()).toBe(false);
+    });
+
+    it('renderiza o widget e o campo oculto quando a chave existe', async () => {
+        pageProps.turnstileSiteKey = 'site-key';
+
+        const wrapper = montarRegister();
+        await flushPromises();
+
+        expect(wrapper.find('[data-test="turnstile"]').exists()).toBe(true);
+        expect(wrapper.get('input[name="turnstile"]').attributes('type')).toBe(
+            'hidden',
+        );
+    });
 });
 
 describe('textos e status', () => {

@@ -30,6 +30,8 @@ declare module '@inertiajs/core' {
             locales: Locale[];
             /** Admin que esta impersonando esta sessao (ADR-025). */
             impersonation: { email: string } | null;
+            /** Chave publica do Turnstile; nula desliga o widget (ADR-052). */
+            turnstileSiteKey: string | null;
             seo: {
                 /** Tela de acesso: pede `noindex` e nada de `hreflang`. */
                 noindex: boolean;

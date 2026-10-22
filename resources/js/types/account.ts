@@ -40,6 +40,30 @@ export type AccountSubscription = {
     start: string | null;
     end: string | null;
     current: boolean;
+    /** Quando a conta encerrou a renovacao automatica (F6; so nas faturas). */
+    renewalCanceledAt?: string | null;
+    /** Primeira cobranca de renovacao recusada no periodo (F6; so nas faturas). */
+    renewalFailedAt?: string | null;
+    /** Ha preapproval viva para encerrar pelo botao de cancelar. */
+    renewable?: boolean;
+};
+
+/** Periodo ja pago que ainda nao comecou (empilhado). */
+export type AccountNextSubscription = {
+    plan: string;
+    start: string | null;
+    end: string | null;
+};
+
+/** Checkout pendente ou recorrencia aguardando a primeira cobranca. */
+export type AccountLastCheckout = {
+    ulid: string;
+    mode: 'one_time' | 'recurring';
+    status: string;
+    planName: string;
+    planSlug: string;
+    processing: boolean;
+    createdAt: string | null;
 };
 
 export type AccountPaymentRow = {
@@ -75,6 +99,8 @@ export type AccountPendingIntent = {
 export type AccountBillingProps = {
     plan: AccountPlan;
     subscription: AccountSubscription | null;
+    nextSubscription?: AccountNextSubscription | null;
+    lastCheckout?: AccountLastCheckout | null;
     pendingIntent?: AccountPendingIntent | null;
     payments: Paginator<AccountPaymentRow>;
     total: number;
@@ -101,4 +127,12 @@ export type AccountHistoryItem = {
 export type AccountHistoryProps = {
     history?: Paginator<AccountHistoryItem>;
     total?: number;
+    /** Toggle do opt-in: grava (ou nao) as proximas consultas. */
+    enabled?: boolean;
+    /** Conta no plano gratuito: a tela mostra o CTA em vez da lista. */
+    locked?: boolean;
+    /** Dias de retencao configurados no servidor. */
+    retentionDays?: number;
+    /** Link para a pagina de planos (Wayfinder nao gera rota fora do grupo). */
+    upgradeUrl?: string;
 };

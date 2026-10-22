@@ -1,6 +1,7 @@
 import {
     CreditCard,
     History,
+    KeyRound,
     LayoutGrid,
     Palette,
     ShieldCheck,
@@ -10,6 +11,7 @@ import type { ComputedRef } from 'vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dashboard } from '@/routes';
+import { index as apiTokens } from '@/routes/api-tokens';
 import { edit as editAppearance } from '@/routes/appearance';
 import { billing, history } from '@/routes/dashboard';
 import { edit as editProfile } from '@/routes/profile';
@@ -73,6 +75,11 @@ export function useAccountNav(): ComputedRef<AccountNavGroup[]> {
                     title: t('settings.nav.appearance'),
                     href: editAppearance().url,
                     icon: Palette,
+                },
+                {
+                    title: t('settings.nav.api_tokens'),
+                    href: apiTokens.url(),
+                    icon: KeyRound,
                 },
             ],
         },

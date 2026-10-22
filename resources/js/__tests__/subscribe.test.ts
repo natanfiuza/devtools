@@ -3,11 +3,16 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import { defineComponent, h } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Subscribe from '@/pages/Subscribe.vue';
-import type { PendingSubscriptionIntent, PublicPlan } from '@/types';
+import type {
+    CheckoutSummary,
+    PendingSubscriptionIntent,
+    PublicPlan,
+} from '@/types';
 
 const { mockRouter } = vi.hoisted(() => ({
     mockRouter: {
         visit: vi.fn(),
+        post: vi.fn(),
     },
 }));
 
@@ -87,6 +92,53 @@ const traducoes = {
             notes_placeholder: 'OBS_PLACEHOLDER',
             submit: 'REGISTRAR_PEDIDO',
             update_submit: 'ATUALIZAR_PEDIDO',
+            checkout: {
+                unavailable: 'PAGAMENTO_ONLINE_INDISPONIVEL',
+                path_label: 'COMO_QUER_ASSINAR',
+                paths: {
+                    one_time: {
+                        title: 'PAGAR_AGORA',
+                        body: 'PAGAR_AGORA_CORPO',
+                    },
+                    recurring: {
+                        title: 'RENOVACAO_AUTOMATICA',
+                        body: 'RENOVACAO_CORPO',
+                    },
+                    manual: {
+                        title: 'ATENDIMENTO_MANUAL',
+                        body: 'MANUAL_CORPO',
+                    },
+                },
+                recurring_badge: 'RENOVACAO_ATIVA',
+                recurring_blocked: 'RENOVACAO_BLOQUEADA',
+                redirect_note: 'REDIRECIONA_MERCADO_PAGO',
+                one_time_action: 'ACAO_PAGAR_AGORA',
+                recurring_action: 'ACAO_ATIVAR_RENOVACAO',
+                errors: {
+                    unavailable: 'ERRO_INDISPONIVEL',
+                    recurring_active: 'ERRO_RENOVACAO_ATIVA',
+                    plan_unavailable: 'ERRO_PLANO',
+                    gateway: 'ERRO_GATEWAY',
+                },
+                status: {
+                    processing: {
+                        title: 'PAGAMENTO_PROCESSANDO',
+                        body: 'PROCESSANDO_CORPO',
+                    },
+                    approved: {
+                        title: 'PAGAMENTO_APROVADO',
+                        body: 'APROVADO_CORPO',
+                    },
+                    expired: {
+                        title: 'CHECKOUT_EXPIRADO',
+                        body: 'EXPIRADO_CORPO',
+                    },
+                    failed: {
+                        title: 'PAGAMENTO_FALHOU',
+                        body: 'FALHOU_CORPO',
+                    },
+                },
+            },
         },
     },
 };
@@ -123,6 +175,9 @@ function montar(
         username?: string;
         pendingIntent?: PendingSubscriptionIntent | null;
         status?: string | null;
+        onlineCheckoutAvailable?: boolean;
+        recurringPlanSlugs?: string[];
+        checkout?: CheckoutSummary | null;
     } = {},
 ): VueWrapper {
     const i18n = createI18nInstance();
@@ -135,6 +190,9 @@ function montar(
             username: props.username ?? 'natan',
             pendingIntent: props.pendingIntent ?? null,
             status: props.status ?? null,
+            onlineCheckoutAvailable: props.onlineCheckoutAvailable ?? true,
+            recurringPlanSlugs: props.recurringPlanSlugs ?? [],
+            checkout: props.checkout ?? null,
         },
         global: {
             plugins: [i18n],
@@ -153,7 +211,7 @@ describe('Subscribe', () => {
     });
 
     it('renderiza o campo documento como opcional (sem atributo required)', () => {
-        const wrapper = montar();
+        const wrapper = montar({ onlineCheckoutAvailable: false });
 
         const inputDoc = wrapper.get('input#document');
         expect(inputDoc.attributes('required')).toBeUndefined();
@@ -161,7 +219,7 @@ describe('Subscribe', () => {
     });
 
     it('renderiza o seletor de DDI com valor padrao do idioma e campo de telefone', () => {
-        const wrapper = montar();
+        const wrapper = montar({ onlineCheckoutAvailable: false });
 
         const hiddenCountry = wrapper.get('input[name="country_code"]');
         expect(hiddenCountry.attributes('value')).toBe('+55');
@@ -172,6 +230,7 @@ describe('Subscribe', () => {
 
     it('extrai o DDI e o numero local quando pendingIntent ja possui telefone com codigo internacional', () => {
         const wrapper = montar({
+            onlineCheckoutAvailable: false,
             pendingIntent: {
                 id: 1,
                 planSlug: 'pro-monthly',
@@ -238,5 +297,108 @@ describe('Subscribe', () => {
         await btnNow.trigger('click');
 
         expect(mockRouter.visit).toHaveBeenCalledWith('/pt-br');
+    });
+
+    it('abre o pagamento avulso com o plano escolhido', async () => {
+        const wrapper = montar();
+
+        expect(wrapper.find('[data-test="subscribe-form"]').exists()).toBe(
+            false,
+        );
+        expect(
+            wrapper.get('[data-test="subscribe-online-panel"]').text(),
+        ).toContain('ACAO_PAGAR_AGORA');
+
+        await wrapper
+            .get('[data-test="subscribe-checkout-submit"]')
+            .trigger('click');
+
+        expect(mockRouter.post).toHaveBeenCalledTimes(1);
+
+        const [url, data] = mockRouter.post.mock.calls[0] as [
+            string,
+            Record<string, string>,
+        ];
+
+        expect(url).toBe('/subscribe/checkout');
+        expect(data).toEqual({ plan: 'pro-monthly', mode: 'one_time' });
+    });
+
+    it('alterna para renovacao automatica e envia o modo recorrente', async () => {
+        const wrapper = montar();
+
+        const recurring = wrapper.get('[data-test="subscribe-path-recurring"]');
+        await recurring.trigger('click');
+
+        expect(recurring.attributes('aria-pressed')).toBe('true');
+
+        await wrapper
+            .get('[data-test="subscribe-checkout-submit"]')
+            .trigger('click');
+
+        expect(mockRouter.post).toHaveBeenCalledWith(
+            '/subscribe/checkout',
+            { plan: 'pro-monthly', mode: 'recurring' },
+            expect.any(Object),
+        );
+    });
+
+    it('bloqueia nova renovacao no mesmo plano e libera no outro', async () => {
+        const wrapper = montar({ recurringPlanSlugs: ['pro-monthly'] });
+
+        expect(
+            wrapper.get('[data-test="subscribe-plan-pro-monthly"]').text(),
+        ).toContain('RENOVACAO_ATIVA');
+
+        const recurring = wrapper.get('[data-test="subscribe-path-recurring"]');
+        expect(recurring.attributes('disabled')).toBeDefined();
+
+        await recurring.trigger('click');
+        expect(recurring.attributes('aria-pressed')).toBe('false');
+
+        await wrapper
+            .get('[data-test="subscribe-plan-pro-yearly"]')
+            .trigger('click');
+
+        expect(recurring.attributes('disabled')).toBeUndefined();
+    });
+
+    it('sem credenciais mostra o aviso e mantem o atendimento manual', () => {
+        const wrapper = montar({ onlineCheckoutAvailable: false });
+
+        expect(
+            wrapper.get('[data-test="subscribe-online-unavailable"]').text(),
+        ).toContain('PAGAMENTO_ONLINE_INDISPONIVEL');
+
+        expect(wrapper.find('[data-test="subscribe-form"]').exists()).toBe(
+            true,
+        );
+        expect(
+            wrapper
+                .get('[data-test="subscribe-path-one_time"]')
+                .attributes('disabled'),
+        ).toBeDefined();
+        expect(
+            wrapper
+                .get('[data-test="subscribe-path-manual"]')
+                .attributes('aria-pressed'),
+        ).toBe('true');
+    });
+
+    it('mostra o banner de checkout pendente', () => {
+        const wrapper = montar({
+            checkout: {
+                ulid: '01ABC',
+                status: 'pending',
+                mode: 'recurring',
+                planSlug: 'pro-monthly',
+                createdAt: '21/10/2026',
+            },
+        });
+
+        const banner = wrapper.get('[data-test="subscribe-checkout-banner"]');
+
+        expect(banner.attributes('data-status')).toBe('pending');
+        expect(banner.text()).toContain('PAGAMENTO_PROCESSANDO');
     });
 });

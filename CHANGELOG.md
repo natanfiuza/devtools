@@ -3,6 +3,165 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Fase 7: API publica, historico e hardening - 2026-10-22
+
+A ultima fase do SPEC abre o produto para fora do navegador. A API v1 entra
+com Personal Access Token do Sanctum e a mesma cota do plano; o historico de
+consultas passa a ser opt-in, so de plano pago e com retencao de 90 dias; o
+site ganha CSP com nonce, HSTS, TrustProxies e Turnstile no cadastro; as metas
+e os dados estruturados fecham o SEO; e as telas de admin que faltavam chegam
+para `output_targets` e o cache de IA.
+
+### Adicionado
+
+- Historico: `users.history_enabled` (aditiva, desligada por padrao, com
+  backfill para quem ja tinha consultas visiveis); toggle em
+  `/dashboard/history`, exclusao do historico terminal (`ClearHistory`), aviso
+  de retencao e bloqueio do Free com CTA de upgrade (ADR-051).
+- Retencao: `AI_HISTORY_RETENTION_DAYS` (90 por padrao), comando
+  `history:prune` (`--days`, `--dry-run`) e seed do agendador diario as 03:45;
+  ledger e cache de IA ficam intactos.
+- Privacidade: `ExportUserData` inclui as consultas do usuario e
+  `AnonymizeUser` apaga `ai_requests` e revoga todos os tokens Sanctum.
+- API publica v1 em `/api/v1`, autenticada por Bearer token do Sanctum com a
+  ability `ai:query`: `POST/GET /sql-queries`, `GET /sql-queries/{ulid}`,
+  `GET /me` e `GET /output-targets`; consulta escopada por
+  `ai_requests.api_token_id`, cota do plano via `usage_ledger` e rate limits
+  por token (`config/api.php`, `API_RATE_*`), com envelope de erro unico
+  (ADR-050).
+- Tokens de API: tela em `/settings/api-tokens` para criar (texto puro
+  mostrado uma vez), listar e revogar; `sanctum`, `config/sanctum.php`,
+  `config/cors.php` e `docs/API.md` + `docs/openapi.yaml`.
+- Hardening: middleware `SecurityHeaders` com CSP por nonce (`CSP_MODE` =
+  `enforce`, `report-only` ou `off`), HSTS, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Permissions-Policy` e `X-Frame-Options`; `TrustProxies`
+  configuravel, `FORCE_HTTPS`, cookies `secure` em producao (ADR-052).
+- Turnstile no cadastro: `ValidTurnstile` (siteverify via `Http`, falha
+  fechada quando configurado) e `TurnstileWidget.vue`; sem as chaves
+  `TURNSTILE_*` o recurso fica desativado, sem widget e sem bloqueio.
+- SEO: JSON-LD Organization/WebSite na home e SoftwareApplication com
+  BreadcrumbList na tool; `twitter:title/description/image:alt`; 404
+  customizada com o componente `Error` e `noindex`; `noindex` tambem em
+  settings, desafio 2FA e tokens de API (ADR-053).
+- Admin: telas somente leitura de `output_targets` (toggle `enabled`) e de
+  `ai_cache` (metadados, filtro e poda das expiradas), com auditoria
+  `OutputTargetUpdated` e `AiCachePruned`.
+- Documentacao: `docs/guides/cron.md` (deploy, agendador e fila), ADRs 050 a
+  053, `docs/acceptance/FASE-7.md`, secoes novas em `docs/API.md`,
+  `docs/ARQUITETURA.md` e `docs/RUNBOOK.md`, e termos novos no glossario.
+
+### Alterado
+
+- `StartAiQuery` grava `history_visible` a partir do opt-in da conta e aceita
+  `api_token_id` do canal; a deduplicacao nao cruza canais nem tokens.
+- O painel do usuario ganhou Historico (pago) e Tokens de API na navegacao.
+- O log de IA continua usando a chave `ai_request_id`, mas o valor e o ULID da
+  solicitacao - nao a coluna bigint legada.
+
+### Corrigido
+
+- Paginas de `settings`, o desafio 2FA e os tokens de API nao saem mais
+  indexaveis; o canonical, OG e sitemap seguem o esquema/host reais atras de
+  proxy confiavel.
+- Comentario e rotulo desatualizados de "Docs entra na F7" foram removidos das
+  telas publicas.
+
+### Notas
+
+- `usage_ledger.ai_request_id` deixou de ser lida e escrita nesta fase. O
+  `DROP` fica para o deploy seguinte, quando nenhum worker antigo puder
+  tentar grava-la entre o `migrate` e o `queue:restart`.
+- Nenhum commit ou push foi feito nesta fase.
+
+## Fase 6: Pagamentos, doacao e webhooks - 2026-10-21
+
+O dinheiro passou a entrar sozinho. A Mercado Pago entrou pelo contrato
+`PaymentGateway` (Checkout Pro, Preapproval e Pix), `/subscribe` virou pagina de
+decisao e cada pagamento aprovado compra um periodo proprio. Doacao e webhooks
+completam o ciclo, e sem credenciais o site continua vendendo pelo manual e
+doando pelo Pix estatico.
+
+### Adicionado
+
+- Banco: `checkout_sessions` (intencao de compra com valor congelado),
+  `donations` (doacao fora de `payments`) e `webhook_events` (payload cru,
+  unique por evento); `subscriptions.renewal_canceled_at`/`renewal_failed_at`,
+  `payments.gateway_method` e unique `(gateway, gateway_ref)`. Migrations
+  aditivas.
+- `App\Contracts\Payments\PaymentGateway` + `MercadoPagoGateway` sem SDK:
+  preferencia, preapproval, Pix, consulta de pagamento/preapproval/cobranca
+  autorizada, estorno e cancelamento, com timeouts e `X-Idempotency-Key`
+  (ADR-045). `config/payments.php` e `config/donations.php`; nenhum segredo no
+  repositorio.
+- Checkout: `StartCheckout`, `StartPreapproval`, `CancelRecurring` e o retorno
+  `/subscribe/checkout/{ulid}/return`; `Subscribe.vue` com Pagar agora,
+  Renovacao automatica no cartao e atendimento manual, e os caminhos online
+  escondidos sem credenciais.
+- Webhooks: `POST /webhooks/mercadopago` isento de CSRF, assinatura
+  `x-signature` HMAC-SHA256 em tempo constante, `ProcessWebhookEvent`
+  (`tries=3`, backoff 10/60/300 s) e `HandleWebhookEvent` com busca do recurso
+  na API antes de agir (ADR-047).
+- Aprovacao: `ApproveGatewayPayment` confere valor/moeda com a sessao, grava
+  `payments` e abre o periodo; `OpenSubscriptionPeriod` empilha no maior fim
+  futuro ou comeca agora (ADR-046). `GrantPlan` foi reescrito sobre a mesma
+  regra.
+- Recorrencia: cancelamento pelo cliente sem perder o periodo pago, aviso unico
+  de falha de renovacao, limpeza na aprovacao seguinte e `RefundGatewayPayment`
+  com o provedor antes do banco (ADR-049).
+- Doacao: `/{locale}/donate` publica com valores sugeridos/livre, Pix dinamico
+  e fallback estatico (`PixPayload` EMV + CRC16, QR em SVG), pagina de status
+  por ULID sem dados do doador e recibo opcional (ADR-048).
+- Comandos `payments:expire` (5 min) e `webhooks:prune --days=30` (diario),
+  semeados em `task_schedules`, ambos com `--dry-run`.
+- Admin: aba **Doacoes** em Pagamentos (busca, status efetivo, detalhe com QR e
+  ticket) e tela **Webhooks** somente leitura com filtros e payload completo.
+- i18n: namespace `donations` e novas chaves de assinatura, billing, admin e
+  e-mail nos cinco idiomas. `/donate` entrou no sitemap e no hreflang;
+  `/subscribe` e o status da doacao ficam `noindex`.
+
+### Alterado
+
+- `subscriptions`: **uma linha por periodo pago**, e nao mais uma linha
+  esticada por concessao; `User::activeSubscription()` escolhe a linha que cobre
+  agora e `nextSubscription()` expoe a proxima futura. A cota le a janela da
+  assinatura vigente.
+- `GrantPlan` de mesmo plano cria o periodo seguinte; plano diferente ou Free
+  encerra tudo e comeca agora, cancelando preapproval antes quando houver.
+- `RefundPayment` encerra a linha vinculada ao pagamento (inclusive futura) sem
+  apagar historico; o periodo vigente de outro pagamento nao cai.
+- Painel de Pagamentos ganhou abas; navegacao do admin ganhou Webhooks.
+- `.env.example` e RUNBOOK com as variaveis do provedor, doacao, cron do
+  `schedule:run` e rotacao das credenciais.
+
+### Corrigido
+
+- `Plan::periodEndFrom()` usa `addMonthNoOverflow()`/`addYearNoOverflow()`:
+  31/01 e 29/02 nao escorregam para o mes seguinte.
+- `Admin\PaymentController` de status de doacao passou a usar o estado efetivo
+  na leitura: pendente vencido filtra como `expired` e Pix estatico nunca
+  expira.
+
+### Documentacao
+
+- **ADR-045** (gateway, Checkout Pro e Preapproval), **ADR-046** (periodos
+  empilhados), **ADR-047** (webhooks), **ADR-048** (doacoes) e **ADR-049**
+  (ciclo da recorrencia).
+- `docs/SPEC.md` secoes 6, 7, 9, 10 e 11; `docs/API.md` com o contrato do
+  webhook; `docs/ARQUITETURA.md` com o fluxo de pagamento; `docs/RUNBOOK.md`
+  com agendador, diagnostico e rotacao; `docs/glossario.md` com os termos de
+  pagamento e doacao; aceite em `docs/acceptance/FASE-6.md`.
+
+### Notas
+
+- **Smoke real da Mercado Pago pendente**: nao ha credenciais neste ambiente. O
+  roteiro para o dono (tunel HTTPS, sandbox, Pix/cartao/boleto, preapproval
+  mensal/anual, cancelamento, estorno, replay de webhook e doacao) esta no
+  aceite, sem imprimir token nenhum.
+- Sem `MERCADO_PAGO_ACCESS_TOKEN` o checkout online nao aparece e a assinatura
+  cai no manual; sem `MERCADO_PAGO_WEBHOOK_SECRET` o endpoint responde 503. Sem
+  chave de Pix estatico, a pagina de doacao fica informativa.
+- Nenhum commit ou push foi feito nesta fase.
+
 ## Fase 5: AI SQL Builder - 2026-10-20
 
 A nona tool abriu. E a unica que depende do servidor (ADR-002) e agora tem
@@ -55,13 +214,16 @@ continua **nunca** sendo executado.
 - `AiCacheRepository::find()` passou a comparar o **payload inteiro** guardado
   com o pedido, e nao confiar so no MD5: colisao de hash virou cache miss
   (ADR-016, agora implementado como decidido).
+- `HistoryController` passou a filtrar `history_visible = true` e a derivar o
+  resumo do contrato real (esclarecimento, primeira premissa, tabelas ou
+  primeira linha do SQL), em vez de ler um campo `summary` que o provedor
+  nunca devolve.
 
 ### Documentacao
 
 - **ADR-039** (cliente fino + DeepSeek), **ADR-040** (reserva/liquidacao/cache
   sem debito), **ADR-041** (gate lexical), **ADR-042** (contrato HTTP) e
-  **ADR-043** (`toolProps`); emendas nas ADRs 002, 004, 006, 011, 016, 029 e
-  030.
+  **ADR-043** (`toolProps`); emendas nas ADRs 002, 004, 006, 011, 016, 029 e 030.
 - RUNBOOK: worker e `retry_after`, cron de `ai:prune-cache`/`ai:reconcile`,
   rotacao da chave DeepSeek e diagnostico de 503/timeout/fila presa.
 - DESIGN: layout formulario | resultado, estados e acessibilidade; glossario
@@ -69,10 +231,13 @@ continua **nunca** sendo executado.
 
 ### Notas
 
-- **Smoke real com o DeepSeek pendente**: as variaveis `AI_*` do `.env` local
-  estao vazias. O roteiro esta em `docs/acceptance/FASE-5.md`; a chave deve ser
-  digitada localmente pelo dono, nunca no chat, e o smoke nao commita nada.
-- Historico de uso e retencao de 90 dias ficaram para a F7; gateway para a F6.
+- **Smoke real com o DeepSeek concluido em 2026-10-21** em banco dedicado,
+  com HTTP, sessao, CSRF, fila e worker reais; a matriz e as evidencias estao
+  em `docs/acceptance/FASE-5.md`. A chave nunca foi impressa e o banco de
+  desenvolvimento nao foi tocado.
+- A lista de consultas foi adiantada em 2026-10-21 (`dashboard/History`,
+  filtro `history_visible`); opt-in, retencao de 90 dias e apagar continuam na
+  F7. Gateway de pagamento e renovacao: F6.
 - Nenhum commit ou push foi feito nesta fase.
 
 ## Preview do WhatsApp: card quadrado e metas no servidor - 2026-10-17

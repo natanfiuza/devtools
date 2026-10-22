@@ -16,6 +16,11 @@ return [
     'throttle' => 'Muitas tentativas. Tente de novo em :seconds segundos.',
     'suspended' => 'Esta conta está suspensa. Fale com a gente se achar que é engano.',
     'reactivated' => 'Bem-vindo de volta! A solicitação de exclusão foi cancelada e sua conta foi reativada com sucesso.',
+    // Turnstile (servidor e widget). Mensagem unica e generica de proposito:
+    // nao revela se o token faltou, expirou ou se o servico esta fora.
+    'turnstile' => [
+        'failed' => 'Não foi possível confirmar que você não é um robô. Tente de novo.',
+    ],
 
     'social' => [
         'divider' => 'ou',

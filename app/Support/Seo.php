@@ -36,6 +36,17 @@ final class Seo
         'settings',
         'admin',
         'subscribe',
+        // Telas de conta: preferencias, seguranca e tokens nao tem conteudo
+        // proprio e nao podem ser indexadas (F7). Os nomes de rota do starter
+        // kit nao usam o prefixo `settings.`, por isso entram um a um.
+        'profile',
+        'security',
+        'appearance',
+        'two-factor',
+        'api-tokens',
+        // Pagina de status de uma doacao: tem token na URL e dados de um
+        // pagamento, nao conteudo para busca. `/donate` continua indexavel.
+        'donate.status',
     ];
 
     public static function noindex(Request $request): bool
@@ -89,6 +100,10 @@ final class Seo
             'terms' => [
                 'title' => (string) trans('legal.terms.title'),
                 'description' => self::legalIntro('legal.terms.intro'),
+            ],
+            'donate' => [
+                'title' => (string) trans('donations.meta.title'),
+                'description' => (string) trans('donations.meta.description'),
             ],
             'tools.show' => self::toolMeta($request),
             default => [
@@ -243,7 +258,7 @@ final class Seo
      * caminho - e so tool `available` tem imagem: e a mesma regra que decide se
      * a pagina existe (App\Http\Controllers\ToolController).
      */
-    private static function toolSlug(Request $request): ?string
+    public static function toolSlug(Request $request): ?string
     {
         $route = $request->route();
         $name = $route?->getName();
