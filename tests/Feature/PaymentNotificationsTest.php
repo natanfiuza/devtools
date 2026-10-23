@@ -108,7 +108,7 @@ it('mostra plano e fim do periodo quando o pagamento concede o plano', function 
     $user = User::factory()->create(['locale' => 'pt_BR']);
     $plan = Plan::query()->where('slug', 'pro-monthly')->sole();
 
-    app(RegisterPayment::class)($user, 2990, PaymentMethod::Pix, $plan, null, null, true);
+    app(RegisterPayment::class)($user, 2990, PaymentMethod::Pix, $plan);
 
     $subscription = $user->refresh()->activeSubscription();
 

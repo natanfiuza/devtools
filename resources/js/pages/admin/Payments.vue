@@ -6,7 +6,6 @@ import AdminTable from '@/components/admin/AdminTable.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -128,7 +127,6 @@ const form = useForm({
     method: firstMethod,
     paid_at: '',
     note: '',
-    grant_plan: false,
 });
 
 function submit(): void {
@@ -368,23 +366,9 @@ function donationBadgeVariant(
           <InputError :message="form.errors.note" />
         </div>
 
-        <div class="flex items-start gap-2 sm:col-span-2 lg:col-span-3">
-          <Checkbox
-            id="payment-grant"
-            :model-value="form.grant_plan"
-            @update:model-value="
-              (value) => (form.grant_plan = value === true)
-            "
-          />
-          <div>
-            <Label for="payment-grant">
-              {{ t('admin.payments.grant_plan') }}
-            </Label>
-            <p class="text-xs text-subtle">
-              {{ t('admin.payments.grant_plan_help') }}
-            </p>
-          </div>
-        </div>
+        <p class="text-xs text-subtle sm:col-span-2 lg:col-span-3">
+          {{ t('admin.payments.grant_plan_help') }}
+        </p>
 
         <div class="flex gap-2 sm:col-span-2 lg:col-span-3">
           <Button

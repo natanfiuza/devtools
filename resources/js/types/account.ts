@@ -29,6 +29,7 @@ export type AccountQuota = {
     exhausted: boolean;
     windowStart: string | null;
     windowEnd: string | null;
+    nextCreditAt?: string | null;
 };
 
 /** Assinatura vigente; `null` quando a conta esta no plano gratuito. */

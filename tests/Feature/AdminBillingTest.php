@@ -9,6 +9,7 @@ use App\Models\AdminAction;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -133,17 +134,20 @@ it('registra um pagamento recebido por fora, com o valor em moeda', function () 
 
     $pagamento = Payment::query()->sole();
 
+    $assinatura = $user->refresh()->activeSubscription();
+
     expect($pagamento->amount_cents)->toBe(123456)
         ->and($pagamento->currency)->toBe('BRL')
         ->and($pagamento->method)->toBe(PaymentMethod::Pix)
         ->and($pagamento->status)->toBe(PaymentStatus::Paid)
         ->and($pagamento->gateway)->toBe('manual')
         ->and($pagamento->plan_id)->toBe($plano->id)
+        ->and($pagamento->subscription_id)->toBe($assinatura?->id)
         ->and($pagamento->note)->toBe('Pix do mes');
 
-    // Sem `grant_plan` o pagamento nao da acesso: cobranca e acesso sao duas
-    // coisas.
-    expect($user->refresh()->activeSubscription())->toBeNull();
+    // Quando o pagamento informa um plano pago, a assinatura e concedida automaticamente.
+    expect($assinatura)->not->toBeNull()
+        ->and($assinatura?->plan_id)->toBe($plano->id);
 
     $registro = AdminAction::query()->sole();
 
@@ -152,9 +156,9 @@ it('registra um pagamento recebido por fora, com o valor em moeda', function () 
         ->and($registro->meta['valor'])->toBe(123456);
 });
 
-it('aceita o valor em ponto decimal', function () {
+it('aceita o valor em ponto decimal e nao concede plano quando nenhum plano e escolhido', function () {
     $admin = User::factory()->admin()->create();
-    User::factory()->create(['email' => 'cliente@exemplo.com']);
+    $user = User::factory()->create(['email' => 'cliente@exemplo.com']);
 
     $this->actingAs($admin)
         ->post(route('admin.payments.store'), [
@@ -163,7 +167,8 @@ it('aceita o valor em ponto decimal', function () {
             'method' => PaymentMethod::Transfer->value,
         ]);
 
-    expect(Payment::query()->sole()->amount_cents)->toBe(2990);
+    expect(Payment::query()->sole()->amount_cents)->toBe(2990)
+        ->and($user->refresh()->activeSubscription())->toBeNull();
 });
 
 it('recusa valor que nao da para ler', function () {
@@ -194,7 +199,7 @@ it('recusa pagamento de conta que nao existe', function () {
         ->assertSessionHasErrors('email');
 });
 
-it('concede o plano junto quando o registro pede', function () {
+it('concede o plano automaticamente quando um plano pago e selecionado no registro', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create();
     $plano = Plan::query()->where('slug', 'pro-yearly')->sole();
@@ -205,7 +210,6 @@ it('concede o plano junto quando o registro pede', function () {
             'plan' => $plano->id,
             'amount' => '299,00',
             'method' => PaymentMethod::Pix->value,
-            'grant_plan' => true,
         ]);
 
     $assinatura = $user->refresh()->activeSubscription();
@@ -224,7 +228,6 @@ it('estorna o pagamento e encerra a assinatura que ele abriu', function () {
         'plan' => $plano->id,
         'amount' => '29,90',
         'method' => PaymentMethod::Pix->value,
-        'grant_plan' => true,
     ]);
 
     $pagamento = Payment::query()->sole();
@@ -236,12 +239,41 @@ it('estorna o pagamento e encerra a assinatura que ele abriu', function () {
 
     expect($pagamento->refresh()->status)->toBe(PaymentStatus::Refunded)
         ->and($assinatura?->refresh()->status)->toBe(SubscriptionStatus::Canceled)
+        ->and($assinatura?->ended_at)->not->toBeNull()
+        ->and($assinatura?->refunded_at)->not->toBeNull()
         ->and($user->refresh()->activeSubscription())->toBeNull();
 
     // A linha do pagamento fica: estorno e estado, e nao exclusao.
     expect(Payment::query()->count())->toBe(1)
         ->and(AdminAction::query()->orderByDesc('id')->first()?->action)
         ->toBe(AdminActionType::PaymentRefunded);
+});
+
+it('estorna pagamento legado sem subscription_id encerrando a assinatura ativa sem outros pagamentos vinculados', function () {
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create();
+    $plano = Plan::query()->where('slug', 'pro-monthly')->sole();
+
+    $assinatura = Subscription::factory()->for($user)->for($plano)->create([
+        'current_period_start' => now()->subDay(),
+        'current_period_end' => now()->addMonth(),
+    ]);
+
+    $pagamentoLegado = Payment::factory()->for($user)->create([
+        'plan_id' => $plano->id,
+        'subscription_id' => null,
+        'gateway' => 'manual',
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.payments.refund', $pagamentoLegado))
+        ->assertRedirect();
+
+    expect($pagamentoLegado->refresh()->status)->toBe(PaymentStatus::Refunded)
+        ->and($assinatura->refresh()->status)->toBe(SubscriptionStatus::Canceled)
+        ->and($assinatura->ended_at)->not->toBeNull()
+        ->and($assinatura->refunded_at)->not->toBeNull()
+        ->and($user->refresh()->activeSubscription())->toBeNull();
 });
 
 it('nao estorna duas vezes', function () {

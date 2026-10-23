@@ -74,14 +74,15 @@ Content-Type: application/json
         },
         "quota": {
             "unit": "tokens",
-            "limit": 500000,
+            "limit": 2000000,
             "used": 12000,
-            "remaining": 488000,
+            "remaining": 1988000,
             "exhausted": false,
             "window": {
                 "start": "2026-10-01T00:00:00-03:00",
                 "end": "2026-11-01T00:00:00-03:00"
-            }
+            },
+            "next_credit_at": null
         }
     }
 }
@@ -186,7 +187,7 @@ nao confirma que o id existe.
 A cota e a do plano, a mesma da tela; nao existe cota paralela para a API.
 
 - Free: `uses` vitalicios; cada solicitacao que chega ao provedor debita 1.
-- Planos pagos: `tokens` da janela corrente da assinatura.
+- Planos pagos: `tokens` acumulativos (2.000.000 de tokens creditados a cada mes iniciado de assinatura paga nao estornada, mais concessoes manuais; no plano anual `next_credit_at` informa a data do proximo lote mensal dentro do ano).
 - Cache hit nao debita. Solicitacao deduplicada nao debita de novo.
 - Cota esgotada responde `402` com `details.unit` e `details.required`, antes
   de enfileirar qualquer coisa.

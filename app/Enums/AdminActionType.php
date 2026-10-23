@@ -29,6 +29,7 @@ enum AdminActionType: string
     case SubscriberRemoved = 'subscriber.removed';
     case SubscriberResubscribed = 'subscriber.resubscribed';
     case SubscriptionIntentFulfilled = 'intent.fulfilled';
+    case SubscriptionIntentPaymentConfirmed = 'intent.payment_confirmed';
     case SubscriptionIntentCanceled = 'intent.canceled';
     case UserRestored = 'user.restored';
 }

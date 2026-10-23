@@ -111,6 +111,7 @@ class UserController extends Controller
                 'exhausted' => $quota->exhausted(),
                 'windowStart' => Format::date($quota->windowStart()),
                 'windowEnd' => Format::date($quota->windowEnd()),
+                'nextCreditAt' => Format::date($quota->nextCreditAt()),
             ],
             'socialAccounts' => $user->socialAccounts()
                 ->get()

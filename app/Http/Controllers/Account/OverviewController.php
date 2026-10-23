@@ -50,6 +50,7 @@ class OverviewController extends Controller
                 'exhausted' => $quota->exhausted(),
                 'windowStart' => Format::date($quota->windowStart()),
                 'windowEnd' => Format::date($quota->windowEnd()),
+                'nextCreditAt' => Format::date($quota->nextCreditAt()),
             ],
             'subscription' => $this->subscription($subscription),
             // Contagem, e nao historico: a lista de consumo por uso chega na

@@ -167,6 +167,8 @@ class SubscriptionController extends Controller
                 'username' => $intent->username,
                 'planSlug' => $intent->plan->slug,
                 'planName' => $intent->plan->name,
+                'planPrice' => Format::money($intent->plan->price_cents, $intent->plan->currency),
+                'planAmount' => number_format($intent->plan->price_cents / 100, 2, '.', ''),
                 'interval' => $intent->plan->interval,
                 'phone' => $intent->phone,
                 'document' => $intent->document,

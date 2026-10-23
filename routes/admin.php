@@ -90,6 +90,8 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
         Route::get('intents', [SubscriptionIntentController::class, 'index'])->name('intents.index');
         Route::post('intents/{intent}/fulfill', [SubscriptionIntentController::class, 'fulfill'])
             ->name('intents.fulfill');
+        Route::post('intents/{intent}/confirm-payment', [SubscriptionIntentController::class, 'confirmPayment'])
+            ->name('intents.confirm-payment');
         Route::post('intents/{intent}/cancel', [SubscriptionIntentController::class, 'cancel'])
             ->name('intents.cancel');
 

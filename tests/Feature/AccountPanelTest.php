@@ -137,12 +137,20 @@ it('mostra o plano da assinatura vigente, com vencimento e cota em tokens', func
             ->where('payments', 1));
 });
 
-it('nao conta o consumo de fora do periodo da assinatura', function () {
+it('acumula a franquia e o consumo entre periodos sucessivos de assinatura', function () {
     $plano = Plan::query()->where('slug', 'pro-monthly')->sole();
     $user = User::factory()->create();
 
+    $inicioAnterior = now()->subMonths(2)->addWeek();
+    $fimAnterior = now()->subWeek();
+
     Subscription::factory()->for($user)->for($plano)->create([
-        'current_period_start' => now()->subWeek(),
+        'current_period_start' => $inicioAnterior,
+        'current_period_end' => $fimAnterior,
+    ]);
+
+    Subscription::factory()->for($user)->for($plano)->create([
+        'current_period_start' => $fimAnterior,
         'current_period_end' => now()->addWeeks(3),
     ]);
 
@@ -154,7 +162,10 @@ it('nao conta o consumo de fora do periodo da assinatura', function () {
 
     $this->actingAs($user)
         ->get(route('dashboard'))
-        ->assertInertia(fn (Assert $page) => $page->where('quota.used', 300));
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('quota.limit', $plano->monthly_tokens * 2)
+            ->where('quota.used', 5300)
+            ->where('quota.remaining', ($plano->monthly_tokens * 2) - 5300));
 });
 
 it('entrega o historico bloqueado no plano gratuito', function () {

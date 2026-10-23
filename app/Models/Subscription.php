@@ -25,6 +25,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $current_period_end
  * @property Carbon|null $renewal_canceled_at
  * @property Carbon|null $renewal_failed_at
+ * @property Carbon|null $ended_at
+ * @property Carbon|null $refunded_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
@@ -57,7 +59,24 @@ class Subscription extends Model
             'current_period_end' => 'datetime',
             'renewal_canceled_at' => 'datetime',
             'renewal_failed_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'refunded_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Encerra a linha (ADR-054). `ended_at` marca ate onde os meses iniciados
+     * contam na cota; `refunded` zera o credito da linha inteira.
+     */
+    public function end(bool $refunded = false): void
+    {
+        $now = now();
+
+        $this->forceFill([
+            'status' => SubscriptionStatus::Canceled,
+            'ended_at' => $this->ended_at ?? $now,
+            'refunded_at' => $refunded ? ($this->refunded_at ?? $now) : $this->refunded_at,
+        ])->save();
     }
 
     /**
