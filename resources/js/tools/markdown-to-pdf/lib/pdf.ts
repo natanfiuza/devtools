@@ -1,17 +1,101 @@
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
-import { getPaperDimensions, getPrintCss } from './themes';
+import {
+    getPaperDimensions,
+    getPrintCss,
+    MARGIN_VALUES_MM,
+} from './themes';
 import type { DocumentConfig } from './types';
 
 /**
  * Utilitarios de exportacao e impressao para o conversor de Markdown para PDF.
  *
  * Processamento 100% no cliente (ADR-002, ADR-037):
- * - `exportToPdf`: Renderiza o documento via html2canvas-pro (com suporte nativo a oklab/oklch do Tailwind 4)
- *   e gera o arquivo binario `.pdf` localmente no navegador atraves do jsPDF.
+ * - `exportToPdf`: Renderiza o documento via html2canvas-pro na largura fisica util exata
+ *   da folha (`widthMm - 2 * marginMm`), fatia as paginas evitando cortar linhas de texto
+ *   ao meio e posiciona cada pagina no jsPDF respeitando as 4 margens configuradas.
  * - `printDocument`: Dispara o dialogo nativo de impressao (`window.print`) atraves de um iframe
  *   isolado, aplicando regras CSS `@page` e `@media print` para renderizacao vetorial de alta nitidez.
  */
+
+const MM_TO_PX = 96 / 25.4;
+
+/**
+ * Localiza uma linha de corte segura (espaco entre linhas de texto/tabela) proxima ao limite da pagina
+ * para evitar cortar caracteres horizontalmente ao meio na virada de pagina.
+ */
+export function findSafeSliceHeight(
+    canvas: HTMLCanvasElement,
+    sourceY: number,
+    maxSliceHeight: number,
+): number {
+    const remainingHeight = canvas.height - sourceY;
+
+    if (remainingHeight <= maxSliceHeight) {
+        return remainingHeight;
+    }
+
+    if (typeof canvas.getContext !== 'function') {
+        return maxSliceHeight;
+    }
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx || typeof ctx.getImageData !== 'function') {
+        return maxSliceHeight;
+    }
+
+    const searchRange = Math.max(16, Math.floor(maxSliceHeight * 0.2));
+    const searchStartY = Math.max(sourceY + 1, sourceY + maxSliceHeight - searchRange);
+    const bandHeight = sourceY + maxSliceHeight - searchStartY;
+
+    if (bandHeight <= 4 || canvas.width <= 0) {
+        return maxSliceHeight;
+    }
+
+    try {
+        const imageData = ctx.getImageData(
+            0,
+            searchStartY,
+            canvas.width,
+            bandHeight,
+        );
+        const { data, width, height } = imageData;
+        // Permite ate 1.5% de pixels escuros na linha (ex.: bordas verticais de 1px de tabelas)
+        const maxDarkPixelsPerRow = Math.max(2, Math.floor(width * 0.015));
+
+        const isRowClean = (rowIdx: number): boolean => {
+            let darkCount = 0;
+            const rowOffset = rowIdx * width * 4;
+
+            for (let x = 0; x < width; x++) {
+                const idx = rowOffset + x * 4;
+                const r = data[idx] ?? 255;
+                const g = data[idx + 1] ?? 255;
+                const b = data[idx + 2] ?? 255;
+
+                if (r < 185 || g < 185 || b < 185) {
+                    darkCount++;
+                    if (darkCount > maxDarkPixelsPerRow) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        };
+
+        // Procura de baixo para cima por 3 linhas consecutivas limpas de texto
+        for (let r = height - 2; r >= 2; r--) {
+            if (isRowClean(r) && isRowClean(r - 1) && isRowClean(r - 2)) {
+                return searchStartY - sourceY + r;
+            }
+        }
+    } catch {
+        return maxSliceHeight;
+    }
+
+    return maxSliceHeight;
+}
 
 export async function exportToPdf(
     element: HTMLElement,
@@ -22,23 +106,35 @@ export async function exportToPdf(
         config.format,
         config.orientation,
     );
+    const marginMm = MARGIN_VALUES_MM[config.margin];
+    const contentWidthMm = Math.max(40, widthMm - 2 * marginMm);
+    const contentHeightMm = Math.max(40, minHeightMm - 2 * marginMm);
+    const contentWidthPx = Math.round(contentWidthMm * MM_TO_PX);
 
     const cleanFilename = filename.trim().toLowerCase().endsWith('.pdf')
         ? filename.trim()
         : `${filename.trim() || 'documento'}.pdf`;
 
-    // Renderiza o elemento em canvas de alta resolucao (scale: 2)
+    // Renderiza o elemento na largura fisica util exata da folha em alta resolucao (scale: 2)
     const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
+        windowWidth: Math.max(1200, contentWidthPx + 120),
         onclone: (_clonedDoc: Document, clonedElement: HTMLElement) => {
-            // Remove estilizacao visual de card do preview antes de fotografar a folha
+            // Remove estilizacao visual de card do preview e trava a largura util fisica da folha
             clonedElement.style.boxShadow = 'none';
             clonedElement.style.border = 'none';
             clonedElement.style.borderRadius = '0';
             clonedElement.style.backgroundColor = '#ffffff';
+            clonedElement.style.width = `${contentWidthMm}mm`;
+            clonedElement.style.maxWidth = `${contentWidthMm}mm`;
+            clonedElement.style.minWidth = `${contentWidthMm}mm`;
+            clonedElement.style.minHeight = 'auto';
+            clonedElement.style.padding = '0';
+            clonedElement.style.margin = '0';
+            clonedElement.style.overflow = 'hidden';
             clonedElement.classList.remove(
                 'rounded',
                 'border',
@@ -48,6 +144,11 @@ export async function exportToPdf(
                 'duration-150',
                 'dark:border-neutral-700/80',
             );
+
+            if (clonedElement.parentElement) {
+                clonedElement.parentElement.style.display = 'block';
+                clonedElement.parentElement.style.width = `${contentWidthPx + 40}px`;
+            }
         },
     });
 
@@ -59,14 +160,19 @@ export async function exportToPdf(
     });
 
     const pxFullHeight = canvas.height;
-    const pxPageHeight = Math.floor(canvas.width * (minHeightMm / widthMm));
-    const nPages = Math.max(1, Math.ceil(pxFullHeight / pxPageHeight));
+    const pxPageHeight = Math.max(
+        1,
+        Math.floor(canvas.width * (contentHeightMm / contentWidthMm)),
+    );
 
-    for (let page = 0; page < nPages; page++) {
-        const sourceY = page * pxPageHeight;
-        const currentSliceHeight = Math.min(
+    let sourceY = 0;
+    let page = 0;
+
+    while (sourceY < pxFullHeight) {
+        const currentSliceHeight = findSafeSliceHeight(
+            canvas,
+            sourceY,
             pxPageHeight,
-            pxFullHeight - sourceY,
         );
 
         if (currentSliceHeight <= 0) {
@@ -94,7 +200,8 @@ export async function exportToPdf(
             );
         }
 
-        const sliceHeightMm = (currentSliceHeight / pxPageHeight) * minHeightMm;
+        const sliceHeightMm =
+            (currentSliceHeight / pxPageHeight) * contentHeightMm;
         const imgData = pageCanvas.toDataURL('image/jpeg', 0.98);
 
         if (page > 0) {
@@ -104,13 +211,16 @@ export async function exportToPdf(
         pdf.addImage(
             imgData,
             'JPEG',
-            0,
-            0,
-            widthMm,
+            marginMm,
+            marginMm,
+            contentWidthMm,
             sliceHeightMm,
             undefined,
             'FAST',
         );
+
+        sourceY += currentSliceHeight;
+        page++;
     }
 
     pdf.save(cleanFilename);

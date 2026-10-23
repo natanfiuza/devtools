@@ -456,7 +456,7 @@ function handlePrint(): void {
           <!-- eslint-disable-next-line vue/no-v-html -->
           <article
             ref="documentSheet"
-            class="markdown-pdf-document rounded border border-neutral-200/80 shadow-md transition-all duration-150 dark:border-neutral-700/80"
+            class="markdown-pdf-document min-w-0 overflow-x-hidden rounded border border-neutral-200/80 shadow-md transition-all duration-150 dark:border-neutral-700/80"
             :class="[
               getThemeClasses(config.theme),
               getFontSizeClasses(config.fontSize),
@@ -516,14 +516,20 @@ function handlePrint(): void {
 </template>
 
 <style>
-/* Estilos fundamentais do documento renderizado */
+/* Estilos fundamentais do documento renderizado (padrao Google Docs em `em` e contencao de tabelas) */
 .markdown-pdf-document {
     box-sizing: border-box;
     background-color: #ffffff;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.markdown-pdf-document > *:first-child {
+    margin-top: 0 !important;
 }
 
 .markdown-pdf-document.theme-modern {
-    color: #1e293b;
+    color: #1f2937;
     background-color: #ffffff;
 }
 
@@ -543,27 +549,30 @@ function handlePrint(): void {
 }
 
 .markdown-pdf-document p {
-    margin-bottom: 0.85rem;
+    margin-top: 0;
+    margin-bottom: 0.6em;
 }
 
 .markdown-pdf-document ul {
     list-style-type: disc;
-    padding-left: 1.5rem;
-    margin-bottom: 0.85rem;
+    padding-left: 1.4em;
+    margin-top: 0;
+    margin-bottom: 0.6em;
 }
 
 .markdown-pdf-document ol {
     list-style-type: decimal;
-    padding-left: 1.5rem;
-    margin-bottom: 0.85rem;
+    padding-left: 1.4em;
+    margin-top: 0;
+    margin-bottom: 0.6em;
 }
 
 .markdown-pdf-document li {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2em;
 }
 
 .markdown-pdf-document input[type='checkbox'] {
-    margin-right: 0.4rem;
+    margin-right: 0.35em;
     vertical-align: middle;
 }
 
@@ -571,183 +580,236 @@ function handlePrint(): void {
     max-width: 100%;
     height: auto;
     border-radius: 4px;
-    margin: 1rem 0;
+    margin: 0.75em 0;
 }
 
-/* Tema Moderno */
+.markdown-pdf-document table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    margin: 0.75em 0;
+    font-size: 0.9em;
+}
+
+.markdown-pdf-document th,
+.markdown-pdf-document td {
+    padding: 5px 8px;
+    text-align: left;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    white-space: normal;
+}
+
+.markdown-pdf-document th code,
+.markdown-pdf-document td code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.markdown-pdf-document pre {
+    max-width: 100%;
+    font-size: 0.9em;
+    line-height: 1.45;
+    padding: 0.65em 0.8em;
+    margin: 0.75em 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    font-family: monospace;
+}
+
+.markdown-pdf-document code {
+    font-size: 0.9em;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-family: monospace;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.markdown-pdf-document pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: 1em;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Tema Moderno (padrao Google Docs) */
 .markdown-pdf-document.theme-modern h1 {
-    color: #0f172a;
-    font-size: 1.9rem;
-    font-weight: 700;
-    margin-top: 1.4rem;
-    margin-bottom: 0.75rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 0.4rem;
+    color: #111827;
+    font-size: 1.65em;
+    line-height: 1.25;
+    font-weight: 600;
+    margin-top: 1.1em;
+    margin-bottom: 0.45em;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-modern h2 {
-    color: #1e293b;
-    font-size: 1.45rem;
+    color: #1f2937;
+    font-size: 1.35em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1.25rem;
-    margin-bottom: 0.6rem;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 0.3rem;
+    margin-top: 1em;
+    margin-bottom: 0.4em;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.2em;
 }
 .markdown-pdf-document.theme-modern h3 {
-    color: #334155;
-    font-size: 1.2rem;
+    color: #374151;
+    font-size: 1.15em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.85em;
+    margin-bottom: 0.35em;
 }
-.markdown-pdf-document.theme-modern h4,
+.markdown-pdf-document.theme-modern h4 {
+    color: #4b5563;
+    font-size: 1.05em;
+    line-height: 1.35;
+    font-weight: 600;
+    margin-top: 0.7em;
+    margin-bottom: 0.3em;
+}
 .markdown-pdf-document.theme-modern h5,
 .markdown-pdf-document.theme-modern h6 {
-    color: #475569;
+    color: #4b5563;
+    font-size: 0.95em;
+    line-height: 1.35;
     font-weight: 600;
-    margin-top: 0.8rem;
-    margin-bottom: 0.4rem;
+    margin-top: 0.6em;
+    margin-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-modern a {
-    color: #2563eb;
+    color: #1a73e8;
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 .markdown-pdf-document.theme-modern blockquote {
-    border-left: 4px solid #3b82f6;
-    padding-left: 1rem;
-    color: #475569;
+    border-left: 3px solid #1a73e8;
+    padding-left: 0.85em;
+    color: #4b5563;
     font-style: italic;
-    margin: 1rem 0;
-    background: #f8fafc;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    margin: 0.75em 0;
+    background: #f8f9fa;
+    padding-top: 0.35em;
+    padding-bottom: 0.35em;
     border-radius: 0 4px 4px 0;
 }
 .markdown-pdf-document.theme-modern pre {
-    background: #0f172a;
-    color: #f8fafc;
-    border-radius: 6px;
-    padding: 0.85rem;
-    overflow-x: auto;
-    font-family: monospace;
-    margin: 1rem 0;
+    background: #f8f9fa;
+    color: #1f2937;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
 }
 .markdown-pdf-document.theme-modern code {
-    background: #f1f5f9;
-    color: #0f172a;
-    padding: 0.15rem 0.35rem;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.9em;
+    background: #f1f3f4;
+    color: #1f2937;
 }
 .markdown-pdf-document.theme-modern pre code {
     background: transparent;
     color: inherit;
     padding: 0;
 }
-.markdown-pdf-document.theme-modern table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.2rem 0;
-}
 .markdown-pdf-document.theme-modern th,
 .markdown-pdf-document.theme-modern td {
-    border: 1px solid #e2e8f0;
-    padding: 0.6rem 0.8rem;
-    text-align: left;
+    border: 1px solid #dadce0;
 }
 .markdown-pdf-document.theme-modern th {
-    background: #f8fafc;
-    color: #0f172a;
+    background: #f8f9fa;
+    color: #111827;
     font-weight: 600;
 }
 .markdown-pdf-document.theme-modern hr {
     border: 0;
-    border-top: 1px solid #e2e8f0;
-    margin: 1.5rem 0;
+    border-top: 1px solid #dadce0;
+    margin: 1em 0;
 }
 
 /* Tema Editorial */
 .markdown-pdf-document.theme-editorial h1 {
     color: #1e3a8a;
-    font-size: 2rem;
+    font-size: 1.65em;
+    line-height: 1.25;
     font-weight: 700;
-    margin-top: 1.5rem;
-    margin-bottom: 0.8rem;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.4rem;
+    margin-top: 1.1em;
+    margin-bottom: 0.45em;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-editorial h2 {
     color: #1e3a8a;
-    font-size: 1.5rem;
+    font-size: 1.35em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1.25rem;
-    margin-bottom: 0.6rem;
+    margin-top: 1em;
+    margin-bottom: 0.4em;
     border-bottom: 1px solid #cbd5e1;
-    padding-bottom: 0.3rem;
+    padding-bottom: 0.2em;
 }
 .markdown-pdf-document.theme-editorial h3 {
     color: #1e40af;
-    font-size: 1.25rem;
+    font-size: 1.15em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.85em;
+    margin-bottom: 0.35em;
 }
-.markdown-pdf-document.theme-editorial h4,
+.markdown-pdf-document.theme-editorial h4 {
+    color: #1e40af;
+    font-size: 1.05em;
+    line-height: 1.35;
+    font-weight: 600;
+    margin-top: 0.7em;
+    margin-bottom: 0.3em;
+}
 .markdown-pdf-document.theme-editorial h5,
 .markdown-pdf-document.theme-editorial h6 {
     color: #1e40af;
+    font-size: 0.95em;
+    line-height: 1.35;
     font-weight: 600;
-    margin-top: 0.8rem;
-    margin-bottom: 0.4rem;
+    margin-top: 0.6em;
+    margin-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-editorial a {
     color: #991b1b;
     text-decoration: underline;
 }
 .markdown-pdf-document.theme-editorial blockquote {
-    border-left: 4px solid #991b1b;
-    padding-left: 1rem;
+    border-left: 3px solid #991b1b;
+    padding-left: 0.85em;
     color: #57534e;
     font-style: italic;
-    margin: 1rem 0;
+    margin: 0.75em 0;
     background: #fafaf9;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding-top: 0.35em;
+    padding-bottom: 0.35em;
 }
 .markdown-pdf-document.theme-editorial pre {
     background: #f5f5f4;
     color: #292524;
     border: 1px solid #e7e5e4;
-    border-radius: 6px;
-    padding: 0.8rem;
-    overflow-x: auto;
-    font-family: monospace;
+    border-radius: 4px;
 }
 .markdown-pdf-document.theme-editorial code {
     background: #f5f5f4;
     color: #991b1b;
-    padding: 0.15rem 0.35rem;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.9em;
 }
 .markdown-pdf-document.theme-editorial pre code {
     background: transparent;
     color: inherit;
     padding: 0;
 }
-.markdown-pdf-document.theme-editorial table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1rem 0;
-}
 .markdown-pdf-document.theme-editorial th,
 .markdown-pdf-document.theme-editorial td {
     border: 1px solid #d6d3d1;
-    padding: 0.6rem 0.8rem;
-    text-align: left;
 }
 .markdown-pdf-document.theme-editorial th {
     background: #f5f5f4;
@@ -757,42 +819,54 @@ function handlePrint(): void {
 .markdown-pdf-document.theme-editorial hr {
     border: 0;
     border-top: 1px solid #d6d3d1;
-    margin: 1.5rem 0;
+    margin: 1em 0;
 }
 
 /* Tema Minimalista */
 .markdown-pdf-document.theme-minimal h1 {
     color: #000;
-    font-size: 1.85rem;
+    font-size: 1.65em;
+    line-height: 1.25;
     font-weight: 700;
-    margin-top: 1.4rem;
-    margin-bottom: 0.7rem;
+    margin-top: 1.1em;
+    margin-bottom: 0.45em;
     border-bottom: 1.5px solid #000;
-    padding-bottom: 0.3rem;
+    padding-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-minimal h2 {
     color: #000;
-    font-size: 1.4rem;
+    font-size: 1.35em;
+    line-height: 1.3;
     font-weight: 700;
-    margin-top: 1.2rem;
-    margin-bottom: 0.5rem;
+    margin-top: 1em;
+    margin-bottom: 0.4em;
     border-bottom: 1px solid #000;
-    padding-bottom: 0.2rem;
+    padding-bottom: 0.2em;
 }
 .markdown-pdf-document.theme-minimal h3 {
     color: #000;
-    font-size: 1.15rem;
+    font-size: 1.15em;
+    line-height: 1.3;
     font-weight: 700;
-    margin-top: 0.9rem;
-    margin-bottom: 0.4rem;
+    margin-top: 0.85em;
+    margin-bottom: 0.35em;
 }
-.markdown-pdf-document.theme-minimal h4,
+.markdown-pdf-document.theme-minimal h4 {
+    color: #000;
+    font-size: 1.05em;
+    line-height: 1.35;
+    font-weight: 700;
+    margin-top: 0.7em;
+    margin-bottom: 0.3em;
+}
 .markdown-pdf-document.theme-minimal h5,
 .markdown-pdf-document.theme-minimal h6 {
     color: #000;
+    font-size: 0.95em;
+    line-height: 1.35;
     font-weight: 700;
-    margin-top: 0.7rem;
-    margin-bottom: 0.3rem;
+    margin-top: 0.6em;
+    margin-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-minimal a {
     color: #000;
@@ -801,42 +875,29 @@ function handlePrint(): void {
 }
 .markdown-pdf-document.theme-minimal blockquote {
     border-left: 3px solid #000;
-    padding-left: 0.8rem;
+    padding-left: 0.8em;
     color: #000;
     font-style: italic;
-    margin: 0.8rem 0;
+    margin: 0.75em 0;
 }
 .markdown-pdf-document.theme-minimal pre {
     background: #fff;
     color: #000;
     border: 1px solid #000;
     border-radius: 2px;
-    padding: 0.7rem;
-    overflow-x: auto;
-    font-family: monospace;
 }
 .markdown-pdf-document.theme-minimal code {
     background: #fff;
     color: #000;
     border: 1px solid #000;
-    padding: 0.1rem 0.25rem;
-    font-family: monospace;
-    font-size: 0.9em;
 }
 .markdown-pdf-document.theme-minimal pre code {
     border: none;
     padding: 0;
 }
-.markdown-pdf-document.theme-minimal table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1rem 0;
-}
 .markdown-pdf-document.theme-minimal th,
 .markdown-pdf-document.theme-minimal td {
     border: 1px solid #000;
-    padding: 0.5rem 0.7rem;
-    text-align: left;
 }
 .markdown-pdf-document.theme-minimal th {
     background: #fff;
@@ -846,37 +907,57 @@ function handlePrint(): void {
 .markdown-pdf-document.theme-minimal hr {
     border: 0;
     border-top: 1px solid #000;
-    margin: 1.2rem 0;
+    margin: 1em 0;
 }
 
 /* Tema Academico */
 .markdown-pdf-document.theme-academic h1 {
     color: #171717;
-    font-size: 1.75rem;
+    font-size: 1.6em;
+    line-height: 1.25;
     font-weight: 700;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+    margin-top: 1.1em;
+    margin-bottom: 0.45em;
     text-align: center;
 }
 .markdown-pdf-document.theme-academic h2 {
     color: #262626;
-    font-size: 1.35rem;
+    font-size: 1.3em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1.3rem;
-    margin-bottom: 0.6rem;
+    margin-top: 1em;
+    margin-bottom: 0.4em;
 }
 .markdown-pdf-document.theme-academic h3 {
     color: #404040;
-    font-size: 1.15rem;
+    font-size: 1.15em;
+    line-height: 1.3;
     font-weight: 600;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.85em;
+    margin-bottom: 0.35em;
+}
+.markdown-pdf-document.theme-academic h4 {
+    color: #404040;
+    font-size: 1.05em;
+    line-height: 1.35;
+    font-weight: 600;
+    margin-top: 0.7em;
+    margin-bottom: 0.3em;
+}
+.markdown-pdf-document.theme-academic h5,
+.markdown-pdf-document.theme-academic h6 {
+    color: #404040;
+    font-size: 0.95em;
+    line-height: 1.35;
+    font-weight: 600;
+    margin-top: 0.6em;
+    margin-bottom: 0.25em;
 }
 .markdown-pdf-document.theme-academic p {
     text-align: justify;
-    text-indent: 1.5em;
-    margin-bottom: 0.8rem;
-    line-height: 1.75;
+    text-indent: 1.25em;
+    margin-bottom: 0.6em;
+    line-height: 1.5;
 }
 .markdown-pdf-document.theme-academic a {
     color: #0f172a;
@@ -884,45 +965,31 @@ function handlePrint(): void {
 }
 .markdown-pdf-document.theme-academic blockquote {
     border-left: 3px solid #737373;
-    padding-left: 1.5rem;
-    margin-left: 1.5rem;
+    padding-left: 1em;
+    margin-left: 1em;
     color: #404040;
     font-style: italic;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
 }
 .markdown-pdf-document.theme-academic pre {
     background: #fafafa;
     color: #171717;
     border: 1px solid #e5e5e5;
     border-radius: 4px;
-    padding: 0.75rem;
-    overflow-x: auto;
-    font-family: monospace;
 }
 .markdown-pdf-document.theme-academic code {
     background: #f5f5f5;
     color: #262626;
-    padding: 0.15rem 0.3rem;
-    border-radius: 3px;
-    font-family: monospace;
-    font-size: 0.9em;
 }
 .markdown-pdf-document.theme-academic pre code {
     background: transparent;
     padding: 0;
 }
-.markdown-pdf-document.theme-academic table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.2rem 0;
-}
 .markdown-pdf-document.theme-academic th,
 .markdown-pdf-document.theme-academic td {
     border-top: 1px solid #171717;
     border-bottom: 1px solid #171717;
-    padding: 0.5rem 0.75rem;
-    text-align: left;
 }
 .markdown-pdf-document.theme-academic th {
     border-bottom: 2px solid #171717;
@@ -932,6 +999,6 @@ function handlePrint(): void {
 .markdown-pdf-document.theme-academic hr {
     border: 0;
     border-top: 1px solid #a3a3a3;
-    margin: 1.5rem 0;
+    margin: 1em 0;
 }
 </style>
