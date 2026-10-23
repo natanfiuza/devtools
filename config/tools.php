@@ -55,6 +55,17 @@ return [
         | todas elas. Ao cortar, a tool avisa.
         */
         'regex_max_matches' => (int) env('TOOLS_REGEX_MAX_MATCHES', 1000),
+
+        /*
+        | Limites e politicas da ferramenta Base64 Image (ADR-055).
+        */
+        'base64_image' => [
+            'free_max_bytes' => (int) env('TOOLS_BASE64_IMAGE_FREE_MAX_BYTES', 2 * 1024 * 1024),
+            'paid_max_bytes' => (int) env('TOOLS_BASE64_IMAGE_PAID_MAX_BYTES', 25 * 1024 * 1024),
+            'download_threshold_bytes' => (int) env('TOOLS_BASE64_IMAGE_DOWNLOAD_THRESHOLD_BYTES', 2 * 1024 * 1024),
+            'free_retention_hours' => (int) env('TOOLS_BASE64_IMAGE_FREE_RETENTION_HOURS', 24),
+            'paid_retention_days' => (int) env('TOOLS_BASE64_IMAGE_PAID_RETENTION_DAYS', 30),
+        ],
     ],
 
 ];

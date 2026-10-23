@@ -27,6 +27,7 @@ class PlanFactory extends Factory
             'monthly_tokens' => 2000000,
             'max_schema_bytes' => 65536,
             'max_prompt_chars' => 4000,
+            'max_image_upload_bytes' => 26214400,
             'lifetime_free_uses' => 0,
             'active' => true,
             'sort' => 10,
