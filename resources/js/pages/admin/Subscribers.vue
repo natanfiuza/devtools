@@ -92,113 +92,130 @@ function unsubscribe(row: AdminSubscriberRow): void {
 </script>
 
 <template>
-    <Head :title="t('admin.subscribers.title')" />
+  <Head :title="t('admin.subscribers.title')" />
 
-    <div class="space-y-4">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('admin.subscribers.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.subscribers.description') }}
-            </p>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.subscribers.help') }}
-            </p>
-        </header>
+  <div class="space-y-4">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('admin.subscribers.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.subscribers.description') }}
+      </p>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.subscribers.help') }}
+      </p>
+    </header>
 
-        <form class="flex flex-wrap items-center gap-2" @submit.prevent="apply">
-            <Input
-                v-model="form.q"
-                class="h-9 max-w-xs"
-                type="search"
-                :placeholder="t('admin.subscribers.search_placeholder')"
-                :aria-label="t('admin.common.search')"
-            />
+    <form
+      class="flex flex-wrap items-center gap-2"
+      @submit.prevent="apply"
+    >
+      <Input
+        v-model="form.q"
+        class="h-9 max-w-xs"
+        type="search"
+        :placeholder="t('admin.subscribers.search_placeholder')"
+        :aria-label="t('admin.common.search')"
+      />
 
-            <Select v-model="form.status">
-                <SelectTrigger
-                    class="h-9 w-44"
-                    :aria-label="t('admin.subscribers.status')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.subscribers.status_all') }}
-                    </SelectItem>
-                    <SelectItem value="confirmed">
-                        {{ t('admin.subscribers.status_confirmed') }}
-                    </SelectItem>
-                    <SelectItem value="pending">
-                        {{ t('admin.subscribers.status_pending') }}
-                    </SelectItem>
-                    <SelectItem value="unsubscribed">
-                        {{ t('admin.subscribers.status_unsubscribed') }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Button type="submit" variant="outline" size="sm">
-                {{ t('admin.common.search') }}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" @click="clear">
-                {{ t('admin.common.clear') }}
-            </Button>
-
-            <Button variant="outline" size="sm" as-child class="ml-auto">
-                <a :href="exportUrl">{{ t('admin.subscribers.export') }}</a>
-            </Button>
-        </form>
-
-        <AdminTable
-            :columns="columns"
-            :rows="subscribers"
-            :empty="t('admin.subscribers.empty')"
-            @page="goToPage"
+      <Select v-model="form.status">
+        <SelectTrigger
+          class="h-9 w-44"
+          :aria-label="t('admin.subscribers.status')"
         >
-            <template #cell-email="{ row }">
-                {{ row.email }}
-            </template>
-            <template #cell-locale="{ row }">
-                {{ row.locale }}
-            </template>
-            <template #cell-source="{ row }">
-                {{ row.source }}
-            </template>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.subscribers.status_all') }}
+          </SelectItem>
+          <SelectItem value="confirmed">
+            {{ t('admin.subscribers.status_confirmed') }}
+          </SelectItem>
+          <SelectItem value="pending">
+            {{ t('admin.subscribers.status_pending') }}
+          </SelectItem>
+          <SelectItem value="unsubscribed">
+            {{ t('admin.subscribers.status_unsubscribed') }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <template #cell-status="{ row }">
-                <Badge
-                    :variant="
-                        row.status === 'unsubscribed' ? 'outline' : 'secondary'
-                    "
-                >
-                    {{ t(`admin.subscribers.status_${row.status}`) }}
-                </Badge>
-            </template>
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+      >
+        {{ t('admin.common.search') }}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="clear"
+      >
+        {{ t('admin.common.clear') }}
+      </Button>
 
-            <template #cell-createdAt="{ row }">
-                {{ row.createdAt }}
-            </template>
+      <Button
+        variant="outline"
+        size="sm"
+        as-child
+        class="ml-auto"
+      >
+        <a :href="exportUrl">{{ t('admin.subscribers.export') }}</a>
+      </Button>
+    </form>
 
-            <template #actions="{ row }">
-                <Button
-                    v-if="row.status === 'unsubscribed'"
-                    variant="outline"
-                    size="sm"
-                    @click="resubscribe(row)"
-                >
-                    {{ t('admin.subscribers.resubscribe') }}
-                </Button>
-                <Button
-                    v-else
-                    variant="outline"
-                    size="sm"
-                    @click="unsubscribe(row)"
-                >
-                    {{ t('admin.subscribers.remove') }}
-                </Button>
-            </template>
-        </AdminTable>
-    </div>
+    <AdminTable
+      :columns="columns"
+      :rows="subscribers"
+      :empty="t('admin.subscribers.empty')"
+      @page="goToPage"
+    >
+      <template #cell-email="{ row }">
+        {{ row.email }}
+      </template>
+      <template #cell-locale="{ row }">
+        {{ row.locale }}
+      </template>
+      <template #cell-source="{ row }">
+        {{ row.source }}
+      </template>
+
+      <template #cell-status="{ row }">
+        <Badge
+          :variant="
+            row.status === 'unsubscribed' ? 'outline' : 'secondary'
+          "
+        >
+          {{ t(`admin.subscribers.status_${row.status}`) }}
+        </Badge>
+      </template>
+
+      <template #cell-createdAt="{ row }">
+        {{ row.createdAt }}
+      </template>
+
+      <template #actions="{ row }">
+        <Button
+          v-if="row.status === 'unsubscribed'"
+          variant="outline"
+          size="sm"
+          @click="resubscribe(row)"
+        >
+          {{ t('admin.subscribers.resubscribe') }}
+        </Button>
+        <Button
+          v-else
+          variant="outline"
+          size="sm"
+          @click="unsubscribe(row)"
+        >
+          {{ t('admin.subscribers.remove') }}
+        </Button>
+      </template>
+    </AdminTable>
+  </div>
 </template>

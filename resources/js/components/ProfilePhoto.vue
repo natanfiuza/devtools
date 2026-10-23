@@ -84,67 +84,67 @@ const removePhoto = () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <input
-            ref="fileInput"
-            type="file"
-            accept="image/jpeg,image/png,image/jpg,image/webp"
-            class="hidden"
-            @change="onFileSelected"
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/jpeg,image/png,image/jpg,image/webp"
+      class="hidden"
+      @change="onFileSelected"
+    >
+
+    <div class="relative">
+      <Avatar
+        class="size-20 overflow-hidden rounded-full border border-border shadow-xs"
+      >
+        <AvatarImage
+          v-if="currentAvatarUrl"
+          :src="currentAvatarUrl"
+          :alt="user.name"
         />
-
-        <div class="relative">
-            <Avatar
-                class="size-20 overflow-hidden rounded-full border border-border shadow-xs"
-            >
-                <AvatarImage
-                    v-if="currentAvatarUrl"
-                    :src="currentAvatarUrl"
-                    :alt="user.name"
-                />
-                <AvatarFallback class="text-lg font-semibold text-foreground">
-                    {{ getInitials(user.name) }}
-                </AvatarFallback>
-            </Avatar>
-        </div>
-
-        <div class="space-y-1.5">
-            <div class="flex flex-wrap items-center gap-2">
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    :disabled="form.processing"
-                    @click="triggerFileInput"
-                >
-                    <Camera class="mr-1.5 size-4" />
-                    <span>
-                        {{
-                            form.processing
-                                ? t('settings.profile.photo_uploading')
-                                : t('settings.profile.photo_upload')
-                        }}
-                    </span>
-                </Button>
-
-                <Button
-                    v-if="user.avatar && !form.processing"
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    @click="removePhoto"
-                >
-                    <Trash2 class="mr-1.5 size-4" />
-                    <span>{{ t('settings.profile.photo_remove') }}</span>
-                </Button>
-            </div>
-
-            <p class="text-xs text-muted-foreground">
-                {{ t('settings.profile.photo_help') }}
-            </p>
-
-            <InputError :message="form.errors.photo" />
-        </div>
+        <AvatarFallback class="text-lg font-semibold text-foreground">
+          {{ getInitials(user.name) }}
+        </AvatarFallback>
+      </Avatar>
     </div>
+
+    <div class="space-y-1.5">
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          :disabled="form.processing"
+          @click="triggerFileInput"
+        >
+          <Camera class="mr-1.5 size-4" />
+          <span>
+            {{
+              form.processing
+                ? t('settings.profile.photo_uploading')
+                : t('settings.profile.photo_upload')
+            }}
+          </span>
+        </Button>
+
+        <Button
+          v-if="user.avatar && !form.processing"
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          @click="removePhoto"
+        >
+          <Trash2 class="mr-1.5 size-4" />
+          <span>{{ t('settings.profile.photo_remove') }}</span>
+        </Button>
+      </div>
+
+      <p class="text-xs text-muted-foreground">
+        {{ t('settings.profile.photo_help') }}
+      </p>
+
+      <InputError :message="form.errors.photo" />
+    </div>
+  </div>
 </template>

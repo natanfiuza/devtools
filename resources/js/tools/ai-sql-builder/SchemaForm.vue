@@ -157,153 +157,163 @@ defineExpose({
 </script>
 
 <template>
-    <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
-        <div class="grid gap-1.5">
-            <Label>{{ t('ai.form.schema_source') }}</Label>
-            <Tabs v-model="source">
-                <TabsList class="w-full">
-                    <TabsTrigger
-                        v-for="item in sources"
-                        :key="item"
-                        :value="item"
-                        class="flex-1"
-                    >
-                        {{ t(`ai.sources.${item}`) }}
-                    </TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
+  <form
+    class="flex flex-col gap-4"
+    @submit.prevent="onSubmit"
+  >
+    <div class="grid gap-1.5">
+      <Label>{{ t('ai.form.schema_source') }}</Label>
+      <Tabs v-model="source">
+        <TabsList class="w-full">
+          <TabsTrigger
+            v-for="item in sources"
+            :key="item"
+            :value="item"
+            class="flex-1"
+          >
+            {{ t(`ai.sources.${item}`) }}
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </div>
 
-        <div class="grid gap-1.5">
-            <Label>{{ t('ai.form.schema') }}</Label>
-            <div class="h-56 overflow-hidden rounded-md border">
-                <CodeEditor
-                    :key="source"
-                    v-model="schema"
-                    class="h-full"
-                    testid="ai-schema-editor"
-                    :placeholder="t('ai.form.schema_placeholder')"
-                    :extensions="extensions"
-                />
-            </div>
-            <p
-                class="text-xs"
-                :class="overSchema ? 'text-destructive' : 'text-subtle'"
-                data-test="ai-schema-counter"
+    <div class="grid gap-1.5">
+      <Label>{{ t('ai.form.schema') }}</Label>
+      <div class="h-56 overflow-hidden rounded-md border">
+        <CodeEditor
+          :key="source"
+          v-model="schema"
+          class="h-full"
+          testid="ai-schema-editor"
+          :placeholder="t('ai.form.schema_placeholder')"
+          :extensions="extensions"
+        />
+      </div>
+      <p
+        class="text-xs"
+        :class="overSchema ? 'text-destructive' : 'text-subtle'"
+        data-test="ai-schema-counter"
+      >
+        {{
+          t('ai.form.schema_limit', {
+            used: formatBytes(schemaBytes, locale),
+            limit: formatBytes(limits.schema, locale),
+          })
+        }}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="grid gap-1.5">
+        <Label>{{ t('ai.form.dialect') }}</Label>
+        <Select v-model="dialect">
+          <SelectTrigger data-test="ai-dialect">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="item in availableDialects"
+              :key="item"
+              :value="item"
             >
-                {{
-                    t('ai.form.schema_limit', {
-                        used: formatBytes(schemaBytes, locale),
-                        limit: formatBytes(limits.schema, locale),
-                    })
-                }}
-            </p>
-        </div>
+              {{ t(`ai.dialects.${item}`) }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        <div class="grid grid-cols-2 gap-3">
-            <div class="grid gap-1.5">
-                <Label>{{ t('ai.form.dialect') }}</Label>
-                <Select v-model="dialect">
-                    <SelectTrigger data-test="ai-dialect">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="item in availableDialects"
-                            :key="item"
-                            :value="item"
-                        >
-                            {{ t(`ai.dialects.${item}`) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-
-            <div class="grid gap-1.5">
-                <Label>{{ t('ai.form.target') }}</Label>
-                <Select v-model="target">
-                    <SelectTrigger data-test="ai-target">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="item in targets"
-                            :key="item.slug"
-                            :value="item.slug"
-                        >
-                            {{ t(`ai.targets.${item.slug}`) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-
-        <div class="grid gap-1.5">
-            <Label for="ai-description">{{ t('ai.form.description') }}</Label>
-            <textarea
-                id="ai-description"
-                v-model="description"
-                rows="3"
-                :placeholder="t('ai.form.description_placeholder')"
-                class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                data-test="ai-description"
-            />
-            <p
-                class="text-xs"
-                :class="overDescription ? 'text-destructive' : 'text-subtle'"
-                data-test="ai-description-counter"
+      <div class="grid gap-1.5">
+        <Label>{{ t('ai.form.target') }}</Label>
+        <Select v-model="target">
+          <SelectTrigger data-test="ai-target">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="item in targets"
+              :key="item.slug"
+              :value="item.slug"
             >
-                {{
-                    t('ai.form.description_limit', {
-                        used: descriptionLength,
-                        limit: limits.description,
-                    })
-                }}
-            </p>
-        </div>
+              {{ t(`ai.targets.${item.slug}`) }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
 
+    <div class="grid gap-1.5">
+      <Label for="ai-description">{{ t('ai.form.description') }}</Label>
+      <textarea
+        id="ai-description"
+        v-model="description"
+        rows="3"
+        :placeholder="t('ai.form.description_placeholder')"
+        class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        data-test="ai-description"
+      />
+      <p
+        class="text-xs"
+        :class="overDescription ? 'text-destructive' : 'text-subtle'"
+        data-test="ai-description-counter"
+      >
+        {{
+          t('ai.form.description_limit', {
+            used: descriptionLength,
+            limit: limits.description,
+          })
+        }}
+      </p>
+    </div>
+
+    <p
+      v-if="showRequired"
+      class="text-sm text-destructive"
+      role="alert"
+      data-test="ai-required"
+    >
+      {{ t('ai.form.required') }}
+    </p>
+
+    <p
+      v-if="overSchema || overDescription"
+      class="text-sm text-destructive"
+      role="alert"
+      data-test="ai-over-limit"
+    >
+      {{ t('ai.form.over_limit') }}
+    </p>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="min-w-0">
         <p
-            v-if="showRequired"
-            class="text-sm text-destructive"
-            role="alert"
-            data-test="ai-required"
+          v-if="quota !== null"
+          class="text-xs text-subtle"
         >
-            {{ t('ai.form.required') }}
+          {{
+            quota.unit === 'tokens'
+              ? t('ai.quota.remaining_tokens', {
+                remaining: quota.remaining,
+                limit: quota.limit,
+              })
+              : t('ai.quota.remaining_uses', {
+                remaining: quota.remaining,
+                limit: quota.limit,
+              })
+          }}
         </p>
-
-        <p
-            v-if="overSchema || overDescription"
-            class="text-sm text-destructive"
-            role="alert"
-            data-test="ai-over-limit"
-        >
-            {{ t('ai.form.over_limit') }}
+        <p class="text-xs text-subtle">
+          {{ t('ai.warnings.sensitive') }}
         </p>
+      </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="min-w-0">
-                <p v-if="quota !== null" class="text-xs text-subtle">
-                    {{
-                        quota.unit === 'tokens'
-                            ? t('ai.quota.remaining_tokens', {
-                                  remaining: quota.remaining,
-                                  limit: quota.limit,
-                              })
-                            : t('ai.quota.remaining_uses', {
-                                  remaining: quota.remaining,
-                                  limit: quota.limit,
-                              })
-                    }}
-                </p>
-                <p class="text-xs text-subtle">
-                    {{ t('ai.warnings.sensitive') }}
-                </p>
-            </div>
-
-            <Button type="submit" :disabled="!canSubmit" data-test="ai-submit">
-                <Spinner v-if="busy" />
-                {{ busy ? t('ai.form.submitting') : t('ai.form.submit') }}
-            </Button>
-        </div>
-    </form>
+      <Button
+        type="submit"
+        :disabled="!canSubmit"
+        data-test="ai-submit"
+      >
+        <Spinner v-if="busy" />
+        {{ busy ? t('ai.form.submitting') : t('ai.form.submit') }}
+      </Button>
+    </div>
+  </form>
 </template>

@@ -103,94 +103,100 @@ const { activeHref, activeTitle } = useActiveSection(navItems, () =>
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-background text-foreground">
-        <aside
-            class="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border lg:flex"
+  <div class="flex min-h-screen bg-background text-foreground">
+    <aside
+      class="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border lg:flex"
+    >
+      <div class="flex h-14 items-center px-4">
+        <Link
+          :href="admin.dashboard.url()"
+          class="flex items-center gap-2"
         >
-            <div class="flex h-14 items-center px-4">
-                <Link
-                    :href="admin.dashboard.url()"
-                    class="flex items-center gap-2"
-                >
-                    <AppLogo />
-                </Link>
-            </div>
+          <AppLogo />
+        </Link>
+      </div>
 
-            <nav
-                class="flex-1 space-y-1 px-2 py-2"
-                :aria-label="t('admin.nav.panel')"
+      <nav
+        class="flex-1 space-y-1 px-2 py-2"
+        :aria-label="t('admin.nav.panel')"
+      >
+        <Link
+          v-for="item in navItems"
+          :key="item.title"
+          :href="item.href"
+          class="flex h-9 items-center gap-2 rounded-md px-3 text-sm"
+          :class="
+            item.href === activeHref
+              ? 'bg-accent/10 text-foreground'
+              : 'text-subtle hover:bg-muted hover:text-foreground'
+          "
+          :aria-current="
+            item.href === activeHref ? 'page' : undefined
+          "
+        >
+          <component
+            :is="item.icon"
+            class="size-4"
+          />
+          {{ item.title }}
+        </Link>
+      </nav>
+
+      <div class="border-t border-border p-2">
+        <a
+          :href="routes.home.value"
+          class="flex h-9 items-center gap-2 rounded-md px-3 text-sm text-subtle hover:bg-muted hover:text-foreground"
+        >
+          <ArrowLeft class="size-4" />
+          {{ t('admin.nav.back_to_site') }}
+        </a>
+      </div>
+    </aside>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <header
+        class="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-background px-4 sm:px-6"
+      >
+        <h1 class="truncate text-sm font-medium">
+          {{ activeTitle }}
+        </h1>
+
+        <div class="flex items-center gap-1">
+          <a
+            :href="routes.home.value"
+            class="text-sm text-subtle hover:text-foreground lg:hidden"
+          >
+            {{ t('admin.nav.back_to_site') }}
+          </a>
+          <LocaleSwitcher />
+          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                type="button"
+                class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+                data-test="admin-user-menu"
+              >
+                <UserInfo :user="page.props.auth.user" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              class="min-w-56"
             >
-                <Link
-                    v-for="item in navItems"
-                    :key="item.title"
-                    :href="item.href"
-                    class="flex h-9 items-center gap-2 rounded-md px-3 text-sm"
-                    :class="
-                        item.href === activeHref
-                            ? 'bg-accent/10 text-foreground'
-                            : 'text-subtle hover:bg-muted hover:text-foreground'
-                    "
-                    :aria-current="
-                        item.href === activeHref ? 'page' : undefined
-                    "
-                >
-                    <component :is="item.icon" class="size-4" />
-                    {{ item.title }}
-                </Link>
-            </nav>
-
-            <div class="border-t border-border p-2">
-                <a
-                    :href="routes.home.value"
-                    class="flex h-9 items-center gap-2 rounded-md px-3 text-sm text-subtle hover:bg-muted hover:text-foreground"
-                >
-                    <ArrowLeft class="size-4" />
-                    {{ t('admin.nav.back_to_site') }}
-                </a>
-            </div>
-        </aside>
-
-        <div class="flex min-w-0 flex-1 flex-col">
-            <header
-                class="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border bg-background px-4 sm:px-6"
-            >
-                <h1 class="truncate text-sm font-medium">
-                    {{ activeTitle }}
-                </h1>
-
-                <div class="flex items-center gap-1">
-                    <a
-                        :href="routes.home.value"
-                        class="text-sm text-subtle hover:text-foreground lg:hidden"
-                    >
-                        {{ t('admin.nav.back_to_site') }}
-                    </a>
-                    <LocaleSwitcher />
-                    <ThemeToggle />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger as-child>
-                            <button
-                                type="button"
-                                class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
-                                data-test="admin-user-menu"
-                            >
-                                <UserInfo :user="page.props.auth.user" />
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" class="min-w-56">
-                            <UserMenuContent :user="page.props.auth.user" />
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </header>
-
-            <main
-                class="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-6"
-            >
-                <slot />
-            </main>
+              <UserMenuContent :user="page.props.auth.user" />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+      </header>
 
-        <Toaster />
+      <main
+        class="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-6"
+      >
+        <slot />
+      </main>
     </div>
+
+    <Toaster />
+  </div>
 </template>

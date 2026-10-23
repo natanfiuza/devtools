@@ -16,5 +16,5 @@ const title = computed(() => page.props.seo.meta.title);
 </script>
 
 <template>
-    <Head :title="title" />
+  <Head :title="title" />
 </template>

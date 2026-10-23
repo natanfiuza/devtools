@@ -67,166 +67,172 @@ function submit(): void {
 </script>
 
 <template>
-    <article class="rounded-lg border border-border p-4">
-        <header class="flex items-start justify-between gap-3">
-            <div>
-                <h3 class="flex items-center gap-2 text-sm font-medium">
-                    {{ plan.name }}
-                    <Badge v-if="plan.isFree" variant="secondary">
-                        {{ t('admin.plans.free_tag') }}
-                    </Badge>
-                </h3>
-                <p class="mt-1 text-xs text-subtle">
-                    {{ t('admin.plans.slug_help', { slug: plan.slug }) }}
-                </p>
-            </div>
+  <article class="rounded-lg border border-border p-4">
+    <header class="flex items-start justify-between gap-3">
+      <div>
+        <h3 class="flex items-center gap-2 text-sm font-medium">
+          {{ plan.name }}
+          <Badge
+            v-if="plan.isFree"
+            variant="secondary"
+          >
+            {{ t('admin.plans.free_tag') }}
+          </Badge>
+        </h3>
+        <p class="mt-1 text-xs text-subtle">
+          {{ t('admin.plans.slug_help', { slug: plan.slug }) }}
+        </p>
+      </div>
 
-            <p class="shrink-0 text-xs text-subtle">
-                {{ t('admin.plans.subscribers') }}:
-                <span class="font-mono">{{ plan.subscribers }}</span>
-            </p>
-        </header>
+      <p class="shrink-0 text-xs text-subtle">
+        {{ t('admin.plans.subscribers') }}:
+        <span class="font-mono">{{ plan.subscribers }}</span>
+      </p>
+    </header>
 
-        <form class="mt-4 grid gap-3 sm:grid-cols-2" @submit.prevent="submit">
-            <div class="grid gap-2 sm:col-span-2">
-                <Label :for="`plan-name-${plan.id}`">
-                    {{ t('admin.plans.name') }}
-                </Label>
-                <Input
-                    :id="`plan-name-${plan.id}`"
-                    v-model="form.name"
-                    type="text"
-                />
-                <InputError :message="form.errors.name" />
-            </div>
+    <form
+      class="mt-4 grid gap-3 sm:grid-cols-2"
+      @submit.prevent="submit"
+    >
+      <div class="grid gap-2 sm:col-span-2">
+        <Label :for="`plan-name-${plan.id}`">
+          {{ t('admin.plans.name') }}
+        </Label>
+        <Input
+          :id="`plan-name-${plan.id}`"
+          v-model="form.name"
+          type="text"
+        />
+        <InputError :message="form.errors.name" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-price-${plan.id}`">
-                    {{ t('admin.plans.price_cents') }}
-                </Label>
-                <Input
-                    :id="`plan-price-${plan.id}`"
-                    v-model="form.price_cents"
-                    type="number"
-                    min="0"
-                />
-                <p class="text-xs text-subtle">
-                    {{ t('admin.plans.price') }}: {{ plan.price }}
-                    {{ plan.currency }}
-                </p>
-                <InputError :message="form.errors.price_cents" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-price-${plan.id}`">
+          {{ t('admin.plans.price_cents') }}
+        </Label>
+        <Input
+          :id="`plan-price-${plan.id}`"
+          v-model="form.price_cents"
+          type="number"
+          min="0"
+        />
+        <p class="text-xs text-subtle">
+          {{ t('admin.plans.price') }}: {{ plan.price }}
+          {{ plan.currency }}
+        </p>
+        <InputError :message="form.errors.price_cents" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-interval-${plan.id}`">
-                    {{ t('admin.plans.interval') }}
-                </Label>
-                <Select v-model="form.interval">
-                    <SelectTrigger :id="`plan-interval-${plan.id}`">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="interval in intervals"
-                            :key="interval"
-                            :value="interval"
-                        >
-                            {{ t(`admin.plans.interval_${interval}`) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-                <InputError :message="form.errors.interval" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-interval-${plan.id}`">
+          {{ t('admin.plans.interval') }}
+        </Label>
+        <Select v-model="form.interval">
+          <SelectTrigger :id="`plan-interval-${plan.id}`">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="interval in intervals"
+              :key="interval"
+              :value="interval"
+            >
+              {{ t(`admin.plans.interval_${interval}`) }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <InputError :message="form.errors.interval" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-tokens-${plan.id}`">
-                    {{ t('admin.plans.monthly_tokens') }}
-                </Label>
-                <Input
-                    :id="`plan-tokens-${plan.id}`"
-                    v-model="form.monthly_tokens"
-                    type="number"
-                    min="0"
-                />
-                <InputError :message="form.errors.monthly_tokens" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-tokens-${plan.id}`">
+          {{ t('admin.plans.monthly_tokens') }}
+        </Label>
+        <Input
+          :id="`plan-tokens-${plan.id}`"
+          v-model="form.monthly_tokens"
+          type="number"
+          min="0"
+        />
+        <InputError :message="form.errors.monthly_tokens" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-uses-${plan.id}`">
-                    {{ t('admin.plans.lifetime_free_uses') }}
-                </Label>
-                <Input
-                    :id="`plan-uses-${plan.id}`"
-                    v-model="form.lifetime_free_uses"
-                    type="number"
-                    min="0"
-                />
-                <InputError :message="form.errors.lifetime_free_uses" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-uses-${plan.id}`">
+          {{ t('admin.plans.lifetime_free_uses') }}
+        </Label>
+        <Input
+          :id="`plan-uses-${plan.id}`"
+          v-model="form.lifetime_free_uses"
+          type="number"
+          min="0"
+        />
+        <InputError :message="form.errors.lifetime_free_uses" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-schema-${plan.id}`">
-                    {{ t('admin.plans.max_schema_bytes') }}
-                </Label>
-                <Input
-                    :id="`plan-schema-${plan.id}`"
-                    v-model="form.max_schema_bytes"
-                    type="number"
-                    min="0"
-                />
-                <InputError :message="form.errors.max_schema_bytes" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-schema-${plan.id}`">
+          {{ t('admin.plans.max_schema_bytes') }}
+        </Label>
+        <Input
+          :id="`plan-schema-${plan.id}`"
+          v-model="form.max_schema_bytes"
+          type="number"
+          min="0"
+        />
+        <InputError :message="form.errors.max_schema_bytes" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-prompt-${plan.id}`">
-                    {{ t('admin.plans.max_prompt_chars') }}
-                </Label>
-                <Input
-                    :id="`plan-prompt-${plan.id}`"
-                    v-model="form.max_prompt_chars"
-                    type="number"
-                    min="0"
-                />
-                <InputError :message="form.errors.max_prompt_chars" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-prompt-${plan.id}`">
+          {{ t('admin.plans.max_prompt_chars') }}
+        </Label>
+        <Input
+          :id="`plan-prompt-${plan.id}`"
+          v-model="form.max_prompt_chars"
+          type="number"
+          min="0"
+        />
+        <InputError :message="form.errors.max_prompt_chars" />
+      </div>
 
-            <div class="grid gap-2">
-                <Label :for="`plan-sort-${plan.id}`">
-                    {{ t('admin.plans.sort') }}
-                </Label>
-                <Input
-                    :id="`plan-sort-${plan.id}`"
-                    v-model="form.sort"
-                    type="number"
-                    min="0"
-                />
-                <InputError :message="form.errors.sort" />
-            </div>
+      <div class="grid gap-2">
+        <Label :for="`plan-sort-${plan.id}`">
+          {{ t('admin.plans.sort') }}
+        </Label>
+        <Input
+          :id="`plan-sort-${plan.id}`"
+          v-model="form.sort"
+          type="number"
+          min="0"
+        />
+        <InputError :message="form.errors.sort" />
+      </div>
 
-            <div class="flex items-center gap-2 sm:col-span-2">
-                <Checkbox
-                    :id="`plan-active-${plan.id}`"
-                    :model-value="form.active"
-                    @update:model-value="
-                        (value) => (form.active = value === true)
-                    "
-                />
-                <Label :for="`plan-active-${plan.id}`">
-                    {{ t('admin.plans.active') }}
-                </Label>
-                <InputError :message="form.errors.active" />
-            </div>
+      <div class="flex items-center gap-2 sm:col-span-2">
+        <Checkbox
+          :id="`plan-active-${plan.id}`"
+          :model-value="form.active"
+          @update:model-value="
+            (value) => (form.active = value === true)
+          "
+        />
+        <Label :for="`plan-active-${plan.id}`">
+          {{ t('admin.plans.active') }}
+        </Label>
+        <InputError :message="form.errors.active" />
+      </div>
 
-            <div class="sm:col-span-2">
-                <Button
-                    type="submit"
-                    variant="outline"
-                    size="sm"
-                    :disabled="form.processing"
-                >
-                    {{ t('admin.plans.save') }}
-                </Button>
-            </div>
-        </form>
-    </article>
+      <div class="sm:col-span-2">
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
+          :disabled="form.processing"
+        >
+          {{ t('admin.plans.save') }}
+        </Button>
+      </div>
+    </form>
+  </article>
 </template>

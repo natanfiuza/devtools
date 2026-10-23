@@ -39,25 +39,28 @@ const { activeTitle } = useActiveSection(items, () => t('account.nav.menu'));
 </script>
 
 <template>
-    <AppShell variant="sidebar">
-        <AppSidebar />
-        <AppContent variant="sidebar" class="min-w-0 overflow-x-clip">
-            <ImpersonationBanner />
-            <AppSidebarHeader :title="activeTitle" />
+  <AppShell variant="sidebar">
+    <AppSidebar />
+    <AppContent
+      variant="sidebar"
+      class="min-w-0 overflow-x-clip"
+    >
+      <ImpersonationBanner />
+      <AppSidebarHeader :title="activeTitle" />
 
-            <!-- `AppContent` ja rende o `<main>`; aqui e so a medida. O
+      <!-- `AppContent` ja rende o `<main>`; aqui e so a medida. O
                  `space-y` separa as telas que tem mais de um bloco na raiz
                  (o Perfil, por exemplo, tem formulario, exportacao e
                  exclusao). -->
-            <div class="w-full flex-1 px-4 py-6">
-                <div class="mx-auto w-full max-w-4xl space-y-12">
-                    <slot />
-                </div>
-            </div>
-        </AppContent>
+      <div class="w-full flex-1 px-4 py-6">
+        <div class="mx-auto w-full max-w-4xl space-y-12">
+          <slot />
+        </div>
+      </div>
+    </AppContent>
 
-        <ConsentBanner />
-        <AnalyticsScript />
-        <Toaster />
-    </AppShell>
+    <ConsentBanner />
+    <AnalyticsScript />
+    <Toaster />
+  </AppShell>
 </template>

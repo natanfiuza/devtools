@@ -24,12 +24,12 @@ const sections = [
 </script>
 
 <template>
-    <PageHead />
+  <PageHead />
 
-    <LegalDocument
-        namespace="terms"
-        :sections="sections"
-        :contact-email="contactEmail"
-        :updated-label="updatedLabel"
-    />
+  <LegalDocument
+    namespace="terms"
+    :sections="sections"
+    :contact-email="contactEmail"
+    :updated-label="updatedLabel"
+  />
 </template>

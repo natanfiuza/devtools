@@ -32,44 +32,50 @@ const routes = useRoutes();
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard.url()">
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+  <Sidebar
+    collapsible="icon"
+    variant="inset"
+  >
+    <SidebarHeader>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            size="lg"
+            as-child
+          >
+            <Link :href="dashboard.url()">
+              <AppLogo />
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarHeader>
 
-        <SidebarContent>
-            <NavMain
-                v-for="group in groups"
-                :key="group.label"
-                :label="group.label"
-                :items="group.items"
-            />
-        </SidebarContent>
+    <SidebarContent>
+      <NavMain
+        v-for="group in groups"
+        :key="group.label"
+        :label="group.label"
+        :items="group.items"
+      />
+    </SidebarContent>
 
-        <SidebarFooter>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton
-                        as-child
-                        :tooltip="t('account.nav.back_to_site')"
-                    >
-                        <a :href="routes.home.value">
-                            <ArrowLeft />
-                            <span>{{ t('account.nav.back_to_site') }}</span>
-                        </a>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-            <NavUser />
-        </SidebarFooter>
-    </Sidebar>
-    <slot />
+    <SidebarFooter>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            as-child
+            :tooltip="t('account.nav.back_to_site')"
+          >
+            <a :href="routes.home.value">
+              <ArrowLeft />
+              <span>{{ t('account.nav.back_to_site') }}</span>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+      <NavUser />
+    </SidebarFooter>
+  </Sidebar>
+  <slot />
 </template>

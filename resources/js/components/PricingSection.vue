@@ -42,62 +42,74 @@ function features(plan: PublicPlan): string[] {
 </script>
 
 <template>
-    <ul class="mt-8 grid gap-4 md:grid-cols-3">
-        <li
-            v-for="plan in plans"
-            :key="plan.slug"
-            :data-test="`plan-card-${plan.slug}`"
-            class="flex flex-col rounded-xl border bg-card p-6"
+  <ul class="mt-8 grid gap-4 md:grid-cols-3">
+    <li
+      v-for="plan in plans"
+      :key="plan.slug"
+      :data-test="`plan-card-${plan.slug}`"
+      class="flex flex-col rounded-xl border bg-card p-6"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="text-base font-medium">
+          {{ plan.name }}
+        </h3>
+        <Badge
+          v-if="plan.interval === 'year'"
+          variant="secondary"
+          data-test="plan-yearly-badge"
         >
-            <div class="flex items-center justify-between gap-2">
-                <h3 class="text-base font-medium">
-                    {{ plan.name }}
-                </h3>
-                <Badge
-                    v-if="plan.interval === 'year'"
-                    variant="secondary"
-                    data-test="plan-yearly-badge"
-                >
-                    {{ t('home.pricing.yearly_badge') }}
-                </Badge>
-            </div>
+          {{ t('home.pricing.yearly_badge') }}
+        </Badge>
+      </div>
 
-            <p
-                class="mt-2 text-[32px] leading-tight font-semibold tracking-[-0.02em]"
-            >
-                {{ plan.isFree ? t('home.pricing.free') : plan.price }}
-            </p>
-            <p v-if="plan.interval !== null" class="text-sm text-subtle">
-                {{ t(`home.pricing.interval.${plan.interval}`) }}
-            </p>
+      <p
+        class="mt-2 text-[32px] leading-tight font-semibold tracking-[-0.02em]"
+      >
+        {{ plan.isFree ? t('home.pricing.free') : plan.price }}
+      </p>
+      <p
+        v-if="plan.interval !== null"
+        class="text-sm text-subtle"
+      >
+        {{ t(`home.pricing.interval.${plan.interval}`) }}
+      </p>
 
-            <ul class="mt-6 flex-1 space-y-2 text-sm text-muted-foreground">
-                <li
-                    v-for="feature in features(plan)"
-                    :key="feature"
-                    class="flex gap-2"
-                >
-                    <Check
-                        class="mt-0.5 size-4 shrink-0 text-brand"
-                        aria-hidden="true"
-                    />
-                    <span>{{ feature }}</span>
-                </li>
-            </ul>
-
-            <Button v-if="plan.isFree" class="mt-6" variant="outline" as-child>
-                <Link :href="routes.register.value">
-                    {{ t('home.cta.register') }}
-                </Link>
-            </Button>
-            <Button v-else class="mt-6" as-child>
-                <Link
-                    :href="routes.subscribe(plan.slug)"
-                    :data-test="`plan-subscribe-${plan.slug}`"
-                >
-                    {{ t('home.cta.subscribe') }}
-                </Link>
-            </Button>
+      <ul class="mt-6 flex-1 space-y-2 text-sm text-muted-foreground">
+        <li
+          v-for="feature in features(plan)"
+          :key="feature"
+          class="flex gap-2"
+        >
+          <Check
+            class="mt-0.5 size-4 shrink-0 text-brand"
+            aria-hidden="true"
+          />
+          <span>{{ feature }}</span>
         </li>
-    </ul>
+      </ul>
+
+      <Button
+        v-if="plan.isFree"
+        class="mt-6"
+        variant="outline"
+        as-child
+      >
+        <Link :href="routes.register.value">
+          {{ t('home.cta.register') }}
+        </Link>
+      </Button>
+      <Button
+        v-else
+        class="mt-6"
+        as-child
+      >
+        <Link
+          :href="routes.subscribe(plan.slug)"
+          :data-test="`plan-subscribe-${plan.slug}`"
+        >
+          {{ t('home.cta.subscribe') }}
+        </Link>
+      </Button>
+    </li>
+  </ul>
 </template>

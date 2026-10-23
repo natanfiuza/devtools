@@ -37,7 +37,7 @@ import { formatBytes } from '@/lib/bytes';
 import { downloadText } from '@/lib/download';
 import type { EditorError } from '@/lib/editor/createEditor';
 import { acceptAttribute, readTextFile, type FileRules } from '@/lib/file';
-import { byteLength, hasBom } from '@/lib/json/parse';
+import { analyzeJson, byteLength, hasBom } from '@/lib/json/parse';
 import JsonTree from './JsonTree.vue';
 import {
     INITIAL_COLLAPSE_DEPTH,
@@ -47,6 +47,7 @@ import {
 } from './lib/analyze';
 import { createAnalyzeClient } from './lib/parseClient';
 import { nodePath } from './lib/path';
+import { prettyJson } from './lib/transform';
 import { collapseFrom, searchNodes, type JsonNode } from './lib/tree';
 import sample from './sample.json?raw';
 
@@ -536,7 +537,39 @@ async function onFile(file: File): Promise<void> {
         return;
     }
 
-    applyText(result.text);
+    const parsed = analyzeJson(result.text);
+    const content = parsed.ok ? prettyJson(parsed.value) : result.text;
+
+    applyText(content);
+}
+
+/** Ao colar um JSON valido, auto-formata o conteudo colado no editor. */
+function onPaste(event: ClipboardEvent): void {
+    const pasted = event.clipboardData?.getData('text/plain');
+
+    if (!pasted || pasted.trim() === '') {
+        return;
+    }
+
+    const parsed = analyzeJson(pasted);
+
+    if (!parsed.ok) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const formatted = prettyJson(parsed.value);
+
+    // Se o editor estava vazio ou com todo o conteudo selecionado, substitui por completo via applyText
+    if (isEmpty.value) {
+        applyText(formatted);
+
+        return;
+    }
+
+    // Se colar dentro de um texto ja existente, insere formatado na posicao do documento
+    document.execCommand?.('insertText', false, formatted);
 }
 
 function openFile(): void {
@@ -554,254 +587,261 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <ToolShell split-key="json-viewer">
-        <template #actions>
-            <ToolActionBar>
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+  <ToolShell split-key="json-viewer">
+    <template #actions>
+      <ToolActionBar>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.open')"
-                    @click="openFile"
-                >
-                    <template #icon>
-                        <FolderOpen class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.open')"
+          @click="openFile"
+        >
+          <template #icon>
+            <FolderOpen class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="isEmpty"
-                        @click="copyDocument"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="isEmpty"
+            @click="copyDocument"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
 
-                    <ToolButton
-                        :label="t('tools.ui.actions.download')"
-                        :disabled="isEmpty"
-                        @click="download"
-                    >
-                        <template #icon>
-                            <Download class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+          <ToolButton
+            :label="t('tools.ui.actions.download')"
+            :disabled="isEmpty"
+            @click="download"
+          >
+            <template #icon>
+              <Download class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <template #input-header>
-            <ToolButton
-                :label="t('tools.json-viewer.format')"
-                :shortcut="`${commandKey} Enter`"
-                :disabled="!canRewrite"
-                @click="format"
-            >
-                <template #icon>
-                    <WandSparkles class="size-3.5" />
-                </template>
-            </ToolButton>
-
-            <ToolButton
-                :label="t('tools.json-viewer.minify')"
-                :disabled="!canRewrite"
-                @click="minify"
-            >
-                <template #icon>
-                    <Minimize2 class="size-3.5" />
-                </template>
-            </ToolButton>
-
-            <ToolButton
-                :label="t('tools.json-viewer.sort_keys')"
-                :disabled="!canRewrite"
-                @click="sortKeys"
-            >
-                <template #icon>
-                    <ArrowDownAZ class="size-3.5" />
-                </template>
-            </ToolButton>
+    <template #input-header>
+      <ToolButton
+        :label="t('tools.json-viewer.format')"
+        :shortcut="`${commandKey} Enter`"
+        :disabled="!canRewrite"
+        @click="format"
+      >
+        <template #icon>
+          <WandSparkles class="size-3.5" />
         </template>
+      </ToolButton>
 
-        <template #input>
-            <FileDropzone
-                ref="dropzone"
-                :accept="acceptAttribute(FILE_RULES)"
-                testid="json-viewer"
-                @file="onFile"
-            >
-                <CodeEditor
-                    v-model="text"
-                    testid="json-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                    :error="editorError"
-                    @find="focusSearch"
-                    @format="format"
-                />
-            </FileDropzone>
+      <ToolButton
+        :label="t('tools.json-viewer.minify')"
+        :disabled="!canRewrite"
+        @click="minify"
+      >
+        <template #icon>
+          <Minimize2 class="size-3.5" />
         </template>
+      </ToolButton>
 
-        <template #output-header>
-            <div ref="searchBox" class="relative">
-                <Search
-                    class="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-subtle"
-                    aria-hidden="true"
-                />
-                <Input
-                    v-model="query"
-                    type="search"
-                    class="h-7 w-40 pr-9 pl-7 text-xs"
-                    :placeholder="t('tools.json-viewer.search.placeholder')"
-                    :aria-label="t('tools.json-viewer.search.label')"
-                    data-test="json-viewer-search"
-                />
-                <!-- O `Esc` que a faixa de atalhos anuncia, colado no campo. -->
-                <kbd
-                    class="pointer-events-none absolute top-1/2 right-1.5 hidden -translate-y-1/2 rounded border bg-surface-2 px-1 font-mono text-[10px] text-subtle sm:inline"
-                    data-test="json-viewer-search-shortcut"
-                >
-                    Esc
-                </kbd>
-            </div>
-
-            <span
-                v-if="searchMessage !== null"
-                class="text-xs text-subtle"
-                data-test="json-viewer-search-count"
-            >
-                {{ searchMessage }}
-            </span>
-
-            <ToolButton
-                v-if="hasQuery"
-                :label="t('tools.json-viewer.search.clear')"
-                variant="ghost"
-                @click="query = ''"
-            >
-                <template #icon>
-                    <X class="size-3.5" />
-                </template>
-            </ToolButton>
-
-            <ToolButton
-                :label="t('tools.json-viewer.expand_all')"
-                :disabled="!hasTree"
-                variant="ghost"
-                @click="expandAll"
-            >
-                <template #icon>
-                    <ChevronsUpDown class="size-3.5" />
-                </template>
-            </ToolButton>
-
-            <ToolButton
-                :label="t('tools.json-viewer.collapse_all')"
-                :disabled="!hasTree"
-                variant="ghost"
-                @click="collapseAll"
-            >
-                <template #icon>
-                    <ChevronsDownUp class="size-3.5" />
-                </template>
-            </ToolButton>
+      <ToolButton
+        :label="t('tools.json-viewer.sort_keys')"
+        :disabled="!canRewrite"
+        @click="sortKeys"
+      >
+        <template #icon>
+          <ArrowDownAZ class="size-3.5" />
         </template>
+      </ToolButton>
+    </template>
 
-        <template #output>
-            <!--
+    <template #input>
+      <FileDropzone
+        ref="dropzone"
+        :accept="acceptAttribute(FILE_RULES)"
+        testid="json-viewer"
+        @file="onFile"
+      >
+        <CodeEditor
+          v-model="text"
+          testid="json-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+          :error="editorError"
+          @find="focusSearch"
+          @format="format"
+          @paste="onPaste"
+        />
+      </FileDropzone>
+    </template>
+
+    <template #output-header>
+      <div
+        ref="searchBox"
+        class="relative"
+      >
+        <Search
+          class="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-subtle"
+          aria-hidden="true"
+        />
+        <Input
+          v-model="query"
+          type="search"
+          class="h-7 w-40 pr-9 pl-7 text-xs"
+          :placeholder="t('tools.json-viewer.search.placeholder')"
+          :aria-label="t('tools.json-viewer.search.label')"
+          data-test="json-viewer-search"
+        />
+        <!-- O `Esc` que a faixa de atalhos anuncia, colado no campo. -->
+        <kbd
+          class="pointer-events-none absolute top-1/2 right-1.5 hidden -translate-y-1/2 rounded border bg-surface-2 px-1 font-mono text-[10px] text-subtle sm:inline"
+          data-test="json-viewer-search-shortcut"
+        >
+          Esc
+        </kbd>
+      </div>
+
+      <span
+        v-if="searchMessage !== null"
+        class="text-xs text-subtle"
+        data-test="json-viewer-search-count"
+      >
+        {{ searchMessage }}
+      </span>
+
+      <ToolButton
+        v-if="hasQuery"
+        :label="t('tools.json-viewer.search.clear')"
+        variant="ghost"
+        @click="query = ''"
+      >
+        <template #icon>
+          <X class="size-3.5" />
+        </template>
+      </ToolButton>
+
+      <ToolButton
+        :label="t('tools.json-viewer.expand_all')"
+        :disabled="!hasTree"
+        variant="ghost"
+        @click="expandAll"
+      >
+        <template #icon>
+          <ChevronsUpDown class="size-3.5" />
+        </template>
+      </ToolButton>
+
+      <ToolButton
+        :label="t('tools.json-viewer.collapse_all')"
+        :disabled="!hasTree"
+        variant="ghost"
+        @click="collapseAll"
+      >
+        <template #icon>
+          <ChevronsDownUp class="size-3.5" />
+        </template>
+      </ToolButton>
+    </template>
+
+    <template #output>
+      <!--
                 A arvore na tela e da ultima versao valida, e nao do texto que
                 esta no editor: o aviso diz isso, e a arvore sai em opacidade
                 reduzida (SPEC secao 5).
             -->
-            <p
-                v-if="stale"
-                role="status"
-                class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
-                data-test="json-viewer-stale"
-            >
-                <TriangleAlert class="size-3.5" aria-hidden="true" />
-                {{ t('tools.ui.states.stale_output') }}
-            </p>
+      <p
+        v-if="stale"
+        role="status"
+        class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
+        data-test="json-viewer-stale"
+      >
+        <TriangleAlert
+          class="size-3.5"
+          aria-hidden="true"
+        />
+        {{ t('tools.ui.states.stale_output') }}
+      </p>
 
-            <div class="relative min-h-0 flex-1">
-                <JsonTree
-                    v-if="hasTree"
-                    class="absolute inset-0 transition-opacity"
-                    :class="stale ? 'opacity-50' : ''"
-                    :nodes="nodes"
-                    :collapsed="collapsed"
-                    :matches="matches"
-                    :virtualize-from="virtualizeFrom"
-                    @toggle="toggle"
-                    @copy="copyPath"
-                />
+      <div class="relative min-h-0 flex-1">
+        <JsonTree
+          v-if="hasTree"
+          class="absolute inset-0 transition-opacity"
+          :class="stale ? 'opacity-50' : ''"
+          :nodes="nodes"
+          :collapsed="collapsed"
+          :matches="matches"
+          :virtualize-from="virtualizeFrom"
+          @toggle="toggle"
+          @copy="copyPath"
+        />
 
-                <p
-                    v-else-if="state !== null"
-                    role="status"
-                    class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                    :class="state.error ? 'text-destructive' : 'text-subtle'"
-                    data-test="json-viewer-state"
-                >
-                    <TriangleAlert
-                        v-if="state.error"
-                        class="size-5"
-                        aria-hidden="true"
-                    />
-                    {{ state.text }}
-                </p>
-            </div>
-        </template>
+        <p
+          v-else-if="state !== null"
+          role="status"
+          class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+          :class="state.error ? 'text-destructive' : 'text-subtle'"
+          data-test="json-viewer-state"
+        >
+          <TriangleAlert
+            v-if="state.error"
+            class="size-5"
+            aria-hidden="true"
+          />
+          {{ state.text }}
+        </p>
+      </div>
+    </template>
 
-        <template #status>
-            <p
-                v-if="status !== null"
-                class="text-xs"
-                :class="status.error ? 'text-destructive' : 'text-subtle'"
-                data-test="json-viewer-status"
-            >
-                {{ status.text }}
-            </p>
-        </template>
+    <template #status>
+      <p
+        v-if="status !== null"
+        class="text-xs"
+        :class="status.error ? 'text-destructive' : 'text-subtle'"
+        data-test="json-viewer-status"
+      >
+        {{ status.text }}
+      </p>
+    </template>
 
-        <template #shortcuts>
-            <span class="flex items-center gap-1.5">
-                <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                    {{ commandKey }} Enter
-                </kbd>
-                {{ t('tools.json-viewer.shortcuts.format') }}
-            </span>
-            <span class="flex items-center gap-1.5">
-                <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                    {{ commandKey }} F
-                </kbd>
-                {{ t('tools.json-viewer.shortcuts.search') }}
-            </span>
-            <span class="flex items-center gap-1.5">
-                <kbd class="rounded border bg-surface-2 px-1 font-mono">
-                    Esc
-                </kbd>
-                {{ t('tools.json-viewer.shortcuts.clear') }}
-            </span>
-        </template>
-    </ToolShell>
+    <template #shortcuts>
+      <span class="flex items-center gap-1.5">
+        <kbd class="rounded border bg-surface-2 px-1 font-mono">
+          {{ commandKey }} Enter
+        </kbd>
+        {{ t('tools.json-viewer.shortcuts.format') }}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <kbd class="rounded border bg-surface-2 px-1 font-mono">
+          {{ commandKey }} F
+        </kbd>
+        {{ t('tools.json-viewer.shortcuts.search') }}
+      </span>
+      <span class="flex items-center gap-1.5">
+        <kbd class="rounded border bg-surface-2 px-1 font-mono">
+          Esc
+        </kbd>
+        {{ t('tools.json-viewer.shortcuts.clear') }}
+      </span>
+    </template>
+  </ToolShell>
 </template>

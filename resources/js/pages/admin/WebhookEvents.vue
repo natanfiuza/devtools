@@ -128,196 +128,224 @@ const payloadJson = computed(() =>
 </script>
 
 <template>
-    <Head :title="t('admin.webhooks.title')" />
+  <Head :title="t('admin.webhooks.title')" />
 
-    <div class="space-y-4">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('admin.webhooks.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.webhooks.description') }}
-            </p>
-            <p class="mt-1 text-xs text-subtle">
-                {{ t('admin.webhooks.readonly') }}
-            </p>
-        </header>
+  <div class="space-y-4">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('admin.webhooks.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.webhooks.description') }}
+      </p>
+      <p class="mt-1 text-xs text-subtle">
+        {{ t('admin.webhooks.readonly') }}
+      </p>
+    </header>
 
-        <form class="flex flex-wrap items-center gap-2" @submit.prevent="apply">
-            <Input
-                v-model="filters.q"
-                class="h-9 max-w-xs"
-                type="search"
-                :placeholder="t('admin.webhooks.search_placeholder')"
-                :aria-label="t('admin.common.search')"
-            />
+    <form
+      class="flex flex-wrap items-center gap-2"
+      @submit.prevent="apply"
+    >
+      <Input
+        v-model="filters.q"
+        class="h-9 max-w-xs"
+        type="search"
+        :placeholder="t('admin.webhooks.search_placeholder')"
+        :aria-label="t('admin.common.search')"
+      />
 
-            <Select v-model="filters.topic">
-                <SelectTrigger
-                    class="h-9 w-56"
-                    :aria-label="t('admin.webhooks.topic')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.webhooks.topic_all') }}
-                    </SelectItem>
-                    <SelectItem
-                        v-for="topic in topics"
-                        :key="topic"
-                        :value="topic"
-                    >
-                        {{ t(`admin.webhooks.topics.${topic}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Select v-model="filters.status">
-                <SelectTrigger
-                    class="h-9 w-44"
-                    :aria-label="t('admin.webhooks.status')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.webhooks.status_all') }}
-                    </SelectItem>
-                    <SelectItem
-                        v-for="status in statuses"
-                        :key="status"
-                        :value="status"
-                    >
-                        {{ t(`admin.webhooks.statuses.${status}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Button type="submit" variant="outline" size="sm">
-                {{ t('admin.common.search') }}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" @click="clear">
-                {{ t('admin.common.clear') }}
-            </Button>
-        </form>
-
-        <AdminTable
-            :columns="columns"
-            :rows="events"
-            :empty="t('admin.webhooks.empty')"
-            @page="goToPage"
+      <Select v-model="filters.topic">
+        <SelectTrigger
+          class="h-9 w-56"
+          :aria-label="t('admin.webhooks.topic')"
         >
-            <template #cell-createdAt="{ row }">
-                {{ row.createdAt ?? '—' }}
-            </template>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.webhooks.topic_all') }}
+          </SelectItem>
+          <SelectItem
+            v-for="topic in topics"
+            :key="topic"
+            :value="topic"
+          >
+            {{ t(`admin.webhooks.topics.${topic}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <template #cell-topic="{ row }">
-                {{ topicLabel(row.topic) }}
-            </template>
+      <Select v-model="filters.status">
+        <SelectTrigger
+          class="h-9 w-44"
+          :aria-label="t('admin.webhooks.status')"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.webhooks.status_all') }}
+          </SelectItem>
+          <SelectItem
+            v-for="status in statuses"
+            :key="status"
+            :value="status"
+          >
+            {{ t(`admin.webhooks.statuses.${status}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <template #cell-eventId="{ row }">
-                {{ row.eventId }}
-            </template>
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+      >
+        {{ t('admin.common.search') }}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="clear"
+      >
+        {{ t('admin.common.clear') }}
+      </Button>
+    </form>
 
-            <template #cell-resourceId="{ row }">
-                {{ row.resourceId ?? '—' }}
-            </template>
+    <AdminTable
+      :columns="columns"
+      :rows="events"
+      :empty="t('admin.webhooks.empty')"
+      @page="goToPage"
+    >
+      <template #cell-createdAt="{ row }">
+        {{ row.createdAt ?? '—' }}
+      </template>
 
-            <template #cell-status="{ row }">
-                <Badge :variant="statusBadgeVariant(row.status)">
-                    {{ t(`admin.webhooks.statuses.${row.status}`) }}
-                </Badge>
-            </template>
+      <template #cell-topic="{ row }">
+        {{ topicLabel(row.topic) }}
+      </template>
 
-            <template #cell-attempts="{ row }">
-                {{ row.attempts }}
-            </template>
+      <template #cell-eventId="{ row }">
+        {{ row.eventId }}
+      </template>
 
-            <template #actions="{ row }">
-                <Button variant="outline" size="sm" @click="openPayload(row)">
-                    {{ t('admin.webhooks.payload') }}
-                </Button>
-            </template>
-        </AdminTable>
+      <template #cell-resourceId="{ row }">
+        {{ row.resourceId ?? '—' }}
+      </template>
 
-        <Dialog :open="selected !== null" @update:open="setPayloadOpen">
-            <DialogContent class="sm:max-w-3xl">
-                <DialogHeader>
-                    <DialogTitle>
-                        {{
-                            t('admin.webhooks.payload_title', {
-                                id: selected?.eventId ?? '',
-                            })
-                        }}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {{ t('admin.webhooks.payload_description') }}
-                    </DialogDescription>
-                </DialogHeader>
+      <template #cell-status="{ row }">
+        <Badge :variant="statusBadgeVariant(row.status)">
+          {{ t(`admin.webhooks.statuses.${row.status}`) }}
+        </Badge>
+      </template>
 
-                <dl v-if="selected" class="grid gap-3 text-sm sm:grid-cols-2">
-                    <div>
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.topic') }}
-                        </dt>
-                        <dd>{{ topicLabel(selected.topic) }}</dd>
-                    </div>
+      <template #cell-attempts="{ row }">
+        {{ row.attempts }}
+      </template>
 
-                    <div>
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.action') }}
-                        </dt>
-                        <dd class="font-mono text-[13px]">
-                            {{ selected.action ?? '—' }}
-                        </dd>
-                    </div>
+      <template #actions="{ row }">
+        <Button
+          variant="outline"
+          size="sm"
+          @click="openPayload(row)"
+        >
+          {{ t('admin.webhooks.payload') }}
+        </Button>
+      </template>
+    </AdminTable>
 
-                    <div>
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.resource') }}
-                        </dt>
-                        <dd class="font-mono text-[13px]">
-                            {{ selected.resourceId ?? '—' }}
-                        </dd>
-                    </div>
+    <Dialog
+      :open="selected !== null"
+      @update:open="setPayloadOpen"
+    >
+      <DialogContent class="sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>
+            {{
+              t('admin.webhooks.payload_title', {
+                id: selected?.eventId ?? '',
+              })
+            }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('admin.webhooks.payload_description') }}
+          </DialogDescription>
+        </DialogHeader>
 
-                    <div>
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.received') }}
-                        </dt>
-                        <dd class="font-mono text-[13px]">
-                            {{ selected.createdAt ?? '—' }}
-                        </dd>
-                    </div>
+        <dl
+          v-if="selected"
+          class="grid gap-3 text-sm sm:grid-cols-2"
+        >
+          <div>
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.topic') }}
+            </dt>
+            <dd>{{ topicLabel(selected.topic) }}</dd>
+          </div>
 
-                    <div>
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.processed') }}
-                        </dt>
-                        <dd class="font-mono text-[13px]">
-                            {{ selected.processedAt ?? '—' }}
-                        </dd>
-                    </div>
+          <div>
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.action') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ selected.action ?? '—' }}
+            </dd>
+          </div>
 
-                    <div v-if="selected.error">
-                        <dt class="text-xs tracking-wide text-subtle uppercase">
-                            {{ t('admin.webhooks.error') }}
-                        </dt>
-                        <dd class="text-destructive">{{ selected.error }}</dd>
-                    </div>
-                </dl>
+          <div>
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.resource') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ selected.resourceId ?? '—' }}
+            </dd>
+          </div>
 
-                <pre
-                    class="max-h-96 overflow-auto rounded-md border border-border bg-muted p-3 font-mono text-[12px] whitespace-pre-wrap"
-                    >{{ payloadJson }}</pre>
+          <div>
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.received') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ selected.createdAt ?? '—' }}
+            </dd>
+          </div>
 
-                <DialogFooter>
-                    <Button variant="ghost" size="sm" @click="selected = null">
-                        {{ t('admin.common.cancel') }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    </div>
+          <div>
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.processed') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ selected.processedAt ?? '—' }}
+            </dd>
+          </div>
+
+          <div v-if="selected.error">
+            <dt class="text-xs tracking-wide text-subtle uppercase">
+              {{ t('admin.webhooks.error') }}
+            </dt>
+            <dd class="text-destructive">
+              {{ selected.error }}
+            </dd>
+          </div>
+        </dl>
+
+        <pre
+          class="max-h-96 overflow-auto rounded-md border border-border bg-muted p-3 font-mono text-[12px] whitespace-pre-wrap"
+        >{{ payloadJson }}</pre>
+
+        <DialogFooter>
+          <Button
+            variant="ghost"
+            size="sm"
+            @click="selected = null"
+          >
+            {{ t('admin.common.cancel') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>

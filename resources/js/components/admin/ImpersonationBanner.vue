@@ -24,15 +24,19 @@ function leave(): void {
 </script>
 
 <template>
-    <div
-        v-if="active"
-        class="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-accent/10 px-4 py-2"
+  <div
+    v-if="active"
+    class="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-accent/10 px-4 py-2"
+  >
+    <p class="text-sm">
+      {{ t('admin.impersonation.banner', { name: active.email }) }}
+    </p>
+    <Button
+      variant="outline"
+      size="sm"
+      @click="leave"
     >
-        <p class="text-sm">
-            {{ t('admin.impersonation.banner', { name: active.email }) }}
-        </p>
-        <Button variant="outline" size="sm" @click="leave">
-            {{ t('admin.impersonation.leave') }}
-        </Button>
-    </div>
+      {{ t('admin.impersonation.leave') }}
+    </Button>
+  </div>
 </template>

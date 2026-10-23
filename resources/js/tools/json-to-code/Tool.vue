@@ -394,161 +394,164 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
 </script>
 
 <template>
-    <ToolShell split-key="json-to-code">
-        <template #actions>
-            <ToolActionBar>
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+  <ToolShell split-key="json-to-code">
+    <template #actions>
+      <ToolActionBar>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.open')"
-                    @click="openFile"
-                >
-                    <template #icon>
-                        <FolderOpen class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.open')"
+          @click="openFile"
+        >
+          <template #icon>
+            <FolderOpen class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="!hasCode"
-                        @click="copyCode"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="!hasCode"
+            @click="copyCode"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
 
-                    <ToolButton
-                        :label="t('tools.ui.actions.download')"
-                        :disabled="!hasCode"
-                        @click="download"
-                    >
-                        <template #icon>
-                            <Download class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+          <ToolButton
+            :label="t('tools.ui.actions.download')"
+            :disabled="!hasCode"
+            @click="download"
+          >
+            <template #icon>
+              <Download class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <template #input>
-            <FileDropzone
-                ref="dropzone"
-                :accept="acceptAttribute(FILE_RULES)"
-                testid="json-to-code"
-                @file="onFile"
-            >
-                <CodeEditor
-                    v-model="text"
-                    testid="json-to-code-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                    :error="editorError"
-                />
-            </FileDropzone>
-        </template>
+    <template #input>
+      <FileDropzone
+        ref="dropzone"
+        :accept="acceptAttribute(FILE_RULES)"
+        testid="json-to-code"
+        @file="onFile"
+      >
+        <CodeEditor
+          v-model="text"
+          testid="json-to-code-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+          :error="editorError"
+        />
+      </FileDropzone>
+    </template>
 
-        <!--
+    <!--
             O alvo e o nome da raiz ficam no cabecalho da **saida**: sao as duas
             escolhas que mudam o que esta do lado de la, e ficam ao lado dele.
         -->
-        <template #output-header>
-            <Select v-model="target">
-                <SelectTrigger
-                    class="h-7 w-36 text-xs"
-                    :aria-label="t('tools.json-to-code.target')"
-                    data-test="json-to-code-target"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="item in TARGETS"
-                        :key="item"
-                        :value="item"
-                    >
-                        {{ t(`tools.json-to-code.targets.${item}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
+    <template #output-header>
+      <Select v-model="target">
+        <SelectTrigger
+          class="h-7 w-36 text-xs"
+          :aria-label="t('tools.json-to-code.target')"
+          data-test="json-to-code-target"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="item in TARGETS"
+            :key="item"
+            :value="item"
+          >
+            {{ t(`tools.json-to-code.targets.${item}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <Input
-                v-model="rootName"
-                class="h-7 w-32 text-xs"
-                :aria-label="t('tools.json-to-code.root_name')"
-                :placeholder="DEFAULT_ROOT_NAME"
-                data-test="json-to-code-root-name"
-            />
-        </template>
+      <Input
+        v-model="rootName"
+        class="h-7 w-32 text-xs"
+        :aria-label="t('tools.json-to-code.root_name')"
+        :placeholder="DEFAULT_ROOT_NAME"
+        data-test="json-to-code-root-name"
+      />
+    </template>
 
-        <template #output>
-            <!--
+    <template #output>
+      <!--
                 O codigo na tela e da ultima versao valida, e nao do texto que
                 esta no editor: o aviso diz isso, e o codigo sai em opacidade
                 reduzida (SPEC secao 5).
             -->
-            <p
-                v-if="stale"
-                role="status"
-                class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
-                data-test="json-to-code-stale"
-            >
-                <TriangleAlert class="size-3.5" aria-hidden="true" />
-                {{ t('tools.ui.states.stale_output') }}
-            </p>
+      <p
+        v-if="stale"
+        role="status"
+        class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
+        data-test="json-to-code-stale"
+      >
+        <TriangleAlert
+          class="size-3.5"
+          aria-hidden="true"
+        />
+        {{ t('tools.ui.states.stale_output') }}
+      </p>
 
-            <div class="relative min-h-0 flex-1 overflow-auto">
-                <pre
-                    v-if="hasCode"
-                    class="p-3 font-mono text-sm transition-opacity"
-                    :class="stale ? 'opacity-50' : ''"
-                    data-test="json-to-code-output"
-                    >{{ code }}</pre>
+      <div class="relative min-h-0 flex-1 overflow-auto">
+        <pre
+          v-if="hasCode"
+          class="p-3 font-mono text-sm transition-opacity"
+          :class="stale ? 'opacity-50' : ''"
+          data-test="json-to-code-output"
+        >{{ code }}</pre>
 
-                <p
-                    v-else-if="state !== null"
-                    role="status"
-                    class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                    :class="state.error ? 'text-destructive' : 'text-subtle'"
-                    data-test="json-to-code-state"
-                >
-                    <TriangleAlert
-                        v-if="state.error"
-                        class="size-5"
-                        aria-hidden="true"
-                    />
-                    {{ state.text }}
-                </p>
-            </div>
-        </template>
+        <p
+          v-else-if="state !== null"
+          role="status"
+          class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+          :class="state.error ? 'text-destructive' : 'text-subtle'"
+          data-test="json-to-code-state"
+        >
+          <TriangleAlert
+            v-if="state.error"
+            class="size-5"
+            aria-hidden="true"
+          />
+          {{ state.text }}
+        </p>
+      </div>
+    </template>
 
-        <template #status>
-            <p
-                v-if="status !== null"
-                class="text-xs"
-                :class="status.error ? 'text-destructive' : 'text-subtle'"
-                data-test="json-to-code-status"
-            >
-                {{ status.text }}
-            </p>
-        </template>
-    </ToolShell>
+    <template #status>
+      <p
+        v-if="status !== null"
+        class="text-xs"
+        :class="status.error ? 'text-destructive' : 'text-subtle'"
+        data-test="json-to-code-status"
+      >
+        {{ status.text }}
+      </p>
+    </template>
+  </ToolShell>
 </template>

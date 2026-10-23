@@ -60,106 +60,129 @@ const cobranca = computed<string>(() => {
 </script>
 
 <template>
-    <Head :title="t('account.overview.title')" />
+  <Head :title="t('account.overview.title')" />
 
-    <div class="space-y-6">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('account.overview.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('account.overview.description') }}
-            </p>
-        </header>
+  <div class="space-y-6">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('account.overview.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('account.overview.description') }}
+      </p>
+    </header>
 
-        <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="rounded-lg border border-border p-4">
-                <dt class="text-[12px] tracking-wide text-subtle uppercase">
-                    {{ t('account.overview.plan') }}
-                </dt>
-                <dd class="mt-2 font-mono text-2xl" data-test="conta-plano">
-                    {{ plan.name }}
-                </dd>
-                <p class="mt-1 text-xs text-subtle">
-                    {{
-                        plan.isFree
-                            ? t('account.overview.plan_free')
-                            : plan.price
-                    }}
-                </p>
-            </div>
-
-            <div class="rounded-lg border border-border p-4">
-                <dt class="text-[12px] tracking-wide text-subtle uppercase">
-                    {{ t('account.overview.quota') }}
-                </dt>
-                <dd class="mt-2 font-mono text-2xl" data-test="conta-restante">
-                    {{ numero(quota.remaining) }}
-                    <span class="text-sm text-subtle">{{ unidade }}</span>
-                </dd>
-                <p class="mt-1 text-xs text-subtle">
-                    {{ t('account.overview.quota_limit') }}:
-                    {{ numero(quota.limit) }} &middot;
-                    {{ t('account.overview.quota_used') }}:
-                    {{ numero(quota.used) }}
-                </p>
-                <p
-                    class="mt-1 text-xs"
-                    :class="
-                        quota.exhausted ? 'text-destructive' : 'text-subtle'
-                    "
-                    data-test="conta-janela"
-                >
-                    {{ janela }}
-                </p>
-            </div>
-
-            <div class="rounded-lg border border-border p-4">
-                <dt class="text-[12px] tracking-wide text-subtle uppercase">
-                    {{ t('account.overview.subscription') }}
-                </dt>
-                <dd class="mt-2 text-sm" data-test="conta-assinatura">
-                    {{ cobranca }}
-                </dd>
-                <p v-if="subscription" class="mt-1 text-xs text-subtle">
-                    {{ subscription.start }} &ndash; {{ subscription.end }}
-                </p>
-            </div>
-
-            <div class="rounded-lg border border-border p-4">
-                <dt class="text-[12px] tracking-wide text-subtle uppercase">
-                    {{ t('account.overview.next_due') }}
-                </dt>
-                <dd class="mt-2 font-mono text-sm" data-test="conta-vencimento">
-                    {{ subscription?.end ?? t('account.overview.no_due') }}
-                </dd>
-            </div>
-        </dl>
-
-        <section
-            class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
+    <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-lg border border-border p-4">
+        <dt class="text-[12px] tracking-wide text-subtle uppercase">
+          {{ t('account.overview.plan') }}
+        </dt>
+        <dd
+          class="mt-2 font-mono text-2xl"
+          data-test="conta-plano"
         >
-            <div>
-                <p class="text-[12px] tracking-wide text-subtle uppercase">
-                    {{ t('account.overview.payments') }}
-                </p>
-                <p class="mt-1 font-mono text-lg">
-                    {{ payments }}
-                </p>
-            </div>
+          {{ plan.name }}
+        </dd>
+        <p class="mt-1 text-xs text-subtle">
+          {{
+            plan.isFree
+              ? t('account.overview.plan_free')
+              : plan.price
+          }}
+        </p>
+      </div>
 
-            <div class="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" as-child>
-                    <Link :href="dashboardRoutes.billing.url()">
-                        {{ t('account.overview.billing_link') }}
-                    </Link>
-                </Button>
-                <Button variant="outline" size="sm" as-child>
-                    <Link :href="dashboardRoutes.history.url()">
-                        {{ t('account.overview.history_link') }}
-                    </Link>
-                </Button>
-            </div>
-        </section>
-    </div>
+      <div class="rounded-lg border border-border p-4">
+        <dt class="text-[12px] tracking-wide text-subtle uppercase">
+          {{ t('account.overview.quota') }}
+        </dt>
+        <dd
+          class="mt-2 font-mono text-2xl"
+          data-test="conta-restante"
+        >
+          {{ numero(quota.remaining) }}
+          <span class="text-sm text-subtle">{{ unidade }}</span>
+        </dd>
+        <p class="mt-1 text-xs text-subtle">
+          {{ t('account.overview.quota_limit') }}:
+          {{ numero(quota.limit) }} &middot;
+          {{ t('account.overview.quota_used') }}:
+          {{ numero(quota.used) }}
+        </p>
+        <p
+          class="mt-1 text-xs"
+          :class="
+            quota.exhausted ? 'text-destructive' : 'text-subtle'
+          "
+          data-test="conta-janela"
+        >
+          {{ janela }}
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-border p-4">
+        <dt class="text-[12px] tracking-wide text-subtle uppercase">
+          {{ t('account.overview.subscription') }}
+        </dt>
+        <dd
+          class="mt-2 text-sm"
+          data-test="conta-assinatura"
+        >
+          {{ cobranca }}
+        </dd>
+        <p
+          v-if="subscription"
+          class="mt-1 text-xs text-subtle"
+        >
+          {{ subscription.start }} &ndash; {{ subscription.end }}
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-border p-4">
+        <dt class="text-[12px] tracking-wide text-subtle uppercase">
+          {{ t('account.overview.next_due') }}
+        </dt>
+        <dd
+          class="mt-2 font-mono text-sm"
+          data-test="conta-vencimento"
+        >
+          {{ subscription?.end ?? t('account.overview.no_due') }}
+        </dd>
+      </div>
+    </dl>
+
+    <section
+      class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-4"
+    >
+      <div>
+        <p class="text-[12px] tracking-wide text-subtle uppercase">
+          {{ t('account.overview.payments') }}
+        </p>
+        <p class="mt-1 font-mono text-lg">
+          {{ payments }}
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          as-child
+        >
+          <Link :href="dashboardRoutes.billing.url()">
+            {{ t('account.overview.billing_link') }}
+          </Link>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          as-child
+        >
+          <Link :href="dashboardRoutes.history.url()">
+            {{ t('account.overview.history_link') }}
+          </Link>
+        </Button>
+      </div>
+    </section>
+  </div>
 </template>

@@ -32,22 +32,22 @@ defineEmits<{ click: [] }>();
 </script>
 
 <template>
-    <Button
-        type="button"
-        size="sm"
-        :variant="variant ?? 'outline'"
-        :disabled="disabled"
-        :aria-pressed="pressed"
-        :aria-label="ariaLabel"
-        @click="$emit('click')"
+  <Button
+    type="button"
+    size="sm"
+    :variant="variant ?? 'outline'"
+    :disabled="disabled"
+    :aria-pressed="pressed"
+    :aria-label="ariaLabel"
+    @click="$emit('click')"
+  >
+    <slot name="icon" />
+    {{ label }}
+    <kbd
+      v-if="shortcut"
+      class="ml-1 hidden rounded border px-1 font-mono text-[10px] text-subtle sm:inline"
     >
-        <slot name="icon" />
-        {{ label }}
-        <kbd
-            v-if="shortcut"
-            class="ml-1 hidden rounded border px-1 font-mono text-[10px] text-subtle sm:inline"
-        >
-            {{ shortcut }}
-        </kbd>
-    </Button>
+      {{ shortcut }}
+    </kbd>
+  </Button>
 </template>
