@@ -8,9 +8,15 @@ import DecoderPanel from './DecoderPanel.vue';
 import HistoryPanel from './HistoryPanel.vue';
 import type { Base64ImageToolProps, ConversionItem } from './types';
 
-const props = defineProps<{
-    toolProps: Base64ImageToolProps;
-}>();
+defineOptions({ inheritAttrs: false });
+
+const props = withDefaults(defineProps<Partial<Base64ImageToolProps>>(), {
+    isAuthenticated: false,
+    isPaidPlan: false,
+    maxUploadBytes: 2 * 1024 * 1024,
+    downloadThresholdBytes: 2 * 1024 * 1024,
+    retentionHours: 24,
+});
 
 const { t } = useI18n();
 
@@ -45,7 +51,7 @@ function onConversionDone(_item: ConversionItem) {
             <!-- Aba do Codificador (Imagem -> Base64) -->
             <TabsContent value="encoder" class="focus-visible:outline-none">
                 <EncoderPanel
-                    :tool-props="props.toolProps"
+                    :tool-props="props"
                     @conversion-done="onConversionDone"
                 />
             </TabsContent>
@@ -59,7 +65,7 @@ function onConversionDone(_item: ConversionItem) {
             <TabsContent value="history" class="focus-visible:outline-none">
                 <HistoryPanel
                     ref="historyRef"
-                    :tool-props="props.toolProps"
+                    :tool-props="props"
                 />
             </TabsContent>
         </Tabs>
