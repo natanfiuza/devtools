@@ -6,7 +6,7 @@ export interface Base64ImageToolProps {
     retentionHours: number;
 }
 
-export type OutputFormat = 'data-uri' | 'img' | 'css';
+export type OutputFormat = 'data-uri' | 'img' | 'css' | 'json' | 'xml';
 
 export interface ConversionItem {
     id: string;
