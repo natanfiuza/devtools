@@ -3,8 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Actions\Account\AnonymizeUser;
+use App\Actions\Account\ExportUserData;
 use App\Models\User;
+use App\Notifications\AccountPurgedNotification;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PurgeDeletedUsers extends Command
 {
@@ -25,7 +29,7 @@ class PurgeDeletedUsers extends Command
     /**
      * Execute the console command.
      */
-    public function handle(AnonymizeUser $anonymize): int
+    public function handle(AnonymizeUser $anonymize, ExportUserData $exportUserData): int
     {
         $days = (int) $this->option('days');
         if ($days < 0) {
@@ -52,8 +56,28 @@ class PurgeDeletedUsers extends Command
 
         $purged = 0;
         foreach ($users as $user) {
-            $anonymize($user);
-            $purged++;
+            try {
+                $export = $exportUserData($user);
+                $json = json_encode($export, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                if ($json === false) {
+                    throw new \RuntimeException('Falha ao serializar dados do usuario para JSON.');
+                }
+
+                $identifier = $user->username ?: (string) $user->getKey();
+                $date = now()->format('Ymd');
+                $fileName = "account-export-{$identifier}-{$date}.json";
+
+                $user->notify((new AccountPurgedNotification($json, $fileName))->locale($user->locale));
+
+                $anonymize($user);
+                $purged++;
+            } catch (Throwable $e) {
+                Log::error("Falha ao processar expurgo/notificacao da conta ID {$user->getKey()}: {$e->getMessage()}", [
+                    'user_id' => $user->getKey(),
+                    'exception' => $e,
+                ]);
+                $this->error("Erro ao expurgar usuario ID {$user->getKey()}: {$e->getMessage()}");
+            }
         }
 
         $this->info("{$purged} conta(s) expurgada(s) com sucesso.");
