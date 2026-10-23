@@ -106,4 +106,8 @@
 - JSON-LD: bloco `<script type="application/ld+json">` com dados estruturados que o buscador le; o site emite Organization e WebSite na home e SoftwareApplication com BreadcrumbList na pagina de tool, so em pagina indexavel (ADR-053).
 - BreadcrumbList: tipo de JSON-LD que descreve a trilha de navegacao (Inicio -> ferramenta) na pagina da tool; acompanha a meta `breadcrumb` da tela.
 - Pagina 404 customizada: componente `Error` do Inertia com o layout publico, textos do namespace `errors` e `noindex`; qualquer rota inexistente cai nela com status 404 (ADR-053).
+- Conversao Base64 de Imagem: transformacao de arquivo de imagem em sequencia Base64 Data URI no servidor (PHP), persistida com identificador ULID em `storage/app/data/base64_images/` (ADR-055).
+- Data URI de Imagem: esquema `data:image/...;base64,...` gerado a partir do conteudo binario de uma imagem, pronto para uso em tags HTML `<img>` ou declaracoes CSS.
+- Retencao de Imagem Base64: prazo de conservacao do arquivo fisico em disco no servidor (24 horas para Free e anonimos; 30 dias para assinantes de planos pagos).
+- Download Direto de Base64: mecanismo de entrega de conversoes superiores a 2 MB no plano pago atraves de arquivo `.txt` direto, preservando a memoria e a responsividade da interface no navegador.
 

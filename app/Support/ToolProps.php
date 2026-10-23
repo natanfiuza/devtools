@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\User;
 use App\Support\Ai\AiToolProps;
+use App\Support\Base64Image\Base64ImageToolProps;
 
 /**
  * Props por tool na pagina generica (ADR-043).
@@ -19,6 +20,7 @@ final class ToolProps
     {
         return match ($slug) {
             'ai-sql-builder' => (object) AiToolProps::for($user),
+            'base64-image' => (object) Base64ImageToolProps::for($user),
             default => (object) [],
         };
     }

@@ -1,0 +1,22 @@
+{
+    "slug": "base64-image",
+    "status": "available",
+    "category": "encode",
+    "icon": "image",
+    "order": 55,
+    "keywords": [
+        "base64",
+        "image",
+        "data-uri",
+        "encoder",
+        "decoder",
+        "converter",
+        "css",
+        "img",
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "svg"
+    ]
+}

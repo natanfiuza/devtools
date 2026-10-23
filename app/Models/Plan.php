@@ -23,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property int $monthly_tokens
  * @property int $max_schema_bytes
  * @property int $max_prompt_chars
+ * @property int $max_image_upload_bytes
  * @property int $lifetime_free_uses
  * @property bool $active
  * @property int $sort
@@ -38,6 +39,7 @@ use Illuminate\Support\Carbon;
     'monthly_tokens',
     'max_schema_bytes',
     'max_prompt_chars',
+    'max_image_upload_bytes',
     'lifetime_free_uses',
     'active',
     'sort',
@@ -63,6 +65,7 @@ class Plan extends Model
             'monthly_tokens' => 'integer',
             'max_schema_bytes' => 'integer',
             'max_prompt_chars' => 'integer',
+            'max_image_upload_bytes' => 'integer',
             'lifetime_free_uses' => 'integer',
             'active' => 'boolean',
             'sort' => 'integer',

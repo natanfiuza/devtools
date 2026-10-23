@@ -26,6 +26,7 @@ const MVP = [
     'json-to-code',
     'sql-formatter',
     'base64-url-hash',
+    'base64-image',
     'jwt-decoder',
     'timestamp-uuid',
     'regex-tester',

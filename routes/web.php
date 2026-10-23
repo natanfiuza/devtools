@@ -4,7 +4,9 @@ use App\Http\Controllers\Account\BillingController;
 use App\Http\Controllers\Account\HistoryController;
 use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Api\AiQueryController;
+use App\Http\Controllers\Api\Base64ImageController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\Base64ImageDownloadController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HomeController;
@@ -86,6 +88,31 @@ Route::prefix('api/ai')
 // Foto de perfil publica servida por UUID direto de storage/app/data/user_profile_image:
 Route::get('users/profile/photo/{uuid}', [ProfilePhotoController::class, 'show'])
     ->name('users.profile.photo');
+
+// API da ferramenta Base64 Image (ADR-055):
+Route::prefix('api/tools/base64-image')
+    ->name('api.tools.base64-image.')
+    ->group(function (): void {
+        Route::post('convert', [Base64ImageController::class, 'convert'])
+            ->name('convert');
+        Route::get('history', [Base64ImageController::class, 'history'])
+            ->middleware('auth')
+            ->name('history');
+        Route::delete('history/{id}', [Base64ImageController::class, 'destroy'])
+            ->name('destroy');
+    });
+
+// Rotas de download e preview dos arquivos da ferramenta Base64 Image:
+Route::prefix('tools/base64-image')
+    ->name('tools.base64-image.')
+    ->group(function (): void {
+        Route::get('download/{id}', [Base64ImageDownloadController::class, 'download'])
+            ->whereUlid('id')
+            ->name('download');
+        Route::get('preview/{id}', [Base64ImageDownloadController::class, 'preview'])
+            ->whereUlid('id')
+            ->name('preview');
+    });
 
 // Definir a primeira senha: contas criadas por login social (ADR-023) chegam
 // aqui quando o Fortify pede a senha em settings/security. O prefixo de idioma
