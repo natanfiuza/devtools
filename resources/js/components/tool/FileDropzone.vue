@@ -61,35 +61,35 @@ defineExpose({ pick });
 </script>
 
 <template>
+  <div
+    class="relative flex min-h-0 flex-1 flex-col"
+    :data-test="`${testid}-dropzone`"
+    @dragover.prevent="dragging = true"
+    @dragleave="dragging = false"
+    @drop.prevent="onDrop"
+  >
+    <slot />
+
     <div
-        class="relative flex min-h-0 flex-1 flex-col"
-        :data-test="`${testid}-dropzone`"
-        @dragover.prevent="dragging = true"
-        @dragleave="dragging = false"
-        @drop.prevent="onDrop"
+      v-if="dragging"
+      class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-ring bg-surface/90 p-4 text-center"
+      :data-test="`${testid}-dropzone-overlay`"
     >
-        <slot />
-
-        <div
-            v-if="dragging"
-            class="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-ring bg-surface/90 p-4 text-center"
-            :data-test="`${testid}-dropzone-overlay`"
-        >
-            <p class="text-sm font-medium">
-                {{ t('tools.ui.drop') }}
-            </p>
-            <p class="text-xs text-subtle">
-                {{ t('tools.ui.states.drop_hint') }}
-            </p>
-        </div>
-
-        <input
-            ref="field"
-            type="file"
-            :accept="accept"
-            class="sr-only"
-            :data-test="`${testid}-file`"
-            @change="onFileChosen"
-        />
+      <p class="text-sm font-medium">
+        {{ t('tools.ui.drop') }}
+      </p>
+      <p class="text-xs text-subtle">
+        {{ t('tools.ui.states.drop_hint') }}
+      </p>
     </div>
+
+    <input
+      ref="field"
+      type="file"
+      :accept="accept"
+      class="sr-only"
+      :data-test="`${testid}-file`"
+      @change="onFileChosen"
+    >
+  </div>
 </template>

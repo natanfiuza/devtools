@@ -24,82 +24,82 @@ const inputEmail = ref(props.email);
 </script>
 
 <template>
-    <Head :title="t('auth.reset.title')" />
+  <Head :title="t('auth.reset.title')" />
 
-    <AuthCard
-        :title="t('auth.reset.title')"
-        :description="t('auth.reset.description')"
+  <AuthCard
+    :title="t('auth.reset.title')"
+    :description="t('auth.reset.description')"
+  >
+    <Form
+      v-slot="{ errors, processing }"
+      v-bind="routes.form.resetPassword.value"
+      :transform="(data) => ({ ...data, token, email })"
+      :reset-on-success="['password', 'password_confirmation']"
+      class="flex flex-col gap-5"
     >
-        <Form
-            v-slot="{ errors, processing }"
-            v-bind="routes.form.resetPassword.value"
-            :transform="(data) => ({ ...data, token, email })"
-            :reset-on-success="['password', 'password_confirmation']"
-            class="flex flex-col gap-5"
-        >
-            <div class="grid gap-4">
-                <div class="grid gap-2">
-                    <Label for="email">{{ t('auth.reset.email') }}</Label>
-                    <Input
-                        id="email"
-                        v-model="inputEmail"
-                        type="email"
-                        name="email"
-                        autocomplete="email"
-                        readonly
-                    />
-                    <InputError :message="errors.email" />
-                </div>
+      <div class="grid gap-4">
+        <div class="grid gap-2">
+          <Label for="email">{{ t('auth.reset.email') }}</Label>
+          <Input
+            id="email"
+            v-model="inputEmail"
+            type="email"
+            name="email"
+            autocomplete="email"
+            readonly
+          />
+          <InputError :message="errors.email" />
+        </div>
 
-                <div class="grid gap-2">
-                    <Label for="password">{{ t('auth.reset.password') }}</Label>
-                    <PasswordInput
-                        id="password"
-                        name="password"
-                        required
-                        autofocus
-                        autocomplete="new-password"
-                        :passwordrules="passwordRules"
-                        :aria-invalid="errors.password ? 'true' : undefined"
-                        aria-describedby="password-error"
-                    />
-                    <InputError
-                        id="password-error"
-                        :message="errors.password"
-                    />
-                </div>
+        <div class="grid gap-2">
+          <Label for="password">{{ t('auth.reset.password') }}</Label>
+          <PasswordInput
+            id="password"
+            name="password"
+            required
+            autofocus
+            autocomplete="new-password"
+            :passwordrules="passwordRules"
+            :aria-invalid="errors.password ? 'true' : undefined"
+            aria-describedby="password-error"
+          />
+          <InputError
+            id="password-error"
+            :message="errors.password"
+          />
+        </div>
 
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">
-                        {{ t('auth.reset.password_confirmation') }}
-                    </Label>
-                    <PasswordInput
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        required
-                        autocomplete="new-password"
-                        :passwordrules="passwordRules"
-                        :aria-invalid="
-                            errors.password_confirmation ? 'true' : undefined
-                        "
-                        aria-describedby="password-confirmation-error"
-                    />
-                    <InputError
-                        id="password-confirmation-error"
-                        :message="errors.password_confirmation"
-                    />
-                </div>
-            </div>
+        <div class="grid gap-2">
+          <Label for="password_confirmation">
+            {{ t('auth.reset.password_confirmation') }}
+          </Label>
+          <PasswordInput
+            id="password_confirmation"
+            name="password_confirmation"
+            required
+            autocomplete="new-password"
+            :passwordrules="passwordRules"
+            :aria-invalid="
+              errors.password_confirmation ? 'true' : undefined
+            "
+            aria-describedby="password-confirmation-error"
+          />
+          <InputError
+            id="password-confirmation-error"
+            :message="errors.password_confirmation"
+          />
+        </div>
+      </div>
 
-            <Button
-                type="submit"
-                class="w-full"
-                :disabled="processing"
-                data-test="reset-password-button"
-            >
-                <Spinner v-if="processing" />
-                {{ t('auth.reset.submit') }}
-            </Button>
-        </Form>
-    </AuthCard>
+      <Button
+        type="submit"
+        class="w-full"
+        :disabled="processing"
+        data-test="reset-password-button"
+      >
+        <Spinner v-if="processing" />
+        {{ t('auth.reset.submit') }}
+      </Button>
+    </Form>
+  </AuthCard>
 </template>

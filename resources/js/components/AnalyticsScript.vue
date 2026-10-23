@@ -40,7 +40,11 @@ watch(consent, apply);
 </script>
 
 <template>
-    <!-- Sem marcacao: a tag entra no <head> por lib/analytics.ts. O `v-if`
+  <!-- Sem marcacao: a tag entra no <head> por lib/analytics.ts. O `v-if`
          falso satisfaz o root do template sem desenhar nada. -->
-    <span v-if="false" hidden aria-hidden="true" />
+  <span
+    v-if="false"
+    hidden
+    aria-hidden="true"
+  />
 </template>

@@ -51,6 +51,8 @@ export interface EditorOptions {
     onFind?: () => void;
     /** Cmd/Ctrl+Enter: o mesmo "formatar" do botao, sem tirar a mao do teclado. */
     onFormat?: () => void;
+    /** Evento de colar no editor, disparado com o texto colado. */
+    onPaste?: (event: ClipboardEvent) => void;
     /**
      * O que **esta** tela acrescenta: a linguagem, o realce de resultados, o
      * que mais ela precisar.
@@ -136,6 +138,18 @@ export function createEditor(
         codeEditorTheme,
         keymap.of(keymaps),
     ];
+
+    if (options.onPaste !== undefined) {
+        const onPaste = options.onPaste;
+
+        extensions.push(
+            EditorView.domEventHandlers({
+                paste: (event) => {
+                    onPaste(event);
+                },
+            }),
+        );
+    }
 
     if (options.placeholder !== undefined) {
         extensions.push(placeholderExtension(options.placeholder));

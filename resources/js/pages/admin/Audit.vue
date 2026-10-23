@@ -67,74 +67,86 @@ function label(value: string): string {
 </script>
 
 <template>
-    <Head :title="t('admin.audit.title')" />
+  <Head :title="t('admin.audit.title')" />
 
-    <div class="space-y-4">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('admin.audit.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.audit.description') }}
-            </p>
-        </header>
+  <div class="space-y-4">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('admin.audit.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.audit.description') }}
+      </p>
+    </header>
 
-        <form class="flex flex-wrap items-center gap-2" @submit.prevent="apply">
-            <Select v-model="action">
-                <SelectTrigger
-                    class="h-9 w-64"
-                    :aria-label="t('admin.audit.filter')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.audit.filter_all') }}
-                    </SelectItem>
-                    <SelectItem
-                        v-for="type in actionTypes"
-                        :key="type"
-                        :value="type"
-                    >
-                        {{ label(type) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Button type="submit" variant="outline" size="sm">
-                {{ t('admin.common.search') }}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" @click="clear">
-                {{ t('admin.common.clear') }}
-            </Button>
-        </form>
-
-        <AdminTable
-            :columns="columns"
-            :rows="entries"
-            :empty="t('admin.audit.empty')"
-            @page="goToPage"
+    <form
+      class="flex flex-wrap items-center gap-2"
+      @submit.prevent="apply"
+    >
+      <Select v-model="action">
+        <SelectTrigger
+          class="h-9 w-64"
+          :aria-label="t('admin.audit.filter')"
         >
-            <template #cell-at="{ row }">
-                {{ row.at }}
-            </template>
-            <template #cell-action="{ row }">
-                {{ label(row.action) }}
-            </template>
-            <template #cell-actor="{ row }">
-                {{ row.actor ?? t('admin.audit.system') }}
-            </template>
-            <template #cell-target="{ row }">
-                {{
-                    row.target ??
-                    (row.targetId === null
-                        ? t('admin.user.no_value')
-                        : `#${row.targetId}`)
-                }}
-            </template>
-            <template #cell-ip="{ row }">
-                {{ row.ip }}
-            </template>
-        </AdminTable>
-    </div>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.audit.filter_all') }}
+          </SelectItem>
+          <SelectItem
+            v-for="type in actionTypes"
+            :key="type"
+            :value="type"
+          >
+            {{ label(type) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+      >
+        {{ t('admin.common.search') }}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="clear"
+      >
+        {{ t('admin.common.clear') }}
+      </Button>
+    </form>
+
+    <AdminTable
+      :columns="columns"
+      :rows="entries"
+      :empty="t('admin.audit.empty')"
+      @page="goToPage"
+    >
+      <template #cell-at="{ row }">
+        {{ row.at }}
+      </template>
+      <template #cell-action="{ row }">
+        {{ label(row.action) }}
+      </template>
+      <template #cell-actor="{ row }">
+        {{ row.actor ?? t('admin.audit.system') }}
+      </template>
+      <template #cell-target="{ row }">
+        {{
+          row.target ??
+            (row.targetId === null
+              ? t('admin.user.no_value')
+              : `#${row.targetId}`)
+        }}
+      </template>
+      <template #cell-ip="{ row }">
+        {{ row.ip }}
+      </template>
+    </AdminTable>
+  </div>
 </template>

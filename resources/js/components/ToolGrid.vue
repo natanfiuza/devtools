@@ -41,52 +41,56 @@ function chipClass(active: boolean): string {
 </script>
 
 <template>
-    <div
-        class="mt-6 flex flex-wrap gap-2"
-        role="group"
-        :aria-label="t('home.tools.filter')"
+  <div
+    class="mt-6 flex flex-wrap gap-2"
+    role="group"
+    :aria-label="t('home.tools.filter')"
+  >
+    <button
+      type="button"
+      data-test="tool-chip-all"
+      :aria-pressed="selected === null"
+      :class="chipClass(selected === null)"
+      @click="selected = null"
     >
-        <button
-            type="button"
-            data-test="tool-chip-all"
-            :aria-pressed="selected === null"
-            :class="chipClass(selected === null)"
-            @click="selected = null"
-        >
-            {{ t('home.tools.all') }}
-        </button>
+      {{ t('home.tools.all') }}
+    </button>
 
-        <button
-            v-for="id in chips"
-            :key="id"
-            type="button"
-            :data-test="`tool-chip-${id}`"
-            :aria-pressed="selected === id"
-            :class="chipClass(selected === id)"
-            @click="selected = id"
-        >
-            <component
-                :is="toolIcon(categoryById(id)?.icon ?? '')"
-                class="size-3.5"
-                aria-hidden="true"
-            />
-            {{ t(`tools.categories.${id}`) }}
-        </button>
-    </div>
-
-    <ul
-        v-if="visible.length > 0"
-        class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        data-test="tool-grid"
+    <button
+      v-for="id in chips"
+      :key="id"
+      type="button"
+      :data-test="`tool-chip-${id}`"
+      :aria-pressed="selected === id"
+      :class="chipClass(selected === id)"
+      @click="selected = id"
     >
-        <ToolCard v-for="tool in visible" :key="tool.slug" :tool="tool" />
-    </ul>
+      <component
+        :is="toolIcon(categoryById(id)?.icon ?? '')"
+        class="size-3.5"
+        aria-hidden="true"
+      />
+      {{ t(`tools.categories.${id}`) }}
+    </button>
+  </div>
 
-    <p
-        v-else
-        class="mt-6 text-sm text-muted-foreground"
-        data-test="tool-grid-empty"
-    >
-        {{ t('home.tools.empty') }}
-    </p>
+  <ul
+    v-if="visible.length > 0"
+    class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    data-test="tool-grid"
+  >
+    <ToolCard
+      v-for="tool in visible"
+      :key="tool.slug"
+      :tool="tool"
+    />
+  </ul>
+
+  <p
+    v-else
+    class="mt-6 text-sm text-muted-foreground"
+    data-test="tool-grid-empty"
+  >
+    {{ t('home.tools.empty') }}
+  </p>
 </template>

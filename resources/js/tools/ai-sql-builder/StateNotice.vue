@@ -108,82 +108,95 @@ function resend(): void {
 </script>
 
 <template>
-    <div
-        class="rounded-lg border p-4"
-        :class="
-            isFailure ? 'border-destructive/40 bg-destructive/5' : 'bg-muted/40'
-        "
-        role="status"
-        data-test="ai-state-notice"
-        :data-kind="kind"
-    >
-        <div class="flex items-start gap-3">
-            <TriangleAlert
-                v-if="isFailure"
-                class="mt-0.5 size-4 shrink-0 text-destructive"
-                aria-hidden="true"
-            />
-            <div class="min-w-0">
-                <h3 class="text-sm font-medium">{{ title }}</h3>
-                <p
-                    v-if="body !== null"
-                    class="mt-1 text-sm text-muted-foreground"
-                >
-                    {{ body }}
-                </p>
-                <p v-if="sent" class="mt-2 text-sm text-brand" role="status">
-                    {{ t('ai.unverified.sent') }}
-                </p>
-                <p
-                    v-if="resendFailed"
-                    class="mt-2 text-sm text-destructive"
-                    role="status"
-                >
-                    {{ t('ai.unverified.failed') }}
-                </p>
-            </div>
-        </div>
-
-        <div v-if="hasAction" class="mt-3 flex flex-wrap gap-2">
-            <Button
-                v-if="kind === 'guest' && loginHref !== undefined"
-                as-child
-                size="sm"
-            >
-                <Link :href="loginHref">{{ t('ai.guest.cta') }}</Link>
-            </Button>
-
-            <Button
-                v-else-if="kind === 'unverified' && resendHref !== undefined"
-                type="button"
-                size="sm"
-                variant="secondary"
-                :disabled="form.processing"
-                data-test="ai-resend"
-                @click="resend"
-            >
-                <Spinner v-if="form.processing" />
-                {{ t('ai.unverified.cta') }}
-            </Button>
-
-            <Button
-                v-else-if="kind === 'quota' && pricingHref !== undefined"
-                as-child
-                size="sm"
-            >
-                <Link :href="pricingHref">{{ t('ai.quota.cta') }}</Link>
-            </Button>
-
-            <Button
-                v-else-if="kind === 'timeout'"
-                type="button"
-                size="sm"
-                variant="secondary"
-                data-test="ai-retry"
-                @click="emit('retry')"
-            >
-                {{ t('ai.states.retry') }}
-            </Button>
-        </div>
+  <div
+    class="rounded-lg border p-4"
+    :class="
+      isFailure ? 'border-destructive/40 bg-destructive/5' : 'bg-muted/40'
+    "
+    role="status"
+    data-test="ai-state-notice"
+    :data-kind="kind"
+  >
+    <div class="flex items-start gap-3">
+      <TriangleAlert
+        v-if="isFailure"
+        class="mt-0.5 size-4 shrink-0 text-destructive"
+        aria-hidden="true"
+      />
+      <div class="min-w-0">
+        <h3 class="text-sm font-medium">
+          {{ title }}
+        </h3>
+        <p
+          v-if="body !== null"
+          class="mt-1 text-sm text-muted-foreground"
+        >
+          {{ body }}
+        </p>
+        <p
+          v-if="sent"
+          class="mt-2 text-sm text-brand"
+          role="status"
+        >
+          {{ t('ai.unverified.sent') }}
+        </p>
+        <p
+          v-if="resendFailed"
+          class="mt-2 text-sm text-destructive"
+          role="status"
+        >
+          {{ t('ai.unverified.failed') }}
+        </p>
+      </div>
     </div>
+
+    <div
+      v-if="hasAction"
+      class="mt-3 flex flex-wrap gap-2"
+    >
+      <Button
+        v-if="kind === 'guest' && loginHref !== undefined"
+        as-child
+        size="sm"
+      >
+        <Link :href="loginHref">
+          {{ t('ai.guest.cta') }}
+        </Link>
+      </Button>
+
+      <Button
+        v-else-if="kind === 'unverified' && resendHref !== undefined"
+        type="button"
+        size="sm"
+        variant="secondary"
+        :disabled="form.processing"
+        data-test="ai-resend"
+        @click="resend"
+      >
+        <Spinner v-if="form.processing" />
+        {{ t('ai.unverified.cta') }}
+      </Button>
+
+      <Button
+        v-else-if="kind === 'quota' && pricingHref !== undefined"
+        as-child
+        size="sm"
+      >
+        <Link :href="pricingHref">
+          {{ t('ai.quota.cta') }}
+        </Link>
+      </Button>
+
+      <Button
+        v-else-if="kind === 'timeout'"
+        type="button"
+        size="sm"
+        variant="secondary"
+        data-test="ai-retry"
+        @click="emit('retry')"
+      >
+        {{ t('ai.states.retry') }}
+      </Button>
+    </div>
+  </div>
 </template>

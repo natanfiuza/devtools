@@ -24,31 +24,37 @@ function onChange(value: unknown): void {
 </script>
 
 <template>
-    <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-            <Button
-                variant="ghost"
-                size="sm"
-                class="gap-2"
-                :aria-label="t('app.actions.change_language')"
-            >
-                <Languages class="size-4" aria-hidden="true" />
-                <span class="hidden sm:inline">{{ current?.name ?? '' }}</span>
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" class="min-w-40">
-            <DropdownMenuRadioGroup
-                :model-value="current?.code ?? ''"
-                @update:model-value="onChange"
-            >
-                <DropdownMenuRadioItem
-                    v-for="locale in locales"
-                    :key="locale.code"
-                    :value="locale.code"
-                >
-                    <span :lang="locale.html">{{ locale.name }}</span>
-                </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-    </DropdownMenu>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button
+        variant="ghost"
+        size="sm"
+        class="gap-2"
+        :aria-label="t('app.actions.change_language')"
+      >
+        <Languages
+          class="size-4"
+          aria-hidden="true"
+        />
+        <span class="hidden sm:inline">{{ current?.name ?? '' }}</span>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent
+      align="end"
+      class="min-w-40"
+    >
+      <DropdownMenuRadioGroup
+        :model-value="current?.code ?? ''"
+        @update:model-value="onChange"
+      >
+        <DropdownMenuRadioItem
+          v-for="locale in locales"
+          :key="locale.code"
+          :value="locale.code"
+        >
+          <span :lang="locale.html">{{ locale.name }}</span>
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

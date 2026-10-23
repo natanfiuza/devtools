@@ -30,77 +30,83 @@ const description = computed<string | undefined>(() =>
 </script>
 
 <template>
-    <Head :title="title" />
+  <Head :title="title" />
 
-    <AuthCard :title="title" :description="description">
-        <Form
-            v-slot="{ errors, processing }"
-            v-bind="
+  <AuthCard
+    :title="title"
+    :description="description"
+  >
+    <Form
+      v-slot="{ errors, processing }"
+      v-bind="
+        hasPassword
+          ? routes.form.confirmPassword.value
+          : routes.form.setPassword.value
+      "
+      reset-on-success
+      class="flex flex-col gap-5"
+    >
+      <div class="grid gap-4">
+        <div class="grid gap-2">
+          <Label for="password">
+            {{
+              t(
                 hasPassword
-                    ? routes.form.confirmPassword.value
-                    : routes.form.setPassword.value
+                  ? 'auth.confirm.password'
+                  : 'auth.confirm.set_password',
+              )
+            }}
+          </Label>
+          <PasswordInput
+            id="password"
+            name="password"
+            required
+            autofocus
+            :autocomplete="
+              hasPassword ? 'current-password' : 'new-password'
             "
-            reset-on-success
-            class="flex flex-col gap-5"
+            :aria-invalid="errors.password ? 'true' : undefined"
+            aria-describedby="password-error"
+          />
+          <InputError
+            id="password-error"
+            :message="errors.password"
+          />
+        </div>
+
+        <div
+          v-if="!hasPassword"
+          class="grid gap-2"
         >
-            <div class="grid gap-4">
-                <div class="grid gap-2">
-                    <Label for="password">
-                        {{
-                            t(
-                                hasPassword
-                                    ? 'auth.confirm.password'
-                                    : 'auth.confirm.set_password',
-                            )
-                        }}
-                    </Label>
-                    <PasswordInput
-                        id="password"
-                        name="password"
-                        required
-                        autofocus
-                        :autocomplete="
-                            hasPassword ? 'current-password' : 'new-password'
-                        "
-                        :aria-invalid="errors.password ? 'true' : undefined"
-                        aria-describedby="password-error"
-                    />
-                    <InputError
-                        id="password-error"
-                        :message="errors.password"
-                    />
-                </div>
+          <Label for="password_confirmation">
+            {{ t('auth.confirm.set_password_confirmation') }}
+          </Label>
+          <PasswordInput
+            id="password_confirmation"
+            name="password_confirmation"
+            required
+            autocomplete="new-password"
+            :aria-invalid="
+              errors.password_confirmation ? 'true' : undefined
+            "
+            aria-describedby="password-confirmation-error"
+          />
+          <InputError
+            id="password-confirmation-error"
+            :message="errors.password_confirmation"
+          />
+        </div>
+      </div>
 
-                <div v-if="!hasPassword" class="grid gap-2">
-                    <Label for="password_confirmation">
-                        {{ t('auth.confirm.set_password_confirmation') }}
-                    </Label>
-                    <PasswordInput
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        required
-                        autocomplete="new-password"
-                        :aria-invalid="
-                            errors.password_confirmation ? 'true' : undefined
-                        "
-                        aria-describedby="password-confirmation-error"
-                    />
-                    <InputError
-                        id="password-confirmation-error"
-                        :message="errors.password_confirmation"
-                    />
-                </div>
-            </div>
-
-            <Button
-                type="submit"
-                class="w-full"
-                :disabled="processing"
-                data-test="confirm-password-button"
-            >
-                <Spinner v-if="processing" />
-                {{ t(`auth.confirm.${hasPassword ? 'submit' : 'set_submit'}`) }}
-            </Button>
-        </Form>
-    </AuthCard>
+      <Button
+        type="submit"
+        class="w-full"
+        :disabled="processing"
+        data-test="confirm-password-button"
+      >
+        <Spinner v-if="processing" />
+        {{ t(`auth.confirm.${hasPassword ? 'submit' : 'set_submit'}`) }}
+      </Button>
+    </Form>
+  </AuthCard>
 </template>

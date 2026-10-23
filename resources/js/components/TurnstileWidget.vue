@@ -142,21 +142,25 @@ defineExpose({ reset });
 </script>
 
 <template>
-    <div v-if="siteKey" class="grid gap-2" data-test="turnstile">
-        <div ref="container" />
-        <!-- Campo oculto: o Inertia serializa junto com os demais inputs. -->
-        <input
-            type="hidden"
-            name="turnstile"
-            :value="token"
-            data-test="turnstile-token"
-        />
-        <p
-            v-if="unavailable"
-            class="text-xs leading-relaxed text-destructive"
-            role="alert"
-        >
-            {{ t('auth.turnstile.failed') }}
-        </p>
-    </div>
+  <div
+    v-if="siteKey"
+    class="grid gap-2"
+    data-test="turnstile"
+  >
+    <div ref="container" />
+    <!-- Campo oculto: o Inertia serializa junto com os demais inputs. -->
+    <input
+      type="hidden"
+      name="turnstile"
+      :value="token"
+      data-test="turnstile-token"
+    >
+    <p
+      v-if="unavailable"
+      class="text-xs leading-relaxed text-destructive"
+      role="alert"
+    >
+      {{ t('auth.turnstile.failed') }}
+    </p>
+  </div>
 </template>

@@ -29,46 +29,46 @@ const href = computed(() => toolPath(props.tool, routes.localeSlug.value));
 </script>
 
 <template>
-    <li
-        :data-test="`tool-card-${tool.slug}`"
-        :class="[
-            'relative flex flex-col gap-2 rounded-xl border bg-card p-5 transition-colors',
-            href ? 'cursor-pointer hover:border-border-strong' : '',
-        ]"
-    >
-        <div class="flex items-center gap-2">
-            <component
-                :is="toolIcon(tool.icon)"
-                class="size-5 shrink-0 text-brand"
-                aria-hidden="true"
-            />
-            <!-- O link cobre o cartao inteiro (after:inset-0) nas tools
+  <li
+    :data-test="`tool-card-${tool.slug}`"
+    :class="[
+      'relative flex flex-col gap-2 rounded-xl border bg-card p-5 transition-colors',
+      href ? 'cursor-pointer hover:border-border-strong' : '',
+    ]"
+  >
+    <div class="flex items-center gap-2">
+      <component
+        :is="toolIcon(tool.icon)"
+        class="size-5 shrink-0 text-brand"
+        aria-hidden="true"
+      />
+      <!-- O link cobre o cartao inteiro (after:inset-0) nas tools
                  disponiveis, mantendo a semantica de lista (<li> -> <h3><a>). -->
-            <h3 class="truncate text-base font-medium">
-                <Link
-                    v-if="href"
-                    :href="href"
-                    data-test="tool-card-link"
-                    class="rounded-sm outline-none after:absolute after:inset-0 after:rounded-xl hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                    {{ t(toolKeys.name(tool)) }}
-                </Link>
-                <template v-else>
-                    {{ t(toolKeys.name(tool)) }}
-                </template>
-            </h3>
-            <Badge
-                v-if="tool.status !== 'available'"
-                variant="secondary"
-                class="ml-auto shrink-0"
-                data-test="tool-card-badge"
-            >
-                {{ t(statusKey(tool)) }}
-            </Badge>
-        </div>
+      <h3 class="truncate text-base font-medium">
+        <Link
+          v-if="href"
+          :href="href"
+          data-test="tool-card-link"
+          class="rounded-sm outline-none after:absolute after:inset-0 after:rounded-xl hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          {{ t(toolKeys.name(tool)) }}
+        </Link>
+        <template v-else>
+          {{ t(toolKeys.name(tool)) }}
+        </template>
+      </h3>
+      <Badge
+        v-if="tool.status !== 'available'"
+        variant="secondary"
+        class="ml-auto shrink-0"
+        data-test="tool-card-badge"
+      >
+        {{ t(statusKey(tool)) }}
+      </Badge>
+    </div>
 
-        <p class="line-clamp-1 text-sm text-muted-foreground">
-            {{ t(toolKeys.description(tool)) }}
-        </p>
-    </li>
+    <p class="line-clamp-1 text-sm text-muted-foreground">
+      {{ t(toolKeys.description(tool)) }}
+    </p>
+  </li>
 </template>

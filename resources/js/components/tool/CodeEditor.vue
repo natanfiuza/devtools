@@ -45,6 +45,7 @@ const emit = defineEmits<{
     'update:modelValue': [value: string];
     find: [];
     format: [];
+    paste: [event: ClipboardEvent];
 }>();
 
 const host = ref<HTMLElement | null>(null);
@@ -64,6 +65,7 @@ const view = shallowRef<EditorView | null>(null);
 const listeners = getCurrentInstance()?.vnode.props ?? {};
 const bindsFormat = listeners.onFormat !== undefined;
 const bindsFind = listeners.onFind !== undefined;
+const bindsPaste = listeners.onPaste !== undefined;
 
 onMounted(() => {
     if (host.value === null) {
@@ -86,6 +88,10 @@ onMounted(() => {
 
     if (bindsFind) {
         options.onFind = () => emit('find');
+    }
+
+    if (bindsPaste) {
+        options.onPaste = (event) => emit('paste', event);
     }
 
     view.value = createEditor(host.value, options);
@@ -125,9 +131,9 @@ watch(
 </script>
 
 <template>
-    <div
-        ref="host"
-        class="h-full min-h-0 font-mono text-sm"
-        :data-test="testid"
-    />
+  <div
+    ref="host"
+    class="h-full min-h-0 font-mono text-sm"
+    :data-test="testid"
+  />
 </template>

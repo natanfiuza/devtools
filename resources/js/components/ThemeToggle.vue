@@ -35,38 +35,41 @@ function onChange(value: unknown): void {
 </script>
 
 <template>
-    <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                :aria-label="t('app.theme.label')"
-            >
-                <component
-                    :is="icons[appearance]"
-                    class="size-4"
-                    aria-hidden="true"
-                />
-            </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" class="min-w-40">
-            <DropdownMenuRadioGroup
-                :model-value="appearance"
-                @update:model-value="onChange"
-            >
-                <DropdownMenuRadioItem
-                    v-for="{ value, Icon, label } in options"
-                    :key="value"
-                    :value="value"
-                >
-                    <component
-                        :is="Icon"
-                        class="size-4 text-muted-foreground"
-                        aria-hidden="true"
-                    />
-                    {{ t(`app.theme.${label}`) }}
-                </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-    </DropdownMenu>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        :aria-label="t('app.theme.label')"
+      >
+        <component
+          :is="icons[appearance]"
+          class="size-4"
+          aria-hidden="true"
+        />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent
+      align="end"
+      class="min-w-40"
+    >
+      <DropdownMenuRadioGroup
+        :model-value="appearance"
+        @update:model-value="onChange"
+      >
+        <DropdownMenuRadioItem
+          v-for="{ value, Icon, label } in options"
+          :key="value"
+          :value="value"
+        >
+          <component
+            :is="Icon"
+            class="size-4 text-muted-foreground"
+            aria-hidden="true"
+          />
+          {{ t(`app.theme.${label}`) }}
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

@@ -100,7 +100,7 @@ const EditorStub = defineComponent({
             default: null,
         },
     },
-    emits: ['update:modelValue'],
+    emits: ['update:modelValue', 'paste', 'format'],
     setup(props) {
         return () =>
             h(
@@ -213,6 +213,9 @@ async function clicar(wrapper: VueWrapper, rotulo: string): Promise<void> {
 /** Texto valido e pequeno, com uma chave aninhada e um item de array. */
 const DOCUMENTO =
     '{\n  "autor": {\n    "nome": "Nataniel",\n    "site": "exemplo.dev"\n  },\n  "tags": ["json", "arvore"]\n}';
+
+/** Versao formatada pelo prettyJson (com arrays expandidos). */
+const DOCUMENTO_FORMATADO = JSON.stringify(JSON.parse(DOCUMENTO), null, 2);
 
 describe('JSON Viewer', () => {
     let clipboard: { writeText: ReturnType<typeof vi.fn> };
@@ -655,6 +658,50 @@ describe('JSON Viewer', () => {
             expect(desabilitado(wrapper, 'FORMATAR')).toBe(true);
         });
 
+        it('auto-formata o json colado no editor', async () => {
+            const wrapper = montar();
+            const minificado = '{"nome":"Nataniel","projeto":"devtools"}';
+            const preventDefault = vi.fn();
+
+            const clipboardData = {
+                getData: (tipo: string) =>
+                    tipo === 'text/plain' ? minificado : '',
+            };
+
+            wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('paste', {
+                clipboardData,
+                preventDefault,
+            });
+
+            await esperarAnalise();
+
+            expect(preventDefault).toHaveBeenCalled();
+            expect(textoDoEditor(wrapper)).toBe(
+                '{\n  "nome": "Nataniel",\n  "projeto": "devtools"\n}',
+            );
+        });
+
+        it('nao intercepta colagem de texto que nao seja json valido', async () => {
+            const wrapper = montar();
+            const textoComum = 'texto nao formatavel';
+            const preventDefault = vi.fn();
+
+            const clipboardData = {
+                getData: (tipo: string) =>
+                    tipo === 'text/plain' ? textoComum : '',
+            };
+
+            wrapper.findComponent({ name: 'CodeEditor' }).vm.$emit('paste', {
+                clipboardData,
+                preventDefault,
+            });
+
+            await esperarAnalise();
+
+            expect(preventDefault).not.toHaveBeenCalled();
+            expect(textoDoEditor(wrapper)).toBe('');
+        });
+
         it('analisa o que foi digitado depois do intervalo de espera', async () => {
             const wrapper = montar();
 
@@ -673,7 +720,7 @@ describe('JSON Viewer', () => {
             });
         }
 
-        it('abre o arquivo escolhido', async () => {
+        it('abre o arquivo escolhido e auto-formata o json', async () => {
             const wrapper = montar();
             const campo = wrapper.get('[data-test="json-viewer-file"]');
             const arquivo = new File([DOCUMENTO], 'dados.json', {
@@ -684,7 +731,7 @@ describe('JSON Viewer', () => {
             await campo.trigger('change');
             await esperarAnalise();
 
-            expect(textoDoEditor(wrapper)).toBe(DOCUMENTO);
+            expect(textoDoEditor(wrapper)).toBe(DOCUMENTO_FORMATADO);
             expect(linhas(wrapper)).toHaveLength(3);
         });
 
@@ -705,6 +752,24 @@ describe('JSON Viewer', () => {
             expect(textoDoEditor(wrapper)).toBe('');
         });
 
+        it('preserva texto original de arquivo com json invalido e acusa erro', async () => {
+            const wrapper = montar();
+            const campo = wrapper.get('[data-test="json-viewer-file"]');
+            const invalido = '{\n  "a": 1\n  "b": 2\n}';
+            const arquivo = new File([invalido], 'quebrado.json', {
+                type: 'application/json',
+            });
+
+            escolher(campo.element, arquivo);
+            await campo.trigger('change');
+            await esperarAnalise();
+
+            expect(textoDoEditor(wrapper)).toBe(invalido);
+            expect(wrapper.get('[data-test="json-editor"]').attributes('data-error')).toBe(
+                'INVALIDO:3:3',
+            );
+        });
+
         it('recusa arquivo maior que o limite', async () => {
             const wrapper = montar(10);
             const campo = wrapper.get('[data-test="json-viewer-file"]');
@@ -721,7 +786,7 @@ describe('JSON Viewer', () => {
             expect(textoDoEditor(wrapper)).toBe('');
         });
 
-        it('abre o arquivo solto na area do editor', async () => {
+        it('abre o arquivo solto na area do editor e auto-formata', async () => {
             const wrapper = montar();
             const arquivo = new File([DOCUMENTO], 'dados.json');
 
@@ -732,7 +797,7 @@ describe('JSON Viewer', () => {
                 });
             await esperarAnalise();
 
-            expect(textoDoEditor(wrapper)).toBe(DOCUMENTO);
+            expect(textoDoEditor(wrapper)).toBe(DOCUMENTO_FORMATADO);
         });
     });
 

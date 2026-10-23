@@ -158,57 +158,59 @@ function onSelectHistory(item: AiHistoryItem): void {
 </script>
 
 <template>
-    <div class="space-y-6">
-        <div
-            :class="
-                blockedKind === null
-                    ? 'grid gap-6 lg:grid-cols-2 lg:items-start'
-                    : 'max-w-2xl'
-            "
-        >
-            <section class="rounded-lg border p-4 sm:p-5">
-                <h2 class="text-base font-medium">{{ t('ai.form.title') }}</h2>
+  <div class="space-y-6">
+    <div
+      :class="
+        blockedKind === null
+          ? 'grid gap-6 lg:grid-cols-2 lg:items-start'
+          : 'max-w-2xl'
+      "
+    >
+      <section class="rounded-lg border p-4 sm:p-5">
+        <h2 class="text-base font-medium">
+          {{ t('ai.form.title') }}
+        </h2>
 
-                <StateNotice
-                    v-if="blockedKind !== null"
-                    class="mt-4"
-                    :kind="blockedKind"
-                    :quota="liveQuota"
-                    :login-href="routes.login.value"
-                    :pricing-href="routes.pricing.value"
-                    :resend-href="routes.form.resendVerification.value.action"
-                />
-
-                <SchemaForm
-                    v-else
-                    ref="schemaFormRef"
-                    class="mt-4"
-                    :sources="sources"
-                    :dialects="dialects"
-                    :targets="targets"
-                    :limits="limits"
-                    :quota="liveQuota"
-                    :busy="busy"
-                    @submit="onSubmit"
-                />
-            </section>
-
-            <ResultPanel
-                v-if="blockedKind === null"
-                :status="status"
-                :result="result"
-                :tokens="tokens"
-                :cache-hit="cacheHit"
-                :failure-message="failureMessage"
-                @retry="retry"
-            />
-        </div>
-
-        <QueryHistory
-            v-if="props.endpoints.history"
-            ref="queryHistoryRef"
-            :history-endpoint="props.endpoints.history"
-            @select="onSelectHistory"
+        <StateNotice
+          v-if="blockedKind !== null"
+          class="mt-4"
+          :kind="blockedKind"
+          :quota="liveQuota"
+          :login-href="routes.login.value"
+          :pricing-href="routes.pricing.value"
+          :resend-href="routes.form.resendVerification.value.action"
         />
+
+        <SchemaForm
+          v-else
+          ref="schemaFormRef"
+          class="mt-4"
+          :sources="sources"
+          :dialects="dialects"
+          :targets="targets"
+          :limits="limits"
+          :quota="liveQuota"
+          :busy="busy"
+          @submit="onSubmit"
+        />
+      </section>
+
+      <ResultPanel
+        v-if="blockedKind === null"
+        :status="status"
+        :result="result"
+        :tokens="tokens"
+        :cache-hit="cacheHit"
+        :failure-message="failureMessage"
+        @retry="retry"
+      />
     </div>
+
+    <QueryHistory
+      v-if="props.endpoints.history"
+      ref="queryHistoryRef"
+      :history-endpoint="props.endpoints.history"
+      @select="onSelectHistory"
+    />
+  </div>
 </template>
