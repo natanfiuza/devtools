@@ -22,9 +22,20 @@ import {
 import type { Base64ImageToolProps, OutputFormat, ConversionItem } from './types';
 import { saveAnonymousConversion } from './lib/storage';
 
-const props = defineProps<{
-    toolProps: Base64ImageToolProps;
-}>();
+const props = withDefaults(
+    defineProps<{
+        toolProps?: Partial<Base64ImageToolProps>;
+    }>(),
+    {
+        toolProps: () => ({
+            isAuthenticated: false,
+            isPaidPlan: false,
+            maxUploadBytes: 2 * 1024 * 1024,
+            downloadThresholdBytes: 2 * 1024 * 1024,
+            retentionHours: 24,
+        }),
+    },
+);
 
 const emit = defineEmits<{
     (e: 'conversion-done', item: ConversionItem): void;
@@ -42,7 +53,7 @@ const currentResult = ref<ConversionItem | null>(null);
 const selectedFormat = ref<OutputFormat>('data-uri');
 
 const formattedMaxLimit = computed(() =>
-    formatBytes(props.toolProps.maxUploadBytes, locale.value),
+    formatBytes(props.toolProps?.maxUploadBytes ?? 2 * 1024 * 1024, locale.value),
 );
 
 function onDrop(event: DragEvent) {
@@ -68,7 +79,8 @@ async function handleFile(file: File) {
         return;
     }
 
-    if (file.size > props.toolProps.maxUploadBytes) {
+    const maxBytes = props.toolProps?.maxUploadBytes ?? 2 * 1024 * 1024;
+    if (file.size > maxBytes) {
         errorMessage.value = t('tools.base64-image.errors.file_too_large', {
             limit: formattedMaxLimit.value,
         });
@@ -99,7 +111,7 @@ async function handleFile(file: File) {
         currentResult.value = data;
 
         // Se usuario anonimo, grava em localStorage
-        if (!props.toolProps.isAuthenticated) {
+        if (!props.toolProps?.isAuthenticated) {
             saveAnonymousConversion({
                 id: data.id,
                 filename: data.filename,
@@ -197,7 +209,7 @@ function reset() {
                 <Badge variant="outline">
                     {{ t('tools.base64-image.max_limit_badge', { limit: formattedMaxLimit }) }}
                 </Badge>
-                <Badge v-if="toolProps.isPaidPlan" variant="default" class="bg-primary/90">
+                <Badge v-if="toolProps?.isPaidPlan" variant="default" class="bg-primary/90">
                     <Sparkles class="mr-1 h-3 w-3" />
                     {{ t('tools.base64-image.pro_plan_badge') }}
                 </Badge>
@@ -256,7 +268,7 @@ function reset() {
                         </span>
                         <span>•</span>
                         <span>
-                            {{ t('tools.base64-image.retention_info', { hours: toolProps.retentionHours }) }}
+                            {{ t('tools.base64-image.retention_info', { hours: toolProps?.retentionHours ?? 24 }) }}
                         </span>
                     </div>
 

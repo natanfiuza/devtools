@@ -9,7 +9,6 @@ import {
     Download,
     Trash2,
     Clock,
-    FileText,
     Image as ImageIcon,
     FileX,
     ExternalLink,
@@ -17,9 +16,20 @@ import {
 import type { Base64ImageToolProps, ConversionItem } from './types';
 import { getAnonymousHistory, removeAnonymousConversion } from './lib/storage';
 
-const props = defineProps<{
-    toolProps: Base64ImageToolProps;
-}>();
+const props = withDefaults(
+    defineProps<{
+        toolProps?: Partial<Base64ImageToolProps>;
+    }>(),
+    {
+        toolProps: () => ({
+            isAuthenticated: false,
+            isPaidPlan: false,
+            maxUploadBytes: 2 * 1024 * 1024,
+            downloadThresholdBytes: 2 * 1024 * 1024,
+            retentionHours: 24,
+        }),
+    },
+);
 
 const { t, locale } = useI18n();
 
@@ -27,7 +37,7 @@ const items = ref<ConversionItem[]>([]);
 const isLoading = ref(false);
 
 async function loadHistory() {
-    if (props.toolProps.isAuthenticated) {
+    if (props.toolProps?.isAuthenticated) {
         isLoading.value = true;
         try {
             const res = await fetch('/api/tools/base64-image/history', {
@@ -65,7 +75,7 @@ async function deleteItem(id: string) {
         return;
     }
 
-    if (!props.toolProps.isAuthenticated) {
+    if (!props.toolProps?.isAuthenticated) {
         removeAnonymousConversion(id);
     }
 
