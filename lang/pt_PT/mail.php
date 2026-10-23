@@ -94,4 +94,13 @@ return [
             'note' => 'A doação não dá acesso a planos nem consome cota: é um apoio ao projeto.',
         ],
     ],
+
+    'account_purged' => [
+        'subject' => 'A sua conta no :app foi eliminada definitivamente',
+        'greeting' => 'Olá, :name!',
+        'greeting_anonymous' => 'Olá!',
+        'intro' => 'O período de carência de 30 dias terminou e a sua conta no :app foi eliminada definitivamente.',
+        'anonymized' => 'Todos os seus dados pessoais identificáveis foram removidos e a sua conta foi anonimizada de acordo com a legislação de proteção de dados.',
+        'attached' => 'Em anexo, enviamos uma cópia em formato JSON com todos os dados exportados da sua conta antes da anonimização.',
+    ],
 ];

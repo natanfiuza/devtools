@@ -94,4 +94,13 @@ return [
             'note' => 'Un don ne donne pas accès aux forfaits et ne consomme pas de quota : c\'est un soutien au projet.',
         ],
     ],
+
+    'account_purged' => [
+        'subject' => 'Votre compte sur :app a été définitivement supprimé',
+        'greeting' => 'Bonjour, :name !',
+        'greeting_anonymous' => 'Bonjour !',
+        'intro' => 'Le délai de grâce de 30 jours est terminé et votre compte sur :app a été définitivement supprimé.',
+        'anonymized' => 'Toutes vos données personnelles identifiables ont été supprimées et votre compte a été anonymisé conformément aux lois sur la protection des données.',
+        'attached' => 'Vous trouverez en pièce jointe une copie au format JSON contenant toutes les données exportées de votre compte avant son anonymisation.',
+    ],
 ];

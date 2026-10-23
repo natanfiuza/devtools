@@ -94,4 +94,13 @@ return [
             'note' => 'A donation does not grant plan access or consume quota: it is support for the project.',
         ],
     ],
+
+    'account_purged' => [
+        'subject' => 'Your account on :app has been permanently deleted',
+        'greeting' => 'Hello, :name!',
+        'greeting_anonymous' => 'Hello!',
+        'intro' => 'The 30-day grace period has ended and your account on :app has been permanently deleted.',
+        'anonymized' => 'All your personally identifiable data has been removed and your account has been anonymized in accordance with privacy laws.',
+        'attached' => 'Attached is a copy in JSON format containing all exported data from your account prior to anonymization.',
+    ],
 ];
