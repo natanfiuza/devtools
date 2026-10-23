@@ -391,6 +391,8 @@ return [
         'copy' => 'Copiar',
         'copied' => '¡Copiado!',
         'download_txt' => 'Descargar .txt',
+        'download_json' => 'Descargar .json',
+        'download_xml' => 'Descargar .xml',
         'download_image' => 'Descargar Imagen',
         'preview_img' => 'Visualizar',
         'size' => 'Tamaño',
@@ -415,6 +417,8 @@ return [
             'data_uri' => 'Data URI / Texto Sin Formato',
             'img_tag' => 'Etiqueta HTML <img>',
             'css_bg' => 'CSS background-image',
+            'json' => 'JSON',
+            'xml' => 'XML',
         ],
         'errors' => [
             'title' => 'Error de conversión',

@@ -18,9 +18,12 @@ import {
     FileText,
     Code,
     Sparkles,
+    Braces,
+    CodeXml,
 } from '@lucide/vue';
 import type { Base64ImageToolProps, OutputFormat, ConversionItem } from './types';
 import { saveAnonymousConversion } from './lib/storage';
+import { formatSnippet } from './lib/formatters';
 
 const props = withDefaults(
     defineProps<{
@@ -157,19 +160,43 @@ function triggerDownload(url: string, filename: string) {
 
 const formattedOutput = computed(() => {
     if (!currentResult.value?.data_uri) return '';
-    const uri = currentResult.value.data_uri;
-    const alt = currentResult.value.filename;
-
-    switch (selectedFormat.value) {
-        case 'img':
-            return `<img src="${uri}" alt="${alt}" />`;
-        case 'css':
-            return `background-image: url("${uri}");`;
-        case 'data-uri':
-        default:
-            return uri;
-    }
+    return formatSnippet(selectedFormat.value, currentResult.value);
 });
+
+const downloadButtonLabel = computed(() => {
+    if (selectedFormat.value === 'json') {
+        return t('tools.base64-image.download_json');
+    }
+    if (selectedFormat.value === 'xml') {
+        return t('tools.base64-image.download_xml');
+    }
+    return t('tools.base64-image.download_txt');
+});
+
+function downloadCurrentSnippet() {
+    if (!currentResult.value) return;
+
+    const filename = currentResult.value.filename;
+    const content = formattedOutput.value;
+
+    if (selectedFormat.value === 'json') {
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        triggerDownload(url, `${filename}.json`);
+        URL.revokeObjectURL(url);
+        return;
+    }
+
+    if (selectedFormat.value === 'xml') {
+        const blob = new Blob([content], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        triggerDownload(url, `${filename}.xml`);
+        URL.revokeObjectURL(url);
+        return;
+    }
+
+    triggerDownload(currentResult.value.download_url, `${filename}.base64.txt`);
+}
 
 function reset() {
     currentResult.value = null;
@@ -289,7 +316,7 @@ function reset() {
             <div v-if="!currentResult.direct_download && currentResult.data_uri" class="space-y-3">
                 <Tabs v-model="selectedFormat" class="w-full">
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
-                        <TabsList>
+                        <TabsList class="flex flex-wrap h-auto">
                             <TabsTrigger value="data-uri" class="text-xs">
                                 <FileText class="mr-1.5 h-3.5 w-3.5" />
                                 {{ t('tools.base64-image.formats.data_uri') }}
@@ -302,6 +329,14 @@ function reset() {
                                 <Sparkles class="mr-1.5 h-3.5 w-3.5" />
                                 {{ t('tools.base64-image.formats.css_bg') }}
                             </TabsTrigger>
+                            <TabsTrigger value="json" class="text-xs">
+                                <Braces class="mr-1.5 h-3.5 w-3.5" />
+                                {{ t('tools.base64-image.formats.json') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="xml" class="text-xs">
+                                <CodeXml class="mr-1.5 h-3.5 w-3.5" />
+                                {{ t('tools.base64-image.formats.xml') }}
+                            </TabsTrigger>
                         </TabsList>
 
                         <div class="flex items-center gap-2">
@@ -310,9 +345,9 @@ function reset() {
                                 <Copy v-else class="mr-1.5 h-3.5 w-3.5" />
                                 {{ copied ? t('tools.base64-image.copied') : t('tools.base64-image.copy') }}
                             </Button>
-                            <Button size="sm" variant="outline" as="a" :href="currentResult.download_url">
+                            <Button size="sm" variant="outline" @click="downloadCurrentSnippet">
                                 <Download class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.download_txt') }}
+                                {{ downloadButtonLabel }}
                             </Button>
                         </div>
                     </div>
@@ -336,6 +371,24 @@ function reset() {
                     </TabsContent>
 
                     <TabsContent value="css" class="mt-2">
+                        <textarea
+                            readonly
+                            rows="7"
+                            :value="formattedOutput"
+                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+                        ></textarea>
+                    </TabsContent>
+
+                    <TabsContent value="json" class="mt-2">
+                        <textarea
+                            readonly
+                            rows="7"
+                            :value="formattedOutput"
+                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+                        ></textarea>
+                    </TabsContent>
+
+                    <TabsContent value="xml" class="mt-2">
                         <textarea
                             readonly
                             rows="7"

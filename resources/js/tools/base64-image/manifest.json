@@ -17,6 +17,8 @@
         "jpg",
         "jpeg",
         "webp",
-        "svg"
+        "svg",
+        "json",
+        "xml"
     ]
 }
