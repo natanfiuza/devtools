@@ -9,8 +9,10 @@ import {
 } from '@/tools/markdown-to-pdf/lib/markdown';
 import { exportToPdf } from '@/tools/markdown-to-pdf/lib/pdf';
 import {
+    getDocumentTypographyCss,
     getFontFamilyCss,
     getFontSizeClasses,
+    getFontSizeCss,
     getPageSheetStyle,
     getPaperDimensions,
     getPrintCss,
@@ -127,10 +129,11 @@ describe('temas e configuracoes de pagina', () => {
         });
     });
 
-    it('calcula estilos da folha com margens e dimensoes', () => {
+    it('calcula estilos da folha com margens e dimensoes responsivas no preview', () => {
         const style = getPageSheetStyle(DEFAULT_CONFIG);
 
-        expect(style.width).toBe('210mm');
+        expect(style.width).toBe('100%');
+        expect(style.maxWidth).toBe('210mm');
         expect(style.minHeight).toBe('297mm');
         expect(style.padding).toBe(`${MARGIN_VALUES_MM.normal}mm`);
         expect(style.fontFamily).toContain('Inter');
@@ -150,19 +153,45 @@ describe('temas e configuracoes de pagina', () => {
         expect(getFontFamilyCss('fira-code')).toContain('Fira Code');
     });
 
-    it('ajusta classes de tamanho de fonte', () => {
-        expect(getFontSizeClasses('sm')).toContain('12.5px');
-        expect(getFontSizeClasses('md')).toContain('14px');
-        expect(getFontSizeClasses('lg')).toContain('16px');
+    it('ajusta classes e css de tamanho de fonte no padrao Google Docs (9pt, 10pt, 11pt)', () => {
+        expect(getFontSizeClasses('sm')).toContain('12px');
+        expect(getFontSizeClasses('md')).toContain('13.3px');
+        expect(getFontSizeClasses('lg')).toContain('14.67px');
+
+        expect(getFontSizeCss('sm')).toEqual({
+            fontSize: '9pt',
+            lineHeight: '1.35',
+        });
+        expect(getFontSizeCss('md')).toEqual({
+            fontSize: '10pt',
+            lineHeight: '1.35',
+        });
+        expect(getFontSizeCss('lg')).toEqual({
+            fontSize: '11pt',
+            lineHeight: '1.35',
+        });
     });
 
-    it('gera css de impressao com tamanho de folha e margens', () => {
+    it('contem regras de contencao de tabelas na margem direita e escala proporcional em em', () => {
+        const css = getDocumentTypographyCss('modern');
+
+        expect(css).toContain('max-width: 100%;');
+        expect(css).toContain('overflow-wrap: anywhere;');
+        expect(css).toContain('word-break: break-word;');
+        expect(css).toContain('font-size: 1.65em;');
+        expect(css).toContain('font-size: 0.9em;');
+    });
+
+    it('gera css de impressao com tamanho de folha, margens, fontSize e fluxo multipagina de tabelas', () => {
         const css = getPrintCss(DEFAULT_CONFIG);
 
         expect(css).toContain('@page {');
         expect(css).toContain('size: 210mm 297mm;');
         expect(css).toContain('margin: 20mm;');
         expect(css).toContain('@media print');
+        expect(css).toContain('font-size: 10pt !important;');
+        expect(css).toContain('display: table-header-group;');
+        expect(css).toContain('blockquote, img, tr {');
     });
 });
 
@@ -348,6 +377,16 @@ describe('exportToPdf utilitario', () => {
         await exportToPdf(el, 'relatorio', DEFAULT_CONFIG);
 
         expect(mockSave).toHaveBeenCalledWith('relatorio.pdf');
+        expect(mockAddImage).toHaveBeenCalledWith(
+            null,
+            'JPEG',
+            20,
+            20,
+            170,
+            expect.any(Number),
+            undefined,
+            'FAST',
+        );
 
         if (capturedOnclone) {
             const cloned = document.createElement('div');
@@ -359,6 +398,9 @@ describe('exportToPdf utilitario', () => {
                 cloned.style.border === 'none' ||
                     cloned.style.borderStyle === 'none',
             ).toBe(true);
+            expect(cloned.style.width).toBe('170mm');
+            expect(cloned.style.maxWidth).toBe('170mm');
+            expect(cloned.style.padding).toBe('0px');
             expect(cloned.classList.contains('shadow-md')).toBe(false);
             expect(cloned.classList.contains('border-neutral-200/80')).toBe(
                 false,

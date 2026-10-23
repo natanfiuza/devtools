@@ -23,14 +23,15 @@ Alem disso, a biblioteca `html2pdf.js` e um pacote legado e sem manutencao ativa
    - `jspdf` e `html2canvas-pro` foram adicionados como dependencias diretas e explicitas no `package.json`.
    - `html2canvas-pro` e um fork moderno com API 100% compativel com `html2canvas`, que adiciona suporte nativo aos novos modelos de cores CSS: `oklab()`, `oklch()`, `lab()`, `lch()` e `color()`.
 
-2. **Reimplementacao direta de `exportToPdf`**:
+2. **Reimplementacao direta de `exportToPdf` com captura em largura fisica util e margens por pagina**:
    - A rotina `exportToPdf` em `resources/js/tools/markdown-to-pdf/lib/pdf.ts` foi reescrita sem intermediarios.
    - O elemento e capturado em alta definicao (`scale: 2`) com fundo `#ffffff`.
-   - Um hook `onclone` neutraliza estilos visuais especificos do preview de tela (bordas, sombras de card e cantos arredondados) antes da fotografia do canvas, garantindo que a folha física do PDF nao apresente artefatos de tela.
-   - O fatiamento em paginas e o posicionamento proporcional em milimetros sao calculados com base nas dimensoes do papel (`getPaperDimensions`) e salvos diretamente pelo `jsPDF`.
+   - Um hook `onclone` neutraliza estilos visuais especificos do preview de tela (bordas, sombras de card e cantos arredondados) e trava a largura do elemento clonado exatamente na largura util fisica da folha (`contentWidthMm = widthMm - 2 * marginMm`) com `padding: 0`, evitando distorcao de escala pelo flexbox do painel de preview.
+   - O fatiamento em paginas procura linhas horizontais livres de texto (`findSafeSliceHeight`) proximas ao limite inferior de cada pagina para nao cortar caracteres ou linhas de tabela ao meio, e posiciona cada fatia no `jsPDF` em `(x = marginMm, y = marginMm, width = contentWidthMm)`, assegurando as 4 margens em todas as paginas.
 
-3. **Padronizacao de cores dos temas em hexadecimal**:
-   - Os temas visuais em `themes.ts` e `Tool.vue` definem suas cores base diretamente em hexadecimal solido (Moderno: `#0f172a` / `#1e293b`, Editorial: `#1c1917`, Minimalista: `#000000`, Academico: `#171717`), prevenindo variacoes de interpretacao entre navegadores e mantendo consistencia com a impressao vetorial (`getPrintCss`).
+3. **Padronizacao de cores em hexadecimal, tipografia estilo Google Docs e contencao de tabelas**:
+   - Os temas visuais em `themes.ts` e `Tool.vue` definem suas cores base diretamente em hexadecimal solido (Moderno: `#111827` / `#1f2937` com bordas `#dadce0`, Editorial: `#1c1917`, Minimalista: `#000000`, Academico: `#171717`), prevenindo variacoes de interpretacao entre navegadores e mantendo consistencia com a impressao vetorial (`getPrintCss`).
+   - A escala tipografica adota as proporcoes do padrao Google Docs (`sm = 9pt`, `md = 10pt`, `lg = 11pt`, entrelinha `1.35`, titulos proporcionais em `em` e tabelas/codigo em `0.9em`), e as tabelas utilizam `max-width: 100%` com `overflow-wrap: anywhere; word-break: break-word` nas celulas para nunca ultrapassarem a margem direita da folha.
 
 ## Consequencias
 
