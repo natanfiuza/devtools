@@ -3,6 +3,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminTable from '@/components/admin/AdminTable.vue';
+import ConfirmRefundDialog from '@/components/admin/ConfirmRefundDialog.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -142,16 +143,10 @@ function submit(): void {
     });
 }
 
-function refund(row: AdminPaymentRow): void {
-    if (!window.confirm(t('admin.payments.refund_confirm'))) {
-        return;
-    }
+const refundTarget = ref<AdminPaymentRow | null>(null);
 
-    router.post(
-        admin.payments.refund.url(row.id),
-        {},
-        { preserveScroll: true },
-    );
+function confirmRefund(row: AdminPaymentRow): void {
+    refundTarget.value = row;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -475,7 +470,7 @@ function donationBadgeVariant(
             v-if="row.status === 'paid'"
             variant="outline"
             size="sm"
-            @click="refund(row)"
+            @click="confirmRefund(row)"
           >
             {{ t('admin.payments.refund') }}
           </Button>
@@ -780,5 +775,10 @@ function donationBadgeVariant(
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ConfirmRefundDialog
+      :payment="refundTarget"
+      @close="refundTarget = null"
+    />
   </div>
 </template>
