@@ -130,8 +130,14 @@ class SubscriptionIntentController extends Controller
         $contactEmail = Legal::contactEmail();
 
         if ($contactEmail !== null) {
+            $admin = User::query()
+                ->where('email', $contactEmail)
+                ->first();
+
+            $targetLocale = $admin?->preferredLocale() ?? $user->preferredLocale();
+
             Notification::route('mail', $contactEmail)
-                ->notify(new SubscriptionIntentSubmitted($intent));
+                ->notify((new SubscriptionIntentSubmitted($intent))->locale($targetLocale));
         }
 
         Inertia::flash('toast', [

@@ -172,6 +172,74 @@ it('permite enviar intencao de assinatura sem documento de identificacao e com c
     );
 });
 
+it('envia o email de intencao no idioma do usuario solicitante', function () {
+    Notification::fake();
+    config()->set('legal.contact_email', 'contato@exemplo.com');
+
+    $user = User::factory()->create([
+        'name' => 'Jean Dupont',
+        'username' => null,
+        'locale' => 'fr',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('subscribe.store'), [
+            'plan' => 'pro-monthly',
+            'username' => 'jean_fr',
+            'phone' => '11999990000',
+            'document' => '12345678900',
+            'payment_method' => SubscriptionIntentPaymentMethod::Pix->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    Notification::assertSentOnDemand(
+        SubscriptionIntentSubmitted::class,
+        function (SubscriptionIntentSubmitted $notification, $channels, $notifiable, $locale) {
+            $mail = $notification->toMail((object) []);
+
+            return $locale === 'fr'
+                && str_contains($mail->subject, 'Nouvelle intention d’abonnement (@jean_fr)')
+                && str_contains(implode(' ', $mail->introLines), 'Nouvelle intention d’abonnement Pro enregistrée par Jean Dupont');
+        }
+    );
+});
+
+it('envia o email de intencao no idioma do administrador quando o contato administrativo e um admin cadastrado', function () {
+    Notification::fake();
+    $admin = User::factory()->admin()->create([
+        'email' => 'admin@devtools.test',
+        'locale' => 'pt_BR',
+    ]);
+    config()->set('legal.contact_email', $admin->email);
+
+    $user = User::factory()->create([
+        'name' => 'Carlos Gomez',
+        'username' => null,
+        'locale' => 'es',
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('subscribe.store'), [
+            'plan' => 'pro-monthly',
+            'username' => 'carlos_g',
+            'phone' => '11999990000',
+            'document' => '12345678900',
+            'payment_method' => SubscriptionIntentPaymentMethod::Pix->value,
+        ])
+        ->assertSessionHasNoErrors();
+
+    Notification::assertSentOnDemand(
+        SubscriptionIntentSubmitted::class,
+        function (SubscriptionIntentSubmitted $notification, $channels, $notifiable, $locale) {
+            $mail = $notification->toMail((object) []);
+
+            return $locale === 'pt_BR'
+                && str_contains($mail->subject, 'Nova intenção de assinatura (@carlos_g)')
+                && str_contains(implode(' ', $mail->introLines), 'Nova intenção de assinatura Pro registrada por Carlos Gomez');
+        }
+    );
+});
+
 it('permite ao admin listar, concluir e cancelar intencoes de assinatura com auditoria', function () {
     $admin = User::factory()->admin()->create();
     $user = User::factory()->create(['username' => 'dev_pro']);
