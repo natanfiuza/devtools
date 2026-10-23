@@ -4,6 +4,7 @@ import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminTable from '@/components/admin/AdminTable.vue';
 import ConfirmIntentPaymentDialog from '@/components/admin/ConfirmIntentPaymentDialog.vue';
+import ConfirmRefundDialog from '@/components/admin/ConfirmRefundDialog.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -219,20 +220,6 @@ const refundTarget = ref<AdminPaymentRow | null>(null);
 
 function confirmRefund(payment: AdminPaymentRow): void {
     refundTarget.value = payment;
-}
-
-function executeRefund(): void {
-    if (!refundTarget.value) return;
-    router.post(
-        admin.payments.refund.url(refundTarget.value.id),
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                refundTarget.value = null;
-            },
-        },
-    );
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1013,35 +1000,10 @@ function executeRestore(): void {
     </section>
 
     <!-- Dialog de Confirmacao de Estorno -->
-    <Dialog
-      :open="refundTarget !== null"
-      @update:open="(val) => !val && (refundTarget = null)"
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{{ t('admin.payments.refund') }}</DialogTitle>
-          <DialogDescription>
-            {{ t('admin.payments.refund_confirm') }}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="ghost"
-            size="sm"
-            @click="refundTarget = null"
-          >
-            {{ t('admin.common.cancel') }}
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            @click="executeRefund"
-          >
-            {{ t('admin.payments.refund') }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmRefundDialog
+      :payment="refundTarget"
+      @close="refundTarget = null"
+    />
 
     <!-- Dialog de Confirmacao de Restauracao de Conta -->
     <Dialog
