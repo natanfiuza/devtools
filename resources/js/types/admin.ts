@@ -180,6 +180,7 @@ export type AdminQuota = {
     exhausted: boolean;
     windowStart: string | null;
     windowEnd: string | null;
+    nextCreditAt?: string | null;
 };
 
 export type AdminSocialAccount = {
@@ -218,9 +219,11 @@ export type AdminIntentRow = {
     username: string;
     planSlug: string;
     planName: string;
+    planPrice?: string;
+    planAmount?: string;
     interval: string | null;
     phone: string;
-    document: string;
+    document: string | null;
     paymentMethod: string;
     notes: string | null;
     status: 'pending' | 'fulfilled' | 'canceled';

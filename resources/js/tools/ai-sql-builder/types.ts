@@ -34,6 +34,7 @@ export interface Quota {
         start: string | null;
         end: string | null;
     };
+    next_credit_at?: string | null;
 }
 
 export interface OutputTarget {

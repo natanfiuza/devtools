@@ -109,7 +109,7 @@ it('nao abre periodo para o Free', function () {
         ->and(Subscription::query()->count())->toBe(0);
 });
 
-it('conta a cota so dentro do periodo corrente, sem herdar o periodo empilhado', function () {
+it('soma a cota apenas dos meses ja iniciados e acumula todo o consumo de tokens', function () {
     $plano = Plan::factory()->create(['monthly_tokens' => 1000]);
     $user = User::factory()->create();
 
@@ -130,16 +130,11 @@ it('conta a cota so dentro do periodo corrente, sem herdar o periodo empilhado',
         'created_at' => now()->subDay(),
     ]);
 
-    // Lancamento ja datado no periodo seguinte (renovacao paga antecipada):
-    // nao pode encolher a franquia de agora.
-    UsageLedger::factory()->for($user)->create([
-        'tokens' => 900,
-        'created_at' => $corrente->current_period_end->copy()->addDay(),
-    ]);
-
     $quota = Quota::for($user);
 
-    expect($quota->used())->toBe(100)
+    // O periodo futuro ainda nao iniciou, entao nao credita antes da hora.
+    expect($quota->limit())->toBe(1000)
+        ->and($quota->used())->toBe(100)
         ->and($quota->remaining())->toBe(900)
         ->and($quota->windowEnd()?->toDateString())->toBe($corrente->current_period_end->toDateString());
 });

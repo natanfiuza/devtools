@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { computed, reactive } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminTable from '@/components/admin/AdminTable.vue';
+import ConfirmIntentPaymentDialog from '@/components/admin/ConfirmIntentPaymentDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,12 +67,10 @@ function goToPage(page: number): void {
     });
 }
 
-function fulfill(row: AdminIntentRow): void {
-    router.post(
-        admin.intents.fulfill.url(row.id),
-        {},
-        { preserveScroll: true },
-    );
+const confirmTarget = ref<AdminIntentRow | null>(null);
+
+function openConfirmPayment(row: AdminIntentRow): void {
+    confirmTarget.value = row;
 }
 
 function cancel(row: AdminIntentRow): void {
@@ -209,13 +208,13 @@ function cancel(row: AdminIntentRow): void {
       <template #actions="{ row }">
         <div class="flex items-center justify-end gap-1">
           <Button
-            v-if="row.status !== 'fulfilled'"
+            v-if="row.status === 'pending'"
             variant="outline"
             size="sm"
-            :data-test="`intent-fulfill-${row.id}`"
-            @click="fulfill(row)"
+            :data-test="`intent-confirm-${row.id}`"
+            @click="openConfirmPayment(row)"
           >
-            {{ t('admin.intents.fulfill') }}
+            {{ t('admin.intents.confirm_payment') }}
           </Button>
           <Button
             v-if="row.status !== 'canceled'"
@@ -229,5 +228,10 @@ function cancel(row: AdminIntentRow): void {
         </div>
       </template>
     </AdminTable>
+
+    <ConfirmIntentPaymentDialog
+      :intent="confirmTarget"
+      @close="confirmTarget = null"
+    />
   </div>
 </template>

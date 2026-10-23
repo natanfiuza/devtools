@@ -4,6 +4,7 @@ use App\Enums\AdminActionType;
 use App\Enums\SubscriptionIntentPaymentMethod;
 use App\Enums\SubscriptionIntentStatus;
 use App\Models\AdminAction;
+use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\SubscriptionIntent;
 use App\Models\User;
@@ -277,4 +278,42 @@ it('permite ao admin listar, concluir e cancelar intencoes de assinatura com aud
 
     expect($intent->refresh()->status)->toBe(SubscriptionIntentStatus::Canceled);
     expect(AdminAction::query()->where('action', AdminActionType::SubscriptionIntentCanceled)->exists())->toBeTrue();
+});
+
+it('confirma o pagamento de uma intencao pendente, concedendo o plano vinculado e marcando a intencao como atendida', function () {
+    Notification::fake();
+
+    $admin = User::factory()->admin()->create();
+    $user = User::factory()->create(['username' => 'dev_confirm']);
+    $plan = Plan::query()->where('slug', 'pro-monthly')->sole();
+
+    $intent = SubscriptionIntent::query()->create([
+        'user_id' => $user->id,
+        'plan_id' => $plan->id,
+        'username' => 'dev_confirm',
+        'phone' => '11999990000',
+        'document' => '12345678900',
+        'payment_method' => SubscriptionIntentPaymentMethod::Pix,
+        'status' => SubscriptionIntentStatus::Pending,
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.intents.confirm-payment', $intent), [
+            'amount' => '29,90',
+            'method' => 'pix',
+            'note' => 'Comprovante Pix recebido',
+        ])
+        ->assertRedirect();
+
+    $assinatura = $user->refresh()->activeSubscription();
+    $pagamento = Payment::query()->sole();
+
+    expect($intent->refresh()->status)->toBe(SubscriptionIntentStatus::Fulfilled)
+        ->and($assinatura)->not->toBeNull()
+        ->and($assinatura?->plan_id)->toBe($plan->id)
+        ->and($pagamento->subscription_id)->toBe($assinatura?->id)
+        ->and($pagamento->plan_id)->toBe($plan->id)
+        ->and($pagamento->amount_cents)->toBe(2990)
+        ->and($pagamento->note)->toBe('Comprovante Pix recebido')
+        ->and(AdminAction::query()->where('action', AdminActionType::SubscriptionIntentPaymentConfirmed)->exists())->toBeTrue();
 });

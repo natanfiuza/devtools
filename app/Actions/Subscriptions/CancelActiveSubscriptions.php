@@ -34,7 +34,7 @@ final class CancelActiveSubscriptions
             ->get();
 
         foreach ($subscriptions as $subscription) {
-            $subscription->forceFill(['status' => SubscriptionStatus::Canceled])->save();
+            $subscription->end();
         }
 
         return $subscriptions->count();

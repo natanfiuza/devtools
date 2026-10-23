@@ -40,7 +40,10 @@ final class AnonymizeUser
         DB::transaction(function () use ($user, $id): void {
             $user->subscriptions()
                 ->current()
-                ->update(['status' => SubscriptionStatus::Canceled->value]);
+                ->update([
+                    'status' => SubscriptionStatus::Canceled->value,
+                    'ended_at' => now(),
+                ]);
 
             if ($user->photo_uuid) {
                 $photoPath = storage_path('app/data/user_profile_image/'.$user->photo_uuid);

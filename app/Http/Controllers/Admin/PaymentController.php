@@ -17,6 +17,7 @@ use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\User;
+use App\Support\DecimalInput;
 use App\Support\Format;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -86,8 +87,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Registra um pagamento recebido por fora do site. Conceder o plano junto
-     * e opcional: cobranca e acesso sao duas coisas.
+     * Registra um pagamento recebido por fora do site. Com plano pago, o plano
+     * e concedido e vinculado ao pagamento (ADR-054).
      */
     public function store(Request $request, RegisterPayment $register): RedirectResponse
     {
@@ -109,7 +110,6 @@ class PaymentController extends Controller
             ))],
             'paid_at' => ['nullable', 'date'],
             'note' => ['nullable', 'string', 'max:255'],
-            'grant_plan' => ['boolean'],
         ]);
 
         $email = is_string($validated['email'] ?? null) ? $validated['email'] : '';
@@ -135,7 +135,6 @@ class PaymentController extends Controller
             plan: $plan,
             paidAt: is_string($paidAt) ? Carbon::parse($paidAt) : null,
             note: is_string($note) ? $note : null,
-            grantPlan: $request->boolean('grant_plan'),
         );
 
         $this->record($request, AdminActionType::PaymentRegistered, $payment, [
@@ -307,36 +306,10 @@ class PaymentController extends Controller
     }
 
     /**
-     * Deixa o valor em ponto decimal.
-     *
-     * O separador decimal e o ultimo sinal que aparece no numero: `29,90` e
-     * `29.90` viram os dois `29.90`, e `1.234,56` vira `1234.56`. Quem escreve
-     * com separador de milhar digita os dois, como em qualquer calculadora -
-     * `2.990` sozinho continua sendo lido como o numero que esta escrito.
-     *
-     * O que nao der para ler assim segue como veio, e a validacao recusa: valor
-     * de dinheiro nao se adivinha.
+     * Deixa o valor em ponto decimal (regras em `DecimalInput::normalize`).
      */
     private function toDecimal(mixed $value): mixed
     {
-        if (! is_string($value)) {
-            return $value;
-        }
-
-        $value = trim($value);
-
-        $lastDot = strrpos($value, '.');
-        $lastComma = strrpos($value, ',');
-
-        if ($lastDot === false && $lastComma === false) {
-            return $value;
-        }
-
-        $decimal = $lastDot > $lastComma ? '.' : ',';
-        $thousands = $decimal === '.' ? ',' : '.';
-
-        // Primeiro o milhar sai, depois o separador decimal vira ponto: na
-        // ordem inversa o ponto recem-criado seria lido como milhar.
-        return str_replace($decimal, '.', str_replace($thousands, '', $value));
+        return DecimalInput::normalize($value);
     }
 }

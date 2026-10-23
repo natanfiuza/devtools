@@ -3,10 +3,10 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AdminTable from '@/components/admin/AdminTable.vue';
+import ConfirmIntentPaymentDialog from '@/components/admin/ConfirmIntentPaymentDialog.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -155,12 +155,10 @@ const intentColumns = computed<AdminColumn[]>(() => [
     { key: 'createdAt', label: t('admin.intents.created'), mono: true },
 ]);
 
-function fulfillIntent(intent: AdminIntentRow): void {
-    router.post(
-        admin.intents.fulfill.url(intent.id),
-        {},
-        { preserveScroll: true },
-    );
+const confirmIntentTarget = ref<AdminIntentRow | null>(null);
+
+function openConfirmIntentPayment(intent: AdminIntentRow): void {
+    confirmIntentTarget.value = intent;
 }
 
 function cancelIntent(intent: AdminIntentRow): void {
@@ -196,7 +194,6 @@ const paymentForm = useForm({
     method: 'pix',
     paid_at: '',
     note: '',
-    grant_plan: true,
 });
 
 function submitPayment(): void {
@@ -213,7 +210,6 @@ function submitPayment(): void {
                 paymentForm.reset();
                 paymentForm.plan = NO_PLAN;
                 paymentForm.method = 'pix';
-                paymentForm.grant_plan = true;
                 newPaymentOpen.value = false;
             },
         });
@@ -617,12 +613,13 @@ function executeRestore(): void {
         <template #actions="{ row }">
           <div class="flex items-center justify-end gap-1">
             <Button
-              v-if="row.status !== 'fulfilled'"
+              v-if="row.status === 'pending'"
               variant="outline"
               size="sm"
-              @click="fulfillIntent(row)"
+              :data-test="`hub-intent-confirm-${row.id}`"
+              @click="openConfirmIntentPayment(row)"
             >
-              {{ t('admin.intents.fulfill') }}
+              {{ t('admin.intents.confirm_payment') }}
             </Button>
             <Button
               v-if="row.status !== 'canceled'"
@@ -807,23 +804,9 @@ function executeRestore(): void {
           <InputError :message="paymentForm.errors.note" />
         </div>
 
-        <div class="flex items-start gap-2 sm:col-span-2 lg:col-span-3">
-          <Checkbox
-            id="hub-payment-grant"
-            :model-value="paymentForm.grant_plan"
-            @update:model-value="
-              (val) => (paymentForm.grant_plan = val === true)
-            "
-          />
-          <div>
-            <Label for="hub-payment-grant">
-              {{ t('admin.payments.grant_plan') }}
-            </Label>
-            <p class="text-xs text-subtle">
-              {{ t('admin.payments.grant_plan_help') }}
-            </p>
-          </div>
-        </div>
+        <p class="text-xs text-subtle sm:col-span-2 lg:col-span-3">
+          {{ t('admin.payments.grant_plan_help') }}
+        </p>
 
         <div class="flex gap-2 sm:col-span-2 lg:col-span-3">
           <Button
@@ -1104,5 +1087,10 @@ function executeRestore(): void {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <ConfirmIntentPaymentDialog
+      :intent="confirmIntentTarget"
+      @close="confirmIntentTarget = null"
+    />
   </div>
 </template>

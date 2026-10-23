@@ -20,9 +20,10 @@ use Throwable;
  * Mercado Pago entrar (F6), os pagamentos dele nascem com o mesmo formato e
  * `gateway` diferente.
  *
- * Conceder o plano junto e opcional e deliberado: o registro fiscal e a
- * concessao de acesso sao duas coisas, e as vezes so uma delas acontece
- * (pagou o mes mas ja tinha acesso; ganhou acesso de cortesia sem pagar).
+ * Pagamento manual com plano pago **concede o plano** e fica vinculado a
+ * assinatura aberta (ADR-054, revisa a ADR-027): plano escolhido e plano
+ * pago, e o vinculo e o que faz o estorno encerrar o acesso. Cortesia sem
+ * dinheiro continua em `GrantPlan`, pela tela da conta.
  */
 final class RegisterPayment
 {
@@ -40,16 +41,15 @@ final class RegisterPayment
         ?Plan $plan = null,
         ?CarbonInterface $paidAt = null,
         ?string $note = null,
-        bool $grantPlan = false,
         string $gateway = 'manual',
         ?string $gatewayRef = null,
         ?Subscription $subscription = null,
         ?string $gatewayMethod = null,
         ?string $currency = null,
     ): Payment {
-        $subscription ??= $grantPlan && $plan !== null
-            ? ($this->grantPlan)($user, $plan)
-            : null;
+        if ($subscription === null && $gateway === 'manual' && $plan !== null && ! $plan->isFree()) {
+            $subscription = ($this->grantPlan)($user, $plan);
+        }
 
         $payment = $user->payments()->create([
             'subscription_id' => $subscription?->getKey(),

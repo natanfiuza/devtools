@@ -312,6 +312,9 @@ components:
             end:
               type: [string, 'null']
               format: date-time
+        next_credit_at:
+          type: [string, 'null']
+          format: date-time
     Plan:
       type: object
       required: [slug, name, is_free]
