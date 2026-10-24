@@ -289,7 +289,14 @@ final class MercadoPagoGateway implements PaymentGateway
         }
 
         if (! $response->successful()) {
-            throw PaymentGatewayException::fromStatus($operation, $response->status());
+            [$gatewayError, $gatewayCauses] = $this->extractErrorDiagnostics($response->body());
+
+            throw PaymentGatewayException::fromStatus(
+                $operation,
+                $response->status(),
+                $gatewayError,
+                $gatewayCauses,
+            );
         }
 
         if (trim($response->body()) === '') {
@@ -366,5 +373,52 @@ final class MercadoPagoGateway implements PaymentGateway
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Extrai apenas os codigos estruturados de erro (`error` e `cause[].code` /
+     * `cause[].description`) sem jamais expor corpo cru ou dados de pagador.
+     *
+     * @return array{0: string|null, 1: list<array{code: string, description: string}>}
+     */
+    private function extractErrorDiagnostics(string $body): array
+    {
+        if (trim($body) === '') {
+            return [null, []];
+        }
+
+        try {
+            $decoded = json_decode($body, true, 16, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return [null, []];
+        }
+
+        if (! is_array($decoded)) {
+            return [null, []];
+        }
+
+        $error = $this->text($decoded['error'] ?? null);
+        $error = $error !== null ? mb_substr($error, 0, 80) : null;
+
+        $causes = [];
+        $rawCauses = $decoded['cause'] ?? null;
+
+        if (is_array($rawCauses)) {
+            foreach (array_slice($rawCauses, 0, 5) as $cause) {
+                if (! is_array($cause)) {
+                    continue;
+                }
+
+                $code = $this->text($cause['code'] ?? null) ?? 'unknown';
+                $description = $this->text($cause['description'] ?? null) ?? '';
+
+                $causes[] = [
+                    'code' => mb_substr($code, 0, 40),
+                    'description' => mb_substr($description, 0, 120),
+                ];
+            }
+        }
+
+        return [$error, $causes];
     }
 }

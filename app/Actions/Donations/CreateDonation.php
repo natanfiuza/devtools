@@ -142,18 +142,39 @@ final class CreateDonation
     }
 
     /**
-     * URL publica do webhook: a configurada ou a rota do site.
+     * URL publica do webhook: a configurada ou a rota do site (desde que nao
+     * aponte para loopback em dev local sem tunel, pois o Mercado Pago recusa
+     * `notification_url` com `localhost` / `127.0.0.1` em producao).
      */
     private function webhookUrl(): ?string
     {
         $configured = config('payments.checkout.webhook_url');
 
         if (is_string($configured) && trim($configured) !== '') {
-            return $configured;
+            return trim($configured);
         }
 
-        return Route::has('webhooks.mercadopago')
-            ? route('webhooks.mercadopago')
-            : null;
+        if (! Route::has('webhooks.mercadopago')) {
+            return null;
+        }
+
+        $url = route('webhooks.mercadopago');
+
+        if (! app()->runningUnitTests() && $this->isLoopbackUrl($url)) {
+            return null;
+        }
+
+        return $url;
+    }
+
+    private function isLoopbackUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '') {
+            return true;
+        }
+
+        return in_array(mb_strtolower(trim($host, '[]')), ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true);
     }
 }
