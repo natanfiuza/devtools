@@ -34,7 +34,7 @@ return [
 
     // E-mail do recebedor quando o doador nao informa um. O provedor exige um
     // e-mail de pagador para criar o Pix.
-    'payer_email' => env('DONATIONS_PAYER_EMAIL', config('mail.from.address')),
+    'payer_email' => env('DONATIONS_PAYER_EMAIL') ?: env('MAIL_FROM_ADDRESS'),
 
     // Recibo por e-mail so quando ha e-mail e esta ligado.
     'send_receipts' => (bool) env('DONATIONS_SEND_RECEIPTS', true),

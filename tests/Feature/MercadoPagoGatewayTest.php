@@ -259,3 +259,45 @@ it('recusa chamadas sem credenciais', function () {
     expect(fn () => $gateway->payment('1'))
         ->toThrow(PaymentGatewayException::class, 'sem credenciais');
 });
+
+it('inclui os codigos estruturados de causa no contexto da excecao sem vazar na mensagem', function () {
+    Http::fake([
+        'api.mercadopago.com/v1/payments' => Http::response([
+            'message' => 'Collector cannot be the same as payer',
+            'error' => 'bad_request',
+            'status' => 400,
+            'cause' => [
+                [
+                    'code' => 2067,
+                    'description' => 'Invalid payer email',
+                ],
+            ],
+        ], 400),
+    ]);
+
+    try {
+        app(PaymentGateway::class)->createPixDonation(new PixChargeRequest(
+            idempotencyKey: 'don_01ERR',
+            externalReference: 'don_01ERR',
+            description: 'Doacao',
+            amountCents: 1000,
+            currency: 'BRL',
+            payerEmail: 'mesmo-email@exemplo.com',
+            notificationUrl: 'https://app.test/webhooks/mercadopago',
+            expiresAt: now()->addHour(),
+        ));
+        $this->fail('Esperava PaymentGatewayException.');
+    } catch (PaymentGatewayException $exception) {
+        expect($exception->getMessage())->toBe('Payments: donation.pix respondeu HTTP 400.')
+            ->and($exception->statusCode)->toBe(400)
+            ->and($exception->gatewayError)->toBe('bad_request')
+            ->and($exception->gatewayCauses)->toBe([
+                ['code' => '2067', 'description' => 'Invalid payer email'],
+            ])
+            ->and($exception->context())->toMatchArray([
+                'operation' => 'donation.pix',
+                'status_code' => 400,
+                'gateway_error' => 'bad_request',
+            ]);
+    }
+});

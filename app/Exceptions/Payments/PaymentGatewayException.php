@@ -13,11 +13,16 @@ use RuntimeException;
  */
 final class PaymentGatewayException extends RuntimeException
 {
+    /**
+     * @param  list<array{code: string, description: string}>  $gatewayCauses
+     */
     private function __construct(
         string $message,
         public readonly bool $retryable,
         public readonly ?int $statusCode = null,
         public readonly string $operation = '',
+        public readonly ?string $gatewayError = null,
+        public readonly array $gatewayCauses = [],
     ) {
         parent::__construct($message);
     }
@@ -31,13 +36,22 @@ final class PaymentGatewayException extends RuntimeException
         );
     }
 
-    public static function fromStatus(string $operation, int $status): self
-    {
+    /**
+     * @param  list<array{code: string, description: string}>  $gatewayCauses
+     */
+    public static function fromStatus(
+        string $operation,
+        int $status,
+        ?string $gatewayError = null,
+        array $gatewayCauses = [],
+    ): self {
         return new self(
             "Payments: {$operation} respondeu HTTP {$status}.",
             retryable: $status === 429 || $status >= 500,
             statusCode: $status,
             operation: $operation,
+            gatewayError: $gatewayError,
+            gatewayCauses: $gatewayCauses,
         );
     }
 
@@ -65,5 +79,20 @@ final class PaymentGatewayException extends RuntimeException
     public function isAlreadyGone(): bool
     {
         return $this->statusCode === 404 || $this->statusCode === 409;
+    }
+
+    /**
+     * Contexto estruturado para o log do Laravel (sem corpo cru nem segredos).
+     *
+     * @return array<string, mixed>
+     */
+    public function context(): array
+    {
+        return array_filter([
+            'operation' => $this->operation !== '' ? $this->operation : null,
+            'status_code' => $this->statusCode,
+            'gateway_error' => $this->gatewayError,
+            'gateway_causes' => $this->gatewayCauses !== [] ? $this->gatewayCauses : null,
+        ], static fn (mixed $value): bool => $value !== null);
     }
 }
