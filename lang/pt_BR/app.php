@@ -63,8 +63,9 @@ return [
         'language' => 'Idioma',
         'privacy' => 'Privacidade',
         'terms' => 'Termos',
-        'cookies' => 'Cookies',
         'donate' => 'Doar',
+        'contact' => 'Contato',
+        'cookies' => 'Cookies',
         'rights' => 'Todos os direitos reservados.',
     ],
 ];

@@ -36,6 +36,8 @@ return [
 
     'info' => [
         'title' => 'Doação indisponível de momento',
+        'description_lead' => 'O Pix ainda não está configurado por aqui. Volte mais tarde ou fale connosco pela',
+        'contact_link' => 'página de contacto',
         'description' => 'O Pix ainda não está configurado por aqui. Volte mais tarde ou fale connosco pela página de contacto.',
     ],
 

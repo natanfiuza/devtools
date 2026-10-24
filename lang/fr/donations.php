@@ -36,6 +36,8 @@ return [
 
     'info' => [
         'title' => 'Don indisponible pour le moment',
+        'description_lead' => 'Pix n\'est pas encore configuré ici. Revenez plus tard ou écrivez-nous depuis la',
+        'contact_link' => 'page de contact',
         'description' => 'Pix n\'est pas encore configuré ici. Revenez plus tard ou écrivez-nous depuis la page de contact.',
     ],
 

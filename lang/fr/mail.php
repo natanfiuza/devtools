@@ -103,4 +103,14 @@ return [
         'anonymized' => 'Toutes vos données personnelles identifiables ont été supprimées et votre compte a été anonymisé conformément aux lois sur la protection des données.',
         'attached' => 'Vous trouverez en pièce jointe une copie au format JSON contenant toutes les données exportées de votre compte avant son anonymisation.',
     ],
+
+    'contact' => [
+        'subject_prefix' => 'Message de contact',
+        'greeting' => 'Nouveau message de contact reçu',
+        'intro' => 'Un nouveau message a été envoyé via le formulaire de contact du site.',
+        'sender' => 'Expéditeur : :name (:email)',
+        'subject_line' => 'Objet : :subject',
+        'message_header' => 'Message :',
+        'meta' => 'IP : :ip | Envoyé le : :date',
+    ],
 ];

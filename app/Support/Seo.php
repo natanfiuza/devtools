@@ -105,6 +105,10 @@ final class Seo
                 'title' => (string) trans('donations.meta.title'),
                 'description' => (string) trans('donations.meta.description'),
             ],
+            'contact' => [
+                'title' => (string) trans('contact.meta.title'),
+                'description' => (string) trans('contact.meta.description'),
+            ],
             'tools.show' => self::toolMeta($request),
             default => [
                 'title' => (string) config('app.name'),

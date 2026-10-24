@@ -103,4 +103,14 @@ return [
         'anonymized' => 'Todos os seus dados pessoais identificáveis foram removidos e sua conta foi anonimizada conforme a LGPD.',
         'attached' => 'Em anexo, enviamos uma cópia em formato JSON contendo todos os dados exportados da sua conta antes da anonimização.',
     ],
+
+    'contact' => [
+        'subject_prefix' => 'Mensagem de contato',
+        'greeting' => 'Nova mensagem de contato recebida',
+        'intro' => 'Uma nova mensagem foi enviada pelo formulário de contato do site.',
+        'sender' => 'Remetente: :name (:email)',
+        'subject_line' => 'Assunto: :subject',
+        'message_header' => 'Mensagem:',
+        'meta' => 'IP: :ip | Enviado em: :date',
+    ],
 ];
