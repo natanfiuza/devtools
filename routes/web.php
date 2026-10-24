@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Base64ImageController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Base64ImageDownloadController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
@@ -51,6 +52,10 @@ Route::prefix('{locale}')
             ->name('donate.store');
         Route::get('donate/{donation}', [DonationController::class, 'status'])
             ->name('donate.status');
+
+        // Contato: pagina publica e indexavel para suporte e mensagens.
+        Route::get('contact', [ContactController::class, 'index'])->name('contact');
+        Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 
         // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
         // so, e o componente de cada tool entra por dentro dela. Sem restricao

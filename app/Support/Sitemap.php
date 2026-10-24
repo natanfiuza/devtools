@@ -30,6 +30,7 @@ final class Sitemap
         'privacy',
         'terms',
         'donate',
+        'contact',
     ];
 
     /**

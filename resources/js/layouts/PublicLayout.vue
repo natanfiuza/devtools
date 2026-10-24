@@ -253,6 +253,13 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
             >
               {{ t('app.footer.donate') }}
             </Link>
+            <Link
+              :href="routes.contact.value"
+              class="hover:text-foreground"
+              data-test="footer-contact"
+            >
+              {{ t('app.footer.contact') }}
+            </Link>
             <button
               type="button"
               data-test="consent-reopen"

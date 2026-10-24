@@ -63,6 +63,7 @@ return [
         'legal',
         'newsletter',
         'donations',
+        'contact',
         'errors',
     ],
 

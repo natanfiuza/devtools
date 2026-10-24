@@ -36,6 +36,8 @@ return [
 
     'info' => [
         'title' => 'Donations are unavailable right now',
+        'description_lead' => 'Pix is not configured here yet. Come back later or reach out through the',
+        'contact_link' => 'contact page',
         'description' => 'Pix is not configured here yet. Come back later or reach out through the contact page.',
     ],
 

@@ -1,6 +1,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import {
+    contact,
     donate,
     home,
     login,
@@ -12,6 +13,7 @@ import {
     subscribe,
     terms,
 } from '@/routes';
+import { store as contactStore } from '@/routes/contact';
 import { store as donateStore } from '@/routes/donate';
 import { status as donationStatusRoute } from '@/routes/donate';
 import { store as loginStore } from '@/routes/login';
@@ -44,6 +46,7 @@ export type UseRoutesReturn = {
     privacy: ComputedRef<string>;
     terms: ComputedRef<string>;
     donate: ComputedRef<string>;
+    contact: ComputedRef<string>;
     subscribe: (plan?: string) => string;
     /** Pagina de status da doacao: o ULID e o identificador publico. */
     donationStatus: (ulid: string) => string;
@@ -63,6 +66,7 @@ export type UseRoutesReturn = {
         resendVerification: FormAction;
         newsletter: FormAction;
         donate: FormAction;
+        contact: FormAction;
         subscribe: ComputedRef<RouteFormDefinition<'post'>>;
         subscribeCheckout: ComputedRef<RouteFormDefinition<'post'>>;
         /** O token do e-mail faz parte da URL, entao vem por parametro. */
@@ -112,6 +116,7 @@ export function useRoutes(): UseRoutesReturn {
         privacy: url(privacy),
         terms: url(terms),
         donate: url(donate),
+        contact: url(contact),
         subscribe: (plan?: string) =>
             subscribe.url(plan ? { query: { plan } } : undefined),
         donationStatus: (ulid: string) =>
@@ -135,6 +140,7 @@ export function useRoutes(): UseRoutesReturn {
             resendVerification: form(resendVerificationAction),
             newsletter: form(newsletterAction),
             donate: form(donateStore),
+            contact: form(contactStore),
             subscribe: computed<RouteFormDefinition<'post'>>(() =>
                 subscribeStore.form(),
             ),

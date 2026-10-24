@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import { HeartHandshake, ShieldCheck } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -126,7 +126,14 @@ function submit(): void {
         {{ t('donations.info.title') }}
       </h2>
       <p class="mt-2 text-muted-foreground">
-        {{ t('donations.info.description') }}
+        {{ t('donations.info.description_lead') }}
+        <Link
+          :href="routes.contact.value"
+          class="underline hover:text-foreground"
+          data-test="donate-contact-link"
+        >
+          {{ t('donations.info.contact_link') }}
+        </Link>.
       </p>
     </div>
 

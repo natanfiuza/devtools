@@ -28,6 +28,7 @@ export function resolveLayout(name: string): unknown {
         case name === 'Terms':
         case name === 'Donate':
         case name === 'DonationStatus':
+        case name === 'Contact':
         case name === 'Error':
             // A 404 e uma pagina publica: mesma casca da home, sem sidebar.
             return PublicLayout;

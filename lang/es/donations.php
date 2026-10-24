@@ -36,6 +36,8 @@ return [
 
     'info' => [
         'title' => 'Donación no disponible por ahora',
+        'description_lead' => 'Pix todavía no está configurado aquí. Vuelve más tarde o escríbenos desde la',
+        'contact_link' => 'página de contacto',
         'description' => 'Pix todavía no está configurado aquí. Vuelve más tarde o escríbenos desde la página de contacto.',
     ],
 
