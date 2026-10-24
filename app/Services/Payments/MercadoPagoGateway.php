@@ -369,7 +369,7 @@ final class MercadoPagoGateway implements PaymentGateway
         }
 
         try {
-            return Date::parse($value);
+            return Date::parse($value)->setTimezone((string) config('app.timezone', 'UTC'));
         } catch (\Throwable) {
             return null;
         }

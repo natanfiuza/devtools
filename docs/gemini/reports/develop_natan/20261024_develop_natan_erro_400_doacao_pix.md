@@ -36,3 +36,6 @@ A inspeção revelou quatro fatores:
 4. **Documentação e Testes:**
    - Atualizada a tabela de Troubleshooting em `docs/guides/mercado-pago.md` com as 4 causas do `HTTP 400` e como inspecionar `gateway_error` e `gateway_causes` no `laravel.log`.
    - Adicionado teste em `tests/Feature/MercadoPagoGatewayTest.php` cobrindo a extração de `gatewayError`, `gatewayCauses` e `context()`.
+5. **Normalização de fuso horário (`-04:00` -> `app.timezone`) em `MercadoPagoGateway::date()`:**
+   - O Mercado Pago retorna `date_of_expiration` e `date_approved` com offset `-04:00` (horário de Nova York/Manaus). Como a coluna `expires_at` no MySQL/MariaDB é `DATETIME` (sem offset), gravar um Carbon com timezone `-04:00` salvava a hora parede `-04:00` (1 hora atrás de `America/Recife` `-03:00`). Como o prazo do Pix é de 60 minutos, a doação nascia instantaneamente expirada ao ser lida em `America/Recife` (`expires_at->isPast() === true`).
+   - Ajustado `MercadoPagoGateway::date()` para chamar `->setTimezone((string) config('app.timezone', 'UTC'))`, garantindo que toda data vinda da API do Mercado Pago seja convertida para o fuso da aplicação antes de ser persistida no banco.
