@@ -75,3 +75,30 @@ it('recusa alvo ou versao que nao batem com o payload', function () {
         new Prompt('sql.v1.md', 'sql', 2, 'Target: SQL.'),
     ))->toThrow(PromptException::class);
 });
+
+it('monta o prompt de sistema no idioma do payload (pt_BR, pt_PT, es, fr, en)', function (string $locale, string $expectedSnippet) {
+    $payload = (new Canonicalizer)->canonicalize(
+        SchemaSource::Ddl,
+        SqlDialect::Mysql,
+        'sql',
+        'CREATE TABLE users (id int);',
+        'Liste usuarios',
+        'model-a',
+        1,
+        $locale,
+    );
+
+    $messages = (new PromptBuilder)->build(
+        aiPromptTarget(),
+        $payload,
+        new Prompt('sql.v1.md', 'sql', 1, 'Target: SQL.'),
+    );
+
+    expect($messages[0]['content'])->toContain($expectedSnippet);
+})->with([
+    ['pt_BR', 'português do Brasil'],
+    ['pt_PT', 'português de Portugal'],
+    ['es', 'estrictamente en español'],
+    ['fr', 'strictement en français'],
+    ['en', 'strictly in English'],
+]);

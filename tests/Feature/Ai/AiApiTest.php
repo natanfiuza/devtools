@@ -333,3 +333,21 @@ it('lista o historico do usuario com suporte a busca por schema e prompt', funct
     expect($respSearchTitle->json('data'))->toHaveCount(1)
         ->and($respSearchTitle->json('data.0.id'))->toBe($req1->id);
 });
+
+it('persiste o locale informado ou recorre ao fallback preferido', function () {
+    $user = User::factory()->create();
+
+    $responseWithLocale = apiAiPost($user, ['locale' => 'pt_BR']);
+    $responseWithLocale->assertStatus(202);
+
+    $id1 = $responseWithLocale->json('data.id');
+    $req1 = AiRequest::query()->findOrFail($id1);
+    expect($req1->locale)->toBe('pt_BR');
+
+    $responseFallback = apiAiPost($user);
+    $responseFallback->assertStatus(202);
+
+    $id2 = $responseFallback->json('data.id');
+    $req2 = AiRequest::query()->findOrFail($id2);
+    expect($req2->locale)->toBe('en');
+});

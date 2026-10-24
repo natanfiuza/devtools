@@ -11,6 +11,7 @@ use App\Http\Resources\AiQueryResource;
 use App\Models\AiRequest;
 use App\Models\OutputTarget;
 use App\Models\User;
+use App\Support\Locales;
 use App\Support\Quota;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,11 @@ final class AiQueryController extends Controller
             ->where('enabled', true)
             ->firstOrFail();
 
+        $rawLocale = (string) ($data['locale'] ?? '');
+        $locale = Locales::isSupported($rawLocale)
+            ? $rawLocale
+            : (Locales::fromSlug($rawLocale) ?? Locales::preferred($request));
+
         $result = $start(
             $user,
             $target,
@@ -51,6 +57,8 @@ final class AiQueryController extends Controller
             SqlDialect::from((string) $data['dialect']),
             (string) $data['schema'],
             (string) $data['description'],
+            null,
+            $locale,
         );
 
         return (new AiQueryResource($result->request, $result->quota))

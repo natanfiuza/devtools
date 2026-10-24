@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\SchemaSource;
 use App\Enums\SqlDialect;
 use App\Models\OutputTarget;
+use App\Support\Locales;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -41,6 +42,7 @@ class StoreAiQueryRequest extends FormRequest
             ],
             'schema' => ['required', 'string', 'max:'.$maxSchemaBytes],
             'description' => ['required', 'string', 'max:'.$maxDescriptionChars],
+            'locale' => ['sometimes', 'nullable', 'string', Rule::in([...Locales::codes(), ...Locales::slugs()])],
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace App\Support\Ai;
 
 use App\Enums\SchemaSource;
 use App\Enums\SqlDialect;
+use App\Support\Locales;
 use InvalidArgumentException;
 
 /**
@@ -24,11 +25,28 @@ final class Canonicalizer
         string $description,
         string $model,
         int $promptVersion,
+        string $locale = 'en',
     ): CanonicalPayload {
         $schema = $this->normalize($schema);
         $description = $this->normalize($description);
         $target = trim($target);
         $model = trim($model);
+        $locale = trim($locale);
+
+        $hasConfig = function_exists('app') && app()->has('config');
+
+        if ($hasConfig) {
+            if (! Locales::isSupported($locale)) {
+                $locale = Locales::fromSlug($locale) ?? Locales::fallback();
+            }
+        } else {
+            $slugs = ['en' => 'en', 'pt-br' => 'pt_BR', 'pt-pt' => 'pt_PT', 'fr' => 'fr', 'es' => 'es'];
+            $supported = ['en', 'pt_BR', 'pt_PT', 'fr', 'es'];
+
+            if (! in_array($locale, $supported, true)) {
+                $locale = $slugs[strtolower($locale)] ?? 'en';
+            }
+        }
 
         if ($schema === '') {
             throw new InvalidArgumentException('The schema must not be empty.');
@@ -58,6 +76,7 @@ final class Canonicalizer
             $description,
             $model,
             $promptVersion,
+            $locale,
         );
     }
 

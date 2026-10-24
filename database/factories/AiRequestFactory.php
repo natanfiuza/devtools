@@ -28,6 +28,7 @@ class AiRequestFactory extends Factory
             'user_id' => User::factory(),
             'output_target_id' => OutputTarget::factory(),
             'status' => AiRequestStatus::Queued,
+            'locale' => 'en',
             'dialect' => SqlDialect::Mysql,
             'schema_source' => SchemaSource::Ddl,
             'prompt_hash' => md5(fake()->uuid()),

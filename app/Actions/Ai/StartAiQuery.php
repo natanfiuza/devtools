@@ -23,6 +23,7 @@ use App\Support\Ai\PromptBuilder;
 use App\Support\Ai\PromptLoader;
 use App\Support\Ai\StartResult;
 use App\Support\Ai\TokenEstimator;
+use App\Support\Locales;
 use App\Support\Quota;
 use Illuminate\Support\Facades\DB;
 
@@ -57,6 +58,7 @@ final class StartAiQuery
         string $schema,
         string $description,
         ?int $apiTokenId = null,
+        ?string $locale = null,
     ): StartResult {
         AiConfiguration::ensureAvailable();
         $model = AiConfiguration::model();
@@ -64,6 +66,10 @@ final class StartAiQuery
         if (! $outputTarget->supportsDialect($dialect)) {
             throw AiInputException::unsupportedDialect();
         }
+
+        $resolvedLocale = is_string($locale) && Locales::isSupported($locale)
+            ? $locale
+            : Locales::fallback();
 
         $prompt = $this->prompts->load($outputTarget->prompt_template);
         $payload = $this->canonicalizer->canonicalize(
@@ -74,6 +80,7 @@ final class StartAiQuery
             $description,
             $model,
             $prompt->version,
+            $resolvedLocale,
         );
 
         $messages = $this->promptBuilder->build($outputTarget, $payload, $prompt);
@@ -162,6 +169,7 @@ final class StartAiQuery
                 'api_token_id' => $apiTokenId,
                 'output_target_id' => $outputTarget->getKey(),
                 'status' => AiRequestStatus::Queued,
+                'locale' => $payload->locale,
                 'dialect' => $dialect,
                 'schema_source' => $schemaSource,
                 'prompt_hash' => $payload->hash(),

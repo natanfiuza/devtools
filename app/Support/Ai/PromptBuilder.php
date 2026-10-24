@@ -31,7 +31,7 @@ final class PromptBuilder
         return [
             [
                 'role' => 'system',
-                'content' => $this->system($target, $prompt),
+                'content' => $this->system($target, $prompt, $payload->locale),
             ],
             [
                 'role' => 'user',
@@ -40,15 +40,50 @@ final class PromptBuilder
         ];
     }
 
-    private function system(OutputTarget $target, Prompt $prompt): string
+    private function system(OutputTarget $target, Prompt $prompt, string $locale): string
     {
         $targetKey = json_encode($target->slug, JSON_THROW_ON_ERROR);
+        $template = $this->loadSystemTemplate($locale);
 
-        return <<<PROMPT
+        return strtr($template, [
+            '{target_instructions}' => $prompt->text,
+            '{target_key}' => $targetKey,
+            '{target_slug}' => $target->slug,
+        ]);
+    }
+
+    private function loadSystemTemplate(string $locale): string
+    {
+        $directory = config('ai.prompt_path');
+        $baseDir = is_string($directory) && $directory !== ''
+            ? rtrim($directory, '/\\').DIRECTORY_SEPARATOR.'system'
+            : resource_path('prompts/system');
+
+        $safeLocale = preg_replace('/[^a-zA-Z0-9_]/', '', $locale) ?? 'en';
+        $path = $baseDir.DIRECTORY_SEPARATOR.$safeLocale.'.md';
+
+        if (! is_file($path) || ! is_readable($path)) {
+            $path = $baseDir.DIRECTORY_SEPARATOR.'en.md';
+        }
+
+        if (is_file($path) && is_readable($path)) {
+            $content = file_get_contents($path);
+
+            if ($content !== false && trim($content) !== '') {
+                return trim($content);
+            }
+        }
+
+        return $this->fallbackSystemTemplate();
+    }
+
+    private function fallbackSystemTemplate(): string
+    {
+        return <<<'PROMPT'
 You are a senior software engineer who generates query code from a database schema.
 
 TARGET INSTRUCTIONS
-{$prompt->text}
+{target_instructions}
 
 HARD RULES
 - Return exactly one JSON object. No markdown fences, no prose before or after it.
@@ -63,7 +98,7 @@ HARD RULES
   or more than one SQL statement.
 - If the schema cannot answer the request, set needs_clarification to true, keep
   sql empty, and write the question in clarification.
-- Write assumptions, warnings and clarification in the same language as the request.
+- Write title, explanation, assumptions, warnings and clarification strictly in English.
 - Keep the response compact enough for the output limit.
 
 JSON SHAPE
@@ -78,14 +113,11 @@ JSON SHAPE
   "needs_clarification": false,
   "clarification": null,
   "outputs": {
-    {$targetKey}: "string"
+    {target_key}: "string"
   }
 }
 
-The dialect value must be exactly the one in DIALECT. Provide a short, informative title for the query reflecting what is being queried and the output target (e.g. "Busca por Pedidos de Clientes no formato TypeORM"). Provide a concise and didactic explanation (1-2 short paragraphs) of how the query was constructed, highlighting key joins, filters, groupings or design decisions so a developer can immediately understand it. Write title, explanation, assumptions, warnings and clarification in the same language as the request. When needs_clarification is
-false, outputs.{$target->slug} is required and non-empty, and sql contains the
-equivalent SQL. When needs_clarification is true, sql, outputs and explanation must be empty and
-clarification must be non-empty.
+The dialect value must be exactly the one in DIALECT. Provide a short, informative title for the query reflecting what is being queried and the output target. Provide a concise and didactic explanation (1-2 short paragraphs) in "explanation" detailing how this query was built, highlighting key joins, filters, groupings or design decisions so a developer can immediately understand it. Write title, explanation, assumptions, warnings and clarification strictly in English. When needs_clarification is false, outputs.{target_slug} is required and non-empty, and sql contains the equivalent SQL. When needs_clarification is true, sql, outputs and explanation must be empty and clarification must be non-empty.
 PROMPT;
     }
 

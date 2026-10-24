@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $api_token_id
  * @property int $output_target_id
  * @property AiRequestStatus $status
+ * @property string|null $locale
  * @property SqlDialect $dialect
  * @property SchemaSource $schema_source
  * @property string $prompt_hash
@@ -62,6 +63,7 @@ use Illuminate\Support\Carbon;
     'api_token_id',
     'output_target_id',
     'status',
+    'locale',
     'dialect',
     'schema_source',
     'prompt_hash',

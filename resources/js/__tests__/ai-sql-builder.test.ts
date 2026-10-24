@@ -383,6 +383,7 @@ describe('SchemaForm', () => {
             output_target: 'sql',
             schema: 'CREATE TABLE users (id int)',
             description: 'Listar',
+            locale: 'pt-br',
         });
     });
 

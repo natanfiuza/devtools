@@ -23,6 +23,7 @@ final readonly class CanonicalPayload
         public string $description,
         public string $model,
         public int $promptVersion,
+        public string $locale = 'en',
     ) {}
 
     /**
@@ -40,6 +41,8 @@ final readonly class CanonicalPayload
         $description = $data['description'] ?? null;
         $model = $data['model'] ?? null;
         $version = $data['prompt_version'] ?? null;
+        $rawLocale = $data['locale'] ?? 'en';
+        $locale = is_string($rawLocale) && $rawLocale !== '' ? $rawLocale : 'en';
 
         if (! is_string($source) || ! is_string($dialect) || ! is_string($target)
             || ! is_string($schema) || ! is_string($description) || ! is_string($model)
@@ -54,13 +57,14 @@ final readonly class CanonicalPayload
             throw PayloadCodecException::invalidShape();
         }
 
-        return new self($schemaSource, $sqlDialect, $target, $schema, $description, $model, $version);
+        return new self($schemaSource, $sqlDialect, $target, $schema, $description, $model, $version, $locale);
     }
 
     /**
      * @return array{
      *     description: string,
      *     dialect: string,
+     *     locale: string,
      *     model: string,
      *     prompt_version: int,
      *     schema: string,
@@ -73,6 +77,7 @@ final readonly class CanonicalPayload
         $data = [
             'description' => $this->description,
             'dialect' => $this->dialect->value,
+            'locale' => $this->locale,
             'model' => $this->model,
             'prompt_version' => $this->promptVersion,
             'schema' => $this->schema,
