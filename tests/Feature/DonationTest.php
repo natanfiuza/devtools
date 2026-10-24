@@ -228,9 +228,11 @@ it('cria o pix dinamico e manda para o status da doacao', function () {
         'api.mercadopago.com/v1/payments' => Http::response([
             'id' => 555,
             'status' => 'pending',
-            // Relativo ao relogio do teste: uma data fixa vence com o tempo e
-            // a doacao nasce expirada, escondendo o QR que o teste confere.
-            'date_of_expiration' => now()->addHour()->toIso8601String(),
+            // O Mercado Pago devolve date_of_expiration com offset -04:00
+            // (horario de Nova York/Manaus). Mesmo com 60 min (menos que a
+            // diferenca de fuso se o offset for ignorado pelo DATETIME do
+            // banco), a conversao para app.timezone evita que nasca vencida.
+            'date_of_expiration' => now()->addMinutes(30)->setTimezone('-04:00')->format('Y-m-d\TH:i:s.vP'),
             'point_of_interaction' => [
                 'transaction_data' => [
                     'qr_code' => '00020126...6304ABCD',
@@ -258,7 +260,8 @@ it('cria o pix dinamico e manda para o status da doacao', function () {
         ->and($donation->qr_code)->toBe('00020126...6304ABCD')
         ->and($donation->qr_code_base64)->toBe('iVBORw0KGgo=')
         ->and($donation->ticket_url)->toContain('payment_id=555')
-        ->and($donation->expires_at)->not->toBeNull();
+        ->and($donation->expires_at)->not->toBeNull()
+        ->and($donation->refresh()->effectiveStatus())->toBe(DonationStatus::Pending);
 
     Http::assertSent(function (Request $request) use ($donation): bool {
         $body = $request->data();
