@@ -193,12 +193,17 @@ DONATIONS_PIX_HOLDER="NATANIEL FIUZA"
 DONATIONS_PIX_CITY="RECIFE"
 ```
 
-### Aplicar as alterações
+### Aplicar as alterações (Obrigatório!)
+
+> [!IMPORTANT]
+> **Por que preencher o `.env` sozinho não ativa os botões nas páginas `/donate` e `/subscribe`?**
+> Em produção (VPS), o script de deploy (`deploy/deploy.sh`) executa `php artisan optimize`, que compila todas as configurações em `bootstrap/cache/config.php`. Enquanto esse cache existir, **o Laravel ignora completamente as leituras de `env()` do arquivo `.env`**. Portanto, sempre que você adicionar ou alterar `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_WEBHOOK_SECRET` ou `DONATIONS_*`, é **obrigatório** limpar e recriar o cache de configuração e reiniciar os workers da fila.
 
 Após salvar o `.env`, limpe e recarregue o cache de configuração e **reinicie os workers da fila** (para que os processos em memória leiam as novas chaves):
 
 **Em produção (VPS):**
 ```bash
+cd /var/www/devtools
 php artisan optimize:clear && php artisan optimize
 php artisan queue:restart
 sudo supervisorctl status devtools-worker:*
@@ -208,6 +213,12 @@ sudo supervisorctl status devtools-worker:*
 ```bash
 php artisan config:clear
 ```
+
+**Como confirmar imediatamente no terminal se o Laravel enxergou as credenciais:**
+```bash
+php artisan about --only=payments
+```
+A saída deve exibir `Mercado Pago Token: configured`, `Mercado Pago Webhook Secret: configured` e `Donation Mode: dynamic (mercadopago)` (sem jamais expor o token na tela).
 
 ---
 

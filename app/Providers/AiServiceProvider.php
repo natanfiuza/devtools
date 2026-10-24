@@ -5,7 +5,9 @@ namespace App\Providers;
 use App\Contracts\Ai\LlmProvider;
 use App\Models\User;
 use App\Services\Ai\DeepSeekProvider;
+use App\Support\Ai\AiConfiguration;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +29,15 @@ class AiServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        AboutCommand::add('AI', function (): array {
+            $model = trim((string) config('ai.model'));
+
+            return [
+                'Provider' => AiConfiguration::isAvailable() ? 'configured' : 'not configured',
+                'Model' => $model !== '' ? $model : 'not configured',
+            ];
+        });
+
         RateLimiter::for('ai-post', function (Request $request): array {
             $user = $request->user();
             $account = $user instanceof User

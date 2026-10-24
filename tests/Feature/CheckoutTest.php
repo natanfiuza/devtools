@@ -328,3 +328,33 @@ it('lista os planos com renovacao ativa e esconde o checkout sem credenciais', f
             ->where('onlineCheckoutAvailable', false)
         );
 });
+
+it('exibe o estado de configuracao de pagamentos e doacoes no artisan about sem vazar segredos', function () {
+    config([
+        'payments.mercadopago.access_token' => 'APP_USR-segredo-token-123',
+        'payments.mercadopago.webhook_secret' => 'segredo-webhook-456',
+    ]);
+
+    $this->artisan('about', ['--json' => true])
+        ->expectsOutputToContain('"payments"')
+        ->expectsOutputToContain('"mercado_pago_token":"configured"')
+        ->expectsOutputToContain('"mercado_pago_webhook_secret":"configured"')
+        ->expectsOutputToContain('"donation_mode":"dynamic (mercadopago)"')
+        ->doesntExpectOutputToContain('APP_USR-segredo-token-123')
+        ->doesntExpectOutputToContain('segredo-webhook-456')
+        ->assertSuccessful();
+
+    config([
+        'payments.mercadopago.access_token' => null,
+        'payments.mercadopago.webhook_secret' => null,
+        'donations.static_pix.key' => 'pix@exemplo.com',
+        'donations.static_pix.holder' => 'NATANIEL',
+        'donations.static_pix.city' => 'RECIFE',
+    ]);
+
+    $this->artisan('about', ['--json' => true])
+        ->expectsOutputToContain('"mercado_pago_token":"not configured"')
+        ->expectsOutputToContain('"mercado_pago_webhook_secret":"not configured"')
+        ->expectsOutputToContain('"donation_mode":"static pix"')
+        ->assertSuccessful();
+});
