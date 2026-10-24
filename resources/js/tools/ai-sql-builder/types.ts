@@ -130,6 +130,7 @@ export interface AiQueryInput {
     output_target: string;
     schema: string;
     description: string;
+    locale?: string;
 }
 
 export interface AiQueryEndpoints {

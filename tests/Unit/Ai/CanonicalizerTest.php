@@ -5,6 +5,9 @@ use App\Enums\SqlDialect;
 use App\Exceptions\Ai\PayloadCodecException;
 use App\Support\Ai\Canonicalizer;
 use App\Support\Ai\CanonicalPayload;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 it('normaliza quebras de linha e espacos do fim sem mudar o conteudo', function () {
     $payload = (new Canonicalizer)->canonicalize(
@@ -73,12 +76,40 @@ it('ordena as chaves do json canonico', function () {
     expect(array_keys($payload->toArray()))->toBe([
         'description',
         'dialect',
+        'locale',
         'model',
         'prompt_version',
         'schema',
         'schema_source',
         'target',
     ]);
+});
+
+it('muda o hash quando o locale muda', function () {
+    $canonicalizer = new Canonicalizer;
+
+    $pt = $canonicalizer->canonicalize(SchemaSource::Ddl, SqlDialect::Mysql, 'sql', 'schema', 'desc', 'model', 1, 'pt_BR');
+    $en = $canonicalizer->canonicalize(SchemaSource::Ddl, SqlDialect::Mysql, 'sql', 'schema', 'desc', 'model', 1, 'en');
+
+    expect($pt->hash())->not->toBe($en->hash())
+        ->and($pt->locale)->toBe('pt_BR')
+        ->and($en->locale)->toBe('en');
+});
+
+it('reconstroi o payload com fallback para locale padrao quando ausente', function () {
+    $data = [
+        'schema_source' => 'ddl',
+        'dialect' => 'mysql',
+        'target' => 'sql',
+        'schema' => 'schema',
+        'description' => 'desc',
+        'model' => 'model',
+        'prompt_version' => 1,
+    ];
+
+    $payload = CanonicalPayload::fromArray($data);
+
+    expect($payload->locale)->toBe('en');
 });
 
 it('reconstroi o payload a partir do array canonico', function () {

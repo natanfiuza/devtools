@@ -12,6 +12,7 @@ use App\Http\Requests\StoreAiQueryRequest;
 use App\Http\Resources\ApiSqlQueryResource;
 use App\Models\AiRequest;
 use App\Models\OutputTarget;
+use App\Support\Locales;
 use App\Support\Quota;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,6 +90,11 @@ final class SqlQueryController extends Controller
             ->where('enabled', true)
             ->firstOrFail();
 
+        $rawLocale = (string) ($data['locale'] ?? '');
+        $locale = Locales::isSupported($rawLocale)
+            ? $rawLocale
+            : (Locales::fromSlug($rawLocale) ?? Locales::preferred($request));
+
         $result = $start(
             $user,
             $target,
@@ -97,6 +103,7 @@ final class SqlQueryController extends Controller
             (string) $data['schema'],
             (string) $data['description'],
             $token->getKey(),
+            $locale,
         );
 
         return (new ApiSqlQueryResource($result->request, $result->quota))

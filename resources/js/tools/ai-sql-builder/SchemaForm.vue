@@ -133,6 +133,7 @@ function onSubmit(): void {
         output_target: target.value,
         schema: schema.value,
         description: description.value,
+        locale: locale.value,
     });
 }
 
