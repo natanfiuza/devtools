@@ -148,7 +148,8 @@ it('cria a cobranca pix da doacao com qr e copia e cola', function () {
             && $body['payment_method_id'] === 'pix'
             && (float) $body['transaction_amount'] === 10.0
             && $body['external_reference'] === 'don_01ABC'
-            && $body['payer']['email'] === 'doador@exemplo.com';
+            && $body['payer']['email'] === 'doador@exemplo.com'
+            && preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}$/', (string) $body['date_of_expiration']) === 1;
     });
 });
 
@@ -290,14 +291,14 @@ it('inclui os codigos estruturados de causa no contexto da excecao sem vazar na 
     } catch (PaymentGatewayException $exception) {
         expect($exception->getMessage())->toBe('Payments: donation.pix respondeu HTTP 400.')
             ->and($exception->statusCode)->toBe(400)
-            ->and($exception->gatewayError)->toBe('bad_request')
+            ->and($exception->gatewayError)->toBe('bad_request: Collector cannot be the same as payer')
             ->and($exception->gatewayCauses)->toBe([
                 ['code' => '2067', 'description' => 'Invalid payer email'],
             ])
             ->and($exception->context())->toMatchArray([
                 'operation' => 'donation.pix',
                 'status_code' => 400,
-                'gateway_error' => 'bad_request',
+                'gateway_error' => 'bad_request: Collector cannot be the same as payer',
             ]);
     }
 });
