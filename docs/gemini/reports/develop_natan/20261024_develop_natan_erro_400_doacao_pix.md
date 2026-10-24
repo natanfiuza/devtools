@@ -18,7 +18,10 @@ A inspeção revelou quatro fatores:
 1. **Ordem de carregamento de `config/donations.php`:** A linha `'payer_email' => env('DONATIONS_PAYER_EMAIL', config('mail.from.address'))` tentava ler `config('mail.from.address')` antes de `config/mail.php` ser carregado pelo Laravel (ordem alfabética `d` antes de `m`), resultando em `null` ou string vazia quando `DONATIONS_PAYER_EMAIL=` estava vazio no `.env`.
 2. **Rejeição da `notification_url` com `localhost` / loopback:** O log mostrava `local.ERROR` no servidor (`/var/www/devtools`). Quando `APP_URL` aponta para `localhost` ou `127.0.0.1` sem `PAYMENTS_WEBHOOK_URL` configurada, o Mercado Pago recusa o `POST /v1/payments` com `HTTP 400 Bad Request` (`notification_url must be valid`).
 3. **Bloqueio de autofinanciamento pelo Mercado Pago (`payer.email` == e-mail da conta recebedora):** Quando o usuário testa logado com o mesmo e-mail da conta Mercado Pago dona do `MERCADO_PAGO_ACCESS_TOKEN` (ou configura esse mesmo e-mail em `DONATIONS_PAYER_EMAIL`), a API do Mercado Pago retorna `HTTP 400` (*"The payer cannot be the same as the collector"*).
-4. **Falta de contexto estruturado no log:** `MercadoPagoGateway` descartava os códigos estruturados `error` e `cause[].code` / `cause[].description` da resposta de erro do Mercado Pago.
+4. **Falta de contexto estruturado no log e Causa Real revelada (`code: 23` em `date_of_expiration`):**
+   - Após instrumentar `PaymentGatewayException::context()`, o log de produção revelou `"gateway_causes":[{"code":"23","description":""}]`.
+   - Na API do Mercado Pago (`POST /v1/payments`), o erro `code: 23` é: *"The following parameters must be valid date and format (`yyyy-MM-dd'T'HH:mm:ss.SSSZ`): `date_of_expiration`"*.
+   - `MercadoPagoGateway` chamava `$request->expiresAt->toIso8601String()`, que no Carbon formata sem milissegundos (`Y-m-d\TH:i:sP`, ex.: `2026-10-24T21:00:05+00:00`), sendo recusado pelo validador do Mercado Pago. Substituído por `$this->iso8601($date)` usando `$date->format('Y-m-d\TH:i:s.vP')` (`2026-10-24T21:00:05.000+00:00`) tanto em `createPixDonation` quanto em `createPreference`.
 
 ---
 

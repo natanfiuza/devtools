@@ -69,8 +69,8 @@ final class MercadoPagoGateway implements PaymentGateway
 
         if ($request->expiresAt !== null) {
             $payload['expires'] = true;
-            $payload['expiration_date_from'] = now()->toIso8601String();
-            $payload['expiration_date_to'] = $request->expiresAt->toIso8601String();
+            $payload['expiration_date_from'] = $this->iso8601(now());
+            $payload['expiration_date_to'] = $this->iso8601($request->expiresAt);
         }
 
         if ($request->statementDescriptor !== null && $request->statementDescriptor !== '') {
@@ -130,7 +130,7 @@ final class MercadoPagoGateway implements PaymentGateway
         }
 
         if ($request->expiresAt !== null) {
-            $payload['date_of_expiration'] = $request->expiresAt->toIso8601String();
+            $payload['date_of_expiration'] = $this->iso8601($request->expiresAt);
         }
 
         $data = $this->send('donation.pix', 'POST', '/v1/payments', $payload, $request->idempotencyKey);
@@ -376,6 +376,16 @@ final class MercadoPagoGateway implements PaymentGateway
     }
 
     /**
+     * A API do Mercado Pago exige milissegundos e offset explicito (`-03:00`,
+     * nunca `Z` puro do `toIso8601String()` em UTC) em `date_of_expiration` e
+     * `expiration_date_*` (erro code 23 quando em formato `...Z`).
+     */
+    private function iso8601(CarbonInterface $date): string
+    {
+        return $date->format('Y-m-d\TH:i:s.vP');
+    }
+
+    /**
      * Extrai apenas os codigos estruturados de erro (`error` e `cause[].code` /
      * `cause[].description`) sem jamais expor corpo cru ou dados de pagador.
      *
@@ -398,7 +408,13 @@ final class MercadoPagoGateway implements PaymentGateway
         }
 
         $error = $this->text($decoded['error'] ?? null);
-        $error = $error !== null ? mb_substr($error, 0, 80) : null;
+        $message = $this->text($decoded['message'] ?? null);
+
+        if ($message !== null && $message !== $error) {
+            $error = $error !== null ? "{$error}: {$message}" : $message;
+        }
+
+        $error = $error !== null ? mb_substr($error, 0, 160) : null;
 
         $causes = [];
         $rawCauses = $decoded['cause'] ?? null;
@@ -410,7 +426,9 @@ final class MercadoPagoGateway implements PaymentGateway
                 }
 
                 $code = $this->text($cause['code'] ?? null) ?? 'unknown';
-                $description = $this->text($cause['description'] ?? null) ?? '';
+                $description = $this->text($cause['description'] ?? null)
+                    ?? $this->text($cause['message'] ?? null)
+                    ?? '';
 
                 $causes[] = [
                     'code' => mb_substr($code, 0, 40),
