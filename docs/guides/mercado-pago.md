@@ -6,6 +6,15 @@ Como configurar, ativar e operar a integração com o Mercado Pago no site. **To
 
 ## 1. Perguntas Rápidas (FAQ)
 
+### Preciso criar duas aplicações no Mercado Pago (uma para PIX/Cartão à vista e outra para Assinaturas recorrentes)?
+**Não. Você deve criar apenas UMA aplicação** no painel do Mercado Pago Developers.
+- No assistente de criação de aplicação do Mercado Pago, a pergunta *"Qual produto você está integrando?"* (Checkout Pro, Checkout Transparente ou Assinaturas) serve apenas para personalizar os atalhos de documentação no painel deles.
+- Tecnicamente, o **`Access Token` (`APP_USR-...`) pertence à sua conta recebedora** e tem permissão simultânea na API REST para chamar todos os endpoints que o DevTools utiliza:
+  1. **Doação PIX Transparente (`/{locale}/donate`):** `POST /v1/payments` (gera o QR Code e Copia e Cola direto na nossa tela);
+  2. **Plano Pro — Pagamento Único (`/subscribe` -> Pagar agora):** `POST /checkout/preferences` (abre o Checkout Pro com PIX à vista, Cartão à vista e Boleto);
+  3. **Plano Pro — Renovação Automática (`/subscribe` -> Renovação automática no cartão):** `POST /preapproval` (cria a assinatura recorrente sem plano associado).
+- Além disso, na aba **Webhooks** dessa mesma aplicação única, você consegue marcar simultaneamente os 3 tópicos (`Pagamentos`, `Planos e assinaturas` e `Faturas de assinaturas`) sob um único `MERCADO_PAGO_WEBHOOK_SECRET`. Se você criasse duas aplicações separadas, cada uma teria uma *Assinatura secreta* diferente para o webhook, o que impediria validar ambas com uma única variável `MERCADO_PAGO_WEBHOOK_SECRET`.
+
 ### Precisa instalar algum SDK?
 **Não.** O projeto **não utiliza** o SDK oficial PHP (`mercadopago/dx-php`) nem o SDK JavaScript (`@mercadopago/sdk-js`):
 - **No Backend (PHP):** A classe `App\Services\Payments\MercadoPagoGateway` (que implementa o contrato `App\Contracts\Payments\PaymentGateway`) faz chamadas HTTP REST diretas usando o cliente nativo do Laravel (`Illuminate\Support\Facades\Http`), com `Bearer Token`, timeouts estritos (`connect_timeout` de 5 s e `timeout` de 20 s), cabeçalho `X-Idempotency-Key` determinístico por operação e exceções seguras (`PaymentGatewayException`), que nunca registram corpo da resposta ou credenciais em log (ADR-045).
@@ -68,7 +77,7 @@ Antes de gerar credenciais de produção:
    - **Nome da aplicação**: `DevTools` (ou `devtools.natanfiuza.dev.br`).
    - **Qual tipo de solução de pagamento você vai integrar?**: selecione **Pagamentos online** (Online payments).
    - **Você está usando uma plataforma de e-commerce?**: selecione **Não** (desenvolvimento próprio).
-   - **Qual produto você está integrando?**: selecione **Checkout Pro** (as APIs de `/v1/payments` para Pix e `/preapproval` para assinaturas ficam automaticamente habilitadas na mesma aplicação).
+   - **Qual produto você está integrando?**: selecione **Checkout Pro** *(ou **Checkout Transparente** — a escolha neste campo não restringe a API: os endpoints `/v1/payments` para Pix transparente, `/checkout/preferences` para Checkout Pro e `/preapproval` para assinaturas recorrentes ficam todos habilitados na mesma aplicação)*.
    - **Modelo de integração**: opcional / padrão.
 5. Aceite os termos de uso e clique em **Criar aplicação**.
 
