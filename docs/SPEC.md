@@ -13,7 +13,7 @@ Site de ferramentas para desenvolvedores. Tools do cliente sao gratuitas e sem l
 ## 3. Idiomas
 en, pt-BR, pt-PT, fr, es. URL prefixada (/pt-br/...), hreflang, seletor no header, escolha do idioma no cadastro e idioma da conta em `users.locale`, trocavel no perfil (ADR-026). Precedencia: em rota prefixada a URL manda (e passa a valer como cookie); sem prefixo - area autenticada, `/admin`, telas de token - a ordem e cookie -> idioma da conta -> `Accept-Language` -> en. O idioma da conta e tambem o idioma dos e-mails. Fallback: en.
 Alcance do prefixo: paginas publicas **e telas de autenticacao** vivem sob `/{locale}` — login, cadastro, esqueci/redefinir senha, verificar e-mail, confirmar senha e logout (ADR-022). A area autenticada (dashboard, settings) nao tem prefixo e usa o idioma da sessao/cookie. Rotas de maquina ficam fora: `/api`, `/webhooks`, `/admin` e `/auth/{provider}/*` (a URL de callback e cadastrada uma vez no provedor), e tambem `/sitemap.xml` e `/robots.txt`, que sao do site inteiro e nao de um idioma. `/` resolve o idioma do visitante e redireciona. Telas de acesso, paginas de token e o guia de estilo sao `noindex, follow` + canonical e sem hreflang; as paginas legais e a home seguem indexaveis com hreflang normal.
-Textos de interface sao escritos com acentuacao correta (o produto e traduzido); a documentacao do repo e escrita sem acentos, como este arquivo.
+Textos de interface e a documentacao do repositorio (`docs/`) sao escritos em portugues com acentuacao correta.
 
 ## 4. Registro de tools
 Cada tool = modulo `resources/js/tools/<slug>/` com `manifest.json`: `slug`, `status` (`soon|available|hidden`), `category`, `icon`, `order` e `keywords` (termos tecnicos de busca). O manifesto guarda so identidade e ciclo de vida - **nenhum texto visivel mora ali**: o nome, a descricao e as palavras-chave traduzidas vem de `tools.<slug>.*` nos 5 idiomas, por convencao a partir do slug.
@@ -232,7 +232,7 @@ A **lista de consultas** foi adiantada na F5 em 2026-10-21 (`dashboard/History`)
 Criterios de aceite por fase em docs/acceptance/FASE-N.md (gerar ao iniciar cada fase).
 
 ## 10. Documentacao a manter
-README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/openapi.yaml, docs/guides/ (passo a passo de operacao: GA4, login GitHub, cron), docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves, hardening, API), CHANGELOG.md.
+README (setup/deploy), docs/ARQUITETURA.md, docs/adr/, docs/glossario.md, docs/design/DESIGN.md, docs/API.md, docs/openapi.yaml, docs/guides/ (passo a passo de operacao: GA4, login Google, login GitHub, Mercado Pago, cron), docs/RUNBOOK.md (deploy, fila, restore de backup, rotacao de chaves, hardening, API), CHANGELOG.md.
 Escrito ate aqui: README, RUNBOOK, DESIGN, docs/adr/, docs/glossario.md e CHANGELOG desde a F0; **docs/ARQUITETURA.md e docs/API.md** entraram na F5, com o fluxo da solicitacao de IA e o contrato HTTP que a tela consome, e ganharam na F6 o fluxo de checkout/webhook e o contrato do webhook da Mercado Pago. A F7 documentou a **API publica v1** em `docs/API.md` e `docs/openapi.yaml` (OpenAPI 3.1), o guia do cron, o hardening e o ciclo do historico no RUNBOOK.
 Tambem fazem parte do repo: docs/acceptance/ (criterios por fase), docs/plans/ e docs/survey/ (plano e levantamento de cada sessao de grill) e docs/claude-code/reports/{branch}/ (relatorio ao fim de cada tarefa, regra do CLAUDE.md).
 Texto de produto que se atualiza sem deploy de codigo: paginas legais em `lang/{locale}/legal.php` e contato/data de revisao em `config/legal.php`; limites, precos e nomes de modelo de IA em `config/` e nas tabelas, nunca no codigo.
@@ -251,7 +251,7 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Login social (Google e GitHub) com vinculo so por e-mail confirmado pelo provedor, e conta sem senha como estado valido; a primeira senha e definida na tela de confirmar senha (ADR-023).
 - Newsletter com duplo opt-in, e confirmacao/descadastro decididos por POST, nunca por GET (ADR-024).
 - Paginas de Privacidade e Termos existem desde ja, sob `/{locale}`, nos 5 idiomas (secao 7).
-- Documentacao do repo em portugues sem acentos; strings de interface com acentuacao correta.
+- Documentacao do repo (`docs/`) e strings de interface escritas em portugues com acentuacao correta.
 - Papeis, autorizacao e auditoria: dois papeis (`user` e `admin`) em `users.role`, `UserPolicy` como unico lugar da autorizacao e toda acao administrativa registrada em `admin_actions`; o primeiro admin nasce por comando (`devtools:admin`), nao por seeder (ADR-025, fecha o item correspondente da 11.2).
 - Idioma da conta x idioma de navegacao: `users.locale` e preferencia duravel (escolhida no cadastro, opcional, e no perfil) e o cookie registra onde a pessoa esta navegando agora; sem prefixo a ordem e cookie -> conta -> `Accept-Language` -> en (ADR-026, muda o comportamento definido na F0).
 - Venda manual: assinatura concedida e pagamento registrado fora do gateway, com precos e limites na tabela `plans` e vigencia resolvida na leitura (ADR-027, fecha o item de valores da 11.2 e adianta parte da F6).

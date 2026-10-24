@@ -9,7 +9,7 @@ Leia SEMPRE: `docs/SPEC.md`, `docs/glossario.md`, `docs/adr/*`, `docs/design/DES
 - Nunca fixe nomes de modelo de IA, precos ou limites no codigo: use `config/`, `.env` ou tabelas (`plans`, `output_targets`).
 - Nunca registre em log o conteudo de schema ou prompt (nem em `admin_actions`).
 - Toda string visivel via i18n (5 idiomas: `en`, `pt-BR`, `pt-PT`, `fr`, `es`). Sem texto hardcoded.
-- Convencao de escrita: strings de interface usam acentuacao correta; documentacao do repositorio e escrita em portugues **sem acentos**.
+- Convencao de escrita: tanto as strings de interface quanto a documentacao do repositorio (`docs/`) sao escritas em portugues **com acentuacao correta**.
 - Decisao nova relevante => novo ADR em `docs/adr/` e termo novo => `docs/glossario.md`.
 - Tools do cliente rodam 100% no navegador; nada de requisicao ao servidor.
 - Deploy: cron executa a copia instalada `deploy/deploy-instaled.sh` (fonte em `deploy/deploy.sh` no repo; ver `deploy/deploy-instaled.md` e `docs/RUNBOOK.md`) a cada minuto. Migrations devem ser retrocompativeis (sem downtime).

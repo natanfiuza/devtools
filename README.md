@@ -11,7 +11,8 @@ dessa tool.
 - Design system: [docs/design/DESIGN.md](docs/design/DESIGN.md)
 - Glossario: [docs/glossario.md](docs/glossario.md)
 - Operacao no servidor: [docs/RUNBOOK.md](docs/RUNBOOK.md)
-- Arquitetura do AI SQL Builder: [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+- Guias operacionais (GA4, OAuth Google/GitHub, Mercado Pago e Cron): [docs/guides/](docs/guides/)
+- Arquitetura do AI SQL Builder e Pagamentos: [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
 - API da IA: [docs/API.md](docs/API.md)
 
 ## Stack

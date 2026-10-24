@@ -61,6 +61,7 @@ ANALYTICS_GA4_ID=
 # Mercado Pago (F6). Sem access token o checkout online nao aparece e a
 # assinatura cai no atendimento manual; sem webhook secret o endpoint responde
 # 503 e nenhuma notificacao e aceita. Nenhum dos dois vai para o repositorio.
+# Passo a passo completo em docs/guides/mercado-pago.md.
 PAYMENTS_GATEWAY=mercadopago
 MERCADO_PAGO_ACCESS_TOKEN=
 MERCADO_PAGO_WEBHOOK_SECRET=
@@ -465,7 +466,9 @@ O passo a passo completo esta em [guides/google-auth.md](guides/google-auth.md) 
 [guides/github-auth.md](guides/github-auth.md).
 
 **Mercado Pago (F6)**: `MERCADO_PAGO_ACCESS_TOKEN` e a chave da API e
-`MERCADO_PAGO_WEBHOOK_SECRET` e o segredo que assina as notificacoes. Para
+`MERCADO_PAGO_WEBHOOK_SECRET` e o segredo que assina as notificacoes (passo a
+passo completo de configuracao, webhooks e doacao Pix em
+[guides/mercado-pago.md](guides/mercado-pago.md)). Para
 rotacionar o token:
 
 1. gere o token novo no painel do provedor (producao ou sandbox);
