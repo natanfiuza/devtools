@@ -8,7 +8,7 @@
 - Premissas: suposicoes do modelo mostradas ao usuario.
 - Provider LLM: implementacao de LlmProvider (DeepSeek).
 - Processamento local: roda no navegador.
-- Solicitacao de IA (ai_request): registro de um pedido ao provedor, com ULID como id, estado (`queued`, `processing`, `done`, `failed`), o par `prompt_hash`/`prompt_version` que o gerou, os tokens reais e a reserva feita (`quota_unit`, `reserved_tokens`, `reserved_uses`). O schema e a descricao ficam nela comprimidos so enquanto a solicitacao esta em voo; ao terminar, o payload e apagado.
+- Solicitacao de IA (ai_request): registro de um pedido ao provedor, com ULID como id, estado (`queued`, `processing`, `done`, `failed`), o par `prompt_hash`/`prompt_version` que o gerou, os tokens reais e a reserva feita (`quota_unit`, `reserved_tokens`, `reserved_uses`). O schema e a descricao ficam nela comprimidos so enquanto a solicitacao esta em voo; o `canonical_payload` e apagado ao terminar. Com historico opt-in, `title`, `prompt` e `schema` ficam em claro na linha por ate 90 dias ou ate a conta apagar (ADR-051).
 - Solicitacao em voo: solicitacao da mesma conta, com o mesmo `prompt_hash`, ainda em `queued` ou `processing` dentro de `AI_INFLIGHT_TTL_SECONDS` (600 s); um POST igual e deduplicado para ela, sem novo debito e sem novo job.
 - Reserva: debito imediato que abre a solicitacao - 1 uso no Free, a estimativa de tokens no plano pago - e que sera ajustado ou estornado na liquidacao. Nao ha coluna de saldo: a reserva e uma linha do ledger.
 - Liquidacao: fechamento da solicitacao com os tokens reais do provedor; no plano pago debita a diferenca se o real passou da reserva e estorna se ficou abaixo. E idempotente: uma solicitacao terminal nao e liquidada duas vezes.
@@ -18,7 +18,7 @@
 - Prompt hash: MD5 do payload canonico + target + dialeto + modelo + versao do prompt + idioma (locale); e **chave de busca, nao prova de identidade** - no hit, o payload guardado e comparado inteiro com o pedido (ADR-016, ADR-056), e a linha que nao bater e ignorada.
 - Needs clarification: resposta do modelo que nao gera o alvo porque falta informacao (`needs_clarification = true`, `sql` vazio e `clarification` preenchida); e uma solicitacao `done` e consome a reserva, porque o trabalho foi feito.
 - Gate do SQL: verificacao lexical do SQL gerado para o alvo `sql` (ADR-041) - uma unica instrucao `SELECT`/`WITH`, sem DDL/DML, `;` interno ou funcoes perigosas; o SQL nunca e executado, e os alvos de ORM passam so pelo contrato.
-- Privacidade da IA: schema e descricao saem do navegador apenas nesta tool (ADR-002), vao ao provedor configurado, podem ficar no cache por ate 30 dias e **nunca** entram em log; a solicitacao apaga o payload ao terminar.
+- Privacidade da IA: schema e descricao saem do navegador apenas nesta tool (ADR-002), vao ao provedor configurado, podem ficar no cache por ate 30 dias e **nunca** entram em log; a solicitacao apaga o `canonical_payload` ao terminar. Com historico opt-in, `title`, `prompt` e `schema` ficam em claro na linha por ate 90 dias ou ate a conta apagar (ADR-051).
 - Cota: quanto a conta ainda pode consumir - usos vitalicios no Free, tokens acumulados da franquia nos planos pagos - sempre calculada do livro-razao e das assinaturas elegiveis, sem coluna de saldo (ADR-054).
 - Franquia de tokens: total acumulado de tokens creditados a cada mes iniciado de assinaturas pagas nao estornadas (1 lote por periodo no mensal, 1 lote por mes calendario iniciado ate 12 no anual) somado as concessoes manuais (`grant`); quando a assinatura vence sem renovacao, a conta opera no Free e o saldo acumulado de tokens volta a valer ao reativar um plano pago (ADR-054).
 - Ledger de uso: livro-razao de debitos, estornos e concessoes; nao guarda saldo.
@@ -37,7 +37,7 @@
 - Descadastro: saida da newsletter pelo link do proprio e-mail; a linha nao e apagada, fica marcada e o reenvio so acontece com nova confirmacao.
 - Pagina legal: Politica de Privacidade e Termos de Uso; conteudo proprio do site, sob `/{locale}`, indexavel e com hreflang normal (ao contrario das telas de acesso).
 - Papel: `user` ou `admin` (`users.role`); diz o que a pessoa pode fazer no site, e nao quem ela e.
-- Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Planos, Intencoes, Pagamentos e Auditoria -, acessiveis so com o papel `admin`.
+- Painel administrativo: telas sob `/admin` - Visao geral, Contas, Assinantes, Assinaturas, Planos, Intencoes, Pagamentos, Webhooks, Alvos de saida, Cache de IA e Auditoria -, acessiveis so com o papel `admin`.
 - Painel do usuario: area autenticada sob uma navegacao unica - Visao geral, Historico (planos pagos), Faturas, Tokens de API e Conta (Perfil, Seguranca, Aparencia).
 - Auditoria: registro em `admin_actions` de toda acao administrativa sobre uma conta ou sobre o catalogo; nao e log de aplicacao e nunca guarda conteudo de schema ou prompt.
 - Impersonacao (entrar como): sessao em que o admin passa a ver o site como o alvo, para dar suporte; a faixa no topo nao pode ser dispensada e a saida e uma rota propria (`DELETE /impersonation`).
@@ -94,9 +94,9 @@
 - Escopo por token: consulta da API pertence ao token que a criou (`ai_requests.api_token_id`), e nao so a conta; outro token ou a tela nao enxergam a consulta (404).
 - Rate limit por token: limite de taxa da API contado por token, separado do limite da tela; o 429 traz `Retry-After` e os numeros vivem em `config/api.php`.
 - Versao da API: numero no caminho (`/api/v1`); mudanca compativel continua na mesma versao, e quebra de contrato exige uma nova, com janela de migracao anunciada no CHANGELOG.
-- Historico (opt-in): consultas de IA ficam visiveis na tela de Historico so quando a conta liga o toggle em `users.history_enabled`; nasce desligado, vale so para planos pagos e desligar impede novas gravacoes sem apagar as antigas (ADR-051).
-- Retencao do historico: prazo de `AI_HISTORY_RETENTION_DAYS` (padrao 90 dias) depois do qual `history:prune` apaga a consulta terminal; o ledger de cota e o cache de IA nao sao tocados.
-- Apagar historico: acao explicita da conta que remove todas as consultas terminais (`done`/`failed`) do usuario, sem tocar nas que ainda estao em voo nem na contabilidade (ADR-051).
+- Historico (opt-in): consultas de IA ficam visiveis na tela de Historico so quando a conta liga o toggle em `users.history_enabled`; nasce desligado, vale so para planos pagos e desligar impede novas gravacoes sem apagar as antigas. Quando ligado, `title`, `prompt` e `schema` ficam em claro na linha (ADR-051).
+- Retencao do historico: prazo de `AI_HISTORY_RETENTION_DAYS` (padrao 90 dias) depois do qual `history:prune` apaga as consultas terminais; o ledger de cota e o cache de IA nao sao tocados.
+- Apagar historico: acao explicita da conta que remove todas as consultas terminais (`done`/`failed`) do usuario, sem tocar nas que ainda estao em voo, na contabilidade nem no cache de IA (ADR-051).
 - Coluna legada `ai_request_id`: coluna bigint de `usage_ledger` que ligava o debito a solicitacao antes do ULID; desde a F7 nao e lida nem escrita e sera removida no deploy seguinte. O `ai_request_id` que aparece no log e o ULID, nao essa coluna.
 - CSP (Content-Security-Policy): cabecalho que lista de onde a pagina pode carregar script, estilo, imagem e conexao; no site sai por nonce e tem modo `enforce`, `report-only` ou `off` (`CSP_MODE`), com `frame-ancestors 'none'` (ADR-052).
 - Nonce de CSP: valor aleatorio gerado por resposta e repetido no cabecalho e nos scripts permitidos; script sem o nonce daquela resposta nao executa.
