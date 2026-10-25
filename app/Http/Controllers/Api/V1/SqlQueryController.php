@@ -25,9 +25,9 @@ use Illuminate\Validation\Rule;
  * na hora, 202 quando entrou na fila; o cliente segue o `poll_url`. A cota e a
  * do plano, debitada pelo mesmo `StartAiQuery`.
  *
- * O escopo de leitura e o token, e nao so a conta: dois tokens da mesma conta
- * sao dois clientes e nao enxergam as consultas um do outro. Consulta da web
- * (`api_token_id` nulo) tambem nao aparece - 404, para nao confirmar o id.
+ * O escopo de leitura e a conta (`user_id`): o token autenticado enxerga todas
+ * as consultas da propria conta (criadas pela web ou por qualquer token da
+ * conta). Consultas de outra conta respondem 404, para nao confirmar o id.
  */
 final class SqlQueryController extends Controller
 {
@@ -36,7 +36,6 @@ final class SqlQueryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $this->apiUser($request);
-        $token = $this->apiToken($request);
 
         /** @var array{status?: string} $filters */
         $filters = $request->validate([
@@ -46,8 +45,7 @@ final class SqlQueryController extends Controller
         $perPage = max(1, min(100, (int) config('api.pagination.per_page', 20)));
 
         $query = AiRequest::query()
-            ->where('user_id', $user->getKey())
-            ->where('api_token_id', $token->getKey());
+            ->where('user_id', $user->getKey());
 
         if (isset($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -114,12 +112,10 @@ final class SqlQueryController extends Controller
     public function show(Request $request, string $aiRequest): JsonResponse
     {
         $user = $this->apiUser($request);
-        $token = $this->apiToken($request);
 
         $model = AiRequest::query()
             ->whereKey($aiRequest)
             ->where('user_id', $user->getKey())
-            ->where('api_token_id', $token->getKey())
             ->with('outputTarget')
             ->firstOrFail();
 

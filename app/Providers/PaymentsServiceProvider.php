@@ -23,8 +23,8 @@ final class PaymentsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        AboutCommand::add('Payments', function (): array {
-            $online = $this->app->make(PaymentGateway::class)->isAvailable();
+        AboutCommand::add('Payments', static function (): array {
+            $online = app(PaymentGateway::class)->isAvailable();
             $webhookSecret = trim((string) config('payments.mercadopago.webhook_secret')) !== '';
             $staticPix = PixPayload::isConfigured();
 

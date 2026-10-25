@@ -238,9 +238,11 @@ sinal para o cliente parar.
 
 ### 7. Histórico e retenção
 
-O histórico é opt-in e exclusivo dos planos pagos (ADR-051). Ele nasce
-desligado em `users.history_enabled`; a tela do Free mostra o CTA de upgrade,
-e a lista só enxerga linhas gravadas com `history_visible`.
+O histórico nasce ligado por padrão em `users.history_enabled` (`true`, opt-out)
+para gravar as consultas geradas no AI SQL Builder (`QueryHistory.vue`). A tela
+de gerenciamento `/dashboard/history` é exclusiva dos planos pagos (ADR-051): a
+tela do Free mostra o CTA de upgrade, e as listas da web só enxergam linhas
+gravadas com `history_visible`.
 
 Quando o histórico está visível, a linha guarda `title`, `prompt` (a
 descrição) e `schema` em claro. O `canonical_payload` continua apagado no
@@ -252,8 +254,8 @@ demanda. Nenhum dos dois toca no `usage_ledger`
 nem no `ai_cache`: cota e cache compartilhado continuam valendo.
 
 Desligar o toggle impede novas gravações, mas não apaga as antigas. A lista da
-API v1 é escopada pelo token e não depende do toggle da tela; o histórico web
-é da conta e depende dele.
+API v1 é escopada pela conta (`user_id`) e não depende do toggle da tela; o
+histórico web é da conta e depende dele.
 
 ## Cache
 
@@ -282,7 +284,7 @@ Duas portas para a mesma ação, com autenticações diferentes:
 | Porta | Autenticação | Quem consome | Escopo da leitura |
 | ----- | ------------ | ------------ | ----------------- |
 | `/api/ai/queries` | Sessão + CSRF (grupo `web`) | A tela do AI SQL Builder | Solicitação da conta (`user_id`) |
-| `/api/v1/sql-queries` | `Authorization: Bearer` (Sanctum PAT, ability `ai:query`) | Cliente externo servidor-a-servidor | Solicitação do **token** (`api_token_id`) |
+| `/api/v1/sql-queries` | `Authorization: Bearer` (Sanctum PAT, ability `ai:query`) | Cliente externo servidor-a-servidor | Solicitação da conta (`user_id`) |
 
 Os cinco endpoints da v1 são:
 
@@ -290,15 +292,16 @@ Os cinco endpoints da v1 são:
 | ------ | ------- | -------------- |
 | `GET` | `/api/v1/me` | Identifica a conta e o estado da cota. |
 | `GET` | `/api/v1/output-targets` | Lista os alvos habilitados e os dialetos aceitos. |
-| `GET` | `/api/v1/sql-queries` | Lista as consultas do token, com paginação. |
+| `GET` | `/api/v1/sql-queries` | Lista as consultas da conta, com paginação. |
 | `POST` | `/api/v1/sql-queries` | Cria a consulta; responde 200 no cache e 202 na fila. |
 | `GET` | `/api/v1/sql-queries/{ulid}` | Consulta o estado; devolve `poll_url` enquanto não termina. |
 
 O PAT é criado em `/settings/api-tokens`; o texto puro aparece uma vez e o
-banco guarda só o hash. Um token sem a ability `ai:query` responde 403, e um
-token não enxerga consultas criadas por outro token nem pela tela (404). As
-duas portas passam por `StartAiQuery`, portanto têm a mesma validação, a mesma
-cota e o mesmo cache.
+banco guarda só o hash. Um token sem a ability `ai:query` responde 403, e a
+leitura enxerga todas as consultas da conta (inclusive as geradas no AI SQL
+Builder web), respondendo 404 para consultas de outra conta. As duas portas
+passam por `StartAiQuery`, portanto têm a mesma validação, a mesma cota e o
+mesmo cache.
 
 Os limites de taxa, o envelope de erro e os detalhes de contrato estão em
 [API.md](API.md) e [openapi.yaml](openapi.yaml); os números vivem em

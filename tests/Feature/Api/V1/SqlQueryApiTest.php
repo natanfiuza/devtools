@@ -195,19 +195,19 @@ it('cria a consulta do Free e devolve 202 com o poll url', function () {
 
     expect($request->api_token_id)->toBe($user->tokens()->sole()->id)
         ->and($request->user_id)->toBe($user->id)
-        ->and($request->history_visible)->toBeFalse();
+        ->and($request->history_visible)->toBeTrue();
 
     $this->assertDatabaseCount('usage_ledger', 1);
 });
 
 it('segue o opt-in do historico da conta', function () {
-    $user = User::factory()->create(['history_enabled' => true]);
+    $user = User::factory()->create(['history_enabled' => false]);
 
     $this->withToken(apiV1Token($user))
         ->postJson('/api/v1/sql-queries', apiV1Body())
         ->assertStatus(202);
 
-    expect(AiRequest::query()->sole()->history_visible)->toBeTrue();
+    expect(AiRequest::query()->sole()->history_visible)->toBeFalse();
 });
 
 it('devolve 200 quando o cache responde', function () {
@@ -254,7 +254,7 @@ it('consulta o status pelo poll url e para de pollar no fim', function () {
         ->assertJsonPath('data.poll_url', null);
 });
 
-it('nao deixa um token ler a consulta de outro token da mesma conta', function () {
+it('permite que qualquer token da conta leia consultas da mesma conta (inclusive da web)', function () {
     $user = User::factory()->create();
     $tokenA = apiV1Token($user);
     $tokenB = apiV1Token($user);
@@ -263,43 +263,54 @@ it('nao deixa um token ler a consulta de outro token da mesma conta', function (
         ->postJson('/api/v1/sql-queries', apiV1Body())
         ->json('data.id');
 
+    $web = AiRequest::factory()->for($user)->done()->create([
+        'title' => 'Consulta Web',
+        'prompt' => 'Listar usuarios ativos',
+        'schema' => 'CREATE TABLE users (id int);',
+    ]);
+
     apiV1ForgetGuards();
 
     $this->withToken($tokenB)
         ->getJson('/api/v1/sql-queries/'.$id)
-        ->assertNotFound()
-        ->assertJsonPath('error.code', 'not_found');
+        ->assertOk()
+        ->assertJsonPath('data.id', $id);
 
     apiV1ForgetGuards();
 
-    $this->withToken($tokenA)
-        ->getJson('/api/v1/sql-queries')
+    $this->withToken($tokenB)
+        ->getJson('/api/v1/sql-queries/'.$web->id)
         ->assertOk()
-        ->assertJsonPath('meta.total', 1)
-        ->assertJsonPath('data.0.id', $id);
+        ->assertJsonPath('data.id', $web->id)
+        ->assertJsonPath('data.title', 'Consulta Web')
+        ->assertJsonPath('data.description', 'Listar usuarios ativos')
+        ->assertJsonPath('data.schema', 'CREATE TABLE users (id int);')
+        ->assertJsonPath('data.schema_source', 'ddl')
+        ->assertJsonPath('data.dialect', 'mysql');
 
     apiV1ForgetGuards();
 
     $this->withToken($tokenB)
         ->getJson('/api/v1/sql-queries')
         ->assertOk()
-        ->assertJsonPath('meta.total', 0);
+        ->assertJsonPath('meta.total', 2);
 });
 
-it('nao expoe consulta da web nem consulta de outra conta', function () {
+it('nao expoe consulta de outra conta', function () {
     $user = User::factory()->create();
     $token = apiV1Token($user);
 
-    $web = AiRequest::factory()->for($user)->done()->create();
     $alheia = AiRequest::factory()->done()->create();
-
-    $this->withToken($token)
-        ->getJson('/api/v1/sql-queries/'.$web->id)
-        ->assertNotFound();
 
     $this->withToken($token)
         ->getJson('/api/v1/sql-queries/'.$alheia->id)
         ->assertNotFound();
+
+    $this->withToken($token)
+        ->getJson('/api/v1/sql-queries')
+        ->assertOk()
+        ->assertJsonPath('meta.total', 0)
+        ->assertJsonPath('data', []);
 });
 
 it('filtra a lista por status', function () {

@@ -180,7 +180,7 @@ it('entrega o historico bloqueado no plano gratuito', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard/History')
             ->where('locked', true)
-            ->where('enabled', false)
+            ->where('enabled', true)
             ->where('history.data', [])
             ->where('total', 0)
             ->where('retentionDays', 90)
@@ -197,7 +197,7 @@ it('entrega o historico vazio no plano pago enquanto nao ha consumo', function (
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard/History')
             ->where('locked', false)
-            ->where('enabled', false)
+            ->where('enabled', true)
             ->where('history.data', [])
             ->where('total', 0));
 });
@@ -303,14 +303,14 @@ it('recusa escritas do historico no plano gratuito', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->patch(route('dashboard.history.preference'), ['history_enabled' => true])
+        ->patch(route('dashboard.history.preference'), ['history_enabled' => false])
         ->assertForbidden();
 
     $this->actingAs($user)
         ->delete(route('dashboard.history.destroy'))
         ->assertForbidden();
 
-    expect($user->fresh()->history_enabled)->toBeFalse();
+    expect($user->fresh()->history_enabled)->toBeTrue();
 });
 
 it('liga e desliga o opt-in sem apagar o que ja foi gravado', function () {
@@ -485,7 +485,7 @@ it('exporta os dados da conta em JSON para download', function () {
         ->and($data['account']['appearance'])->toBe('dark')
         // Credencial nao sai no arquivo: nao ha copia da senha fora do banco.
         ->and($data['account'])->not->toHaveKeys(['password', 'remember_token'])
-        ->and($data['account']['history_enabled'])->toBeFalse()
+        ->and($data['account']['history_enabled'])->toBeTrue()
         ->and($data['ai_requests'])->toHaveCount(1)
         ->and($data['ai_requests'][0]['status'])->toBe('done')
         ->and($data['ai_requests'][0]['tokens_in'])->toBe(800)

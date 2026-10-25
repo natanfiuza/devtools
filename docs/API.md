@@ -47,8 +47,8 @@ A base e a URL do site mais `/api/v1`.
 | `GET` | `/me` | conta, plano e cota do dono do token |
 | `GET` | `/output-targets` | alvos habilitados, com slug, rotulo, linguagem e dialetos |
 | `POST` | `/sql-queries` | cria uma consulta: `200` em cache hit, `202` na fila |
-| `GET` | `/sql-queries` | lista paginada das consultas **daquele token** |
-| `GET` | `/sql-queries/{ulid}` | estado e resultado de uma consulta daquele token |
+| `GET` | `/sql-queries` | lista paginada das consultas da conta |
+| `GET` | `/sql-queries/{ulid}` | estado e resultado de uma consulta da conta |
 
 Cabecalhos esperados:
 
@@ -153,9 +153,9 @@ pelo `poll_url`.
 
 ### GET /api/v1/sql-queries
 
-Lista as consultas criadas **por aquele token**, da mais nova para a mais
-antiga. Consultas feitas pela tela (`api_token_id` nulo) e consultas de outro
-token da mesma conta nao aparecem.
+Lista as consultas criadas pela conta dona do token (tanto pela API quanto pela
+tela web do AI SQL Builder), da mais nova para a mais antiga. Consultas de
+outra conta nao aparecem.
 
 | Parametro | Padrao | Regra |
 | --- | --- | --- |
@@ -179,8 +179,8 @@ Responde `200` em qualquer estado, com o mesmo objeto do `POST`. O `poll_url`
 some (`null`) quando a solicitacao termina, inclusive em `failed` - nesse caso
 leia `error_code`.
 
-Um ULID inexistente, de outra conta ou de outro token responde `404`: o 404
-nao confirma que o id existe.
+Um ULID inexistente ou de outra conta responde `404`: o 404 nao confirma que o
+id existe.
 
 ### Cota
 
