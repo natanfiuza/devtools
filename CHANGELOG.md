@@ -93,14 +93,16 @@ doando pelo Pix estatico.
   autorizada, estorno e cancelamento, com timeouts e `X-Idempotency-Key`
   (ADR-045). `config/payments.php` e `config/donations.php`; nenhum segredo no
   repositorio.
-- Checkout: `StartCheckout`, `StartPreapproval`, `CancelRecurring` e o retorno
+- Checkout: `StartCheckout` (`mode=one_time|recurring` em
+  `POST /subscribe/checkout`), `CancelRecurring` e o retorno
   `/subscribe/checkout/{ulid}/return`; `Subscribe.vue` com Pagar agora,
   Renovacao automatica no cartao e atendimento manual, e os caminhos online
   escondidos sem credenciais.
 - Webhooks: `POST /webhooks/mercadopago` isento de CSRF, assinatura
   `x-signature` HMAC-SHA256 em tempo constante, `ProcessWebhookEvent`
-  (`tries=3`, backoff 10/60/300 s) e `HandleWebhookEvent` com busca do recurso
-  na API antes de agir (ADR-047).
+  (`tries=3`, backoff 10/60/300 s; com 3 tentativas, so 10 s e 60 s sao
+  usados) e `HandleWebhookEvent` com busca do recurso na API antes de agir
+  (ADR-047).
 - Aprovacao: `ApproveGatewayPayment` confere valor/moeda com a sessao, grava
   `payments` e abre o periodo; `OpenSubscriptionPeriod` empilha no maior fim
   futuro ou comeca agora (ADR-046). `GrantPlan` foi reescrito sobre a mesma
@@ -123,8 +125,9 @@ doando pelo Pix estatico.
 
 - `subscriptions`: **uma linha por periodo pago**, e nao mais uma linha
   esticada por concessao; `User::activeSubscription()` escolhe a linha que cobre
-  agora e `nextSubscription()` expoe a proxima futura. A cota le a janela da
-  assinatura vigente.
+  agora e `nextSubscription()` expoe a proxima futura. A cota acumulativa da
+  ADR-054 soma os lotes mensais de todas as assinaturas nao estornadas, com
+  rollover; a janela vigente e so informativa.
 - `GrantPlan` de mesmo plano cria o periodo seguinte; plano diferente ou Free
   encerra tudo e comeca agora, cancelando preapproval antes quando houver.
 - `RefundPayment` encerra a linha vinculada ao pagamento (inclusive futura) sem
