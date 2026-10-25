@@ -146,6 +146,7 @@ final class SettleAiQuery
                 'tokens_out' => max(0, $hit->cache->tokens_out),
                 'cache_hit' => true,
                 'error_code' => null,
+                'title' => $locked->history_visible ? $hit->result->title : null,
                 'canonical_payload' => null,
                 'response_json' => $hit->result->json(),
             ])->save();

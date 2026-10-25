@@ -9,9 +9,9 @@ info:
     `/settings/api-tokens`. A criacao e assincrona: o POST responde 200 em
     cache hit ou 202 na fila, e o cliente acompanha o `poll_url`.
 
-    A cota e a do plano (`usage_ledger`), nao uma cota paralela. Toda leitura e
-    escopada pelo token que criou a consulta: consultas da tela ou de outro
-    token da mesma conta respondem 404.
+    A cota e a do plano (`usage_ledger`), nao uma cota paralela. A leitura e
+    escopada pela conta dona do token (`user_id`): consultas de outra conta
+    respondem 404.
   contact:
     name: devtools
     url: https://devtools.natanfiuza.dev.br
@@ -414,6 +414,8 @@ components:
         - poll_after_ms
         - quota
         - error_code
+        - schema_source
+        - dialect
         - output_target
         - poll_url
         - created_at
@@ -421,6 +423,8 @@ components:
         id:
           type: string
           pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+        title:
+          type: [string, 'null']
         status:
           type: string
           enum: [queued, processing, done, failed]
@@ -452,7 +456,17 @@ components:
             - timeout
             - internal
             - null
+        schema_source:
+          type: string
+          enum: [ddl, json, migration, models]
+        dialect:
+          type: string
+          enum: [mysql, pgsql, sqlsrv, sqlite]
         output_target:
+          type: [string, 'null']
+        schema:
+          type: [string, 'null']
+        description:
           type: [string, 'null']
         poll_url:
           type: [string, 'null']

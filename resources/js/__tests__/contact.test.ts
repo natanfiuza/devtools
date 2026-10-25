@@ -75,7 +75,13 @@ const traducoes = {
     },
 };
 
-function montarPagina(props = { name: null, email: null, status: null }): VueWrapper {
+function montarPagina(
+    props: { name: string | null; email: string | null; status: string | null } = {
+        name: null,
+        email: null,
+        status: null,
+    },
+): VueWrapper {
     const i18n = createI18nInstance();
     applyTranslations(i18n, { locale: 'pt_BR', translations: traducoes });
 

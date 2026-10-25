@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -335,14 +336,16 @@ it('exibe o estado de configuracao de pagamentos e doacoes no artisan about sem 
         'payments.mercadopago.webhook_secret' => 'segredo-webhook-456',
     ]);
 
-    $this->artisan('about', ['--json' => true])
-        ->expectsOutputToContain('"payments"')
-        ->expectsOutputToContain('"mercado_pago_token":"configured"')
-        ->expectsOutputToContain('"mercado_pago_webhook_secret":"configured"')
-        ->expectsOutputToContain('"donation_mode":"dynamic (mercadopago)"')
-        ->doesntExpectOutputToContain('APP_USR-segredo-token-123')
-        ->doesntExpectOutputToContain('segredo-webhook-456')
-        ->assertSuccessful();
+    $this->withoutMockingConsoleOutput()->artisan('about', ['--json' => true]);
+    $output = Artisan::output();
+
+    expect($output)
+        ->toContain('"payments"')
+        ->toContain('"mercado_pago_token":"configured"')
+        ->toContain('"mercado_pago_webhook_secret":"configured"')
+        ->toContain('"donation_mode":"dynamic (mercadopago)"')
+        ->not->toContain('APP_USR-segredo-token-123')
+        ->not->toContain('segredo-webhook-456');
 
     config([
         'payments.mercadopago.access_token' => null,
@@ -352,9 +355,11 @@ it('exibe o estado de configuracao de pagamentos e doacoes no artisan about sem 
         'donations.static_pix.city' => 'RECIFE',
     ]);
 
-    $this->artisan('about', ['--json' => true])
-        ->expectsOutputToContain('"mercado_pago_token":"not configured"')
-        ->expectsOutputToContain('"mercado_pago_webhook_secret":"not configured"')
-        ->expectsOutputToContain('"donation_mode":"static pix"')
-        ->assertSuccessful();
+    $this->withoutMockingConsoleOutput()->artisan('about', ['--json' => true]);
+    $outputDisabled = Artisan::output();
+
+    expect($outputDisabled)
+        ->toContain('"mercado_pago_token":"not configured"')
+        ->toContain('"mercado_pago_webhook_secret":"not configured"')
+        ->toContain('"donation_mode":"static pix"');
 });

@@ -409,21 +409,21 @@ it('estorna a reserva em tokens quando o plano pago falha', function () {
 it('grava a visibilidade do historico conforme o opt-in da conta', function () {
     $user = User::factory()->create();
 
-    // Desligado por padrao: a solicitacao nasce fora do historico.
+    // Ligado por padrao: a solicitacao nasce visivel no historico.
     $start = aiStart($user);
 
-    expect($start->request->history_visible)->toBeFalse();
+    expect($start->request->history_visible)->toBeTrue();
 
     app(SettleAiQuery::class)($start->request, aiActionResult(), 10, 5);
 
-    expect(AiRequest::query()->whereKey($start->request->id)->sole()->history_visible)->toBeFalse()
+    expect(AiRequest::query()->whereKey($start->request->id)->sole()->history_visible)->toBeTrue()
         ->and(AiCache::query()->count())->toBe(1);
 
-    $user->forceFill(['history_enabled' => true])->save();
+    $user->forceFill(['history_enabled' => false])->save();
 
-    $habilitada = aiStart($user, null, 'CREATE TABLE users (id int);', 'Liste os usuarios ativos');
+    $desabilitada = aiStart($user, null, 'CREATE TABLE users (id int);', 'Liste os usuarios ativos');
 
-    expect($habilitada->request->history_visible)->toBeTrue();
+    expect($desabilitada->request->history_visible)->toBeFalse();
 });
 
 it('grava o token da API na solicitacao e nao deduplica entre canais', function () {

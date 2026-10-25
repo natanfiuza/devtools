@@ -68,6 +68,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
      */
     protected $attributes = [
         'role' => 'user',
+        'history_enabled' => true,
     ];
 
     /**

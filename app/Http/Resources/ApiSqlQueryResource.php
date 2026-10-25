@@ -37,7 +37,11 @@ final class ApiSqlQueryResource extends JsonResource
 
         return [
             ...(new AiQueryResource($model, $this->quota))->toArray($request),
+            'schema_source' => $model->schema_source->value,
+            'dialect' => $model->dialect->value,
             'output_target' => $model->outputTarget->slug,
+            'schema' => $model->schema,
+            'description' => $model->prompt,
             'poll_url' => $terminal
                 ? null
                 : route('api.v1.sql-queries.show', ['aiRequest' => $model->id]),

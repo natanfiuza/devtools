@@ -134,13 +134,13 @@ Rotas em `/api/v1`, fora do prefixo de idioma e do grupo `web`, autenticadas por
 | Metodo | Rota | Resposta |
 | --- | --- | --- |
 | POST | `/api/v1/sql-queries` | 200 (cache hit) ou 202 (fila), no contrato de `AiQueryResource` com `poll_url` |
-| GET | `/api/v1/sql-queries/{ulid}` | status/resultado de uma solicitacao daquele token |
-| GET | `/api/v1/sql-queries` | lista paginada (20) das solicitacoes do token, filtro `status` |
+| GET | `/api/v1/sql-queries/{ulid}` | status/resultado de uma solicitacao da conta |
+| GET | `/api/v1/sql-queries` | lista paginada (20) das solicitacoes da conta, filtro `status` |
 | GET | `/api/v1/me` | conta, plano e cota |
 | GET | `/api/v1/output-targets` | alvos `enabled` com slug, rotulo, idioma e dialetos |
 
 - A cota e a **mesma do plano** (`usage_ledger` + `Quota`): cache hit nao debita e a cota esgotada responde 402. Cada token tem rate limits proprios (`config/api.php`, env `API_RATE_*`): POST 30/min e 300/h, leitura 120/min.
-- `ai_requests.api_token_id` guarda o token que criou cada solicitacao; `show` e `index` filtram por ele, entao um token nao le consultas de outro token da mesma conta (404). O `history_enabled` decide apenas o que aparece na tela web; a lista da API e do token que criou.
+- `ai_requests.api_token_id` guarda o token que criou cada solicitacao na API; `show` e `index` filtram por `user_id` (escopo da conta), entao o token le todas as consultas da propria conta (inclusive as geradas no AI SQL Builder web), e consultas de outra conta respondem 404. O `history_enabled` decide apenas o que aparece nas listas de historico da web; a lista da API retorna as solicitacoes da conta.
 - Tokens sao criados, vistos uma unica vez e revogados em `/settings/api-tokens`; a anonimizacao da conta revoga todos. O segredo do token nunca e gravado em claro.
 - Contrato completo, exemplos, paleta de erros e versionamento em `docs/API.md`; o mesmo contrato em `docs/openapi.yaml` (OpenAPI 3.1). Nao existe pagina publica `/docs`.
 
@@ -176,7 +176,7 @@ Templates versionados em `resources/prompts/<target_slug>.v<N>.md`; `prompt_vers
 
 A **lista de consultas** foi adiantada na F5 em 2026-10-21 (`dashboard/History`) e fechada na F7: mostra as solicitacoes com `history_visible = true`, com dialeto, status, tokens/usos, cache, SQL e resumo derivado do contrato (sem campo `summary` no payload da IA).
 
-- **Opt-in global**, desligado por padrao (`users.history_enabled`): desligado, novas solicitacoes nascem com `history_visible = false` e nao aparecem. Contas que ja tinham linhas visiveis receberam o toggle ligado no backfill da migration, preservando o historico existente.
+- **Ativo por padrao (opt-out)** (`users.history_enabled`, default `true`): ligado por padrao para gravar as consultas geradas no AI SQL Builder; quando desligado na tela de Historico, novas solicitacoes nascem com `history_visible = false` e nao aparecem.
 - Desligar o toggle **nao apaga** o passado: as linhas antigas continuam visiveis ate "Apagar historico", que remove apenas as linhas terminais (`done`/`failed`) da conta e nunca uma solicitacao `queued`/`processing` em voo.
 - A tela e de **planos pagos**: o Free ve o estado bloqueado com CTA para `/pricing` e nao lista linhas. As rotas de preferencia e exclusao respondem 403 no Free.
 - **Retencao de 90 dias** (`AI_HISTORY_RETENTION_DAYS`): `history:prune` apaga linhas terminais mais antigas que a janela, diariamente as 03:45. `usage_ledger` e `ai_cache` ficam intactos - o primeiro sustenta a cota/contabilidade, o segundo e cache compartilhado.

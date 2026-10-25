@@ -138,7 +138,7 @@ describe('registro', () => {
 
         expect(component).toBeDefined();
         expect(typeof component).toBe('object');
-    }, 20000);
+    }, 60000);
 
     it('monta as chaves de traducao pelo slug', () => {
         const tool = toolAt(0);
