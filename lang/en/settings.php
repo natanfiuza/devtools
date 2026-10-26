@@ -74,6 +74,18 @@ return [
     'api_tokens' => [
         'title' => 'API tokens',
         'description' => 'Tokens to integrate your systems with the public query API.',
+        'docs_banner' => [
+            'title' => 'API v1 Documentation',
+            'description' => 'Learn how to authenticate, submit schemas, poll asynchronous results, and integrate with cURL, Node.js, PHP, Python, or n8n.',
+            'cta' => 'View API documentation',
+        ],
+        'stats' => [
+            'total_requests' => 'API HTTP requests',
+            'total_queries' => 'SQL queries via API',
+            'active_tokens' => 'Active tokens',
+        ],
+        'requests_count' => '{count} requests',
+        'queries_count' => '{count} SQL queries',
         'create' => [
             'name' => 'Token name',
             'name_placeholder' => 'e.g. deploy-integration',

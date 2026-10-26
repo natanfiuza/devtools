@@ -86,6 +86,10 @@ it('escreve titulo e descricao de cada pagina indexavel no HTML do servidor', fu
                 (string) trans('donations.meta.title', [], $code),
                 (string) trans('donations.meta.description', [], $code),
             ],
+            '/'.$locale['slug'].'/api-docs' => [
+                (string) trans('api_docs.meta.title', [], $code),
+                (string) trans('api_docs.meta.description', [], $code),
+            ],
         ];
 
         foreach ($paginas as $url => [$titulo, $descricao]) {
@@ -311,7 +315,7 @@ it('marca como noindex as telas de conta e o desafio de dois fatores', function 
 });
 
 it('mantem as paginas publicas fora da lista de noindex', function () {
-    foreach (['home', 'pricing', 'privacy', 'terms', 'donate', 'tools.show'] as $name) {
+    foreach (['home', 'pricing', 'privacy', 'terms', 'donate', 'api-docs', 'tools.show'] as $name) {
         $route = Route::getRoutes()->getByName($name);
 
         expect($route)->not->toBeNull("Rota ausente: {$name}");

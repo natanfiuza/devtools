@@ -235,6 +235,13 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
             :aria-label="t('app.footer.language')"
           >
             <Link
+              :href="routes.apiDocs.value"
+              class="hover:text-foreground"
+              data-test="footer-api-docs"
+            >
+              {{ t('app.footer.api_docs') }}
+            </Link>
+            <Link
               :href="routes.privacy.value"
               class="hover:text-foreground"
             >

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { Check, Copy, KeyRound, Trash2 } from '@lucide/vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { BookOpen, Check, Copy, KeyRound, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Heading from '@/components/Heading.vue';
@@ -18,19 +18,22 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useRoutes } from '@/composables/useRoutes';
 import { destroy, store } from '@/routes/api-tokens';
 import type { ApiToken, ApiTokensProps } from '@/types';
 
 /**
- * Tokens da API publica v1 (ADR-050).
+ * Tokens da API publica v1 (ADR-050, ADR-057).
  *
  * O valor em texto puro e mostrado uma unica vez, na requisicao seguinte ao
  * POST: depois disso so existe o hash no banco. Revogar e definitivo - a
- * integracao que usava o token perde o acesso no pedido seguinte.
+ * integracao que usava o token perde o acesso no pedido seguinte, mas os
+ * contadores acumulados da conta sao preservados.
  */
 const props = defineProps<ApiTokensProps>();
 
 const { t } = useI18n();
+const routes = useRoutes();
 
 const form = useForm({ name: '' });
 const copied = ref(false);
@@ -38,6 +41,12 @@ const tokenToRevoke = ref<ApiToken | null>(null);
 const isRevoking = ref(false);
 
 const hasTokens = computed(() => props.tokens.length > 0);
+
+const summaryStats = computed(() => ({
+    totalRequests: props.stats?.totalRequests ?? 0,
+    totalSqlQueries: props.stats?.totalSqlQueries ?? 0,
+    activeTokens: props.stats?.activeTokens ?? props.tokens.length,
+}));
 
 function createToken(): void {
     form.post(store.url(), {
@@ -101,6 +110,82 @@ function lastUsed(token: ApiToken): string {
       :title="t('settings.api_tokens.title')"
       :description="t('settings.api_tokens.description')"
     />
+
+    <!-- Banner de documentacao da API -->
+    <div
+      data-test="api-tokens-docs-banner"
+      class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4"
+    >
+      <div class="flex items-start gap-3">
+        <BookOpen
+          class="mt-0.5 size-4 shrink-0 text-accent"
+          aria-hidden="true"
+        />
+        <div class="space-y-1">
+          <p class="text-sm font-medium">
+            {{ t('settings.api_tokens.docs_banner.title') }}
+          </p>
+          <p class="text-xs leading-relaxed text-subtle">
+            {{ t('settings.api_tokens.docs_banner.description') }}
+          </p>
+        </div>
+      </div>
+
+      <Button
+        variant="outline"
+        size="sm"
+        as-child
+      >
+        <Link
+          :href="routes.apiDocs.value"
+          data-test="api-tokens-docs-link"
+        >
+          {{ t('settings.api_tokens.docs_banner.cta') }}
+        </Link>
+      </Button>
+    </div>
+
+    <!-- Contadores acumulados da API -->
+    <div
+      data-test="api-tokens-stats"
+      class="grid gap-3 sm:grid-cols-3"
+    >
+      <div class="rounded-lg border border-border p-4">
+        <p class="text-xs text-subtle">
+          {{ t('settings.api_tokens.stats.total_requests') }}
+        </p>
+        <p
+          data-test="api-tokens-stat-requests"
+          class="mt-1 font-mono text-xl font-semibold"
+        >
+          {{ summaryStats.totalRequests }}
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-border p-4">
+        <p class="text-xs text-subtle">
+          {{ t('settings.api_tokens.stats.total_queries') }}
+        </p>
+        <p
+          data-test="api-tokens-stat-queries"
+          class="mt-1 font-mono text-xl font-semibold"
+        >
+          {{ summaryStats.totalSqlQueries }}
+        </p>
+      </div>
+
+      <div class="rounded-lg border border-border p-4">
+        <p class="text-xs text-subtle">
+          {{ t('settings.api_tokens.stats.active_tokens') }}
+        </p>
+        <p
+          data-test="api-tokens-stat-active"
+          class="mt-1 font-mono text-xl font-semibold"
+        >
+          {{ summaryStats.activeTokens }}
+        </p>
+      </div>
+    </div>
 
     <!-- Valor recem-criado: aparece uma vez e some no proximo carregamento -->
     <div
@@ -194,7 +279,17 @@ function lastUsed(token: ApiToken): string {
               {{ t('settings.api_tokens.created') }}
               {{ formatDate(token.createdAt) }} ·
               {{ t('settings.api_tokens.last_used') }}
-              {{ lastUsed(token) }}
+              {{ lastUsed(token) }} ·
+              {{
+                t('settings.api_tokens.requests_count', {
+                  count: token.requestsCount ?? 0,
+                })
+              }} ·
+              {{
+                t('settings.api_tokens.queries_count', {
+                  count: token.sqlQueriesCount ?? 0,
+                })
+              }}
             </p>
           </div>
 

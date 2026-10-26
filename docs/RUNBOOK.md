@@ -580,8 +580,10 @@ curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/ap
 | 429 | rate limit do token; respeite o `Retry-After` |
 
 O contrato completo (payloads, exemplos, erros e versionamento) esta em
-[API.md](API.md) e em [openapi.yaml](openapi.yaml). Nao existe pagina publica de
-documentacao.
+[API.md](API.md), em [openapi.yaml](openapi.yaml) (`/openapi.yaml`) e na pagina
+publica de documentacao em `/{locale}/api-docs` (ADR-057). Os contadores de
+requisicoes HTTP e de consultas SQL por token e por conta ficam visiveis em
+`/settings/api-tokens` e em `/admin/users/{user}`.
 
 ## 9. Logs e diagnostico
 

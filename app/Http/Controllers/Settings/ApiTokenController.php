@@ -37,6 +37,8 @@ final class ApiTokenController extends Controller
                 'id' => $token->getKey(),
                 'name' => $token->name,
                 'abilities' => $token->abilities ?? [],
+                'requestsCount' => (int) ($token->getAttribute('requests_count') ?? 0),
+                'sqlQueriesCount' => (int) ($token->getAttribute('sql_queries_count') ?? 0),
                 'lastUsedAt' => $token->last_used_at?->toIso8601String(),
                 'createdAt' => $token->created_at?->toIso8601String(),
             ]);
@@ -45,6 +47,11 @@ final class ApiTokenController extends Controller
 
         return Inertia::render('settings/ApiTokens', [
             'tokens' => $tokens,
+            'stats' => [
+                'totalRequests' => (int) $user->api_requests_count,
+                'totalSqlQueries' => (int) $user->api_sql_queries_count,
+                'activeTokens' => $tokens->count(),
+            ],
             'plainTextToken' => is_string($plainTextToken)
                 ? $plainTextToken
                 : null,

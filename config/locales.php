@@ -64,6 +64,7 @@ return [
         'newsletter',
         'donations',
         'contact',
+        'api_docs',
         'errors',
     ],
 

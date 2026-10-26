@@ -18,12 +18,16 @@ A API publica permite que um sistema externo use o AI SQL Builder sem o
 navegador. Ela e assincrona como a tela: o `POST` cria a solicitacao (ou
 responde do cache) e o cliente acompanha pelo `poll_url`.
 
-Decisao completa na ADR-050.
+Decisao completa na ADR-050 e ADR-057. No site, o guia interativo de integracao
+esta disponivel em `/{locale}/api-docs` e a especificacao OpenAPI 3.1 em
+`/openapi.yaml`.
 
 ### Autenticacao
 
 1. Na tela **Configuracoes > Tokens de API** (`/settings/api-tokens`), crie um
-   token com um nome que identifique a integracao.
+   token com um nome que identifique a integracao. A tela tambem mostra os
+   contadores de requisicoes HTTP e de consultas SQL geradas por token e no
+   acumulado da conta.
 2. Copie o valor na hora: ele aparece **uma unica vez**. Depois disso o banco
    so guarda o hash.
 3. Envie o valor em `Authorization: Bearer <token>` em toda requisicao.

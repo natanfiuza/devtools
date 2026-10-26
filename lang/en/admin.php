@@ -172,6 +172,9 @@ return [
             'unlimited' => 'No limit',
             'window' => 'Counted from {start} to {end}',
             'lifetime' => 'Lifetime quota',
+            'api_requests' => 'API HTTP requests',
+            'api_queries' => 'SQL queries via API',
+            'api_tokens' => 'Active API tokens',
         ],
 
         'social' => [

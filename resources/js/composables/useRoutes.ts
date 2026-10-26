@@ -47,6 +47,7 @@ export type UseRoutesReturn = {
     terms: ComputedRef<string>;
     donate: ComputedRef<string>;
     contact: ComputedRef<string>;
+    apiDocs: ComputedRef<string>;
     subscribe: (plan?: string) => string;
     /** Pagina de status da doacao: o ULID e o identificador publico. */
     donationStatus: (ulid: string) => string;
@@ -117,6 +118,7 @@ export function useRoutes(): UseRoutesReturn {
         terms: url(terms),
         donate: url(donate),
         contact: url(contact),
+        apiDocs: computed<string>(() => `/${slug.value}/api-docs`),
         subscribe: (plan?: string) =>
             subscribe.url(plan ? { query: { plan } } : undefined),
         donationStatus: (ulid: string) =>

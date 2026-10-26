@@ -3,10 +3,11 @@
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
+use App\Http\Middleware\TrackApiTokenUsage;
 use Illuminate\Support\Facades\Route;
 
 /*
-| API publica v1 (ADR-050).
+| API publica v1 (ADR-050, ADR-057).
 |
 | Autenticacao por Bearer token do Sanctum, sem sessao e sem CSRF. A ability
 | `ai:query` e exigida em toda a superficie: um token criado para outra
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
     ->name('api.v1.')
-    ->middleware(['auth:sanctum', 'active', 'verified', 'abilities:ai:query'])
+    ->middleware(['auth:sanctum', 'active', 'verified', 'abilities:ai:query', TrackApiTokenUsage::class])
     ->group(function (): void {
         Route::get('me', MeController::class)
             ->middleware('throttle:api-read')

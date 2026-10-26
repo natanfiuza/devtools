@@ -74,6 +74,18 @@ return [
     'api_tokens' => [
         'title' => 'Tokens de API',
         'description' => 'Tokens para integrar os seus sistemas à API pública de consultas.',
+        'docs_banner' => [
+            'title' => 'Documentação da API v1',
+            'description' => 'Veja como autenticar, enviar esquemas, consultar resultados assíncronos e integrar com cURL, Node.js, PHP, Python ou n8n.',
+            'cta' => 'Ver documentação da API',
+        ],
+        'stats' => [
+            'total_requests' => 'Pedidos HTTP na API',
+            'total_queries' => 'Consultas SQL via API',
+            'active_tokens' => 'Tokens ativos',
+        ],
+        'requests_count' => '{count} pedidos',
+        'queries_count' => '{count} consultas SQL',
         'create' => [
             'name' => 'Nome do token',
             'name_placeholder' => 'Ex.: integracao-deploy',

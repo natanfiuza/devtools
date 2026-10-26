@@ -172,6 +172,9 @@ return [
             'unlimited' => 'Sans limite',
             'window' => 'Compté du {start} au {end}',
             'lifetime' => 'Quota à vie',
+            'api_requests' => 'Requêtes HTTP sur l’API',
+            'api_queries' => 'Requêtes SQL via l’API',
+            'api_tokens' => 'Jetons API actifs',
         ],
 
         'social' => [

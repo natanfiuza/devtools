@@ -33,6 +33,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string|null $locale
  * @property string|null $appearance
  * @property bool $history_enabled
+ * @property int $api_requests_count
+ * @property int $api_sql_queries_count
  * @property string|null $remember_token
  * @property string|null $photo_uuid
  * @property-read string|null $avatar
@@ -69,6 +71,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     protected $attributes = [
         'role' => 'user',
         'history_enabled' => true,
+        'api_requests_count' => 0,
+        'api_sql_queries_count' => 0,
     ];
 
     /**
@@ -104,6 +108,8 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'anonymized_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'history_enabled' => 'boolean',
+            'api_requests_count' => 'integer',
+            'api_sql_queries_count' => 'integer',
             'deleted_at' => 'datetime',
         ];
     }

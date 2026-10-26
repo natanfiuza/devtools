@@ -74,6 +74,18 @@ return [
     'api_tokens' => [
         'title' => 'Jetons API',
         'description' => 'Jetons pour intégrer vos systèmes à l’API publique de requêtes.',
+        'docs_banner' => [
+            'title' => 'Documentation de l’API v1',
+            'description' => 'Découvrez comment vous authentifier, envoyer des schémas, interroger les résultats asynchrones et intégrer avec cURL, Node.js, PHP, Python ou n8n.',
+            'cta' => 'Voir la documentation de l’API',
+        ],
+        'stats' => [
+            'total_requests' => 'Requêtes HTTP sur l’API',
+            'total_queries' => 'Requêtes SQL via l’API',
+            'active_tokens' => 'Jetons actifs',
+        ],
+        'requests_count' => '{count} requêtes',
+        'queries_count' => '{count} requêtes SQL',
         'create' => [
             'name' => 'Nom du jeton',
             'name_placeholder' => 'Ex. : intégration-déploiement',

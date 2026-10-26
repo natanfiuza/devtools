@@ -5,6 +5,7 @@ use App\Http\Controllers\Account\HistoryController;
 use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Api\Base64ImageController;
+use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\Base64ImageDownloadController;
 use App\Http\Controllers\CheckoutController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\RobotsController;
@@ -57,6 +59,10 @@ Route::prefix('{locale}')
         Route::get('contact', [ContactController::class, 'index'])->name('contact');
         Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 
+        // Documentacao publica da API v1 (ADR-057): guia de integracao,
+        // endpoints, exemplos e link para a especificacao OpenAPI.
+        Route::get('api-docs', ApiDocsController::class)->name('api-docs');
+
         // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
         // so, e o componente de cada tool entra por dentro dela. Sem restricao
         // de formato no slug - o 404 de tool que nao funciona e regra de
@@ -64,11 +70,12 @@ Route::prefix('{locale}')
         Route::get('tools/{slug}', ToolController::class)->name('tools.show');
     });
 
-// Sitemap e robots: sao de todo o site, nao de um idioma, entao ficam fora do
-// prefixo. O `robots.txt` de public/ saiu do repositorio - arquivo estatico
-// vence a rota, no nginx e no `artisan serve`.
+// Sitemap, robots e OpenAPI: sao de todo o site, nao de um idioma, entao ficam
+// fora do prefixo. O `robots.txt` de public/ saiu do repositorio - arquivo
+// estatico vence a rota, no nginx e no `artisan serve`.
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
+Route::get('openapi.yaml', OpenApiController::class)->name('openapi');
 
 // API do AI SQL Builder (ADR-042). Fica fora do prefixo de idioma porque o
 // cliente manda `Accept: application/json` e o idioma nao muda o recurso. Usa

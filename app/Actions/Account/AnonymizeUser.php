@@ -70,6 +70,8 @@ final class AnonymizeUser
                 'locale' => null,
                 'appearance' => null,
                 'history_enabled' => false,
+                'api_requests_count' => 0,
+                'api_sql_queries_count' => 0,
                 'anonymized_at' => now(),
             ])->save();
 

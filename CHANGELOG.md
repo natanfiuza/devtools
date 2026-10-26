@@ -3,6 +3,31 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Contador de requisições e documentação pública da API v1 - 2026-10-25
+
+### Adicionado
+
+- **Contadores de uso da API v1** (ADR-057): colunas `requests_count` e
+  `sql_queries_count` em `personal_access_tokens` e acumuladores vitalícios
+  `api_requests_count` e `api_sql_queries_count` em `users` (com backfill a
+  partir de `ai_requests`). Middleware `TrackApiTokenUsage` no grupo `/api/v1` e
+  incremento de consultas SQL via API em `StartAiQuery` (incluindo cache hits,
+  sem duplicar em dedupe em voo).
+- **Exibição de contadores**: 3 cards de resumo no topo de
+  `/settings/api-tokens` (requisições HTTP na API, consultas SQL via API e
+  tokens ativos), contadores individuais por token listado e métricas de API no
+  card de consumo em `/admin/users/{user}`.
+- **Página pública de documentação da API** (`/{locale}/api-docs`,
+  `ApiDocs.vue` + `ApiDocsController`) nos 5 idiomas (`pt-BR`, `pt-PT`, `en`,
+  `es`, `fr`), indexável, com `hreflang`, presença no `sitemap.xml`, guia de
+  autenticação Bearer e fluxo assíncrono (`200`/`202` + `poll_url`), referência
+  dos 5 endpoints, tabela de alvos habilitados (`output_targets`), limites de
+  taxa, códigos de erro e exemplos copiáveis em abas (`cURL`, `JavaScript / TS`,
+  `PHP`, `Python`, `n8n / HTTP`).
+- **Rota `/openapi.yaml`** (`OpenApiController`) servindo `docs/openapi.yaml`, e
+  links para a documentação da API na aba **Tokens de API**
+  (`/settings/api-tokens`) e no rodapé público (`PublicLayout.vue`).
+
 ## Fase 7: API publica, historico e hardening - 2026-10-22
 
 A ultima fase do SPEC abre o produto para fora do navegador. A API v1 entra

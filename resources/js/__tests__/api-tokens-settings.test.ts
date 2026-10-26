@@ -49,11 +49,28 @@ vi.mock('@inertiajs/vue3', async () => {
 
             return form;
         },
+        usePage: () => ({
+            props: {
+                localeSlug: 'pt-br',
+            },
+        }),
         router: routerMock,
         Head: defineComponent({
             name: 'InertiaHead',
             props: { title: { type: String, default: '' } },
             render: () => h('div'),
+        }),
+        Link: defineComponent({
+            name: 'InertiaLink',
+            props: { href: { type: String, default: '' } },
+            setup(props, { slots, attrs }) {
+                return () =>
+                    h(
+                        'a',
+                        { ...attrs, href: props.href },
+                        slots.default ? slots.default() : [],
+                    );
+            },
         }),
     };
 });
@@ -63,6 +80,18 @@ const traducoes = {
         api_tokens: {
             title: 'TITULO_TOKENS',
             description: 'DESCRICAO_TOKENS',
+            docs_banner: {
+                title: 'TITULO_DOCS_API',
+                description: 'DESCRICAO_DOCS_API',
+                cta: 'VER_DOCS_API',
+            },
+            stats: {
+                total_requests: 'TOTAL_REQUISICOES_HTTP',
+                total_queries: 'TOTAL_CONSULTAS_SQL',
+                active_tokens: 'TOKENS_ATIVOS',
+            },
+            requests_count: '{count} REQUISICOES_TOKEN',
+            queries_count: '{count} CONSULTAS_TOKEN',
             create: {
                 name: 'NOME_TOKEN',
                 name_placeholder: 'DICA_NOME_TOKEN',
@@ -106,6 +135,8 @@ const TOKEN: ApiToken = {
     id: 7,
     name: 'integracao',
     abilities: ['ai:query'],
+    requestsCount: 12,
+    sqlQueriesCount: 4,
     lastUsedAt: null,
     createdAt: '2026-10-22T10:00:00+00:00',
 };
@@ -163,12 +194,39 @@ describe('lista de tokens', () => {
         expect(linhas[0]?.text()).toContain('ai:query');
         expect(linhas[0]?.text()).toContain('CRIADO_EM 2026-10-22 10:00');
         expect(linhas[0]?.text()).toContain('ULTIMO_USO NUNCA');
+        expect(linhas[0]?.text()).toContain('12 REQUISICOES_TOKEN');
+        expect(linhas[0]?.text()).toContain('4 CONSULTAS_TOKEN');
         expect(linhas[1]?.text()).toContain('ULTIMO_USO 2026-10-21 08:30');
         // A lista nunca recebe o texto puro do token.
         expect(lista.text()).not.toContain('plainTextToken');
         expect(wrapper.find('[data-test="api-tokens-vazio"]').exists()).toBe(
             false,
         );
+    });
+
+    it('exibe os contadores acumulados e o link para a pagina de documentacao da API', () => {
+        const wrapper = montar({
+            tokens: [TOKEN],
+            stats: {
+                totalRequests: 48,
+                totalSqlQueries: 19,
+                activeTokens: 1,
+            },
+        });
+
+        expect(
+            wrapper.get('[data-test="api-tokens-stat-requests"]').text(),
+        ).toBe('48');
+        expect(
+            wrapper.get('[data-test="api-tokens-stat-queries"]').text(),
+        ).toBe('19');
+        expect(wrapper.get('[data-test="api-tokens-stat-active"]').text()).toBe(
+            '1',
+        );
+
+        const docsLink = wrapper.get('[data-test="api-tokens-docs-link"]');
+        expect(docsLink.attributes('href')).toBe('/pt-br/api-docs');
+        expect(docsLink.text()).toContain('VER_DOCS_API');
     });
 });
 

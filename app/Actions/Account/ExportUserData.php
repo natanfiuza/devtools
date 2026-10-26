@@ -45,6 +45,8 @@ final class ExportUserData
                 'locale' => $user->locale,
                 'appearance' => $user->appearance,
                 'history_enabled' => (bool) $user->history_enabled,
+                'api_requests_count' => (int) $user->api_requests_count,
+                'api_sql_queries_count' => (int) $user->api_sql_queries_count,
                 'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 'created_at' => $user->created_at?->toIso8601String(),
             ],

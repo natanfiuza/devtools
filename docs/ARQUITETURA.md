@@ -303,10 +303,19 @@ Builder web), respondendo 404 para consultas de outra conta. As duas portas
 passam por `StartAiQuery`, portanto têm a mesma validação, a mesma cota e o
 mesmo cache.
 
+Cada requisição autenticada em `/api/v1/*` passa pelo middleware
+`TrackApiTokenUsage`, que incrementa `personal_access_tokens.requests_count` e
+`users.api_requests_count`. Quando uma consulta SQL é criada ou servida do cache
+via API (`$apiTokenId !== null` em `StartAiQuery`, exceto deduplicação em voo),
+`personal_access_tokens.sql_queries_count` e `users.api_sql_queries_count`
+também são incrementados (ADR-057). Assim, revogar um token ou rodar
+`history:prune` não reduz os acumuladores vitalícios da conta.
+
 Os limites de taxa, o envelope de erro e os detalhes de contrato estão em
-[API.md](API.md) e [openapi.yaml](openapi.yaml); os números vivem em
-`config/api.php`. O 402 vem da cota do plano, não do limitador, e o 429 traz
-`Retry-After`.
+[API.md](API.md), em [openapi.yaml](openapi.yaml) (servido em `/openapi.yaml`)
+e na página pública `/{locale}/api-docs` (`ApiDocs.vue`, ADR-057); os números
+vivem em `config/api.php`. O 402 vem da cota do plano, não do limitador, e o
+429 traz `Retry-After`.
 
 ## Fila e tempos
 

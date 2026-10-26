@@ -181,6 +181,9 @@ export type AdminQuota = {
     windowStart: string | null;
     windowEnd: string | null;
     nextCreditAt?: string | null;
+    apiRequestsCount?: number;
+    apiSqlQueriesCount?: number;
+    apiTokensCount?: number;
 };
 
 export type AdminSocialAccount = {
