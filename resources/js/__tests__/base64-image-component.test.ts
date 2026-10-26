@@ -1,8 +1,9 @@
-import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { mount, flushPromises } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Tool from '@/tools/base64-image/Tool.vue';
-import type { Base64ImageToolProps } from '@/tools/base64-image/types';
+import EncoderPanel from '@/tools/base64-image/EncoderPanel.vue';
+import type { Base64ImageToolProps, ConversionItem } from '@/tools/base64-image/types';
 
 const TRADUCOES = {
     tools: {
@@ -22,6 +23,8 @@ const TRADUCOES = {
             original_size: 'Tamanho original',
             base64_size: 'Tamanho Base64',
             retention_info: 'Histórico disponível por {hours}h',
+            retention_info_day: 'Histórico disponível por {days} dia',
+            retention_info_days: 'Histórico disponível por {days} dias',
             history_empty_title: 'Nenhuma conversão recente',
             history_empty_desc: 'As imagens que você converter aparecerão aqui durante o período de retenção.',
             decoder_input_label: 'Cole a string Base64 ou Data URI:',
@@ -96,5 +99,87 @@ describe('Base64 Image Tool Component', () => {
                 global: { plugins: [i18n()] },
             });
         }).not.toThrow();
+    });
+
+    it('exibe retencao em horas (24h) no painel de conversao para plano Free', async () => {
+        const mockConversion: ConversionItem = {
+            id: 'conv-123',
+            filename: 'test.png',
+            mime_type: 'image/png',
+            file_size_bytes: 1024,
+            base64_size_bytes: 1400,
+            data_uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            created_at: new Date().toISOString(),
+            download_url: '/dl/123',
+            preview_url: '/preview/123',
+        };
+
+        vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockConversion,
+        } as Response);
+
+        const wrapper = mount(EncoderPanel, {
+            props: {
+                toolProps: {
+                    isAuthenticated: false,
+                    isPaidPlan: false,
+                    retentionHours: 24,
+                },
+            },
+            global: { plugins: [i18n()] },
+        });
+
+        const file = new File(['dummy'], 'test.png', { type: 'image/png' });
+        const input = wrapper.find('input[type="file"]');
+        Object.defineProperty(input.element, 'files', {
+            value: [file],
+            writable: false,
+        });
+        await input.trigger('change');
+        await flushPromises();
+
+        expect(wrapper.text()).toContain('Histórico disponível por 24h');
+    });
+
+    it('exibe retencao em dias (30 dias) no painel de conversao para plano Pro (720h)', async () => {
+        const mockConversion: ConversionItem = {
+            id: 'conv-456',
+            filename: 'pro.png',
+            mime_type: 'image/png',
+            file_size_bytes: 2048,
+            base64_size_bytes: 2800,
+            data_uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            created_at: new Date().toISOString(),
+            download_url: '/dl/456',
+            preview_url: '/preview/456',
+        };
+
+        vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockConversion,
+        } as Response);
+
+        const wrapper = mount(EncoderPanel, {
+            props: {
+                toolProps: {
+                    isAuthenticated: true,
+                    isPaidPlan: true,
+                    retentionHours: 720,
+                },
+            },
+            global: { plugins: [i18n()] },
+        });
+
+        const file = new File(['dummy'], 'pro.png', { type: 'image/png' });
+        const input = wrapper.find('input[type="file"]');
+        Object.defineProperty(input.element, 'files', {
+            value: [file],
+            writable: false,
+        });
+        await input.trigger('change');
+        await flushPromises();
+
+        expect(wrapper.text()).toContain('Histórico disponível por 30 dias');
     });
 });

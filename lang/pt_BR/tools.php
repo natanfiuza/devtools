@@ -386,6 +386,8 @@ return [
         'original_size' => 'Tamanho original',
         'base64_size' => 'Tamanho Base64',
         'retention_info' => 'Histórico disponível por {hours}h',
+        'retention_info_day' => 'Histórico disponível por {days} dia',
+        'retention_info_days' => 'Histórico disponível por {days} dias',
         'direct_download_notice_title' => 'Arquivo grande convertido',
         'direct_download_notice_desc' => 'Para proteger o navegador, o download do arquivo .txt com a Data URI foi iniciado diretamente.',
         'copy' => 'Copiar',

@@ -23,7 +23,7 @@ import {
 } from '@lucide/vue';
 import type { Base64ImageToolProps, OutputFormat, ConversionItem } from './types';
 import { saveAnonymousConversion } from './lib/storage';
-import { formatSnippet } from './lib/formatters';
+import { formatSnippet, formatRetentionTime } from './lib/formatters';
 
 const props = withDefaults(
     defineProps<{
@@ -205,207 +205,290 @@ function reset() {
 </script>
 
 <template>
-    <div class="space-y-6">
-        <!-- Area de Upload / Dropzone -->
-        <div
-            v-if="!currentResult && !isLoading"
-            class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-10 text-center transition-colors cursor-pointer"
-            :class="isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/30'"
-            @dragover.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
-            @drop.prevent="onDrop"
-            @click="fileInput?.click()"
+  <div class="space-y-6">
+    <!-- Area de Upload / Dropzone -->
+    <div
+      v-if="!currentResult && !isLoading"
+      class="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-10 text-center transition-colors cursor-pointer"
+      :class="isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50 hover:bg-muted/30'"
+      @dragover.prevent="isDragging = true"
+      @dragleave.prevent="isDragging = false"
+      @drop.prevent="onDrop"
+      @click="fileInput?.click()"
+    >
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/*"
+        class="hidden"
+        @change="onFileSelect"
+      >
+      <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+        <Upload class="h-8 w-8" />
+      </div>
+      <h3 class="text-lg font-semibold tracking-tight">
+        {{ t('tools.base64-image.upload_title') }}
+      </h3>
+      <p class="text-sm text-muted-foreground mt-1 max-w-sm">
+        {{ t('tools.base64-image.upload_subtitle') }}
+      </p>
+      <div class="mt-4 flex items-center gap-2">
+        <Badge variant="outline">
+          {{ t('tools.base64-image.max_limit_badge', { limit: formattedMaxLimit }) }}
+        </Badge>
+        <Badge
+          v-if="toolProps?.isPaidPlan"
+          variant="default"
+          class="bg-primary/90"
         >
-            <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="onFileSelect"
-            />
-            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-                <Upload class="h-8 w-8" />
-            </div>
-            <h3 class="text-lg font-semibold tracking-tight">
-                {{ t('tools.base64-image.upload_title') }}
-            </h3>
-            <p class="text-sm text-muted-foreground mt-1 max-w-sm">
-                {{ t('tools.base64-image.upload_subtitle') }}
-            </p>
-            <div class="mt-4 flex items-center gap-2">
-                <Badge variant="outline">
-                    {{ t('tools.base64-image.max_limit_badge', { limit: formattedMaxLimit }) }}
-                </Badge>
-                <Badge v-if="toolProps?.isPaidPlan" variant="default" class="bg-primary/90">
-                    <Sparkles class="mr-1 h-3 w-3" />
-                    {{ t('tools.base64-image.pro_plan_badge') }}
-                </Badge>
-            </div>
-        </div>
-
-        <!-- Estado de Carregamento -->
-        <div v-if="isLoading" class="flex flex-col items-center justify-center rounded-xl border p-12 text-center bg-card">
-            <Spinner class="h-8 w-8 text-primary mb-4" />
-            <p class="text-base font-medium">{{ t('tools.base64-image.converting') }}</p>
-            <p class="text-xs text-muted-foreground mt-1">{{ t('tools.base64-image.converting_hint') }}</p>
-        </div>
-
-        <!-- Alerta de Erro -->
-        <Alert v-if="errorMessage" variant="destructive">
-            <AlertCircle class="h-4 w-4" />
-            <AlertTitle>{{ t('tools.base64-image.errors.title') }}</AlertTitle>
-            <AlertDescription>{{ errorMessage }}</AlertDescription>
-        </Alert>
-
-        <!-- Resultado da Conversao -->
-        <div v-if="currentResult && !isLoading" class="space-y-6">
-            <!-- Barra de Informacoes e Previa -->
-            <div class="flex flex-col lg:flex-row gap-6 rounded-xl border bg-card p-5">
-                <!-- Miniatura / Previa da Imagem -->
-                <div class="flex items-center justify-center rounded-lg border bg-muted/30 p-2 max-w-[200px] max-h-[160px] overflow-hidden self-center lg:self-start">
-                    <img
-                        :src="currentResult.data_uri || currentResult.preview_url"
-                        :alt="currentResult.filename"
-                        class="max-h-36 max-w-full rounded object-contain"
-                    />
-                </div>
-
-                <!-- Detalhes do Arquivo -->
-                <div class="flex-1 space-y-2">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h4 class="font-semibold text-base break-all">{{ currentResult.filename }}</h4>
-                        <Button variant="outline" size="sm" @click="reset">
-                            <RefreshCw class="mr-1.5 h-3.5 w-3.5" />
-                            {{ t('tools.base64-image.new_image') }}
-                        </Button>
-                    </div>
-
-                    <div class="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
-                        <span class="rounded bg-muted px-2 py-0.5 font-medium text-foreground">
-                            {{ currentResult.mime_type }}
-                        </span>
-                        <span>
-                            {{ t('tools.base64-image.original_size') }}:
-                            <strong>{{ formatBytes(currentResult.file_size_bytes, locale) }}</strong>
-                        </span>
-                        <span>•</span>
-                        <span>
-                            {{ t('tools.base64-image.base64_size') }}:
-                            <strong>{{ formatBytes(currentResult.base64_size_bytes, locale) }}</strong>
-                        </span>
-                        <span>•</span>
-                        <span>
-                            {{ t('tools.base64-image.retention_info', { hours: toolProps?.retentionHours ?? 24 }) }}
-                        </span>
-                    </div>
-
-                    <!-- Mensagem para Download Direto (> 2 MB no Plano Pago) -->
-                    <Alert v-if="currentResult.direct_download" class="mt-3 bg-primary/5 border-primary/20">
-                        <Sparkles class="h-4 w-4 text-primary" />
-                        <AlertTitle class="text-sm font-medium text-foreground">
-                            {{ t('tools.base64-image.direct_download_notice_title') }}
-                        </AlertTitle>
-                        <AlertDescription class="text-xs text-muted-foreground mt-0.5">
-                            {{ t('tools.base64-image.direct_download_notice_desc') }}
-                        </AlertDescription>
-                    </Alert>
-                </div>
-            </div>
-
-            <!-- Saida Formatada (se nao for direct_download) -->
-            <div v-if="!currentResult.direct_download && currentResult.data_uri" class="space-y-3">
-                <Tabs v-model="selectedFormat" class="w-full">
-                    <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
-                        <TabsList class="flex flex-wrap h-auto">
-                            <TabsTrigger value="data-uri" class="text-xs">
-                                <FileText class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.formats.data_uri') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="img" class="text-xs">
-                                <Code class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.formats.img_tag') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="css" class="text-xs">
-                                <Sparkles class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.formats.css_bg') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="json" class="text-xs">
-                                <Braces class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.formats.json') }}
-                            </TabsTrigger>
-                            <TabsTrigger value="xml" class="text-xs">
-                                <CodeXml class="mr-1.5 h-3.5 w-3.5" />
-                                {{ t('tools.base64-image.formats.xml') }}
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <div class="flex items-center gap-2">
-                            <Button size="sm" variant="secondary" @click="copy(formattedOutput)">
-                                <Check v-if="copied" class="mr-1.5 h-3.5 w-3.5 text-primary" />
-                                <Copy v-else class="mr-1.5 h-3.5 w-3.5" />
-                                {{ copied ? t('tools.base64-image.copied') : t('tools.base64-image.copy') }}
-                            </Button>
-                            <Button size="sm" variant="outline" @click="downloadCurrentSnippet">
-                                <Download class="mr-1.5 h-3.5 w-3.5" />
-                                {{ downloadButtonLabel }}
-                            </Button>
-                        </div>
-                    </div>
-
-                    <TabsContent value="data-uri" class="mt-2">
-                        <textarea
-                            readonly
-                            rows="7"
-                            :value="formattedOutput"
-                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
-                        ></textarea>
-                    </TabsContent>
-
-                    <TabsContent value="img" class="mt-2">
-                        <textarea
-                            readonly
-                            rows="7"
-                            :value="formattedOutput"
-                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
-                        ></textarea>
-                    </TabsContent>
-
-                    <TabsContent value="css" class="mt-2">
-                        <textarea
-                            readonly
-                            rows="7"
-                            :value="formattedOutput"
-                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
-                        ></textarea>
-                    </TabsContent>
-
-                    <TabsContent value="json" class="mt-2">
-                        <textarea
-                            readonly
-                            rows="7"
-                            :value="formattedOutput"
-                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
-                        ></textarea>
-                    </TabsContent>
-
-                    <TabsContent value="xml" class="mt-2">
-                        <textarea
-                            readonly
-                            rows="7"
-                            :value="formattedOutput"
-                            class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
-                        ></textarea>
-                    </TabsContent>
-                </Tabs>
-            </div>
-
-            <!-- Botao de Download caso tenha sido Direct Download -->
-            <div v-else class="flex justify-end">
-                <Button variant="default" as="a" :href="currentResult.download_url">
-                    <Download class="mr-2 h-4 w-4" />
-                    {{ t('tools.base64-image.download_txt') }}
-                </Button>
-            </div>
-        </div>
+          <Sparkles class="mr-1 h-3 w-3" />
+          {{ t('tools.base64-image.pro_plan_badge') }}
+        </Badge>
+      </div>
     </div>
+
+    <!-- Estado de Carregamento -->
+    <div
+      v-if="isLoading"
+      class="flex flex-col items-center justify-center rounded-xl border p-12 text-center bg-card"
+    >
+      <Spinner class="h-8 w-8 text-primary mb-4" />
+      <p class="text-base font-medium">
+        {{ t('tools.base64-image.converting') }}
+      </p>
+      <p class="text-xs text-muted-foreground mt-1">
+        {{ t('tools.base64-image.converting_hint') }}
+      </p>
+    </div>
+
+    <!-- Alerta de Erro -->
+    <Alert
+      v-if="errorMessage"
+      variant="destructive"
+    >
+      <AlertCircle class="h-4 w-4" />
+      <AlertTitle>{{ t('tools.base64-image.errors.title') }}</AlertTitle>
+      <AlertDescription>{{ errorMessage }}</AlertDescription>
+    </Alert>
+
+    <!-- Resultado da Conversao -->
+    <div
+      v-if="currentResult && !isLoading"
+      class="space-y-6"
+    >
+      <!-- Barra de Informacoes e Previa -->
+      <div class="flex flex-col lg:flex-row gap-6 rounded-xl border bg-card p-5">
+        <!-- Miniatura / Previa da Imagem -->
+        <div class="flex items-center justify-center rounded-lg border bg-muted/30 p-2 max-w-[200px] max-h-[160px] overflow-hidden self-center lg:self-start">
+          <img
+            :src="currentResult.data_uri || currentResult.preview_url"
+            :alt="currentResult.filename"
+            class="max-h-36 max-w-full rounded object-contain"
+          >
+        </div>
+
+        <!-- Detalhes do Arquivo -->
+        <div class="flex-1 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="font-semibold text-base break-all">
+              {{ currentResult.filename }}
+            </h4>
+            <Button
+              variant="outline"
+              size="sm"
+              @click="reset"
+            >
+              <RefreshCw class="mr-1.5 h-3.5 w-3.5" />
+              {{ t('tools.base64-image.new_image') }}
+            </Button>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1 text-xs text-muted-foreground">
+            <span class="rounded bg-muted px-2 py-0.5 font-medium text-foreground">
+              {{ currentResult.mime_type }}
+            </span>
+            <span>
+              {{ t('tools.base64-image.original_size') }}:
+              <strong>{{ formatBytes(currentResult.file_size_bytes, locale) }}</strong>
+            </span>
+            <span>•</span>
+            <span>
+              {{ t('tools.base64-image.base64_size') }}:
+              <strong>{{ formatBytes(currentResult.base64_size_bytes, locale) }}</strong>
+            </span>
+            <span>•</span>
+            <span>
+              {{ formatRetentionTime(toolProps?.retentionHours ?? 24, t) }}
+            </span>
+          </div>
+
+          <!-- Mensagem para Download Direto (> 2 MB no Plano Pago) -->
+          <Alert
+            v-if="currentResult.direct_download"
+            class="mt-3 bg-primary/5 border-primary/20"
+          >
+            <Sparkles class="h-4 w-4 text-primary" />
+            <AlertTitle class="text-sm font-medium text-foreground">
+              {{ t('tools.base64-image.direct_download_notice_title') }}
+            </AlertTitle>
+            <AlertDescription class="text-xs text-muted-foreground mt-0.5">
+              {{ t('tools.base64-image.direct_download_notice_desc') }}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+
+      <!-- Saida Formatada (se nao for direct_download) -->
+      <div
+        v-if="!currentResult.direct_download && currentResult.data_uri"
+        class="space-y-3"
+      >
+        <Tabs
+          v-model="selectedFormat"
+          class="w-full"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
+            <TabsList class="flex flex-wrap h-auto">
+              <TabsTrigger
+                value="data-uri"
+                class="text-xs"
+              >
+                <FileText class="mr-1.5 h-3.5 w-3.5" />
+                {{ t('tools.base64-image.formats.data_uri') }}
+              </TabsTrigger>
+              <TabsTrigger
+                value="img"
+                class="text-xs"
+              >
+                <Code class="mr-1.5 h-3.5 w-3.5" />
+                {{ t('tools.base64-image.formats.img_tag') }}
+              </TabsTrigger>
+              <TabsTrigger
+                value="css"
+                class="text-xs"
+              >
+                <Sparkles class="mr-1.5 h-3.5 w-3.5" />
+                {{ t('tools.base64-image.formats.css_bg') }}
+              </TabsTrigger>
+              <TabsTrigger
+                value="json"
+                class="text-xs"
+              >
+                <Braces class="mr-1.5 h-3.5 w-3.5" />
+                {{ t('tools.base64-image.formats.json') }}
+              </TabsTrigger>
+              <TabsTrigger
+                value="xml"
+                class="text-xs"
+              >
+                <CodeXml class="mr-1.5 h-3.5 w-3.5" />
+                {{ t('tools.base64-image.formats.xml') }}
+              </TabsTrigger>
+            </TabsList>
+
+            <div class="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                @click="copy(formattedOutput)"
+              >
+                <Check
+                  v-if="copied"
+                  class="mr-1.5 h-3.5 w-3.5 text-primary"
+                />
+                <Copy
+                  v-else
+                  class="mr-1.5 h-3.5 w-3.5"
+                />
+                {{ copied ? t('tools.base64-image.copied') : t('tools.base64-image.copy') }}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                @click="downloadCurrentSnippet"
+              >
+                <Download class="mr-1.5 h-3.5 w-3.5" />
+                {{ downloadButtonLabel }}
+              </Button>
+            </div>
+          </div>
+
+          <TabsContent
+            value="data-uri"
+            class="mt-2"
+          >
+            <textarea
+              readonly
+              rows="7"
+              :value="formattedOutput"
+              class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="img"
+            class="mt-2"
+          >
+            <textarea
+              readonly
+              rows="7"
+              :value="formattedOutput"
+              class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="css"
+            class="mt-2"
+          >
+            <textarea
+              readonly
+              rows="7"
+              :value="formattedOutput"
+              class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="json"
+            class="mt-2"
+          >
+            <textarea
+              readonly
+              rows="7"
+              :value="formattedOutput"
+              class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="xml"
+            class="mt-2"
+          >
+            <textarea
+              readonly
+              rows="7"
+              :value="formattedOutput"
+              class="w-full resize-y rounded-lg border bg-muted/40 p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <!-- Botao de Download caso tenha sido Direct Download -->
+      <div
+        v-else
+        class="flex justify-end"
+      >
+        <Button
+          variant="default"
+          as="a"
+          :href="currentResult.download_url"
+        >
+          <Download class="mr-2 h-4 w-4" />
+          {{ t('tools.base64-image.download_txt') }}
+        </Button>
+      </div>
+    </div>
+  </div>
 </template>
