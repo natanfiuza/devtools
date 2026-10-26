@@ -11,6 +11,7 @@ import {
     formatJsonOutput,
     formatXmlOutput,
     formatSnippet,
+    formatRetentionTime,
 } from '../tools/base64-image/lib/formatters';
 import type { ConversionItem } from '../tools/base64-image/types';
 
@@ -158,6 +159,38 @@ describe('Base64 Image Decoder & Storage', () => {
             expect(formatSnippet('data-uri', sampleItem)).toBe(sampleItem.data_uri);
             expect(formatSnippet('img', sampleItem)).toBe(`<img src="${sampleItem.data_uri}" alt="${sampleItem.filename}" />`);
             expect(formatSnippet('css', sampleItem)).toBe(`background-image: url("${sampleItem.data_uri}");`);
+        });
+
+        it('formatRetentionTime exibe em horas para valores ate 24h', () => {
+            const mockT = (key: string, params?: Record<string, unknown>) => {
+                if (key === 'tools.base64-image.retention_info') {
+                    return `Histórico disponível por ${params?.hours}h`;
+                }
+                return key;
+            };
+
+            expect(formatRetentionTime(1, mockT)).toBe('Histórico disponível por 1h');
+            expect(formatRetentionTime(12, mockT)).toBe('Histórico disponível por 12h');
+            expect(formatRetentionTime(24, mockT)).toBe('Histórico disponível por 24h');
+        });
+
+        it('formatRetentionTime exibe em dias quando for maior que 24h', () => {
+            const mockT = (key: string, params?: Record<string, unknown>) => {
+                if (key === 'tools.base64-image.retention_info_day') {
+                    return `Histórico disponível por ${params?.days} dia`;
+                }
+                if (key === 'tools.base64-image.retention_info_days') {
+                    return `Histórico disponível por ${params?.days} dias`;
+                }
+                return key;
+            };
+
+            // 25h e 30h arredondam para 1 dia
+            expect(formatRetentionTime(25, mockT)).toBe('Histórico disponível por 1 dia');
+            // 48h sao 2 dias
+            expect(formatRetentionTime(48, mockT)).toBe('Histórico disponível por 2 dias');
+            // 720h sao exatamente 30 dias (cenario Plano Pago)
+            expect(formatRetentionTime(720, mockT)).toBe('Histórico disponível por 30 dias');
         });
     });
 });

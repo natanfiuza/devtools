@@ -82,3 +82,22 @@ export function formatSnippet(
             return uri;
     }
 }
+
+/**
+ * Formata o texto de retenção do histórico em horas (<= 24h) ou dias (> 24h).
+ */
+export function formatRetentionTime(
+    hours: number,
+    t: (key: string, params?: Record<string, unknown>) => string,
+): string {
+    if (hours <= 24) {
+        return t('tools.base64-image.retention_info', { hours });
+    }
+
+    const days = Math.round(hours / 24);
+    if (days === 1) {
+        return t('tools.base64-image.retention_info_day', { days });
+    }
+
+    return t('tools.base64-image.retention_info_days', { days });
+}
