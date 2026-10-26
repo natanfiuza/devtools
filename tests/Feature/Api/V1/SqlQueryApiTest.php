@@ -409,3 +409,61 @@ it('nao escreve schema nem descricao no log', function () {
         });
     }
 });
+
+it('incrementa os contadores de requisicoes HTTP e de consultas SQL por token e na conta sem duplicar em dedupe em voo', function () {
+    $user = User::factory()->create();
+    $newToken = $user->createToken('cli', ['ai:query']);
+    $token = $newToken->plainTextToken;
+    $pat = $newToken->accessToken;
+
+    // 1. Chamada GET (/me) -> +1 HTTP request, 0 SQL queries
+    $this->withToken($token)
+        ->getJson('/api/v1/me')
+        ->assertOk();
+
+    expect($pat->fresh()->requests_count)->toBe(1)
+        ->and($pat->fresh()->sql_queries_count)->toBe(0)
+        ->and($user->fresh()->api_requests_count)->toBe(1)
+        ->and($user->fresh()->api_sql_queries_count)->toBe(0);
+
+    // 2. Primeiro POST (/sql-queries) -> +1 HTTP request, +1 SQL query (nova solicitacao em voo)
+    $this->withToken($token)
+        ->postJson('/api/v1/sql-queries', apiV1Body())
+        ->assertStatus(202);
+
+    expect($pat->fresh()->requests_count)->toBe(2)
+        ->and($pat->fresh()->sql_queries_count)->toBe(1)
+        ->and($user->fresh()->api_requests_count)->toBe(2)
+        ->and($user->fresh()->api_sql_queries_count)->toBe(1);
+
+    // 3. Segundo POST identico enquanto a primeira esta queued (dedupe em voo) -> +1 HTTP request, +0 SQL query
+    $this->withToken($token)
+        ->postJson('/api/v1/sql-queries', apiV1Body())
+        ->assertStatus(202);
+
+    expect($pat->fresh()->requests_count)->toBe(3)
+        ->and($pat->fresh()->sql_queries_count)->toBe(1)
+        ->and($user->fresh()->api_requests_count)->toBe(3)
+        ->and($user->fresh()->api_sql_queries_count)->toBe(1);
+
+    // 4. Cache hit para outra consulta -> +1 HTTP request, +1 SQL query
+    $cachedPayload = (new Canonicalizer)->canonicalize(
+        SchemaSource::Ddl,
+        SqlDialect::Mysql,
+        'sql',
+        'CREATE TABLE users (id int, name varchar(80));',
+        'Outra consulta em cache',
+        'test-model',
+        1,
+    );
+    app(AiCacheRepository::class)->store($cachedPayload, apiV1Result(), 30, 10);
+
+    $this->withToken($token)
+        ->postJson('/api/v1/sql-queries', apiV1Body(['description' => 'Outra consulta em cache']))
+        ->assertOk();
+
+    expect($pat->fresh()->requests_count)->toBe(4)
+        ->and($pat->fresh()->sql_queries_count)->toBe(2)
+        ->and($user->fresh()->api_requests_count)->toBe(4)
+        ->and($user->fresh()->api_sql_queries_count)->toBe(2);
+});

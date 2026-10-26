@@ -8,11 +8,20 @@ export type ApiToken = {
     id: number;
     name: string;
     abilities: string[];
+    requestsCount?: number;
+    sqlQueriesCount?: number;
     lastUsedAt: string | null;
     createdAt: string | null;
+};
+
+export type ApiTokensStats = {
+    totalRequests: number;
+    totalSqlQueries: number;
+    activeTokens: number;
 };
 
 export type ApiTokensProps = {
     tokens: ApiToken[];
     plainTextToken: string | null;
+    stats?: ApiTokensStats;
 };

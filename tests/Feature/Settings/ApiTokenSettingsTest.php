@@ -15,8 +15,15 @@ uses(RefreshDatabase::class);
 */
 
 it('lista os tokens da conta sem expor o valor', function () {
-    $user = User::factory()->create();
-    $user->createToken('integracao', ['ai:query']);
+    $user = User::factory()->create([
+        'api_requests_count' => 14,
+        'api_sql_queries_count' => 5,
+    ]);
+    $token = $user->createToken('integracao', ['ai:query']);
+    $token->accessToken->forceFill([
+        'requests_count' => 9,
+        'sql_queries_count' => 3,
+    ])->save();
 
     $this->actingAs($user)
         ->get(route('api-tokens.index'))
@@ -24,9 +31,14 @@ it('lista os tokens da conta sem expor o valor', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('settings/ApiTokens')
             ->where('plainTextToken', null)
+            ->where('stats.totalRequests', 14)
+            ->where('stats.totalSqlQueries', 5)
+            ->where('stats.activeTokens', 1)
             ->has('tokens', 1)
             ->where('tokens.0.name', 'integracao')
             ->where('tokens.0.abilities', ['ai:query'])
+            ->where('tokens.0.requestsCount', 9)
+            ->where('tokens.0.sqlQueriesCount', 3)
             ->missing('tokens.0.plainTextToken'));
 });
 
@@ -120,4 +132,34 @@ it('token revogado deixa de autenticar', function () {
         ->getJson('/api/v1/me')
         ->assertUnauthorized()
         ->assertJsonPath('error.code', 'unauthenticated');
+});
+
+it('preserva os contadores acumulados da conta ao revogar um token', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('cli', ['ai:query']);
+
+    $this->withToken($token->plainTextToken)
+        ->getJson('/api/v1/me')
+        ->assertOk();
+
+    $this->withToken($token->plainTextToken)
+        ->getJson('/api/v1/output-targets')
+        ->assertOk();
+
+    expect($token->accessToken->fresh()->requests_count)->toBe(2)
+        ->and($user->fresh()->api_requests_count)->toBe(2);
+
+    $this->actingAs($user)
+        ->delete(route('api-tokens.destroy', ['token' => $token->accessToken->id]))
+        ->assertSessionHasNoErrors();
+
+    expect($user->tokens()->count())->toBe(0)
+        ->and($user->fresh()->api_requests_count)->toBe(2);
+
+    $this->actingAs($user->fresh())
+        ->get(route('api-tokens.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('stats.totalRequests', 2)
+            ->where('stats.activeTokens', 0));
 });

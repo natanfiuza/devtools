@@ -517,6 +517,40 @@ function submitDelete(): void {
           }}
         </p>
 
+        <dl
+          v-if="
+            quota.apiRequestsCount !== undefined ||
+              quota.apiSqlQueriesCount !== undefined ||
+              quota.apiTokensCount !== undefined
+          "
+          class="mt-3 space-y-1.5 border-t border-border pt-3 text-sm"
+        >
+          <div class="flex justify-between gap-4">
+            <dt class="text-subtle">
+              {{ t('admin.user.quota.api_requests') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ quota.apiRequestsCount ?? 0 }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-subtle">
+              {{ t('admin.user.quota.api_queries') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ quota.apiSqlQueriesCount ?? 0 }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-subtle">
+              {{ t('admin.user.quota.api_tokens') }}
+            </dt>
+            <dd class="font-mono text-[13px]">
+              {{ quota.apiTokensCount ?? 0 }}
+            </dd>
+          </div>
+        </dl>
+
         <form
           class="mt-4 space-y-2"
           @submit.prevent="submitQuota"

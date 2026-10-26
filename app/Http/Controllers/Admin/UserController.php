@@ -112,6 +112,9 @@ class UserController extends Controller
                 'windowStart' => Format::date($quota->windowStart()),
                 'windowEnd' => Format::date($quota->windowEnd()),
                 'nextCreditAt' => Format::date($quota->nextCreditAt()),
+                'apiRequestsCount' => (int) $user->api_requests_count,
+                'apiSqlQueriesCount' => (int) $user->api_sql_queries_count,
+                'apiTokensCount' => $user->tokens()->count(),
             ],
             'socialAccounts' => $user->socialAccounts()
                 ->get()

@@ -110,4 +110,7 @@
 - Data URI de Imagem: esquema `data:image/...;base64,...` gerado a partir do conteudo binario de uma imagem, pronto para uso em tags HTML `<img>` ou declaracoes CSS.
 - Retencao de Imagem Base64: prazo de conservacao do arquivo fisico em disco no servidor (24 horas para Free e anonimos; 30 dias para assinantes de planos pagos).
 - Download Direto de Base64: mecanismo de entrega de conversoes superiores a 2 MB no plano pago atraves de arquivo `.txt` direto, preservando a memoria e a responsividade da interface no navegador.
+- Contador de requisições da API: dupla métrica que registra o total de chamadas HTTP autenticadas em `/api/v1/*` (`requests_count` no token e `api_requests_count` na conta) e o total de consultas SQL geradas via API (`sql_queries_count` no token e `api_sql_queries_count` na conta), preservando o acumulado vitalício da conta mesmo após revogação de tokens ou poda de 90 dias do histórico (ADR-057).
+- Documentação pública da API (`/{locale}/api-docs`): página pública e indexável nos 5 idiomas que apresenta o guia de integração da API v1 (autenticação Bearer, fluxo assíncrono `200`/`202` + `poll_url`, endpoints, alvos de saída habilitados, rate limits, erros e exemplos em cURL, JS/TS, PHP, Python e n8n), além do link para `/openapi.yaml`, acessível pelo rodapé público e pela aba Tokens de API (ADR-057).
+
 

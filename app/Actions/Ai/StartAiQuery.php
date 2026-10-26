@@ -156,6 +156,7 @@ final class StartAiQuery
                 ]);
 
                 $this->cache->recordHit($hit->cache);
+                $this->incrementApiSqlQueriesCount($lockedUser, $apiTokenId);
 
                 return new StartResult($request, $quota, true);
             }
@@ -198,6 +199,8 @@ final class StartAiQuery
                 $unit === QuotaUnit::Tokens ? $estimatedTokens : 0,
                 $unit === QuotaUnit::Uses ? 1 : 0,
             );
+
+            $this->incrementApiSqlQueriesCount($lockedUser, $apiTokenId);
 
             return new StartResult($request, Quota::for($lockedUser));
         });
@@ -250,5 +253,20 @@ final class StartAiQuery
         if ($remaining < $required) {
             throw QuotaExceededException::forUnit($unit, $required);
         }
+    }
+
+    private function incrementApiSqlQueriesCount(User $user, ?int $apiTokenId): void
+    {
+        if ($apiTokenId === null) {
+            return;
+        }
+
+        DB::table('personal_access_tokens')
+            ->where('id', $apiTokenId)
+            ->increment('sql_queries_count');
+
+        DB::table('users')
+            ->where('id', $user->getKey())
+            ->increment('api_sql_queries_count');
     }
 }

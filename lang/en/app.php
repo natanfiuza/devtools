@@ -61,6 +61,7 @@ return [
 
     'footer' => [
         'language' => 'Language',
+        'api_docs' => 'API',
         'privacy' => 'Privacy',
         'terms' => 'Terms',
         'donate' => 'Donate',

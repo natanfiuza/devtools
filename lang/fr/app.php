@@ -62,6 +62,7 @@ return [
 
     'footer' => [
         'language' => 'Langue',
+        'api_docs' => 'API',
         'privacy' => 'Confidentialité',
         'terms' => 'Conditions',
         'donate' => 'Faire un don',
