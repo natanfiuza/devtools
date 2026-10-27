@@ -112,5 +112,8 @@
 - Download Direto de Base64: mecanismo de entrega de conversoes superiores a 2 MB no plano pago atraves de arquivo `.txt` direto, preservando a memoria e a responsividade da interface no navegador.
 - Contador de requisições da API: dupla métrica que registra o total de chamadas HTTP autenticadas em `/api/v1/*` (`requests_count` no token e `api_requests_count` na conta) e o total de consultas SQL geradas via API (`sql_queries_count` no token e `api_sql_queries_count` na conta), preservando o acumulado vitalício da conta mesmo após revogação de tokens ou poda de 90 dias do histórico (ADR-057).
 - Documentação pública da API (`/{locale}/api-docs`): página pública e indexável nos 5 idiomas que apresenta o guia de integração da API v1 (autenticação Bearer, fluxo assíncrono `200`/`202` + `poll_url`, endpoints, alvos de saída habilitados, rate limits, erros e exemplos em cURL, JS/TS, PHP, Python e n8n), além do link para `/openapi.yaml`, acessível pelo rodapé público e pela aba Tokens de API (ADR-057).
+- Share Text: ferramenta de compartilhamento rápido de notas, códigos e textos no navegador com compatibilidade total com Hastebin (ADR-058).
+- Shared Text (`shared_texts`): modelo e registro de persistência de textos compartilhados, identificado por ULID, vinculando arquivos físicos em `storage/app/data/sharetext/{user_id|anonymous}/{ulid}.txt`, tamanho em bytes, extensão opcional e data de expiração (ADR-058).
+- API Hastebin (`/documents`, `/raw/{id}`): superfície clássica de integração HTTP aceitando payloads brutos de CLI e utilitários de terminal, com detecção de sessão e token Bearer Sanctum (ADR-058).
 
 

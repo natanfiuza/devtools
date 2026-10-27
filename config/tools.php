@@ -66,6 +66,16 @@ return [
             'free_retention_hours' => (int) env('TOOLS_BASE64_IMAGE_FREE_RETENTION_HOURS', 24),
             'paid_retention_days' => (int) env('TOOLS_BASE64_IMAGE_PAID_RETENTION_DAYS', 30),
         ],
+
+        /*
+        | Limites e politicas da ferramenta Share Text (ADR-058).
+        */
+        'share_text' => [
+            'anonymous_max_bytes' => (int) env('TOOLS_SHARE_TEXT_ANONYMOUS_MAX_BYTES', 1 * 1024 * 1024),
+            'anonymous_retention_hours' => (int) env('TOOLS_SHARE_TEXT_ANONYMOUS_RETENTION_HOURS', 72),
+            'free_max_bytes' => (int) env('TOOLS_SHARE_TEXT_FREE_MAX_BYTES', 5 * 1024 * 1024),
+            'paid_max_bytes' => (int) env('TOOLS_SHARE_TEXT_PAID_MAX_BYTES', 25 * 1024 * 1024),
+        ],
     ],
 
 ];
