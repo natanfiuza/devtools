@@ -17,6 +17,7 @@ use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ProfilePhotoController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\ShareTextController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SubscriptionIntentController;
 use App\Http\Controllers\ToolController;
@@ -67,6 +68,11 @@ Route::prefix('{locale}')
         // so, e o componente de cada tool entra por dentro dela. Sem restricao
         // de formato no slug - o 404 de tool que nao funciona e regra de
         // negocio, nao de URL.
+        Route::get('tools/share-text/{id}', ToolController::class)
+            ->where('id', '[0-9A-HJ-KM-NP-TV-Z]{26}(?:\.[a-zA-Z0-9_-]+)?')
+            ->defaults('slug', 'share-text')
+            ->name('tools.share-text.view');
+
         Route::get('tools/{slug}', ToolController::class)->name('tools.show');
     });
 
@@ -124,6 +130,35 @@ Route::prefix('tools/base64-image')
         Route::get('preview/{id}', [Base64ImageDownloadController::class, 'preview'])
             ->whereUlid('id')
             ->name('preview');
+    });
+
+// Atalho curto e visualizacao crua da ferramenta Share Text (ADR-058):
+Route::get('share/{id}', [ShareTextController::class, 'redirectShort'])
+    ->where('id', '[0-9A-HJ-KM-NP-TV-Z]{26}(?:\.[a-zA-Z0-9_-]+)?')
+    ->name('share.short');
+
+Route::get('raw/{id}', [ShareTextController::class, 'raw'])
+    ->where('id', '[0-9A-HJ-KM-NP-TV-Z]{26}(?:\.[a-zA-Z0-9_-]+)?')
+    ->name('share.raw');
+
+// API publica compativel com Hastebin:
+Route::post('documents', [ShareTextController::class, 'store'])
+    ->name('documents.store');
+Route::get('documents/{id}', [ShareTextController::class, 'show'])
+    ->where('id', '[0-9A-HJ-KM-NP-TV-Z]{26}(?:\.[a-zA-Z0-9_-]+)?')
+    ->name('documents.show');
+
+// API interna da ferramenta Share Text:
+Route::prefix('api/tools/share-text')
+    ->name('api.tools.share-text.')
+    ->group(function (): void {
+        Route::get('history', [ShareTextController::class, 'history'])
+            ->middleware('auth')
+            ->name('history');
+        Route::delete('{id}', [ShareTextController::class, 'destroy'])
+            ->middleware('auth')
+            ->where('id', '[0-9A-HJ-KM-NP-TV-Z]{26}')
+            ->name('destroy');
     });
 
 // Definir a primeira senha: contas criadas por login social (ADR-023) chegam

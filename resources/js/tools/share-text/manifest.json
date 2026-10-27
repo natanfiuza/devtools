@@ -1,0 +1,19 @@
+{
+    "slug": "share-text",
+    "status": "available",
+    "category": "text",
+    "icon": "file-text",
+    "order": 56,
+    "keywords": [
+        "hastebin",
+        "pastebin",
+        "share",
+        "text",
+        "code",
+        "snippet",
+        "upload",
+        "compartilhar",
+        "texto",
+        "codigo"
+    ]
+}

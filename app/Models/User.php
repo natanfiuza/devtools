@@ -279,6 +279,14 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * @return HasMany<SharedText, $this>
+     */
+    public function sharedTexts(): HasMany
+    {
+        return $this->hasMany(SharedText::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

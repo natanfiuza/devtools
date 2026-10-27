@@ -40,7 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // O gateway nao tem sessao nem token CSRF: a autenticidade da
         // notificacao vem de `x-signature`, conferida no controller (F6).
-        $middleware->validateCsrfTokens(except: ['webhooks/mercadopago']);
+        // A API Hastebin (/documents) aceita envios diretos de clientes CLI (ADR-058).
+        $middleware->validateCsrfTokens(except: ['webhooks/mercadopago', 'documents*']);
 
         // Proxies do nginx do VPS (ADR-052). A lista vem de TRUSTED_PROXIES e e
         // lida por request; sem ela, IP e esquema sao os da conexao direta.

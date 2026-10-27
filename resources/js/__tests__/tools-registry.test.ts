@@ -27,6 +27,7 @@ const MVP = [
     'sql-formatter',
     'base64-url-hash',
     'base64-image',
+    'share-text',
     'jwt-decoder',
     'timestamp-uuid',
     'regex-tester',

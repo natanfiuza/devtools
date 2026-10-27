@@ -54,6 +54,7 @@ class ToolController extends Controller
             'toolProps' => ToolProps::for(
                 $tool['slug'],
                 $user instanceof User ? $user : null,
+                $request,
             ),
         ]);
     }
