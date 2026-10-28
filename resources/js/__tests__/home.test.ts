@@ -103,6 +103,23 @@ const traducoes = {
             preview_prompt: 'PEDIDO_IA',
             preview_sql: 'SQL_IA',
         },
+        api: {
+            badge: 'SELO_API',
+            title: 'TITULO_API',
+            body: 'CORPO_API',
+            note: 'NOTA_API',
+            cta_docs: 'DOCS_API',
+            cta_tokens: 'TOKENS_API',
+            preview_title: 'PREVIEW_TITULO_API',
+            preview_code: 'CODE_API',
+        },
+        donation: {
+            badge: 'SELO_DOACAO',
+            title: 'TITULO_DOACAO',
+            body: 'CORPO_DOACAO',
+            note: 'NOTA_DOACAO',
+            cta: 'APOIAR_PIX',
+        },
         cta: {
             register: 'CRIAR_CONTA',
             subscribe: 'ASSINAR_PLANO',
@@ -244,6 +261,40 @@ describe('hero e destaque', () => {
         expect(cta.text()).toBe('ABRIR_IA');
         expect(cta.attributes('href')).toBe('/pt-br/tools/ai-sql-builder');
         expect(wrapper.get('a[href="/pt-br/pricing"]').text()).toBe('PLANOS');
+    });
+
+    it('mostra o card da API com o preview estatico e CTAs', () => {
+        const wrapper = montar();
+        const texto = wrapper.text();
+
+        expect(texto).toContain('SELO_API');
+        expect(texto).toContain('TITULO_API');
+        expect(texto).toContain('CORPO_API');
+        expect(texto).toContain('NOTA_API');
+        expect(texto).toContain('PREVIEW_TITULO_API');
+        expect(texto).toContain('CODE_API');
+
+        const docsCta = wrapper.get('[data-test="home-api-docs-cta"]');
+        expect(docsCta.text()).toBe('DOCS_API');
+        expect(docsCta.attributes('href')).toBe('/pt-br/api-docs');
+
+        const registerCta = wrapper.get('[data-test="home-api-register-cta"]');
+        expect(registerCta.text()).toBe('CRIAR_CONTA');
+        expect(registerCta.attributes('href')).toBe('/pt-br/register');
+    });
+
+    it('mostra a chamada de doacao com link para a pagina de doacao Pix', () => {
+        const wrapper = montar();
+        const texto = wrapper.text();
+
+        expect(texto).toContain('SELO_DOACAO');
+        expect(texto).toContain('TITULO_DOACAO');
+        expect(texto).toContain('CORPO_DOACAO');
+        expect(texto).toContain('NOTA_DOACAO');
+
+        const donateCta = wrapper.get('[data-test="home-donate-cta"]');
+        expect(donateCta.text()).toBe('APOIAR_PIX');
+        expect(donateCta.attributes('href')).toBe('/pt-br/donate');
     });
 });
 

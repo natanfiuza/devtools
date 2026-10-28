@@ -22,6 +22,25 @@ return [
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],
 
+    'api' => [
+        'badge' => 'REST API v1',
+        'title' => 'Automate and integrate directly into your workflow',
+        'body' => 'Generate SQL and ORM code programmatically. Connect devtools to your CI/CD pipelines, CLI scripts, internal tools, and n8n automations without copy-pasting through the UI.',
+        'note' => 'Bearer token authentication (Sanctum), asynchronous processing, and instant responses on cache hit.',
+        'cta_docs' => 'View API documentation',
+        'cta_tokens' => 'Manage API tokens',
+        'preview_title' => 'cURL request example',
+        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer YOUR_TOKEN\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"List active users ordered by name\"\n  }'",
+    ],
+
+    'donation' => [
+        'badge' => 'Support devtools',
+        'title' => 'Help keep the tools online and free for everyone',
+        'body' => 'devtools is an independent project built by developers for developers. All utility tools run 100% in your browser with complete privacy and zero intrusive ads. Pix donations directly help fund server hosting and AI model quotas.',
+        'note' => 'Any amount makes a difference and keeps the project sustainable and accessible to everyone.',
+        'cta' => 'Make a donation via Pix',
+    ],
+
     'cta' => [
         'register' => 'Create account',
         'contact' => 'Talk by e-mail',

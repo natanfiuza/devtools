@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Link } from '@inertiajs/vue3';
-import { Sparkles } from '@lucide/vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { HeartHandshake, Sparkles, Terminal } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import PageHead from '@/components/PageHead.vue';
 import SearchTrigger from '@/components/SearchTrigger.vue';
@@ -9,18 +9,22 @@ import ToolGrid from '@/components/ToolGrid.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRoutes } from '@/composables/useRoutes';
+import { index as apiTokens } from '@/routes/api-tokens';
 import { allTools, toolPath } from '@/tools/registry';
 
 /**
- * Home publica (DESIGN): hero com a busca, grid de ferramentas por categoria
- * e AI SQL Builder em destaque.
+ * Home publica (DESIGN): hero com a busca, grid de ferramentas por categoria,
+ * AI SQL Builder em destaque, card de integracao via API REST e chamada de doacao.
  *
  * O grid sai do registro de tools (`resources/js/tools`), o mesmo que alimenta
  * a busca Cmd+K e o sitemap; os planos vivem em pagina propria (`Pricing.vue`,
  * `/{locale}/pricing`).
  */
 const { t } = useI18n();
+const page = usePage();
 const routes = useRoutes();
+
+const isAuthenticated = computed<boolean>(() => page.props.auth?.user != null);
 
 /** O registro inteiro: a F1 nao tem filtro de visibilidade a fazer aqui. */
 const tools = allTools;
@@ -137,6 +141,115 @@ const aiHref = computed(() =>
             class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
           ><code>{{ t('home.ai.preview_sql') }}</code></pre>
         </figure>
+      </div>
+    </section>
+
+    <section class="mt-20">
+      <div
+        class="grid items-center gap-8 rounded-xl border bg-surface p-6 sm:p-10 lg:grid-cols-2"
+      >
+        <div>
+          <Badge variant="secondary">
+            <Terminal
+              class="size-3"
+              aria-hidden="true"
+            />
+            {{ t('home.api.badge') }}
+          </Badge>
+
+          <h2
+            class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
+          >
+            {{ t('home.api.title') }}
+          </h2>
+          <p class="mt-2 text-muted-foreground">
+            {{ t('home.api.body') }}
+          </p>
+          <p class="mt-4 text-sm text-subtle">
+            {{ t('home.api.note') }}
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <Button as-child>
+              <Link
+                :href="routes.apiDocs.value"
+                data-test="home-api-docs-cta"
+              >
+                {{ t('home.api.cta_docs') }}
+              </Link>
+            </Button>
+            <Button
+              v-if="isAuthenticated"
+              variant="outline"
+              as-child
+            >
+              <Link
+                :href="apiTokens.url()"
+                data-test="home-api-tokens-cta"
+              >
+                {{ t('home.api.cta_tokens') }}
+              </Link>
+            </Button>
+            <Button
+              v-else
+              variant="outline"
+              as-child
+            >
+              <Link
+                :href="routes.register.value"
+                data-test="home-api-register-cta"
+              >
+                {{ t('home.cta.register') }}
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <figure class="rounded-lg border bg-surface-2 p-4">
+          <p class="text-sm text-subtle">
+            {{ t('home.api.preview_title') }}
+          </p>
+          <pre
+            class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
+          ><code>{{ t('home.api.preview_code') }}</code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section class="mt-20">
+      <div class="rounded-xl border bg-surface p-6 sm:p-10">
+        <div class="max-w-3xl">
+          <Badge variant="secondary">
+            <HeartHandshake
+              class="size-3"
+              aria-hidden="true"
+            />
+            {{ t('home.donation.badge') }}
+          </Badge>
+
+          <h2
+            class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
+          >
+            {{ t('home.donation.title') }}
+          </h2>
+          <p class="mt-2 text-muted-foreground">
+            {{ t('home.donation.body') }}
+          </p>
+          <p class="mt-4 text-sm text-subtle">
+            {{ t('home.donation.note') }}
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <Button as-child>
+              <Link
+                :href="routes.donate.value"
+                data-test="home-donate-cta"
+              >
+                {{ t('home.donation.cta') }}
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   </div>

@@ -22,6 +22,25 @@ return [
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],
 
+    'api' => [
+        'badge' => 'API REST v1',
+        'title' => 'Automatize e integre diretamente no seu fluxo de trabalho',
+        'body' => 'Gere SQL e código de ORM programaticamente. Conecte o devtools aos seus pipelines de CI/CD, scripts CLI, ferramentas internas e automações no n8n sem necessitar de copiar e colar pela interface.',
+        'note' => 'Autenticação com Bearer Token (Sanctum), processamento assíncrono e resposta instantânea em caso de cache.',
+        'cta_docs' => 'Ver documentação da API',
+        'cta_tokens' => 'Gerir tokens de API',
+        'preview_title' => 'Exemplo de pedido cURL',
+        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer SEU_TOKEN\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"Listar utilizadores ativos ordenados por nome\"\n  }'",
+    ],
+
+    'donation' => [
+        'badge' => 'Apoie o devtools',
+        'title' => 'Ajude a manter as ferramentas online e gratuitas',
+        'body' => 'O devtools é um projeto independente criado por programadores para programadores. Todas as ferramentas utilitárias correm 100% no seu navegador com total privacidade e sem anúncios invasivos. Doações via Pix ajudam diretamente a suportar custos de servidores e modelos de IA.',
+        'note' => 'Qualquer valor faz a diferença e mantém o projeto sustentável e acessível para toda a comunidade.',
+        'cta' => 'Fazer uma doação via Pix',
+    ],
+
     'cta' => [
         'register' => 'Criar conta',
         'contact' => 'Falar por e-mail',

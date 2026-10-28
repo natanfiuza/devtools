@@ -22,6 +22,25 @@ return [
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],
 
+    'api' => [
+        'badge' => 'API REST v1',
+        'title' => 'Automatiza e integra directamente en tu flujo de trabajo',
+        'body' => 'Genera SQL y código ORM mediante programación. Conecta devtools a tus pipelines de CI/CD, scripts CLI, herramientas internas y automatizaciones en n8n sin tener que copiar y pegar desde la interfaz.',
+        'note' => 'Autenticación con Bearer token (Sanctum), procesamiento asíncrono y respuesta instantánea si existe en caché.',
+        'cta_docs' => 'Ver documentación de la API',
+        'cta_tokens' => 'Gestionar tokens de API',
+        'preview_title' => 'Ejemplo de petición cURL',
+        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer TU_TOKEN\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"Listar usuarios activos ordenados por nombre\"\n  }'",
+    ],
+
+    'donation' => [
+        'badge' => 'Apoya devtools',
+        'title' => 'Ayuda a mantener las herramientas activas y gratuitas',
+        'body' => 'devtools es un proyecto independiente creado por desarrolladores para desarrolladores. Todas las herramientas se ejecutan 100% en tu navegador con total privacidad y sin anuncios molestos. Las donaciones vía Pix ayudan directamente a costear servidores y cuotas de modelos de IA.',
+        'note' => 'Cualquier aporte marca la diferencia y mantiene el proyecto sostenible y accesible para todos.',
+        'cta' => 'Hacer una donación vía Pix',
+    ],
+
     'cta' => [
         'register' => 'Crear cuenta',
         'contact' => 'Escribir por correo',

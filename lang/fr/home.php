@@ -22,6 +22,25 @@ return [
         'preview_sql' => "SELECT c.name, SUM(o.total) AS spent\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.created_at >= NOW() - INTERVAL '30 days'\nGROUP BY c.name\nORDER BY spent DESC\nLIMIT 10;",
     ],
 
+    'api' => [
+        'badge' => 'API REST v1',
+        'title' => 'Automatisez et intégrez directement à votre flux de travail',
+        'body' => 'Générez du SQL et du code ORM par programmation. Connectez devtools à vos pipelines CI/CD, scripts CLI, outils internes et automatisations n8n sans devoir copier-coller depuis l\'interface.',
+        'note' => 'Authentification par jeton Bearer (Sanctum), traitement asynchrone et réponse instantanée en cas de cache.',
+        'cta_docs' => 'Consulter la documentation de l\'API',
+        'cta_tokens' => 'Gérer les jetons d\'API',
+        'preview_title' => 'Exemple de requête cURL',
+        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer VOTRE_JETON\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"Lister les utilisateurs actifs triés par nom\"\n  }'",
+    ],
+
+    'donation' => [
+        'badge' => 'Soutenez devtools',
+        'title' => 'Aidez à maintenir les outils en ligne et gratuits pour tous',
+        'body' => 'devtools est un projet indépendant conçu par des développeurs pour des développeurs. Tous les outils s\'exécutent à 100 % dans votre navigateur en toute confidentialité et sans publicité. Vos dons via Pix financent directement l\'hébergement des serveurs et les quotas de modèles IA.',
+        'note' => 'Chaque contribution fait la différence et maintient la plateforme accessible à l\'ensemble de la communauté.',
+        'cta' => 'Faire un don via Pix',
+    ],
+
     'cta' => [
         'register' => 'Créer un compte',
         'contact' => 'Écrire un e-mail',
