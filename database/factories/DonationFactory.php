@@ -26,6 +26,8 @@ class DonationFactory extends Factory
             'status' => DonationStatus::Pending,
             'gateway' => 'mercadopago',
             'gateway_ref' => null,
+            'gateway_status' => null,
+            'gateway_status_detail' => null,
             'qr_code' => '00020126...6304ABCD',
             'qr_code_base64' => base64_encode('png-fake'),
             'ticket_url' => null,

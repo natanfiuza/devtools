@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Donations\CreateDonation;
+use App\Actions\Donations\SyncDonationPayment;
 use App\Contracts\Payments\PaymentGateway;
+use App\Enums\DonationFailureReason;
 use App\Enums\DonationStatus;
+use App\Enums\DonationSyncOutcome;
 use App\Exceptions\Payments\DonationException;
 use App\Exceptions\Payments\PaymentGatewayException;
+use App\Exceptions\Payments\PaymentVerificationException;
 use App\Http\Requests\StoreDonationRequest;
 use App\Models\Donation;
 use App\Models\User;
@@ -114,6 +118,9 @@ class DonationController extends Controller
         $pending = $status === DonationStatus::Pending;
 
         return Inertia::render('DonationStatus', [
+            // O auto-refresh da pagina so relê o banco; quem fala com o
+            // provedor e o botao "Ja paguei" (ADR-059).
+            'pollMs' => max(0, (int) config('donations.status_poll_ms', 15000)),
             'donation' => [
                 'ulid' => $donation->ulid,
                 'status' => $status->value,
@@ -127,8 +134,94 @@ class DonationController extends Controller
                 'qrImage' => $pending ? $this->qrImage($donation->qr_code_base64) : null,
                 'ticketUrl' => $pending ? $donation->ticket_url : null,
                 'static' => $donation->gateway === 'manual',
+                'canCheck' => $this->canCheck($donation, $status),
+                // Motivo traduzido; o `status_detail` cru continua so no banco.
+                'failureReason' => $status === DonationStatus::Failed
+                    ? __(DonationFailureReason::fromStatusDetail($donation->gateway_status_detail)->translationKey())
+                    : null,
             ],
         ]);
+    }
+
+    /**
+     * Consulta o provedor sob demanda ("Ja paguei", ADR-059).
+     *
+     * O efeito fica no `SyncDonationPayment`, o mesmo do webhook: a pagina so
+     * descobre mais cedo o que o provedor ja sabe. Doacao resolvida nao gasta
+     * consulta, e uma referencia divergente nao sincroniza nada.
+     */
+    public function check(Request $request, SyncDonationPayment $sync): RedirectResponse
+    {
+        $donation = Donation::query()
+            ->where('ulid', (string) $request->route('donation'))
+            ->firstOrFail();
+
+        $status = $donation->effectiveStatus();
+
+        if (! in_array($status, [DonationStatus::Pending, DonationStatus::Expired], true)) {
+            return $this->redirectToStatus($donation, 'info', 'donations.check.already');
+        }
+
+        if (! $this->canCheck($donation, $status)) {
+            return $this->redirectToStatus($donation, 'warning', 'donations.check.unavailable');
+        }
+
+        try {
+            $payment = $this->gateway->payment((string) $donation->gateway_ref);
+        } catch (PaymentGatewayException $exception) {
+            report($exception);
+
+            return $this->redirectToStatus($donation, 'error', 'donations.check.error');
+        }
+
+        if ($payment->externalReference !== 'don_'.$donation->ulid) {
+            // O id gravado aponta para outro pagamento: nao mexe no estado.
+            return $this->redirectToStatus($donation, 'error', 'donations.check.mismatch');
+        }
+
+        try {
+            $outcome = $sync($donation, $payment);
+        } catch (PaymentVerificationException $exception) {
+            report($exception);
+
+            return $this->redirectToStatus($donation, 'error', 'donations.check.error');
+        }
+
+        [$type, $messageKey] = match ($outcome) {
+            DonationSyncOutcome::Confirmed => ['success', 'donations.check.success'],
+            DonationSyncOutcome::Declined => ['warning', 'donations.check.failed'],
+            DonationSyncOutcome::Refunded => ['info', 'donations.check.refunded'],
+            DonationSyncOutcome::Unchanged => ['info', 'donations.check.pending'],
+        };
+
+        return $this->redirectToStatus($donation, $type, $messageKey);
+    }
+
+    /**
+     * Só a doacao dinamica ainda aberta tem o que consultar: Pix estatico nao
+     * tem cobranca no provedor e doacao paga/estornada/falha ja e terminal.
+     */
+    private function canCheck(Donation $donation, DonationStatus $status): bool
+    {
+        return in_array($status, [DonationStatus::Pending, DonationStatus::Expired], true)
+            && $donation->gateway === 'mercadopago'
+            && is_string($donation->gateway_ref)
+            && $donation->gateway_ref !== ''
+            && $this->gateway->isAvailable();
+    }
+
+    private function redirectToStatus(
+        Donation $donation,
+        string $type,
+        string $messageKey,
+    ): RedirectResponse {
+        Inertia::flash('toast', [
+            'type' => $type,
+            'message' => __($messageKey),
+        ]);
+
+        // `locale` vem do `URL::defaults()` do ResolveLocale, como no `store()`.
+        return redirect()->route('donate.status', ['donation' => $donation->ulid]);
     }
 
     private function refuse(string $messageKey): RedirectResponse

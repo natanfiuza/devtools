@@ -85,6 +85,10 @@ export type AdminDonationRow = {
     amount: string;
     status: 'pending' | 'paid' | 'expired' | 'refunded' | 'failed';
     gateway: string;
+    /** Status cru do provedor (`approved`, `cancelled`...); diagnostico. */
+    gatewayStatus: string | null;
+    /** Detalhe cru do provedor (`rejected_by_bank`...); diagnostico. */
+    gatewayStatusDetail: string | null;
     locale: string;
     createdAt: string | null;
     paidAt: string | null;

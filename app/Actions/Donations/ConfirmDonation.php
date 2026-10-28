@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Notification;
 /**
  * Marca a doacao como paga e envia o recibo (F6).
  *
- * Idempotente: so a transicao `pending -> paid` vale. Webhook repetido nao
- * muda o estado nem manda um segundo recibo. Valor e moeda sao conferidos com
- * a doacao gravada - o corpo do webhook nunca decide quanto foi pago.
+ * Idempotente: so a transicao `pending|expired -> paid` vale. Webhook repetido
+ * nao muda o estado nem manda um segundo recibo. Um Pix aprovado depois do
+ * vencimento local ainda confirma (ADR-048), por isso `expired` entra na
+ * guarda. Valor e moeda sao conferidos com a doacao gravada - o corpo do
+ * webhook nunca decide quanto foi pago.
  */
 final class ConfirmDonation
 {
@@ -52,7 +54,10 @@ final class ConfirmDonation
             ->lockForUpdate()
             ->first();
 
-        if (! $locked instanceof Donation || $locked->status !== DonationStatus::Pending) {
+        if (
+            ! $locked instanceof Donation
+            || ! in_array($locked->status, [DonationStatus::Pending, DonationStatus::Expired], true)
+        ) {
             return false;
         }
 

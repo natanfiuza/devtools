@@ -324,6 +324,8 @@ return [
         'status' => 'Status',
         'status_all' => 'All',
         'gateway' => 'Source',
+        'gateway_status' => 'Gateway status',
+        'gateway_status_detail' => 'Gateway status detail',
         'locale' => 'Language',
         'created' => 'Created on',
         'paid_at' => 'Paid on',

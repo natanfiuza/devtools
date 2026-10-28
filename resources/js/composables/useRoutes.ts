@@ -15,7 +15,10 @@ import {
 } from '@/routes';
 import { store as contactStore } from '@/routes/contact';
 import { store as donateStore } from '@/routes/donate';
-import { status as donationStatusRoute } from '@/routes/donate';
+import {
+    check as donationCheckRoute,
+    status as donationStatusRoute,
+} from '@/routes/donate';
 import { store as loginStore } from '@/routes/login';
 import { store as registerStore } from '@/routes/register';
 import { store as subscribeStore } from '@/routes/subscribe';
@@ -51,6 +54,8 @@ export type UseRoutesReturn = {
     subscribe: (plan?: string) => string;
     /** Pagina de status da doacao: o ULID e o identificador publico. */
     donationStatus: (ulid: string) => string;
+    /** Consulta o provedor sob demanda ("Ja paguei"). */
+    donationCheck: (ulid: string) => string;
 
     login: ComputedRef<string>;
     register: ComputedRef<string>;
@@ -123,6 +128,11 @@ export function useRoutes(): UseRoutesReturn {
             subscribe.url(plan ? { query: { plan } } : undefined),
         donationStatus: (ulid: string) =>
             donationStatusRoute.url({
+                locale: slug.value,
+                donation: ulid,
+            }),
+        donationCheck: (ulid: string) =>
+            donationCheckRoute.url({
                 locale: slug.value,
                 donation: ulid,
             }),

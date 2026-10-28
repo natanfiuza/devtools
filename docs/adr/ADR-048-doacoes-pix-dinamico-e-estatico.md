@@ -56,3 +56,10 @@ Alem disso, a doacao nao pode virar receita na fatura nem consumir cota - ela e 
 - **Exigir nome e e-mail**: impossibilitaria a doacao anonima, que foi decisao de produto.
 - **Confirmar pelo corpo do webhook**: contrario ao ADR-047; valor e moeda vem da API.
 - **Biblioteca JS de QR**: nova dependencia no front; o QR ja podia ser gerado no servidor com o que estava instalado.
+
+## Emenda (ADR-059, 2026-10-27)
+
+- A transicao de confirmacao e `pending|expired -> paid` (o §9 ja dizia que um Pix aprovado depois do vencimento local confirma; o codigo agora concorda).
+- `donations` guarda `gateway_status` e `gateway_status_detail`, gravados na criacao, no webhook e na consulta sob demanda; o motivo da recusa chega ao doador traduzido e o codigo cru fica no admin.
+- A pagina de status se atualiza a cada `DONATIONS_STATUS_POLL_MS` (so banco local) e oferece "Ja paguei" (`POST /donate/{ulid}/check`), com limite por IP e `donations:check {ulid}` para o operador.
+- O prazo do QR ficou `max(30, (int) (env('DONATIONS_EXPIRES_MINUTES') ?: 60))`: chave vazia cai em 60 e o piso subiu de 5 para 30 minutos.

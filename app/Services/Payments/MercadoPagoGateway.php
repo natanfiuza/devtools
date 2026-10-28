@@ -151,6 +151,7 @@ final class MercadoPagoGateway implements PaymentGateway
             $this->text($transaction['qr_code_base64'] ?? null),
             $this->text($transaction['ticket_url'] ?? null),
             $this->date($data['date_of_expiration'] ?? null),
+            $this->text($data['status_detail'] ?? null),
         );
     }
 
@@ -163,6 +164,10 @@ final class MercadoPagoGateway implements PaymentGateway
         if ($paymentId === null) {
             throw PaymentGatewayException::invalidResponse('payment');
         }
+
+        $payer = $data['payer'] ?? null;
+        $payer = is_array($payer) ? $payer : [];
+        $liveMode = $data['live_mode'] ?? null;
 
         return new GatewayPayment(
             $paymentId,
@@ -177,6 +182,11 @@ final class MercadoPagoGateway implements PaymentGateway
             ),
             $this->text($data['payment_method_id'] ?? null),
             $this->date($data['date_approved'] ?? null),
+            payerEmail: $this->text($payer['email'] ?? null),
+            collectorId: $this->text($data['collector_id'] ?? null),
+            liveMode: is_bool($liveMode) ? $liveMode : null,
+            createdAt: $this->date($data['date_created'] ?? null),
+            expiresAt: $this->date($data['date_of_expiration'] ?? null),
         );
     }
 

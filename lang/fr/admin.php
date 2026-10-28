@@ -324,6 +324,8 @@ return [
         'status' => 'Statut',
         'status_all' => 'Tous',
         'gateway' => 'Origine',
+        'gateway_status' => 'Statut chez le prestataire',
+        'gateway_status_detail' => 'Détail chez le prestataire',
         'locale' => 'Langue',
         'created' => 'Créé le',
         'paid_at' => 'Payé le',

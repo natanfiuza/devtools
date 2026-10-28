@@ -73,6 +73,8 @@ DONATIONS_SUGGESTED_CENTS=500,1000,2500,5000
 DONATIONS_MIN_CENTS=100
 DONATIONS_MAX_CENTS=100000
 DONATIONS_EXPIRES_MINUTES=60
+DONATIONS_STATUS_POLL_MS=15000
+DONATIONS_CHECK_PER_MINUTE=5
 DONATIONS_SEND_RECEIPTS=true
 DONATIONS_PIX_KEY=
 DONATIONS_PIX_HOLDER=
@@ -205,6 +207,13 @@ convivem por alguns segundos (FPM com PHP ja carregado, fila, SSR).
 Na pratica: adicionar coluna com default ou nullable; renomear em dois passos
 (coluna nova + copia, depois remocao numa fase seguinte); nunca `DROP` no
 mesmo deploy que para de usar a coluna.
+
+A migration da ADR-059 (`gateway_status` e `gateway_status_detail` em
+`donations`) segue exatamente esse padrao: duas colunas nullable, sem default,
+sem indice e sem backfill. O PHP antigo as ignora durante a janela entre o
+`migrate` e o `queue:restart`; o codigo novo preenche na criacao, no webhook e
+na consulta sob demanda. Nao ha o que conferir depois do deploy alem do
+`php artisan migrate --force` que o proprio `deploy.sh` roda.
 
 **Pendencia conhecida (F7)**: `usage_ledger.ai_request_id` nao e mais lida nem
 escrita desde 2026-10-22, mas continua na tabela. O `DROP` fica para o deploy
@@ -622,6 +631,7 @@ Problemas que ja sabemos diagnosticar:
 | Webhook responde **401** | Segredo diferente do configurado no painel do provedor, `data.id` ausente ou URL reescrita por proxy. O manifesto assinado e `id/request-id/ts` |
 | Evento em `/admin/webhooks` fica `failed` | O recurso nao foi encontrado na API, valor/moeda divergiu da sessao ou o provedor recusou: o `error` e o payload explicam. Corrigir a causa e esperar o reenvio do provedor; nao ha botao de reprocessar (ADR-047) |
 | Doacao mostra Pix estatico sem confirmacao | Sem credenciais do provedor: e o fallback previsto (ADR-048). Com token, confira `DONATIONS_PAYER_EMAIL` - o provedor exige e-mail de pagador |
+| Doacao recusada/vencida sem explicacao, ou paga que ficou `pending` | Rode `php artisan donations:check <ulid>` (detalhes em [guides/mercado-pago.md](guides/mercado-pago.md#8-consulta-sob-demanda-e-diagnóstico-de-doações-adr-059)): ele **grava** o estado sincronizado e imprime `status`, `status_detail`, `live_mode`, `collector_id` e o prazo do QR. `live_mode=false` = token de teste; `rejected_by_bank`/`rejected_high_risk`/`rejected_by_regulations` sao do banco ou da conta do provedor, nao do codigo (ADR-059) |
 | Renovacao nao acontece e o acesso segue | Preapproval cancelada (`renewal_canceled_at`) ou cartao recusado (`renewal_failed_at`); o acesso vale ate `current_period_end`. O aviso sai uma vez por periodo |
 | `webhook_events` cresce sem parar | `webhooks:prune` nao roda: falta o cron do `schedule:run` (secao 5) ou o worker esta parado |
 

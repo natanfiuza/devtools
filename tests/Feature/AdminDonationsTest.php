@@ -45,6 +45,8 @@ it('mostra os dados que a pagina publica nao mostra', function () {
     $donation = Donation::factory()->create([
         'name' => 'Maria Doadora',
         'email' => 'maria@exemplo.com',
+        'gateway_status' => 'rejected',
+        'gateway_status_detail' => 'rejected_by_bank',
     ]);
 
     $this->actingAs($admin)
@@ -56,6 +58,9 @@ it('mostra os dados que a pagina publica nao mostra', function () {
             ->where('donations.data.0.email', 'maria@exemplo.com')
             ->where('donations.data.0.status', DonationStatus::Pending->value)
             ->where('donations.data.0.gateway', 'mercadopago')
+            // O codigo cru e do admin; a pagina publica so ve o motivo traduzido.
+            ->where('donations.data.0.gatewayStatus', 'rejected')
+            ->where('donations.data.0.gatewayStatusDetail', 'rejected_by_bank')
             ->where('donations.data.0.qrCode', $donation->qr_code));
 });
 
