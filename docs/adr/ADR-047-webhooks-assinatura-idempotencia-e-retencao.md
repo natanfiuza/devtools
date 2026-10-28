@@ -55,3 +55,7 @@ Tres erros seriam graves:
 - **Janela de 5 minutos no timestamp**: bloquearia replay antigo, mas derrubaria retries legitimos e exigiria relogio sincronizado; a idempotencia ja resolve.
 - **Retencao indefinida**: cresce sem limite e guarda dado pessoal sem finalidade; 30 dias cobrem a janela util.
 - **Throttle proprio na rota**: o provedor pode notificar em rajada; um 429 nosso perderia a notificacao e o reenvio viria junto com o throttled.
+
+## Emenda (ADR-059, 2026-10-27)
+
+O topico `payment` de uma doacao resolve a doacao **antes** do ramo de estorno: o estorno dela tambem precisa gravar `gateway_status` e `gateway_status_detail`. O efeito local passou a ser `SyncDonationPayment` (usado tambem pelo botao "Ja paguei" e pelo comando `donations:check`), e o webhook continua sendo o **unico caminho automatico** de confirmacao - nao ha conciliacao em cron.

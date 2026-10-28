@@ -32,6 +32,8 @@ export type DonationPublicStatus =
 
 /** Props de `/donate/{ulid}`. */
 export type DonationStatusProps = {
+    /** Intervalo do auto-refresh, em ms. 0 desliga. */
+    pollMs: number;
     donation: {
         ulid: string;
         status: DonationPublicStatus;
@@ -44,5 +46,9 @@ export type DonationStatusProps = {
         ticketUrl: string | null;
         /** Pix estatico de configuracao, sem confirmacao automatica. */
         static: boolean;
+        /** Ha uma cobranca no provedor para consultar agora ("Ja paguei"). */
+        canCheck: boolean;
+        /** Motivo da recusa ja traduzido; null fora de `failed`. */
+        failureReason: string | null;
     };
 };

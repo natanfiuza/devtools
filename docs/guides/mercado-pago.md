@@ -172,8 +172,16 @@ DONATIONS_SUGGESTED_CENTS=500,1000,2500,5000
 DONATIONS_MIN_CENTS=100
 DONATIONS_MAX_CENTS=100000
 
-# Validade do QR Code dinâmico gerado pelo Mercado Pago (minutos, mínimo 5).
+# Validade do QR Code dinâmico gerado pelo Mercado Pago (minutos, mínimo 30).
+# Chave vazia ou ausente cai no padrão de 60; valor abaixo de 30 é elevado a 30.
 DONATIONS_EXPIRES_MINUTES=60
+
+# Ritmo do auto-refresh da página de status da doação (milissegundos; 0 desliga).
+# Atualiza só o banco local, nunca chama o Mercado Pago a cada ciclo.
+DONATIONS_STATUS_POLL_MS=15000
+
+# Limite por IP do botão "Já paguei" (consultas por minuto).
+DONATIONS_CHECK_PER_MINUTE=5
 
 # E-mail de pagador enviado ao Mercado Pago quando o doador faz uma doação anônima
 # (sem preencher o campo de e-mail). Se vazio, usa o MAIL_FROM_ADDRESS.
@@ -325,11 +333,81 @@ ngrok http 8000
 | **Teste de Webhook no painel do Mercado Pago retorna HTTP `503`** | `MERCADO_PAGO_WEBHOOK_SECRET` está vazio no `.env` (ou config em cache). Por segurança, o endpoint fica desligado quando não há segredo (ADR-047). | Copie a **Assinatura secreta** na tela de Webhooks do Mercado Pago, salve em `MERCADO_PAGO_WEBHOOK_SECRET` no `.env` e rode `php artisan optimize:clear && php artisan optimize`. |
 | **Webhook retorna HTTP `401 Unauthorized`** | A assinatura HMAC `x-signature` não bateu com `MERCADO_PAGO_WEBHOOK_SECRET`. | Verifique se você copiou a **Assinatura secreta** (da tela de Webhooks) e não o `Client Secret` ou `Access Token`. Depois de atualizar no `.env`, rode `php artisan optimize:clear && php artisan optimize`. |
 | **Pagamento foi aprovado no Mercado Pago, mas o plano/doação continua `pending` no site** | 1) O webhook não está chegando (URL errada no painel MP); ou<br>2) O worker da fila (`devtools-worker`) está parado; ou<br>3) O evento falhou na consulta à API. | 1) Abra `/admin/webhooks` no painel admin do site: se a lista estiver vazia, o Mercado Pago não está chamando a URL;<br>2) Se o evento estiver `pending`, reinicie o worker (`sudo supervisorctl restart devtools-worker:*`);<br>3) Se estiver `failed`, veja a coluna de erro em `/admin/webhooks` (ex.: token de teste usado para buscar pagamento de produção). |
+| **Doação aparece como recusada/vencida, ou a pessoa diz que pagou e a tela continua `pending`** | 1) A recusa veio do banco do pagador ou da análise do Mercado Pago (não é bug do código); 2) O QR expirou antes do pagamento; 3) O webhook não chegou. | Rode `php artisan donations:check {ulid}` e leia `status`/`status_detail` com a tabela da **seção 8**; confira também `live_mode` (token de teste não vale como venda real) e `date_of_expiration`. `rejected_by_bank`, `rejected_high_risk` e `rejected_by_regulations` exigem ação no banco do pagador ou na conta Mercado Pago — o sistema só explica. Se o provedor disser `approved` e a doação estiver em aberto, o próprio comando sincroniza (ou o doador usa **Já paguei**). |
+| **Doação com `date_of_expiration` só ~5 minutos depois de `date_created`** | `DONATIONS_EXPIRES_MINUTES` vazio no `.env` (o `(int) ''` virava `0` e o piso antigo era 5) e config em cache. | Preencha `DONATIONS_EXPIRES_MINUTES=60` e rode `php artisan optimize:clear && php artisan optimize && php artisan queue:restart`. O código endurecido hoje garante piso de 30 minutos e trata chave vazia como 60. |
 | **Evento de teste simulado pelo botão "Simular notificação" do painel MP fica `failed` em `/admin/webhooks`** | O botão "Simular notificação" do painel do Mercado Pago envia um `data.id` fictício (ex.: `123456`). Quando o nosso job `ProcessWebhookEvent` vai buscar `GET /v1/payments/123456` na API real (*fetch-before-fulfill*), a API do Mercado Pago retorna `404 Not Found`. | **Comportamento esperado e correto por desenho (ADR-047):** o endpoint respondeu `201` (provando que a URL e a assinatura HMAC funcionam!), e o job recusou o ID fictício porque ele não existe na API. Em um pagamento real ou de Sandbox real, o `data.id` existe na API e o evento passa para `processed`. |
 
 ---
 
-## 8. Rotação de Credenciais sem Downtime
+## 8. Consulta sob demanda e diagnóstico de doações (ADR-059)
+
+O webhook continua sendo o **único caminho automático** de confirmação. Quando
+a pessoa pagou e a notificação ainda não chegou (ou o provedor não notificou),
+há dois caminhos manuais, e ambos usam a mesma ação `SyncDonationPayment` do
+webhook — não existem duas implementações para divergir.
+
+### Botão "Já paguei" na página de status
+
+- `POST /{locale}/donate/{ulid}/check`, disponível só para Pix dinâmico em
+  aberto (`pending` ou `expired`), com `gateway = mercadopago`, `gateway_ref`
+  gravado e token configurado;
+- consulta `GET /v1/payments/{gateway_ref}`, confere valor, moeda e
+  `external_reference = don_<ulid>` antes de sincronizar;
+- o ULID é a capacidade: quem tem o link vê a própria doação, e mais ninguém;
+- limite por IP de `DONATIONS_CHECK_PER_MINUTE` (padrão 5). Estourado, a
+  resposta é um toast traduzido, não uma página `429`;
+- a página de status também se atualiza sozinha a cada
+  `DONATIONS_STATUS_POLL_MS` (padrão 15 s, `0` desliga), **lendo só o banco
+  local**. O polling não chama o provedor e não substitui o webhook.
+
+### Comando `donations:check {ulid}`
+
+Para o operador no VPS. Imprime o snapshot local e o que o provedor respondeu,
+e **grava** o novo estado (não é somente leitura):
+
+```bash
+cd /var/www/devtools
+php artisan donations:check 01ARZ3NDEKTSV4RRFFQ69G5FAV
+```
+
+| Campo | Para que serve |
+|---|---|
+| `status` / `status_detail` | estado no provedor e o motivo (ex.: `rejected_by_bank`, `expired`, `accredited`) |
+| `live_mode` | `true` = token de produção; `false` = token de teste, e um Pix de teste não vale como venda real |
+| `collector_id` | conta recebedora que criou o pagamento; deve ser a sua |
+| valor e moeda | conferem com o congelado na doação |
+| `date_created` / `date_of_expiration` | janela do QR; diferença de 5 minutos denunciava o bug do `.env` (hoje o piso é 30 minutos) |
+| `external_reference` | `don_<ulid>`; divergência não sincroniza |
+| e-mail do pagador | **mascarado** no comando; nunca vai para log, prop pública ou webhook |
+
+Leitura do `status_detail`:
+
+| `status` | `status_detail` | Leitura |
+|---|---|---|
+| `pending` | `pending_waiting_transfer` | QR gerado e não pago; a recusa, se houver, foi no app do banco do pagador |
+| `rejected` | `rejected_by_bank` / `bank_error` | banco do pagador recusou (limite, saldo, bloqueio, regra noturna) |
+| `rejected` | `rejected_high_risk` | análise de risco do Mercado Pago |
+| `rejected` | `rejected_by_regulations` | regras regulatórias / situação da conta recebedora |
+| `rejected` | `rejected_by_biz_rule` | regra de negócio da conta Mercado Pago |
+| `rejected` | `rejected_insufficient_data` | dados do pagador insuficientes |
+| `approved` | `accredited` | pago |
+
+O doador vê o motivo **traduzido** (`donations.reasons.*`, nos cinco idiomas); o
+código cru (`gateway_status_detail`) só aparece no admin, em **Pagamentos >
+Doações**. Doação já `paid`, `refunded` ou `failed` não regride: um pagamento
+aprovado encontrado depois de uma falha é anomalia de dados, que o comando
+mostra mas não reabre.
+
+> [!IMPORTANT]
+> Depois de alterar `DONATIONS_CHECK_PER_MINUTE`, `DONATIONS_STATUS_POLL_MS` ou
+> `DONATIONS_EXPIRES_MINUTES`, rode `php artisan optimize:clear && php artisan
+> optimize` e `php artisan queue:restart`: com o cache de configuração ativo o
+> Laravel ignora o `.env`, e os workers em memória continuam com os valores
+> antigos.
+
+---
+
+## 9. Rotação de Credenciais sem Downtime
 
 ### Rotacionar o `MERCADO_PAGO_ACCESS_TOKEN`
 1. Acesse <https://www.mercadopago.com.br/developers/panel/app>, abra sua aplicação -> **Credenciais de produção** e gere/renove o **Access Token**.
@@ -354,7 +432,7 @@ ngrok http 8000
 
 ---
 
-## 9. Onde Isso Vive no Código
+## 10. Onde Isso Vive no Código
 
 | Peça | Arquivo |
 |---|---|
@@ -372,8 +450,10 @@ ngrok http 8000
 | Aprovação de pagamento de gateway e empilhamento de período | `app/Actions/Payments/ApproveGatewayPayment.php`, `app/Actions/Subscriptions/OpenSubscriptionPeriod.php` |
 | Cancelamento de recorrência e estorno gateway-primeiro | `app/Actions/Payments/CancelRecurring.php`, `app/Actions/Payments/RefundGatewayPayment.php` |
 | Criação e confirmação de Doação por PIX (Dinâmico e Estático) | `app/Actions/Donations/CreateDonation.php`, `app/Actions/Donations/ConfirmDonation.php` |
+| Sincronização única da doação (webhook, "Já paguei" e comando) e motivo traduzido | `app/Actions/Donations/SyncDonationPayment.php`, `app/Enums/DonationSyncOutcome.php`, `app/Enums/DonationFailureReason.php` |
+| Consulta sob demanda da página de status e diagnóstico no VPS | `app/Http/Controllers/DonationController.php` (`check`), `app/Console/Commands/CheckDonation.php` |
 | Gerador local de BR Code EMV (CRC16) e QR Code SVG (fallback estático) | `app/Support/Payments/PixPayload.php`, `app/Support/Payments/PixQrCode.php` |
 | Comandos agendados de expiração e poda de webhooks | `app/Console/Commands/ExpirePayments.php`, `app/Console/Commands/PruneWebhookEvents.php` |
 | Telas de assinatura, doação e faturas | `resources/js/pages/Subscribe.vue`, `resources/js/pages/Donate.vue`, `resources/js/pages/DonationStatus.vue`, `resources/js/pages/dashboard/Billing.vue` |
 | Telas administrativas (Pagamentos/Doações e Eventos de Webhook) | `resources/js/pages/admin/Payments.vue`, `resources/js/pages/admin/WebhookEvents.vue` |
-| Decisões arquiteturais (ADRs) | `docs/adr/ADR-045-gateway-mercado-pago-checkout-pro-e-preapproval.md` a `ADR-049-ciclo-da-recorrencia-cancelamento-falha-e-estorno.md` |
+| Decisões arquiteturais (ADRs) | `docs/adr/ADR-045-gateway-mercado-pago-checkout-pro-e-preapproval.md` a `ADR-049-ciclo-da-recorrencia-cancelamento-falha-e-estorno.md`, com `ADR-059-consulta-sob-demanda-e-diagnostico-de-doacoes-pix.md` |

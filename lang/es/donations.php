@@ -71,6 +71,32 @@ return [
         'receipt' => 'Si indicaste un correo, el recibo llegará a tu bandeja de entrada.',
     ],
 
+    // Motivo que ve el donante cuando la donación falla (ADR-059). La clave
+    // viene del `status_detail`; el código crudo nunca sale del servidor.
+    'reasons' => [
+        'high_risk' => 'Mercado Pago rechazó el Pix en su análisis de riesgo. Inténtalo de nuevo o usa otro medio de pago.',
+        'bank' => 'Tu banco rechazó el Pix. Revisa límite, saldo o bloqueos e inténtalo de nuevo.',
+        'regulations' => 'Una regla regulatoria impidió el Pix. Inténtalo de nuevo más tarde o usa otra cuenta.',
+        'insufficient_data' => 'Faltaron datos para que Mercado Pago completara el Pix. Inténtalo de nuevo con tus datos completos.',
+        'biz_rule' => 'Una regla de la cuenta que recibe la donación rechazó el Pix. Inténtalo de nuevo más tarde.',
+        'other' => 'El proveedor no completó el pago. Genera un nuevo Pix e inténtalo de nuevo.',
+    ],
+
+    'check' => [
+        'button' => 'Ya pagué',
+        'loading' => 'Consultando…',
+        'hint' => '¿Ya pagaste? Toca para confirmar ahora.',
+        'success' => 'Pago confirmado. ¡Gracias!',
+        'pending' => 'Mercado Pago todavía no confirmó este Pix. Espera un momento e inténtalo de nuevo.',
+        'failed' => 'El pago fue rechazado. Mira el motivo en esta página.',
+        'refunded' => 'El pago aparece como devuelto.',
+        'already' => 'Esta donación ya fue resuelta.',
+        'unavailable' => 'No hay nada que consultar para esta donación ahora.',
+        'mismatch' => 'El pago consultado no pertenece a esta donación.',
+        'error' => 'No se pudo consultar el pago ahora. Inténtalo de nuevo en unos instantes.',
+        'throttled' => 'Demasiadas consultas en poco tiempo. Espera un minuto e inténtalo de nuevo.',
+    ],
+
     'errors' => [
         'unavailable' => 'Las donaciones por Pix no están disponibles por ahora.',
         'gateway' => 'No se pudo generar el Pix ahora. Inténtalo de nuevo en unos instantes.',

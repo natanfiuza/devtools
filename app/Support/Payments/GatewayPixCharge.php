@@ -16,5 +16,6 @@ final readonly class GatewayPixCharge
         public ?string $qrCodeBase64,
         public ?string $ticketUrl,
         public ?CarbonInterface $expiresAt,
+        public ?string $statusDetail = null,
     ) {}
 }

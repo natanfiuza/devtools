@@ -71,6 +71,32 @@ return [
         'receipt' => 'Se indicou um e-mail, o recibo chega à caixa de entrada.',
     ],
 
+    // Motivo mostrado ao doador quando a doação falha (ADR-059). A chave vem do
+    // `status_detail`; o código cru do fornecedor nunca sai do servidor.
+    'reasons' => [
+        'high_risk' => 'O Mercado Pago recusou o Pix na análise de risco. Tente de novo ou use outro meio de pagamento.',
+        'bank' => 'O banco recusou o Pix. Verifique limite, saldo ou bloqueios e tente de novo.',
+        'regulations' => 'Uma regra regulatória impediu o Pix. Tente de novo mais tarde ou use outra conta.',
+        'insufficient_data' => 'Faltaram dados para o Mercado Pago concluir o Pix. Tente de novo com os seus dados completos.',
+        'biz_rule' => 'Uma regra da conta que recebe a doação recusou o Pix. Tente de novo mais tarde.',
+        'other' => 'O pagamento não foi concluído pelo fornecedor. Gere um novo Pix e tente de novo.',
+    ],
+
+    'check' => [
+        'button' => 'Já paguei',
+        'loading' => 'A consultar…',
+        'hint' => 'Já pagou? Toque para confirmar agora.',
+        'success' => 'Pagamento confirmado. Obrigado!',
+        'pending' => 'O Mercado Pago ainda não confirmou este Pix. Aguarde um instante e tente de novo.',
+        'failed' => 'O pagamento foi recusado. Veja o motivo nesta página.',
+        'refunded' => 'O pagamento aparece como devolvido.',
+        'already' => 'Esta doação já foi resolvida.',
+        'unavailable' => 'Não há nada para consultar agora nesta doação.',
+        'mismatch' => 'O pagamento consultado não pertence a esta doação.',
+        'error' => 'Não foi possível consultar o pagamento agora. Tente de novo dentro de instantes.',
+        'throttled' => 'Demasiadas consultas em pouco tempo. Aguarde um minuto e tente de novo.',
+    ],
+
     'errors' => [
         'unavailable' => 'A doação por Pix não está disponível de momento.',
         'gateway' => 'Não foi possível gerar o Pix agora. Tente de novo dentro de instantes.',

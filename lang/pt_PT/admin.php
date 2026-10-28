@@ -324,6 +324,8 @@ return [
         'status' => 'Situação',
         'status_all' => 'Todas',
         'gateway' => 'Origem',
+        'gateway_status' => 'Estado no fornecedor',
+        'gateway_status_detail' => 'Detalhe no fornecedor',
         'locale' => 'Idioma',
         'created' => 'Criada em',
         'paid_at' => 'Paga em',

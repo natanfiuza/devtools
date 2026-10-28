@@ -228,6 +228,7 @@ it('cria o pix dinamico e manda para o status da doacao', function () {
         'api.mercadopago.com/v1/payments' => Http::response([
             'id' => 555,
             'status' => 'pending',
+            'status_detail' => 'pending_waiting_transfer',
             // O Mercado Pago devolve date_of_expiration com offset -04:00
             // (horario de Nova York/Manaus). Mesmo com 60 min (menos que a
             // diferenca de fuso se o offset for ignorado pelo DATETIME do
@@ -257,6 +258,8 @@ it('cria o pix dinamico e manda para o status da doacao', function () {
 
     expect($donation->gateway)->toBe('mercadopago')
         ->and($donation->gateway_ref)->toBe('555')
+        ->and($donation->gateway_status)->toBe('pending')
+        ->and($donation->gateway_status_detail)->toBe('pending_waiting_transfer')
         ->and($donation->qr_code)->toBe('00020126...6304ABCD')
         ->and($donation->qr_code_base64)->toBe('iVBORw0KGgo=')
         ->and($donation->ticket_url)->toContain('payment_id=555')
@@ -504,7 +507,7 @@ it('marca a doacao como devolvida no estorno do provedor', function () {
 
     Http::fake([
         'api.mercadopago.com/v1/payments/pay_9' => Http::response(
-            pagamentoDaDoacao($donation, ['status' => 'refunded']),
+            pagamentoDaDoacao($donation, ['status' => 'refunded', 'status_detail' => 'refunded']),
         ),
     ]);
 
@@ -514,7 +517,9 @@ it('marca a doacao como devolvida no estorno do provedor', function () {
     ]);
 
     expect(app(HandleWebhookEvent::class)($event))->toBe(WebhookEventStatus::Processed);
-    expect($donation->refresh()->status)->toBe(DonationStatus::Refunded);
+    expect($donation->refresh()->status)->toBe(DonationStatus::Refunded)
+        ->and($donation->gateway_status)->toBe('refunded')
+        ->and($donation->gateway_status_detail)->toBe('refunded');
 });
 
 it('marca a doacao como falha quando o pix e recusado', function () {
@@ -527,7 +532,7 @@ it('marca a doacao como falha quando o pix e recusado', function () {
 
     Http::fake([
         'api.mercadopago.com/v1/payments/pay_9' => Http::response(
-            pagamentoDaDoacao($donation, ['status' => 'rejected']),
+            pagamentoDaDoacao($donation, ['status' => 'rejected', 'status_detail' => 'rejected_by_bank']),
         ),
     ]);
 
@@ -537,7 +542,9 @@ it('marca a doacao como falha quando o pix e recusado', function () {
     ]);
 
     expect(app(HandleWebhookEvent::class)($event))->toBe(WebhookEventStatus::Processed);
-    expect($donation->refresh()->status)->toBe(DonationStatus::Failed);
+    expect($donation->refresh()->status)->toBe(DonationStatus::Failed)
+        ->and($donation->gateway_status)->toBe('rejected')
+        ->and($donation->gateway_status_detail)->toBe('rejected_by_bank');
 });
 
 it('nao altera a doacao com pagamento ainda pendente', function () {
@@ -550,7 +557,7 @@ it('nao altera a doacao com pagamento ainda pendente', function () {
 
     Http::fake([
         'api.mercadopago.com/v1/payments/pay_9' => Http::response(
-            pagamentoDaDoacao($donation, ['status' => 'pending']),
+            pagamentoDaDoacao($donation, ['status' => 'pending', 'status_detail' => 'pending_waiting_transfer']),
         ),
     ]);
 
@@ -560,5 +567,82 @@ it('nao altera a doacao com pagamento ainda pendente', function () {
     ]);
 
     expect(app(HandleWebhookEvent::class)($event))->toBe(WebhookEventStatus::Ignored);
-    expect($donation->refresh()->status)->toBe(DonationStatus::Pending);
+    expect($donation->refresh()->status)->toBe(DonationStatus::Pending)
+        ->and($donation->gateway_status)->toBe('pending')
+        ->and($donation->gateway_status_detail)->toBe('pending_waiting_transfer');
+});
+
+it('confirma pelo webhook uma doacao vencida paga dentro do prazo do provedor', function () {
+    config(['payments.mercadopago.access_token' => 'token-de-teste']);
+
+    $donation = Donation::factory()->expired()->create([
+        'gateway_ref' => 'pay_9',
+        'amount_cents' => 2500,
+    ]);
+
+    Http::fake([
+        'api.mercadopago.com/v1/payments/pay_9' => Http::response(pagamentoDaDoacao($donation)),
+    ]);
+
+    $event = WebhookEvent::factory()->create([
+        'topic' => 'payment',
+        'resource_id' => 'pay_9',
+    ]);
+
+    expect(app(HandleWebhookEvent::class)($event))->toBe(WebhookEventStatus::Processed);
+    expect($donation->refresh()->status)->toBe(DonationStatus::Paid);
+});
+
+it('mostra o motivo da recusa sem expor o codigo do provedor', function () {
+    $donation = Donation::factory()->create([
+        'status' => DonationStatus::Failed,
+        'gateway_status' => 'rejected',
+        'gateway_status_detail' => 'rejected_by_bank',
+    ]);
+
+    $html = $this->get('/pt-br/donate/'.$donation->ulid)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('donation.failureReason', trans('donations.reasons.bank', [], 'pt_BR'))
+        )
+        ->getContent();
+
+    expect($html)->not->toContain('rejected_by_bank');
+});
+
+it('oferece a consulta sob demanda so para pix dinamico em aberto', function (array $attributes, bool $token, bool $expected) {
+    config(['payments.mercadopago.access_token' => $token ? 'token-de-teste' : null]);
+
+    $donation = Donation::factory()->create($attributes);
+
+    $this->get('/pt-br/donate/'.$donation->ulid)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('donation.canCheck', $expected));
+})->with([
+    'pendente' => [['gateway_ref' => 'pay_9'], true, true],
+    'vencida' => [[
+        'gateway_ref' => 'pay_9',
+        'status' => DonationStatus::Expired,
+        'expires_at' => now()->subMinute(),
+    ], true, true],
+    'paga' => [['gateway_ref' => 'pay_9', 'status' => DonationStatus::Paid, 'paid_at' => now()], true, false],
+    'estatica' => [['gateway' => 'manual'], true, false],
+    'sem referencia' => [[], true, false],
+    'sem gateway' => [['gateway_ref' => 'pay_9'], false, false],
+]);
+
+it('publica o ritmo do auto-refresh da pagina de status', function () {
+    config(['donations.status_poll_ms' => 7000]);
+
+    $donation = Donation::factory()->create();
+
+    $this->get('/pt-br/donate/'.$donation->ulid)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('pollMs', 7000));
+
+    config(['donations.status_poll_ms' => 0]);
+
+    $this->get('/pt-br/donate/'.$donation->ulid)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('pollMs', 0));
 });

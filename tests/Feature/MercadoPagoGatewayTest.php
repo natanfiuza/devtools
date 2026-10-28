@@ -113,6 +113,7 @@ it('cria a cobranca pix da doacao com qr e copia e cola', function () {
         'api.mercadopago.com/v1/payments' => Http::response([
             'id' => 555,
             'status' => 'pending',
+            'status_detail' => 'pending_waiting_transfer',
             'date_of_expiration' => now()->addHour()->toIso8601String(),
             'point_of_interaction' => [
                 'transaction_data' => [
@@ -137,6 +138,7 @@ it('cria a cobranca pix da doacao com qr e copia e cola', function () {
 
     expect($cobranca->id)->toBe('555')
         ->and($cobranca->status)->toBe('pending')
+        ->and($cobranca->statusDetail)->toBe('pending_waiting_transfer')
         ->and($cobranca->qrCode)->toBe('00020126...6304ABCD')
         ->and($cobranca->qrCodeBase64)->toBe('iVBORw0KGgo=')
         ->and($cobranca->ticketUrl)->toContain('payment_id=555');
@@ -164,7 +166,12 @@ it('mapeia o pagamento aprovado do provedor', function () {
             'external_reference' => 'chk_01ABC',
             'payment_type_id' => 'credit_card',
             'payment_method_id' => 'visa',
+            'date_created' => '2026-10-21T09:55:00.000-03:00',
             'date_approved' => '2026-10-21T10:00:00.000-03:00',
+            'date_of_expiration' => '2026-10-21T11:55:00.000-03:00',
+            'live_mode' => true,
+            'collector_id' => 78128962,
+            'payer' => ['email' => 'pagador@exemplo.com'],
         ]),
     ]);
 
@@ -172,12 +179,19 @@ it('mapeia o pagamento aprovado do provedor', function () {
 
     expect($pagamento->id)->toBe('987')
         ->and($pagamento->isApproved())->toBeTrue()
+        ->and($pagamento->statusDetail)->toBe('accredited')
         ->and($pagamento->amountCents)->toBe(2990)
         ->and($pagamento->currency)->toBe('BRL')
         ->and($pagamento->externalReference)->toBe('chk_01ABC')
         ->and($pagamento->method)->toBe(PaymentMethod::CreditCard)
         ->and($pagamento->methodId)->toBe('visa')
-        ->and($pagamento->paidAt)->not->toBeNull();
+        ->and($pagamento->paidAt)->not->toBeNull()
+        // Diagnostico do `donations:check`: modo de operacao, recebedor e datas.
+        ->and($pagamento->payerEmail)->toBe('pagador@exemplo.com')
+        ->and($pagamento->collectorId)->toBe('78128962')
+        ->and($pagamento->liveMode)->toBeTrue()
+        ->and($pagamento->createdAt?->toDateTimeString())->toBe('2026-10-21 09:55:00')
+        ->and($pagamento->expiresAt?->toDateTimeString())->toBe('2026-10-21 11:55:00');
 });
 
 it('mapeia a cobranca da preapproval com o pagamento subjacente', function () {

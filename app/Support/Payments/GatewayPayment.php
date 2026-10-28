@@ -25,6 +25,13 @@ final readonly class GatewayPayment
         public PaymentMethod $method,
         public ?string $methodId,
         public ?CarbonInterface $paidAt,
+        // Diagnostico do comando `donations:check`. Nunca vao para log, dump,
+        // prop Inertia ou serializacao: o e-mail e PII do pagador.
+        public ?string $payerEmail = null,
+        public ?string $collectorId = null,
+        public ?bool $liveMode = null,
+        public ?CarbonInterface $createdAt = null,
+        public ?CarbonInterface $expiresAt = null,
     ) {}
 
     public function isApproved(): bool

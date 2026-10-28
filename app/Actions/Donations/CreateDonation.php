@@ -58,7 +58,7 @@ final class CreateDonation
 
     private function dynamic(Donation $donation): Donation
     {
-        $expiresAt = now()->addMinutes(max(5, (int) config('donations.expires_minutes', 60)));
+        $expiresAt = now()->addMinutes((int) config('donations.expires_minutes', 60));
         $payerEmail = $this->payerEmail($donation);
 
         if ($payerEmail === null) {
@@ -89,6 +89,10 @@ final class CreateDonation
 
         $donation->forceFill([
             'gateway_ref' => $charge->id,
+            'gateway_status' => mb_substr($charge->status, 0, 32),
+            'gateway_status_detail' => $charge->statusDetail !== null
+                ? mb_substr($charge->statusDetail, 0, 64)
+                : null,
             'qr_code' => $charge->qrCode,
             'qr_code_base64' => $charge->qrCodeBase64,
             'ticket_url' => $charge->ticketUrl,

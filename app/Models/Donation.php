@@ -29,6 +29,8 @@ use Illuminate\Support\Str;
  * @property DonationStatus $status
  * @property string $gateway
  * @property string|null $gateway_ref
+ * @property string|null $gateway_status
+ * @property string|null $gateway_status_detail
  * @property string|null $qr_code
  * @property string|null $qr_code_base64
  * @property string|null $ticket_url
@@ -48,6 +50,8 @@ use Illuminate\Support\Str;
     'status',
     'gateway',
     'gateway_ref',
+    'gateway_status',
+    'gateway_status_detail',
     'qr_code',
     'qr_code_base64',
     'ticket_url',

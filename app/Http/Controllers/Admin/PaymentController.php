@@ -258,6 +258,10 @@ class PaymentController extends Controller
                 'amount' => Format::money($donation->amount_cents, $donation->currency),
                 'status' => $donation->effectiveStatus()->value,
                 'gateway' => $donation->gateway,
+                // Cru, para diagnostico no admin (ADR-059); o doador so ve o
+                // motivo traduzido.
+                'gatewayStatus' => $donation->gateway_status,
+                'gatewayStatusDetail' => $donation->gateway_status_detail,
                 'locale' => $donation->locale,
                 'createdAt' => Format::dateTime($donation->created_at),
                 'paidAt' => Format::dateTime($donation->paid_at),

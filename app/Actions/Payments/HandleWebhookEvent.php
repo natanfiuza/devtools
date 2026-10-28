@@ -2,11 +2,11 @@
 
 namespace App\Actions\Payments;
 
-use App\Actions\Donations\ConfirmDonation;
+use App\Actions\Donations\SyncDonationPayment;
 use App\Contracts\Payments\PaymentGateway;
 use App\Enums\CheckoutMode;
 use App\Enums\CheckoutStatus;
-use App\Enums\DonationStatus;
+use App\Enums\DonationSyncOutcome;
 use App\Enums\WebhookEventStatus;
 use App\Exceptions\Payments\PaymentGatewayException;
 use App\Models\CheckoutSession;
@@ -42,7 +42,7 @@ final class HandleWebhookEvent
         private readonly ApproveGatewayPayment $approvePayment,
         private readonly RefundGatewayPayment $refundPayment,
         private readonly HandleRenewalFailure $handleRenewalFailure,
-        private readonly ConfirmDonation $confirmDonation,
+        private readonly SyncDonationPayment $syncDonation,
     ) {}
 
     public function __invoke(WebhookEvent $event): WebhookEventStatus
@@ -65,14 +65,16 @@ final class HandleWebhookEvent
     {
         $payment = $this->gateway->payment($resourceId);
 
-        if ($payment->isRefunded()) {
-            return $this->syncRefund($payment);
-        }
-
+        // A doacao vem antes do estorno: o estorno dela tambem precisa gravar
+        // o status/detalhe do provedor (ADR-059).
         $donation = $this->donationFor($payment);
 
         if ($donation instanceof Donation) {
             return $this->donationPayment($donation, $payment);
+        }
+
+        if ($payment->isRefunded()) {
+            return $this->syncRefund($payment);
         }
 
         if (! $payment->isApproved()) {
@@ -88,33 +90,20 @@ final class HandleWebhookEvent
     }
 
     /**
-     * Doacao aprovada, recusada ou ainda pendente.
+     * Doacao aprovada, recusada, estornada ou ainda pendente.
      *
-     * Aprovada confirma uma vez (valor e moeda conferidos com a doacao); Pix
-     * recusado/cancelado encerra a doacao como falha. Pendente nao faz nada.
+     * O efeito fica em `SyncDonationPayment`, compartilhado com o botao "Ja
+     * paguei" e o comando de diagnostico. Aprovado confirma uma vez (valor e
+     * moeda conferidos com a doacao); Pix recusado/cancelado encerra a doacao
+     * como falha. Pendente nao faz nada.
      */
     private function donationPayment(Donation $donation, GatewayPayment $payment): WebhookEventStatus
     {
-        if ($payment->isApproved()) {
-            $confirmed = ($this->confirmDonation)(
-                $donation,
-                $payment->amountCents,
-                $payment->currency,
-                $payment->paidAt,
-            );
+        $outcome = ($this->syncDonation)($donation, $payment);
 
-            return $confirmed ? WebhookEventStatus::Processed : WebhookEventStatus::Ignored;
-        }
-
-        if (in_array($payment->status, ['rejected', 'cancelled'], true)) {
-            if ($donation->status === DonationStatus::Pending) {
-                $donation->forceFill(['status' => DonationStatus::Failed])->save();
-            }
-
-            return WebhookEventStatus::Processed;
-        }
-
-        return WebhookEventStatus::Ignored;
+        return $outcome === DonationSyncOutcome::Unchanged
+            ? WebhookEventStatus::Ignored
+            : WebhookEventStatus::Processed;
     }
 
     private function preapproval(string $resourceId): WebhookEventStatus
@@ -197,18 +186,7 @@ final class HandleWebhookEvent
             ->first();
 
         if (! $local instanceof Payment) {
-            // Pode ser doacao estornada: nao ha `payments`, so a doacao.
-            $donation = $this->donationFor($payment);
-
-            if (! $donation instanceof Donation) {
-                return WebhookEventStatus::Ignored;
-            }
-
-            if ($donation->status !== DonationStatus::Refunded) {
-                $donation->forceFill(['status' => DonationStatus::Refunded])->save();
-            }
-
-            return WebhookEventStatus::Processed;
+            return WebhookEventStatus::Ignored;
         }
 
         // O dinheiro ja voltou: so sincroniza o estado local e tenta cancelar

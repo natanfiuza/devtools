@@ -371,11 +371,13 @@ avulso, Preapproval (ADR-045) e confirmação de uma intenção de assinatura
 `POST /subscribe/checkout`, com `mode=one_time` ou `mode=recurring`; não há
 uma rota separada para recorrência.
 
-**Não há conciliação de pagamentos.** O webhook é a única confirmação
-automática; o retorno do navegador é só a porta de volta e não libera nada.
-Não existe rotina que varra pagamentos aprovados no provedor para corrigir o
-banco: um webhook perdido é uma anomalia para o admin, não algo que o sistema
-descobre sozinho.
+**Não há conciliação automática de pagamentos.** O webhook é a única
+confirmação automática; o retorno do navegador é só a porta de volta e não
+libera nada. Não existe rotina que varra pagamentos aprovados no provedor para
+corrigir o banco: um webhook perdido é uma anomalia para o admin, não algo que
+o sistema descobre sozinho. Doações têm uma consulta **sob demanda** (o botão
+"Já paguei" e o comando `donations:check`), que roda a mesma sincronização do
+webhook quando uma pessoa pede — não é conciliador em background (ADR-059).
 
 ### Quatro caminhos
 
@@ -415,11 +417,12 @@ navegador -> /subscribe
                     +-------------------------------------+----------------------+
                     |                                     |                      |
                     v                                     v                      v
-          ApproveGatewayPayment                  RefundGatewayPayment      ConfirmDonation
-          (payment approved)                     (refund/chargeback)       (donation)
+          ApproveGatewayPayment                  RefundGatewayPayment   SyncDonationPayment
+          (payment approved)                     (refund/chargeback)    (payment da doacao)
                     |                                     |                      |
                     v                                     v                      v
-       OpenSubscriptionPeriod + RegisterPayment     RefundPayment        donations.paid
+       OpenSubscriptionPeriod + RegisterPayment     RefundPayment   ConfirmDonation (aprovado)
+                                                                   donations.paid/refunded/failed
                     |
                     v
        checkout_sessions approved, payments, subscriptions
@@ -438,7 +441,8 @@ navegador -> /subscribe
 | Aprovação | `ApproveGatewayPayment` | Confere valor/moeda com a sessão, abre período e grava o pagamento. | Não chama o provedor de novo. |
 | Período | `OpenSubscriptionPeriod` | Empilha ou inicia o período conforme a assinatura vigente. | Não mexe em pagamento. |
 | Estorno | `RefundGatewayPayment` + `RefundPayment` | No gateway, provedor primeiro; no manual, só estado local; depois assinatura e aviso. | Não devolve consumo no ledger. |
-| Doação | `CreateDonation` + `ConfirmDonation` + `PixPayload` | Pix dinâmico/estático, confirmação idempotente e recibo. | Não entra em `payments` nem consome cota. |
+| Doação | `CreateDonation` + `SyncDonationPayment` + `ConfirmDonation` + `PixPayload` | Pix dinâmico/estático, status/detalhe do provedor, confirmação idempotente e recibo. | Não entra em `payments` nem consome cota. |
+| Consulta sob demanda | `POST /donate/{ulid}/check` + `donations:check` | Lê o pagamento no provedor, confere a referência e sincroniza; motivo da recusa traduzido. | Não é conciliação automática; não reabre `failed`. |
 
 ### Um período por pagamento
 
@@ -553,12 +557,22 @@ confirmação automática). O dinâmico exige um e-mail de pagador; sem o e-mail
 falha. O estático usa a chave, o titular e a cidade de `config/donations.php`.
 
 A doação vive fora de `payments`: não entra em fatura e não consome cota.
-`ConfirmDonation` confere valor e moeda com a linha gravada e só transita
-`pending -> paid` uma vez, disparando o recibo quando há e-mail e
-`DONATIONS_SEND_RECEIPTS` está ligado. A página de status, pública por ULID,
-mostra valor, estado e datas, nunca os dados de quem doou. A expiração é
-resolvida também na leitura (`effectiveStatus()`): um Pix dinâmico pendente
-vencido já aparece vencido antes da varredura, e o Pix estático
+`SyncDonationPayment` é o único efeito local de um pagamento consultado: grava
+`gateway_status`/`gateway_status_detail` em toda passagem, delega o aprovado ao
+`ConfirmDonation` (que confere valor e moeda e transita `pending|expired ->
+paid` uma vez, disparando o recibo quando há e-mail e
+`DONATIONS_SEND_RECEIPTS` está ligado) e trata recusa/estorno com update
+condicional, para um aviso atrasado não rebaixar uma doação já paga. O webhook
+continua sendo a única confirmação automática; o botão "Já paguei"
+(`POST /donate/{ulid}/check`, com limite por IP) e o comando
+`donations:check {ulid}` chamam o mesmo caminho sob demanda. A página de status,
+pública por ULID, mostra valor, estado e datas, nunca os dados de quem doou, e
+se atualiza a cada `DONATIONS_STATUS_POLL_MS` (default 15 s, só banco local)
+enquanto está `pending`. Uma recusa vira motivo traduzido
+(`DonationFailureReason`) na tela pública; o código cru do provedor fica só no
+admin. O comando imprime o e-mail do pagador mascarado e nunca o token. A
+expiração é resolvida também na leitura (`effectiveStatus()`): um Pix dinâmico
+pendente vencido já aparece vencido antes da varredura, e o Pix estático
 (`gateway = manual`) nunca expira. `payments:expire` só mexe em `pending`
 (checkouts e doações).
 
@@ -566,7 +580,10 @@ vencido já aparece vencido antes da varredura, e o Pix estático
 
 - Requisição ao provedor de pagamento: 20 s (connect 5 s); job de webhook:
   60 s, 3 tentativas; checkout: 60 min; QR dinâmico de doação: o prazo do
-  provedor ou 60 min quando ele não informa.
+  provedor ou 60 min quando ele não informa (piso de 30 min na configuração).
+- Consulta sob demanda do Pix: `DONATIONS_CHECK_PER_MINUTE` (default 5) por IP;
+  auto-refresh da página de status: `DONATIONS_STATUS_POLL_MS` (default 15 s,
+  `0` desliga) e só lê o banco local.
 - `payments:expire` roda a cada 5 min e só marca checkout e doação `pending`
   vencidos; `webhooks:prune --days=30` roda diariamente às 03:30;
   `history:prune` roda diariamente às 03:45 com 90 dias; `base64-images:prune`

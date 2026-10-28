@@ -71,6 +71,32 @@ return [
         'receipt' => 'If you provided an e-mail, the receipt will arrive in your inbox.',
     ],
 
+    // Reason shown to the donor when a donation fails (ADR-059). The key comes
+    // from the provider's `status_detail`; the raw code never leaves the server.
+    'reasons' => [
+        'high_risk' => 'Mercado Pago declined the Pix in its risk analysis. Try again or use another payment method.',
+        'bank' => 'Your bank declined the Pix. Check your limit, balance or blocks and try again.',
+        'regulations' => 'A regulatory rule blocked the Pix. Try again later or use another account.',
+        'insufficient_data' => 'Mercado Pago was missing data to complete the Pix. Try again with your full details.',
+        'biz_rule' => 'A rule on the account receiving the donation declined the Pix. Try again later.',
+        'other' => 'The provider did not complete the payment. Generate a new Pix and try again.',
+    ],
+
+    'check' => [
+        'button' => 'I already paid',
+        'loading' => 'Checking…',
+        'hint' => 'Already paid? Tap to confirm now.',
+        'success' => 'Payment confirmed. Thank you!',
+        'pending' => 'Mercado Pago has not confirmed this Pix yet. Wait a moment and try again.',
+        'failed' => 'The payment was declined. See the reason on this page.',
+        'refunded' => 'The payment shows as refunded.',
+        'already' => 'This donation has already been resolved.',
+        'unavailable' => 'There is nothing to check for this donation right now.',
+        'mismatch' => 'The payment that was checked does not belong to this donation.',
+        'error' => 'We could not check the payment right now. Try again in a moment.',
+        'throttled' => 'Too many checks in a short time. Wait a minute and try again.',
+    ],
+
     'errors' => [
         'unavailable' => 'Pix donations are not available right now.',
         'gateway' => 'We could not generate the Pix right now. Try again in a moment.',

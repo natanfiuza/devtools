@@ -71,6 +71,32 @@ return [
         'receipt' => 'Si vous avez indiqué un e-mail, le reçu arrivera dans votre boîte de réception.',
     ],
 
+    // Motivo affiché au donateur quand un don échoue (ADR-059). La clé vient du
+    // `status_detail` ; le code brut ne quitte jamais le serveur.
+    'reasons' => [
+        'high_risk' => 'Mercado Pago a refusé le Pix lors de son analyse de risque. Réessayez ou utilisez un autre moyen de paiement.',
+        'bank' => 'Votre banque a refusé le Pix. Vérifiez votre limite, votre solde ou vos blocages, puis réessayez.',
+        'regulations' => 'Une règle réglementaire a bloqué le Pix. Réessayez plus tard ou utilisez un autre compte.',
+        'insufficient_data' => 'Il manquait des données à Mercado Pago pour finaliser le Pix. Réessayez avec vos informations complètes.',
+        'biz_rule' => 'Une règle du compte qui reçoit le don a refusé le Pix. Réessayez plus tard.',
+        'other' => 'Le prestataire n\'a pas finalisé le paiement. Générez un nouveau Pix et réessayez.',
+    ],
+
+    'check' => [
+        'button' => 'J\'ai déjà payé',
+        'loading' => 'Vérification…',
+        'hint' => 'Vous avez déjà payé ? Touchez pour confirmer maintenant.',
+        'success' => 'Paiement confirmé. Merci !',
+        'pending' => 'Mercado Pago n\'a pas encore confirmé ce Pix. Patientez un instant et réessayez.',
+        'failed' => 'Le paiement a été refusé. Voir le motif sur cette page.',
+        'refunded' => 'Le paiement apparaît comme remboursé.',
+        'already' => 'Ce don a déjà été résolu.',
+        'unavailable' => 'Il n\'y a rien à vérifier pour ce don pour le moment.',
+        'mismatch' => 'Le paiement consulté n\'appartient pas à ce don.',
+        'error' => 'Impossible de vérifier le paiement maintenant. Réessayez dans un instant.',
+        'throttled' => 'Trop de vérifications en peu de temps. Attendez une minute et réessayez.',
+    ],
+
     'errors' => [
         'unavailable' => 'Les dons via Pix ne sont pas disponibles pour le moment.',
         'gateway' => 'Impossible de générer le Pix maintenant. Réessayez dans un instant.',

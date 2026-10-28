@@ -55,6 +55,13 @@ Route::prefix('{locale}')
             ->name('donate.store');
         Route::get('donate/{donation}', [DonationController::class, 'status'])
             ->name('donate.status');
+        // "Ja paguei": consulta o provedor sob demanda. O ULID e a capacidade;
+        // o limite e por IP (nomeado, nao `throttle:10,1`, que era contornado
+        // trocando o prefixo de idioma).
+        Route::post('donate/{donation}/check', [DonationController::class, 'check'])
+            ->where('donation', '[0-9A-HJKMNP-TV-Z]{26}')
+            ->middleware('throttle:donation-check')
+            ->name('donate.check');
 
         // Contato: pagina publica e indexavel para suporte e mensagens.
         Route::get('contact', [ContactController::class, 'index'])->name('contact');

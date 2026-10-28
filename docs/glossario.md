@@ -65,6 +65,9 @@
 - Pix estatico: QR e copia e cola montados localmente a partir de chave, titular e cidade de `config/donations.php`; funciona sem provedor, mas **nao tem confirmacao automatica** (ADR-048).
 - Copia e cola (Pix): texto EMV do Pix, com chave, valor e identificador, que o banco le; no dinamico vem do provedor e no estatico e gerado por `PixPayload`.
 - Recibo de doacao: e-mail enviado so quando a doacao transita `pending -> paid`, tem e-mail de doador e `DONATIONS_SEND_RECEIPTS` esta ligado; doacao anonima e valida sem recibo (ADR-048).
+- Detalhe do status (`status_detail`): codigo do provedor que explica o `status` de um pagamento (ex.: `accredited`, `pending_waiting_transfer`, `rejected_by_bank`, `expired`); fica gravado em `donations.gateway_status_detail` na criacao, no webhook e na consulta sob demanda, e o doador ve o motivo traduzido, nunca o codigo cru (ADR-059).
+- Consulta sob demanda: leitura do pagamento na API do provedor disparada pelo doador pelo botao "Ja paguei" (`POST /{locale}/donate/{ulid}/check`) ou pelo operador com `donations:check {ulid}`, que sincroniza o estado pelo mesmo caminho do webhook; **nao** e conciliacao automatica - o unico caminho automatico continua sendo o webhook (ADR-059).
+- Motivo de recusa: traducao do `status_detail` de uma recusa para uma explicacao ao doador (`DonationFailureReason` -> `donations.reasons.*`, cinco idiomas); o que nao estiver no mapa cai em `other`, e o codigo do provedor so aparece no admin (ADR-059).
 - Idioma da conta: preferencia duradoura gravada em `users.locale` (codigo, ex. `pt_BR`), escolhida no cadastro e no perfil; e tambem o idioma dos e-mails que saem para ela.
 - Idioma de navegacao: o idioma da pagina aberta agora (prefixo da URL ou cookie `locale`, ex. `pt-br`); pode diferir do idioma da conta.
 - Anonimizacao: exclusao que apaga o que identifica a pessoa e mantem a cobranca (guarda fiscal); a linha fica marcada por `anonymized_at` e nao volta.

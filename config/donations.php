@@ -29,8 +29,16 @@ return [
     'max_cents' => (int) env('DONATIONS_MAX_CENTS', 100000),
 
     // Quanto tempo o QR dinamico vale; depois a doacao expira e precisa ser
-    // refeita.
-    'expires_minutes' => (int) env('DONATIONS_EXPIRES_MINUTES', 60),
+    // refeita. `?:` (e nao o default do `env()`) porque uma chave vazia no
+    // `.env` devolve `''`, que vira 0 e encurtava o QR para 5 minutos; o piso
+    // impede um prazo curto demais para o pagador escanear e pagar.
+    'expires_minutes' => max(30, (int) (env('DONATIONS_EXPIRES_MINUTES') ?: 60)),
+
+    // Intervalo do auto-refresh da pagina de status, em ms. 0 desliga.
+    'status_poll_ms' => max(0, (int) env('DONATIONS_STATUS_POLL_MS', 15000)),
+
+    // Teto de consultas sob demanda ao provedor por IP, por minuto.
+    'check_per_minute' => max(1, (int) env('DONATIONS_CHECK_PER_MINUTE', 5)),
 
     // E-mail do recebedor quando o doador nao informa um. O provedor exige um
     // e-mail de pagador para criar o Pix.
