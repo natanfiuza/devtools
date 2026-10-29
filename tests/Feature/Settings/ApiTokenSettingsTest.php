@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AiRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -168,7 +169,7 @@ it('entrega metricas de uso com estatisticas diarias de tokens e requisicoes', f
     $user = User::factory()->create();
     $token = $user->createToken('servidor-node', ['ai:query']);
 
-    \App\Models\AiRequest::factory()->done()->create([
+    AiRequest::factory()->done()->create([
         'user_id' => $user->id,
         'api_token_id' => $token->accessToken->id,
         'tokens_in' => 450,

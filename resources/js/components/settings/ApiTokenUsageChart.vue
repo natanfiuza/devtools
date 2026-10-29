@@ -79,7 +79,11 @@ const tokenColorMap = computed(() => {
         if (token.isRevoked || token.id === 'revoked') {
             map.set(token.id, REVOKED_COLOR);
         } else {
-            map.set(token.id, TOKEN_COLORS[colorIdx % TOKEN_COLORS.length]);
+            const color =
+                TOKEN_COLORS[colorIdx % TOKEN_COLORS.length] ??
+                TOKEN_COLORS[0] ??
+                '#6366f1';
+            map.set(token.id, color);
             colorIdx++;
         }
     }
@@ -91,7 +95,11 @@ function getTokenColor(tokenId: number | 'revoked', isRevoked = false): string {
     if (isRevoked || tokenId === 'revoked') {
         return REVOKED_COLOR;
     }
-    return tokenColorMap.value.get(tokenId) ?? TOKEN_COLORS[0];
+    return (
+        tokenColorMap.value.get(tokenId) ??
+        TOKEN_COLORS[0] ??
+        '#6366f1'
+    );
 }
 
 const days = computed<ApiTokenDailyUsage[]>(() => props.stats?.days ?? []);
@@ -179,7 +187,7 @@ const barWidth = computed(() => {
 
 // Calcula fatias empilhadas para cada dia
 type StackSegment = {
-    tokenId: number | 'revoked';
+    tokenId: number | 'revoked' | 'total';
     tokenName: string;
     tokens: number;
     color: string;
@@ -251,16 +259,25 @@ function shouldShowDayLabel(index: number, totalDays: number): boolean {
 
 // Posicionamento do tooltip flutuante
 const tooltipStyle = computed(() => {
-    if (hoveredDayIndex.value === null || !computedDayBars.value[hoveredDayIndex.value]) {
+    if (hoveredDayIndex.value === null) {
         return { display: 'none' };
     }
 
     const bar = computedDayBars.value[hoveredDayIndex.value];
+    if (!bar) {
+        return { display: 'none' };
+    }
+
     const leftPercent = (bar.xCenter / SVG_WIDTH) * 100;
 
     return {
         left: `${leftPercent}%`,
-        transform: leftPercent > 70 ? 'translateX(-100%)' : leftPercent < 30 ? 'translateX(0)' : 'translateX(-50%)',
+        transform:
+            leftPercent > 70
+                ? 'translateX(-100%)'
+                : leftPercent < 30
+                  ? 'translateX(0)'
+                  : 'translateX(-50%)',
     };
 });
 </script>

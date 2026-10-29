@@ -3,7 +3,6 @@
 namespace App\Support\Ai;
 
 use App\Models\User;
-use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
@@ -78,7 +77,7 @@ final class ApiTokenUsageMetrics
             ->whereNotNull('api_token_id')
             ->where('created_at', '>=', $startDate->startOfDay())
             ->where('created_at', '<=', $endDate->endOfDay())
-            ->selectRaw("
+            ->selectRaw('
                 date(created_at) as usage_date,
                 api_token_id,
                 COUNT(*) as requests_count,
@@ -86,7 +85,7 @@ final class ApiTokenUsageMetrics
                     THEN (COALESCE(tokens_in, 0) + COALESCE(tokens_out, 0))
                     ELSE COALESCE(reserved_tokens, 0)
                 END) as total_tokens
-            ")
+            ')
             ->groupBy('usage_date', 'api_token_id')
             ->orderBy('usage_date')
             ->get();
