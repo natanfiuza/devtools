@@ -193,3 +193,34 @@ describe('swapLocaleInPath', () => {
         expect(swapLocaleInPath('/', slugs, 'fr')).toBeNull();
     });
 });
+
+describe('messageCompiler tolerante', () => {
+    it('degrada mensagem invalida para o texto cru sem lancar', () => {
+        const instance = createI18nInstance();
+        const cru = 'curl -d \'{\n  "a": 1\n}\'';
+
+        applyTranslations(instance, {
+            locale: 'pt_BR',
+            translations: { home: { api: { preview_code: cru } } },
+        });
+
+        expect(() => instance.global.t('home.api.preview_code')).not.toThrow();
+
+        expect(instance.global.t('home.api.preview_code')).toBe(cru);
+    });
+
+    it('mantem a interpolacao das mensagens validas', () => {
+        const instance = createI18nInstance();
+
+        applyTranslations(instance, {
+            locale: 'pt_BR',
+            translations: {
+                home: { pricing: { features: { uses: '{count} usos' } } },
+            },
+        });
+
+        expect(
+            instance.global.t('home.pricing.features.uses', { count: 5 }),
+        ).toBe('5 usos');
+    });
+});

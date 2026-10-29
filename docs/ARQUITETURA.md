@@ -25,7 +25,7 @@ vocabulário, em [glossario.md](glossario.md). As decisões ficam em `ADR-0xx`.
 | Base64 Image | `/api/tools/base64-image/*`, `/tools/base64-image/{download,preview}` | Conversão no servidor, armazenamento, retenção e download. | `### Base64 Image`; ADR-055 |
 | Contato | `GET/POST /{locale}/contact` | Formulário público, gravação e e-mail para a administração. | `### Contato` |
 | Admin | `/admin/*` | Contas, assinaturas, planos, intenções, pagamentos, webhooks, alvos e cache. | ADR-025; [DESIGN.md](design/DESIGN.md) |
-| i18n e prompts | `/{locale}`, `lang/`, `resources/prompts/` | Cinco idiomas; o locale entra no payload e no hash da IA. | ADR-010, ADR-026, ADR-056; [SPEC.md](SPEC.md) |
+| i18n e prompts | `/{locale}`, `lang/`, `resources/prompts/` | Cinco idiomas; o locale entra no payload e no hash da IA; traducao compilada em runtime com compilador tolerante. | ADR-010, ADR-026, ADR-056, ADR-060; [SPEC.md](SPEC.md) |
 | SEO | `sitemap.xml`, `robots.txt`, JSON-LD e OG | Páginas públicas, hreflang, dados estruturados e imagem por tool. | ADR-009, ADR-030, ADR-033, ADR-053 |
 | Deploy e operação | `deploy/`, Supervisor, cron | Deploy por cópia instalada, worker e rotinas de `task_schedules`. | [RUNBOOK.md](RUNBOOK.md), [guides/cron.md](guides/cron.md); ADR-014, ADR-035 |
 | Contas, planos e cota | Auth, `/settings/*`, `plans`, `subscriptions` | Conta, plano, franquia acumulativa e tokens de API. | ADR-012, ADR-025, ADR-050, ADR-054 |

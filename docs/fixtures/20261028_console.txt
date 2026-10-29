@@ -1,0 +1,494 @@
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+O @ vue-i18n-CaoWPIKs.js:3
+te @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+O @ vue-i18n-CaoWPIKs.js:3
+T @ vue-i18n-CaoWPIKs.js:3
+w @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+O @ vue-i18n-CaoWPIKs.js:3
+T @ vue-i18n-CaoWPIKs.js:3
+w @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+(anonymous) @ vue-i18n-CaoWPIKs.js:3
+ir @ vue-i18n-CaoWPIKs.js:1
+_e @ vue-i18n-CaoWPIKs.js:3
+mount @ vue-i18n-CaoWPIKs.js:3
+t.mount @ vue-i18n-CaoWPIKs.js:4
+(anonymous) @ dist-9hcTfLFV.js:89
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+Connecting to '<URL>' violates the following Content Security Policy directive: "connect-src 'self' <URL> <URL> <URL> <URL>". The action has been blocked.
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/pagead/conversion/998597367/?random=1793223265726&cv=11&fst=1793223265726&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za208zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&rcb=1&gtm_ee=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dgtag.config%3Ballow_google_signals%3Dfalse&category=acrcp_v1_512&ept=6. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+Gz @ js?id=G-2JLK9ZJVJG:812
+lG @ js?id=G-2JLK9ZJVJG:944
+XO @ js?id=G-2JLK9ZJVJG:1158
+f @ js?id=G-2JLK9ZJVJG:1160
+(anonymous) @ js?id=G-2JLK9ZJVJG:1162
+Um @ js?id=G-2JLK9ZJVJG:579
+mp @ js?id=G-2JLK9ZJVJG:598
+ZO @ js?id=G-2JLK9ZJVJG:1162
+v @ js?id=G-2JLK9ZJVJG:878
+$m @ js?id=G-2JLK9ZJVJG:581
+x @ js?id=G-2JLK9ZJVJG:878
+oD @ js?id=G-2JLK9ZJVJG:878
+mD.flush @ js?id=G-2JLK9ZJVJG:882
+mD.push @ js?id=G-2JLK9ZJVJG:880
+uD @ js?id=G-2JLK9ZJVJG:885
+$D.event @ js?id=G-2JLK9ZJVJG:903
+QE @ js?id=G-2JLK9ZJVJG:916
+RE @ js?id=G-2JLK9ZJVJG:919
+TE @ js?id=G-2JLK9ZJVJG:924
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=1&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&_tu=AAg&gtm=45je6ar0v9267309505za208zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793223265728&tfd=1201&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+Ap.H @ js?id=G-2JLK9ZJVJG:602
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+$u @ js?id=G-2JLK9ZJVJG:731
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://www.google.com/pagead/uconversion/998597367/?random=1793223265726&cv=11&fst=1793223265726&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za208zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&rcb=1&gtm_ee=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dgtag.config%3Ballow_google_signals%3Dfalse&category=acrcp_v1_512&gcp=4&ept=66. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+pd @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:600
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+Loading the image '<URL>' violates the following Content Security Policy directive: "img-src 'self' data: <URL> <URL>". The action has been blocked.
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+le @ vue-i18n-CaoWPIKs.js:3
+oe @ vue-i18n-CaoWPIKs.js:3
+te @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+ee @ vue-i18n-CaoWPIKs.js:3
+k @ vue-i18n-CaoWPIKs.js:3
+w @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+re @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=0&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fen&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&ae=a&_tu=AAg&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793225908761&tfd=2644263&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+Ap.H @ js?id=G-2JLK9ZJVJG:602
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+$u @ js?id=G-2JLK9ZJVJG:731
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+le @ vue-i18n-CaoWPIKs.js:3
+oe @ vue-i18n-CaoWPIKs.js:3
+te @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+ee @ vue-i18n-CaoWPIKs.js:3
+k @ vue-i18n-CaoWPIKs.js:3
+w @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+re @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=0&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fes&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&ae=a&_tu=AAg&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793225911593&tfd=2647096&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+Ap.H @ js?id=G-2JLK9ZJVJG:602
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+$u @ js?id=G-2JLK9ZJVJG:731
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+ie @ vue-i18n-CaoWPIKs.js:3
+j @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+le @ vue-i18n-CaoWPIKs.js:3
+oe @ vue-i18n-CaoWPIKs.js:3
+te @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+ee @ vue-i18n-CaoWPIKs.js:3
+k @ vue-i18n-CaoWPIKs.js:3
+w @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+re @ vue-i18n-CaoWPIKs.js:3
+ne @ vue-i18n-CaoWPIKs.js:3
+v @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+Vn @ vue-i18n-CaoWPIKs.js:1
+fo @ vue-i18n-CaoWPIKs.js:3
+s @ vue-i18n-CaoWPIKs.js:3
+run @ vue-i18n-CaoWPIKs.js:1
+runIfDirty @ vue-i18n-CaoWPIKs.js:1
+zn @ vue-i18n-CaoWPIKs.js:1
+or @ vue-i18n-CaoWPIKs.js:1
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/pagead/conversion/998597367/?random=1793225918349&cv=11&fst=1793225918349&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fes&rcb=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&ept=6. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+Gz @ js?id=G-2JLK9ZJVJG:812
+lG @ js?id=G-2JLK9ZJVJG:944
+XO @ js?id=G-2JLK9ZJVJG:1158
+f @ js?id=G-2JLK9ZJVJG:1160
+(anonymous) @ js?id=G-2JLK9ZJVJG:1162
+Um @ js?id=G-2JLK9ZJVJG:579
+mp @ js?id=G-2JLK9ZJVJG:598
+ZO @ js?id=G-2JLK9ZJVJG:1162
+v @ js?id=G-2JLK9ZJVJG:878
+$m @ js?id=G-2JLK9ZJVJG:581
+x @ js?id=G-2JLK9ZJVJG:878
+oD @ js?id=G-2JLK9ZJVJG:878
+mD.flush @ js?id=G-2JLK9ZJVJG:882
+mD.push @ js?id=G-2JLK9ZJVJG:880
+uD @ js?id=G-2JLK9ZJVJG:885
+$D.event @ js?id=G-2JLK9ZJVJG:903
+QE @ js?id=G-2JLK9ZJVJG:916
+c.push @ js?id=G-2JLK9ZJVJG:922
+IE.push @ js?id=G-2JLK9ZJVJG:923
+WE @ js?id=G-2JLK9ZJVJG:924
+(anonymous) @ js?id=G-2JLK9ZJVJG:1063
+(anonymous) @ js?id=G-2JLK9ZJVJG:1062
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=0&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&ae=a&_tu=AAg&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793225918352&tfd=2653854&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+Ap.H @ js?id=G-2JLK9ZJVJG:602
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+$u @ js?id=G-2JLK9ZJVJG:731
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://www.google.com/pagead/uconversion/998597367/?random=1793225918349&cv=11&fst=1793225918349&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fes&rcb=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&gcp=4&ept=66. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+pd @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:600
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/pagead/conversion/998597367/?random=1793225931227&cv=11&fst=1793225931227&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br%2Fapi-docs&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&rcb=1&frm=0&tiba=Documenta%C3%A7%C3%A3o%20da%20API%20v1%20-%20devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&ept=6. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+Gz @ js?id=G-2JLK9ZJVJG:812
+lG @ js?id=G-2JLK9ZJVJG:944
+XO @ js?id=G-2JLK9ZJVJG:1158
+f @ js?id=G-2JLK9ZJVJG:1160
+(anonymous) @ js?id=G-2JLK9ZJVJG:1162
+Um @ js?id=G-2JLK9ZJVJG:579
+mp @ js?id=G-2JLK9ZJVJG:598
+ZO @ js?id=G-2JLK9ZJVJG:1162
+v @ js?id=G-2JLK9ZJVJG:878
+$m @ js?id=G-2JLK9ZJVJG:581
+x @ js?id=G-2JLK9ZJVJG:878
+oD @ js?id=G-2JLK9ZJVJG:878
+mD.flush @ js?id=G-2JLK9ZJVJG:882
+mD.push @ js?id=G-2JLK9ZJVJG:880
+uD @ js?id=G-2JLK9ZJVJG:885
+$D.event @ js?id=G-2JLK9ZJVJG:903
+QE @ js?id=G-2JLK9ZJVJG:916
+c.push @ js?id=G-2JLK9ZJVJG:922
+IE.push @ js?id=G-2JLK9ZJVJG:923
+WE @ js?id=G-2JLK9ZJVJG:924
+(anonymous) @ js?id=G-2JLK9ZJVJG:1063
+(anonymous) @ js?id=G-2JLK9ZJVJG:1062
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=0&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br%2Fapi-docs&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&ae=a&_tu=AAg&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793225931231&tfd=2666733&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+Ap.H @ js?id=G-2JLK9ZJVJG:602
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+Ru @ js?id=G-2JLK9ZJVJG:723
+Vu @ js?id=G-2JLK9ZJVJG:728
+Wu @ js?id=G-2JLK9ZJVJG:728
+$u @ js?id=G-2JLK9ZJVJG:731
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://www.google.com/pagead/uconversion/998597367/?random=1793225931227&cv=11&fst=1793225931227&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br%2Fapi-docs&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&rcb=1&frm=0&tiba=Documenta%C3%A7%C3%A3o%20da%20API%20v1%20-%20devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&gcp=4&ept=66. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+rp.sendRequest @ js?id=G-2JLK9ZJVJG:598
+t @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:777
+f @ js?id=G-2JLK9ZJVJG:772
+Sw @ js?id=G-2JLK9ZJVJG:773
+jx @ js?id=G-2JLK9ZJVJG:776
+Yx.H @ js?id=G-2JLK9ZJVJG:791
+Su @ js?id=G-2JLK9ZJVJG:726
+t @ js?id=G-2JLK9ZJVJG:723
+pd @ js?id=G-2JLK9ZJVJG:725
+(anonymous) @ js?id=G-2JLK9ZJVJG:600
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+vue-i18n-CaoWPIKs.js:1 SyntaxError: 2
+    at Sd (vue-i18n-CaoWPIKs.js:4:9831)
+    at d (vue-i18n-CaoWPIKs.js:5:958)
+    at _e (vue-i18n-CaoWPIKs.js:5:6026)
+    at ye (vue-i18n-CaoWPIKs.js:5:6693)
+    at Object.be [as nextToken] (vue-i18n-CaoWPIKs.js:5:7188)
+    at p (vue-i18n-CaoWPIKs.js:5:10085)
+    at h (vue-i18n-CaoWPIKs.js:5:11126)
+    at Object.g [as parse] (vue-i18n-CaoWPIKs.js:5:11286)
+    at tf (vue-i18n-CaoWPIKs.js:6:527)
+    at Af (vue-i18n-CaoWPIKs.js:6:2547)
+Hn @ vue-i18n-CaoWPIKs.js:1
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/pagead/conversion/998597367/?random=1793233074815&cv=11&fst=1793233074815&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br%2Fapi-docs&rcb=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&ept=6. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://pagead2.googlesyndication.com/ccm/collect?rcb=1&frm=0&apvc=0&tid=AW-998597367&en=page_view&dl=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&scrsrc=www.googletagmanager.com&rnd=304814617.1793223266&navt=r&npa=1&ae=a&_tu=AAg&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&tft=1793233074819&tfd=9810336&tids=AW-998597367&fmt=8. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
+js?id=G-2JLK9ZJVJG:600 Fetch API cannot load https://www.google.com/pagead/uconversion/998597367/?random=1793233074815&cv=11&fst=1793233074815&fmt=8&bg=ffffff&guid=ON&async=1&en=page_view&gtm=45je6ar0v9267309505za200zd9267309505xecxf1&gcs=G101&gcd=13p3r3p3p7l1&dma_cps=-&dma=0&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120420414~120469145~120469153~121246026~121246034&u_w=1920&u_h=1080&url=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br&ref=https%3A%2F%2Fdevtools.natanfiuza.dev.br%2Fpt-br%2Fapi-docs&rcb=1&frm=0&tiba=devtools&npa=1&pscdl=denied&label=GDqNCNTBwKodEPfFldwD&ae=a&hn=www.googleadservices.com&uaa=x86&uab=64&uafvl=Not%253AA-Brand%3B8.0.0.0%7CChromium%3B156.0.8078.49%7CGoogle%2520Chrome%3B156.0.8078.49&uamb=0&uam=&uap=Windows&uapv=19.0.0&uaw=0&_tu=AAg&data=event%3Dpage_view&category=acrcp_v1_512&gcp=4&ept=66. Refused to connect because it violates the document's Content Security Policy.
+up.K @ js?id=G-2JLK9ZJVJG:600
