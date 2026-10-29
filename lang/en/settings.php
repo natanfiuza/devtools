@@ -107,6 +107,42 @@ return [
         'cancel' => 'Cancel',
         'empty_title' => 'No tokens yet',
         'empty' => 'Create a token to call the public API from another system.',
+        'usage_chart' => [
+            'title' => 'AI Token Usage Statistics',
+            'description' => 'Track daily AI token consumption and requests made via your API tokens.',
+            'views' => [
+                'total' => 'Daily total',
+                'by_token' => 'By API token',
+            ],
+            'periods' => [
+                'current_month' => 'Current month',
+                'previous_month' => 'Previous month',
+                'custom' => 'Custom',
+            ],
+            'custom' => [
+                'start_date' => 'Start date',
+                'end_date' => 'End date',
+                'apply' => 'Apply',
+            ],
+            'summary' => [
+                'tokens' => 'Tokens consumed',
+                'requests' => 'Requests',
+            ],
+            'tooltip' => [
+                'date' => 'Date',
+                'total_tokens' => '{count} tokens',
+                'requests' => '{count} requests',
+                'share' => '{percent}% of day',
+            ],
+            'legend' => [
+                'revoked_tokens' => 'Revoked tokens',
+                'tokens' => 'Tokens',
+            ],
+            'empty' => [
+                'title' => 'No usage in period',
+                'description' => 'No API queries were performed within the selected date range.',
+            ],
+        ],
     ],
 
     'appearance' => [

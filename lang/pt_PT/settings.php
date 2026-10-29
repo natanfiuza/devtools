@@ -107,6 +107,42 @@ return [
         'cancel' => 'Cancelar',
         'empty_title' => 'Nenhum token criado',
         'empty' => 'Crie um token para chamar a API pública a partir de outro sistema.',
+        'usage_chart' => [
+            'title' => 'Estatísticas de consumo de IA',
+            'description' => 'Acompanhe a quantidade diária de tokens de IA consumidos e pedidos através de tokens de API.',
+            'views' => [
+                'total' => 'Total diário',
+                'by_token' => 'Por token de API',
+            ],
+            'periods' => [
+                'current_month' => 'Mês atual',
+                'previous_month' => 'Mês anterior',
+                'custom' => 'Personalizado',
+            ],
+            'custom' => [
+                'start_date' => 'Data inicial',
+                'end_date' => 'Data final',
+                'apply' => 'Aplicar',
+            ],
+            'summary' => [
+                'tokens' => 'Tokens consumidos',
+                'requests' => 'Pedidos',
+            ],
+            'tooltip' => [
+                'date' => 'Data',
+                'total_tokens' => '{count} tokens',
+                'requests' => '{count} pedidos',
+                'share' => '{percent}% do dia',
+            ],
+            'legend' => [
+                'revoked_tokens' => 'Tokens revogados',
+                'tokens' => 'Tokens',
+            ],
+            'empty' => [
+                'title' => 'Sem consumo no período',
+                'description' => 'Não foram realizados pedidos através dos tokens de API nas datas selecionadas.',
+            ],
+        ],
     ],
 
     'appearance' => [

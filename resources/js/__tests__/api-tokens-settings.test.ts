@@ -113,6 +113,42 @@ const traducoes = {
             cancel: 'CANCELAR',
             empty_title: 'NENHUM_TOKEN',
             empty: 'DICA_CRIAR_TOKEN',
+            usage_chart: {
+                title: 'TITULO_GRAFICO',
+                description: 'DESCRICAO_GRAFICO',
+                views: {
+                    total: 'TOTAL_DIARIO',
+                    by_token: 'POR_TOKEN',
+                },
+                periods: {
+                    current_month: 'MES_ATUAL',
+                    previous_month: 'MES_ANTERIOR',
+                    custom: 'PERSONALIZADO',
+                },
+                custom: {
+                    start_date: 'DATA_INICIAL',
+                    end_date: 'DATA_FINAL',
+                    apply: 'APLICAR',
+                },
+                summary: {
+                    tokens: 'TOKENS_CONSUMIDOS',
+                    requests: 'REQUISICOES',
+                },
+                tooltip: {
+                    date: 'DATA',
+                    total_tokens: '{count} TOKENS',
+                    requests: '{count} REQUISICOES',
+                    share: '{percent}% DO_DIA',
+                },
+                legend: {
+                    revoked_tokens: 'TOKENS_REVOGADOS',
+                    tokens: 'TOKENS',
+                },
+                empty: {
+                    title: 'SEM_CONSUMO',
+                    description: 'SEM_CONSULTAS',
+                },
+            },
         },
     },
 };
