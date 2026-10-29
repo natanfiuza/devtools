@@ -30,7 +30,7 @@ return [
         'cta_docs' => 'Consulter la documentation de l\'API',
         'cta_tokens' => 'Gérer les jetons d\'API',
         'preview_title' => 'Exemple de requête cURL',
-        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer VOTRE_JETON\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"Lister les utilisateurs actifs triés par nom\"\n  }'",
+        'preview_code' => "curl -sS -X POST \"https://devtools.natanfiuza.dev.br/api/v1/sql-queries\" \\\n  -H \"Authorization: Bearer VOTRE_JETON\" \\\n  -H \"Accept: application/json\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{'{'}\n    \"schema_source\": \"ddl\",\n    \"dialect\": \"mysql\",\n    \"output_target\": \"sql\",\n    \"schema\": \"CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(120), active TINYINT(1));\",\n    \"description\": \"Lister les utilisateurs actifs triés par nom\"\n  {'}'}'",
     ],
 
     'donation' => [

@@ -12,6 +12,7 @@ Site de ferramentas para desenvolvedores. Tools do cliente sao gratuitas e sem l
 
 ## 3. Idiomas
 en, pt-BR, pt-PT, fr, es. URL prefixada (/pt-br/...), hreflang, seletor no header, escolha do idioma no cadastro e idioma da conta em `users.locale`, trocavel no perfil (ADR-026). Precedencia: em rota prefixada a URL manda (e passa a valer como cookie); sem prefixo - area autenticada, `/admin`, telas de token - a ordem e cookie -> idioma da conta -> `Accept-Language` -> en. O idioma da conta e tambem o idioma dos e-mails. Fallback: en.
+Compilacao em runtime: as traducoes nao entram no bundle — o PHP manda os namespaces do locale ativo e o vue-i18n compila no navegador e no SSR, entao `vite build` nao pega sintaxe quebrada em `lang/`. Chaves e fechaves literais num texto visivel sao escritas como `{'{'}` e `{'}'}` (como o `{'@'}`), e um `messageCompiler` tolerante exibe o texto cru em vez de derrubar a pagina; o teste `i18n-messages.test.ts` compila todas as folhas dos cinco idiomas com o compilador estrito (ADR-060).
 Alcance do prefixo: paginas publicas **e telas de autenticacao** vivem sob `/{locale}` — login, cadastro, esqueci/redefinir senha, verificar e-mail, confirmar senha e logout (ADR-022). A area autenticada (dashboard, settings) nao tem prefixo e usa o idioma da sessao/cookie. Rotas de maquina ficam fora: `/api`, `/webhooks`, `/admin` e `/auth/{provider}/*` (a URL de callback e cadastrada uma vez no provedor), e tambem `/sitemap.xml` e `/robots.txt`, que sao do site inteiro e nao de um idioma. `/` resolve o idioma do visitante e redireciona. Telas de acesso, paginas de token e o guia de estilo sao `noindex, follow` + canonical e sem hreflang; as paginas legais e a home seguem indexaveis com hreflang normal.
 Textos de interface e a documentacao do repositorio (`docs/`) sao escritos em portugues com acentuacao correta.
 
@@ -243,7 +244,7 @@ Reconstruida em 2026-10-13 (a secao estava vazia e delegava para fora do repo; a
 - Cache hit **nao** debita cota; a cota so e debitada em cache miss (era a citada "Q1", secao 6 item 2).
 - Assets: build no servidor (era "decidir na Fase 0"; ver ADR-014).
 - Tema claro e escuro desde a F0, com contraste AA validado por teste (era "validar" no DESIGN.md).
-- i18n: fonte unica em `lang/{locale}/*.php`, exposta ao Inertia escopada por namespace e consumida pelo vue-i18n.
+- i18n: fonte unica em `lang/{locale}/*.php`, exposta ao Inertia escopada por namespace e consumida pelo vue-i18n, compilada em runtime com compilador tolerante e guarda de compilacao (ADR-060).
 - Testes em SQLite `:memory:`; dev local e producao em MariaDB.
 - SSR da Inertia ligado em producao, com gate por `INERTIA_SSR_ENABLED`.
 - Git: commits e PR apenas pelo usuario, via gitpr, com aprovacao de cada um.

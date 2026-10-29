@@ -1,7 +1,59 @@
+import { compile } from '@intlify/core-base';
+import type { MessageCompiler, MessageFunction } from '@intlify/core-base';
 import { createI18n } from 'vue-i18n';
 import type { Locale, Translations } from '@/types';
 
 export const FALLBACK_LOCALE = 'en';
+
+/**
+ * O vue-i18n compila as mensagens em runtime (navegador e SSR), porque elas
+ * chegam do PHP. O compilador padrao lanca SyntaxError de dentro de `t()`
+ * quando a mensagem tem um literal de sintaxe nao escapado (ver ADR-060), e o
+ * throw derruba o render inteiro. Este compilador tolerante mostra o texto
+ * cru em vez de nao renderizar nada.
+ *
+ * `@intlify/core-base` precisa acompanhar o `vue-i18n`: `npm ls
+ * @intlify/core-base` deve mostrar uma copia so. Se as versoes divergirem,
+ * subir as duas juntas.
+ */
+const loggedCompileFailures = new Set<string>();
+const rawMessageCache = new Map<string, MessageFunction<string>>();
+
+const safeMessageCompiler: MessageCompiler = (message, context) => {
+    try {
+        return compile(message, context);
+    } catch {
+        // O core-base nao cacheia mensagem com erro e o namespace e
+        // substituido inteiro a cada navegacao; sem cache, todo `t()` da
+        // mesma chave recompilaria e logaria de novo.
+        const source = typeof message === 'string' ? message : '';
+        const cacheKey = `${context.locale}\0${context.key}\0${source}`;
+        const cached = rawMessageCache.get(cacheKey);
+
+        if (cached !== undefined) {
+            return cached;
+        }
+
+        const logKey = `${context.locale}:${context.key}`;
+
+        if (!loggedCompileFailures.has(logKey)) {
+            loggedCompileFailures.add(logKey);
+            // Sem o conteudo da mensagem: o erro do compilador carrega um
+            // code frame com a traducao.
+            console.error(
+                `[i18n] falha ao compilar ${logKey}; exibindo o texto cru.`,
+            );
+        }
+
+        // O PHP sempre manda string; um AST (nao usado aqui) cai na chave.
+        const fallback: MessageFunction<string> = () =>
+            typeof message === 'string' ? message : context.key;
+
+        rawMessageCache.set(cacheKey, fallback);
+
+        return fallback;
+    }
+};
 
 /** Props de idioma que o Laravel compartilha em toda pagina. */
 export type LocaleProps = {
@@ -26,6 +78,8 @@ export function createI18nInstance() {
         // O PHP ja resolve o fallback de chave; aqui nao queremos ruido.
         missingWarn: false,
         fallbackWarn: false,
+        // Rede de seguranca para traducao invalida vinda de lang/ (ADR-060).
+        messageCompiler: safeMessageCompiler,
     });
 }
 

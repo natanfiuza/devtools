@@ -118,5 +118,7 @@
 - Share Text: ferramenta de compartilhamento rápido de notas, códigos e textos no navegador com compatibilidade total com Hastebin (ADR-058).
 - Shared Text (`shared_texts`): modelo e registro de persistência de textos compartilhados, identificado por ULID, vinculando arquivos físicos em `storage/app/data/sharetext/{user_id|anonymous}/{ulid}.txt`, tamanho em bytes, extensão opcional e data de expiração (ADR-058).
 - API Hastebin (`/documents`, `/raw/{id}`): superfície clássica de integração HTTP aceitando payloads brutos de CLI e utilitários de terminal, com detecção de sessão e token Bearer Sanctum (ADR-058).
+- Escape de sintaxe do vue-i18n: forma de exibir `{`, `}` ou `@` como texto literal numa tradução (`{'{'}`, `{'}'}`, `{'@'}`), porque esses caracteres abrem chaves, fecham chaves e mensagens ligadas; `{'{'}` também evita a interpolação da mensagem (ADR-060).
+- Compilador de mensagens tolerante: `messageCompiler` customizado que compila a tradução com o core-base e, quando ela é inválida, exibe o texto cru e registra um aviso por chave em vez de lançar e derrubar o render (ADR-060).
 
 
