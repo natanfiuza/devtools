@@ -19,8 +19,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useRoutes } from '@/composables/useRoutes';
+import ApiTokenUsageChart from '@/components/settings/ApiTokenUsageChart.vue';
 import { destroy, store } from '@/routes/api-tokens';
-import type { ApiToken, ApiTokensProps } from '@/types';
+import type { ApiToken, ApiTokensProps, ApiTokenUsagePeriod } from '@/types';
 
 /**
  * Tokens da API publica v1 (ADR-050, ADR-057).
@@ -98,6 +99,29 @@ function lastUsed(token: ApiToken): string {
     return token.lastUsedAt === null
         ? t('settings.api_tokens.never')
         : formatDate(token.lastUsedAt);
+}
+
+function handlePeriodChange(payload: {
+    period: ApiTokenUsagePeriod['type'];
+    startDate?: string;
+    endDate?: string;
+}): void {
+    const params: Record<string, string> = {
+        period: payload.period,
+    };
+
+    if (payload.startDate) {
+        params.start_date = payload.startDate;
+    }
+    if (payload.endDate) {
+        params.end_date = payload.endDate;
+    }
+
+    router.get(window.location.pathname, params, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['usageStats'],
+    });
 }
 </script>
 
@@ -186,6 +210,12 @@ function lastUsed(token: ApiToken): string {
         </p>
       </div>
     </div>
+
+    <!-- Grafico de consumo diario e por token de API -->
+    <ApiTokenUsageChart
+      :stats="props.usageStats"
+      @period-change="handlePeriodChange"
+    />
 
     <!-- Valor recem-criado: aparece uma vez e some no proximo carregamento -->
     <div

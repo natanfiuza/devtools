@@ -163,3 +163,50 @@ it('preserva os contadores acumulados da conta ao revogar um token', function ()
             ->where('stats.totalRequests', 2)
             ->where('stats.activeTokens', 0));
 });
+
+it('entrega metricas de uso com estatisticas diarias de tokens e requisicoes', function () {
+    $user = User::factory()->create();
+    $token = $user->createToken('servidor-node', ['ai:query']);
+
+    \App\Models\AiRequest::factory()->done()->create([
+        'user_id' => $user->id,
+        'api_token_id' => $token->accessToken->id,
+        'tokens_in' => 450,
+        'tokens_out' => 150,
+        'created_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('usageStats')
+            ->where('usageStats.period.type', 'current_month')
+            ->where('usageStats.summary.totalTokens', 600)
+            ->where('usageStats.summary.totalRequests', 1)
+            ->has('usageStats.days')
+            ->has('usageStats.tokens', 1)
+            ->where('usageStats.tokens.0.name', 'servidor-node'));
+});
+
+it('permite filtrar metricas de uso pelo mes anterior ou periodo customizado', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index', ['period' => 'previous_month']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('usageStats.period.type', 'previous_month'));
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index', [
+            'period' => 'custom',
+            'start_date' => '2026-05-01',
+            'end_date' => '2026-05-15',
+        ]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('usageStats.period.type', 'custom')
+            ->where('usageStats.period.startDate', '2026-05-01')
+            ->where('usageStats.period.endDate', '2026-05-15'));
+});

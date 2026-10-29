@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApiTokenRequest;
 use App\Models\User;
+use App\Support\Ai\ApiTokenUsageMetrics;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,17 @@ final class ApiTokenController extends Controller
 
         $plainTextToken = $request->session()->get('api_token');
 
+        $period = $request->query('period', ApiTokenUsageMetrics::PERIOD_CURRENT_MONTH);
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        $usageStats = app(ApiTokenUsageMetrics::class)->forUser(
+            $user,
+            is_string($period) ? $period : ApiTokenUsageMetrics::PERIOD_CURRENT_MONTH,
+            is_string($startDate) ? $startDate : null,
+            is_string($endDate) ? $endDate : null,
+        );
+
         return Inertia::render('settings/ApiTokens', [
             'tokens' => $tokens,
             'stats' => [
@@ -52,6 +64,7 @@ final class ApiTokenController extends Controller
                 'totalSqlQueries' => (int) $user->api_sql_queries_count,
                 'activeTokens' => $tokens->count(),
             ],
+            'usageStats' => $usageStats,
             'plainTextToken' => is_string($plainTextToken)
                 ? $plainTextToken
                 : null,

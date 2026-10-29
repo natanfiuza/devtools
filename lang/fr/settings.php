@@ -107,6 +107,42 @@ return [
         'cancel' => 'Annuler',
         'empty_title' => 'Aucun jeton créé',
         'empty' => 'Créez un jeton pour appeler l’API publique depuis un autre système.',
+        'usage_chart' => [
+            'title' => 'Statistiques d\'utilisation de l\'IA',
+            'description' => 'Suivez la consommation quotidienne de jetons d\'IA et les requêtes via jetons d\'API.',
+            'views' => [
+                'total' => 'Total quotidien',
+                'by_token' => 'Par jeton d\'API',
+            ],
+            'periods' => [
+                'current_month' => 'Mois en cours',
+                'previous_month' => 'Mois précédent',
+                'custom' => 'Personnalisé',
+            ],
+            'custom' => [
+                'start_date' => 'Date de début',
+                'end_date' => 'Date de fin',
+                'apply' => 'Appliquer',
+            ],
+            'summary' => [
+                'tokens' => 'Jetons consommés',
+                'requests' => 'Requêtes',
+            ],
+            'tooltip' => [
+                'date' => 'Date',
+                'total_tokens' => '{count} jetons',
+                'requests' => '{count} requêtes',
+                'share' => '{percent}% du jour',
+            ],
+            'legend' => [
+                'revoked_tokens' => 'Jetons révoqués',
+                'tokens' => 'Jetons',
+            ],
+            'empty' => [
+                'title' => 'Aucune utilisation sur la période',
+                'description' => 'Aucune requête d\'API n\'a été effectuée aux dates sélectionnées.',
+            ],
+        ],
     ],
 
     'appearance' => [
