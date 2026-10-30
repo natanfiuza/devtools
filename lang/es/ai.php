@@ -10,12 +10,12 @@
 
 return [
     'form' => [
-        'title' => 'Describe la consulta',
+        'title' => 'Describe la consulta u operación',
         'schema_source' => 'Origen del esquema',
         'schema' => 'Esquema',
-        'schema_placeholder' => 'Pega las tablas, columnas y relaciones que la consulta puede usar.',
-        'description' => '¿Qué debe hacer la consulta?',
-        'description_placeholder' => 'Ejemplo: lista los 10 clientes que más gastaron en los últimos 30 días.',
+        'schema_placeholder' => 'Pega las tablas, columnas y relaciones que la consulta u operación puede usar.',
+        'description' => '¿Qué debe hacer la consulta u operación?',
+        'description_placeholder' => 'Ejemplo: lista los 10 clientes más activos o actualiza el estado de los pedidos pendientes.',
         'dialect' => 'Dialecto',
         'target' => 'Salida',
         'submit' => 'Generar',
@@ -152,7 +152,7 @@ return [
     ],
 
     'warnings' => [
-        'review' => 'Revisa el resultado antes de usarlo. La consulta nunca se ejecuta aquí.',
+        'review' => 'Revisa el resultado antes de usarlo. La consulta u operación nunca se ejecuta aquí.',
         'sensitive' => 'No pegues contraseñas, tokens ni datos personales en el esquema.',
     ],
 
