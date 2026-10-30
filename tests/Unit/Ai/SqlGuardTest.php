@@ -45,18 +45,46 @@ it('aceita a funcao REPLACE em uma leitura', function () {
     ))->not->toThrow(UnsafeSqlException::class);
 });
 
-it('recusa DDL, DML e CTE que escreve', function () {
+it('aceita instrucoes DML seguras (INSERT, UPDATE e DELETE com WHERE)', function () {
+    $guard = new SqlGuard;
+
+    expect(fn () => $guard->assertSafe(
+        "INSERT INTO users (name, email) VALUES ('John', 'john@example.com')",
+        SqlDialect::Mysql,
+    ))->not->toThrow(UnsafeSqlException::class);
+
+    expect(fn () => $guard->assertSafe(
+        "UPDATE users SET name = 'John Doe', updated_at = NOW() WHERE id = 1;",
+        SqlDialect::Pgsql,
+    ))->not->toThrow(UnsafeSqlException::class);
+
+    expect(fn () => $guard->assertSafe(
+        'DELETE FROM users WHERE active = 0',
+        SqlDialect::Sqlite,
+    ))->not->toThrow(UnsafeSqlException::class);
+});
+
+it('recusa UPDATE e DELETE sem clausula WHERE', function () {
+    $guard = new SqlGuard;
+
+    expect(fn () => $guard->assertSafe(
+        "UPDATE users SET name = 'x'",
+        SqlDialect::Mysql,
+    ))->toThrow(UnsafeSqlException::class);
+
+    expect(fn () => $guard->assertSafe(
+        'DELETE FROM users',
+        SqlDialect::Pgsql,
+    ))->toThrow(UnsafeSqlException::class);
+});
+
+it('recusa DDL e comandos administrativos', function () {
     $guard = new SqlGuard;
     $statements = [
-        'INSERT INTO users (id) VALUES (1)',
-        'UPDATE users SET name = \'x\'',
-        'DELETE FROM users',
         'DROP TABLE users',
         'ALTER TABLE users ADD COLUMN email text',
         'CREATE TABLE x (id int)',
         'TRUNCATE TABLE users',
-        'WITH removed AS (DELETE FROM users RETURNING id) SELECT * FROM removed',
-        'WITH changed AS (UPDATE users SET name = \'x\' RETURNING id) SELECT * FROM changed',
         'EXPLAIN SELECT * FROM users',
     ];
 

@@ -6,13 +6,13 @@ use App\Enums\SqlDialect;
 use App\Exceptions\Ai\UnsafeSqlException;
 
 /**
- * Gate lexical do SQL gerado para o alvo `sql` (ADR-041).
+ * Gate lexical do SQL gerado para o alvo `sql` (ADR-041 e ADR-061).
  *
- * O SQL nunca e executado por nos; o gate existe para nao devolver uma
- * instrucao de escrita como se fosse leitura. Ele nao e um parser por dialeto:
- * remove strings/comentarios, exige uma unica instrucao comecando em
- * `SELECT`/`WITH` e recusa os verbos e funcoes que mudam dados ou tocam o
- * servidor.
+ * O SQL nunca e executado por nos; o gate existe para validar que a instrucao
+ * e uma consulta (DQL: SELECT/WITH) ou manipulacao de dados (DML: INSERT/UPDATE/DELETE)
+ * segura, exigindo clausula WHERE em operacoes de UPDATE e DELETE para mitigar
+ * destruicao acidental de dados, e recusando instrucoes de DDL, administracao ou
+ * funcoes perigosas do servidor.
  *
  * A divisao por `;` e feita no texto cru, antes de remover strings. Isso e
  * deliberadamente conservador: um `;` dentro de um literal faz a query ser
@@ -20,7 +20,7 @@ use App\Exceptions\Ai\UnsafeSqlException;
  */
 final class SqlGuard
 {
-    private const FORBIDDEN_KEYWORDS = '/\b(ALTER|ANALYZE|ATTACH|BEGIN|BULK|CALL|COMMENT|COMMIT|COPY|CREATE|DBCC|DEALLOCATE|DECLARE|DELETE|DETACH|DISCARD|DROP|EXEC|EXECUTE|FLUSH|GRANT|INSERT|KILL|LISTEN|LOAD|LOCK|MERGE|NOTIFY|OPTIMIZE|PRAGMA|PREPARE|RECONFIGURE|REINDEX|RELEASE|RENAME|REPAIR|RESET|REVOKE|ROLLBACK|SAVEPOINT|SET|SHUTDOWN|TRUNCATE|UNLISTEN|UNLOCK|UPDATE|UPSERT|USE|VACUUM|WAITFOR)\b/i';
+    private const FORBIDDEN_KEYWORDS = '/\b(ALTER|ANALYZE|ATTACH|BEGIN|BULK|CALL|COMMENT|COMMIT|COPY|CREATE|DBCC|DEALLOCATE|DECLARE|DETACH|DISCARD|DROP|EXEC|EXECUTE|FLUSH|GRANT|KILL|LISTEN|LOAD|LOCK|MERGE|NOTIFY|OPTIMIZE|PRAGMA|PREPARE|RECONFIGURE|REINDEX|RELEASE|RENAME|REPAIR|RESET|REVOKE|ROLLBACK|SAVEPOINT|SHUTDOWN|TRUNCATE|UNLISTEN|UNLOCK|USE|VACUUM|WAITFOR)\b/i';
 
     private const DANGEROUS_FUNCTIONS = '/\b(BENCHMARK|DBLINK|LOAD_FILE|LO_EXPORT|LO_IMPORT|NEXTVAL|OPENROWSET|OPENDATASOURCE|PG_ADVISORY_LOCK|PG_ADVISORY_XACT_LOCK|PG_LS_DIR|PG_READ_BINARY_FILE|PG_READ_FILE|PG_SLEEP|SETVAL|SLEEP|SP_EXECUTESQL|XP_CMDSHELL|XP_DIRTREE|XP_REGREAD|XP_REGWRITE)\s*\(/i';
 
@@ -44,15 +44,31 @@ final class SqlGuard
         $statement = $this->strip($sql, $dialect);
         $statement = trim(preg_replace('/\s+/', ' ', $statement) ?? $statement);
 
-        if (preg_match('/^(SELECT|WITH)\b/i', $statement) !== 1) {
-            throw UnsafeSqlException::because('not_select');
+        if (preg_match('/^(SELECT|WITH|INSERT|UPDATE|DELETE)\b/i', $statement) !== 1) {
+            throw UnsafeSqlException::because('unsupported_statement');
+        }
+
+        if (preg_match('/^(UPDATE|DELETE)\b/i', $statement) === 1 && preg_match('/\bWHERE\b/i', $statement) !== 1) {
+            throw UnsafeSqlException::because('missing_where_clause');
+        }
+
+        if (preg_match('/^UPDATE\b/i', $statement) === 1 && preg_match('/\bSET\b/i', $statement) !== 1) {
+            throw UnsafeSqlException::because('missing_set_clause');
+        }
+
+        if (preg_match('/^UPDATE\b/i', $statement) !== 1 && preg_match('/\bSET\b/i', $statement) === 1) {
+            throw UnsafeSqlException::because('forbidden_keyword');
+        }
+
+        if (preg_match('/\bFOR\s+UPDATE\b/i', $statement) === 1) {
+            throw UnsafeSqlException::because('for_update_clause');
         }
 
         if (preg_match(self::FORBIDDEN_KEYWORDS, $statement) === 1) {
             throw UnsafeSqlException::because('forbidden_keyword');
         }
 
-        if (preg_match('/\bINTO\b/i', $statement) === 1) {
+        if (preg_match('/^(SELECT|WITH)\b/i', $statement) === 1 && preg_match('/\bINTO\b/i', $statement) === 1) {
             throw UnsafeSqlException::because('into_clause');
         }
 

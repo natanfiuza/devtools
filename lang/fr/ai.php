@@ -10,12 +10,12 @@
 
 return [
     'form' => [
-        'title' => 'Décrivez la requête',
+        'title' => 'Décrivez la requête ou l\'opération',
         'schema_source' => 'Source du schéma',
         'schema' => 'Schéma',
-        'schema_placeholder' => 'Collez les tables, colonnes et relations que la requête peut utiliser.',
-        'description' => 'Que doit faire la requête ?',
-        'description_placeholder' => 'Exemple : listez les 10 clients qui ont le plus dépensé ces 30 derniers jours.',
+        'schema_placeholder' => 'Collez les tables, colonnes et relations que la requête ou l\'opération peut utiliser.',
+        'description' => 'Que doit faire la requête ou l\'opération ?',
+        'description_placeholder' => 'Exemple : listez les 10 clients les plus actifs ou mettez à jour le statut des commandes en attente.',
         'dialect' => 'Dialecte',
         'target' => 'Sortie',
         'submit' => 'Générer',
@@ -152,7 +152,7 @@ return [
     ],
 
     'warnings' => [
-        'review' => 'Relisez le résultat avant de l\'utiliser. La requête n\'est jamais exécutée ici.',
+        'review' => 'Relisez le résultat avant de l\'utiliser. La requête ou l\'opération n\'est jamais exécutée ici.',
         'sensitive' => 'Ne collez pas de mots de passe, de tokens ni de données personnelles dans le schéma.',
     ],
 

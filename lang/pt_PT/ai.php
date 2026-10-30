@@ -10,12 +10,12 @@
 
 return [
     'form' => [
-        'title' => 'Descreva a consulta',
+        'title' => 'Descreva a consulta ou operação',
         'schema_source' => 'Fonte do schema',
         'schema' => 'Schema',
-        'schema_placeholder' => 'Cole as tabelas, colunas e relações que a consulta pode usar.',
-        'description' => 'O que deve fazer a consulta?',
-        'description_placeholder' => 'Exemplo: liste os 10 clientes que mais gastaram nos últimos 30 dias.',
+        'schema_placeholder' => 'Cole as tabelas, colunas e relações que a consulta ou operação pode usar.',
+        'description' => 'O que deve fazer a consulta ou operação?',
+        'description_placeholder' => 'Exemplo: liste os 10 clientes mais ativos ou atualize o estado das encomendas pendentes.',
         'dialect' => 'Dialeto',
         'target' => 'Saída',
         'submit' => 'Gerar',
@@ -152,7 +152,7 @@ return [
     ],
 
     'warnings' => [
-        'review' => 'Reveja o resultado antes de o usar. A consulta nunca é executada aqui.',
+        'review' => 'Reveja o resultado antes de o usar. A consulta ou operação nunca é executada aqui.',
         'sensitive' => 'Não cole palavras-passe, tokens nem dados pessoais no schema.',
     ],
 

@@ -10,12 +10,12 @@
 
 return [
     'form' => [
-        'title' => 'Describe the query',
+        'title' => 'Describe the query or operation',
         'schema_source' => 'Schema source',
         'schema' => 'Schema',
-        'schema_placeholder' => 'Paste the tables, columns and relationships the query may use.',
-        'description' => 'What should the query do?',
-        'description_placeholder' => 'Example: list the 10 customers who spent the most in the last 30 days.',
+        'schema_placeholder' => 'Paste the tables, columns and relationships the query or operation may use.',
+        'description' => 'What should the query or operation do?',
+        'description_placeholder' => 'Example: list the 10 most active customers or update pending order statuses.',
         'dialect' => 'Dialect',
         'target' => 'Output',
         'submit' => 'Generate',
@@ -152,7 +152,7 @@ return [
     ],
 
     'warnings' => [
-        'review' => 'Review the result before using it. The query is never executed here.',
+        'review' => 'Review the result before using it. The query or operation is never executed here.',
         'sensitive' => 'Do not paste passwords, tokens or personal data into the schema.',
     ],
 
