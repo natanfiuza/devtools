@@ -21,7 +21,7 @@ final class BadgeForgeToolProps
         return [
             'endpoint' => (string) config('badgeforge.endpoint', '/api/badges/static'),
             'styles' => app(StyleCatalog::class)->ids(),
-            'logos' => app(LogoCatalog::class)->metadata(),
+            'logos' => self::logosByName(),
             'limits' => [
                 'maxTextLength' => (int) config('badgeforge.limits.max_text_length', 100),
                 'logoSize' => [
@@ -43,5 +43,25 @@ final class BadgeForgeToolProps
                 'logoPosition' => (string) config('badgeforge.logo_position', 'left'),
             ],
         ];
+    }
+
+    /**
+     * Logos em ordem alfabetica pelo nome exibido, sem diferenciar maiusculas.
+     * O slug desempata para a ordem ser estavel. O catalogo continua lendo a
+     * config na ordem declarada; a ordenacao e do payload da tela.
+     *
+     * @return list<array{slug: string, name: string}>
+     */
+    private static function logosByName(): array
+    {
+        $logos = app(LogoCatalog::class)->metadata();
+
+        usort(
+            $logos,
+            static fn (array $a, array $b): int => strcasecmp($a['name'], $b['name'])
+                ?: strcmp($a['slug'], $b['slug']),
+        );
+
+        return $logos;
     }
 }

@@ -113,10 +113,6 @@ function reset(): void {
 
 <template>
   <div class="mx-auto max-w-6xl space-y-6 py-4">
-    <p class="text-sm text-muted-foreground">
-      {{ t('tools.badgeforge.intro') }}
-    </p>
-
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Formulario -->
       <section class="space-y-6">
