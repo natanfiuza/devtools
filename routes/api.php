@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
+use App\Http\Controllers\BadgeForge\StaticBadgeController;
 use App\Http\Middleware\TrackApiTokenUsage;
 use Illuminate\Support\Facades\Route;
 
@@ -43,4 +44,22 @@ Route::prefix('v1')
             ->whereUlid('aiRequest')
             ->middleware('throttle:api-read')
             ->name('sql-queries.show');
+    });
+
+/*
+| BadgeForge - badges estaticas (SPEC-BADGEFORGE §6, ADR-076).
+|
+| Stateless como o resto de `api/`: sem sessao, sem CSRF e sem throttle -
+| estaticas nao consomem cota (SPEC §11). O `where` explicito em `message`
+| e obrigatorio: o requisito padrao do Symfony exclui o ponto e usa
+| quantificador possessivo, o que impediria `1.0.0.svg`.
+*/
+Route::prefix('badges')
+    ->name('badges.')
+    ->group(function (): void {
+        Route::get('static/{label}/{message}.{ext}', StaticBadgeController::class)
+            ->where('label', '[^/]+')
+            ->where('message', '[^/]+')
+            ->where('ext', 'svg')
+            ->name('static');
     });

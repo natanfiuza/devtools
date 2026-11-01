@@ -1,0 +1,117 @@
+# OpenAPI BadgeForge (resumo)
+
+Somente a superfície da F1 está implementada; os demais caminhos aparecem como
+planejados. O OpenAPI completo em 3.1 é entregue na F8 (`ADR-071`).
+
+```yaml
+openapi: 3.1.0
+info:
+  title: BadgeForge API
+  version: 1.1.0
+paths:
+  /api/badges/static/{label}/{message}.{ext}:
+    get:
+      summary: Static badge
+      description: >
+        Gera o SVG do badge. Item público, sem sessão e sem autenticação.
+        Na F1 a única extensão aceita é `svg`; `png` entra na F2.
+      parameters:
+        - name: label
+          in: path
+          required: true
+          schema: { type: string }
+        - name: message
+          in: path
+          required: true
+          schema: { type: string }
+        - name: ext
+          in: path
+          required: true
+          schema: { type: string, enum: [svg] }
+        - name: style
+          in: query
+          schema:
+            type: string
+            enum: [flat, flat-square, plastic, for-the-badge, social]
+            default: flat
+        - name: color
+          in: query
+          schema: { type: string, default: "#9f9f9f" }
+        - name: labelColor
+          in: query
+          schema: { type: string, default: "#555555" }
+        - name: logo
+          in: query
+          description: Slug de logo embutido; desconhecido é ignorado.
+          schema: { type: string }
+        - name: logoColor
+          in: query
+          schema: { type: string, default: "#ffffff" }
+        - name: logoSize
+          in: query
+          schema: { type: integer, minimum: 8, maximum: 20 }
+        - name: logoPosition
+          in: query
+          schema: { type: string, enum: [left, right], default: left }
+        - name: link
+          in: query
+          description: Envolve o SVG em <a>; só http/https.
+          schema: { type: string, format: uri }
+        - name: cacheSeconds
+          in: query
+          schema: { type: integer, minimum: 300, maximum: 86400, default: 86400 }
+      responses:
+        "200":
+          description: Badge image
+          headers:
+            Cache-Control:
+              schema: { type: string, example: "public, max-age=86400" }
+            ETag:
+              schema: { type: string }
+          content:
+            image/svg+xml: {}
+        "304":
+          description: Not modified (If-None-Match igual ao ETag)
+        "404":
+          description: Segmento vazio, extensão ausente ou diferente de svg
+  /api/badges/{provider}/{path}.{ext}:
+    get:
+      summary: Dynamic provider badge (F4 — planejado)
+      description: >
+        Item público é lido anonimamente na API pública do provider. Item
+        privado exige usuário pagador e PAT do próprio usuário, cifrado e
+        vinculado ao badge pessoal (ADR-068); a URL leva apenas o ULID.
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema: { type: string }
+        - name: path
+          in: path
+          required: true
+          schema: { type: string }
+        - name: ext
+          in: path
+          required: true
+          schema: { type: string, enum: [svg, png] }
+      responses:
+        "200":
+          description: Badge image
+          content:
+            image/svg+xml: {}
+            image/png: {}
+  /api/badges/endpoint.{ext}:
+    get:
+      summary: JSON endpoint badge (F5 — planejado)
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema: { type: string, format: uri }
+      responses:
+        "200":
+          description: Badge image
+          content:
+            image/svg+xml: {}
+            image/png: {}
+```

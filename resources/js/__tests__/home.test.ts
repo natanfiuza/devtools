@@ -68,6 +68,7 @@ const toolTraducoes: Record<string, unknown> = {
         security: 'CAT_SEG',
         time: 'CAT_TEMPO',
         text: 'CAT_TEXTO',
+        badges: 'CAT_IMAGENS',
     },
 };
 
@@ -367,7 +368,7 @@ describe('grid de ferramentas', () => {
         const todas = wrapper.get('[data-test="tool-chip-all"]');
         expect(todas.text()).toBe('TODAS');
         expect(todas.attributes('aria-pressed')).toBe('true');
-        expect(wrapper.findAll('[data-test^="tool-chip-"]')).toHaveLength(7);
+        expect(wrapper.findAll('[data-test^="tool-chip-"]')).toHaveLength(8);
 
         // SQL tem duas tools no catalogo.
         const sql = wrapper.get('[data-test="tool-chip-sql"]');

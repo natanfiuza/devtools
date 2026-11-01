@@ -68,6 +68,7 @@ return [
         'security' => 'Sécurité',
         'time' => 'Date et heure',
         'text' => 'Texte',
+        'badges' => 'Images',
     ],
 
     'json-viewer' => [
@@ -480,5 +481,72 @@ return [
         'messages' => [
             'deleted' => 'Texte supprimé avec succès.',
         ],
+    ],
+
+    'badgeforge' => [
+        'name' => 'BadgeForge',
+        'description' => 'Créez des badges SVG pour vos README avec aperçu en temps réel et extraits prêts pour Markdown, HTML et reStructuredText.',
+        'keywords' => 'badge, shields, svg, readme, markdown, ci, couverture',
+        'intro' => 'Composez le badge, vérifiez l\'aperçu et copiez l\'extrait. L\'image est servie en SVG par ce site ; rien de ce que vous saisissez ici ne quitte le navigateur, hormis l\'URL que vous copiez.',
+
+        'fields' => [
+            'label' => 'Libellé',
+            'message' => 'Message',
+            'style' => 'Style',
+            'color' => 'Couleur',
+            'label_color' => 'Couleur du libellé',
+            'logo' => 'Logo',
+            'logo_color' => 'Couleur du logo',
+            'logo_size' => 'Taille du logo',
+            'logo_position' => 'Position du logo',
+            'link' => 'Lien',
+            'cache_seconds' => 'Cache (secondes)',
+        ],
+
+        'placeholders' => [
+            'label' => 'build',
+            'message' => 'passing',
+            'color' => '#9f9f9f ou green',
+            'label_color' => '#555555',
+            'logo_color' => '#ffffff',
+            'link' => 'https://exemple.com',
+        ],
+
+        'positions' => [
+            'left' => 'Gauche',
+            'right' => 'Droite',
+        ],
+
+        'logo_none' => 'Aucun logo',
+
+        'sections' => [
+            'content' => 'Contenu',
+            'colors' => 'Couleurs',
+            'logo' => 'Logo',
+            'advanced' => 'Avancé',
+        ],
+
+        'preview' => [
+            'title' => 'Aperçu',
+            'dark' => 'Fond sombre',
+            'light' => 'Fond clair',
+            'empty' => 'Saisissez un libellé et un message pour voir le badge.',
+            'dimensions' => '{width} × {height} px',
+        ],
+
+        'snippets' => [
+            'title' => 'Intégrer',
+            'url' => 'URL',
+            'markdown' => 'Markdown',
+            'html' => 'HTML',
+            'rst' => 'reStructuredText',
+        ],
+
+        'actions' => [
+            'sample' => 'Exemple',
+            'reset' => 'Réinitialiser',
+        ],
+
+        'social_note' => 'Le style social utilise toujours ses propres couleurs.',
     ],
 ];

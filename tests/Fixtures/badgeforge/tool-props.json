@@ -1,0 +1,43 @@
+{
+    "endpoint": "/api/badges/static",
+    "styles": ["flat", "flat-square", "plastic", "for-the-badge", "social"],
+    "logos": [
+        { "slug": "github", "name": "GitHub" },
+        { "slug": "gitlab", "name": "GitLab" },
+        { "slug": "npm", "name": "npm" },
+        { "slug": "composer", "name": "Composer" },
+        { "slug": "docker", "name": "Docker" },
+        { "slug": "laravel", "name": "Laravel" },
+        { "slug": "symfony", "name": "Symfony" },
+        { "slug": "php", "name": "PHP" },
+        { "slug": "python", "name": "Python" },
+        { "slug": "javascript", "name": "JavaScript" },
+        { "slug": "typescript", "name": "TypeScript" },
+        { "slug": "vue", "name": "Vue" },
+        { "slug": "react", "name": "React" },
+        { "slug": "node", "name": "Node.js" },
+        { "slug": "vite", "name": "Vite" },
+        { "slug": "tailwind", "name": "Tailwind CSS" },
+        { "slug": "mysql", "name": "MySQL" },
+        { "slug": "postgresql", "name": "PostgreSQL" },
+        { "slug": "redis", "name": "Redis" },
+        { "slug": "phpunit", "name": "PHPUnit" },
+        { "slug": "pest", "name": "Pest" },
+        { "slug": "markdown", "name": "Markdown" },
+        { "slug": "json", "name": "JSON" },
+        { "slug": "html", "name": "HTML" }
+    ],
+    "limits": {
+        "maxTextLength": 100,
+        "logoSize": { "min": 8, "max": 20 },
+        "cacheSeconds": { "default": 86400, "min": 300, "max": 86400 },
+        "linkMaxLength": 2048
+    },
+    "defaults": {
+        "style": "flat",
+        "color": "#9f9f9f",
+        "labelColor": "#555555",
+        "logoColor": "#ffffff",
+        "logoPosition": "left"
+    }
+}

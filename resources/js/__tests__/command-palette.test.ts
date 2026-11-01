@@ -64,6 +64,7 @@ const toolsTraducoes: Record<string, unknown> = {
         security: 'CAT_SEG',
         time: 'CAT_TEMPO',
         text: 'CAT_TEXTO',
+        badges: 'CAT_IMAGENS',
     },
 };
 

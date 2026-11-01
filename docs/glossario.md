@@ -120,5 +120,19 @@
 - API Hastebin (`/documents`, `/raw/{id}`): superfície clássica de integração HTTP aceitando payloads brutos de CLI e utilitários de terminal, com detecção de sessão e token Bearer Sanctum (ADR-058).
 - Escape de sintaxe do vue-i18n: forma de exibir `{`, `}` ou `@` como texto literal numa tradução (`{'{'}`, `{'}'}`, `{'@'}`), porque esses caracteres abrem chaves, fecham chaves e mensagens ligadas; `{'{'}` também evita a interpolação da mensagem (ADR-060).
 - Compilador de mensagens tolerante: `messageCompiler` customizado que compila a tradução com o core-base e, quando ela é inválida, exibe o texto cru e registra um aviso por chave em vez de lançar e derrubar o render (ADR-060).
+- Badge: imagem de status SVG (PNG a partir da F2) gerada e servida pelo BadgeForge a partir de uma URL, sem sessao e sem JavaScript (ADR-072).
+- Badge estatica: badge cujo conteudo inteiro vem da propria URL - label, message, estilo, cores, logo, posicao e link.
+- Badge dinamica (de provider): badge cujo conteudo vem da API publica de um servico externo (GitHub, npm, Docker Hub, Packagist); entra na F4 (ADR-068).
+- Badge pessoal: badge criada por usuario pago, servida em `/b/{username}/{ulid}.svg`; e o unico lugar onde cabe item privado, e a URL carrega so o ULID, nunca uma credencial (ADR-064).
+- Label / Message: os dois textos da badge - o da esquerda (rotulo) e o da direita (mensagem) - separados por cor de fundo propria; o `aria-label` e `"label: message"`.
+- Estilo da badge: um de `flat`, `flat-square`, `plastic`, `for-the-badge` ou `social`; a geometria inteira vive em `resources/badgeforge/styles.json`, lida pelo PHP e pelo TS (ADR-074).
+- Logo embutido: SVG autoral, so com `<path d>`, registrado em `config/badgeforge.php` e desenhado dentro do documento do badge na cor pedida (ADR-074).
+- Snippet: trecho pronto para colar - URL, Markdown, HTML ou reStructuredText - montado no navegador a partir do formulario.
+- Renderer / espelho TS: o renderer PHP (`StaticBadgeRenderer`) e a autoridade do SVG; o espelho TypeScript gera o mesmo documento byte a byte para o preview instantaneo, sem requisicao (ADR-075).
+- ETag da badge: hash sha256 do SVG enviado no header; `If-None-Match` igual responde 304 sem corpo (ADR-076).
+- TTL da badge: `cacheSeconds` efetivo, padrao 86400 e clamp 300-86400 em `config/badgeforge.php`, enviado em `Cache-Control: public, max-age=...` (ADR-076).
+- Acesso ao provider: item publico e lido anonimamente na API publica do provider; item privado exige PAT do usuario pagador, cifrado em repouso, vinculado a badge pessoal, revogavel e nunca presente em URL, log ou exportacao (ADR-068).
+- Provider customizado: provider definido por usuario pago em painel (F7), com URL e parse proprios.
+- Preset: configuracao de badge salva por usuario cadastrado para reaproveitar (F3, ADR-066).
 
 

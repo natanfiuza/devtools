@@ -68,6 +68,7 @@ return [
         'security' => 'Security',
         'time' => 'Date and time',
         'text' => 'Text',
+        'badges' => 'Images',
     ],
 
     'json-viewer' => [
@@ -480,5 +481,72 @@ return [
         'messages' => [
             'deleted' => 'Text successfully deleted.',
         ],
+    ],
+
+    'badgeforge' => [
+        'name' => 'BadgeForge',
+        'description' => 'Create SVG badges for your READMEs with live preview and ready snippets for Markdown, HTML and reStructuredText.',
+        'keywords' => 'badge, shields, svg, readme, markdown, ci, coverage',
+        'intro' => 'Build the badge, check the preview and copy the snippet. The image is served as SVG by this site; nothing you type here leaves the browser except the URL you copy.',
+
+        'fields' => [
+            'label' => 'Label',
+            'message' => 'Message',
+            'style' => 'Style',
+            'color' => 'Color',
+            'label_color' => 'Label color',
+            'logo' => 'Logo',
+            'logo_color' => 'Logo color',
+            'logo_size' => 'Logo size',
+            'logo_position' => 'Logo position',
+            'link' => 'Link',
+            'cache_seconds' => 'Cache (seconds)',
+        ],
+
+        'placeholders' => [
+            'label' => 'build',
+            'message' => 'passing',
+            'color' => '#9f9f9f or green',
+            'label_color' => '#555555',
+            'logo_color' => '#ffffff',
+            'link' => 'https://example.com',
+        ],
+
+        'positions' => [
+            'left' => 'Left',
+            'right' => 'Right',
+        ],
+
+        'logo_none' => 'No logo',
+
+        'sections' => [
+            'content' => 'Content',
+            'colors' => 'Colors',
+            'logo' => 'Logo',
+            'advanced' => 'Advanced',
+        ],
+
+        'preview' => [
+            'title' => 'Preview',
+            'dark' => 'Dark background',
+            'light' => 'Light background',
+            'empty' => 'Type a label and a message to see the badge.',
+            'dimensions' => '{width} × {height} px',
+        ],
+
+        'snippets' => [
+            'title' => 'Embed',
+            'url' => 'URL',
+            'markdown' => 'Markdown',
+            'html' => 'HTML',
+            'rst' => 'reStructuredText',
+        ],
+
+        'actions' => [
+            'sample' => 'Example',
+            'reset' => 'Reset',
+        ],
+
+        'social_note' => 'The social style always uses its own colors.',
     ],
 ];

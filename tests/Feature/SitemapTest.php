@@ -165,6 +165,7 @@ it('lista a pagina de cada tool que funciona', function () {
         'timestamp-uuid',
         'regex-tester',
         'markdown-to-pdf',
+        'badgeforge',
     ];
 
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();

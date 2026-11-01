@@ -1,0 +1,112 @@
+{
+  "default": "flat",
+  "order": ["flat", "flat-square", "plastic", "for-the-badge", "social"],
+  "gradients": {
+    "flat": [
+      { "offset": "0", "color": "#ffffff", "opacity": ".5" },
+      { "offset": "1", "color": "#000000", "opacity": ".1" }
+    ],
+    "plastic": [
+      { "offset": "0", "color": "#ffffff", "opacity": ".7" },
+      { "offset": ".5", "color": "#ffffff", "opacity": ".1" },
+      { "offset": "1", "color": "#000000", "opacity": ".2" }
+    ]
+  },
+  "styles": {
+    "flat": {
+      "height": 20,
+      "radius": 3,
+      "padding": 6,
+      "gap": 2,
+      "font_size": 11,
+      "font_weight": 600,
+      "uppercase": false,
+      "letter_spacing": 0,
+      "baseline": 14,
+      "logo_size": 10,
+      "font_family": "Verdana,DejaVu Sans,Geneva,sans-serif",
+      "metrics_family": "sans",
+      "gradient": "flat",
+      "text_color": "#ffffff",
+      "label_color": null,
+      "message_color": null,
+      "bottom_shadow": null
+    },
+    "flat-square": {
+      "height": 20,
+      "radius": 0,
+      "padding": 6,
+      "gap": 2,
+      "font_size": 11,
+      "font_weight": 600,
+      "uppercase": false,
+      "letter_spacing": 0,
+      "baseline": 14,
+      "logo_size": 10,
+      "font_family": "Verdana,DejaVu Sans,Geneva,sans-serif",
+      "metrics_family": "sans",
+      "gradient": null,
+      "text_color": "#ffffff",
+      "label_color": null,
+      "message_color": null,
+      "bottom_shadow": null
+    },
+    "plastic": {
+      "height": 20,
+      "radius": 3,
+      "padding": 6,
+      "gap": 2,
+      "font_size": 11,
+      "font_weight": 600,
+      "uppercase": false,
+      "letter_spacing": 0,
+      "baseline": 14,
+      "logo_size": 10,
+      "font_family": "Verdana,DejaVu Sans,Geneva,sans-serif",
+      "metrics_family": "sans",
+      "gradient": "plastic",
+      "text_color": "#ffffff",
+      "label_color": null,
+      "message_color": null,
+      "bottom_shadow": { "height": 1, "color": "#000000", "opacity": ".15" }
+    },
+    "for-the-badge": {
+      "height": 28,
+      "radius": 0,
+      "padding": 10,
+      "gap": 2,
+      "font_size": 10,
+      "font_weight": 700,
+      "uppercase": true,
+      "letter_spacing": 1,
+      "baseline": 18,
+      "logo_size": 14,
+      "font_family": "Verdana,DejaVu Sans,Geneva,sans-serif",
+      "metrics_family": "sans",
+      "gradient": null,
+      "text_color": "#ffffff",
+      "label_color": null,
+      "message_color": null,
+      "bottom_shadow": null
+    },
+    "social": {
+      "height": 20,
+      "radius": 3,
+      "padding": 5,
+      "gap": 2,
+      "font_size": 11,
+      "font_weight": 400,
+      "uppercase": false,
+      "letter_spacing": 0,
+      "baseline": 14,
+      "logo_size": 10,
+      "font_family": "Helvetica Neue,Helvetica,Arial,sans-serif",
+      "metrics_family": "helvetica",
+      "gradient": null,
+      "text_color": "#ffffff",
+      "label_color": "#555555",
+      "message_color": "#007ec6",
+      "bottom_shadow": null
+    }
+  }
+}
