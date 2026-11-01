@@ -25,7 +25,8 @@
         { "slug": "pest", "name": "Pest" },
         { "slug": "markdown", "name": "Markdown" },
         { "slug": "json", "name": "JSON" },
-        { "slug": "html", "name": "HTML" }
+        { "slug": "html", "name": "HTML" },
+        { "slug": "gitpr", "name": "GitPR" }
     ],
     "limits": {
         "maxTextLength": 100,

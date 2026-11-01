@@ -1,0 +1,55 @@
+# 🚨 Relatório do Linter GitPR
+
+## ⚠️ Avisos
+
+- 👀 Lembrete: Você criou/modificou a função na linha 24 de app/Http/Controllers/BadgeForge/StaticBadgeController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 19 de app/Support/BadgeForge/BadgeForgeToolProps.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 15 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 23 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 82 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 108 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 126 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 133 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 142 de app/Support/BadgeForge/BadgeRequest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 11 de app/Support/BadgeForge/BadgeSpec.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 25 de app/Support/BadgeForge/BadgeSpec.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 30 de app/Support/BadgeForge/BadgeSpec.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 17 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 66 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 71 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 101 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 126 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 175 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 186 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 194 de app/Support/BadgeForge/Color.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 10 de app/Support/BadgeForge/ColorValue.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 15 de app/Support/BadgeForge/ColorValue.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 23 de app/Support/BadgeForge/ColorValue.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 20 de app/Support/BadgeForge/FontMetrics.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 22 de app/Support/BadgeForge/FontMetrics.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 70 de app/Support/BadgeForge/FontMetrics.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 84 de app/Support/BadgeForge/FontMetrics.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 10 de app/Support/BadgeForge/Logo.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 14 de app/Support/BadgeForge/LogoCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 16 de app/Support/BadgeForge/LogoCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 38 de app/Support/BadgeForge/LogoCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 55 de app/Support/BadgeForge/LogoCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 63 de app/Support/BadgeForge/LogoCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 14 de app/Support/BadgeForge/StaticBadgeRenderer.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 18 de app/Support/BadgeForge/StaticBadgeRenderer.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 118 de app/Support/BadgeForge/StaticBadgeRenderer.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 15 de app/Support/BadgeForge/Style.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 40 de app/Support/BadgeForge/Style.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 14 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 16 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 33 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 38 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 46 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 64 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 99 de app/Support/BadgeForge/StyleCatalog.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 21 de app/Support/BadgeForge/Svg.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 33 de app/Support/BadgeForge/Svg.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 41 de app/Support/BadgeForge/Svg.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 13 de tests/Unit/BadgeForge/BadgeRequestTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 17 de tests/Unit/BadgeForge/StaticBadgeRendererTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 36 de tests/Unit/BadgeForge/StaticBadgeRendererTest.php. Garantiu que o DocBlock está atualizado?
