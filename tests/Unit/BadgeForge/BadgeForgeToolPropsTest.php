@@ -23,6 +23,19 @@ it('produz exatamente o payload compartilhado', function () {
     expect(BadgeForgeToolProps::for())->toBe($expected);
 });
 
+it('ordena os logos pelo nome sem diferenciar maiusculas', function () {
+    /** @var list<array{slug: string, name: string}> $logos */
+    $logos = BadgeForgeToolProps::for()['logos'];
+    $names = array_column($logos, 'name');
+    $sorted = $names;
+
+    usort($sorted, static fn (string $a, string $b): int => strcasecmp($a, $b));
+
+    expect($names)->toBe($sorted)
+        ->and($names[0])->toBe('Composer')
+        ->and($names[array_key_last($names)])->toBe('Vue');
+});
+
 it('registra todo logo com arquivo e viewBox', function () {
     $catalog = app(LogoCatalog::class);
     $directory = (string) config('badgeforge.logos_path');

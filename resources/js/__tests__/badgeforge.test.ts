@@ -129,6 +129,38 @@ describe('builder', () => {
         ).toBe(86400);
     });
 
+    it('aceita numero cru do input type=number e trata NaN/Infinity como vazio', () => {
+        expect(
+            normalizeBadge(form({ logo: 'github', logoSize: 12 }), PROPS)
+                .logoSize,
+        ).toBe(12);
+        expect(
+            normalizeBadge(form({ logo: 'github', logoSize: 4 }), PROPS)
+                .logoSize,
+        ).toBe(8);
+        expect(
+            normalizeBadge(form({ logo: 'github', logoSize: 100 }), PROPS)
+                .logoSize,
+        ).toBe(20);
+        expect(
+            normalizeBadge(form({ logo: 'github', logoSize: Number.NaN }), PROPS)
+                .logoSize,
+        ).toBe(10);
+        expect(
+            normalizeBadge(
+                form({ logo: 'github', logoSize: Number.POSITIVE_INFINITY }),
+                PROPS,
+            ).logoSize,
+        ).toBe(10);
+        expect(
+            normalizeBadge(form({ cacheSeconds: 600 }), PROPS).cacheSeconds,
+        ).toBe(600);
+        expect(
+            normalizeBadge(form({ cacheSeconds: Number.NaN }), PROPS)
+                .cacheSeconds,
+        ).toBe(86400);
+    });
+
     it('usa caixa alta no for-the-badge', () => {
         const spec = normalizeBadge(form({ style: 'for-the-badge' }), PROPS);
 

@@ -100,6 +100,36 @@ beforeEach(() => {
 });
 
 describe('BadgeForge Tool', () => {
+    it('nao repete a introducao que a pagina ja mostra', () => {
+        const wrapper = mountTool();
+
+        expect(wrapper.text()).not.toContain(TRADUCOES.tools.badgeforge.intro);
+    });
+
+    it('aceita os campos numericos sem derrubar a previa', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.find('[data-test="badge-sample"]').trigger('click');
+        await wrapper.find('[data-test="badge-logo-size"]').setValue('12');
+        await wrapper.find('[data-test="badge-cache"]').setValue('600');
+
+        expect(wrapper.find('[data-test="badge-logo-size"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="badge-cache"]').exists()).toBe(true);
+
+        const svg = decodeDataUri(
+            wrapper.find('[data-test="badge-preview"]').attributes('src') ?? '',
+        );
+
+        expect(svg).toContain('width="12" height="12"');
+
+        const snippet = wrapper.find('[data-test="badge-snippet"]').text();
+
+        expect(snippet).toContain('logoSize=12');
+        expect(snippet).toContain('cacheSeconds=600');
+    });
+
     it('mostra o estado vazio ate haver rotulo e mensagem', async () => {
         const wrapper = mountTool();
 

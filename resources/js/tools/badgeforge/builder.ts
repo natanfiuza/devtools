@@ -6,9 +6,10 @@ import type { BadgeForgeToolProps, BadgeSpec, BadgeStyle } from './types';
 /**
  * Estado do formulario e normalizacao (espelho de `BadgeRequest`).
  *
- * Os campos numericos sao guardados como texto: vazio significa "default do
- * estilo/config", exatamente como o parametro ausente na URL. A validacao e
- * tolerante como a do servidor - entrada invalida cai no padrao, nunca quebra.
+ * Os campos numericos nascem como texto (vazio = default do estilo/config),
+ * mas `v-model` em `<input type="number">` entrega `number`; por isso o estado
+ * e `string | number` e a normalizacao aceita os dois. A validacao e tolerante
+ * como a do servidor - entrada invalida cai no padrao, nunca quebra.
  */
 
 export interface BadgeFormState {
@@ -19,10 +20,10 @@ export interface BadgeFormState {
     labelColor: string;
     logo: string;
     logoColor: string;
-    logoSize: string;
+    logoSize: string | number;
     logoPosition: 'left' | 'right';
     link: string;
-    cacheSeconds: string;
+    cacheSeconds: string | number;
 }
 
 /** Valor do select quando nao ha logo (reka-ui recusa item de valor vazio). */
@@ -124,12 +125,13 @@ export function locksColors(style: BadgeStyle): boolean {
 
 /** `integer()` do `BadgeRequest`: so digitos; invalido cai no default; clamp. */
 function integer(
-    raw: string,
+    raw: string | number,
     fallback: number,
     min: number,
     max: number,
 ): number {
-    const value = /^\d{1,9}$/.test(raw.trim()) ? Number(raw.trim()) : fallback;
+    const text = typeof raw === 'number' ? String(raw) : raw.trim();
+    const value = /^\d{1,9}$/.test(text) ? Number(text) : fallback;
 
     return Math.max(min, Math.min(max, value));
 }
