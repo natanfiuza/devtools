@@ -75,6 +75,7 @@ return [
         'markdown' => ['name' => 'Markdown', 'file' => 'markdown.svg'],
         'json' => ['name' => 'JSON', 'file' => 'json.svg'],
         'html' => ['name' => 'HTML', 'file' => 'html.svg'],
+        'gitpr' => ['name' => 'GitPR', 'file' => 'gitpr.svg'],
     ],
 
 ];

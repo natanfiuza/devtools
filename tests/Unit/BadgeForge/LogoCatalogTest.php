@@ -5,11 +5,11 @@ use Tests\TestCase;
 
 uses(TestCase::class);
 
-it('carrega os 24 logos embutidos com viewBox e um unico path', function () {
+it('carrega os 25 logos embutidos com viewBox e um unico path', function () {
     $catalog = app(LogoCatalog::class);
     $logos = $catalog->metadata();
 
-    expect($logos)->toHaveCount(24);
+    expect($logos)->toHaveCount(25);
 
     foreach ($logos as $logo) {
         $resolved = $catalog->find($logo['slug']);

@@ -8,7 +8,7 @@ Fonte: `docs/SPEC-BADGEFORGE.md` secao 16 + `docs/claude-code/plans/develop_nata
 
 Nucleo de badges estaticas em SVG geradas e servidas pelo Laravel: endpoint
 publico `GET /api/badges/static/{label}/{message}.svg`, cinco estilos, parser de
-cores completo, 24 logos embutidos, `logoSize`/`logoPosition`/`link`/`cacheSeconds`,
+cores completo, 25 logos embutidos, `logoSize`/`logoPosition`/`link`/`cacheSeconds`,
 ETag/304 e `Cache-Control`, builder 100% no navegador com preview e quatro
 snippets, tool registrada no catalogo (home, busca, sitemap, OG) e i18n nos cinco
 idiomas.
