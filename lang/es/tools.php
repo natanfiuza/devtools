@@ -68,6 +68,7 @@ return [
         'security' => 'Seguridad',
         'time' => 'Fecha y hora',
         'text' => 'Texto',
+        'badges' => 'Imágenes',
     ],
 
     'json-viewer' => [
@@ -480,5 +481,72 @@ return [
         'messages' => [
             'deleted' => 'Texto eliminado con éxito.',
         ],
+    ],
+
+    'badgeforge' => [
+        'name' => 'BadgeForge',
+        'description' => 'Crea insignias SVG para tus README con vista previa en tiempo real y fragmentos listos para Markdown, HTML y reStructuredText.',
+        'keywords' => 'insignia, badge, shields, svg, readme, markdown, ci, cobertura',
+        'intro' => 'Arma la insignia, revisa la vista previa y copia el fragmento. La imagen se sirve como SVG desde este sitio; nada de lo que escribes aquí sale del navegador salvo la URL que copias.',
+
+        'fields' => [
+            'label' => 'Etiqueta',
+            'message' => 'Mensaje',
+            'style' => 'Estilo',
+            'color' => 'Color',
+            'label_color' => 'Color de la etiqueta',
+            'logo' => 'Logo',
+            'logo_color' => 'Color del logo',
+            'logo_size' => 'Tamaño del logo',
+            'logo_position' => 'Posición del logo',
+            'link' => 'Enlace',
+            'cache_seconds' => 'Caché (segundos)',
+        ],
+
+        'placeholders' => [
+            'label' => 'build',
+            'message' => 'passing',
+            'color' => '#9f9f9f o green',
+            'label_color' => '#555555',
+            'logo_color' => '#ffffff',
+            'link' => 'https://ejemplo.com',
+        ],
+
+        'positions' => [
+            'left' => 'Izquierda',
+            'right' => 'Derecha',
+        ],
+
+        'logo_none' => 'Sin logo',
+
+        'sections' => [
+            'content' => 'Contenido',
+            'colors' => 'Colores',
+            'logo' => 'Logo',
+            'advanced' => 'Avanzado',
+        ],
+
+        'preview' => [
+            'title' => 'Vista previa',
+            'dark' => 'Fondo oscuro',
+            'light' => 'Fondo claro',
+            'empty' => 'Escribe una etiqueta y un mensaje para ver la insignia.',
+            'dimensions' => '{width} × {height} px',
+        ],
+
+        'snippets' => [
+            'title' => 'Insertar',
+            'url' => 'URL',
+            'markdown' => 'Markdown',
+            'html' => 'HTML',
+            'rst' => 'reStructuredText',
+        ],
+
+        'actions' => [
+            'sample' => 'Ejemplo',
+            'reset' => 'Limpiar',
+        ],
+
+        'social_note' => 'El estilo social siempre usa sus propios colores.',
     ],
 ];

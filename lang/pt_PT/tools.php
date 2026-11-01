@@ -68,6 +68,7 @@ return [
         'security' => 'Segurança',
         'time' => 'Data e hora',
         'text' => 'Texto',
+        'badges' => 'Imagens',
     ],
 
     'json-viewer' => [
@@ -480,5 +481,72 @@ return [
         'messages' => [
             'deleted' => 'Texto eliminado com sucesso.',
         ],
+    ],
+
+    'badgeforge' => [
+        'name' => 'BadgeForge',
+        'description' => 'Crie badges SVG para os seus READMEs com pré-visualização em tempo real e excertos prontos para Markdown, HTML e reStructuredText.',
+        'keywords' => 'selo, badge, shields, svg, readme, markdown, ci, cobertura',
+        'intro' => 'Monte o badge, veja a pré-visualização e copie o excerto. A imagem é servida como SVG por este site; nada do que escreve aqui sai do navegador além da URL que copia.',
+
+        'fields' => [
+            'label' => 'Rótulo',
+            'message' => 'Mensagem',
+            'style' => 'Estilo',
+            'color' => 'Cor',
+            'label_color' => 'Cor do rótulo',
+            'logo' => 'Logo',
+            'logo_color' => 'Cor do logo',
+            'logo_size' => 'Tamanho do logo',
+            'logo_position' => 'Posição do logo',
+            'link' => 'Link',
+            'cache_seconds' => 'Cache (segundos)',
+        ],
+
+        'placeholders' => [
+            'label' => 'build',
+            'message' => 'passing',
+            'color' => '#9f9f9f ou green',
+            'label_color' => '#555555',
+            'logo_color' => '#ffffff',
+            'link' => 'https://exemplo.com',
+        ],
+
+        'positions' => [
+            'left' => 'Esquerda',
+            'right' => 'Direita',
+        ],
+
+        'logo_none' => 'Sem logo',
+
+        'sections' => [
+            'content' => 'Conteúdo',
+            'colors' => 'Cores',
+            'logo' => 'Logo',
+            'advanced' => 'Avançado',
+        ],
+
+        'preview' => [
+            'title' => 'Pré-visualização',
+            'dark' => 'Fundo escuro',
+            'light' => 'Fundo claro',
+            'empty' => 'Escreva um rótulo e uma mensagem para ver o badge.',
+            'dimensions' => '{width} × {height} px',
+        ],
+
+        'snippets' => [
+            'title' => 'Incorporar',
+            'url' => 'URL',
+            'markdown' => 'Markdown',
+            'html' => 'HTML',
+            'rst' => 'reStructuredText',
+        ],
+
+        'actions' => [
+            'sample' => 'Exemplo',
+            'reset' => 'Limpar',
+        ],
+
+        'social_note' => 'O estilo social usa sempre as suas próprias cores.',
     ],
 ];

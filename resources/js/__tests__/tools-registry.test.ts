@@ -32,6 +32,7 @@ const MVP = [
     'timestamp-uuid',
     'regex-tester',
     'markdown-to-pdf',
+    'badgeforge',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */

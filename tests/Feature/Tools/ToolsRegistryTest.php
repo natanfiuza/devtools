@@ -25,6 +25,7 @@ function mvpToolSlugs(): array
         'timestamp-uuid',
         'regex-tester',
         'markdown-to-pdf',
+        'badgeforge',
     ];
 }
 
@@ -83,7 +84,7 @@ it('nao repete slug nem ordem de exibicao', function () {
 /*
 | F3 virou as seis tools simples `available`; a F5 fechou o AI SQL Builder, a
 | ultima que dependia de servidor. O sitemap - que lista so o que funciona -
-| passa a ter as nove paginas do MVP.
+| passa a ter as dez paginas do MVP.
 */
 it('lista para o sitemap apenas as tools que funcionam', function () {
     expect(array_column(Tools::available(), 'slug'))->toBe([
@@ -98,6 +99,7 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'timestamp-uuid',
         'regex-tester',
         'markdown-to-pdf',
+        'badgeforge',
     ]);
 });
 

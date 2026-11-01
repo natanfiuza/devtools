@@ -1,0 +1,20 @@
+{
+    "slug": "badgeforge",
+    "status": "available",
+    "category": "badges",
+    "icon": "image",
+    "order": 95,
+    "keywords": [
+        "badge",
+        "badges",
+        "shield",
+        "readme",
+        "svg",
+        "status",
+        "ci",
+        "coverage",
+        "markdown",
+        "reStructuredText",
+        "image"
+    ]
+}
