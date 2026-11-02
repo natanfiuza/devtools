@@ -79,7 +79,7 @@ it('responde 404 em JSON para segmento invalido ou formato nao suportado', funct
         ->assertJsonPath('error.code', 'not_found');
 })->with([
     'sem extensao' => '/api/badges/static/build/passing',
-    'png na F1' => '/api/badges/static/build/passing.png',
+    'formato nao suportado' => '/api/badges/static/build/passing.gif',
     'extensao em caixa alta' => '/api/badges/static/build/passing.SVG',
     'barra simples' => '/api/badges/static/ci%2Fcd/passing.svg',
     'segmento vazio' => '/api/badges/static/build//passing.svg',
@@ -101,6 +101,16 @@ it('decodifica a barra dupla-codificada no texto', function () {
 
     expect($svg)->toContain('<title>ci/cd: passing</title>')
         ->and($svg)->toContain('aria-label="ci/cd: passing"');
+});
+
+it('aplica a fonte pedida e ignora fonte desconhecida', function () {
+    $default = (string) $this->get('/api/badges/static/build/passing.svg')->getContent();
+    $spaced = (string) $this->get('/api/badges/static/build/passing.svg?font=space-grotesk')->getContent();
+    $unknown = (string) $this->get('/api/badges/static/build/passing.svg?font=nope')->getContent();
+
+    expect($spaced)->not->toBe($default)
+        ->and($spaced)->toContain('font-family="Space Grotesk,DejaVu Sans,sans-serif"')
+        ->and($unknown)->toBe($default);
 });
 
 it('cai no padrao para estilo ou cor invalidos e ignora logo desconhecido', function () {

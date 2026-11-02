@@ -21,9 +21,13 @@ final class StaticBadgeRenderer
         $gap = $style->gap;
         $logoWidth = $spec->logo !== null ? $spec->logoSize + $gap : 0;
 
+        // `??` ja tolera `$spec->font` nulo (mesma semantica de isset()).
+        $fontFamily = $spec->font->stack ?? $style->fontFamily;
+        $metricsFamily = $spec->font->slug ?? $style->metricsFamily;
+
         $labelAdvance = $this->metrics->width(
             $spec->label,
-            $style->metricsFamily,
+            $metricsFamily,
             $style->fontSize,
             $style->fontWeight,
             $style->letterSpacing,
@@ -31,7 +35,7 @@ final class StaticBadgeRenderer
 
         $messageAdvance = $this->metrics->width(
             $spec->message,
-            $style->metricsFamily,
+            $metricsFamily,
             $style->fontSize,
             $style->fontWeight,
             $style->letterSpacing,
@@ -95,8 +99,8 @@ final class StaticBadgeRenderer
             $group .= '</svg>';
         }
 
-        $group .= $this->text($labelX, $style->baseline, $style, $spec->label);
-        $group .= $this->text($messageX, $style->baseline, $style, $spec->message);
+        $group .= $this->text($labelX, $style->baseline, $style, $fontFamily, $spec->label);
+        $group .= $this->text($messageX, $style->baseline, $style, $fontFamily, $spec->message);
         $group .= '</g>';
 
         $content = $defs.$group;
@@ -115,10 +119,10 @@ final class StaticBadgeRenderer
         return $svg;
     }
 
-    private function text(int $x, int $y, Style $style, string $text): string
+    private function text(int $x, int $y, Style $style, string $fontFamily, string $text): string
     {
         $attributes = 'x="'.$x.'" y="'.$y.'" '.$style->textColor->fillAttributes()
-            .' font-family="'.Svg::escape($style->fontFamily).'"'
+            .' font-family="'.Svg::escape($fontFamily).'"'
             .' font-size="'.$style->fontSize.'"'
             .' font-weight="'.$style->fontWeight.'"';
 

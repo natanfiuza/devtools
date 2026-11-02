@@ -335,6 +335,57 @@
                 "link": null,
                 "cacheSeconds": 86400
             }
+        },
+        {
+            "name": "flat_font_space_grotesk",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "space-grotesk",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_font_fira_code",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "fira-code",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_font_libre_franklin",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "libre-franklin",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
         }
     ]
 }

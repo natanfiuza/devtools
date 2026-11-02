@@ -47,6 +47,7 @@ it('acompanha os limites da configuracao', function () {
         'logoSize' => ['min' => 4, 'max' => 30],
         'cacheSeconds' => ['default' => 600, 'min' => 60, 'max' => 900],
         'linkMaxLength' => 512,
+        'png' => ['maxWidth' => 600],
     ])->and($props['defaults'])->toBe([
         'style' => 'plastic',
         'color' => '#123456',

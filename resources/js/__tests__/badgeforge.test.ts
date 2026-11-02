@@ -77,6 +77,15 @@ describe('textWidth', () => {
             textWidth('ab', 'sans', 10, 700, 0) + 2,
         );
     });
+
+    it('usa as metricas das fontes empacotadas', () => {
+        const sans = textWidth('build', 'sans', 11, 700, 0);
+
+        expect(textWidth('build', 'space-grotesk', 11, 700, 0)).not.toBe(sans);
+        expect(textWidth('build', 'fira-code', 11, 400, 0)).not.toBe(
+            textWidth('build', 'sans', 11, 400, 0),
+        );
+    });
 });
 
 describe('builder', () => {
@@ -84,6 +93,7 @@ describe('builder', () => {
         const state = defaultForm(PROPS);
 
         expect(state.style).toBe('flat');
+        expect(state.font).toBe('default');
         expect(state.color).toBe('#9f9f9f');
         expect(state.labelColor).toBe('#555555');
         expect(state.logoColor).toBe('#ffffff');
@@ -143,8 +153,10 @@ describe('builder', () => {
                 .logoSize,
         ).toBe(20);
         expect(
-            normalizeBadge(form({ logo: 'github', logoSize: Number.NaN }), PROPS)
-                .logoSize,
+            normalizeBadge(
+                form({ logo: 'github', logoSize: Number.NaN }),
+                PROPS,
+            ).logoSize,
         ).toBe(10);
         expect(
             normalizeBadge(
@@ -172,6 +184,18 @@ describe('builder', () => {
         expect(Array.from(truncate('😀'.repeat(101), 100))).toHaveLength(100);
         expect(truncate('abc', 100)).toBe('abc');
         expect(truncate('x'.repeat(101), 100).endsWith('…')).toBe(true);
+    });
+
+    it('resolve a fonte escolhida e cai no padrao quando desconhecida', () => {
+        const chosen = normalizeBadge(form({ font: 'space-grotesk' }), PROPS);
+
+        expect(chosen.font).toEqual({
+            slug: 'space-grotesk',
+            name: 'Space Grotesk',
+            stack: 'Space Grotesk,DejaVu Sans,sans-serif',
+        });
+        expect(normalizeBadge(form({ font: 'nope' }), PROPS).font).toBeNull();
+        expect(normalizeBadge(form(), PROPS).font).toBeNull();
     });
 
     it('cai no padrao para cor invalida e ignora logo desconhecido', () => {
@@ -259,6 +283,40 @@ describe('buildBadgeUrl', () => {
         );
     });
 
+    it('leva a fonte so quando difere da pilha do estilo', () => {
+        const withFont = normalizeBadge(form({ font: 'fira-code' }), PROPS);
+
+        expect(buildBadgeUrl(origin, endpoint, withFont, PROPS)).toContain(
+            '?font=fira-code',
+        );
+        expect(
+            buildBadgeUrl(
+                origin,
+                endpoint,
+                normalizeBadge(form(), PROPS),
+                PROPS,
+            ),
+        ).not.toContain('font=');
+    });
+
+    it('troca a extensao e acrescenta download=1 sob pedido', () => {
+        const spec = normalizeBadge(form(), PROPS);
+        const base = 'https://devtools.test/api/badges/static/build/passing';
+
+        expect(
+            buildBadgeUrl(origin, endpoint, spec, PROPS, { format: 'png' }),
+        ).toBe(`${base}.png`);
+        expect(
+            buildBadgeUrl(origin, endpoint, spec, PROPS, { download: true }),
+        ).toBe(`${base}.svg?download=1`);
+        expect(
+            buildBadgeUrl(origin, endpoint, spec, PROPS, {
+                format: 'png',
+                download: true,
+            }),
+        ).toBe(`${base}.png?download=1`);
+    });
+
     it('codifica a barra e o espaco no texto', () => {
         const spec = normalizeBadge(
             form({ label: 'ci/cd', message: 'deploy now' }),
@@ -300,5 +358,13 @@ describe('preview', () => {
 
         expect(svg).toContain('<title>build: passing</title>');
         expect(svg).toContain('<path');
+    });
+
+    it('troca a pilha de fontes do texto quando ha fonte escolhida', () => {
+        const spec = normalizeBadge(form({ font: 'libre-franklin' }), PROPS);
+
+        expect(renderBadge(spec)).toContain(
+            'font-family="Libre Franklin,DejaVu Sans,sans-serif"',
+        );
     });
 });

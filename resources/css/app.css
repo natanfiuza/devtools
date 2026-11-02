@@ -5,6 +5,65 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+  Fontes do BadgeForge (ADR-077). Sao as mesmas TTF que o servidor usa para
+  rasterizar o PNG: o preview inline do tool aparece com a fonte real e o
+  seletor de fonte nao mente. O Vite empacota os arquivos e versiona a URL.
+*/
+@font-face {
+    font-family: 'Fira Code';
+    src: url('../badgeforge/fonts/fira-code/FiraCode-Regular.ttf')
+        format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    src: url('../badgeforge/fonts/fira-code/FiraCode-Bold.ttf')
+        format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Libre Franklin';
+    src: url('../badgeforge/fonts/libre-franklin/LibreFranklin-Regular.ttf')
+        format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Libre Franklin';
+    src: url('../badgeforge/fonts/libre-franklin/LibreFranklin-Bold.ttf')
+        format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Grotesk';
+    src: url('../badgeforge/fonts/space-grotesk/SpaceGrotesk-Regular.ttf')
+        format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Grotesk';
+    src: url('../badgeforge/fonts/space-grotesk/SpaceGrotesk-Bold.ttf')
+        format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*

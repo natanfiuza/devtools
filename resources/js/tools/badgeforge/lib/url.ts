@@ -28,19 +28,35 @@ export function encodeSegment(text: string): string {
     return encoded;
 }
 
+/** Formato do endpoint publico: SVG canonico ou PNG rasterizado. */
+export type BadgeFormat = 'svg' | 'png';
+
+export interface BuildBadgeUrlOptions {
+    format?: BadgeFormat;
+    /** Acrescenta `download=1`: a resposta vira `Content-Disposition: attachment`. */
+    download?: boolean;
+}
+
 export function buildBadgeUrl(
     origin: string,
     endpoint: string,
     spec: BadgeSpec,
     props: BadgeForgeToolProps,
+    options: BuildBadgeUrlOptions = {},
 ): string {
     const defaults = props.defaults;
     const base = endpoint.replace(/\/+$/, '');
-    const path = `${base}/${encodeSegment(spec.label)}/${encodeSegment(spec.message)}.svg`;
+    const format = options.format ?? 'svg';
+    const path = `${base}/${encodeSegment(spec.label)}/${encodeSegment(spec.message)}.${format}`;
     const params: string[] = [];
 
     if (spec.style.id !== defaults.style) {
         params.push(`style=${encodeURIComponent(spec.style.id)}`);
+    }
+
+    // Sem fonte escolhida o badge usa a pilha do estilo (default implicito).
+    if (spec.font !== null) {
+        params.push(`font=${encodeURIComponent(spec.font.slug)}`);
     }
 
     // O estilo social fixa as duas cores: manda-las na URL nao mudaria nada.
@@ -72,6 +88,10 @@ export function buildBadgeUrl(
 
     if (spec.cacheSeconds !== props.limits.cacheSeconds.default) {
         params.push(`cacheSeconds=${spec.cacheSeconds}`);
+    }
+
+    if (options.download === true) {
+        params.push('download=1');
     }
 
     const query = params.length > 0 ? `?${params.join('&')}` : '';

@@ -36,6 +36,21 @@ it('ordena os logos pelo nome sem diferenciar maiusculas', function () {
         ->and($names[array_key_last($names)])->toBe('Vue');
 });
 
+it('lista as fontes na ordem da config com as TTF empacotadas', function () {
+    /** @var list<array{slug: string, name: string, stack: string}> $fonts */
+    $fonts = BadgeForgeToolProps::for()['fonts'];
+    $directory = (string) config('badgeforge.fonts_path');
+    /** @var array<string, array{regular: string, bold: string}> $configured */
+    $configured = (array) config('badgeforge.fonts');
+
+    expect(array_column($fonts, 'slug'))->toBe(array_keys($configured));
+
+    foreach ($configured as $data) {
+        expect(is_file($directory.'/'.$data['regular']))->toBeTrue()
+            ->and(is_file($directory.'/'.$data['bold']))->toBeTrue();
+    }
+});
+
 it('registra todo logo com arquivo e viewBox', function () {
     $catalog = app(LogoCatalog::class);
     $directory = (string) config('badgeforge.logos_path');

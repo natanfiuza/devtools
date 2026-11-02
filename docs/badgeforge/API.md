@@ -1,21 +1,25 @@
 # API BadgeForge
 
-## Estática (F1 — disponível)
+## Estática (F1/F2 — disponível)
 
 ```text
-GET /api/badges/static/{label}/{message}.svg
+GET /api/badges/static/{label}/{message}.{svg|png}
 ```
 
-O SVG é gerado e servido pelo próprio devtools, sem sessão e sem autenticação.
-A rota fica no grupo `api`, fora do prefixo `v1`, e não tem throttle próprio.
+A imagem é gerada e servida pelo próprio devtools, sem sessão e sem
+autenticação. A rota fica no grupo `api`, fora do prefixo `v1`, e não tem
+throttle próprio.
 
 ### Caminho
 
 - `label` e `message`: texto do badge, sem barra. `_` vira espaço, `__` vira
   `_`; a barra é escrita `%252F` (dupla codificação: o router decodifica o path
   antes do match). `-` e `.` são literais.
-- A extensão `.svg` é obrigatória. Sem extensão ou com `.png` a resposta é 404
-  (`.png` entra na F2, ver `ADR-067`).
+- A extensão é obrigatória e vale `svg` ou `png`; outro valor (ou URL sem
+  extensão) responde 404. Para o PNG, o caminho termina em `.../message.png` —
+  não em `.svg.png`.
+- O SVG é o formato canônico. O PNG é rasterizado na primeira requisição e
+  depois servido do cache em disco (ver `ADR-067` e `ADR-077`).
 - Texto acima de 100 caracteres é truncado com `…`; segmento vazio dá 404.
 
 ### Query
@@ -31,6 +35,8 @@ A rota fica no grupo `api`, fora do prefixo `v1`, e não tem throttle próprio.
 | `logoPosition` | `left` | `left` ou `right`; outro → `left` |
 | `link` | — | só `http`/`https`; outro → sem âncora |
 | `cacheSeconds` | 86400 | inteiro com clamp 300–86400; inválido → padrão |
+| `font` | pilha do estilo | `fira-code`, `libre-franklin` ou `space-grotesk`; outro valor → pilha do estilo |
+| `download` | — | `1` acrescenta `Content-Disposition: attachment`; outro valor é ignorado |
 
 Cores aceitam nomes CSS (148), apelidos de badge (`brightgreen`, `critical`…),
 hex 3/4/6/8, `rgb()`, `rgba()`, `hsl()`, `hsla()` e `transparent`. Cores com
@@ -46,17 +52,30 @@ O estilo `social` fixa as próprias cores (`#555555` e `#007ec6`): `color` e
 /api/badges/static/build/passing.svg?style=for-the-badge&logo=github
 /api/badges/static/ci%252Fcd/passing.svg?color=brightgreen
 /api/badges/static/vers%C3%A3o/1.0.0.svg
+/api/badges/static/build/passing.png?font=space-grotesk
+/api/badges/static/build/passing.svg?download=1
+/api/badges/static/build/passing.png?download=1
 ```
 
 ### Resposta
 
-- `200`: `Content-Type: image/svg+xml; charset=utf-8`,
+- `200`: `Content-Type: image/svg+xml; charset=utf-8` ou `image/png`,
   `Cache-Control: public, max-age=<cacheSeconds>`, `ETag: "<sha256>"`.
+- PNG: 1× natural (fundo transparente), reduzido proporcionalmente só quando a
+  largura passa de 600 px (`badgeforge.png.max_width`). A rasterização exige a
+  extensão `imagick`; o arquivo fica em
+  `storage/app/data/tools/badgeforge/static/{sha256(svg)}.png` e a segunda
+  requisição do mesmo SVG lê do disco.
+- `download=1`: `Content-Disposition: attachment; filename="<label>-<message>.<ext>"`
+  com a variante RFC 5987 (`filename*=UTF-8''...`) para acentos.
 - `304`: `If-None-Match` igual ao ETag; sem corpo e sem `Content-Type`.
-- `404`: segmento vazio, extensão ausente ou diferente de `svg` (envelope
+- `404`: segmento vazio, extensão ausente ou diferente de `svg`/`png` (envelope
   `ApiError`).
-- O documento tem `role="img"`, `aria-label="label: message"` e `<title>` com o
-  mesmo texto. Nada é registrado em log além de IDs e classes de exceção.
+- `503`: PNG pedido em servidor sem a extensão `imagick`; envelope
+  `ApiError` com código `image_unavailable`.
+- O documento SVG tem `role="img"`, `aria-label="label: message"` e `<title>`
+  com o mesmo texto. Nada é registrado em log além de IDs e classes de
+  exceção; o conteúdo do badge nunca entra no log da aplicação.
 
 ## Provider (F4 — planejado)
 

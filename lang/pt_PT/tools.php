@@ -501,6 +501,8 @@ return [
             'logo_position' => 'Posição do logo',
             'link' => 'Link',
             'cache_seconds' => 'Cache (segundos)',
+            'font' => 'Fonte',
+            'format' => 'Formato',
         ],
 
         'placeholders' => [
@@ -518,6 +520,15 @@ return [
         ],
 
         'logo_none' => 'Sem logo',
+
+        'fonts' => [
+            'default' => 'Predefinida do estilo',
+        ],
+
+        'formats' => [
+            'svg' => 'SVG',
+            'png' => 'PNG',
+        ],
 
         'sections' => [
             'content' => 'Conteúdo',

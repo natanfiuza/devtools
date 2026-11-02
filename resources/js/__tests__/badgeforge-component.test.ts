@@ -18,6 +18,7 @@ const TRADUCOES = {
                 copy: 'Copiar',
                 copied: 'Copiado',
                 copy_manual: 'Selecione e copie',
+                download: 'Baixar',
             },
         },
         badgeforge: {
@@ -34,6 +35,8 @@ const TRADUCOES = {
                 logo_position: 'Posição do logo',
                 link: 'Link',
                 cache_seconds: 'Cache (segundos)',
+                font: 'Fonte',
+                format: 'Formato',
             },
             placeholders: {
                 label: 'build',
@@ -45,6 +48,8 @@ const TRADUCOES = {
             },
             positions: { left: 'Esquerda', right: 'Direita' },
             logo_none: 'Sem logo',
+            fonts: { default: 'Padrão do estilo' },
+            formats: { svg: 'SVG', png: 'PNG' },
             sections: {
                 content: 'Conteúdo',
                 colors: 'Cores',
@@ -85,10 +90,9 @@ function mountTool() {
     });
 }
 
-function decodeDataUri(src: string): string {
-    return decodeURIComponent(
-        src.replace('data:image/svg+xml;charset=utf-8,', ''),
-    );
+/** O preview e SVG inline: o markup do wrapper traz o documento gerado. */
+function previewSvg(wrapper: ReturnType<typeof mountTool>): string {
+    return wrapper.find('[data-test="badge-preview"]').html();
 }
 
 beforeEach(() => {
@@ -118,9 +122,7 @@ describe('BadgeForge Tool', () => {
         );
         expect(wrapper.find('[data-test="badge-cache"]').exists()).toBe(true);
 
-        const svg = decodeDataUri(
-            wrapper.find('[data-test="badge-preview"]').attributes('src') ?? '',
-        );
+        const svg = previewSvg(wrapper);
 
         expect(svg).toContain('width="12" height="12"');
 
@@ -141,11 +143,12 @@ describe('BadgeForge Tool', () => {
         await wrapper.find('[data-test="badge-label"]').setValue('build');
         await wrapper.find('[data-test="badge-message"]').setValue('passing');
 
-        const image = wrapper.find('[data-test="badge-preview"]');
+        const preview = wrapper.find('[data-test="badge-preview"]');
 
-        expect(image.exists()).toBe(true);
-        expect(image.attributes('src')).toContain('data:image/svg+xml');
-        expect(image.attributes('alt')).toBe('build: passing');
+        expect(preview.exists()).toBe(true);
+        expect(preview.html()).toContain('<svg xmlns=');
+        expect(preview.html()).not.toContain('data:image/svg');
+        expect(preview.attributes('aria-label')).toBe('build: passing');
     });
 
     it('reflete cor, cor do rotulo e cor do logo no SVG', async () => {
@@ -160,9 +163,7 @@ describe('BadgeForge Tool', () => {
             .find('[data-test="badge-logo-color"]')
             .setValue('#000000');
 
-        const svg = decodeDataUri(
-            wrapper.find('[data-test="badge-preview"]').attributes('src') ?? '',
-        );
+        const svg = previewSvg(wrapper);
 
         expect(svg).toContain('fill="#ff0000"');
         expect(svg).toContain('fill="#123456"');
@@ -188,9 +189,7 @@ describe('BadgeForge Tool', () => {
             wrapper.find('[data-test="badge-color"]').attributes('disabled'),
         ).toBeDefined();
 
-        const svg = decodeDataUri(
-            wrapper.find('[data-test="badge-preview"]').attributes('src') ?? '',
-        );
+        const svg = previewSvg(wrapper);
 
         expect(svg).toContain('fill="#007ec6"');
         expect(svg).toContain('fill="#555555"');
@@ -230,6 +229,56 @@ describe('BadgeForge Tool', () => {
         expect(wrapper.find('[data-test="badge-copy-feedback"]').text()).toBe(
             'Copiado',
         );
+    });
+
+    it('aplica a fonte escolhida no preview e na URL', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.find('[data-test="badge-sample"]').trigger('click');
+
+        const fontSelect = wrapper
+            .findAllComponents({ name: 'Select' })
+            .find((select) => select.props('modelValue') === 'default');
+
+        expect(fontSelect).toBeDefined();
+
+        fontSelect?.vm.$emit('update:modelValue', 'fira-code');
+        await wrapper.vm.$nextTick();
+
+        expect(previewSvg(wrapper)).toContain(
+            'font-family="Fira Code,DejaVu Sans,monospace"',
+        );
+        expect(wrapper.find('[data-test="badge-snippet"]').text()).toContain(
+            'font=fira-code',
+        );
+    });
+
+    it('troca o formato dos snippets e do botao de download', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.find('[data-test="badge-sample"]').trigger('click');
+
+        const href = (): string =>
+            wrapper.find('[data-test="badge-download"]').attributes('href') ??
+            '';
+
+        expect(href()).toContain('/build/passing.svg');
+        expect(href()).toContain('download=1');
+
+        const formatSelect = wrapper
+            .findAllComponents({ name: 'Select' })
+            .find((select) => select.props('modelValue') === 'svg');
+
+        expect(formatSelect).toBeDefined();
+
+        formatSelect?.vm.$emit('update:modelValue', 'png');
+        await wrapper.vm.$nextTick();
+
+        expect(wrapper.find('[data-test="badge-snippet"]').text()).toContain(
+            '/build/passing.png',
+        );
+        expect(href()).toContain('/build/passing.png');
+        expect(href()).toContain('download=1');
     });
 
     it('limpa o formulario de volta ao padrao', async () => {

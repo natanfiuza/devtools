@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { fontAsset } from '@/tools/badgeforge/lib/fonts';
 import { renderBadge } from '@/tools/badgeforge/lib/render';
 import { styleById } from '@/tools/badgeforge/lib/styles';
 import { logoAsset } from '@/tools/badgeforge/logos';
 import cases from '../../../tests/Fixtures/badgeforge/cases.json';
 import toolProps from '../../../tests/Fixtures/badgeforge/tool-props.json';
-import type { BadgeSpec } from '@/tools/badgeforge/types';
+import type { BadgeForgeToolProps, BadgeSpec } from '@/tools/badgeforge/types';
 
 /**
  * Paridade byte a byte com o renderer PHP (ADR-075).
@@ -19,12 +20,15 @@ const expectedFiles = import.meta.glob(
     { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>;
 
+const PROPS = toolProps as BadgeForgeToolProps;
+
 interface FixtureCase {
     name: string;
     spec: {
         label: string;
         message: string;
         style: string;
+        font?: string | null;
         labelColor: { hex: string; alpha: number };
         messageColor: { hex: string; alpha: number };
         logo: string | null;
@@ -41,6 +45,7 @@ function specFrom(data: FixtureCase['spec']): BadgeSpec {
         label: data.label,
         message: data.message,
         style: styleById(data.style),
+        font: fontAsset(data.font ?? null, PROPS),
         labelColor: { ...data.labelColor },
         messageColor: { ...data.messageColor },
         logo: data.logo === null ? null : logoAsset(data.logo),

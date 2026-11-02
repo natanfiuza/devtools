@@ -44,3 +44,23 @@ it('trata acentos, marcas combinantes e glifos desconhecidos', function () {
         // CJK nao esta na tabela: cai no fallback largo.
         ->and($metrics->width('状', 'sans', 11, 400, 0))->toBe(7);
 });
+
+it('mede pelas metricas de cada fonte empacotada', function () {
+    $metrics = app(FontMetrics::class);
+
+    // Space Grotesk e mais estreita que a tabela aproximada da sans.
+    expect($metrics->width('build', 'space-grotesk', 11, 600, 0))
+        ->toBeLessThan($metrics->width('build', 'sans', 11, 600, 0))
+        ->and($metrics->width('build', 'libre-franklin', 11, 600, 0))
+        ->not->toBe($metrics->width('build', 'sans', 11, 600, 0));
+});
+
+it('aplica o percentual de negrito da propria familia', function () {
+    $metrics = app(FontMetrics::class);
+
+    expect($metrics->width('BUILD', 'libre-franklin', 10, 700, 0))
+        ->toBeGreaterThan($metrics->width('BUILD', 'libre-franklin', 10, 400, 0))
+        // Fira Code e monoespacada: Bold e Regular tem os mesmos avancos.
+        ->and($metrics->width('build', 'fira-code', 11, 700, 0))
+        ->toBe($metrics->width('build', 'fira-code', 11, 400, 0));
+});

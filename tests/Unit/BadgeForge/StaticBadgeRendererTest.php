@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\BadgeForge\BadgeFontCatalog;
 use App\Support\BadgeForge\BadgeSpec;
 use App\Support\BadgeForge\ColorValue;
 use App\Support\BadgeForge\LogoCatalog;
@@ -22,6 +23,7 @@ function badgeSpecFromArray(array $data): BadgeSpec
         label: $data['label'],
         message: $data['message'],
         style: app(StyleCatalog::class)->get($data['style']),
+        font: isset($data['font']) ? app(BadgeFontCatalog::class)->find($data['font']) : null,
         labelColor: new ColorValue($data['labelColor']['hex'], (float) $data['labelColor']['alpha']),
         messageColor: new ColorValue($data['messageColor']['hex'], (float) $data['messageColor']['alpha']),
         logo: $data['logo'] !== null ? $logos->find($data['logo']) : null,

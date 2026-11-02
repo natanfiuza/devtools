@@ -1,4 +1,5 @@
 import { parseColorOr } from './lib/color';
+import { DEFAULT_FONT, fontAsset } from './lib/fonts';
 import { styleById } from './lib/styles';
 import { logoAsset } from './logos';
 import type { BadgeForgeToolProps, BadgeSpec, BadgeStyle } from './types';
@@ -16,6 +17,7 @@ export interface BadgeFormState {
     label: string;
     message: string;
     style: string;
+    font: string;
     color: string;
     labelColor: string;
     logo: string;
@@ -34,6 +36,7 @@ export function defaultForm(props: BadgeForgeToolProps): BadgeFormState {
         label: '',
         message: '',
         style: props.defaults.style,
+        font: DEFAULT_FONT,
         color: props.defaults.color,
         labelColor: props.defaults.labelColor,
         logo: NO_LOGO,
@@ -75,6 +78,7 @@ export function normalizeBadge(
         label,
         message,
         style,
+        font: fontAsset(form.font, props),
         labelColor:
             style.labelColor ??
             parseColorOr(form.labelColor, props.defaults.labelColor),

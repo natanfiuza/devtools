@@ -26,6 +26,8 @@ return [
 
     'logos_path' => resource_path('badgeforge/logos'),
 
+    'fonts_path' => resource_path('badgeforge/fonts'),
+
     'endpoint' => '/api/badges/static',
 
     'default_style' => 'flat',
@@ -43,6 +45,17 @@ return [
         'logo_size' => ['min' => 8, 'max' => 20],
         'cache_seconds' => ['default' => 86400, 'min' => 300, 'max' => 86400],
         'link_max_length' => 2048,
+    ],
+
+    /*
+    | PNG (F2, ADR-077): rasterizacao 1x pelo Imagick, com downscale
+    | proporcional so acima de `max_width`. O cache e content-addressed pelo
+    | sha256 do SVG; `cache_path` e relativo a `storage_path()`.
+    */
+    'png' => [
+        'max_width' => 600,
+        'cache_path' => 'app/data/tools/badgeforge/static',
+        'prune_after_hours' => 48,
     ],
 
     /*
@@ -76,6 +89,36 @@ return [
         'json' => ['name' => 'JSON', 'file' => 'json.svg'],
         'html' => ['name' => 'HTML', 'file' => 'html.svg'],
         'gitpr' => ['name' => 'GitPR', 'file' => 'gitpr.svg'],
+    ],
+
+    /*
+    | Fontes embutidas, escolhidas por `?font=`. A chave do slug e a mesma
+    | usada em `families.<slug>` do font-metrics.json; `stack` e a pilha que
+    | vai no atributo `font-family` do SVG (e no @font-face da web).
+    | Os TTF normalizam qualquer `unitsPerEm` para 1000 na tabela de avancos.
+    */
+    'fonts' => [
+        'fira-code' => [
+            'name' => 'Fira Code',
+            'family' => 'Fira Code',
+            'stack' => 'Fira Code,DejaVu Sans,monospace',
+            'regular' => 'fira-code/FiraCode-Regular.ttf',
+            'bold' => 'fira-code/FiraCode-Bold.ttf',
+        ],
+        'libre-franklin' => [
+            'name' => 'Libre Franklin',
+            'family' => 'Libre Franklin',
+            'stack' => 'Libre Franklin,DejaVu Sans,sans-serif',
+            'regular' => 'libre-franklin/LibreFranklin-Regular.ttf',
+            'bold' => 'libre-franklin/LibreFranklin-Bold.ttf',
+        ],
+        'space-grotesk' => [
+            'name' => 'Space Grotesk',
+            'family' => 'Space Grotesk',
+            'stack' => 'Space Grotesk,DejaVu Sans,sans-serif',
+            'regular' => 'space-grotesk/SpaceGrotesk-Regular.ttf',
+            'bold' => 'space-grotesk/SpaceGrotesk-Bold.ttf',
+        ],
     ],
 
 ];
