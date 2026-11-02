@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Copy, Eraser, Sparkles } from '@lucide/vue';
+import { Copy, Download, Eraser, Sparkles } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import {
     sampleForm,
     type BadgeFormState,
 } from './builder';
+import { DEFAULT_FONT } from './lib/fonts';
 import { badgeDimensions, renderBadge } from './lib/render';
 import {
     htmlSnippet,
@@ -30,7 +31,7 @@ import {
     rstSnippet,
     urlSnippet,
 } from './lib/snippets';
-import { buildBadgeUrl } from './lib/url';
+import { buildBadgeUrl, type BadgeFormat } from './lib/url';
 import type { BadgeForgeToolProps } from './types';
 
 /**
@@ -38,8 +39,9 @@ import type { BadgeForgeToolProps } from './types';
  *
  * Formulario a esquerda, preview e snippets a direita. A pagina nao faz
  * requisicao nenhuma (ADR-002): o SVG e montado no navegador pelo espelho
- * TypeScript do renderer PHP e vira data URI no `<img>`. O endpoint publico
- * so e usado por quem consome o snippet copiado.
+ * TypeScript do renderer PHP e entra inline no DOM (ADR-077), para a fonte
+ * web escolhida valer no preview. O endpoint publico so e usado por quem
+ * consome o snippet copiado ou clica em Baixar.
  */
 
 defineOptions({ inheritAttrs: false });
@@ -64,6 +66,7 @@ const SWATCHES = [
 
 const form = ref<BadgeFormState>(defaultForm(props));
 const darkBackground = ref(false);
+const format = ref<BadgeFormat>('svg');
 const snippetTab = ref<'url' | 'markdown' | 'html' | 'rst'>('markdown');
 
 const { message: copyMessage, copy: copySnippet } = useCopyFeedback();
@@ -71,9 +74,6 @@ const { message: copyMessage, copy: copySnippet } = useCopyFeedback();
 const spec = computed(() => normalizeBadge(form.value, props));
 const svg = computed(() => renderBadge(spec.value));
 const dimensions = computed(() => badgeDimensions(spec.value));
-const dataUri = computed(
-    () => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg.value)}`,
-);
 const altText = computed(() => `${spec.value.label}: ${spec.value.message}`);
 
 const hasContent = computed(
@@ -85,8 +85,35 @@ const forcesColors = computed(() => locksColors(spec.value.style));
 const origin = typeof window === 'undefined' ? '' : window.location.origin;
 
 const url = computed(() =>
-    buildBadgeUrl(origin, props.endpoint, spec.value, props),
+    buildBadgeUrl(origin, props.endpoint, spec.value, props, {
+        format: format.value,
+    }),
 );
+
+const downloadUrl = computed(() =>
+    buildBadgeUrl(origin, props.endpoint, spec.value, props, {
+        format: format.value,
+        download: true,
+    }),
+);
+
+/**
+ * PNG acima do cap do servidor e reduzido proporcionalmente: o snippet HTML
+ * precisa anunciar a largura/altura que o arquivo tera de fato.
+ */
+const snippetDimensions = computed(() => {
+    const { width, height } = dimensions.value;
+    const maxWidth = props.limits.png.maxWidth;
+
+    if (format.value !== 'png' || maxWidth <= 0 || width <= maxWidth) {
+        return { width, height };
+    }
+
+    return {
+        width: maxWidth,
+        height: Math.max(1, Math.round((height * maxWidth) / width)),
+    };
+});
 
 const snippets = computed<Record<'url' | 'markdown' | 'html' | 'rst', string>>(
     () => ({
@@ -95,8 +122,8 @@ const snippets = computed<Record<'url' | 'markdown' | 'html' | 'rst', string>>(
         html: htmlSnippet(
             url.value,
             altText.value,
-            dimensions.value.width,
-            dimensions.value.height,
+            snippetDimensions.value.width,
+            snippetDimensions.value.height,
         ),
         rst: rstSnippet(url.value, altText.value),
     }),
@@ -409,6 +436,33 @@ function reset(): void {
                 data-test="badge-cache"
               />
             </div>
+
+            <div class="space-y-2">
+              <Label for="badge-font">
+                {{ t('tools.badgeforge.fields.font') }}
+              </Label>
+              <Select v-model="form.font">
+                <SelectTrigger
+                  id="badge-font"
+                  class="w-full"
+                  data-test="badge-font"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem :value="DEFAULT_FONT">
+                    {{ t('tools.badgeforge.fonts.default') }}
+                  </SelectItem>
+                  <SelectItem
+                    v-for="font in props.fonts"
+                    :key="font.slug"
+                    :value="font.slug"
+                  >
+                    {{ font.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </section>
@@ -439,14 +493,20 @@ function reset(): void {
           "
           data-test="badge-stage"
         >
-          <img
+          <!--
+            SVG inline (nao `<img>`): fonte carregada pela pagina nao vale
+            dentro de uma imagem. O conteudo e gerado e escapado pelo proprio
+            renderer, por isso o `v-html` e seguro (ADR-077).
+          -->
+          <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado pelo renderer -->
+          <div
             v-if="hasContent"
-            :src="dataUri"
-            :alt="altText"
-            :width="dimensions.width"
-            :height="dimensions.height"
+            :aria-label="altText"
+            class="inline-flex max-w-full"
             data-test="badge-preview"
-          >
+            v-html="svg"
+          />
+          <!-- eslint-enable vue/no-v-html -->
           <p
             v-else
             class="text-sm text-muted-foreground"
@@ -470,9 +530,47 @@ function reset(): void {
         </p>
 
         <div class="space-y-2">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.snippets.title') }}
-          </h2>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="text-sm font-semibold">
+              {{ t('tools.badgeforge.snippets.title') }}
+            </h2>
+
+            <div class="flex items-center gap-2">
+              <div class="w-24">
+                <Select v-model="format">
+                  <SelectTrigger
+                    id="badge-format"
+                    class="w-full"
+                    :aria-label="t('tools.badgeforge.fields.format')"
+                    data-test="badge-format"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="value in ['svg', 'png'] as const"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ t(`tools.badgeforge.formats.${value}`) }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                as-child
+                variant="outline"
+                size="sm"
+                data-test="badge-download"
+              >
+                <a :href="downloadUrl">
+                  <Download class="size-4" />
+                  {{ t('tools.ui.actions.download') }}
+                </a>
+              </Button>
+            </div>
+          </div>
 
           <Tabs v-model="snippetTab">
             <TabsList class="grid w-full grid-cols-4">

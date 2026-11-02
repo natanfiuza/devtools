@@ -14,10 +14,12 @@ export function renderBadge(spec: BadgeSpec): string {
     const style = spec.style;
     const gap = style.gap;
     const logoWidth = spec.logo !== null ? spec.logoSize + gap : 0;
+    const fontFamily = spec.font?.stack ?? style.fontFamily;
+    const metricsFamily = spec.font?.slug ?? style.metricsFamily;
 
     const labelAdvance = textWidth(
         spec.label,
-        style.metricsFamily,
+        metricsFamily,
         style.fontSize,
         style.fontWeight,
         style.letterSpacing,
@@ -25,7 +27,7 @@ export function renderBadge(spec: BadgeSpec): string {
 
     const messageAdvance = textWidth(
         spec.message,
-        style.metricsFamily,
+        metricsFamily,
         style.fontSize,
         style.fontWeight,
         style.letterSpacing,
@@ -95,8 +97,14 @@ export function renderBadge(spec: BadgeSpec): string {
         group += '</svg>';
     }
 
-    group += textElement(labelX, style.baseline, style, spec.label);
-    group += textElement(messageX, style.baseline, style, spec.message);
+    group += textElement(labelX, style.baseline, style, fontFamily, spec.label);
+    group += textElement(
+        messageX,
+        style.baseline,
+        style,
+        fontFamily,
+        spec.message,
+    );
     group += '</g>';
 
     let content = defs + group;
@@ -113,7 +121,7 @@ export function renderBadge(spec: BadgeSpec): string {
     );
 }
 
-/** Largura/altura do documento, uteis para os snippets e para o `<img>`. */
+/** Largura/altura do documento, uteis para os snippets e para o preview. */
 export function badgeDimensions(spec: BadgeSpec): {
     width: number;
     height: number;
@@ -141,11 +149,12 @@ function textElement(
     x: number,
     y: number,
     style: BadgeStyle,
+    fontFamily: string,
     text: string,
 ): string {
     let attributes =
         `x="${x}" y="${y}" ${fillAttributes(style.textColor)}` +
-        ` font-family="${escapeXml(style.fontFamily)}"` +
+        ` font-family="${escapeXml(fontFamily)}"` +
         ` font-size="${style.fontSize}"` +
         ` font-weight="${style.fontWeight}"`;
 

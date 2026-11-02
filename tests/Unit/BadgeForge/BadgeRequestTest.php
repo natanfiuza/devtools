@@ -84,6 +84,18 @@ it('resolve logo conhecido e ignora desconhecido', function () {
         ->and(badgeRequest()->spec('a', 'b', ['logo' => 'nope'])?->logo)->toBeNull();
 });
 
+it('resolve a fonte empacotada e ignora fonte desconhecida', function () {
+    $spec = badgeRequest()->spec('a', 'b', ['font' => 'space-grotesk']);
+
+    expect($spec?->font?->slug)->toBe('space-grotesk')
+        ->and($spec?->font?->name)->toBe('Space Grotesk')
+        ->and($spec?->font?->stack)->toBe('Space Grotesk,DejaVu Sans,sans-serif')
+        ->and(badgeRequest()->spec('a', 'b', ['font' => 'SPACE-GROTESK'])?->font?->slug)->toBe('space-grotesk')
+        ->and(badgeRequest()->spec('a', 'b', ['font' => 'nope'])?->font)->toBeNull()
+        ->and(badgeRequest()->spec('a', 'b', [])?->font)->toBeNull()
+        ->and(badgeRequest()->spec('a', 'b', ['font' => ['space-grotesk']])?->font)->toBeNull();
+});
+
 it('faz clamp do logoSize e usa o default do estilo', function () {
     expect(badgeRequest()->spec('a', 'b', ['logoSize' => '4'])?->logoSize)->toBe(8)
         ->and(badgeRequest()->spec('a', 'b', ['logoSize' => '100'])?->logoSize)->toBe(20)

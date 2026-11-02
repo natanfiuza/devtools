@@ -11,11 +11,19 @@ export interface BadgeForgeLogo {
     name: string;
 }
 
+/** Fonte empacotada (ADR-077); `stack` e o `font-family` do SVG. */
+export interface BadgeFont {
+    slug: string;
+    name: string;
+    stack: string;
+}
+
 export interface BadgeForgeLimits {
     maxTextLength: number;
     logoSize: { min: number; max: number };
     cacheSeconds: { default: number; min: number; max: number };
     linkMaxLength: number;
+    png: { maxWidth: number };
 }
 
 export interface BadgeForgeDefaults {
@@ -30,6 +38,7 @@ export interface BadgeForgeToolProps {
     endpoint: string;
     styles: string[];
     logos: BadgeForgeLogo[];
+    fonts: BadgeFont[];
     limits: BadgeForgeLimits;
     defaults: BadgeForgeDefaults;
 }
@@ -75,6 +84,7 @@ export interface BadgeSpec {
     label: string;
     message: string;
     style: BadgeStyle;
+    font: BadgeFont | null;
     labelColor: BadgeColor;
     messageColor: BadgeColor;
     logo: BadgeLogo | null;

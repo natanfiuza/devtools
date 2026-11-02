@@ -11,6 +11,7 @@ import data from '../../../../badgeforge/font-metrics.json';
 interface MetricsData {
     fallback_units: number;
     bold_percent: number;
+    family_bold_percent: Record<string, number>;
     zero_width_ranges: number[][];
     families: Record<string, Record<string, number>>;
 }
@@ -46,7 +47,10 @@ export function textWidth(
         units += advance[String(codePoint)] ?? fallback;
     }
 
-    const boldPercent = metrics.bold_percent ?? 100;
+    // Fontes empacotadas trazem o proprio percentual (Bold/Regular);
+    // `sans`/`helvetica` continuam na media global.
+    const boldPercent =
+        metrics.family_bold_percent?.[family] ?? metrics.bold_percent ?? 100;
 
     if (fontWeight >= 600 && boldPercent !== 100) {
         units = Math.trunc((units * boldPercent + 50) / 100);

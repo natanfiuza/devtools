@@ -28,11 +28,29 @@
         { "slug": "vite", "name": "Vite" },
         { "slug": "vue", "name": "Vue" }
     ],
+    "fonts": [
+        {
+            "slug": "fira-code",
+            "name": "Fira Code",
+            "stack": "Fira Code,DejaVu Sans,monospace"
+        },
+        {
+            "slug": "libre-franklin",
+            "name": "Libre Franklin",
+            "stack": "Libre Franklin,DejaVu Sans,sans-serif"
+        },
+        {
+            "slug": "space-grotesk",
+            "name": "Space Grotesk",
+            "stack": "Space Grotesk,DejaVu Sans,sans-serif"
+        }
+    ],
     "limits": {
         "maxTextLength": 100,
         "logoSize": { "min": 8, "max": 20 },
         "cacheSeconds": { "default": 86400, "min": 300, "max": 86400 },
-        "linkMaxLength": 2048
+        "linkMaxLength": 2048,
+        "png": { "maxWidth": 600 }
     },
     "defaults": {
         "style": "flat",

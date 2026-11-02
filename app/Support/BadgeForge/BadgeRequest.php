@@ -15,6 +15,7 @@ final class BadgeRequest
     public function __construct(
         private readonly StyleCatalog $styles,
         private readonly LogoCatalog $logos,
+        private readonly BadgeFontCatalog $fonts,
     ) {}
 
     /**
@@ -68,6 +69,7 @@ final class BadgeRequest
             label: $label,
             message: $message,
             style: $style,
+            font: $this->fonts->find(self::queryString($query, 'font')),
             labelColor: $labelColor,
             messageColor: $messageColor,
             logo: $logo,

@@ -43,3 +43,9 @@ essa infraestrutura; prometer `.png` cedo criaria um 404 disfarçado de recurso.
 - Consumidores que exigem PNG precisam esperar a F2.
 - A regra da extensão no texto obriga um canto de URL documentado para textos
   que terminam em `.svg`, `.png` ou ponto.
+
+## Nota (F2, 2026-11-02)
+
+O item 2 acima descrevia a F1: `.png` respondia 404. Com a F2 entregue, a rota
+aceita `svg` e `png`, o PNG é rasterizado pelo Imagick e cacheado em disco, e a
+política de tamanho, transparência e 503 está em `ADR-077`.

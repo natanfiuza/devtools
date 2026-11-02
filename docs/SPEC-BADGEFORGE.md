@@ -9,22 +9,23 @@ BadgeForge é uma plataforma de badges SVG/PNG integrada ao devtools.natanfiuza.
 - Pago: logos ilimitados, badges pessoais, providers customizados, analytics completo, exportação CSV, sem limite de badges pessoais.
 
 ## 3. Formatos
-- SVG: formato canônico e único da F1 (ADR-073).
-- A extensão é obrigatória no caminho; `.png` só existe a partir da F2 (não é alias de SVG).
-- PNG (F2): gerado na primeira requisição, depois servido do disco.
-- Largura máxima do PNG: 600 px.
-- Biblioteca: PHP Imagick (extensão imagick).
+- SVG: formato canônico (F1, ADR-073).
+- A extensão é obrigatória no caminho (`svg` ou `png`); `.png` não é alias de SVG.
+- PNG (F2, entregue): 1x natural e fundo transparente, gerado na primeira requisição e depois servido do cache em disco (ADR-077).
+- Largura máxima do PNG: 600 px, com redução proporcional acima disso.
+- Biblioteca: PHP Imagick (extensão imagick); sem ela, PNG responde 503 `image_unavailable`.
 - Conversão: SVG -> PNG no servidor.
+- Fontes do badge: pilha do estilo por padrão; `?font=` aceita `fira-code`, `libre-franklin` e `space-grotesk` (ADR-077).
 
 ## 4. Estilos
 flat, flat-square, plastic, for-the-badge, social.
 
 ## 5. Parâmetros
-style, label, message, color, labelColor, logo, logoColor, logoSize, logoPosition, link, download, cacheSeconds, refresh.
+style, label, message, color, labelColor, logo, logoColor, logoSize, logoPosition, link, download, cacheSeconds, refresh, font.
 
 ## 6. Tipos
 ### Estática
-GET /api/badges/static/{label}/{message}.svg  (F1; `.png` entra na F2)
+GET /api/badges/static/{label}/{message}.{svg|png}  (F1/F2, entregue)
 
 ### Provider
 GET /api/badges/{provider}/{path}.{svg|png}
@@ -46,6 +47,8 @@ storage/app/data/tools/badgeforge/{username}/{ulid}.svg
 storage/app/data/tools/badgeforge/{username}/{ulid}.png
 
 Anônimo usa username=anonymous.
+
+Cache estático do PNG (F2): `storage/app/data/tools/badgeforge/static/{sha256(svg)}.png`, sem teto de tamanho; `badgeforge:prune` remove arquivos com mais de `prune_after_hours` (48 h) sem uso, com `--dry-run` (ADR-077).
 
 Tabelas:
 - badge_assets: id ULID, user_id nullable, slug, type, provider_slug, source_path, svg_path, png_path, etag, bytes, last_generated_at, expires_at, timestamps.
@@ -116,7 +119,7 @@ Usuários cadastrados podem salvar presets: label, message, estilo, cores, logo,
 
 ## 16. Fases
 F1: núcleo SVG estático + builder + snippets + cache. **Entregue em 2026-10-31** — ver `docs/acceptance/BADGEFORGE-FASE-1.md`.
-F2: PNG + Imagick + download + docs.
+F2: PNG + Imagick + download + docs + fontes `?font=`. **Entregue em 2026-11-02** — ver `docs/acceptance/BADGEFORGE-FASE-2.md` e ADR-077.
 F3: logos personalizados + presets + contas.
 F4: providers GitHub/npm/Packagist/Docker (acesso público anônimo; PAT de usuário pago só para item privado).
 F5: endpoint JSON + SSRF.

@@ -1,20 +1,20 @@
 # OpenAPI BadgeForge (resumo)
 
-Somente a superfície da F1 está implementada; os demais caminhos aparecem como
+A superfície da F1/F2 está implementada; os demais caminhos aparecem como
 planejados. O OpenAPI completo em 3.1 é entregue na F8 (`ADR-071`).
 
 ```yaml
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.1.0
+  version: 1.2.0
 paths:
   /api/badges/static/{label}/{message}.{ext}:
     get:
       summary: Static badge
       description: >
-        Gera o SVG do badge. Item público, sem sessão e sem autenticação.
-        Na F1 a única extensão aceita é `svg`; `png` entra na F2.
+        Gera o SVG do badge ou o PNG rasterizado. Item público, sem sessão e
+        sem autenticação. O PNG é cacheado em disco pelo sha256 do SVG.
       parameters:
         - name: label
           in: path
@@ -27,7 +27,7 @@ paths:
         - name: ext
           in: path
           required: true
-          schema: { type: string, enum: [svg] }
+          schema: { type: string, enum: [svg, png] }
         - name: style
           in: query
           schema:
@@ -60,6 +60,16 @@ paths:
         - name: cacheSeconds
           in: query
           schema: { type: integer, minimum: 300, maximum: 86400, default: 86400 }
+        - name: font
+          in: query
+          description: Fonte empacotada; desconhecida cai na pilha do estilo.
+          schema:
+            type: string
+            enum: [fira-code, libre-franklin, space-grotesk]
+        - name: download
+          in: query
+          description: "`1` responde como anexo (Content-Disposition)."
+          schema: { type: string, enum: ["1"] }
       responses:
         "200":
           description: Badge image
@@ -68,12 +78,19 @@ paths:
               schema: { type: string, example: "public, max-age=86400" }
             ETag:
               schema: { type: string }
+            Content-Disposition:
+              description: Presente só com download=1; inclui filename* RFC 5987.
+              schema: { type: string }
           content:
             image/svg+xml: {}
+            image/png:
+              description: 1x natural, transparente; largura máxima de 600 px.
         "304":
           description: Not modified (If-None-Match igual ao ETag)
         "404":
-          description: Segmento vazio, extensão ausente ou diferente de svg
+          description: Segmento vazio, extensão ausente ou diferente de svg/png
+        "503":
+          description: PNG pedido sem a extensão imagick (código image_unavailable)
   /api/badges/{provider}/{path}.{ext}:
     get:
       summary: Dynamic provider badge (F4 — planejado)

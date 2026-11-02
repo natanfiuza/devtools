@@ -60,6 +60,6 @@ Route::prefix('badges')
         Route::get('static/{label}/{message}.{ext}', StaticBadgeController::class)
             ->where('label', '[^/]+')
             ->where('message', '[^/]+')
-            ->where('ext', 'svg')
+            ->where('ext', 'svg|png')
             ->name('static');
     });

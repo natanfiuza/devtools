@@ -12,6 +12,7 @@ final readonly class BadgeSpec
         public string $label,
         public string $message,
         public Style $style,
+        public ?BadgeFont $font,
         public ColorValue $labelColor,
         public ColorValue $messageColor,
         public ?Logo $logo,

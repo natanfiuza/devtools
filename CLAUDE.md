@@ -20,8 +20,8 @@ Leia SEMPRE: docs/SPEC.md, docs/glossario.md, docs/adr/*, docs/design/DESIGN.md.
 
 - Ferramenta: /tools/badgeforge
 - Especificação: docs/SPEC-BADGEFORGE.md
-- ADRs: docs/adr/ADR-062-badgeforge a ADR-076-badgeforge
+- ADRs: docs/adr/ADR-062-badgeforge a ADR-077-badgeforge
 - API: docs/badgeforge/API.md
-- Fase atual: F1 — núcleo SVG estático (entregue)
-- Regras: SVG é o formato canônico; PNG entra na Fase 2; sem providers externos na Fase 1.
+- Fase atual: F2 — PNG, download e fontes do badge (entregue)
+- Regras: SVG é o formato canônico; PNG (F2) via Imagick com cache em disco; fontes empacotadas via `?font=` (ADR-077); sem providers externos até a F4.
 - Acesso a providers: item público é lido anonimamente na API pública (sem token global em `.env`); PAT é do usuário pagador e só para item privado, cifrado, vinculado ao badge pessoal, e a URL leva apenas o ULID (ADR-068).

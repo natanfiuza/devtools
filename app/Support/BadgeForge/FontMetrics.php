@@ -49,7 +49,9 @@ final class FontMetrics
             $units += (int) ($advance[(string) $codePoint] ?? $fallback);
         }
 
-        $boldPercent = (int) ($data['bold_percent'] ?? 100);
+        // Fontes empacotadas trazem o proprio percentual (Bold/Regular);
+        // `sans`/`helvetica` continuam na media global.
+        $boldPercent = (int) ($data['family_bold_percent'][$family] ?? $data['bold_percent'] ?? 100);
 
         if ($fontWeight >= 600 && $boldPercent !== 100) {
             $units = intdiv($units * $boldPercent + 50, 100);

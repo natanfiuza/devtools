@@ -22,6 +22,7 @@ final class BadgeForgeToolProps
             'endpoint' => (string) config('badgeforge.endpoint', '/api/badges/static'),
             'styles' => app(StyleCatalog::class)->ids(),
             'logos' => self::logosByName(),
+            'fonts' => app(BadgeFontCatalog::class)->metadata(),
             'limits' => [
                 'maxTextLength' => (int) config('badgeforge.limits.max_text_length', 100),
                 'logoSize' => [
@@ -34,6 +35,9 @@ final class BadgeForgeToolProps
                     'max' => (int) config('badgeforge.limits.cache_seconds.max', 86400),
                 ],
                 'linkMaxLength' => (int) config('badgeforge.limits.link_max_length', 2048),
+                'png' => [
+                    'maxWidth' => (int) config('badgeforge.png.max_width', 600),
+                ],
             ],
             'defaults' => [
                 'style' => (string) config('badgeforge.default_style', 'flat'),
