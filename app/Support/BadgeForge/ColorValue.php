@@ -18,6 +18,20 @@ final readonly class ColorValue
     }
 
     /**
+     * Formato da query/preset: `#rrggbb` ou `#rrggbbaa`, igual ao espelho TS.
+     */
+    public function serialized(): string
+    {
+        if ($this->isOpaque()) {
+            return $this->hex;
+        }
+
+        $byte = (int) round($this->alpha * 255);
+
+        return $this->hex.substr('00'.dechex($byte), -2);
+    }
+
+    /**
      * Atributos `fill` e, quando translucido, `fill-opacity`.
      */
     public function fillAttributes(): string

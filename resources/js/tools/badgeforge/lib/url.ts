@@ -35,6 +35,11 @@ export interface BuildBadgeUrlOptions {
     format?: BadgeFormat;
     /** Acrescenta `download=1`: a resposta vira `Content-Disposition: attachment`. */
     download?: boolean;
+    /**
+     * Slug para montar `logo=` mesmo quando os paths ainda nao chegaram.
+     * Usado por logos personalizados (`u_<ULID>`), carregados sob demanda.
+     */
+    logoSlug?: string;
 }
 
 export function buildBadgeUrl(
@@ -68,13 +73,15 @@ export function buildBadgeUrl(
         pushColor(params, 'labelColor', spec.labelColor, defaults.labelColor);
     }
 
-    if (spec.logo !== null) {
-        params.push(`logo=${encodeURIComponent(spec.logo.slug)}`);
+    const logoSlug = options.logoSlug ?? spec.logo?.slug ?? null;
+
+    if (logoSlug !== null) {
+        params.push(`logo=${encodeURIComponent(logoSlug)}`);
     }
 
     pushColor(params, 'logoColor', spec.logoColor, defaults.logoColor);
 
-    if (spec.logo !== null && spec.logoSize !== spec.style.logoSize) {
+    if (logoSlug !== null && spec.logoSize !== spec.style.logoSize) {
         params.push(`logoSize=${spec.logoSize}`);
     }
 

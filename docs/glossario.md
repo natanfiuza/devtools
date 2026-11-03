@@ -136,6 +136,9 @@
 - TTL da badge: `cacheSeconds` efetivo, padrao 86400 e clamp 300-86400 em `config/badgeforge.php`, enviado em `Cache-Control: public, max-age=...` (ADR-076).
 - Acesso ao provider: item publico e lido anonimamente na API publica do provider; item privado exige PAT do usuario pagador, cifrado em repouso, vinculado a badge pessoal, revogavel e nunca presente em URL, log ou exportacao (ADR-068).
 - Provider customizado: provider definido por usuario pago em painel (F7), com URL e parse proprios.
-- Preset: configuracao de badge salva por usuario cadastrado para reaproveitar (F3, ADR-066).
+- Preset: snapshot normalizado do formulario de badge, salvo por conta verificada e reaplicado no builder ou no painel; nao tem URL publica, cache nem analytics (F3, ADR-066 e ADR-079).
+- Logo personalizado: SVG multi-path enviado pela conta, aceito somente com `<svg>`, `<g>` e `<path>` e guardado como `viewBox` + paths normalizados; o arquivo cru nunca e servido (F3, ADR-078).
+- Slug opaco: identificador publico que nao revela dono nem caminho de conta; o logo personalizado usa `u_<ULID>` e o namespace `u_` e reservado (ADR-078).
+- Preset orfao: preset cujo logo referenciado deixou de existir (custom apagado ou embutido fora da config); a leitura marca `logoOrphaned` e a UI aplica o preset com `logo = none` (ADR-079).
 
 

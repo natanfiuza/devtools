@@ -37,7 +37,7 @@ for (const [path, svg] of Object.entries(files)) {
         logos[slug] = {
             slug,
             viewBox: viewBox[1],
-            pathData: pathData[1],
+            paths: [{ d: pathData[1], fillRule: null, clipRule: null }],
         };
     }
 }

@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { Copy, Download, Eraser, Sparkles } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import {
+    Bookmark,
+    Copy,
+    Download,
+    Eraser,
+    Image,
+    Sparkles,
+} from '@lucide/vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,14 +23,19 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
+import { login as loginRoute, pricing as pricingRoute } from '@/routes';
+import LogoLibraryDialog from './LogoLibraryDialog.vue';
+import PresetDialog from './PresetDialog.vue';
 import {
     defaultForm,
+    isCustomLogoSlug,
     locksColors,
     NO_LOGO,
     normalizeBadge,
     sampleForm,
     type BadgeFormState,
 } from './builder';
+import { customLogoAsset, loadCustomLogo } from './customLogos';
 import { DEFAULT_FONT } from './lib/fonts';
 import { badgeDimensions, renderBadge } from './lib/render';
 import {
@@ -32,16 +45,24 @@ import {
     urlSnippet,
 } from './lib/snippets';
 import { buildBadgeUrl, type BadgeFormat } from './lib/url';
-import type { BadgeForgeToolProps } from './types';
+import type {
+    BadgeForgeCustomLogoSummary,
+    BadgeForgePreset,
+    BadgeForgeToolProps,
+} from './types';
 
 /**
  * BadgeForge (ADR-072 a ADR-076).
  *
- * Formulario a esquerda, preview e snippets a direita. A pagina nao faz
- * requisicao nenhuma (ADR-002): o SVG e montado no navegador pelo espelho
- * TypeScript do renderer PHP e entra inline no DOM (ADR-077), para a fonte
- * web escolhida valer no preview. O endpoint publico so e usado por quem
+ * Formulario a esquerda, preview e snippets a direita. Geracao e previa sao
+ * locais (ADR-002, com a emenda da ADR-079): o SVG e montado no navegador pelo
+ * espelho TypeScript do renderer PHP e entra inline no DOM (ADR-077), para a
+ * fonte web escolhida valer no preview. O endpoint publico so e usado por quem
  * consome o snippet copiado ou clica em Baixar.
+ *
+ * O servidor entra apenas nas acoes explicitas de conta (ADR-078, ADR-079):
+ * buscar os paths de um logo personalizado escolhido, enviar/renomear/excluir
+ * logo e salvar/aplicar preset. Digitar no formulario nunca faz requisicao.
  */
 
 defineOptions({ inheritAttrs: false });
@@ -82,11 +103,92 @@ const hasContent = computed(
 
 const forcesColors = computed(() => locksColors(spec.value.style));
 
+/* ------------------------------------------------------------------ */
+/* Conta, logos personalizados e presets (ADR-078, ADR-079)            */
+/* ------------------------------------------------------------------ */
+
+const page = usePage();
+
+const logoDialogOpen = ref(false);
+const presetDialogOpen = ref(false);
+
+/** O idioma prefixa as rotas publicas; fora do Inertia cai no fallback. */
+const localeSlug = computed<string>(() => {
+    const shared = page.props as Record<string, unknown> | undefined;
+
+    return typeof shared?.localeSlug === 'string' ? shared.localeSlug : 'en';
+});
+
+const isAuthenticated = computed<boolean>(() => {
+    const shared = page.props as Record<string, unknown> | undefined;
+    const auth = shared?.auth;
+
+    return (
+        typeof auth === 'object' &&
+        auth !== null &&
+        (auth as { user?: unknown }).user != null
+    );
+});
+
+/** Sem Inertia (testes) o idioma fica no fallback e as rotas seguem validas. */
+const loginUrl = computed<string>(
+    () => loginRoute({ locale: localeSlug.value }).url,
+);
+
+const pricingUrl = computed<string>(
+    () => pricingRoute({ locale: localeSlug.value }).url,
+);
+
+const customLogoMap = computed<Map<string, BadgeForgeCustomLogoSummary>>(() => {
+    const map = new Map<string, BadgeForgeCustomLogoSummary>();
+
+    for (const logo of props.customLogos) {
+        map.set(logo.slug.toLowerCase().trim(), logo);
+    }
+
+    return map;
+});
+
+/** Busca os paths uma unica vez, na selecao explicita do logo. */
+function ensureCustomLogo(slug: string): void {
+    const summary = customLogoMap.value.get(slug.toLowerCase().trim());
+
+    if (summary === undefined || customLogoAsset(summary.slug) !== null) {
+        return;
+    }
+
+    void loadCustomLogo(summary);
+}
+
+watch(
+    () => form.value.logo,
+    (slug) => {
+        if (isCustomLogoSlug(slug)) {
+            ensureCustomLogo(slug);
+        }
+    },
+);
+
 const origin = typeof window === 'undefined' ? '' : window.location.origin;
+
+/**
+ * Slug custom mesmo antes de os paths chegarem: a URL e o snippet nunca
+ * dependem do preview (ADR-078). Logo custom desconhecido (preset orfao) fica
+ * de fora e cai para "sem logo".
+ */
+const customLogoSlug = computed<string | null>(() => {
+    const slug = form.value.logo;
+
+    return isCustomLogoSlug(slug) &&
+        customLogoMap.value.has(slug.toLowerCase().trim())
+        ? slug.toLowerCase().trim()
+        : null;
+});
 
 const url = computed(() =>
     buildBadgeUrl(origin, props.endpoint, spec.value, props, {
         format: format.value,
+        logoSlug: customLogoSlug.value ?? undefined,
     }),
 );
 
@@ -94,6 +196,7 @@ const downloadUrl = computed(() =>
     buildBadgeUrl(origin, props.endpoint, spec.value, props, {
         format: format.value,
         download: true,
+        logoSlug: customLogoSlug.value ?? undefined,
     }),
 );
 
@@ -136,10 +239,111 @@ function loadSample(): void {
 function reset(): void {
     form.value = defaultForm(props);
 }
+
+/** Texto do snapshot; qualquer valor fora do contrato cai no default. */
+function presetText(value: unknown, fallback: string): string {
+    return typeof value === 'string' ? value : fallback;
+}
+
+/**
+ * Aplica um preset ao formulario. `logoOrphaned` ja cobre o custom excluido;
+ * embutido removido da config tambem cai para "sem logo" (ADR-079).
+ */
+function applyPreset(preset: BadgeForgePreset): void {
+    const source = preset.form;
+
+    form.value = {
+        label: presetText(source.label, ''),
+        message: presetText(source.message, ''),
+        style: presetText(source.style, props.defaults.style),
+        font:
+            typeof source.font === 'string' && source.font !== ''
+                ? source.font
+                : DEFAULT_FONT,
+        color: presetText(source.color, props.defaults.color),
+        labelColor: presetText(source.labelColor, props.defaults.labelColor),
+        logo: preset.logoOrphaned ? NO_LOGO : presetText(source.logo, NO_LOGO),
+        logoColor: presetText(source.logoColor, props.defaults.logoColor),
+        logoSize: typeof source.logoSize === 'number' ? source.logoSize : '',
+        logoPosition: source.logoPosition === 'right' ? 'right' : 'left',
+        link: presetText(source.link, ''),
+        cacheSeconds:
+            typeof source.cacheSeconds === 'number' ? source.cacheSeconds : '',
+    };
+}
+
+/**
+ * `?preset=<ulid>` vem do painel. A URL e limpa antes de aplicar para um
+ * recarregamento nao reaplicar o snapshot por cima do que foi editado.
+ */
+onMounted(() => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    const current = new URL(window.location.href);
+    const presetId = current.searchParams.get('preset');
+
+    if (presetId === null) {
+        return;
+    }
+
+    const preset = props.presets.find((item) => item.id === presetId);
+
+    current.searchParams.delete('preset');
+    window.history.replaceState(
+        window.history.state,
+        '',
+        current.toString(),
+    );
+
+    if (preset !== undefined) {
+        applyPreset(preset);
+    }
+});
 </script>
 
 <template>
   <div class="mx-auto max-w-6xl space-y-6 py-4">
+    <!-- Gestao da conta: os dialogos so tocam o servidor em acao explicita. -->
+    <div
+      v-if="props.management.canManage"
+      class="flex flex-wrap items-center gap-2"
+      data-test="badge-management"
+    >
+      <Button
+        variant="outline"
+        size="sm"
+        data-test="badge-manage-logos"
+        @click="logoDialogOpen = true"
+      >
+        <Image class="size-4" />
+        {{ t('tools.badgeforge.management.logos_button') }}
+      </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        data-test="badge-manage-presets"
+        @click="presetDialogOpen = true"
+      >
+        <Bookmark class="size-4" />
+        {{ t('tools.badgeforge.management.presets_button') }}
+      </Button>
+    </div>
+    <p
+      v-else-if="!isAuthenticated"
+      class="text-xs text-muted-foreground"
+      data-test="badge-login-cta"
+    >
+      {{ t('tools.badgeforge.management.login_cta') }}
+      <a
+        :href="loginUrl"
+        class="font-medium underline underline-offset-2"
+      >
+        {{ t('tools.badgeforge.management.login_action') }}
+      </a>
+    </p>
+
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Formulario -->
       <section class="space-y-6">
@@ -327,6 +531,14 @@ function reset(): void {
                     v-for="logo in props.logos"
                     :key="logo.slug"
                     :value="logo.slug"
+                  >
+                    {{ logo.name }}
+                  </SelectItem>
+                  <SelectItem
+                    v-for="logo in props.customLogos"
+                    :key="logo.slug"
+                    :value="logo.slug"
+                    data-test="badge-logo-custom-option"
                   >
                     {{ logo.name }}
                   </SelectItem>
@@ -626,5 +838,22 @@ function reset(): void {
         </div>
       </section>
     </div>
+
+    <LogoLibraryDialog
+      v-if="props.management.canManage"
+      v-model:open="logoDialogOpen"
+      :logos="props.customLogos"
+      :limits="props.limits.customLogos"
+      :upgrade-url="pricingUrl"
+    />
+
+    <PresetDialog
+      v-if="props.management.canManage"
+      v-model:open="presetDialogOpen"
+      :presets="props.presets"
+      :limits="props.limits.presets"
+      :builder-form="form"
+      @apply="applyPreset"
+    />
   </div>
 </template>

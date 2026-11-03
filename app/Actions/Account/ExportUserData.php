@@ -4,6 +4,8 @@ namespace App\Actions\Account;
 
 use App\Exceptions\Ai\PayloadCodecException;
 use App\Models\AiRequest;
+use App\Models\BadgeCustomLogo;
+use App\Models\BadgePreset;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\SocialAccount;
@@ -111,6 +113,34 @@ final class ExportUserData
                 ->get()
                 ->map(fn (AiRequest $request): array => $this->aiRequest($request))
                 ->all(),
+            // BadgeForge: o logo e o SVG normalizado que a pessoa enviou (o
+            // arquivo cru nunca foi gravado) e o preset e o formulario que ela
+            // salvou. Ver ADR-078 e ADR-079.
+            'badgeforge' => [
+                'custom_logos' => $user->badgeCustomLogos()
+                    ->orderBy('created_at')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (BadgeCustomLogo $logo): array => [
+                        'name' => $logo->name,
+                        'slug' => $logo->slug(),
+                        'view_box' => $logo->view_box,
+                        'paths' => $logo->paths,
+                        'size_bytes' => $logo->size_bytes,
+                        'created_at' => $logo->created_at?->toIso8601String(),
+                    ])
+                    ->all(),
+                'presets' => $user->badgePresets()
+                    ->orderBy('created_at')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (BadgePreset $preset): array => [
+                        'name' => $preset->name,
+                        'form' => $preset->payload,
+                        'created_at' => $preset->created_at?->toIso8601String(),
+                    ])
+                    ->all(),
+            ],
             // O livro-razao do consumo: e da conta, e nao estado do sistema.
             'usage' => $user->usageLedger()
                 ->orderBy('id')

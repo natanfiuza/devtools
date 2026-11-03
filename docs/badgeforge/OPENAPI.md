@@ -1,13 +1,15 @@
 # OpenAPI BadgeForge (resumo)
 
-A superfície da F1/F2 está implementada; os demais caminhos aparecem como
-planejados. O OpenAPI completo em 3.1 é entregue na F8 (`ADR-071`).
+A superfície da F1/F2 está implementada, com o `logo=u_<ULID>` da F3; os
+demais caminhos aparecem como planejados. O OpenAPI completo em 3.1 é
+entregue na F8 (`ADR-071`). A gestão de logos e presets da F3 é web/Inertia
+autenticada e não faz parte desta API.
 
 ```yaml
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.2.0
+  version: 1.3.0
 paths:
   /api/badges/static/{label}/{message}.{ext}:
     get:
@@ -42,7 +44,10 @@ paths:
           schema: { type: string, default: "#555555" }
         - name: logo
           in: query
-          description: Slug de logo embutido; desconhecido é ignorado.
+          description: >
+            Slug de logo embutido ou `u_<ULID>` de logo personalizado
+            (namespace `u_` reservado). Desconhecido, malformado ou apagado é
+            ignorado: o badge sai sem logo, 200.
           schema: { type: string }
         - name: logoColor
           in: query
@@ -59,6 +64,9 @@ paths:
           schema: { type: string, format: uri }
         - name: cacheSeconds
           in: query
+          description: >
+            Clamp 300–86400. Com `logo=u_...`, o teto cai para
+            `custom_logos.max_cache_seconds` (3600).
           schema: { type: integer, minimum: 300, maximum: 86400, default: 86400 }
         - name: font
           in: query

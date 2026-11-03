@@ -22,6 +22,15 @@ const expectedFiles = import.meta.glob(
 
 const PROPS = toolProps as BadgeForgeToolProps;
 
+interface FixtureInlineLogo {
+    viewBox: string;
+    paths: Array<{
+        d: string;
+        fillRule?: 'nonzero' | 'evenodd' | null;
+        clipRule?: 'nonzero' | 'evenodd' | null;
+    }>;
+}
+
 interface FixtureCase {
     name: string;
     spec: {
@@ -31,12 +40,35 @@ interface FixtureCase {
         font?: string | null;
         labelColor: { hex: string; alpha: number };
         messageColor: { hex: string; alpha: number };
-        logo: string | null;
+        logo: string | FixtureInlineLogo | null;
         logoColor: { hex: string; alpha: number };
         logoSize: number;
         logoPosition: 'left' | 'right';
         link: string | null;
         cacheSeconds: number;
+    };
+}
+
+function logoFrom(
+    logo: FixtureCase['spec']['logo'],
+): BadgeSpec['logo'] {
+    if (logo === null) {
+        return null;
+    }
+
+    if (typeof logo === 'string') {
+        return logoAsset(logo);
+    }
+
+    return {
+        slug: 'fixture',
+        viewBox: logo.viewBox,
+        paths: logo.paths.map((path) => ({
+            d: path.d,
+            fillRule: path.fillRule ?? null,
+            clipRule: path.clipRule ?? null,
+        })),
+        custom: true,
     };
 }
 
@@ -48,7 +80,7 @@ function specFrom(data: FixtureCase['spec']): BadgeSpec {
         font: fontAsset(data.font ?? null, PROPS),
         labelColor: { ...data.labelColor },
         messageColor: { ...data.messageColor },
-        logo: data.logo === null ? null : logoAsset(data.logo),
+        logo: logoFrom(data.logo),
         logoColor: { ...data.logoColor },
         logoSize: data.logoSize,
         logoPosition: data.logoPosition,

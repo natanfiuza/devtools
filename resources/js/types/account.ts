@@ -8,6 +8,7 @@
 
 // `Paginator` e a forma da paginacao do Laravel, nao uma coisa do painel
 // administrativo; mora em `./admin` por ter nascido la.
+import type { BadgeForgeToolProps } from '@/tools/badgeforge/types';
 import type { Paginator } from './admin';
 
 /** Plano vigente da conta (`User::effectivePlan`). */
@@ -122,6 +123,14 @@ export type AccountHistoryItem = {
     sql: string | null;
     summary: string | null;
     errorCode: string | null;
+};
+
+/** Props do BadgeForge da conta (`/dashboard/badgeforge`, ADR-079). */
+export type AccountBadgeForgeProps = {
+    /** Mesmo contrato da tool: a pagina de conta nao recalcula limites. */
+    toolProps: BadgeForgeToolProps;
+    toolUrl: string;
+    upgradeUrl: string;
 };
 
 /** Props do Historico (`/dashboard/history`). */

@@ -5,8 +5,8 @@ BadgeForge é uma plataforma de badges SVG/PNG integrada ao devtools.natanfiuza.
 
 ## 2. Perfis
 - Anônimo: badges estáticas, estilos, logos embutidos, preview, snippets, download.
-- Cadastrado: até 2 logos personalizados, JSON endpoint, presets, analytics básico.
-- Pago: logos ilimitados, badges pessoais, providers customizados, analytics completo, exportação CSV, sem limite de badges pessoais.
+- Cadastrado (F3): até 2 logos personalizados (`custom_logos.free_limit`, em config), presets ilimitados, JSON endpoint (F5), analytics básico (F7).
+- Pago: logos personalizados ilimitados, badges pessoais (F4), providers customizados (F7), analytics completo, exportação CSV, sem limite de badges pessoais.
 
 ## 3. Formatos
 - SVG: formato canônico (F1, ADR-073).
@@ -22,6 +22,14 @@ flat, flat-square, plastic, for-the-badge, social.
 
 ## 5. Parâmetros
 style, label, message, color, labelColor, logo, logoColor, logoSize, logoPosition, link, download, cacheSeconds, refresh, font.
+
+`logo` aceita um slug embutido ou `u_<ULID>` de um logo personalizado (F3,
+ADR-078). O namespace `u_` é reservado. Logo inexistente, apagado ou
+malformado não é erro: o badge sai sem logo, 200.
+
+`cacheSeconds` em badge com `logo=u_...` é limitado a
+`custom_logos.max_cache_seconds` (3600 s), para que exclusão/renomeação do logo
+apareçam em no máximo 1 h. Badge sem logo custom mantém o teto de 86400 s.
 
 ## 6. Tipos
 ### Estática
@@ -53,6 +61,10 @@ Cache estático do PNG (F2): `storage/app/data/tools/badgeforge/static/{sha256(s
 Tabelas:
 - badge_assets: id ULID, user_id nullable, slug, type, provider_slug, source_path, svg_path, png_path, etag, bytes, last_generated_at, expires_at, timestamps.
 - badge_asset_views: id, badge_asset_id, user_id nullable, ip_hash, user_agent_hash, user_agent, referer_domain, country, format, style, cache_hit, viewed_at.
+
+F3 (ADR-078, ADR-079):
+- badge_custom_logos: id ULID, user_id, name, view_box, paths (JSON), path_count, size_bytes, timestamps; único por (user_id, name). Guarda só o SVG normalizado — o arquivo enviado nunca vai para banco ou disco.
+- badge_presets: id ULID, user_id, name, payload (JSON — snapshot do formulário), timestamps; único por (user_id, name). Não tem URL pública nem cache.
 
 ## 8. Providers
 Tabelas:
@@ -100,7 +112,12 @@ Aplica-se a provider e endpoint. Estáticas não são limitadas além de proteç
 - Exportação em lote disponível para pagos.
 
 ## 13. Presets
-Usuários cadastrados podem salvar presets: label, message, estilo, cores, logo, provider e parâmetros. Preset não é badge publicada.
+Usuários cadastrados podem salvar presets: label, message, estilo, fonte, cores, logo (`none`, embutido ou `u_<ULID>`), logoSize, logoPosition, link e cacheSeconds. Preset é um **snapshot normalizado do formulário**, não uma badge publicada: não tem URL, cache, analytics nem registro de acesso (F3, ADR-079).
+
+- Limite em `config/badgeforge.php` (`presets.limit`); `null` = ilimitado, e o valor vale para qualquer conta verificada.
+- Um preset que aponta para logo excluído é lido como **órfão** (`logoOrphaned`) e aplicado com `logo = none`, com aviso na UI.
+- `?preset=<ulid>` abre o builder com o snapshot aplicado; o parâmetro é removido da URL depois.
+- Gestão no builder e em `/dashboard/badgeforge`, com item na navegação da conta.
 
 ## 14. Documentação
 - Pública em /docs/badgeforge.
@@ -110,9 +127,11 @@ Usuários cadastrados podem salvar presets: label, message, estilo, cores, logo,
 
 ## 15. Segurança
 - Sanitização de SVG por allowlist de tags/atributos e escape XML; nada de markup do usuário entra no documento.
+- Logo personalizado (F3, ADR-078): o parser aceita só `<svg>`, `<g>` e `<path>`, com allowlist de atributos (`viewBox`, `d`, `fill-rule`, `clip-rule`) e limites de bytes/paths/profundidade; recusa `DOCTYPE`, entidade, PI, `script`, `style`, `image`, `use`, `foreignObject`, `on*`, `href`, `style`, `transform`, `opacity` e `url(`. Só `viewBox` + paths normalizados são persistidos; o upload cru nunca é servido, logado ou exportado.
 - `link` só aceita `http`/`https` e sai com `rel="noopener noreferrer"`.
 - SSRF protection (F5).
 - Rate limit global; o endpoint estático não tem throttle próprio na F1.
+- Gestão autenticada (F3): rotas sob `auth, verified, active`, escritas em `throttle:badgeforge-management`, e registro de outra conta responde **404** (nunca 403).
 - Hash de IP (analytics, a partir da F7).
 - Auditoria.
 - Credenciais: nenhum token global em `.env`; PAT do usuário só para item privado, cifrado, nunca em URL ou log (ADR-068).
@@ -120,7 +139,7 @@ Usuários cadastrados podem salvar presets: label, message, estilo, cores, logo,
 ## 16. Fases
 F1: núcleo SVG estático + builder + snippets + cache. **Entregue em 2026-10-31** — ver `docs/acceptance/BADGEFORGE-FASE-1.md`.
 F2: PNG + Imagick + download + docs + fontes `?font=`. **Entregue em 2026-11-02** — ver `docs/acceptance/BADGEFORGE-FASE-2.md` e ADR-077.
-F3: logos personalizados + presets + contas.
+F3: logos personalizados + presets + contas. **Entregue em 2026-11-02** — ver `docs/acceptance/BADGEFORGE-FASE-3.md`, ADR-078 e ADR-079.
 F4: providers GitHub/npm/Packagist/Docker (acesso público anônimo; PAT de usuário pago só para item privado).
 F5: endpoint JSON + SSRF.
 F6: providers Codecov/Coveralls/Laravel/PHP/Python.

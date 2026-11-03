@@ -50,7 +50,22 @@
         "logoSize": { "min": 8, "max": 20 },
         "cacheSeconds": { "default": 86400, "min": 300, "max": 86400 },
         "linkMaxLength": 2048,
-        "png": { "maxWidth": 600 }
+        "png": { "maxWidth": 600 },
+        "customLogos": {
+            "limit": 0,
+            "used": 0,
+            "maxBytes": 262144,
+            "maxPaths": 200,
+            "maxPathLength": 4000,
+            "maxTotalPathLength": 100000,
+            "maxCacheSeconds": 3600,
+            "nameMaxLength": 80
+        },
+        "presets": {
+            "limit": 0,
+            "used": 0,
+            "nameMaxLength": 80
+        }
     },
     "defaults": {
         "style": "flat",
@@ -58,5 +73,12 @@
         "labelColor": "#555555",
         "logoColor": "#ffffff",
         "logoPosition": "left"
-    }
+    },
+    "management": {
+        "canManage": false,
+        "canSavePresets": false,
+        "isPaid": false
+    },
+    "customLogos": [],
+    "presets": []
 }

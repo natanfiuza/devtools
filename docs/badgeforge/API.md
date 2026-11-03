@@ -29,12 +29,12 @@ throttle próprio.
 | `style` | `flat` | `flat`, `flat-square`, `plastic`, `for-the-badge`, `social`; outro valor → `flat` |
 | `color` | `#9f9f9f` | cor inválida → padrão |
 | `labelColor` | `#555555` | cor inválida → padrão |
-| `logo` | — | slug fora do registro embutido → ignorado |
+| `logo` | — | slug embutido ou `u_<ULID>` de logo personalizado; desconhecido/apagado → badge sem logo |
 | `logoColor` | `#ffffff` | cor inválida → padrão |
 | `logoSize` | 10 (14 em `for-the-badge`) | clamp 8–20 |
 | `logoPosition` | `left` | `left` ou `right`; outro → `left` |
 | `link` | — | só `http`/`https`; outro → sem âncora |
-| `cacheSeconds` | 86400 | inteiro com clamp 300–86400; inválido → padrão |
+| `cacheSeconds` | 86400 | inteiro com clamp 300–86400; inválido → padrão; no máximo 3600 com `logo=u_...` |
 | `font` | pilha do estilo | `fira-code`, `libre-franklin` ou `space-grotesk`; outro valor → pilha do estilo |
 | `download` | — | `1` acrescenta `Content-Disposition: attachment`; outro valor é ignorado |
 
@@ -44,6 +44,23 @@ transparência saem como `fill` + `fill-opacity`.
 
 O estilo `social` fixa as próprias cores (`#555555` e `#007ec6`): `color` e
 `labelColor` não têm efeito nele.
+
+### Logo personalizado (`?logo=u_<ULID>`, F3)
+
+O prefixo `u_` é um namespace reservado: o catálogo embutido nunca usa esses
+slugs. O endpoint de imagem **não exige autenticação** e continua stateless —
+o ULID é a referência opaca, sem nome de usuário ou caminho de conta.
+
+- O logo é um SVG multi-path sanitizado no upload: só `<svg>`, `<g>` e `<path>`
+  com `viewBox`, `d`, `fill-rule` e `clip-rule`. O arquivo cru nunca é
+  persistido nem servido (ADR-078).
+- Slug malformado, ULID inexistente, logo apagado ou banco indisponível →
+  **200 sem logo**, nunca 4xx. Badges já publicados continuam válidos.
+- Badge com logo personalizado tem `cacheSeconds` limitado a
+  `custom_logos.max_cache_seconds` (3600 s), para que renomear/excluir o logo
+  apareça em no máximo 1 h. O teto normal (86400 s) vale para os embutidos.
+- O ETag continua sendo o sha256 do corpo servido, então a mudança do logo
+  muda o ETag naturalmente.
 
 ### Exemplos
 
@@ -110,7 +127,29 @@ GET /api/badges/endpoint.svg?url=https://...
 
 Requer autenticação. HTTPS obrigatório, SSRF bloqueado, TTL mínimo 300 s.
 
-## Pessoal (F3+ — planejado)
+## Gestão da conta (F3 — web/Inertia, não é API pública)
+
+Estas rotas são da área autenticada (sessão + CSRF, `auth, verified, active`);
+não há API pública de gestão na F3.
+
+| Método | Caminho | Ação |
+|---|---|---|
+| GET | `/dashboard/badgeforge` | página da conta (limites, logos, presets) |
+| POST | `/badgeforge/logos` | upload SVG + parse (multipart) |
+| GET | `/badgeforge/logos/{ulid}` | JSON `{viewBox, paths}` — só o dono |
+| PATCH | `/badgeforge/logos/{ulid}` | renomear |
+| DELETE | `/badgeforge/logos/{ulid}` | excluir |
+| POST | `/badgeforge/presets` | criar snapshot |
+| PATCH | `/badgeforge/presets/{ulid}` | renomear |
+| DELETE | `/badgeforge/presets/{ulid}` | excluir |
+
+Regras: escritas em `throttle:badgeforge-management`; registro de outra conta
+responde **404**; SVG inválido responde **422** com
+`validation.custom_logo.<code>`; limites em `config/badgeforge.php` (Free: 2
+logos; pago: ilimitado; presets: ilimitados). Os paths nunca viajam nas props
+da página — são buscados sob demanda no `GET` do logo.
+
+## Pessoal (F4 — planejado)
 
 ```text
 GET /b/{username}/{ulid}.svg
@@ -119,7 +158,11 @@ GET /b/{username}/{ulid}.svg
 Apenas usuários pagos criam. A URL carrega só o ULID opaco; o PAT de item
 privado nunca aparece nela.
 
-## Metadados e gestão (fases futuras)
+## Metadados e gestão (API pública — fases futuras)
+
+A gestão de logos e presets na F3 é web/Inertia autenticada (seção acima),
+não esta API. Os caminhos abaixo seguem planejados para as fases de
+providers, analytics e OpenAPI completo:
 
 ```text
 GET /api/badgeforge/providers

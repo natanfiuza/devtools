@@ -12,6 +12,7 @@ import NewsletterForm from '@/components/NewsletterForm.vue';
 import SearchTrigger from '@/components/SearchTrigger.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
 import {
     Sheet,
     SheetContent,
@@ -292,5 +293,6 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
     <ConsentBanner />
     <AnalyticsScript />
     <CommandPalette />
+    <Toaster />
   </div>
 </template>

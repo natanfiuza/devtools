@@ -15,6 +15,7 @@ final class BadgeRequest
     public function __construct(
         private readonly StyleCatalog $styles,
         private readonly LogoCatalog $logos,
+        private readonly CustomLogoRepository $customLogos,
         private readonly BadgeFontCatalog $fonts,
     ) {}
 
@@ -47,9 +48,10 @@ final class BadgeRequest
         $messageColor = $style->messageColor
             ?? Color::parseOr(self::queryString($query, 'color'), (string) config('badgeforge.colors.default'));
 
-        $logo = $this->logos->find(self::queryString($query, 'logo'));
+        $rawLogo = self::queryString($query, 'logo');
+        $logo = $this->resolveLogo($rawLogo);
 
-        $logoSize = self::integer(
+        $logoSize = BadgeInput::integer(
             self::queryString($query, 'logoSize'),
             $style->logoSize,
             (int) config('badgeforge.limits.logo_size.min', 8),
@@ -58,12 +60,21 @@ final class BadgeRequest
 
         $logoPosition = self::queryString($query, 'logoPosition') === 'right' ? 'right' : 'left';
 
-        $cacheSeconds = self::integer(
+        $cacheSeconds = BadgeInput::integer(
             self::queryString($query, 'cacheSeconds'),
             (int) config('badgeforge.limits.cache_seconds.default', 86400),
             (int) config('badgeforge.limits.cache_seconds.min', 300),
             (int) config('badgeforge.limits.cache_seconds.max', 86400),
         );
+
+        if (self::isCustomLogoSlug($rawLogo)) {
+            // Logos personalizados podem ser excluidos: o teto garante que a
+            // remocao chegue ao CDN em no maximo `max_cache_seconds` (ADR-078).
+            $cacheSeconds = min(
+                $cacheSeconds,
+                (int) config('badgeforge.custom_logos.max_cache_seconds', 3600),
+            );
+        }
 
         return new BadgeSpec(
             label: $label,
@@ -76,9 +87,27 @@ final class BadgeRequest
             logoColor: Color::parseOr(self::queryString($query, 'logoColor'), (string) config('badgeforge.colors.logo')),
             logoSize: $logoSize,
             logoPosition: $logoPosition,
-            link: self::link(self::queryString($query, 'link')),
+            link: BadgeInput::link(self::queryString($query, 'link')),
             cacheSeconds: $cacheSeconds,
         );
+    }
+
+    /**
+     * `u_` e namespace reservado para logos personalizados; um slug nesse
+     * formato nunca cai no catalogo embutido.
+     */
+    private function resolveLogo(?string $raw): ?Logo
+    {
+        if (self::isCustomLogoSlug($raw)) {
+            return $this->customLogos->find($raw);
+        }
+
+        return $this->logos->find($raw);
+    }
+
+    private static function isCustomLogoSlug(?string $raw): bool
+    {
+        return $raw !== null && preg_match('/^u_/i', trim($raw)) === 1;
     }
 
     public static function decodeText(string $segment): ?string
@@ -130,36 +159,5 @@ final class BadgeRequest
         $value = $query[$key] ?? null;
 
         return is_string($value) ? $value : null;
-    }
-
-    private static function integer(?string $raw, int $default, int $min, int $max): int
-    {
-        $value = $raw !== null && preg_match('/^\d{1,9}$/', trim($raw)) === 1
-            ? (int) trim($raw)
-            : $default;
-
-        return max($min, min($max, $value));
-    }
-
-    private static function link(?string $raw): ?string
-    {
-        if ($raw === null) {
-            return null;
-        }
-
-        $value = trim($raw);
-        $maxLength = (int) config('badgeforge.limits.link_max_length', 2048);
-
-        if ($value === '' || mb_strlen($value, 'UTF-8') > $maxLength) {
-            return null;
-        }
-
-        if (preg_match('~^https?://[^\s"\'<>]+$~i', $value) !== 1) {
-            return null;
-        }
-
-        $host = parse_url($value, PHP_URL_HOST);
-
-        return is_string($host) && $host !== '' ? $value : null;
     }
 }

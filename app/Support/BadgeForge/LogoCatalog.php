@@ -97,7 +97,7 @@ final class LogoCatalog
             slug: $slug,
             name: (string) ($definition['name'] ?? $slug),
             viewBox: $viewBox[1],
-            pathData: $path[1],
+            paths: [new LogoPath($path[1])],
         );
     }
 }

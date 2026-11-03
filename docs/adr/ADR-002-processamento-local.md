@@ -18,3 +18,15 @@ continua cobrindo isso. O backend da F5 e o que a excecao exigia e nada alem:
 (ADR-019), o provedor (ADR-039) e o ledger/cache (ADR-040). O resto do site
 continua estatico: a pagina e o SEO saem do servidor, mas nenhum texto da tool
 e processado la.
+
+## Emenda da F3 do BadgeForge (2026-11-02)
+
+A gestao de logos personalizados e presets (ADR-079) acrescentou ao BadgeForge
+uma excecao **estreita e explicita**. Geracao, preview, snippets e download
+continuam 100% no navegador; nenhuma digitacao faz requisicao. O servidor e
+chamado apenas em acao de conta: buscar os paths do logo personalizado
+escolhido, enviar/renomear/excluir logo e salvar/renomear/excluir preset
+(`/badgeforge/*` e `/dashboard/badgeforge`, sob `auth, verified, active`).
+Nao ha endpoint de render ou de validacao de SVG, e as demais tools de
+navegador seguem sem backend - a guarda "digitar nao dispara fetch" esta nos
+testes da tool.

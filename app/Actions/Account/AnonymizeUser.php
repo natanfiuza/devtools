@@ -84,6 +84,12 @@ final class AnonymizeUser
             $user->aiRequests()->delete();
             $user->tokens()->delete();
 
+            // Logos e presets do BadgeForge sao dado da pessoa (F3, ADR-078 e
+            // ADR-079). Badges ja publicados sao stateless: a URL leva o ULID
+            // e passa a renderizar sem logo, sem reescrever nada.
+            $user->badgeCustomLogos()->delete();
+            $user->badgePresets()->delete();
+
             DB::table('sessions')->where('user_id', $id)->delete();
         });
     }

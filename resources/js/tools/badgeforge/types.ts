@@ -24,6 +24,65 @@ export interface BadgeForgeLimits {
     cacheSeconds: { default: number; min: number; max: number };
     linkMaxLength: number;
     png: { maxWidth: number };
+    customLogos: BadgeForgeCustomLogoLimits;
+    presets: BadgeForgePresetLimits;
+}
+
+/** `limit: null` = ilimitado; `0` = gestao indisponivel (convidado). */
+export interface BadgeForgeCustomLogoLimits {
+    limit: number | null;
+    used: number;
+    maxBytes: number;
+    maxPaths: number;
+    maxPathLength: number;
+    maxTotalPathLength: number;
+    maxCacheSeconds: number;
+    nameMaxLength: number;
+}
+
+export interface BadgeForgePresetLimits {
+    limit: number | null;
+    used: number;
+    nameMaxLength: number;
+}
+
+export interface BadgeForgeManagement {
+    canManage: boolean;
+    canSavePresets: boolean;
+    isPaid: boolean;
+}
+
+/** Metadados de um logo personalizado; os paths vem sob demanda (ADR-078). */
+export interface BadgeForgeCustomLogoSummary {
+    id: string;
+    slug: string;
+    name: string;
+    viewBox: string;
+    pathCount: number;
+    sizeBytes: number;
+}
+
+/** Snapshot normalizado do formulario que o preset guarda. */
+export interface BadgeForgePresetForm {
+    label: string;
+    message: string;
+    style: string;
+    font: string | null;
+    color: string;
+    labelColor: string;
+    logo: string;
+    logoColor: string;
+    logoSize: number;
+    logoPosition: 'left' | 'right';
+    link: string;
+    cacheSeconds: number;
+}
+
+export interface BadgeForgePreset {
+    id: string;
+    name: string;
+    form: BadgeForgePresetForm;
+    logoOrphaned: boolean;
 }
 
 export interface BadgeForgeDefaults {
@@ -41,6 +100,9 @@ export interface BadgeForgeToolProps {
     fonts: BadgeFont[];
     limits: BadgeForgeLimits;
     defaults: BadgeForgeDefaults;
+    management: BadgeForgeManagement;
+    customLogos: BadgeForgeCustomLogoSummary[];
+    presets: BadgeForgePreset[];
 }
 
 /** Cor resolvida: hexadecimal canonico (#rrggbb) e alfa entre 0 e 1. */
@@ -49,11 +111,22 @@ export interface BadgeColor {
     alpha: number;
 }
 
-/** Logo embutido ja extraido do SVG de `resources/badgeforge/logos`. */
+/** Um path ja validado (espelho de `App\Support\BadgeForge\LogoPath`). */
+export interface BadgeLogoPath {
+    d: string;
+    fillRule: 'nonzero' | 'evenodd' | null;
+    clipRule: 'nonzero' | 'evenodd' | null;
+}
+
+/**
+ * Logo pronto para o renderer: embutido (`custom: false`, um path) ou
+ * personalizado (`custom: true`, varios paths). Ver ADR-078.
+ */
 export interface BadgeLogo {
     slug: string;
     viewBox: string;
-    pathData: string;
+    paths: BadgeLogoPath[];
+    custom?: boolean;
 }
 
 /** Geometria resolvida de um estilo (espelho de `App\Support\BadgeForge\Style`). */

@@ -3,6 +3,8 @@
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\AiRequest;
+use App\Models\BadgeCustomLogo;
+use App\Models\BadgePreset;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -185,6 +187,10 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
     AiRequest::factory()->for($user)->done()->create(['history_visible' => true]);
     $user->createToken('cli', ['ai:query']);
 
+    // Logos e presets do BadgeForge tambem sao dado da pessoa (ADR-078, ADR-079).
+    BadgeCustomLogo::factory()->for($user)->create();
+    BadgePreset::factory()->for($user)->create();
+
     // Simula exclusao ha mais de 30 dias
     $user->delete();
     DB::table('users')->where('id', $user->id)->update(['deleted_at' => now()->subDays(31)]);
@@ -208,7 +214,9 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
         ->and($anonima->activeSubscription())->toBeNull()
         ->and($anonima->history_enabled)->toBeFalse()
         ->and($anonima->aiRequests()->count())->toBe(0)
-        ->and($anonima->tokens()->count())->toBe(0);
+        ->and($anonima->tokens()->count())->toBe(0)
+        ->and($anonima->badgeCustomLogos()->count())->toBe(0)
+        ->and($anonima->badgePresets()->count())->toBe(0);
 });
 
 it('requires the correct password to delete the account', function () {

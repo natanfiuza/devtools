@@ -59,6 +59,42 @@ return [
     ],
 
     /*
+    | Logos personalizados (F3, ADR-078): o upload vira viewBox + lista de
+    | paths normalizados no banco; o arquivo cru nunca e guardado nem servido.
+    | O limite de logos e por conta: Free tem teto, pago e ilimitado
+    | (`paid_limit` nulo). O teto de cache garante que excluir/renomear um logo
+    | apareca em no maximo uma hora nos badges ja publicados.
+    */
+    'custom_logos' => [
+        'free_limit' => 2,
+        'paid_limit' => null,
+        'name_max_length' => 80,
+        'max_bytes' => 262144,
+        'max_paths' => 200,
+        'max_path_length' => 4000,
+        'max_total_path_length' => 100000,
+        'max_viewbox_extent' => 10000,
+        'max_document_depth' => 8,
+        'max_cache_seconds' => 3600,
+    ],
+
+    /*
+    | Presets (F3, ADR-079): snapshot do formulario, sem URL publica.
+    */
+    'presets' => [
+        'name_max_length' => 80,
+        'limit' => null,
+    ],
+
+    /*
+    | Gestao autenticada de logos/presets: limite de taxa das escritas.
+    */
+    'management' => [
+        'rate_limit' => 20,
+        'rate_decay_seconds' => 60,
+    ],
+
+    /*
     | Logos embutidos: slug -> arquivo. O viewBox e o path sao lidos do
     | proprio SVG; o catalogo recusa arquivo que nao tenha exatamente um
     | <path> e o <svg> raiz.

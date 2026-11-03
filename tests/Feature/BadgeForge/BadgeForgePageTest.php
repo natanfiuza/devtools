@@ -48,6 +48,21 @@ it('acompanha os limites da configuracao', function () {
         'cacheSeconds' => ['default' => 600, 'min' => 60, 'max' => 900],
         'linkMaxLength' => 512,
         'png' => ['maxWidth' => 600],
+        'customLogos' => [
+            'limit' => 0,
+            'used' => 0,
+            'maxBytes' => 262144,
+            'maxPaths' => 200,
+            'maxPathLength' => 4000,
+            'maxTotalPathLength' => 100000,
+            'maxCacheSeconds' => 3600,
+            'nameMaxLength' => 80,
+        ],
+        'presets' => [
+            'limit' => 0,
+            'used' => 0,
+            'nameMaxLength' => 80,
+        ],
     ])->and($props['defaults'])->toBe([
         'style' => 'plastic',
         'color' => '#123456',

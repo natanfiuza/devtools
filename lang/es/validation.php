@@ -170,6 +170,28 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'custom_logo' => [
+        'invalid_logo' => 'Este logo no está disponible para tu cuenta.',
+        'limit_reached' => 'Alcanzaste el límite de logos de tu plan.',
+        'too_large' => 'El archivo SVG es más grande de lo permitido.',
+        'invalid_encoding' => 'El SVG no es un texto UTF-8 válido.',
+        'doctype_not_allowed' => 'El SVG no puede declarar DOCTYPE.',
+        'processing_instruction_not_allowed' => 'El SVG no puede contener instrucciones de procesamiento.',
+        'malformed' => 'No se pudo leer el SVG.',
+        'invalid_root' => 'El archivo debe ser un elemento SVG.',
+        'unsupported_attribute' => 'El SVG usa un atributo no permitido.',
+        'unsafe_value' => 'El SVG usa un valor no permitido.',
+        'invalid_viewbox' => 'El SVG necesita un viewBox válido.',
+        'too_deep' => 'El SVG tiene demasiados grupos anidados.',
+        'unsupported_element' => 'El SVG usa un elemento no permitido.',
+        'text_not_allowed' => 'El SVG no puede contener texto.',
+        'invalid_path' => 'Uno de los trazados no es válido.',
+        'path_too_long' => 'Uno de los trazados es demasiado largo.',
+        'total_path_too_long' => 'Los trazados superan la longitud permitida.',
+        'too_many_paths' => 'El SVG tiene demasiados trazados.',
+        'missing_paths' => 'El SVG debe contener al menos un trazado.',
+    ],
+
     'attributes' => [
         'amount' => 'importe',
         'code' => 'código',
@@ -177,6 +199,7 @@ return [
         'document' => 'documento',
         'email' => 'correo electrónico',
         'locale' => 'idioma',
+        'logo' => 'logo',
         'method' => 'método',
         'name' => 'nombre',
         'newsletter' => 'newsletter',

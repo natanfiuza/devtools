@@ -3,7 +3,9 @@
 use App\Support\BadgeForge\BadgeFontCatalog;
 use App\Support\BadgeForge\BadgeSpec;
 use App\Support\BadgeForge\ColorValue;
+use App\Support\BadgeForge\Logo;
 use App\Support\BadgeForge\LogoCatalog;
+use App\Support\BadgeForge\LogoPath;
 use App\Support\BadgeForge\StaticBadgeRenderer;
 use App\Support\BadgeForge\StyleCatalog;
 use Tests\TestCase;
@@ -17,8 +19,6 @@ uses(TestCase::class);
 
 function badgeSpecFromArray(array $data): BadgeSpec
 {
-    $logos = app(LogoCatalog::class);
-
     return new BadgeSpec(
         label: $data['label'],
         message: $data['message'],
@@ -26,12 +26,46 @@ function badgeSpecFromArray(array $data): BadgeSpec
         font: isset($data['font']) ? app(BadgeFontCatalog::class)->find($data['font']) : null,
         labelColor: new ColorValue($data['labelColor']['hex'], (float) $data['labelColor']['alpha']),
         messageColor: new ColorValue($data['messageColor']['hex'], (float) $data['messageColor']['alpha']),
-        logo: $data['logo'] !== null ? $logos->find($data['logo']) : null,
+        logo: badgeLogoFromFixture($data['logo']),
         logoColor: new ColorValue($data['logoColor']['hex'], (float) $data['logoColor']['alpha']),
         logoSize: $data['logoSize'],
         logoPosition: $data['logoPosition'],
         link: $data['link'],
         cacheSeconds: $data['cacheSeconds'],
+    );
+}
+
+/**
+ * `logo` na fixture e um slug embutido ou um logo custom inline
+ * (`{viewBox, paths}`), permitindo cobrir multi-path sem banco.
+ *
+ * @param  string|array<string, mixed>|null  $logo
+ */
+function badgeLogoFromFixture(string|array|null $logo): ?Logo
+{
+    if ($logo === null) {
+        return null;
+    }
+
+    if (is_string($logo)) {
+        return app(LogoCatalog::class)->find($logo);
+    }
+
+    $paths = array_map(
+        static fn (array $path): LogoPath => new LogoPath(
+            d: (string) $path['d'],
+            fillRule: isset($path['fillRule']) ? (string) $path['fillRule'] : null,
+            clipRule: isset($path['clipRule']) ? (string) $path['clipRule'] : null,
+        ),
+        (array) $logo['paths'],
+    );
+
+    return new Logo(
+        slug: 'fixture',
+        name: 'fixture',
+        viewBox: (string) $logo['viewBox'],
+        paths: $paths,
+        custom: true,
     );
 }
 
