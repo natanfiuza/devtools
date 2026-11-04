@@ -6,6 +6,7 @@ use App\Exceptions\Ai\PayloadCodecException;
 use App\Models\AiRequest;
 use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
+use App\Models\BadgeEndpoint;
 use App\Models\BadgePreset;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
@@ -163,6 +164,21 @@ final class ExportUserData
                         'last_generated_at' => $asset->last_generated_at?->toIso8601String(),
                         'expires_at' => $asset->expires_at?->toIso8601String(),
                         'created_at' => $asset->created_at?->toIso8601String(),
+                    ])
+                    ->all(),
+                // Endpoints JSON (F5, ADR-083): o dono recebe a URL de origem
+                // que ele mesmo cadastrou - e o dado dele - e as URLs publicas.
+                // Nenhum corpo de origem e guardado para exportar.
+                'endpoints' => $user->badgeEndpoints()
+                    ->orderBy('created_at')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (BadgeEndpoint $endpoint): array => [
+                        'name' => $endpoint->name,
+                        'url' => $endpoint->url,
+                        'svg_url' => $endpoint->publicSvgUrl(),
+                        'png_url' => $endpoint->publicPngUrl(),
+                        'created_at' => $endpoint->created_at?->toIso8601String(),
                     ])
                     ->all(),
             ],

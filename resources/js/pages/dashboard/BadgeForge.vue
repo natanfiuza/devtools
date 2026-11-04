@@ -15,6 +15,7 @@ import {
     destroy as destroyPreset,
     update as updatePreset,
 } from '@/routes/badgeforge/presets';
+import EndpointBadgesPanel from '@/tools/badgeforge/EndpointBadgesPanel.vue';
 import LogoPreview from '@/tools/badgeforge/LogoPreview.vue';
 import LogoUploadForm from '@/tools/badgeforge/LogoUploadForm.vue';
 import PersonalBadgesPanel from '@/tools/badgeforge/PersonalBadgesPanel.vue';
@@ -567,5 +568,9 @@ function deletePreset(preset: BadgeForgePreset): void {
       :tool-props="toolProps"
       :upgrade-url="upgradeUrl"
     />
+
+    <div id="endpoint-badges">
+      <EndpointBadgesPanel :tool-props="toolProps" />
+    </div>
   </div>
 </template>

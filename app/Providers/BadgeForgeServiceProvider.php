@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\BadgeEndpoint;
 use App\Models\User;
+use App\Support\BadgeForge\Endpoint\DnsHostResolver;
+use App\Support\BadgeForge\Endpoint\HostResolver;
 use App\Support\BadgeForge\Providers\ProviderCatalog;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\JsonResponse;
@@ -10,7 +13,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Throwable;
 
 /**
  * Limite de taxa da gestao do BadgeForge (ADR-078/ADR-079).
@@ -25,6 +30,7 @@ final class BadgeForgeServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ProviderCatalog::class);
+        $this->app->bind(HostResolver::class, DnsHostResolver::class);
     }
 
     public function boot(): void
@@ -47,6 +53,43 @@ final class BadgeForgeServiceProvider extends ServiceProvider
                 ->response(static fn (): JsonResponse => response()->json([
                     'message' => __('tools.badgeforge.management.throttled'),
                 ], 429));
+        });
+
+        // A imagem de endpoint e anonima: o limite e por dono, derivado do
+        // ULID na rota. O `ThrottleRequests` roda antes do `SubstituteBindings`,
+        // entao aqui chega o ULID cru - nunca tipar o parametro como model.
+        // ULID invalido/desconhecido ou banco fora cai no anonimo por IP.
+        RateLimiter::for('badgeforge-endpoint', function (Request $request): Limit {
+            $decaySeconds = max(1, (int) config('badgeforge.endpoint.rate_limit.decay_seconds', 60));
+            $perMinute = max(1, (int) config('badgeforge.endpoint.rate_limit.anonymous', 60));
+            $account = 'guest:'.$request->ip();
+
+            $id = $request->route('badgeEndpoint');
+
+            if (is_string($id) && Str::isUlid($id)) {
+                try {
+                    $endpoint = BadgeEndpoint::query()->with('user')->find($id);
+                    $owner = $endpoint?->user;
+
+                    if ($owner instanceof User) {
+                        $isFree = $owner->effectivePlan()->isFree();
+                        $account = 'user:'.$owner->getKey();
+                        $perMinute = max(1, (int) config(
+                            $isFree
+                                ? 'badgeforge.endpoint.rate_limit.free'
+                                : 'badgeforge.endpoint.rate_limit.paid',
+                            $isFree ? 300 : 3_000,
+                        ));
+                    }
+                } catch (Throwable) {
+                    // Banco fora: segue no anonimo, sem 500.
+                }
+            }
+
+            return Limit::perMinutes(
+                max(1, (int) ceil($decaySeconds / 60)),
+                $perMinute,
+            )->by('badgeforge-endpoint:'.$account);
         });
 
         RateLimiter::for('badgeforge-management', function (Request $request): Limit {

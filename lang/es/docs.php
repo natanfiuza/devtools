@@ -29,6 +29,7 @@ return [
             'static' => 'Badges estáticas',
             'provider' => 'Badges de provider',
             'personal' => 'Badges personales',
+            'json' => 'Badges de endpoint JSON',
         ],
 
         'quick_start' => [
@@ -80,6 +81,22 @@ return [
             'refresh_note' => 'La imagen es stateless. Para forzar una nueva generación usa la acción de refresh del panel; la URL pública ignora ?refresh=1.',
         ],
 
+        'endpoint' => [
+            'title' => 'Badges de endpoint JSON',
+            'intro' => 'Registra una URL HTTPS en tu panel y obtén una URL de badge opaca. La URL de origen nunca aparece en la imagen, y quien lee tu README no necesita una cuenta para ver la badge.',
+            'url_label' => 'Formato de la URL',
+            'contract_title' => 'JSON esperado',
+            'contract_body' => 'El origen debe responder con el esquema shields.io versión 1: schemaVersion 1, label y message no vacíos, y color/labelColor opcionales que se usan como valores por defecto — un parámetro de la query siempre gana. Los demás campos se ignoran.',
+            'cache_title' => 'Caché y respaldo',
+            'cache_body' => 'La respuesta se guarda {ttl} segundos. Si el origen cae o nos limita, se sigue sirviendo la última respuesta buena (STALE); sin respuesta previa, la badge muestra “unavailable”, nunca un error.',
+            'limits_title' => 'Límite de peticiones',
+            'limits_anonymous' => 'Badge desconocida o anónima: {limit} peticiones por minuto por IP.',
+            'limits_free' => 'Propietario con cuenta gratuita: {limit} peticiones por minuto.',
+            'limits_paid' => 'Propietario con cuenta de pago: {limit} peticiones por minuto.',
+            'security_title' => 'Por qué es seguro',
+            'security_body' => 'Solo HTTPS en el puerto 443, sin redirecciones, y todas las IP resueltas deben ser públicas. La conexión se fija a la IP validada, así que un cambio de DNS entre la comprobación y la petición no puede llegar a una dirección interna. La URL de origen queda en el servidor: no está en la página, ni en los logs, ni en la URL de la imagen.',
+            'manage_cta' => 'Gestionar endpoints JSON',
+        ],
         'cache' => [
             'title' => 'Caché, ETag y respuestas antiguas',
             'body' => 'Las respuestas de provider se guardan en caché durante {ttl} segundos. La imagen sale con ETag y Cache-Control, así que una segunda petición recibe 304 cuando nada cambió.',

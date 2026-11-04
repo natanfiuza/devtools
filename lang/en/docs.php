@@ -29,6 +29,7 @@ return [
             'static' => 'Static badges',
             'provider' => 'Provider badges',
             'personal' => 'Personal badges',
+            'json' => 'JSON endpoint badges',
         ],
 
         'quick_start' => [
@@ -80,6 +81,22 @@ return [
             'refresh_note' => 'The image is stateless. To force a new generation use the refresh action in your dashboard; the public URL ignores ?refresh=1.',
         ],
 
+        'endpoint' => [
+            'title' => 'JSON endpoint badges',
+            'intro' => 'Register an HTTPS URL in your dashboard and get an opaque badge URL. The source URL never appears in the image URL, and readers of your README do not need an account to see the badge.',
+            'url_label' => 'URL format',
+            'contract_title' => 'Expected JSON',
+            'contract_body' => 'The source must answer with shields.io schema version 1: schemaVersion 1, non-empty label and message, and optional color/labelColor used as defaults — a query parameter always wins. Other fields are ignored.',
+            'cache_title' => 'Cache and fallback',
+            'cache_body' => 'The response is cached for {ttl} seconds. If the source is offline or rate limited, the last good response keeps being served (STALE); with no previous response the badge shows “unavailable”, never an error.',
+            'limits_title' => 'Rate limit',
+            'limits_anonymous' => 'Unknown or anonymous badge: {limit} requests per minute per IP.',
+            'limits_free' => 'Free account owner: {limit} requests per minute.',
+            'limits_paid' => 'Paid account owner: {limit} requests per minute.',
+            'security_title' => 'Why it is safe',
+            'security_body' => 'Only HTTPS on port 443, no redirects, and every resolved IP must be public. The connection is pinned to the validated IP, so a DNS change between the check and the fetch cannot reach an internal address. The source URL stays on the server: it is not in the page, the logs or the image URL.',
+            'manage_cta' => 'Manage JSON endpoints',
+        ],
         'cache' => [
             'title' => 'Cache, ETag and stale responses',
             'body' => 'Provider responses are cached for {ttl} seconds. The image is served with ETag and Cache-Control, so a second request is answered with 304 when nothing changed.',

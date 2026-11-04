@@ -16,7 +16,7 @@ use Illuminate\Database\QueryException;
  */
 final class ProviderCatalog
 {
-    private const array RESERVED_SLUGS = ['static'];
+    private const array RESERVED_SLUGS = ['static', 'endpoint'];
 
     /**
      * @var array<string, BadgeProvider>|null

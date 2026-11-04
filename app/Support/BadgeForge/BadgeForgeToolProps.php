@@ -4,6 +4,7 @@ namespace App\Support\BadgeForge;
 
 use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
+use App\Models\BadgeEndpoint;
 use App\Models\BadgePreset;
 use App\Models\User;
 use App\Support\BadgeForge\Providers\ProviderCatalog;
@@ -36,10 +37,11 @@ final class BadgeForgeToolProps
         $customLogos = $canManage ? self::customLogos($user) : [];
         $presets = $canManage ? self::presets($user) : [];
         $personalBadges = self::personalBadges($user);
+        $endpointBadges = self::endpointBadges($user);
         $personalLimit = $isPaid ? null : 0;
 
         return [
-            'endpoint' => (string) config('badgeforge.endpoint', '/api/badges/static'),
+            'endpoint' => (string) config('badgeforge.static_endpoint', '/api/badges/static'),
             'providerEndpoint' => (string) config('badgeforge.provider_endpoint', '/api/badges'),
             'personalEndpoint' => (string) config('badgeforge.personal_endpoint', '/b'),
             'styles' => app(StyleCatalog::class)->ids(),
@@ -89,6 +91,12 @@ final class BadgeForgeToolProps
                     'used' => count($personalBadges),
                     'nameMaxLength' => (int) config('badgeforge.personal_badges.name_max_length', 80),
                 ],
+                // Endpoints JSON (F5, ADR-083): sem limite de quantidade -
+                // "apenas cadastrados" e a regra, e todo Free pode cadastrar.
+                'endpointBadges' => [
+                    'nameMaxLength' => (int) config('badgeforge.endpoint.name_max_length', 80),
+                    'urlMaxLength' => (int) config('badgeforge.endpoint.url_max_length', 2048),
+                ],
                 'providers' => [
                     'maxParamLength' => (int) config('badgeforge.providers.max_param_length', 200),
                 ],
@@ -104,11 +112,14 @@ final class BadgeForgeToolProps
                 'canManage' => $canManage,
                 'canSavePresets' => $canManage,
                 'canCreatePersonalBadges' => $canManage && $isPaid,
+                // "Apenas cadastrados" e a regra do endpoint: Free cadastra.
+                'canCreateEndpointBadges' => $canManage,
                 'isPaid' => $isPaid,
             ],
             'customLogos' => $customLogos,
             'presets' => $presets,
             'personalBadges' => $personalBadges,
+            'endpointBadges' => $endpointBadges,
         ];
     }
 
@@ -165,6 +176,40 @@ final class BadgeForgeToolProps
                 'createdAt' => $asset->created_at?->toIso8601String(),
             ];
         })->all();
+
+        return array_values($badges);
+    }
+
+    /**
+     * Endpoints JSON do dono (F5, ADR-083): so nome e URLs publicas. A URL de
+     * origem nunca selecionada aqui - e segredo de operacao e nao tem uso na
+     * tela. A lista sobrevive a downgrade, porque serve e excluir continua
+     * valendo; uma migracao ainda nao aplicada devolve lista vazia.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function endpointBadges(?User $user): array
+    {
+        if (! $user instanceof User) {
+            return [];
+        }
+
+        try {
+            $endpoints = $user->badgeEndpoints()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get(['id', 'name', 'created_at']);
+        } catch (QueryException) {
+            return [];
+        }
+
+        $badges = $endpoints->map(static fn (BadgeEndpoint $endpoint): array => [
+            'id' => (string) $endpoint->id,
+            'name' => (string) $endpoint->name,
+            'svgUrl' => $endpoint->publicSvgUrl(),
+            'pngUrl' => $endpoint->publicPngUrl(),
+            'createdAt' => $endpoint->created_at?->toIso8601String(),
+        ])->all();
 
         return array_values($badges);
     }

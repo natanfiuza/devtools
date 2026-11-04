@@ -2,6 +2,7 @@
 
 use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
+use App\Models\BadgeEndpoint;
 use App\Models\BadgePreset;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -41,6 +42,7 @@ it('descreve a conta Free com o limite de dois logos', function () {
         'canManage' => true,
         'canSavePresets' => true,
         'canCreatePersonalBadges' => false,
+        'canCreateEndpointBadges' => true,
         'isPaid' => false,
     ])
         ->and($props['limits']['customLogos']['limit'])->toBe(2)
@@ -86,6 +88,7 @@ it('marca o plano pago como ilimitado', function () {
 
     expect($props['management']['isPaid'])->toBe(true)
         ->and($props['management']['canCreatePersonalBadges'])->toBeTrue()
+        ->and($props['management']['canCreateEndpointBadges'])->toBeTrue()
         ->and($props['limits']['customLogos']['limit'])->toBeNull()
         ->and($props['limits']['presets']['limit'])->toBeNull()
         ->and($props['limits']['personalBadges']['limit'])->toBeNull();
@@ -111,6 +114,7 @@ it('nao abre a gestao para conta nao verificada ou suspensa', function (string $
         ])
         ->and($props['limits']['presets']['limit'])->toBe(0)
         ->and($props['management']['canCreatePersonalBadges'])->toBeFalse()
+        ->and($props['management']['canCreateEndpointBadges'])->toBeFalse()
         ->and($props['limits']['personalBadges'])->toBe([
             'limit' => 0,
             'used' => 0,
@@ -170,7 +174,8 @@ it('nao consulta logos nem presets para convidado', function () {
     expect($props['management']['canManage'])->toBeFalse()
         ->and($props['customLogos'])->toBe([])
         ->and($props['presets'])->toBe([])
-        ->and($props['personalBadges'])->toBe([]);
+        ->and($props['personalBadges'])->toBe([])
+        ->and($props['endpointBadges'])->toBe([]);
 });
 
 it('lista as badges pessoais do dono com URLs publicas e sem credencial', function () {
@@ -229,5 +234,43 @@ it('nao derruba a pagina quando a tabela de badges ainda nao existe', function (
             ->and($props['limits']['personalBadges'])->toBe(['limit' => 0, 'used' => 0, 'nameMaxLength' => 80]);
     } finally {
         Schema::rename('badge_assets_gone', 'badge_assets');
+    }
+});
+
+it('lista os endpoints JSON sem a URL de origem', function () {
+    $user = User::factory()->create();
+    $endpoint = BadgeEndpoint::factory()->for($user)->create([
+        'name' => 'deploys',
+        'url' => 'https://example.com/badge.json',
+    ]);
+
+    $props = BadgeForgeToolProps::for($user);
+
+    expect($props['endpointBadges'])->toHaveCount(1)
+        ->and($props['endpointBadges'][0])->toBe([
+            'id' => $endpoint->id,
+            'name' => 'deploys',
+            'svgUrl' => url('/api/badges/endpoint/'.$endpoint->id.'.svg'),
+            'pngUrl' => url('/api/badges/endpoint/'.$endpoint->id.'.png'),
+            'createdAt' => $endpoint->created_at?->toIso8601String(),
+        ])
+        ->and($props['endpointBadges'][0])->not->toHaveKey('url')
+        ->and($props['limits']['endpointBadges'])->toBe([
+            'nameMaxLength' => 80,
+            'urlMaxLength' => 2048,
+        ]);
+});
+
+it('nao derruba a pagina quando a tabela de endpoints ainda nao existe', function () {
+    $user = User::factory()->create();
+
+    Schema::rename('badge_endpoints', 'badge_endpoints_gone');
+
+    try {
+        $props = BadgeForgeToolProps::for($user);
+
+        expect($props['endpointBadges'])->toBe([]);
+    } finally {
+        Schema::rename('badge_endpoints_gone', 'badge_endpoints');
     }
 });

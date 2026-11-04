@@ -71,6 +71,10 @@ it('acompanha os limites da configuracao', function () {
             'used' => 0,
             'nameMaxLength' => 80,
         ],
+        'endpointBadges' => [
+            'nameMaxLength' => 80,
+            'urlMaxLength' => 2048,
+        ],
         'providers' => ['maxParamLength' => 200],
     ])->and($props['defaults'])->toBe([
         'style' => 'plastic',

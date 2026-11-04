@@ -196,6 +196,7 @@ function accountProps(
                 canManage: true,
                 canSavePresets: true,
                 canCreatePersonalBadges: false,
+                canCreateEndpointBadges: true,
                 isPaid: false,
             },
             customLogos: [CUSTOM_LOGO],

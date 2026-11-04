@@ -317,6 +317,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Endpoints JSON cadastrados pela conta (F5, ADR-083).
+     *
+     * @return HasMany<BadgeEndpoint, $this>
+     */
+    public function badgeEndpoints(): HasMany
+    {
+        return $this->hasMany(BadgeEndpoint::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

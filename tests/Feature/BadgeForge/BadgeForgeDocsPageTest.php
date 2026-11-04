@@ -10,9 +10,10 @@ uses(RefreshDatabase::class);
 | Documentacao publica do BadgeForge (`/{locale}/docs/badgeforge`, ADR-082).
 |
 | A pagina e publica e indexavel: ela carrega o mesmo catalogo de providers
-| que alimenta o builder (nada de credencial nem asset de conta), os tres
-| endpoints configurados e o TTL de cache. O contrato do catalogo e o mesmo da
-| fixture exata da tool, entao o teste compara com ela.
+| que alimenta o builder (nada de credencial nem asset de conta), as quatro
+| rotas de imagem, os TTLs de cache e os limites do endpoint JSON. O contrato
+| do catalogo e o mesmo da fixture exata da tool, entao o teste compara com
+| ela.
 */
 
 function badgeforgeDocsFixture(): array
@@ -31,10 +32,17 @@ it('entrega o catalogo de providers e os endpoints nos cinco idiomas', function 
         ->assertInertia(fn (Assert $page) => $page
             ->component('BadgeForgeDocs')
             ->where('providers', $fixture['providers'])
-            ->where('staticEndpoint', (string) config('badgeforge.endpoint'))
+            ->where('staticEndpoint', (string) config('badgeforge.static_endpoint'))
             ->where('providerEndpoint', (string) config('badgeforge.provider_endpoint'))
             ->where('personalEndpoint', (string) config('badgeforge.personal_endpoint'))
+            ->where('jsonEndpoint', (string) config('badgeforge.endpoint.path'))
             ->where('cacheTtl', (int) config('badgeforge.providers.cache_ttl'))
+            ->where('endpointCacheTtl', (int) config('badgeforge.endpoint.cache_ttl'))
+            ->where('endpointRateLimits', [
+                'anonymous' => (int) config('badgeforge.endpoint.rate_limit.anonymous'),
+                'free' => (int) config('badgeforge.endpoint.rate_limit.free'),
+                'paid' => (int) config('badgeforge.endpoint.rate_limit.paid'),
+            ])
             ->where('origin', rtrim(url('/'), '/'))
             ->missing('personalBadges')
             ->missing('credential')
@@ -54,10 +62,15 @@ it('lista os quatro providers com as nove metricas', function () {
 
 it('acompanha a configuracao de endpoints e de cache', function () {
     config([
-        'badgeforge.endpoint' => '/api/badges/static',
+        'badgeforge.static_endpoint' => '/api/badges/static',
         'badgeforge.provider_endpoint' => '/api/badges',
         'badgeforge.personal_endpoint' => '/b',
+        'badgeforge.endpoint.path' => '/api/badges/endpoint',
         'badgeforge.providers.cache_ttl' => 120,
+        'badgeforge.endpoint.cache_ttl' => 90,
+        'badgeforge.endpoint.rate_limit.anonymous' => 11,
+        'badgeforge.endpoint.rate_limit.free' => 22,
+        'badgeforge.endpoint.rate_limit.paid' => 33,
     ]);
 
     $this->get('/'.Locales::fallback().'/docs/badgeforge')
@@ -66,6 +79,13 @@ it('acompanha a configuracao de endpoints e de cache', function () {
             ->where('staticEndpoint', '/api/badges/static')
             ->where('providerEndpoint', '/api/badges')
             ->where('personalEndpoint', '/b')
+            ->where('jsonEndpoint', '/api/badges/endpoint')
             ->where('cacheTtl', 120)
+            ->where('endpointCacheTtl', 90)
+            ->where('endpointRateLimits', [
+                'anonymous' => 11,
+                'free' => 22,
+                'paid' => 33,
+            ])
         );
 });

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
+use App\Http\Controllers\BadgeForge\EndpointBadgeController;
 use App\Http\Controllers\BadgeForge\ProviderBadgeController;
 use App\Http\Controllers\BadgeForge\StaticBadgeController;
 use App\Http\Middleware\TrackApiTokenUsage;
@@ -63,6 +64,15 @@ Route::prefix('badges')
             ->where('message', '[^/]+')
             ->where('ext', 'svg|png')
             ->name('static');
+
+        // F5: a URL publica leva so o ULID; a URL de origem fica no servidor.
+        // Registrada antes do provider para que `endpoint` nao seja lido como
+        // slug de provider (e o catalogo tambem o reserva).
+        Route::get('endpoint/{badgeEndpoint}.{ext}', EndpointBadgeController::class)
+            ->where('badgeEndpoint', '[0-9A-Za-z]{1,64}')
+            ->where('ext', 'svg|png')
+            ->middleware('throttle:badgeforge-endpoint')
+            ->name('endpoint');
 
         // F4: registrada depois da estatica de proposito. O Symfony casa na
         // ordem de registro, entao `/api/badges/static/...` continua vencendo

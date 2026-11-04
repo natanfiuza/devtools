@@ -2,6 +2,7 @@
 
 namespace App\Actions\Account;
 
+use App\Actions\BadgeForge\DeleteBadgeEndpoint;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
 use App\Models\User;
@@ -34,7 +35,10 @@ final class AnonymizeUser
      */
     private const PLACEHOLDER_DOMAIN = 'removido.invalid';
 
-    public function __construct(private readonly BadgeAssetStorage $storage) {}
+    public function __construct(
+        private readonly BadgeAssetStorage $storage,
+        private readonly DeleteBadgeEndpoint $deleteEndpoints,
+    ) {}
 
     public function __invoke(User $user): void
     {
@@ -99,6 +103,12 @@ final class AnonymizeUser
                 $this->storage->delete($asset->svg_path);
                 $this->storage->delete($asset->png_path);
                 $asset->delete();
+            }
+
+            // Endpoints JSON (F5, ADR-083): a linha leva a URL de origem e a
+            // chave de cache leva o hash dela. As duas saem juntas.
+            foreach ($user->badgeEndpoints()->get() as $endpoint) {
+                ($this->deleteEndpoints)($endpoint);
             }
 
             DB::table('sessions')->where('user_id', $id)->delete();

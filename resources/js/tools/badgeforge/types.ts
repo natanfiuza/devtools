@@ -30,6 +30,7 @@ export interface BadgeForgeLimits {
     customLogos: BadgeForgeCustomLogoLimits;
     presets: BadgeForgePresetLimits;
     personalBadges: BadgeForgePersonalBadgeLimits;
+    endpointBadges: BadgeForgeEndpointBadgeLimits;
     providers: { maxParamLength: number };
 }
 
@@ -58,10 +59,17 @@ export interface BadgeForgePresetLimits {
     nameMaxLength: number;
 }
 
+/** Sem limite de quantidade: free cadastra (F5, ADR-083). */
+export interface BadgeForgeEndpointBadgeLimits {
+    nameMaxLength: number;
+    urlMaxLength: number;
+}
+
 export interface BadgeForgeManagement {
     canManage: boolean;
     canSavePresets: boolean;
     canCreatePersonalBadges: boolean;
+    canCreateEndpointBadges: boolean;
     isPaid: boolean;
 }
 
@@ -113,6 +121,18 @@ export interface BadgeForgePersonalBadge {
     pngUrl: string | null;
     lastGeneratedAt: string | null;
     expiresAt: string | null;
+    createdAt: string | null;
+}
+
+/**
+ * Endpoint JSON do dono (F5, ADR-083). A URL de origem fica no servidor: o
+ * cliente so recebe a identidade e as URLs publicas.
+ */
+export interface BadgeForgeEndpointBadge {
+    id: string;
+    name: string;
+    svgUrl: string;
+    pngUrl: string;
     createdAt: string | null;
 }
 
@@ -171,6 +191,7 @@ export interface BadgeForgeToolProps {
     customLogos: BadgeForgeCustomLogoSummary[];
     presets: BadgeForgePreset[];
     personalBadges: BadgeForgePersonalBadge[];
+    endpointBadges: BadgeForgeEndpointBadge[];
 }
 
 /** Cor resolvida: hexadecimal canonico (#rrggbb) e alfa entre 0 e 1. */

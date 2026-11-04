@@ -58,6 +58,7 @@ const TRADUCOES = {
                 static: 'ESTATICAS',
                 provider: 'PROVIDERS',
                 personal: 'PESSOAIS',
+                json: 'ENDPOINT_JSON',
             },
             quick_start: {
                 title: 'INICIO',
@@ -99,6 +100,22 @@ const TRADUCOES = {
                 tool_cta: 'CRIAR_PESSOAL',
                 refresh_note: 'NOTA_REFRESH',
             },
+            endpoint: {
+                title: 'SECAO_ENDPOINT_JSON',
+                intro: 'INTRO_ENDPOINT_JSON',
+                url_label: 'URL_ENDPOINT_JSON',
+                contract_title: 'CONTRATO_SHIELDS',
+                contract_body: 'CORPO_CONTRATO',
+                cache_title: 'CACHE_ENDPOINT',
+                cache_body: 'CACHE_ENDPOINT_DE_{ttl}_SEGUNDOS',
+                limits_title: 'LIMITES_ENDPOINT',
+                limits_anonymous: 'ANONIMO_{limit}',
+                limits_free: 'FREE_{limit}',
+                limits_paid: 'PAGO_{limit}',
+                security_title: 'SEGURANCA_ENDPOINT',
+                security_body: 'CORPO_SEGURANCA_ENDPOINT',
+                manage_cta: 'GERENCIAR_ENDPOINTS',
+            },
             cache: {
                 title: 'SECAO_CACHE',
                 body: 'CACHE_DE_{ttl}_SEGUNDOS',
@@ -139,7 +156,10 @@ const PADRAO = {
     staticEndpoint: '/api/badges/static',
     providerEndpoint: '/api/badges',
     personalEndpoint: '/b',
+    jsonEndpoint: '/api/badges/endpoint',
     cacheTtl: 300,
+    endpointCacheTtl: 300,
+    endpointRateLimits: { anonymous: 60, free: 300, paid: 3000 },
     origin: 'https://devtools.example',
 };
 
@@ -216,6 +236,40 @@ describe('BadgeForge Docs', () => {
         expect(
             wrapper.find('[data-test="badgeforge-docs-personal"]').text(),
         ).toContain('GITHUB_PAT');
+    });
+
+    it('documenta o endpoint JSON com contrato, TTL e limites', () => {
+        const wrapper = mountDocs({
+            endpointCacheTtl: 450,
+            endpointRateLimits: { anonymous: 5, free: 7, paid: 9 },
+        });
+
+        const section = wrapper.find('[data-test="badgeforge-docs-json-endpoint"]');
+
+        expect(section.text()).toContain('INTRO_ENDPOINT_JSON');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-url"]').text(),
+        ).toBe('https://devtools.example/api/badges/endpoint/{ulid}.svg');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-contract"]').text(),
+        ).toContain('"schemaVersion": 1');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-cache"]').text(),
+        ).toContain('450');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-limits"]').text(),
+        ).toContain('ANONIMO_5');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-limits"]').text(),
+        ).toContain('FREE_7');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-limits"]').text(),
+        ).toContain('PAGO_9');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-json-manage"]').attributes(
+                'href',
+            ),
+        ).toBe('/pt-br/dashboard/badgeforge');
     });
 
     it('interpola o TTL de cache da configuracao', () => {
