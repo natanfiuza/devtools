@@ -243,6 +243,13 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
               {{ t('app.footer.api_docs') }}
             </Link>
             <Link
+              :href="routes.badgeforgeDocs.value"
+              class="hover:text-foreground"
+              data-test="footer-badgeforge-docs"
+            >
+              {{ t('app.footer.badgeforge_docs') }}
+            </Link>
+            <Link
               :href="routes.privacy.value"
               class="hover:text-foreground"
             >

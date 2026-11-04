@@ -80,6 +80,8 @@ const TRADUCOES = {
             limits: 'LIMITES',
             limit_logos: 'LIMITE_LOGOS',
             limit_presets: 'LIMITE_PRESETS',
+            limit_personal_badges: 'LIMITE_PESSOAIS',
+            personal_readonly_note: '{used} PESSOAIS',
             unlimited: 'ILIMITADO',
             used_of: '{used} DE {limit}',
             upgrade: 'UPGRADE',
@@ -193,6 +195,7 @@ function accountProps(
             management: {
                 canManage: true,
                 canSavePresets: true,
+                canCreatePersonalBadges: false,
                 isPaid: false,
             },
             customLogos: [CUSTOM_LOGO],
@@ -281,7 +284,7 @@ describe('BadgeForge na conta', () => {
             wrapper.find('[data-test="badgeforge-upgrade"]').exists(),
         ).toBe(false);
         expect(wrapper.find('[data-test="badgeforge-limits"]').text()).toBe(
-            'LIMITESLIMITE_LOGOSILIMITADOLIMITE_PRESETSILIMITADO',
+            'LIMITESLIMITE_LOGOSILIMITADOLIMITE_PRESETSILIMITADOLIMITE_PESSOAIS0 PESSOAIS',
         );
     });
 

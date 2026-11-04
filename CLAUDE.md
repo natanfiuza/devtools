@@ -20,9 +20,11 @@ Leia SEMPRE: docs/SPEC.md, docs/glossario.md, docs/adr/*, docs/design/DESIGN.md.
 
 - Ferramenta: /tools/badgeforge
 - Especificação: docs/SPEC-BADGEFORGE.md
-- ADRs: docs/adr/ADR-062-badgeforge a ADR-079-badgeforge
-- API: docs/badgeforge/API.md
-- Fase atual: F3 — logos personalizados + presets + contas (entregue)
-- Regras: SVG é o formato canônico; PNG (F2) via Imagick com cache em disco; fontes empacotadas via `?font=` (ADR-077); sem providers externos até a F4.
+- ADRs: docs/adr/ADR-062-badgeforge a ADR-082-badgeforge
+- API: docs/badgeforge/API.md; documentação pública: `/{locale}/docs/badgeforge`
+- Fase atual: F4 — providers + badges pessoais + PAT + docs públicas (entregue)
+- Regras: SVG é o formato canônico; PNG (F2) via Imagick com cache em disco; fontes empacotadas via `?font=` (ADR-077); providers em `/api/badges/{provider}/{definition}/{path}` (ADR-080).
 - Logos personalizados e presets (F3, ADR-078 e ADR-079): SVG multi-path sanitizado persistido só como `viewBox` + paths normalizados; referência pública `u_<ULID>`; limites em `config/badgeforge.php` (Free: 2 logos; pago: ilimitado; presets: ilimitados); gestão web autenticada em `/dashboard/badgeforge` e `/badgeforge/*`; paths buscados sob demanda (nunca nas props); gerar/prever/snippet continua 100% no navegador.
-- Acesso a providers: item público é lido anonimamente na API pública (sem token global em `.env`); PAT é do usuário pagador e só para item privado, cifrado, vinculado ao badge pessoal, e a URL leva apenas o ULID (ADR-068).
+- Acesso a providers (F4, ADR-068/ADR-080): item público é lido anonimamente na API pública (sem token global em `.env`); PAT é do usuário pagador e só para item privado, cifrado, vinculado ao badge pessoal, e a URL leva apenas o ULID. Cache de provider por URL resolvida, payload projetado (sem descrição/README), condicional, stale-if-error e fallback 200 — nunca 500. `parser_class` é inerte; `client_key`/`extractor_key` resolvem clientes e métricas em código.
+- Badges pessoais (F4, ADR-081): `/b/{username}/{ulid}.{svg|png}` stateless, só pago cria, arquivo em `storage/app/data/tools/badgeforge/personal/{username}/{ulid}.{ext}`; `?refresh=1` é ignorado — atualizar é `POST /badgeforge/badges/{id}/refresh` do dono; downgrade serve/copia/exclui mas bloqueia edição.
+- Docs públicas do BadgeForge (F4, ADR-082): `/{locale}/docs/badgeforge`, namespace i18n `docs`, tabela gerada do catálogo, SEO/sitemap/rodapé; label/message da imagem são neutros de idioma (exceção documentada).

@@ -1,15 +1,15 @@
 # OpenAPI BadgeForge (resumo)
 
-A superfície da F1/F2 está implementada, com o `logo=u_<ULID>` da F3; os
-demais caminhos aparecem como planejados. O OpenAPI completo em 3.1 é
-entregue na F8 (`ADR-071`). A gestão de logos e presets da F3 é web/Inertia
-autenticada e não faz parte desta API.
+A superfície das F1–F4 está implementada: badges estáticas, PNG/fontes, logos
+personalizados (`logo=u_<ULID>`), badges de provider e badges pessoais. O
+OpenAPI completo em 3.1 é entregue na F8 (`ADR-071`). A gestão de logos,
+presets e badges pessoais é web/Inertia autenticada e não faz parte desta API.
 
 ```yaml
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.3.0
+  version: 1.4.0
 paths:
   /api/badges/static/{label}/{message}.{ext}:
     get:
@@ -99,21 +99,108 @@ paths:
           description: Segmento vazio, extensão ausente ou diferente de svg/png
         "503":
           description: PNG pedido sem a extensão imagick (código image_unavailable)
-  /api/badges/{provider}/{path}.{ext}:
+  /api/badges/{provider}/{definition}/{path}.{ext}:
     get:
-      summary: Dynamic provider badge (F4 — planejado)
+      summary: Dynamic provider badge
       description: >
-        Item público é lido anonimamente na API pública do provider. Item
-        privado exige usuário pagador e PAT do próprio usuário, cifrado e
-        vinculado ao badge pessoal (ADR-068); a URL leva apenas o ULID.
+        Lê a API pública do provider de forma anônima e responde sempre com
+        uma imagem. A resposta do provider fica em cache por
+        `providers.cache_ttl` (300 s por padrão); falha ou rate limit servem a
+        última resposta boa (stale) e, sem ela, um fallback 200. Item privado
+        não é servido por esta rota: use uma badge pessoal (ADR-081).
       parameters:
         - name: provider
           in: path
           required: true
-          schema: { type: string }
+          schema: { type: string, enum: [github, npm, packagist, docker] }
+        - name: definition
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [stars, forks, issues, license, v, dm, dt, pulls]
         - name: path
           in: path
           required: true
+          description: >
+            Coordenadas do item, no formato da definição — `{owner}/{repo}`,
+            `{package}` (aceita escopo com `/`), `{vendor}/{package}` ou
+            `{namespace}/{repository}`.
+          schema: { type: string }
+        - name: ext
+          in: path
+          required: true
+          schema: { type: string, enum: [svg, png] }
+        - name: style
+          in: query
+          schema: { type: string, default: flat }
+        - name: color
+          in: query
+          schema: { type: string }
+        - name: labelColor
+          in: query
+          schema: { type: string }
+        - name: logo
+          in: query
+          schema: { type: string }
+        - name: logoColor
+          in: query
+          schema: { type: string }
+        - name: logoSize
+          in: query
+          schema: { type: integer, minimum: 8, maximum: 20 }
+        - name: logoPosition
+          in: query
+          schema: { type: string, enum: [left, right] }
+        - name: link
+          in: query
+          schema: { type: string, format: uri }
+        - name: font
+          in: query
+          schema: { type: string, enum: [fira-code, libre-franklin, space-grotesk] }
+        - name: download
+          in: query
+          schema: { type: string, enum: ["1"] }
+      responses:
+        "200":
+          description: Badge image (inclusive stale e fallback)
+          headers:
+            Cache-Control:
+              schema: { type: string, example: "public, max-age=300" }
+            ETag:
+              schema: { type: string }
+            X-Badge-Cache:
+              description: HIT, MISS, STALE ou FALLBACK.
+              schema: { type: string }
+            Warning:
+              description: '110 - "Response is Stale" quando a resposta é stale.'
+              schema: { type: string }
+          content:
+            image/svg+xml: {}
+            image/png: {}
+        "304":
+          description: Not modified (If-None-Match igual ao ETag)
+        "404":
+          description: Provider, definição ou path desconhecido/inválido
+        "503":
+          description: PNG pedido sem a extensão imagick
+  /b/{username}/{ulid}.{ext}:
+    get:
+      summary: Personal badge image
+      description: >
+        Imagem stateless de uma badge pessoal (ADR-081). A URL leva apenas o
+        username e o ULID; nenhuma credencial aparece nela. A imagem é
+        regenerada quando `expires_at` vence; `?refresh=1` é ignorado — o
+        dono força uma nova geração com `POST /badgeforge/badges/{ulid}/refresh`.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema: { type: string }
+        - name: ulid
+          in: path
+          required: true
+          description: ULID opaco da badge (não é o id público do banco).
           schema: { type: string }
         - name: ext
           in: path
@@ -122,9 +209,20 @@ paths:
       responses:
         "200":
           description: Badge image
+          headers:
+            Cache-Control:
+              schema: { type: string, example: "public, max-age=3600" }
+            ETag:
+              schema: { type: string }
           content:
             image/svg+xml: {}
             image/png: {}
+        "304":
+          description: Not modified
+        "404":
+          description: Badge inexistente ou username que não é o dono
+        "503":
+          description: PNG pedido sem a extensão imagick
   /api/badges/endpoint.{ext}:
     get:
       summary: JSON endpoint badge (F5 — planejado)

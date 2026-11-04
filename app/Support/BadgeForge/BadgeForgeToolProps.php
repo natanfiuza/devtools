@@ -2,9 +2,12 @@
 
 namespace App\Support\BadgeForge;
 
+use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgePreset;
 use App\Models\User;
+use App\Support\BadgeForge\Providers\ProviderCatalog;
+use Illuminate\Database\QueryException;
 
 /**
  * Props da pagina `/tools/badgeforge` (ADR-043, ADR-079).
@@ -32,12 +35,17 @@ final class BadgeForgeToolProps
 
         $customLogos = $canManage ? self::customLogos($user) : [];
         $presets = $canManage ? self::presets($user) : [];
+        $personalBadges = self::personalBadges($user);
+        $personalLimit = $isPaid ? null : 0;
 
         return [
             'endpoint' => (string) config('badgeforge.endpoint', '/api/badges/static'),
+            'providerEndpoint' => (string) config('badgeforge.provider_endpoint', '/api/badges'),
+            'personalEndpoint' => (string) config('badgeforge.personal_endpoint', '/b'),
             'styles' => app(StyleCatalog::class)->ids(),
             'logos' => self::logosByName(),
             'fonts' => app(BadgeFontCatalog::class)->metadata(),
+            'providers' => app(ProviderCatalog::class)->forDocs(),
             'limits' => [
                 'maxTextLength' => (int) config('badgeforge.limits.max_text_length', 100),
                 'logoSize' => [
@@ -74,6 +82,16 @@ final class BadgeForgeToolProps
                     'used' => count($presets),
                     'nameMaxLength' => (int) config('badgeforge.presets.name_max_length', 80),
                 ],
+                // `null` = ilimitado para pago; `0` = criacao bloqueada
+                // (free ou convidado), mesmo com badges antigas na lista.
+                'personalBadges' => [
+                    'limit' => $personalLimit,
+                    'used' => count($personalBadges),
+                    'nameMaxLength' => (int) config('badgeforge.personal_badges.name_max_length', 80),
+                ],
+                'providers' => [
+                    'maxParamLength' => (int) config('badgeforge.providers.max_param_length', 200),
+                ],
             ],
             'defaults' => [
                 'style' => (string) config('badgeforge.default_style', 'flat'),
@@ -85,11 +103,70 @@ final class BadgeForgeToolProps
             'management' => [
                 'canManage' => $canManage,
                 'canSavePresets' => $canManage,
+                'canCreatePersonalBadges' => $canManage && $isPaid,
                 'isPaid' => $isPaid,
             ],
             'customLogos' => $customLogos,
             'presets' => $presets,
+            'personalBadges' => $personalBadges,
         ];
+    }
+
+    /**
+     * Badges pessoais do dono, inclusive apos downgrade (F4, ADR-081): a lista
+     * continua visivel para copiar a URL e excluir. A consulta nunca seleciona
+     * `credential`/`credential_fingerprint`, e uma migracao ainda nao aplicada
+     * devolve lista vazia em vez de derrubar a pagina durante o deploy.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function personalBadges(?User $user): array
+    {
+        if (! $user instanceof User) {
+            return [];
+        }
+
+        try {
+            $assets = $user->badgeAssets()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get([
+                    'id', 'name', 'type', 'provider_slug', 'definition_slug', 'params',
+                    'private', 'credential_username', 'credential_set_at',
+                    'last_generated_at', 'expires_at', 'created_at',
+                ]);
+        } catch (QueryException) {
+            return [];
+        }
+
+        $username = $user->username;
+        $base = rtrim((string) config('badgeforge.personal_endpoint', '/b'), '/');
+
+        $badges = $assets->map(static function (BadgeAsset $asset) use ($username, $base): array {
+            $id = (string) $asset->id;
+            $publicUrl = is_string($username) && $username !== ''
+                ? url($base.'/'.$username.'/'.$id)
+                : null;
+
+            return [
+                'id' => $id,
+                'name' => (string) $asset->name,
+                'type' => (string) $asset->type,
+                'providerSlug' => $asset->provider_slug,
+                'definitionSlug' => $asset->definition_slug,
+                'params' => $asset->params,
+                'private' => (bool) $asset->private,
+                'credentialSet' => $asset->credentialSet(),
+                'credentialUsername' => $asset->credential_username,
+                'url' => $publicUrl === null ? null : $publicUrl.'.svg',
+                'pngUrl' => $publicUrl === null ? null : $publicUrl.'.png',
+                'lastGeneratedAt' => $asset->last_generated_at?->toIso8601String(),
+                'expiresAt' => $asset->expires_at?->toIso8601String(),
+                'createdAt' => $asset->created_at?->toIso8601String(),
+            ];
+        })->all();
+
+        return array_values($badges);
     }
 
     /**

@@ -307,6 +307,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Badges pessoais publicados pela conta (F4, ADR-081).
+     *
+     * @return HasMany<BadgeAsset, $this>
+     */
+    public function badgeAssets(): HasMany
+    {
+        return $this->hasMany(BadgeAsset::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

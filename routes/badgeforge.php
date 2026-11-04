@@ -3,6 +3,7 @@
 use App\Http\Controllers\BadgeForge\BadgeForgeAccountController;
 use App\Http\Controllers\BadgeForge\BadgePresetController;
 use App\Http\Controllers\BadgeForge\CustomLogoController;
+use App\Http\Controllers\BadgeForge\PersonalBadgeManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Gestao autenticada do BadgeForge (F3, ADR-078/ADR-079).
@@ -42,5 +43,25 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         Route::delete('badgeforge/presets/{badgePreset}', [BadgePresetController::class, 'destroy'])
             ->whereUlid('badgePreset')
             ->name('badgeforge.presets.destroy');
+
+        // Badges pessoais (F4, ADR-081). A URL publica e stateless; aqui so
+        // ficam as acoes do dono. Refresh tem throttle proprio porque gera
+        // chamada externa.
+        Route::post('badgeforge/badges', [PersonalBadgeManagementController::class, 'store'])
+            ->name('badgeforge.badges.store');
+        Route::patch('badgeforge/badges/{badgeAsset}', [PersonalBadgeManagementController::class, 'update'])
+            ->whereUlid('badgeAsset')
+            ->name('badgeforge.badges.update');
+        Route::patch('badgeforge/badges/{badgeAsset}/credential', [PersonalBadgeManagementController::class, 'credential'])
+            ->whereUlid('badgeAsset')
+            ->name('badgeforge.badges.credential');
+        Route::delete('badgeforge/badges/{badgeAsset}', [PersonalBadgeManagementController::class, 'destroy'])
+            ->whereUlid('badgeAsset')
+            ->name('badgeforge.badges.destroy');
     });
+
+    Route::post('badgeforge/badges/{badgeAsset}/refresh', [PersonalBadgeManagementController::class, 'refresh'])
+        ->whereUlid('badgeAsset')
+        ->middleware('throttle:badgeforge-refresh')
+        ->name('badgeforge.badges.refresh');
 });

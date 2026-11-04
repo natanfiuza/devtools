@@ -4,6 +4,7 @@ namespace App\Actions\Account;
 
 use App\Exceptions\Ai\PayloadCodecException;
 use App\Models\AiRequest;
+use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgePreset;
 use App\Models\NewsletterSubscriber;
@@ -138,6 +139,30 @@ final class ExportUserData
                         'name' => $preset->name,
                         'form' => $preset->payload,
                         'created_at' => $preset->created_at?->toIso8601String(),
+                    ])
+                    ->all(),
+                // Badges pessoais (F4, ADR-081): metadados e URLs publicas.
+                // O PAT cifrado e o fingerprint nunca saem - exportar
+                // credencial seria criar uma copia fora do lugar protegido.
+                'badges' => $user->badgeAssets()
+                    ->orderBy('created_at')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (BadgeAsset $asset): array => [
+                        'name' => $asset->name,
+                        'type' => $asset->type,
+                        'private' => (bool) $asset->private,
+                        'provider' => $asset->provider_slug,
+                        'definition' => $asset->definition_slug,
+                        'params' => $asset->params,
+                        'form' => $asset->form,
+                        'credential_set' => $asset->credentialSet(),
+                        'credential_username' => $asset->credential_username,
+                        'url' => $asset->publicSvgUrl(),
+                        'png_url' => $asset->publicPngUrl(),
+                        'last_generated_at' => $asset->last_generated_at?->toIso8601String(),
+                        'expires_at' => $asset->expires_at?->toIso8601String(),
+                        'created_at' => $asset->created_at?->toIso8601String(),
                     ])
                     ->all(),
             ],

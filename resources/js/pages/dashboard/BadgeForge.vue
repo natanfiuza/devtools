@@ -17,6 +17,7 @@ import {
 } from '@/routes/badgeforge/presets';
 import LogoPreview from '@/tools/badgeforge/LogoPreview.vue';
 import LogoUploadForm from '@/tools/badgeforge/LogoUploadForm.vue';
+import PersonalBadgesPanel from '@/tools/badgeforge/PersonalBadgesPanel.vue';
 import { forgetCustomLogo, loadCustomLogo } from '@/tools/badgeforge/customLogos';
 import type {
     AccountBadgeForgeProps,
@@ -42,6 +43,7 @@ const logos = props.toolProps.customLogos;
 const presets = props.toolProps.presets;
 const logoLimits = props.toolProps.limits.customLogos;
 const presetLimits = props.toolProps.limits.presets;
+const personalLimits = props.toolProps.limits.personalBadges;
 
 const previewId = ref<string | null>(null);
 const previewLogo = ref<BadgeLogo | null>(null);
@@ -212,6 +214,21 @@ function deletePreset(preset: BadgeForgePreset): void {
                 : t('account.badgeforge.used_of', {
                   used: presetLimits.used,
                   limit: presetLimits.limit,
+                })
+            }}
+          </dd>
+        </div>
+
+        <div class="flex items-center justify-between gap-4 px-4 py-2">
+          <dt class="text-sm text-subtle">
+            {{ t('account.badgeforge.limit_personal_badges') }}
+          </dt>
+          <dd class="text-sm">
+            {{
+              personalLimits.limit === null
+                ? t('account.badgeforge.unlimited')
+                : t('account.badgeforge.personal_readonly_note', {
+                  used: personalLimits.used,
                 })
             }}
           </dd>
@@ -545,5 +562,10 @@ function deletePreset(preset: BadgeForgePreset): void {
         </li>
       </ul>
     </section>
+
+    <PersonalBadgesPanel
+      :tool-props="toolProps"
+      :upgrade-url="upgradeUrl"
+    />
   </div>
 </template>

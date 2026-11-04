@@ -12,12 +12,7 @@ namespace App\Support\BadgeForge;
  */
 final class BadgeRequest
 {
-    public function __construct(
-        private readonly StyleCatalog $styles,
-        private readonly LogoCatalog $logos,
-        private readonly CustomLogoRepository $customLogos,
-        private readonly BadgeFontCatalog $fonts,
-    ) {}
+    public function __construct(private readonly BadgeSpecBuilder $builder) {}
 
     /**
      * @param  array<string, mixed>  $query
@@ -31,83 +26,7 @@ final class BadgeRequest
             return null;
         }
 
-        $style = $this->styles->get(self::queryString($query, 'style'));
-
-        if ($style->uppercase) {
-            $label = mb_strtoupper($label, 'UTF-8');
-            $message = mb_strtoupper($message, 'UTF-8');
-        }
-
-        $maxLength = (int) config('badgeforge.limits.max_text_length', 100);
-        $label = self::truncate($label, $maxLength);
-        $message = self::truncate($message, $maxLength);
-
-        $labelColor = $style->labelColor
-            ?? Color::parseOr(self::queryString($query, 'labelColor'), (string) config('badgeforge.colors.label'));
-
-        $messageColor = $style->messageColor
-            ?? Color::parseOr(self::queryString($query, 'color'), (string) config('badgeforge.colors.default'));
-
-        $rawLogo = self::queryString($query, 'logo');
-        $logo = $this->resolveLogo($rawLogo);
-
-        $logoSize = BadgeInput::integer(
-            self::queryString($query, 'logoSize'),
-            $style->logoSize,
-            (int) config('badgeforge.limits.logo_size.min', 8),
-            (int) config('badgeforge.limits.logo_size.max', 20),
-        );
-
-        $logoPosition = self::queryString($query, 'logoPosition') === 'right' ? 'right' : 'left';
-
-        $cacheSeconds = BadgeInput::integer(
-            self::queryString($query, 'cacheSeconds'),
-            (int) config('badgeforge.limits.cache_seconds.default', 86400),
-            (int) config('badgeforge.limits.cache_seconds.min', 300),
-            (int) config('badgeforge.limits.cache_seconds.max', 86400),
-        );
-
-        if (self::isCustomLogoSlug($rawLogo)) {
-            // Logos personalizados podem ser excluidos: o teto garante que a
-            // remocao chegue ao CDN em no maximo `max_cache_seconds` (ADR-078).
-            $cacheSeconds = min(
-                $cacheSeconds,
-                (int) config('badgeforge.custom_logos.max_cache_seconds', 3600),
-            );
-        }
-
-        return new BadgeSpec(
-            label: $label,
-            message: $message,
-            style: $style,
-            font: $this->fonts->find(self::queryString($query, 'font')),
-            labelColor: $labelColor,
-            messageColor: $messageColor,
-            logo: $logo,
-            logoColor: Color::parseOr(self::queryString($query, 'logoColor'), (string) config('badgeforge.colors.logo')),
-            logoSize: $logoSize,
-            logoPosition: $logoPosition,
-            link: BadgeInput::link(self::queryString($query, 'link')),
-            cacheSeconds: $cacheSeconds,
-        );
-    }
-
-    /**
-     * `u_` e namespace reservado para logos personalizados; um slug nesse
-     * formato nunca cai no catalogo embutido.
-     */
-    private function resolveLogo(?string $raw): ?Logo
-    {
-        if (self::isCustomLogoSlug($raw)) {
-            return $this->customLogos->find($raw);
-        }
-
-        return $this->logos->find($raw);
-    }
-
-    private static function isCustomLogoSlug(?string $raw): bool
-    {
-        return $raw !== null && preg_match('/^u_/i', trim($raw)) === 1;
+        return $this->builder->build($label, $message, $query);
     }
 
     public static function decodeText(string $segment): ?string
@@ -149,15 +68,5 @@ final class BadgeRequest
         }
 
         return implode('', array_slice($characters, 0, $limit - 1)).'…';
-    }
-
-    /**
-     * @param  array<string, mixed>  $query
-     */
-    private static function queryString(array $query, string $key): ?string
-    {
-        $value = $query[$key] ?? null;
-
-        return is_string($value) ? $value : null;
     }
 }

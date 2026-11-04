@@ -25,6 +25,14 @@ export function htmlSnippet(
     return `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(alt)}" width="${width}" height="${height}" />`;
 }
 
+/**
+ * `<img>` sem largura/altura: a imagem do provider e renderizada no servidor e
+ * o tamanho depende da metrica (versao, licenca, numero abreviado).
+ */
+export function imageSnippet(url: string, alt: string): string {
+    return `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(alt)}" />`;
+}
+
 /** reStructuredText (`.. image::` + `:alt:`). */
 export function rstSnippet(url: string, alt: string): string {
     return `.. image:: ${url}\n   :alt: ${alt}`;

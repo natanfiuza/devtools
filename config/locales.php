@@ -65,6 +65,7 @@ return [
         'donations',
         'contact',
         'api_docs',
+        'docs',
         'errors',
     ],
 

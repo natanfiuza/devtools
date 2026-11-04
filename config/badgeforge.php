@@ -30,6 +30,10 @@ return [
 
     'endpoint' => '/api/badges/static',
 
+    'provider_endpoint' => '/api/badges',
+
+    'personal_endpoint' => '/b',
+
     'default_style' => 'flat',
 
     'logo_position' => 'left',
@@ -92,6 +96,39 @@ return [
     'management' => [
         'rate_limit' => 20,
         'rate_decay_seconds' => 60,
+    ],
+
+    /*
+    | Providers externos (F4, ADR-080): a chamada publica e anonima e o cache
+    | e por URL resolvida. Nenhum token global existe em config/.env - a
+    | credencial e sempre do dono do badge pessoal (ADR-068/ADR-081).
+    */
+    'providers' => [
+        'cache_ttl' => 300,
+        'stale_ttl' => 86400,
+        'fallback_ttl' => 60,
+        'connect_timeout' => 3,
+        'timeout' => 5,
+        'max_body_bytes' => 1048576,
+        'max_param_length' => 200,
+        'user_agent' => 'devtools-badgeforge/1.0',
+        'unavailable_message' => 'unavailable',
+        'unknown_message' => 'unknown',
+        'refresh_rate_limit' => 10,
+        'refresh_rate_decay_seconds' => 60,
+    ],
+
+    /*
+    | Badges pessoais (F4, ADR-081): arquivos sob `personal/{username}` na
+    | base abaixo; o banco guarda o path relativo, nunca o absoluto. O teto de
+    | cache limita o tempo que uma exclusao/renomeacao leva para sumir de CDN.
+    */
+    'personal_badges' => [
+        'name_max_length' => 80,
+        'max_cache_seconds' => 3600,
+        'credential_max_length' => 512,
+        'prune_after_hours' => 48,
+        'path' => 'app/data/tools/badgeforge',
     ],
 
     /*

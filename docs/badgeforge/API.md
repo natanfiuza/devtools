@@ -94,13 +94,15 @@ o ULID é a referência opaca, sem nome de usuário ou caminho de conta.
   com o mesmo texto. Nada é registrado em log além de IDs e classes de
   exceção; o conteúdo do badge nunca entra no log da aplicação.
 
-## Provider (F4 — planejado)
+## Provider (F4 — entregue)
 
 ```text
-GET /api/badges/{provider}/{path}.svg
+GET /api/badges/{provider}/{definition}/{path}.svg
 ```
 
-Exemplos previstos:
+`{definition}` é a métrica (`stars`, `forks`, `issues`, `license`, `v`, `dm`,
+`dt`, `pulls`) e `{path}` são as coordenadas do item no formato daquela
+métrica. Exemplos:
 
 ```text
 /api/badges/github/stars/natanfiuza/devtools.svg
@@ -115,9 +117,20 @@ Exemplos previstos:
 - **Item privado**: só para usuário pagador e só em badge pessoal. O PAT é do
   usuário, cifrado em repouso e vinculado ao badge; a URL pública leva apenas o
   ULID. Ver `ADR-068` e `docs/tutorial/`.
-- Packagist não hospeda pacote privado: o acesso é sempre público.
-- Cache padrão de 300 s, com `stale-if-error` para não devolver erro ao `<img>`
-  quando o provider falhar ou limitar.
+- Packagist não hospeda pacote privado: o acesso é sempre público; npm `dm`
+  (contagem de downloads) também é sempre público.
+- Cache padrão de 300 s (`badgeforge.providers.cache_ttl`), por URL resolvida:
+  GitHub `stars`/`forks`/`issues`/`license` compartilham a mesma entrada (a URL
+  da API é a mesma); npm `v`/`dm` e Packagist `dt`/`v` têm entradas separadas.
+- `stale-if-error`: provider fora do ar, 429 ou timeout servem a última
+  resposta boa com `Warning: 110` e `X-Badge-Cache: STALE`; sem resposta
+  anterior, a imagem sai 200 com o rótulo da métrica e `unavailable`.
+- Cosmético (`style`, `color`, `labelColor`, `logo`, `logoSize`, `font`,
+  `download=1`, `png`) funciona igual à badge estática. `cacheSeconds` e
+  `refresh` são **ignorados** nesta rota: o TTL é do servidor.
+- Provider, definição ou path inválido/desconhecido responde **404** com o
+  envelope `ApiError`. A rota estática continua vencendo: `/api/badges/static/...`
+  nunca cai aqui.
 
 ## Endpoint JSON (F5 — planejado)
 
@@ -134,7 +147,7 @@ não há API pública de gestão na F3.
 
 | Método | Caminho | Ação |
 |---|---|---|
-| GET | `/dashboard/badgeforge` | página da conta (limites, logos, presets) |
+| GET | `/dashboard/badgeforge` | página da conta (limites, logos, presets e badges pessoais) |
 | POST | `/badgeforge/logos` | upload SVG + parse (multipart) |
 | GET | `/badgeforge/logos/{ulid}` | JSON `{viewBox, paths}` — só o dono |
 | PATCH | `/badgeforge/logos/{ulid}` | renomear |
@@ -142,21 +155,34 @@ não há API pública de gestão na F3.
 | POST | `/badgeforge/presets` | criar snapshot |
 | PATCH | `/badgeforge/presets/{ulid}` | renomear |
 | DELETE | `/badgeforge/presets/{ulid}` | excluir |
+| POST | `/badgeforge/badges` | criar badge pessoal (só plano pago) |
+| PATCH | `/badgeforge/badges/{ulid}` | renomear badge |
+| PATCH | `/badgeforge/badges/{ulid}/credential` | definir/trocar o PAT da badge |
+| POST | `/badgeforge/badges/{ulid}/refresh` | forçar nova geração (provider) |
+| DELETE | `/badgeforge/badges/{ulid}` | excluir badge e arquivos |
 
-Regras: escritas em `throttle:badgeforge-management`; registro de outra conta
-responde **404**; SVG inválido responde **422** com
-`validation.custom_logo.<code>`; limites em `config/badgeforge.php` (Free: 2
-logos; pago: ilimitado; presets: ilimitados). Os paths nunca viajam nas props
-da página — são buscados sob demanda no `GET` do logo.
+Regras: escritas em `throttle:badgeforge-management` (o refresh tem limiter
+próprio, `badgeforge-refresh`); registro de outra conta responde **404**; SVG
+inválido responde **422** com `validation.custom_logo.<code>`; limites em
+`config/badgeforge.php` (Free: 2 logos; pago: ilimitado; presets: ilimitados).
+Os paths nunca viajam nas props da página — são buscados sob demanda no `GET` do
+logo. Badge pessoal é imutável em provider/params: para mudar, crie outra e
+exclua a antiga. O PAT é write-only e nunca volta na resposta.
 
-## Pessoal (F4 — planejado)
+A página pública `/{locale}/docs/badgeforge` documenta os três endpoints, as
+nove métricas e o fluxo de credencial nos cinco idiomas.
+
+## Pessoal (F4 — entregue)
 
 ```text
 GET /b/{username}/{ulid}.svg
 ```
 
 Apenas usuários pagos criam. A URL carrega só o ULID opaco; o PAT de item
-privado nunca aparece nela.
+privado nunca aparece nela. A imagem é stateless (sem sessão/CSRF), devolve
+`ETag`/`304` e `Cache-Control` com teto de 3600 s
+(`badgeforge.personal_badges.max_cache_seconds`). `?refresh=1` é ignorado:
+o dono força uma nova geração por `POST /badgeforge/badges/{ulid}/refresh`.
 
 ## Metadados e gestão (API pública — fases futuras)
 

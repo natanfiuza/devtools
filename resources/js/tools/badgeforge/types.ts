@@ -6,6 +6,9 @@
  * cores vem dos JSONs de `resources/badgeforge`, os mesmos lidos pelo PHP.
  */
 
+/** Modo do construtor: badge estatica local ou badge de provider (F4). */
+export type BadgeMode = 'static' | 'provider';
+
 export interface BadgeForgeLogo {
     slug: string;
     name: string;
@@ -26,6 +29,15 @@ export interface BadgeForgeLimits {
     png: { maxWidth: number };
     customLogos: BadgeForgeCustomLogoLimits;
     presets: BadgeForgePresetLimits;
+    personalBadges: BadgeForgePersonalBadgeLimits;
+    providers: { maxParamLength: number };
+}
+
+/** `limit: null` = ilimitado (pago); `0` = criacao bloqueada. */
+export interface BadgeForgePersonalBadgeLimits {
+    limit: number | null;
+    used: number;
+    nameMaxLength: number;
 }
 
 /** `limit: null` = ilimitado; `0` = gestao indisponivel (convidado). */
@@ -49,7 +61,59 @@ export interface BadgeForgePresetLimits {
 export interface BadgeForgeManagement {
     canManage: boolean;
     canSavePresets: boolean;
+    canCreatePersonalBadges: boolean;
     isPaid: boolean;
+}
+
+/**
+ * Parametro de path de uma definicao de provider (F4, ADR-080). `pattern` e
+ * aplicado ao trecho cru; `allowSlash` libera barra (pacote npm com escopo).
+ */
+export interface BadgeForgeProviderParam {
+    name: string;
+    required: boolean;
+    pattern: string;
+    allowSlash: boolean;
+    placeholderKey: string;
+}
+
+export interface BadgeForgeProviderDefinition {
+    slug: string;
+    name: string;
+    label: string;
+    supportsPrivate: boolean;
+    examplePath: string;
+    pathPattern: string;
+    params: BadgeForgeProviderParam[];
+}
+
+export interface BadgeForgeProvider {
+    slug: string;
+    name: string;
+    category: string;
+    requiresAuth: boolean;
+    /** Basic auth (Docker): o PAT privado exige tambem o username. */
+    requiresUsername: boolean;
+    documentationUrl: string | null;
+    definitions: BadgeForgeProviderDefinition[];
+}
+
+/** Badge pessoal do dono; o PAT nunca viaja, so o estado da credencial. */
+export interface BadgeForgePersonalBadge {
+    id: string;
+    name: string;
+    type: 'static' | 'provider';
+    providerSlug: string | null;
+    definitionSlug: string | null;
+    params: Record<string, string> | null;
+    private: boolean;
+    credentialSet: boolean;
+    credentialUsername: string | null;
+    url: string | null;
+    pngUrl: string | null;
+    lastGeneratedAt: string | null;
+    expiresAt: string | null;
+    createdAt: string | null;
 }
 
 /** Metadados de um logo personalizado; os paths vem sob demanda (ADR-078). */
@@ -95,14 +159,18 @@ export interface BadgeForgeDefaults {
 
 export interface BadgeForgeToolProps {
     endpoint: string;
+    providerEndpoint: string;
+    personalEndpoint: string;
     styles: string[];
     logos: BadgeForgeLogo[];
     fonts: BadgeFont[];
+    providers: BadgeForgeProvider[];
     limits: BadgeForgeLimits;
     defaults: BadgeForgeDefaults;
     management: BadgeForgeManagement;
     customLogos: BadgeForgeCustomLogoSummary[];
     presets: BadgeForgePreset[];
+    personalBadges: BadgeForgePersonalBadge[];
 }
 
 /** Cor resolvida: hexadecimal canonico (#rrggbb) e alfa entre 0 e 1. */

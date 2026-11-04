@@ -29,6 +29,7 @@ const TRADUCOES = {
         },
         badgeforge: {
             intro: 'Monte o badge e copie o trecho.',
+            modes: { static: 'Estático', provider: 'Provedor' },
             fields: {
                 label: 'Rótulo',
                 message: 'Mensagem',
@@ -136,6 +137,7 @@ function managedProps(
         management: {
             canManage: true,
             canSavePresets: true,
+            canCreatePersonalBadges: false,
             isPaid: false,
         },
         customLogos: [CUSTOM_LOGO],
@@ -287,7 +289,9 @@ describe('BadgeForge Tool', () => {
         expect(markdown).toContain('![build: passing](http');
         expect(markdown).toContain('/api/badges/static/build/passing.svg');
 
-        const triggers = wrapper.findAll('[role="tab"]');
+        const triggers = wrapper.findAll(
+            '[data-test="badge-snippet-tabs"] [role="tab"]',
+        );
 
         expect(triggers.map((tab) => tab.text())).toEqual([
             'URL',
@@ -378,6 +382,25 @@ describe('BadgeForge Tool', () => {
         expect(
             wrapper.find('[data-test="badge-stage"]').attributes('class'),
         ).toContain('bg-neutral-100');
+    });
+});
+
+describe('BadgeForge Tool - modo provider', () => {
+    it('troca o construtor local pela imagem do endpoint de provider', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.find('[data-test="badge-mode-provider"]').trigger('click');
+        await flushPromises();
+
+        expect(wrapper.find('[data-test="badge-preview"]').exists()).toBe(false);
+        expect(
+            wrapper.find('[data-test="badge-provider-mode"]').exists(),
+        ).toBe(true);
+        expect(
+            wrapper
+                .find('[data-test="badge-provider-preview"]')
+                .attributes('src'),
+        ).toContain('/api/badges/github/stars/natanfiuza/devtools.svg');
     });
 });
 

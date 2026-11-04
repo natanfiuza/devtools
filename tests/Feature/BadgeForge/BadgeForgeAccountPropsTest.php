@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgePreset;
 use App\Models\Plan;
@@ -7,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Support\BadgeForge\BadgeForgeToolProps;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
 
@@ -38,6 +40,7 @@ it('descreve a conta Free com o limite de dois logos', function () {
     expect($props['management'])->toBe([
         'canManage' => true,
         'canSavePresets' => true,
+        'canCreatePersonalBadges' => false,
         'isPaid' => false,
     ])
         ->and($props['limits']['customLogos']['limit'])->toBe(2)
@@ -45,6 +48,11 @@ it('descreve a conta Free com o limite de dois logos', function () {
         ->and($props['limits']['presets'])->toBe([
             'limit' => null,
             'used' => 1,
+            'nameMaxLength' => 80,
+        ])
+        ->and($props['limits']['personalBadges'])->toBe([
+            'limit' => 0,
+            'used' => 0,
             'nameMaxLength' => 80,
         ])
         ->and($props['customLogos'])->toBe([[
@@ -77,8 +85,10 @@ it('marca o plano pago como ilimitado', function () {
     $props = BadgeForgeToolProps::for($user);
 
     expect($props['management']['isPaid'])->toBe(true)
+        ->and($props['management']['canCreatePersonalBadges'])->toBeTrue()
         ->and($props['limits']['customLogos']['limit'])->toBeNull()
-        ->and($props['limits']['presets']['limit'])->toBeNull();
+        ->and($props['limits']['presets']['limit'])->toBeNull()
+        ->and($props['limits']['personalBadges']['limit'])->toBeNull();
 });
 
 it('nao abre a gestao para conta nao verificada ou suspensa', function (string $state) {
@@ -100,6 +110,12 @@ it('nao abre a gestao para conta nao verificada ou suspensa', function (string $
             'nameMaxLength' => 80,
         ])
         ->and($props['limits']['presets']['limit'])->toBe(0)
+        ->and($props['management']['canCreatePersonalBadges'])->toBeFalse()
+        ->and($props['limits']['personalBadges'])->toBe([
+            'limit' => 0,
+            'used' => 0,
+            'nameMaxLength' => 80,
+        ])
         ->and($props['customLogos'])->toBe([])
         ->and($props['presets'])->toBe([]);
 })->with([
@@ -153,5 +169,65 @@ it('nao consulta logos nem presets para convidado', function () {
 
     expect($props['management']['canManage'])->toBeFalse()
         ->and($props['customLogos'])->toBe([])
-        ->and($props['presets'])->toBe([]);
+        ->and($props['presets'])->toBe([])
+        ->and($props['personalBadges'])->toBe([]);
+});
+
+it('lista as badges pessoais do dono com URLs publicas e sem credencial', function () {
+    $user = User::factory()->create(['username' => 'natanfiuza']);
+    $asset = BadgeAsset::factory()->for($user)->provider()->private()->create([
+        'name' => 'Estrelas',
+        'credential' => 'ghp_segredo',
+        'credential_username' => 'natanfiuza',
+        'credential_set_at' => now(),
+        'params' => ['owner' => 'natanfiuza', 'repo' => 'devtools'],
+    ]);
+
+    $props = BadgeForgeToolProps::for($user);
+    $entry = $props['personalBadges'][0];
+
+    expect($props['personalBadges'])->toHaveCount(1)
+        ->and($entry)->toBe([
+            'id' => $asset->id,
+            'name' => 'Estrelas',
+            'type' => 'provider',
+            'providerSlug' => 'github',
+            'definitionSlug' => 'stars',
+            'params' => ['owner' => 'natanfiuza', 'repo' => 'devtools'],
+            'private' => true,
+            'credentialSet' => true,
+            'credentialUsername' => 'natanfiuza',
+            'url' => url('/b/natanfiuza/'.$asset->id.'.svg'),
+            'pngUrl' => url('/b/natanfiuza/'.$asset->id.'.png'),
+            'lastGeneratedAt' => null,
+            'expiresAt' => null,
+            'createdAt' => $asset->created_at?->toIso8601String(),
+        ])
+        ->and($entry)->not->toHaveKeys(['credential', 'credential_fingerprint', 'svg_path', 'png_path'])
+        ->and($props['limits']['personalBadges'])->toBe(['limit' => 0, 'used' => 1, 'nameMaxLength' => 80]);
+});
+
+it('omite as URLs enquanto a conta nao tem username', function () {
+    $user = User::factory()->create(['username' => null]);
+    BadgeAsset::factory()->for($user)->static()->create();
+
+    $entry = BadgeForgeToolProps::for($user)['personalBadges'][0];
+
+    expect($entry['url'])->toBeNull()
+        ->and($entry['pngUrl'])->toBeNull();
+});
+
+it('nao derruba a pagina quando a tabela de badges ainda nao existe', function () {
+    $user = User::factory()->create();
+
+    Schema::rename('badge_assets', 'badge_assets_gone');
+
+    try {
+        $props = BadgeForgeToolProps::for($user);
+
+        expect($props['personalBadges'])->toBe([])
+            ->and($props['limits']['personalBadges'])->toBe(['limit' => 0, 'used' => 0, 'nameMaxLength' => 80]);
+    } finally {
+        Schema::rename('badge_assets_gone', 'badge_assets');
+    }
 });

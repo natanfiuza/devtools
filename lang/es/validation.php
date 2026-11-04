@@ -192,6 +192,18 @@ return [
         'missing_paths' => 'El SVG debe contener al menos un trazado.',
     ],
 
+    'badge_asset' => [
+        'paid_only' => 'Las insignias personales están disponibles en planes de pago.',
+        'username_required' => 'Elige un nombre de usuario antes de crear una insignia personal.',
+        'provider_unknown' => 'Este proveedor o métrica no está disponible.',
+        'params_invalid' => 'Los parámetros del proveedor no son válidos.',
+        'private_unsupported' => 'Esta métrica no admite repositorios privados.',
+        'credential_required' => 'Se requiere un token de acceso personal para elementos privados.',
+        'credential_not_allowed' => 'La credencial solo se permite en insignias de proveedor privadas.',
+        'credential_username_required' => 'Las insignias privadas de Docker requieren el nombre de usuario de la cuenta.',
+        'not_provider' => 'Solo se pueden actualizar las insignias de proveedor.',
+    ],
+
     'attributes' => [
         'amount' => 'importe',
         'code' => 'código',

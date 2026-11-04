@@ -65,6 +65,7 @@ it('devolve o visitante da tool sem gestao', function () {
             ->where('toolProps.management', [
                 'canManage' => false,
                 'canSavePresets' => false,
+                'canCreatePersonalBadges' => false,
                 'isPaid' => false,
             ])
         );

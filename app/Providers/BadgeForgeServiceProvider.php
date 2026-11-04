@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Support\BadgeForge\Providers\ProviderCatalog;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,8 +22,33 @@ use Inertia\Inertia;
  */
 final class BadgeForgeServiceProvider extends ServiceProvider
 {
+    public function register(): void
+    {
+        $this->app->singleton(ProviderCatalog::class);
+    }
+
     public function boot(): void
     {
+        // O refresh de badge pessoal dispara uma chamada externa: o limite e
+        // separado do CRUD e responde JSON, porque a UI chama por fetch.
+        RateLimiter::for('badgeforge-refresh', function (Request $request): Limit {
+            $user = $request->user();
+            $account = $user instanceof User
+                ? 'user:'.$user->getKey()
+                : 'guest:'.$request->ip();
+
+            $decaySeconds = max(1, (int) config('badgeforge.providers.refresh_rate_decay_seconds', 60));
+
+            return Limit::perMinutes(
+                max(1, (int) ceil($decaySeconds / 60)),
+                max(1, (int) config('badgeforge.providers.refresh_rate_limit', 10)),
+            )
+                ->by('badgeforge-refresh:'.$account)
+                ->response(static fn (): JsonResponse => response()->json([
+                    'message' => __('tools.badgeforge.management.throttled'),
+                ], 429));
+        });
+
         RateLimiter::for('badgeforge-management', function (Request $request): Limit {
             $user = $request->user();
             $account = $user instanceof User

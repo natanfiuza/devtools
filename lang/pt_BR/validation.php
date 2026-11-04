@@ -192,6 +192,18 @@ return [
         'missing_paths' => 'O SVG precisa conter pelo menos um caminho.',
     ],
 
+    'badge_asset' => [
+        'paid_only' => 'As badges pessoais estão disponíveis em planos pagos.',
+        'username_required' => 'Escolha um nome de usuário antes de criar uma badge pessoal.',
+        'provider_unknown' => 'Este provedor ou métrica não está disponível.',
+        'params_invalid' => 'Os parâmetros do provedor não são válidos.',
+        'private_unsupported' => 'Esta métrica não aceita repositórios privados.',
+        'credential_required' => 'Um token de acesso pessoal é obrigatório para itens privados.',
+        'credential_not_allowed' => 'A credencial só é permitida em badges de provedor privadas.',
+        'credential_username_required' => 'Badges privadas do Docker exigem o nome de usuário da conta.',
+        'not_provider' => 'Só badges de provedor podem ser atualizadas.',
+    ],
+
     'attributes' => [
         'amount' => 'valor',
         'code' => 'código',

@@ -30,3 +30,14 @@ escolhido, enviar/renomear/excluir logo e salvar/renomear/excluir preset
 Nao ha endpoint de render ou de validacao de SVG, e as demais tools de
 navegador seguem sem backend - a guarda "digitar nao dispara fetch" esta nos
 testes da tool.
+
+## Emenda da F4 do BadgeForge (2026-11-03)
+
+O modo provider (ADR-080) e a badge pessoal (ADR-081) ampliaram a excecao do
+BadgeForge sem mudar a regra: o builder estatico continua 100% no navegador e
+nenhuma digitacao faz requisicao. O que o servidor passou a fazer e o que a
+imagem exige por contrato — buscar a metrica no provider publico anonimamente
+(ou com o PAT do dono, no caso da badge pessoal), cachear o valor projetado e
+renderizar o SVG/PNG. O preview de provider e uma tag `<img>` apontando para
+`/api/badges/...`; nao ha endpoint de render para o formulario. As demais tools
+de navegador seguem sem backend.

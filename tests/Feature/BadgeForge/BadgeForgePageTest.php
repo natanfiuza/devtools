@@ -1,7 +1,10 @@
 <?php
 
 use App\Support\BadgeForge\BadgeForgeToolProps;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+
+uses(RefreshDatabase::class);
 
 /*
 | Pagina do BadgeForge (`/{locale}/tools/badgeforge`).
@@ -63,6 +66,12 @@ it('acompanha os limites da configuracao', function () {
             'used' => 0,
             'nameMaxLength' => 80,
         ],
+        'personalBadges' => [
+            'limit' => 0,
+            'used' => 0,
+            'nameMaxLength' => 80,
+        ],
+        'providers' => ['maxParamLength' => 200],
     ])->and($props['defaults'])->toBe([
         'style' => 'plastic',
         'color' => '#123456',

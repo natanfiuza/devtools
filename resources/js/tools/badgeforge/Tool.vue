@@ -7,6 +7,7 @@ import {
     Eraser,
     Image,
     Sparkles,
+    UserRound,
 } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -25,7 +26,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import { login as loginRoute, pricing as pricingRoute } from '@/routes';
 import LogoLibraryDialog from './LogoLibraryDialog.vue';
+import ModeTabs from './ModeTabs.vue';
+import PersonalBadgeDialog from './PersonalBadgeDialog.vue';
 import PresetDialog from './PresetDialog.vue';
+import ProviderForm from './ProviderForm.vue';
+import ProviderPreview from './ProviderPreview.vue';
 import {
     defaultForm,
     isCustomLogoSlug,
@@ -37,6 +42,7 @@ import {
 } from './builder';
 import { customLogoAsset, loadCustomLogo } from './customLogos';
 import { DEFAULT_FONT } from './lib/fonts';
+import { defaultProviderForm } from './lib/providerUrl';
 import { badgeDimensions, renderBadge } from './lib/render';
 import {
     htmlSnippet,
@@ -49,6 +55,7 @@ import type {
     BadgeForgeCustomLogoSummary,
     BadgeForgePreset,
     BadgeForgeToolProps,
+    BadgeMode,
 } from './types';
 
 /**
@@ -86,6 +93,8 @@ const SWATCHES = [
 ];
 
 const form = ref<BadgeFormState>(defaultForm(props));
+const providerForm = ref(defaultProviderForm(props));
+const mode = ref<BadgeMode>('static');
 const darkBackground = ref(false);
 const format = ref<BadgeFormat>('svg');
 const snippetTab = ref<'url' | 'markdown' | 'html' | 'rst'>('markdown');
@@ -111,6 +120,7 @@ const page = usePage();
 
 const logoDialogOpen = ref(false);
 const presetDialogOpen = ref(false);
+const personalDialogOpen = ref(false);
 
 /** O idioma prefixa as rotas publicas; fora do Inertia cai no fallback. */
 const localeSlug = computed<string>(() => {
@@ -329,6 +339,15 @@ onMounted(() => {
         <Bookmark class="size-4" />
         {{ t('tools.badgeforge.management.presets_button') }}
       </Button>
+      <Button
+        variant="outline"
+        size="sm"
+        data-test="badge-personal-open"
+        @click="personalDialogOpen = true"
+      >
+        <UserRound class="size-4" />
+        {{ t('tools.badgeforge.personal.create_button') }}
+      </Button>
     </div>
     <p
       v-else-if="!isAuthenticated"
@@ -344,7 +363,12 @@ onMounted(() => {
       </a>
     </p>
 
-    <div class="grid gap-6 lg:grid-cols-2">
+    <ModeTabs v-model="mode" />
+
+    <div
+      v-if="mode === 'static'"
+      class="grid gap-6 lg:grid-cols-2"
+    >
       <!-- Formulario -->
       <section class="space-y-6">
         <div class="flex items-center justify-between gap-2">
@@ -784,7 +808,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <Tabs v-model="snippetTab">
+          <Tabs v-model="snippetTab" data-test="badge-snippet-tabs">
             <TabsList class="grid w-full grid-cols-4">
               <TabsTrigger value="url">
                 {{ t('tools.badgeforge.snippets.url') }}
@@ -839,6 +863,21 @@ onMounted(() => {
       </section>
     </div>
 
+    <div
+      v-else
+      class="grid gap-6 lg:grid-cols-2"
+      data-test="badge-provider-mode"
+    >
+      <ProviderForm
+        v-model="providerForm"
+        :tool-props="props"
+      />
+      <ProviderPreview
+        :form="providerForm"
+        :tool-props="props"
+      />
+    </div>
+
     <LogoLibraryDialog
       v-if="props.management.canManage"
       v-model:open="logoDialogOpen"
@@ -854,6 +893,16 @@ onMounted(() => {
       :limits="props.limits.presets"
       :builder-form="form"
       @apply="applyPreset"
+    />
+
+    <PersonalBadgeDialog
+      v-if="props.management.canManage"
+      v-model:open="personalDialogOpen"
+      :tool-props="props"
+      :mode="mode"
+      :builder-form="form"
+      :provider-form="providerForm"
+      :upgrade-url="pricingUrl"
     />
   </div>
 </template>
