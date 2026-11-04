@@ -28,7 +28,7 @@ return [
 
     'fonts_path' => resource_path('badgeforge/fonts'),
 
-    'endpoint' => '/api/badges/static',
+    'static_endpoint' => '/api/badges/static',
 
     'provider_endpoint' => '/api/badges',
 
@@ -129,6 +129,52 @@ return [
         'credential_max_length' => 512,
         'prune_after_hours' => 48,
         'path' => 'app/data/tools/badgeforge',
+    ],
+
+    /*
+    | Endpoint JSON (F5, ADR-083/ADR-084): o dono cadastra uma URL HTTPS e o
+    | servidor busca o JSON no contrato shields v1. A URL nunca viaja ao
+    | cliente; a imagem publica e o ULID. Toda chamada sai de um IP publico
+    | resolvido e pinado - nunca de um destino arbitrario. Os limites por
+    | plano vivem aqui e podem ser reduzidos por .env para smoke/operacao.
+    */
+    'endpoint' => [
+        'path' => '/api/badges/endpoint',
+        'name_max_length' => 80,
+        'url_max_length' => 2048,
+        'allowed_scheme' => 'https',
+        'allowed_port' => 443,
+        'max_url_length' => 2048,
+        'max_host_length' => 253,
+        'cache_ttl' => 300,
+        'max_cache_ttl' => 3600,
+        'stale_ttl' => 86400,
+        'fallback_ttl' => 60,
+        'connect_timeout' => 3,
+        'timeout' => 5,
+        'max_body_bytes' => 524288,
+        'max_json_depth' => 32,
+        'user_agent' => 'devtools-badgeforge/1.0',
+        'unavailable_message' => 'unavailable',
+        'follow_redirects' => false,
+        'require_curl' => true,
+        'rate_limit' => [
+            'anonymous' => (int) env('BADGEFORGE_ENDPOINT_LIMIT_ANONYMOUS', 60),
+            'free' => (int) env('BADGEFORGE_ENDPOINT_LIMIT_FREE', 300),
+            'paid' => (int) env('BADGEFORGE_ENDPOINT_LIMIT_PAID', 3000),
+            'decay_seconds' => 60,
+        ],
+        'blocked_ipv4_cidrs' => [
+            '0.0.0.0/8', '10.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8',
+            '169.254.0.0/16', '172.16.0.0/12', '192.0.0.0/24', '192.0.2.0/24',
+            '192.168.0.0/16', '198.18.0.0/15', '198.51.100.0/24',
+            '203.0.113.0/24', '224.0.0.0/4', '240.0.0.0/4',
+        ],
+        'blocked_ipv6_cidrs' => [
+            '::/96', '::1/128', '::ffff:0:0/96', '64:ff9b::/96',
+            '100::/64', '2001:db8::/32', 'fc00::/7', 'fe80::/10', 'ff00::/8',
+        ],
+        'require_ipv6_global_unicast' => true,
     ],
 
     /*

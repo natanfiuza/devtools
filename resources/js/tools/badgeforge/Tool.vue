@@ -25,6 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import { login as loginRoute, pricing as pricingRoute } from '@/routes';
+import { badgeforge as badgeforgeDashboard } from '@/routes/dashboard';
 import LogoLibraryDialog from './LogoLibraryDialog.vue';
 import ModeTabs from './ModeTabs.vue';
 import PersonalBadgeDialog from './PersonalBadgeDialog.vue';
@@ -147,6 +148,11 @@ const loginUrl = computed<string>(
 
 const pricingUrl = computed<string>(
     () => pricingRoute({ locale: localeSlug.value }).url,
+);
+
+/** A lista e o cadastro de endpoints ficam no painel da conta (ADR-083). */
+const endpointDashboardUrl = computed<string>(
+    () => `${badgeforgeDashboard().url}#endpoint-badges`,
 );
 
 const customLogoMap = computed<Map<string, BadgeForgeCustomLogoSummary>>(() => {
@@ -362,6 +368,31 @@ onMounted(() => {
         {{ t('tools.badgeforge.management.login_action') }}
       </a>
     </p>
+
+    <!-- Endpoint JSON: cadastro e lista vivem na dashboard (ADR-083). -->
+    <div
+      v-if="props.management.canManage"
+      class="rounded-lg border border-border px-4 py-3"
+      data-test="badge-endpoint-cta"
+    >
+      <p class="text-sm font-medium">
+        {{ t('tools.badgeforge.endpoint.cta_title') }}
+      </p>
+      <p class="text-xs text-subtle">
+        {{ t('tools.badgeforge.endpoint.cta_description') }}
+      </p>
+      <Button
+        as-child
+        variant="outline"
+        size="sm"
+        class="mt-2"
+        data-test="badge-endpoint-cta-link"
+      >
+        <a :href="endpointDashboardUrl">
+          {{ t('tools.badgeforge.endpoint.cta_action') }}
+        </a>
+      </Button>
+    </div>
 
     <ModeTabs v-model="mode" />
 

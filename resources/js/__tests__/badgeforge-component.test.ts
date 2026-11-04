@@ -85,6 +85,11 @@ const TRADUCOES = {
                 login_cta: 'Entre para enviar seus próprios logos.',
                 login_action: 'Entrar',
             },
+            endpoint: {
+                cta_title: 'Badge de endpoint JSON',
+                cta_description: 'Cadastre o endpoint na sua conta.',
+                cta_action: 'Gerenciar endpoints',
+            },
         },
     },
 };
@@ -138,6 +143,7 @@ function managedProps(
             canManage: true,
             canSavePresets: true,
             canCreatePersonalBadges: false,
+            canCreateEndpointBadges: true,
             isPaid: false,
         },
         customLogos: [CUSTOM_LOGO],
@@ -429,6 +435,25 @@ describe('BadgeForge Tool - gestao da conta', () => {
             wrapper.find('[data-test="badge-manage-presets"]').exists(),
         ).toBe(true);
         expect(wrapper.find('[data-test="badge-login-cta"]').exists()).toBe(
+            false,
+        );
+    });
+
+    it('leva ao painel de endpoints JSON so para quem gerencia a conta', () => {
+        const managed = mountTool(managedProps());
+
+        expect(
+            managed.find('[data-test="badge-endpoint-cta"]').exists(),
+        ).toBe(true);
+        expect(
+            managed
+                .find('[data-test="badge-endpoint-cta-link"]')
+                .attributes('href'),
+        ).toBe('/dashboard/badgeforge#endpoint-badges');
+
+        const guest = mountTool();
+
+        expect(guest.find('[data-test="badge-endpoint-cta"]').exists()).toBe(
             false,
         );
     });

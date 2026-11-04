@@ -131,6 +131,11 @@
 - Cache de provider: entrada `badgeforge:provider:{sha256}` com o payload **projetado** (so as metricas exibidas), `etag`, `fetched_at` e `stale_until`; as quatro definicoes do GitHub compartilham a mesma entrada porque a URL e a mesma (ADR-080).
 - Stale-if-error: resposta `200` com o ultimo valor bom quando o provider falha ou limita, sinalizada por `Warning: 110 - "Response is Stale"`; e o que impede um rate limit externo de quebrar a imagem do README (ADR-080).
 - Fallback badge: badge `200` com label da definicao e a mensagem de `providers.unavailable_message` quando nao existe valor bom em cache; fica cacheada por `fallback_ttl` (ou `Retry-After` dentro do limite) e nunca vira 500 (ADR-080).
+- Badge de endpoint JSON: badge servida em `/api/badges/endpoint/{ulid}.{svg|png}` a partir de uma URL HTTPS cadastrada pelo dono em `badge_endpoints`; a imagem e stateless e anonima, a URL de origem nunca aparece nela e o corpo de origem nunca e persistido (F5, ADR-083).
+- Contrato shields v1: formato JSON aceito da origem de um endpoint - `schemaVersion` exatamente `1`, `label`/`message` strings nao vazias e `color`/`labelColor` opcionais como defaults; os demais campos do shields sao ignorados (ADR-083).
+- SSRF (Server-Side Request Forgery): ataque em que o servidor e induzido a buscar um destino interno pelo valor controlado pelo usuario; no BadgeForge o destino e validado e a conexao e pinada num IP publico (F5, ADR-084).
+- DNS pinning: fixar a conexao no IP que passou na classificacao via `CURLOPT_RESOLVE`, para que uma troca de DNS entre a validacao e o fetch (rebinding) nao mude o destino (ADR-084).
+- Rate limit por dono: limite de leitura da badge de endpoint aplicado ao dono do endpoint (Free 300/min, pago 3000/min), e nao ao IP de quem le o README; ULID desconhecido cai no anonimo 60/min por IP (ADR-084).
 - Label / Message: os dois textos da badge - o da esquerda (rotulo) e o da direita (mensagem) - separados por cor de fundo propria; o `aria-label` e `"label: message"`.
 - Estilo da badge: um de `flat`, `flat-square`, `plastic`, `for-the-badge` ou `social`; a geometria inteira vive em `resources/badgeforge/styles.json`, lida pelo PHP e pelo TS (ADR-074).
 - Logo embutido: SVG autoral, so com `<path d>`, registrado em `config/badgeforge.php` e desenhado dentro do documento do badge na cor pedida (ADR-074).

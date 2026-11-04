@@ -204,6 +204,19 @@ return [
         'not_provider' => 'Seuls les badges de fournisseur peuvent être actualisés.',
     ],
 
+    'badge_endpoint' => [
+        'url_length' => 'L\'URL dépasse la longueur autorisée.',
+        'url_chars' => 'L\'URL contient des caractères non autorisés.',
+        'scheme' => 'Seules les URL HTTPS sont acceptées.',
+        'userinfo' => 'Retirez l\'utilisateur et le mot de passe de l\'URL.',
+        'host' => 'Cet hôte n\'est pas autorisé.',
+        'port' => 'Seul le port 443 est accepté.',
+        'unresolvable' => 'Impossible de résoudre l\'hôte.',
+        'unsafe_ip' => 'L\'hôte résout vers une adresse privée ou réservée.',
+        'redirect' => 'L\'URL redirige vers une autre adresse.',
+        'invalid_payload' => 'L\'endpoint n\'a pas renvoyé de badge JSON shields valide.',
+    ],
+
     'attributes' => [
         'amount' => 'montant',
         'code' => 'code',

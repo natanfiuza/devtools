@@ -29,6 +29,7 @@ return [
             'static' => 'Badges statiques',
             'provider' => 'Badges de provider',
             'personal' => 'Badges personnelles',
+            'json' => 'Badges d\'endpoint JSON',
         ],
 
         'quick_start' => [
@@ -78,6 +79,23 @@ return [
             'manage_cta' => 'Gérer les badges personnelles',
             'tool_cta' => 'Créer une badge personnelle dans le générateur',
             'refresh_note' => 'L\'image est stateless. Pour forcer une nouvelle génération, utilisez l\'action de refresh du tableau de bord ; l\'URL publique ignore ?refresh=1.',
+        ],
+
+        'endpoint' => [
+            'title' => 'Badges d\'endpoint JSON',
+            'intro' => 'Enregistrez une URL HTTPS dans votre tableau de bord et obtenez une URL de badge opaque. L\'URL source n\'apparaît jamais dans l\'image, et les lecteurs de votre README n\'ont pas besoin de compte pour voir la badge.',
+            'url_label' => 'Format de l\'URL',
+            'contract_title' => 'JSON attendu',
+            'contract_body' => 'La source doit répondre au schéma shields.io version 1 : schemaVersion 1, label et message non vides, et color/labelColor facultatifs utilisés comme valeurs par défaut — un paramètre de la query l\'emporte toujours. Les autres champs sont ignorés.',
+            'cache_title' => 'Cache et repli',
+            'cache_body' => 'La réponse est mise en cache pendant {ttl} secondes. Si la source est indisponible ou nous limite, la dernière bonne réponse continue d\'être servie (STALE) ; sans réponse précédente, la badge affiche « unavailable », jamais une erreur.',
+            'limits_title' => 'Limite de requêtes',
+            'limits_anonymous' => 'Badge inconnue ou anonyme : {limit} requêtes par minute par IP.',
+            'limits_free' => 'Propriétaire d\'un compte gratuit : {limit} requêtes par minute.',
+            'limits_paid' => 'Propriétaire d\'un compte payant : {limit} requêtes par minute.',
+            'security_title' => 'Pourquoi c\'est sûr',
+            'security_body' => 'HTTPS uniquement sur le port 443, sans redirection, et toutes les IP résolues doivent être publiques. La connexion est épinglée sur l\'IP validée, donc un changement DNS entre la vérification et la requête ne peut pas atteindre une adresse interne. L\'URL source reste sur le serveur : elle n\'est ni dans la page, ni dans les logs, ni dans l\'URL de l\'image.',
+            'manage_cta' => 'Gérer les endpoints JSON',
         ],
 
         'cache' => [

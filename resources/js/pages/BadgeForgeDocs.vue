@@ -55,12 +55,21 @@ export type BadgeForgeDocsProvider = {
     definitions: BadgeForgeDocsDefinition[];
 };
 
+export type BadgeForgeDocsEndpointRateLimits = {
+    anonymous: number;
+    free: number;
+    paid: number;
+};
+
 export type BadgeForgeDocsProps = {
     providers: BadgeForgeDocsProvider[];
     staticEndpoint: string;
     providerEndpoint: string;
     personalEndpoint: string;
+    jsonEndpoint: string;
     cacheTtl: number;
+    endpointCacheTtl: number;
+    endpointRateLimits: BadgeForgeDocsEndpointRateLimits;
     origin: string;
 };
 
@@ -79,6 +88,7 @@ const origin = computed(() => trimSlash(props.origin));
 const staticEndpoint = computed(() => trimSlash(props.staticEndpoint));
 const providerEndpoint = computed(() => trimSlash(props.providerEndpoint));
 const personalEndpoint = computed(() => trimSlash(props.personalEndpoint));
+const jsonEndpoint = computed(() => trimSlash(props.jsonEndpoint));
 
 const toolUrl = computed(() => `/${routes.localeSlug.value}/tools/badgeforge`);
 const dashboardUrl = computed(
@@ -96,6 +106,18 @@ const staticMarkdown = computed(() =>
 const personalUrlFormat = computed(
     () => `${origin.value}${personalEndpoint.value}/{username}/{ulid}.svg`,
 );
+
+const jsonUrlFormat = computed(
+    () => `${origin.value}${jsonEndpoint.value}/{ulid}.svg`,
+);
+
+const jsonContract = `{
+  "schemaVersion": 1,
+  "label": "deploys",
+  "message": "green",
+  "color": "brightgreen",
+  "labelColor": "blue"
+}`;
 
 function metricLabel(
     providerSlug: string,
@@ -176,7 +198,7 @@ async function copyValue(value: string): Promise<void> {
         {{ t('docs.badgeforge.endpoints.title') }}
       </h2>
 
-      <div class="grid gap-4 sm:grid-cols-3">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="space-y-1 rounded-lg border border-border bg-surface p-4">
           <p class="text-xs text-muted-foreground">
             {{ t('docs.badgeforge.endpoints.static') }}
@@ -203,6 +225,15 @@ async function copyValue(value: string): Promise<void> {
             class="block font-mono text-xs break-all"
             data-test="badgeforge-docs-endpoint-personal"
           >{{ personalEndpoint }}/{username}/{ulid}.svg</code>
+        </div>
+        <div class="space-y-1 rounded-lg border border-border bg-surface p-4">
+          <p class="text-xs text-muted-foreground">
+            {{ t('docs.badgeforge.endpoints.json') }}
+          </p>
+          <code
+            class="block font-mono text-xs break-all"
+            data-test="badgeforge-docs-endpoint-json"
+          >{{ jsonEndpoint }}/{ulid}.svg</code>
         </div>
       </div>
     </section>
@@ -462,6 +493,95 @@ async function copyValue(value: string): Promise<void> {
         >
           <Link :href="toolUrl">
             {{ t('docs.badgeforge.personal.tool_cta') }}
+          </Link>
+        </Button>
+      </div>
+    </section>
+
+    <!-- JSON endpoint -->
+    <section
+      class="space-y-4"
+      data-test="badgeforge-docs-json-endpoint"
+    >
+      <h2 class="text-xl font-semibold tracking-tight">
+        {{ t('docs.badgeforge.endpoint.title') }}
+      </h2>
+      <p class="max-w-3xl text-sm text-muted-foreground">
+        {{ t('docs.badgeforge.endpoint.intro') }}
+      </p>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="space-y-1 rounded-lg border border-border bg-surface p-4">
+          <p class="text-xs text-muted-foreground">
+            {{ t('docs.badgeforge.endpoint.url_label') }}
+          </p>
+          <code
+            class="block font-mono text-xs break-all"
+            data-test="badgeforge-docs-json-url"
+          >{{ jsonUrlFormat }}</code>
+        </div>
+
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="text-sm font-semibold">
+            {{ t('docs.badgeforge.endpoint.contract_title') }}
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            {{ t('docs.badgeforge.endpoint.contract_body') }}
+          </p>
+          <pre
+            class="overflow-x-auto rounded-md bg-muted p-3 text-xs break-all whitespace-pre-wrap"
+            data-test="badgeforge-docs-json-contract"
+          >{{ jsonContract }}</pre>
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="inline-flex items-center gap-2 text-sm font-semibold">
+            <Clock class="size-4 text-accent" />
+            {{ t('docs.badgeforge.endpoint.cache_title') }}
+          </h3>
+          <p
+            class="text-sm text-muted-foreground"
+            data-test="badgeforge-docs-json-cache"
+          >
+            {{ t('docs.badgeforge.endpoint.cache_body', { ttl: endpointCacheTtl }) }}
+          </p>
+        </div>
+
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="text-sm font-semibold">
+            {{ t('docs.badgeforge.endpoint.limits_title') }}
+          </h3>
+          <ul
+            class="list-disc space-y-1 pl-5 text-sm text-muted-foreground"
+            data-test="badgeforge-docs-json-limits"
+          >
+            <li>{{ t('docs.badgeforge.endpoint.limits_anonymous', { limit: endpointRateLimits.anonymous }) }}</li>
+            <li>{{ t('docs.badgeforge.endpoint.limits_free', { limit: endpointRateLimits.free }) }}</li>
+            <li>{{ t('docs.badgeforge.endpoint.limits_paid', { limit: endpointRateLimits.paid }) }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+        <h3 class="inline-flex items-center gap-2 text-sm font-semibold">
+          <ShieldCheck class="size-4 text-accent" />
+          {{ t('docs.badgeforge.endpoint.security_title') }}
+        </h3>
+        <p class="text-sm text-muted-foreground">
+          {{ t('docs.badgeforge.endpoint.security_body') }}
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          as-child
+          data-test="badgeforge-docs-json-manage"
+        >
+          <Link :href="dashboardUrl">
+            {{ t('docs.badgeforge.endpoint.manage_cta') }}
+            <ArrowRight class="size-4" />
           </Link>
         </Button>
       </div>

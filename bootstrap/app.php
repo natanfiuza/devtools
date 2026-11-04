@@ -96,8 +96,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // O PAT de uma badge pessoal nunca volta no `_old_input` de um 422
-        // (F4, ADR-081). O handler e quem grava o input na sessao.
-        $exceptions->dontFlash(['credential']);
+        // (F4, ADR-081) - e a URL de origem de um endpoint tambem nao (F5,
+        // ADR-084). O handler e quem grava o input na sessao.
+        $exceptions->dontFlash(['credential', 'url']);
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),

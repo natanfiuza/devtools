@@ -3,6 +3,7 @@
 use App\Http\Controllers\BadgeForge\BadgeForgeAccountController;
 use App\Http\Controllers\BadgeForge\BadgePresetController;
 use App\Http\Controllers\BadgeForge\CustomLogoController;
+use App\Http\Controllers\BadgeForge\EndpointManagementController;
 use App\Http\Controllers\BadgeForge\PersonalBadgeManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,17 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         Route::delete('badgeforge/badges/{badgeAsset}', [PersonalBadgeManagementController::class, 'destroy'])
             ->whereUlid('badgeAsset')
             ->name('badgeforge.badges.destroy');
+
+        // Endpoints JSON (F5, ADR-083). A URL de origem so existe aqui e no
+        // servidor; a imagem publica e a rota com ULID em `routes/api.php`.
+        Route::post('badgeforge/endpoints', [EndpointManagementController::class, 'store'])
+            ->name('badgeforge.endpoints.store');
+        Route::patch('badgeforge/endpoints/{badgeEndpoint}', [EndpointManagementController::class, 'update'])
+            ->whereUlid('badgeEndpoint')
+            ->name('badgeforge.endpoints.update');
+        Route::delete('badgeforge/endpoints/{badgeEndpoint}', [EndpointManagementController::class, 'destroy'])
+            ->whereUlid('badgeEndpoint')
+            ->name('badgeforge.endpoints.destroy');
     });
 
     Route::post('badgeforge/badges/{badgeAsset}/refresh', [PersonalBadgeManagementController::class, 'refresh'])

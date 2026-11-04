@@ -204,6 +204,19 @@ return [
         'not_provider' => 'Só badges de provedor podem ser atualizadas.',
     ],
 
+    'badge_endpoint' => [
+        'url_length' => 'A URL passa do tamanho permitido.',
+        'url_chars' => 'A URL contém caracteres não permitidos.',
+        'scheme' => 'Só são aceitas URLs HTTPS.',
+        'userinfo' => 'Remova o usuário e a senha da URL.',
+        'host' => 'Este host não é permitido.',
+        'port' => 'Só a porta 443 é aceita.',
+        'unresolvable' => 'Não foi possível resolver o host.',
+        'unsafe_ip' => 'O host resolve para um endereço privado ou reservado.',
+        'redirect' => 'A URL redireciona para outro endereço.',
+        'invalid_payload' => 'O endpoint não devolveu um badge JSON válido do shields.',
+    ],
+
     'attributes' => [
         'amount' => 'valor',
         'code' => 'código',

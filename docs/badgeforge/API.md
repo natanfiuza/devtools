@@ -132,13 +132,72 @@ métrica. Exemplos:
   envelope `ApiError`. A rota estática continua vencendo: `/api/badges/static/...`
   nunca cai aqui.
 
-## Endpoint JSON (F5 — planejado)
+## Endpoint JSON (F5 — entregue)
 
 ```text
-GET /api/badges/endpoint.svg?url=https://...
+GET /api/badges/endpoint/{ulid}.{svg|png}
 ```
 
-Requer autenticação. HTTPS obrigatório, SSRF bloqueado, TTL mínimo 300 s.
+A imagem é stateless e anônima, como a badge pessoal: o ULID é a única
+identidade pública e a URL de origem **nunca** aparece nela. O cadastro é feito
+pelo dono em `/dashboard/badgeforge` (nome + URL); ler o README não exige
+sessão. ULID desconhecido responde **404** no envelope `ApiError` (ADR-083).
+
+### Contrato de origem (shields v1)
+
+O servidor busca a URL cadastrada e aceita **apenas** o núcleo shields v1:
+
+```json
+{
+  "schemaVersion": 1,
+  "label": "deploys",
+  "message": "green",
+  "color": "brightgreen",
+  "labelColor": "blue"
+}
+```
+
+- `schemaVersion` precisa ser exatamente `1`.
+- `label` e `message` são strings obrigatórias e não vazias (após `trim`).
+- `color`/`labelColor` são opcionais e viram **defaults**: a query
+  (`?color=`, `?labelColor=`) vence.
+- Precisam vir com `Content-Type: application/json` (ou `+json`) e corpo até
+  `endpoint.max_body_bytes`; lista, escalar, JSON inválido, content-type
+  diferente ou redirect são recusados.
+- `logoSvg`, `namedLogo`, `style`, `cacheSeconds` e `link` do JSON são
+  ignorados: cosméticos vêm da query e o TTL é do servidor.
+- Cosmético (`style`, `logo`, `logoSize`, `font`, `download=1`, `png`) funciona
+  como nas demais rotas. `?label=` sobrescreve o label da origem.
+
+### Cache e falhas
+
+- Chave `badgeforge:endpoint:v1:sha256(url canônica)` — a chave não revela host
+  nem path, e dois cadastros da mesma origem compartilham a entrada.
+- TTL fixo em `endpoint.cache_ttl` (300 s), limitado por `max_cache_ttl`
+  (3600 s). `?cacheSeconds=` e `?refresh=1` são **ignorados**.
+- `X-Badge-Cache: HIT|MISS|STALE`; quando a origem manda `ETag`, a revalidação
+  usa `If-None-Match` e um `304` renova a entrada.
+- Origem fora do ar, 429 ou timeout servem o último valor bom (`STALE` +
+  `Warning: 110`); sem valor bom, a imagem sai **200** com o nome do endpoint e
+  a mensagem `unavailable` — nunca 500.
+- Uma URL guardada que não passa mais no guard responde **422** `unsafe_url`.
+
+### SSRF
+
+Antes de qualquer conexão: HTTPS na porta 443, sem userinfo, host ASCII válido,
+sem redirect; resolução A+AAAA e **todos** os IPs precisam ser públicos;
+conexão pinada no IP validado (`CURLOPT_RESOLVE`), proxy de ambiente
+desabilitado (`CURLOPT_NOPROXY=*`, `proxy: ''`) e só `CURLPROTO_HTTPS`. Sem a
+extensão `curl` o fetch falha fechado (`curl_unavailable`). Na criação, URL
+insegura ou payload fora do contrato vira **422**
+`validation.badge_endpoint.*`; falha de rede não bloqueia o cadastro
+(ADR-084).
+
+### Rate limit
+
+Por **dono**, não por leitor: Free 300/min, pago 3000/min, e ULID
+inválido/desconhecido cai no anônimo 60/min por IP. O 429 sai no envelope
+`rate_limited` com `X-RateLimit-*` e `Retry-After`.
 
 ## Gestão da conta (F3 — web/Inertia, não é API pública)
 
@@ -160,6 +219,9 @@ não há API pública de gestão na F3.
 | PATCH | `/badgeforge/badges/{ulid}/credential` | definir/trocar o PAT da badge |
 | POST | `/badgeforge/badges/{ulid}/refresh` | forçar nova geração (provider) |
 | DELETE | `/badgeforge/badges/{ulid}` | excluir badge e arquivos |
+| POST | `/badgeforge/endpoints` | cadastrar endpoint JSON (nome + URL de origem) |
+| PATCH | `/badgeforge/endpoints/{ulid}` | renomear endpoint (a URL é imutável) |
+| DELETE | `/badgeforge/endpoints/{ulid}` | excluir endpoint e esquecer a chave de cache |
 
 Regras: escritas em `throttle:badgeforge-management` (o refresh tem limiter
 próprio, `badgeforge-refresh`); registro de outra conta responde **404**; SVG
@@ -169,8 +231,9 @@ Os paths nunca viajam nas props da página — são buscados sob demanda no `GET
 logo. Badge pessoal é imutável em provider/params: para mudar, crie outra e
 exclua a antiga. O PAT é write-only e nunca volta na resposta.
 
-A página pública `/{locale}/docs/badgeforge` documenta os três endpoints, as
-nove métricas e o fluxo de credencial nos cinco idiomas.
+A página pública `/{locale}/docs/badgeforge` documenta as quatro rotas de
+imagem, as nove métricas, o fluxo de credencial e o contrato do endpoint JSON
+nos cinco idiomas.
 
 ## Pessoal (F4 — entregue)
 

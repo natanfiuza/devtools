@@ -209,6 +209,19 @@ return [
         'not_provider' => 'Only provider badges can be refreshed.',
     ],
 
+    'badge_endpoint' => [
+        'url_length' => 'The URL is longer than allowed.',
+        'url_chars' => 'The URL contains characters that are not allowed.',
+        'scheme' => 'Only HTTPS URLs are accepted.',
+        'userinfo' => 'Remove the username and password from the URL.',
+        'host' => 'This host is not allowed.',
+        'port' => 'Only port 443 is accepted.',
+        'unresolvable' => 'The host could not be resolved.',
+        'unsafe_ip' => 'The host resolves to a private or reserved address.',
+        'redirect' => 'The URL redirects to another address.',
+        'invalid_payload' => 'The endpoint did not return a valid shields JSON badge.',
+    ],
+
     'attributes' => [
         'amount' => 'amount',
         'code' => 'code',
