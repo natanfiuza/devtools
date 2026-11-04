@@ -2,10 +2,15 @@
 
 use App\Models\BadgeProvider;
 use App\Models\BadgeProviderDefinition;
+use App\Support\BadgeForge\Providers\Clients\CodecovProviderClient;
+use App\Support\BadgeForge\Providers\Clients\CoverallsProviderClient;
 use App\Support\BadgeForge\Providers\Clients\DockerHubProviderClient;
 use App\Support\BadgeForge\Providers\Clients\GithubProviderClient;
+use App\Support\BadgeForge\Providers\Clients\LaravelProviderClient;
 use App\Support\BadgeForge\Providers\Clients\NpmProviderClient;
 use App\Support\BadgeForge\Providers\Clients\PackagistProviderClient;
+use App\Support\BadgeForge\Providers\Clients\PhpProviderClient;
+use App\Support\BadgeForge\Providers\Clients\PythonProviderClient;
 use App\Support\BadgeForge\Providers\ProviderCredential;
 use App\Support\BadgeForge\Providers\ProviderFetchException;
 use App\Support\BadgeForge\Providers\ProviderFetchRequest;
@@ -85,6 +90,31 @@ function packagistClient(): PackagistProviderClient
 function dockerClient(): DockerHubProviderClient
 {
     return new DockerHubProviderClient(new ProviderMetricFormatter);
+}
+
+function codecovClient(): CodecovProviderClient
+{
+    return new CodecovProviderClient(new ProviderMetricFormatter);
+}
+
+function coverallsClient(): CoverallsProviderClient
+{
+    return new CoverallsProviderClient(new ProviderMetricFormatter);
+}
+
+function laravelClient(): LaravelProviderClient
+{
+    return new LaravelProviderClient(new ProviderMetricFormatter);
+}
+
+function phpClient(): PhpProviderClient
+{
+    return new PhpProviderClient(new ProviderMetricFormatter);
+}
+
+function pythonClient(): PythonProviderClient
+{
+    return new PythonProviderClient(new ProviderMetricFormatter);
 }
 
 beforeEach(function () {
@@ -206,6 +236,143 @@ it('projeta pulls do docker e usa basic auth no privado', function () {
     ));
 });
 
+it('projeta a cobertura do codecov e do coveralls', function () {
+    Http::fake([
+        'api.codecov.io/*' => Http::response([
+            'totals' => ['coverage' => 66.89, 'lines' => 1200],
+            'name' => 'requests',
+        ]),
+        'coveralls.io/*' => Http::response([
+            'covered_percent' => 94.148,
+            'covered_lines' => 900,
+        ]),
+    ]);
+
+    $codecov = codecovClient()->fetch(clientRequest(
+        clientPair('codecov', 'coverage', 'coverage'),
+        'https://api.codecov.io/api/v2/github/psf/repos/requests/',
+    ));
+
+    $coveralls = coverallsClient()->fetch(clientRequest(
+        clientPair('coveralls', 'coverage', 'coverage'),
+        'https://coveralls.io/github/twbs/bootstrap.json',
+    ));
+
+    expect($codecov->metrics)->toBe(['coverage' => 66.89])
+        ->and($coveralls->metrics)->toBe(['coverage' => 94.148]);
+});
+
+it('recusa cobertura ausente ou nao numerica', function () {
+    Http::fake([
+        'api.codecov.io/*' => Http::response(['totals' => ['coverage' => null]]),
+        'coveralls.io/*' => Http::response(['covered_percent' => 'many']),
+    ]);
+
+    expect(fn () => codecovClient()->fetch(clientRequest(
+        clientPair('codecov', 'coverage', 'coverage'),
+        'https://api.codecov.io/api/v2/github/psf/repos/requests/',
+    )))->toThrow(ProviderFetchException::class);
+
+    expect(fn () => coverallsClient()->fetch(clientRequest(
+        clientPair('coveralls', 'coverage', 'coverage'),
+        'https://coveralls.io/github/twbs/bootstrap.json',
+    )))->toThrow(ProviderFetchException::class);
+});
+
+it('projeta versao estavel e downloads do laravel em toda resposta', function () {
+    Http::fake([
+        'packagist.org/*' => Http::response([
+            'downloads' => ['total' => 611_976_413, 'monthly' => 20_000_000],
+            'versions' => ['13.x-dev', 'v13.40.0', 'v13.39.0'],
+        ]),
+    ]);
+
+    $expected = ['version' => 'v13.40.0', 'downloads' => 611_976_413];
+
+    $version = laravelClient()->fetch(clientRequest(
+        clientPair('laravel', 'version', 'v'),
+        'https://packagist.org/packages/laravel/framework/stats.json',
+    ));
+
+    $downloads = laravelClient()->fetch(clientRequest(
+        clientPair('laravel', 'downloads', 'dt'),
+        'https://packagist.org/packages/laravel/framework/stats.json',
+    ));
+
+    expect($version->metrics)->toBe($expected)
+        ->and($downloads->metrics)->toBe($expected);
+});
+
+it('projeta versao nula quando nao ha release estavel', function () {
+    Http::fake([
+        'packagist.org/*' => Http::response([
+            'downloads' => ['total' => 10],
+            'versions' => ['14.x-dev', '13.x-dev'],
+        ]),
+    ]);
+
+    $payload = laravelClient()->fetch(clientRequest(
+        clientPair('laravel', 'version', 'v'),
+        'https://packagist.org/packages/laravel/framework/stats.json',
+    ));
+
+    expect($payload->metrics)->toBe(['version' => null, 'downloads' => 10]);
+});
+
+it('projeta a versao de runtime do php e do python', function () {
+    Http::fake([
+        'www.php.net/*' => Http::response([
+            8 => ['version' => '8.5.12', 'date' => '2025-11-20'],
+        ]),
+        'endoflife.date/*' => Http::response([
+            ['cycle' => '3.15', 'latest' => '3.15.2', 'eol' => '2030-10-01'],
+            ['cycle' => '3.14', 'latest' => '3.14.0', 'eol' => '2030-10-01'],
+        ]),
+    ]);
+
+    $php = phpClient()->fetch(clientRequest(
+        clientPair('php', 'version', 'v'),
+        'https://www.php.net/releases/index.php?json&max=1',
+    ));
+
+    $python = pythonClient()->fetch(clientRequest(
+        clientPair('python', 'version', 'v'),
+        'https://endoflife.date/api/python.json',
+    ));
+
+    expect($php->metrics)->toBe(['version' => '8.5.12'])
+        ->and($python->metrics)->toBe(['version' => '3.15.2']);
+});
+
+it('recusa shape inesperado nos clientes novos', function () {
+    Http::fake([
+        'api.codecov.io/*' => Http::response(['coverage' => 10]),
+        'packagist.org/*' => Http::response(['versions' => ['13.x-dev']]),
+        'www.php.net/*' => Http::response([]),
+        'endoflife.date/*' => Http::response([]),
+    ]);
+
+    expect(fn () => codecovClient()->fetch(clientRequest(
+        clientPair('codecov', 'coverage', 'coverage'),
+        'https://api.codecov.io/api/v2/github/psf/repos/requests/',
+    )))->toThrow(ProviderFetchException::class);
+
+    expect(fn () => laravelClient()->fetch(clientRequest(
+        clientPair('laravel', 'version', 'v'),
+        'https://packagist.org/packages/laravel/framework/stats.json',
+    )))->toThrow(ProviderFetchException::class);
+
+    expect(fn () => phpClient()->fetch(clientRequest(
+        clientPair('php', 'version', 'v'),
+        'https://www.php.net/releases/index.php?json&max=1',
+    )))->toThrow(ProviderFetchException::class);
+
+    expect(fn () => pythonClient()->fetch(clientRequest(
+        clientPair('python', 'version', 'v'),
+        'https://endoflife.date/api/python.json',
+    )))->toThrow(ProviderFetchException::class);
+});
+
 it('trata 304 como notModified com o etag corrente', function () {
     Http::fake(['api.github.com/*' => Http::response('', 304)]);
 
@@ -318,5 +485,10 @@ it('declara suporte a privado apenas onde a API suporta', function () {
         ->and(npmClient()->supportsPrivate(clientDefinition('npm', 'version', 'v')))->toBeTrue()
         ->and(npmClient()->supportsPrivate(clientDefinition('npm', 'downloads', 'dm')))->toBeFalse()
         ->and(packagistClient()->supportsPrivate(clientDefinition('packagist', 'downloads', 'dt')))->toBeFalse()
-        ->and(dockerClient()->supportsPrivate(clientDefinition('docker', 'pulls', 'pulls')))->toBeTrue();
+        ->and(dockerClient()->supportsPrivate(clientDefinition('docker', 'pulls', 'pulls')))->toBeTrue()
+        ->and(codecovClient()->supportsPrivate(clientDefinition('codecov', 'coverage', 'coverage')))->toBeFalse()
+        ->and(coverallsClient()->supportsPrivate(clientDefinition('coveralls', 'coverage', 'coverage')))->toBeFalse()
+        ->and(laravelClient()->supportsPrivate(clientDefinition('laravel', 'version', 'v')))->toBeFalse()
+        ->and(phpClient()->supportsPrivate(clientDefinition('php', 'version', 'v')))->toBeFalse()
+        ->and(pythonClient()->supportsPrivate(clientDefinition('python', 'version', 'v')))->toBeFalse();
 });

@@ -164,6 +164,31 @@ it('cria uma badge de provider sem chamar o provider', function () {
     Http::assertNothingSent();
 });
 
+it('cria badge de provider sem params usando o path literal', function () {
+    Http::preventStrayRequests();
+
+    $user = personalBadgeAccount();
+
+    foreach ([['php', 'v'], ['laravel', 'dt']] as [$provider, $definition]) {
+        $this->actingAs($user)
+            ->from(route('dashboard.badgeforge'))
+            ->post(route('badgeforge.badges.store'), [
+                'name' => 'Runtime '.$provider,
+                'type' => 'provider',
+                'provider_slug' => $provider,
+                'definition_slug' => $definition,
+                'params' => [],
+                'form' => personalBadgeForm(),
+            ])
+            ->assertSessionHasNoErrors();
+    }
+
+    expect(BadgeAsset::query()->orderBy('id')->pluck('params')->all())->toBe([[], []])
+        ->and(BadgeAsset::query()->count())->toBe(2);
+
+    Http::assertNothingSent();
+});
+
 it('guarda o PAT cifrado e recusa credencial fora de badge privada', function () {
     $user = personalBadgeAccount();
 
@@ -269,6 +294,9 @@ it('recusa provider, params ou nome invalidos', function () {
         ],
         'param a mais' => [
             'provider_slug' => 'github', 'definition_slug' => 'stars', 'params' => ['owner' => 'a', 'repo' => 'b', 'x' => 'c'],
+        ],
+        'param a mais sem params' => [
+            'provider_slug' => 'php', 'definition_slug' => 'v', 'params' => ['latest' => 'latest'],
         ],
     ];
 

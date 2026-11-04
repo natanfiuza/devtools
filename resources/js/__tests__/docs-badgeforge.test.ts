@@ -181,15 +181,22 @@ function mountDocs(
 }
 
 describe('BadgeForge Docs', () => {
-    it('mostra os quatro providers com as nove metricas do catalogo', () => {
+    it('mostra os nove providers com as quinze metricas do catalogo', () => {
         const wrapper = mountDocs();
 
         expect(
             wrapper.findAll('[data-test^="badgeforge-docs-provider-"]'),
-        ).toHaveLength(4);
+        ).toHaveLength(9);
         expect(
             wrapper.findAll('[data-test^="badgeforge-docs-metric-"]'),
-        ).toHaveLength(9);
+        ).toHaveLength(15);
+    });
+
+    it('mostra o path literal das definicoes sem params', () => {
+        const wrapper = mountDocs();
+        const php = wrapper.find('[data-test="badgeforge-docs-metric-php-v"]');
+
+        expect(php.text()).toContain('/api/badges/php/v/latest.svg');
     });
 
     it('traduz o nome da metrica e mostra o caminho do exemplo', () => {

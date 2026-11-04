@@ -644,6 +644,12 @@ return [
                 'packagist_dt' => 'Downloads do Packagist',
                 'packagist_v' => 'Versão do Packagist',
                 'docker_pulls' => 'Pulls do Docker Hub',
+                'codecov_coverage' => 'Cobertura do Codecov',
+                'coveralls_coverage' => 'Cobertura do Coveralls',
+                'laravel_v' => 'Versão do Laravel',
+                'laravel_dt' => 'Downloads do Laravel',
+                'php_v' => 'Versão do PHP',
+                'python_v' => 'Versão do Python',
             ],
         ],
         'personal' => [

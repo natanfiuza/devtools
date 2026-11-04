@@ -3,11 +3,16 @@
 namespace App\Support\BadgeForge\Providers;
 
 use App\Models\BadgeProviderDefinition;
+use App\Support\BadgeForge\Providers\Clients\CodecovProviderClient;
+use App\Support\BadgeForge\Providers\Clients\CoverallsProviderClient;
 use App\Support\BadgeForge\Providers\Clients\DockerHubProviderClient;
 use App\Support\BadgeForge\Providers\Clients\GithubProviderClient;
+use App\Support\BadgeForge\Providers\Clients\LaravelProviderClient;
 use App\Support\BadgeForge\Providers\Clients\NpmProviderClient;
 use App\Support\BadgeForge\Providers\Clients\PackagistProviderClient;
+use App\Support\BadgeForge\Providers\Clients\PhpProviderClient;
 use App\Support\BadgeForge\Providers\Clients\ProviderClient;
+use App\Support\BadgeForge\Providers\Clients\PythonProviderClient;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -28,8 +33,16 @@ final class ProviderClientRegistry
         NpmProviderClient $npm,
         PackagistProviderClient $packagist,
         DockerHubProviderClient $docker,
+        CodecovProviderClient $codecov,
+        CoverallsProviderClient $coveralls,
+        LaravelProviderClient $laravel,
+        PhpProviderClient $php,
+        PythonProviderClient $python,
     ) {
-        foreach ([$github, $npm, $packagist, $docker] as $client) {
+        foreach ([
+            $github, $npm, $packagist, $docker,
+            $codecov, $coveralls, $laravel, $php, $python,
+        ] as $client) {
             $this->clients[$client->key()] = $client;
         }
     }

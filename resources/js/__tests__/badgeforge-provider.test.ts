@@ -87,7 +87,7 @@ function urlFor(
 }
 
 describe('buildProviderBadgeUrl', () => {
-    it('gera a URL das nove metricas com o exemplo do catalogo', () => {
+    it('gera a URL das quinze metricas com o exemplo do catalogo', () => {
         const cases: Array<{
             provider: string;
             definition: string;
@@ -102,6 +102,12 @@ describe('buildProviderBadgeUrl', () => {
             { provider: 'packagist', definition: 'dt', path: 'packagist/dt/laravel/framework.svg' },
             { provider: 'packagist', definition: 'v', path: 'packagist/v/laravel/framework.svg' },
             { provider: 'docker', definition: 'pulls', path: 'docker/pulls/library/postgres.svg' },
+            { provider: 'codecov', definition: 'coverage', path: 'codecov/coverage/psf/requests.svg' },
+            { provider: 'coveralls', definition: 'coverage', path: 'coveralls/coverage/twbs/bootstrap.svg' },
+            { provider: 'laravel', definition: 'v', path: 'laravel/v/latest.svg' },
+            { provider: 'laravel', definition: 'dt', path: 'laravel/dt/latest.svg' },
+            { provider: 'php', definition: 'v', path: 'php/v/latest.svg' },
+            { provider: 'python', definition: 'v', path: 'python/v/latest.svg' },
         ];
 
         for (const item of cases) {
@@ -116,6 +122,48 @@ describe('buildProviderBadgeUrl', () => {
             expect(url).not.toContain('cacheSeconds');
             expect(url).not.toContain('refresh');
             expect(url).not.toContain('token');
+        }
+    });
+
+    it('usa o path literal da definicao sem params', () => {
+        const { provider, definition } = pair('php', 'v');
+
+        expect(exampleParams(definition)).toEqual({});
+        expect(
+            invalidProviderParam(
+                definition,
+                {},
+                PROPS.limits.providers.maxParamLength,
+            ),
+        ).toBeNull();
+        expect(
+            buildProviderBadgeUrl(
+                ORIGIN,
+                ENDPOINT,
+                provider,
+                definition,
+                {},
+                cosmetics(),
+                PROPS,
+            ),
+        ).toBe(`${ORIGIN}${ENDPOINT}/php/v/latest.svg`);
+    });
+
+    it('recusa literal invalido no catalogo', () => {
+        const { provider, definition } = pair('php', 'v');
+
+        for (const pathPattern of ['', '..', 'latest/x', '{owner}', 'lat est']) {
+            expect(
+                buildProviderBadgeUrl(
+                    ORIGIN,
+                    ENDPOINT,
+                    provider,
+                    { ...definition, pathPattern },
+                    {},
+                    cosmetics(),
+                    PROPS,
+                ),
+            ).toBe('');
         }
     });
 

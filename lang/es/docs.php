@@ -14,13 +14,13 @@ return [
 
         'meta' => [
             'title' => 'Documentación de BadgeForge',
-            'description' => 'Badges dinámicas para estrellas de GitHub, versiones de npm, descargas de Packagist y pulls de Docker, además de badges personales con credencial vinculada a cada badge.',
+            'description' => 'Badges dinámicas para estrellas de GitHub, versiones de npm, descargas de Packagist, pulls de Docker, cobertura de Codecov y Coveralls y versiones de runtime de Laravel, PHP y Python, además de badges personales con credencial vinculada a cada badge.',
         ],
 
         'hero' => [
             'eyebrow' => 'BadgeForge',
             'title' => 'Badges que se actualizan solas',
-            'subtitle' => 'Las badges estáticas se dibujan en el servidor. Las de provider leen GitHub, npm, Packagist y Docker Hub de forma anónima, con una respuesta en caché que nunca rompe la imagen de tu README.',
+            'subtitle' => 'Las badges estáticas se dibujan en el servidor. Las de provider leen GitHub, npm, Packagist, Docker Hub, Codecov, Coveralls y las últimas versiones de Laravel, PHP y Python de forma anónima, con una respuesta en caché que nunca rompe la imagen de tu README.',
             'open_tool' => 'Abrir el generador',
         ],
 
@@ -60,6 +60,11 @@ return [
                 'npm' => 'Última versión publicada y descargas mensuales. El contador de descargas es siempre público.',
                 'packagist' => 'Descargas totales y última versión de un paquete Composer, siempre desde el registro público.',
                 'docker' => 'Recuento de pulls de Docker Hub. Las imágenes privadas usan el nombre de usuario más un personal access token.',
+                'codecov' => 'Cobertura de líneas de la rama predeterminada, leída de la API de Codecov. La badge es siempre pública.',
+                'coveralls' => 'Porcentaje de cobertura de la rama predeterminada, leído del endpoint JSON de Coveralls. Solo público.',
+                'laravel' => 'Última versión estable de Laravel y descargas totales desde Packagist. Las dos métricas comparten una sola petición en caché.',
+                'php' => 'Última versión estable de PHP publicada en php.net. Pública y anónima.',
+                'python' => 'Última versión estable de Python, leída de endoflife.date. Pública y anónima.',
             ],
         ],
 

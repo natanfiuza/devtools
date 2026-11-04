@@ -8,9 +8,10 @@ use App\Support\BadgeForge\BadgeRequest;
  * Formata a metrica projetada para o texto da metade direita do badge
  * (F4, ADR-080).
  *
- * Numeros usam k/M/B, licenca usa `spdx_id` (ou `unknown`) e versao e texto
- * limpo; o resultado e truncado pelo mesmo limite do badge estatico. HTML
- * nunca e escapado aqui: o renderer e o dono dessa responsabilidade.
+ * Numeros usam k/M/B, licenca usa `spdx_id` (ou `unknown`), versao e texto
+ * limpo, cobertura e percentual inteiro (F6) e o resultado e truncado pelo
+ * mesmo limite do badge estatico. HTML nunca e escapado aqui: o renderer e o
+ * dono dessa responsabilidade.
  */
 final class ProviderMetricFormatter
 {
@@ -19,6 +20,7 @@ final class ProviderMetricFormatter
         $text = match ($extractorKey) {
             'license' => $this->license($value),
             'version' => $this->text($value),
+            'coverage' => $this->coverage($value),
             default => $this->number($value),
         };
 
@@ -62,6 +64,21 @@ final class ProviderMetricFormatter
         }
 
         return (string) (int) $number;
+    }
+
+    public function coverage(mixed $value): ?string
+    {
+        if (! is_int($value) && ! is_float($value) && ! (is_string($value) && is_numeric($value))) {
+            return null;
+        }
+
+        $number = (float) $value;
+
+        if (! is_finite($number) || $number < 0 || $number > 100) {
+            return null;
+        }
+
+        return ((int) round($number)).'%';
     }
 
     public function license(mixed $value): ?string

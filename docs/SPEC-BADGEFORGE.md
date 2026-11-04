@@ -38,9 +38,9 @@ GET /api/badges/static/{label}/{message}.{svg|png}  (F1/F2, entregue)
 ### Provider
 GET /api/badges/{provider}/{definition}/{path}.{svg|png}  (F4, entregue)
 
-Providers iniciais: github, npm, packagist, docker — acesso anônimo para item público. Nove definições: `github/{stars,forks,issues,license}`, `npm/{v,dm}`, `packagist/{dt,v}`, `docker/pulls`. O `path` segue o `path_pattern` da definição (`owner/repo`, `package`, `vendor/package`, `namespace/repository`).
+Providers (F4 + F6, entregues): github, npm, packagist, docker, codecov, coveralls, laravel, php e python — acesso anônimo para item público; nenhum dos cinco novos aceita item privado. Quinze definições: `github/{stars,forks,issues,license}`, `npm/{v,dm}`, `packagist/{dt,v}`, `docker/pulls`, `codecov/coverage`, `coveralls/coverage`, `laravel/{v,dt}`, `php/v` e `python/v`. O `path` segue o `path_pattern` da definição (`owner/repo`, `package`, `vendor/package`, `namespace/repository`); nas definições de versão de runtime o path é o literal `latest` (ADR-085).
 
-Cache padrão: 300 segundos por URL resolvida (as quatro definições do GitHub compartilham uma entrada), com requisição condicional, `stale-if-error` e fallback 200. O TTL de resposta é limitado pelo teto de cache do BadgeForge (`personal_badges.max_cache_seconds`, 3600 s). `?cacheSeconds=` e `?refresh=1` são ignorados na rota pública; a imagem nunca responde 500 por falha do provider (ADR-080).
+Cache padrão: 300 segundos por URL resolvida (as quatro definições do GitHub compartilham uma entrada; no Laravel `v` e `dt` também, porque o client projeta as duas métricas de uma única chamada), com requisição condicional, `stale-if-error` e fallback 200. O TTL de resposta é limitado pelo teto de cache do BadgeForge (`personal_badges.max_cache_seconds`, 3600 s). `?cacheSeconds=` e `?refresh=1` são ignorados na rota pública; a imagem nunca responde 500 por falha do provider (ADR-080, ADR-085).
 
 ### Endpoint JSON
 GET /api/badges/endpoint/{ulid}.{svg|png}  (F5, entregue)
@@ -82,9 +82,11 @@ slug, name, category, enabled, requires_auth, auth_type, base_url, cache_ttl, ra
 Campos da definition:
 provider_id, slug, name, label (metade esquerda da imagem), client_key, extractor_key, path_pattern, required_params, optional_params, url_template, response_type, parser_class, example_path, supports_private, sort, enabled.
 
-O **comportamento é código** (ADR-080): `client_key` resolve o cliente HTTP no `ProviderClientRegistry` (`github`, `npm`, `packagist`, `docker`) e `extractor_key` escolhe a métrica no payload projetado (`stars`, `forks`, `issues`, `license`, `v`, `dm`, `dt`, `pulls`). `parser_class` existe por compatibilidade e nasceu NULL; **nunca é lida nem instanciada**. Os metadados (catálogo, labels, paths, exemplos, `supports_private`, documentação, ordem) entram por migração com `insertOrIgnore`, porque o deploy roda `migrate --force` e nunca `db:seed`.
+O **comportamento é código** (ADR-080, ADR-085): `client_key` resolve o cliente HTTP no `ProviderClientRegistry` (`github`, `npm`, `packagist`, `docker`, `codecov`, `coveralls`, `laravel`, `php`, `python`) e `extractor_key` escolhe a métrica no payload projetado (`stars`, `forks`, `issues`, `license`, `v`, `dm`, `dt`, `pulls`, `coverage`, `version`, `downloads`). `parser_class` existe por compatibilidade e nasceu NULL; **nunca é lida nem instanciada**. Os metadados (catálogo, labels, paths, exemplos, `supports_private`, documentação, ordem) entram por migração com `insertOrIgnore`, porque o deploy roda `migrate --force` e nunca `db:seed`.
 
 Providers iniciais (F4, entregue): github, npm, packagist, docker — sempre chamando a API pública do provider de forma anônima para item público. Cache do provider por URL resolvida (payload **projetado**, sem descrição/README), requisição condicional quando suportada e `stale-if-error` absorvem o rate limit anônimo; um 429 do provider nunca vira 500 na imagem. `supports_private` é true para GitHub (todas), npm `v` e Docker `pulls`; false para npm `dm` e Packagist (ambas). Docker privado usa Basic com `username` non-secret além do PAT.
+
+Providers da F6 (entregue, ADR-085): codecov (`coverage`, `totals.coverage`), coveralls (`coverage`, `covered_percent`), laravel (`v` e `dt` de `stats.json`, uma chamada para as duas), php (`version` do primeiro release de `php.net`) e python (`latest` do `endoflife.date`). Categorias novas: `coverage` e `runtime`. Os cinco são públicos e sem PAT (`supports_private=false`). Cobertura é percentual inteiro da branch padrão. As definições de runtime usam `required_params=[]` e `path_pattern=latest`; o parser e o builder só aceitam esse literal.
 
 Providers customizados: apenas pagos. Configuráveis via painel (F7).
 
@@ -100,7 +102,7 @@ F4 (entregue): `credential` usa cast `encrypted` e a coluna é `hidden` com `cre
 
 ## 10. Cache
 - Estático: 86400s padrão (`cacheSeconds` clampado 300–86400, editável na URL) + ETag sha256 e 304 via `If-None-Match`.
-- Provider (F4): 300s padrão (`providers.cache_ttl`), cache por URL resolvida com payload projetado; `stale_ttl` (86400 s) guarda o último valor bom; falha sem entrada vira fallback 200 com `fallback_ttl` (60 s, ou `Retry-After` dentro do limite). Headers `X-Badge-Cache: HIT|MISS|STALE` e `Warning: 110` quando stale. Store de cache fora do ar degrada para fetch direto/fallback (ADR-080).
+- Provider (F4/F6): 300s padrão (`providers.cache_ttl`), cache por URL resolvida com payload projetado; `stale_ttl` (86400 s) guarda o último valor bom; falha sem entrada vira fallback 200 com `fallback_ttl` (60 s, ou `Retry-After` dentro do limite). Headers `X-Badge-Cache: HIT|MISS|STALE` e `Warning: 110` quando stale. Store de cache fora do ar degrada para fetch direto/fallback (ADR-080). A chave inclui o slug do provider: `laravel/v/latest` e `laravel/dt/latest` compartilham a entrada porque o client projeta versão e downloads juntos; `packagist/dt` continua numa entrada separada, mesmo usando o mesmo host (ADR-085).
 - Badge pessoal (F4): o arquivo é servido de disco com `expires_at` no futuro; vencido, regenera sob lock e regrava. Exclusão/renomeação aparecem em no máximo `personal_badges.max_cache_seconds` (3600 s).
 - Endpoint JSON (F5, ADR-083): chave `badgeforge:endpoint:v1:sha256(url canônica)` — dois cadastros da mesma origem compartilham a entrada e a chave não revela host/path. TTL fixo em `endpoint.cache_ttl` (300 s), limitado por `max_cache_ttl` (3600 s); `stale_ttl` (86400 s) guarda o último valor bom; `fallback_ttl` (60 s) é o TTL do fallback. HIT/MISS/STALE sob `Cache::lock`, `If-None-Match` quando a origem manda `ETag` (304 renova `fetched_at`), `X-Badge-Cache` e `Warning: 110` no stale; sem entrada, fallback 200 com `label` = nome do cadastro e `message` = `endpoint.unavailable_message`. Store fora do ar degrada para fetch direto e, se este falhar, fallback — nunca 500.
 - PNG: mesmo TTL do SVG.
@@ -137,7 +139,7 @@ Usuários cadastrados podem salvar presets: label, message, estilo, fonte, cores
 - Pública em `/{locale}/docs/badgeforge` (F4, entregue): cinco idiomas, tabela por provider gerada do catálogo, snippets copiáveis, badge pessoal/PAT, cache/stale, erros e segurança. Indexável, com meta de servidor, sitemap e link no rodapé (ADR-082).
 - Endpoint JSON (F5, entregue): nova seção na mesma página, com URL pública, contrato shields v1, TTL fixo, fallback e a regra de que a URL de origem só é cadastrada na dashboard — nunca exposta.
 - Página por provider (a partir da F4, entregue dentro da página única).
-- A OpenAPI documenta provider, badge pessoal e endpoint JSON como entregues em v1.5.0; o 3.1 completo é F8.
+- A OpenAPI documenta provider, badge pessoal e endpoint JSON como entregues em v1.6.0 (nove providers, quinze definições e o path literal de runtime); o 3.1 completo é F8.
 - Tutoriais: guias do **usuário pagador** para item privado (GitHub, npm, Docker) em `docs/tutorial/`; Packagist é sempre público e não tem tutorial de PAT. Os tutoriais apontam para a página pública e para o fluxo real de revogação (excluir a badge).
 - Exceção de idioma: o label/message da **imagem** são neutros (nomes próprios e números), porque a URL é pública e cacheada; a interface e a documentação são traduzidas (ADR-082).
 
@@ -158,7 +160,7 @@ F2: PNG + Imagick + download + docs + fontes `?font=`. **Entregue em 2026-11-02*
 F3: logos personalizados + presets + contas. **Entregue em 2026-11-02** — ver `docs/acceptance/BADGEFORGE-FASE-3.md`, ADR-078 e ADR-079.
 F4: providers GitHub/npm/Packagist/Docker + badges pessoais + PAT + docs públicas. **Entregue em 2026-11-03** — ver `docs/acceptance/BADGEFORGE-FASE-4.md`, ADR-080, ADR-081 e ADR-082.
 F5: endpoint JSON + SSRF. **Entregue em 2026-11-04** — ver `docs/acceptance/BADGEFORGE-FASE-5.md`, ADR-083 e ADR-084.
-F6: providers Codecov/Coveralls/Laravel/PHP/Python.
+F6: providers Codecov/Coveralls/Laravel/PHP/Python. **Entregue em 2026-11-04** — ver `docs/acceptance/BADGEFORGE-FASE-6.md` e ADR-085.
 F7: providers customizados + analytics completo + admin.
 F8: OpenAPI + documentação + hardening.
 
@@ -170,6 +172,7 @@ F8: OpenAPI + documentação + hardening.
 - Rate limit funcionando.
 - SSRF bloqueado (F5): HTTPS/443, sem userinfo/redirect, todos os IPs públicos e conexão pinada; URL de origem fora de props, flash, log e cache legível.
 - Endpoint JSON (F5): contrato shields v1, TTL fixo, convergência de origem nunca 500 (stale/fallback 200), 404 para ULID desconhecido e rate limit por dono.
+- Providers F6 (entregue): cobertura como percentual inteiro (0–100), versão de runtime no path literal `latest`, Laravel `v`/`dt` compartilhando uma chamada de cache e nenhum provider novo aceitando item privado; falha de shape vira fallback 200 e path literal inválido é 404.
 - i18n completo nos 5 idiomas.
 - Docs por provider (F4, entregue em `/{locale}/docs/badgeforge`).
 - Provider nunca vira 500 na imagem: falha é stale/fallback 200; PATH/URL inválidos são 404; badge pessoal desconhecida é 404 de corpo vazio, nunca HTML.

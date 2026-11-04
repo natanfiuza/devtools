@@ -94,22 +94,33 @@ o ULID é a referência opaca, sem nome de usuário ou caminho de conta.
   com o mesmo texto. Nada é registrado em log além de IDs e classes de
   exceção; o conteúdo do badge nunca entra no log da aplicação.
 
-## Provider (F4 — entregue)
+## Provider (F4/F6 — entregue)
 
 ```text
 GET /api/badges/{provider}/{definition}/{path}.svg
 ```
 
 `{definition}` é a métrica (`stars`, `forks`, `issues`, `license`, `v`, `dm`,
-`dt`, `pulls`) e `{path}` são as coordenadas do item no formato daquela
-métrica. Exemplos:
+`dt`, `pulls`, `coverage`) e `{path}` são as coordenadas do item no formato
+daquela métrica. Exemplos:
 
 ```text
 /api/badges/github/stars/natanfiuza/devtools.svg
 /api/badges/npm/v/laravel.svg
 /api/badges/packagist/dt/laravel/framework.svg
 /api/badges/docker/pulls/library/nginx.svg
+/api/badges/codecov/coverage/psf/requests.svg
+/api/badges/coveralls/coverage/twbs/bootstrap.svg
+/api/badges/laravel/v/latest.svg
+/api/badges/laravel/dt/latest.svg
+/api/badges/php/v/latest.svg
+/api/badges/python/v/latest.svg
 ```
+
+Nas definições de versão de runtime (Laravel, PHP e Python) o `{path}` é o
+literal `latest`: a URL é estável e o valor atualizado vem do cache,
+nunca de um parâmetro de versão. Qualquer outro literal responde 404
+(ADR-085).
 
 - **Item público** (repositório, pacote, imagem pública): o servidor consulta a
   API pública do provider de forma **anônima**; nenhum token global existe em
@@ -118,10 +129,16 @@ métrica. Exemplos:
   usuário, cifrado em repouso e vinculado ao badge; a URL pública leva apenas o
   ULID. Ver `ADR-068` e `docs/tutorial/`.
 - Packagist não hospeda pacote privado: o acesso é sempre público; npm `dm`
-  (contagem de downloads) também é sempre público.
+  (contagem de downloads) também é sempre público. Codecov, Coveralls,
+  Laravel, PHP e Python são públicos e não aceitam item privado.
+- Cobertura (Codecov e Coveralls) é o percentual inteiro da **branch padrão**
+  do serviço (`66.89` vira `67%`, `94.148` vira `94%`); não há `?branch=` na
+  rota pública.
 - Cache padrão de 300 s (`badgeforge.providers.cache_ttl`), por URL resolvida:
   GitHub `stars`/`forks`/`issues`/`license` compartilham a mesma entrada (a URL
-  da API é a mesma); npm `v`/`dm` e Packagist `dt`/`v` têm entradas separadas.
+  da API é a mesma); Laravel `v`/`dt` também, porque o client projeta versão e
+  downloads de uma única chamada a `stats.json`; npm `v`/`dm` e Packagist
+  `dt`/`v` têm entradas separadas.
 - `stale-if-error`: provider fora do ar, 429 ou timeout servem a última
   resposta boa com `Warning: 110` e `X-Badge-Cache: STALE`; sem resposta
   anterior, a imagem sai 200 com o rótulo da métrica e `unavailable`.

@@ -130,6 +130,26 @@ abstract class AbstractProviderClient implements ProviderClient
     /**
      * @param  array<string, mixed>  $data
      */
+    protected function number(array $data, string $key): float
+    {
+        $value = $data[$key] ?? null;
+
+        if (! is_int($value) && ! is_float($value) && ! (is_string($value) && is_numeric($value))) {
+            throw new ProviderFetchException(ProviderFetchException::INVALID_RESPONSE);
+        }
+
+        $number = (float) $value;
+
+        if (! is_finite($number) || $number < 0) {
+            throw new ProviderFetchException(ProviderFetchException::INVALID_RESPONSE);
+        }
+
+        return $number;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
     protected function text(array $data, string $key): string
     {
         $value = $data[$key] ?? null;

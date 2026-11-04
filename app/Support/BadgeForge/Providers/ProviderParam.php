@@ -7,7 +7,8 @@ namespace App\Support\BadgeForge\Providers;
  * JSON `required_params` (F4, ADR-080).
  *
  * Um JSON invalido nunca vira excecao em tempo de request: `listFrom()`
- * devolve `null` e a definicao e tratada como indisponivel (404).
+ * devolve `null` e a definicao e tratada como indisponivel (404). Uma lista
+ * vazia e valida e significa definicao sem coordenadas (path literal, F6).
  */
 final readonly class ProviderParam
 {
@@ -23,8 +24,12 @@ final readonly class ProviderParam
      */
     public static function listFrom(mixed $raw): ?array
     {
-        if (! is_array($raw) || $raw === []) {
+        if (! is_array($raw)) {
             return null;
+        }
+
+        if ($raw === []) {
+            return [];
         }
 
         $params = [];

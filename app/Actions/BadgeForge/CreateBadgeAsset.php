@@ -160,7 +160,13 @@ final class CreateBadgeAsset
             $this->guard->fail('params', 'validation.badge_asset.params_invalid');
         }
 
-        $parsed = $this->parser->parse($pair->definition, implode('/', $parts));
+        // Definicao sem coordenadas usa o proprio `path_pattern` como literal
+        // (ex.: `latest`); `implode('/', [])` seria string vazia e o parser
+        // recusaria (F6, ADR-085).
+        $parsed = $this->parser->parse(
+            $pair->definition,
+            $definitions === [] ? (string) $pair->definition->path_pattern : implode('/', $parts),
+        );
 
         if ($parsed === null) {
             $this->guard->fail('params', 'validation.badge_asset.params_invalid');

@@ -370,6 +370,140 @@
                     ]
                 }
             ]
+        },
+        {
+            "slug": "codecov",
+            "name": "Codecov",
+            "category": "coverage",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://docs.codecov.com/reference",
+            "definitions": [
+                {
+                    "slug": "coverage",
+                    "name": "Codecov coverage",
+                    "label": "coverage",
+                    "supportsPrivate": false,
+                    "examplePath": "psf/requests",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "coveralls",
+            "name": "Coveralls",
+            "category": "coverage",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://docs.coveralls.io/api-reference",
+            "definitions": [
+                {
+                    "slug": "coverage",
+                    "name": "Coveralls coverage",
+                    "label": "coverage",
+                    "supportsPrivate": false,
+                    "examplePath": "twbs/bootstrap",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "laravel",
+            "name": "Laravel",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://laravel.com/docs/releases",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "Laravel version",
+                    "label": "laravel",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                },
+                {
+                    "slug": "dt",
+                    "name": "Laravel downloads",
+                    "label": "downloads",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
+        },
+        {
+            "slug": "php",
+            "name": "PHP",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://www.php.net/releases/",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "PHP version",
+                    "label": "php",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
+        },
+        {
+            "slug": "python",
+            "name": "Python",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://endoflife.date/python",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "Python version",
+                    "label": "python",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
         }
     ],
     "limits": {
