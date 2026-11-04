@@ -14,13 +14,13 @@ return [
 
         'meta' => [
             'title' => 'Documentation BadgeForge',
-            'description' => 'Badges dynamiques pour les étoiles GitHub, les versions npm, les téléchargements Packagist et les pulls Docker, avec des badges personnelles dont les identifiants sont liés à chaque badge.',
+            'description' => 'Badges dynamiques pour les étoiles GitHub, les versions npm, les téléchargements Packagist, les pulls Docker, la couverture Codecov et Coveralls et les versions de runtime de Laravel, PHP et Python, avec des badges personnelles dont les identifiants sont liés à chaque badge.',
         ],
 
         'hero' => [
             'eyebrow' => 'BadgeForge',
             'title' => 'Des badges qui se mettent à jour seuls',
-            'subtitle' => 'Les badges statiques sont dessinés sur le serveur. Les badges de provider lisent GitHub, npm, Packagist et Docker Hub de façon anonyme, avec une réponse en cache qui ne casse jamais l\'image de votre README.',
+            'subtitle' => 'Les badges statiques sont dessinés sur le serveur. Les badges de provider lisent GitHub, npm, Packagist, Docker Hub, Codecov, Coveralls et les dernières versions de Laravel, PHP et Python de façon anonyme, avec une réponse en cache qui ne casse jamais l\'image de votre README.',
             'open_tool' => 'Ouvrir le générateur',
         ],
 
@@ -60,6 +60,11 @@ return [
                 'npm' => 'Dernière version publiée et nombre de téléchargements mensuels. Le compteur de téléchargements est toujours public.',
                 'packagist' => 'Téléchargements totaux et dernière version d\'un paquet Composer, toujours depuis le registre public.',
                 'docker' => 'Nombre de pulls Docker Hub. Les images privées utilisent le nom d\'utilisateur et un personal access token.',
+                'codecov' => 'Couverture de lignes de la branche par défaut, lue via l\'API Codecov. La badge est toujours publique.',
+                'coveralls' => 'Pourcentage de couverture de la branche par défaut, lu sur l\'endpoint JSON Coveralls. Public uniquement.',
+                'laravel' => 'Dernière version stable de Laravel et téléchargements totaux depuis Packagist. Les deux métriques partagent une seule requête en cache.',
+                'php' => 'Dernière version stable de PHP publiée sur php.net. Publique et anonyme.',
+                'python' => 'Dernière version stable de Python, lue sur endoflife.date. Publique et anonyme.',
             ],
         ],
 

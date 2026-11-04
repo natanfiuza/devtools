@@ -1,16 +1,17 @@
 # OpenAPI BadgeForge (resumo)
 
-A superfície das F1–F5 está implementada: badges estáticas, PNG/fontes, logos
-personalizados (`logo=u_<ULID>`), badges de provider, badges pessoais e a badge
-de endpoint JSON. O OpenAPI completo em 3.1 é entregue na F8 (`ADR-071`). A
-gestão de logos, presets, badges pessoais e endpoints é web/Inertia autenticada
-e não faz parte desta API.
+A superfície das F1–F6 está implementada: badges estáticas, PNG/fontes, logos
+personalizados (`logo=u_<ULID>`), badges de provider (nove providers, quinze
+definições, incluindo cobertura e versões de runtime), badges pessoais e a
+badge de endpoint JSON. O OpenAPI completo em 3.1 é entregue na F8
+(`ADR-071`). A gestão de logos, presets, badges pessoais e endpoints é
+web/Inertia autenticada e não faz parte desta API.
 
 ```yaml
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.5.0
+  version: 1.6.0
 paths:
   /api/badges/static/{label}/{message}.{ext}:
     get:
@@ -113,20 +114,25 @@ paths:
         - name: provider
           in: path
           required: true
-          schema: { type: string, enum: [github, npm, packagist, docker] }
+          schema:
+            type: string
+            enum: [github, npm, packagist, docker, codecov, coveralls, laravel, php, python]
         - name: definition
           in: path
           required: true
           schema:
             type: string
-            enum: [stars, forks, issues, license, v, dm, dt, pulls]
+            enum: [stars, forks, issues, license, v, dm, dt, pulls, coverage]
         - name: path
           in: path
           required: true
           description: >
             Coordenadas do item, no formato da definição — `{owner}/{repo}`,
             `{package}` (aceita escopo com `/`), `{vendor}/{package}` ou
-            `{namespace}/{repository}`.
+            `{namespace}/{repository}`. Nas definições de versão de runtime
+            (laravel, php e python) o valor é o literal `latest`; qualquer
+            outro literal responde 404. Cobertura (codecov e coveralls) é o
+            percentual inteiro da branch padrão.
           schema: { type: string }
         - name: ext
           in: path

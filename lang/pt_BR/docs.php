@@ -14,13 +14,13 @@ return [
 
         'meta' => [
             'title' => 'Documentação do BadgeForge',
-            'description' => 'Badges dinâmicas para estrelas do GitHub, versões do npm, downloads do Packagist e pulls do Docker, além de badges pessoais com credencial vinculada a cada badge.',
+            'description' => 'Badges dinâmicas para estrelas do GitHub, versões do npm, downloads do Packagist, pulls do Docker, cobertura do Codecov e Coveralls e versões de runtime do Laravel, PHP e Python, além de badges pessoais com credencial vinculada a cada badge.',
         ],
 
         'hero' => [
             'eyebrow' => 'BadgeForge',
             'title' => 'Badges que se atualizam sozinhas',
-            'subtitle' => 'As badges estáticas são desenhadas no servidor. As de provider leem GitHub, npm, Packagist e Docker Hub de forma anônima, com resposta em cache que nunca quebra a imagem no seu README.',
+            'subtitle' => 'As badges estáticas são desenhadas no servidor. As de provider leem GitHub, npm, Packagist, Docker Hub, Codecov, Coveralls e as últimas versões de Laravel, PHP e Python de forma anônima, com resposta em cache que nunca quebra a imagem no seu README.',
             'open_tool' => 'Abrir o construtor',
         ],
 
@@ -60,6 +60,11 @@ return [
                 'npm' => 'Versão publicada mais recente e contagem de downloads por mês. A contagem de downloads é sempre pública.',
                 'packagist' => 'Downloads totais e versão mais recente de um pacote Composer, sempre pelo registro público.',
                 'docker' => 'Contagem de pulls do Docker Hub. Imagens privadas usam o username mais um personal access token.',
+                'codecov' => 'Cobertura de linhas do branch padrão, lida da API do Codecov. A badge é sempre pública.',
+                'coveralls' => 'Percentual de cobertura do branch padrão, lido do endpoint JSON do Coveralls. Somente público.',
+                'laravel' => 'Última versão estável do Laravel e downloads totais no Packagist. As duas métricas compartilham uma única requisição em cache.',
+                'php' => 'Última versão estável do PHP publicada no php.net. Pública e anônima.',
+                'python' => 'Última versão estável do Python, lida do endoflife.date. Pública e anônima.',
             ],
         ],
 

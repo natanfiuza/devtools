@@ -142,6 +142,22 @@ export function buildProviderBadgeUrl(
     const format = options.format ?? 'svg';
     const segments = [provider.slug, definition.slug];
 
+    if (definition.params.length === 0) {
+        // Definicao sem coordenadas: o path da URL e o literal do catalogo
+        // (`latest`). Um literal fora do padrao nunca vira snippet (F6).
+        const literal = definition.pathPattern.trim();
+
+        if (
+            !/^[A-Za-z0-9._-]+$/.test(literal) ||
+            literal === '.' ||
+            literal === '..'
+        ) {
+            return '';
+        }
+
+        segments.push(literal);
+    }
+
     for (const param of definition.params) {
         const encoded = encodeParam(
             (params[param.name] ?? '').trim(),

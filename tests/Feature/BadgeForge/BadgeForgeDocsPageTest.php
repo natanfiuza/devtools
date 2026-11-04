@@ -49,15 +49,15 @@ it('entrega o catalogo de providers e os endpoints nos cinco idiomas', function 
         );
 })->with(['en', 'es', 'fr', 'pt-br', 'pt-pt']);
 
-it('lista os quatro providers com as nove metricas', function () {
+it('lista os nove providers com as quinze metricas', function () {
     $fixture = badgeforgeDocsFixture();
 
     $definitions = collect($fixture['providers'])
         ->flatMap(fn (array $provider): array => $provider['definitions'])
         ->count();
 
-    expect($fixture['providers'])->toHaveCount(4)
-        ->and($definitions)->toBe(9);
+    expect($fixture['providers'])->toHaveCount(9)
+        ->and($definitions)->toBe(15);
 });
 
 it('acompanha a configuracao de endpoints e de cache', function () {

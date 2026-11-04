@@ -36,15 +36,25 @@ function fakeAllProviderApis(): void
         ], 200, ['ETag' => '"gh1"']),
         'registry.npmjs.org/*' => Http::response(['version' => '18.2.0']),
         'api.npmjs.org/*' => Http::response(['downloads' => 1_234_567]),
+        // Stub especifico antes do generico: `laravel/*/stats.json` e o mesmo
+        // URL do `packagist/dt`, mas o caso de packagist usa outro pacote.
+        'https://packagist.org/packages/laravel/framework/stats.json' => Http::response([
+            'downloads' => ['total' => 611_976_413],
+            'versions' => ['13.x-dev', 'v13.40.0'],
+        ]),
         'https://packagist.org/*' => Http::response(['downloads' => ['total' => 98_765]]),
         'https://repo.packagist.org/*' => Http::response([
             'packages' => ['laravel/framework' => [['version' => 'v11.0.0']]],
         ]),
         'hub.docker.com/*' => Http::response(['pull_count' => 1_000_000_000]),
+        'api.codecov.io/*' => Http::response(['totals' => ['coverage' => 66.89]]),
+        'coveralls.io/*' => Http::response(['covered_percent' => 94.148]),
+        'www.php.net/*' => Http::response([8 => ['version' => '8.5.12']]),
+        'endoflife.date/*' => Http::response([['latest' => '3.15.2']]),
     ]);
 }
 
-it('serve as 9 metricas com uma unica chamada por URL', function () {
+it('serve as 15 metricas com uma unica chamada por URL', function () {
     fakeAllProviderApis();
 
     $cases = [
@@ -54,9 +64,15 @@ it('serve as 9 metricas com uma unica chamada por URL', function () {
         ['github', 'license', 'natanfiuza/devtools', 'license', 'MIT', 'HIT'],
         ['npm', 'v', 'vue', 'npm', '18.2.0', 'MISS'],
         ['npm', 'dm', 'vue', 'downloads', '1.2M', 'MISS'],
-        ['packagist', 'dt', 'laravel/framework', 'downloads', '98.7k', 'MISS'],
+        ['packagist', 'dt', 'symfony/console', 'downloads', '98.7k', 'MISS'],
         ['packagist', 'v', 'laravel/framework', 'version', 'v11.0.0', 'MISS'],
         ['docker', 'pulls', 'library/postgres', 'pulls', '1B', 'MISS'],
+        ['codecov', 'coverage', 'psf/requests', 'coverage', '67%', 'MISS'],
+        ['coveralls', 'coverage', 'twbs/bootstrap', 'coverage', '94%', 'MISS'],
+        ['laravel', 'v', 'latest', 'laravel', 'v13.40.0', 'MISS'],
+        ['laravel', 'dt', 'latest', 'downloads', '611M', 'HIT'],
+        ['php', 'v', 'latest', 'php', '8.5.12', 'MISS'],
+        ['python', 'v', 'latest', 'python', '3.15.2', 'MISS'],
     ];
 
     foreach ($cases as [$provider, $definition, $path, $label, $message, $status]) {
@@ -69,8 +85,9 @@ it('serve as 9 metricas com uma unica chamada por URL', function () {
     }
 
     // GitHub compartilha a entrada pelas 4 definicoes; npm/packagist tem URLs
-    // distintas por metrica e docker tem uma so.
-    Http::assertSentCount(6);
+    // distintas por metrica e docker tem uma so. Laravel `v` e `dt` tambem
+    // compartilham a entrada, porque leem o mesmo `stats.json`.
+    Http::assertSentCount(11);
 
     Http::assertSent(fn ($request): bool => ! $request->hasHeader('Authorization'));
 });
@@ -119,6 +136,15 @@ it('responde 404 para provider, definicao, path ou item desabilitado', function 
         ->assertNotFound();
 
     $this->get('/api/badges/github/stars/a.svg')
+        ->assertNotFound();
+
+    // Definicao sem params so aceita o literal: `8.5` e qualquer outro path
+    // nao e a URL publica de `php/v`.
+    $this->get('/api/badges/php/v/8.5.svg')
+        ->assertNotFound();
+    $this->get('/api/badges/php/v/Latest.svg')
+        ->assertNotFound();
+    $this->get('/api/badges/laravel/v/latest/extra.svg')
         ->assertNotFound();
 
     BadgeProviderDefinition::query()->where('slug', 'v')->update(['enabled' => false]);

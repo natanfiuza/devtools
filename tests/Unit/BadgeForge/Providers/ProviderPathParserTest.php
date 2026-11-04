@@ -90,6 +90,40 @@ it('aceita um unico param com allowSlash, como pacote npm com escopo', function 
         ->and(pathParser()->parse($definition, '@scope/'))->toBeNull();
 });
 
+it('aceita o path literal de uma definicao sem params', function () {
+    $definition = providerDefinition([
+        'slug' => 'v',
+        'name' => 'PHP version',
+        'label' => 'php',
+        'client_key' => 'php',
+        'extractor_key' => 'version',
+        'path_pattern' => 'latest',
+        'required_params' => [],
+        'url_template' => 'https://www.php.net/releases/index.php?json&max=1',
+        'supports_private' => false,
+        'example_path' => 'latest',
+    ]);
+
+    expect(pathParser()->parse($definition, 'latest'))->toBe([])
+        ->and(pathParser()->parse($definition, 'latest/'))->toBeNull()
+        ->and(pathParser()->parse($definition, 'Latest'))->toBeNull()
+        ->and(pathParser()->parse($definition, 'latest/x'))->toBeNull()
+        ->and(pathParser()->parse($definition, '8.5'))->toBeNull()
+        ->and(pathParser()->parse($definition, ''))->toBeNull();
+});
+
+it('recusa literal vazio, com placeholders ou de traversal', function () {
+    $empty = providerDefinition(['required_params' => [], 'path_pattern' => '']);
+    $placeholder = providerDefinition(['required_params' => [], 'path_pattern' => '{owner}']);
+    $traversal = providerDefinition(['required_params' => [], 'path_pattern' => '..']);
+    $withSlash = providerDefinition(['required_params' => [], 'path_pattern' => 'a/b']);
+
+    expect(pathParser()->parse($empty, ''))->toBeNull()
+        ->and(pathParser()->parse($placeholder, '{owner}'))->toBeNull()
+        ->and(pathParser()->parse($traversal, '..'))->toBeNull()
+        ->and(pathParser()->parse($withSlash, 'a/b'))->toBeNull();
+});
+
 it('trata JSON de params invalido como definicao indisponivel', function () {
     $broken = providerDefinition(['required_params' => 'nope']);
     $twoSlashes = providerDefinition([

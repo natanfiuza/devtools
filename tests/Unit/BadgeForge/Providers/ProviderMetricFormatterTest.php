@@ -54,6 +54,26 @@ it('limpa e trunca versao', function () {
         ->and($long)->toEndWith('…');
 });
 
+it('formata cobertura como percentual inteiro', function () {
+    $formatter = metricFormatter();
+
+    expect($formatter->coverage(66.89))->toBe('67%')
+        ->and($formatter->coverage(94.148))->toBe('94%')
+        ->and($formatter->coverage(0))->toBe('0%')
+        ->and($formatter->coverage(100))->toBe('100%')
+        ->and($formatter->coverage('72.5'))->toBe('73%');
+});
+
+it('recusa cobertura fora de 0 a 100 ou invalida', function () {
+    $formatter = metricFormatter();
+
+    expect($formatter->coverage(-1))->toBeNull()
+        ->and($formatter->coverage(100.4))->toBeNull()
+        ->and($formatter->coverage(INF))->toBeNull()
+        ->and($formatter->coverage('nope'))->toBeNull()
+        ->and($formatter->coverage(null))->toBeNull();
+});
+
 it('despacha por extractor_key', function () {
     $formatter = metricFormatter();
 
@@ -61,5 +81,6 @@ it('despacha por extractor_key', function () {
         ->and($formatter->format(42, 'downloads'))->toBe('42')
         ->and($formatter->format(42, 'pulls'))->toBe('42')
         ->and($formatter->format(['spdx_id' => 'MIT'], 'license'))->toBe('MIT')
-        ->and($formatter->format('2.1.0', 'version'))->toBe('2.1.0');
+        ->and($formatter->format('2.1.0', 'version'))->toBe('2.1.0')
+        ->and($formatter->format(66.89, 'coverage'))->toBe('67%');
 });

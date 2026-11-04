@@ -27,14 +27,18 @@ it('devolve null para provider ou definicao desconhecida ou desabilitada', funct
     expect(app(ProviderCatalog::class)->pair('npm', 'v'))->toBeNull();
 });
 
-it('publica o catalogo das 9 metricas em ordem estavel', function () {
+it('publica o catalogo das 15 metricas em ordem estavel', function () {
     $docs = app(ProviderCatalog::class)->forDocs();
 
-    expect(array_column($docs, 'slug'))->toBe(['github', 'npm', 'packagist', 'docker'])
+    expect(array_column($docs, 'slug'))
+        ->toBe(['github', 'npm', 'packagist', 'docker', 'codecov', 'coveralls', 'laravel', 'php', 'python'])
         ->and(array_merge(...array_map(
             static fn (array $provider): array => array_column($provider['definitions'], 'slug'),
             $docs,
-        )))->toBe(['stars', 'forks', 'issues', 'license', 'v', 'dm', 'dt', 'v', 'pulls']);
+        )))->toBe([
+            'stars', 'forks', 'issues', 'license', 'v', 'dm', 'dt', 'v', 'pulls',
+            'coverage', 'coverage', 'v', 'dt', 'v', 'v',
+        ]);
 
     $github = $docs[0];
 
@@ -56,6 +60,15 @@ it('publica o catalogo das 9 metricas em ordem estavel', function () {
                 'placeholderKey' => 'repo',
             ],
         ]);
+});
+
+it('publica definicao sem params com lista vazia e path literal', function () {
+    $docs = app(ProviderCatalog::class)->forDocs();
+    $php = collect($docs)->firstWhere('slug', 'php');
+
+    expect($php['definitions'][0]['pathPattern'])->toBe('latest')
+        ->and($php['definitions'][0]['examplePath'])->toBe('latest')
+        ->and($php['definitions'][0]['params'])->toBe([]);
 });
 
 it('ignora provider com slug reservado static', function () {

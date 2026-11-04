@@ -14,13 +14,13 @@ return [
 
         'meta' => [
             'title' => 'BadgeForge documentation',
-            'description' => 'Dynamic badges for GitHub stars, npm versions, Packagist downloads and Docker pulls, plus personal badges with a credential bound to each badge.',
+            'description' => 'Dynamic badges for GitHub stars, npm versions, Packagist downloads, Docker pulls, Codecov and Coveralls coverage and Laravel, PHP and Python runtime versions, plus personal badges with a credential bound to each badge.',
         ],
 
         'hero' => [
             'eyebrow' => 'BadgeForge',
             'title' => 'Badges that update themselves',
-            'subtitle' => 'Static badges are drawn on the server. Provider badges read GitHub, npm, Packagist and Docker Hub anonymously, with a cached response that never breaks the image in your README.',
+            'subtitle' => 'Static badges are drawn on the server. Provider badges read GitHub, npm, Packagist, Docker Hub, Codecov, Coveralls and the latest Laravel, PHP and Python versions anonymously, with a cached response that never breaks the image in your README.',
             'open_tool' => 'Open the builder',
         ],
 
@@ -60,6 +60,11 @@ return [
                 'npm' => 'Latest published version and monthly download counts. Download counts are always public.',
                 'packagist' => 'Total downloads and the latest version of a Composer package, always from the public registry.',
                 'docker' => 'Pull counts from Docker Hub. Private images use the username plus a personal access token.',
+                'codecov' => 'Line coverage for the default branch, read from the Codecov API. The badge is always public.',
+                'coveralls' => 'Coverage percentage for the default branch, read from the Coveralls JSON endpoint. Public only.',
+                'laravel' => 'Latest stable Laravel release and total downloads from Packagist. Both metrics share one cached request.',
+                'php' => 'Latest stable PHP release published on php.net. Public and anonymous.',
+                'python' => 'Latest stable Python release, read from endoflife.date. Public and anonymous.',
             ],
         ],
 

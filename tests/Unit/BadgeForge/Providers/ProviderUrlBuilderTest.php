@@ -62,6 +62,18 @@ it('preserva barra entre segmentos quando allowSlash', function () {
         ->toBe('https://registry.npmjs.org/@scope/pkg/latest');
 });
 
+it('devolve o template literal quando a definicao nao tem params', function () {
+    $pair = providerPair([
+        'path_pattern' => 'latest',
+        'required_params' => [],
+        'url_template' => 'https://packagist.org/packages/laravel/framework/stats.json',
+        'example_path' => 'latest',
+    ]);
+
+    expect((new ProviderUrlBuilder)->build($pair, []))
+        ->toBe('https://packagist.org/packages/laravel/framework/stats.json');
+});
+
 it('recusa template http, com userinfo ou com porta', function () {
     expect(fn () => (new ProviderUrlBuilder)->build(
         providerPair(['url_template' => 'http://api.github.com/repos/{owner}/{repo}']),
