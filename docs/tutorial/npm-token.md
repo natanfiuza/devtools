@@ -7,6 +7,10 @@ registry público do npm de forma anônima.
 O badge de item privado é uma **badge pessoal**: a URL pública leva apenas o
 identificador opaco da badge (`/b/{username}/{ulid}.svg`), nunca o token.
 
+A referência pública da ferramenta, com os exemplos de cada métrica e o campo de
+credencial, fica em `/{idioma}/docs/badgeforge` (link **BadgeForge docs** no rodapé
+do site).
+
 ## 1. Antes de começar
 
 - Sua conta precisa estar em um plano pago e ter uma badge pessoal criada na
@@ -36,8 +40,8 @@ sai em exportação de dados.
 ## 4. Revogar ou trocar
 
 - Para trocar: gere outro token, cole sobre o anterior e salve.
-- Para revogar: apague a credencial na badge (ou apague a badge) e revogue em
-  **npmjs.com → Access Tokens → Revoke**.
+- Para revogar: apague a badge (não existe "remover credencial" sem recriar) e
+  revogue em **npmjs.com → Access Tokens → Revoke**.
 - Se a conta for encerrada/anonimizada, a credencial é apagada junto.
 
 ## 5. Se o badge parar de atualizar

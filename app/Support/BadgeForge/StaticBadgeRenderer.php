@@ -95,7 +95,21 @@ final class StaticBadgeRenderer
 
         if ($spec->logo !== null) {
             $group .= '<svg x="'.$logoX.'" y="'.$logoY.'" width="'.$spec->logoSize.'" height="'.$spec->logoSize.'" viewBox="'.Svg::escape($spec->logo->viewBox).'" aria-hidden="true" focusable="false">';
-            $group .= '<path d="'.Svg::escape($spec->logo->pathData).'" '.$spec->logoColor->fillAttributes().'/>';
+
+            foreach ($spec->logo->paths as $logoPath) {
+                $group .= '<path d="'.Svg::escape($logoPath->d).'"';
+
+                if ($logoPath->fillRule !== null) {
+                    $group .= ' fill-rule="'.$logoPath->fillRule.'"';
+                }
+
+                if ($logoPath->clipRule !== null) {
+                    $group .= ' clip-rule="'.$logoPath->clipRule.'"';
+                }
+
+                $group .= ' '.$spec->logoColor->fillAttributes().'/>';
+            }
+
             $group .= '</svg>';
         }
 

@@ -175,6 +175,40 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'custom_logo' => [
+        'invalid_logo' => 'This logo is not available for your account.',
+        'limit_reached' => 'You reached the logo limit of your plan.',
+        'too_large' => 'The SVG file is larger than allowed.',
+        'invalid_encoding' => 'The SVG is not valid UTF-8 text.',
+        'doctype_not_allowed' => 'The SVG must not declare a DOCTYPE.',
+        'processing_instruction_not_allowed' => 'The SVG must not contain processing instructions.',
+        'malformed' => 'The SVG could not be read.',
+        'invalid_root' => 'The file must be an SVG element.',
+        'unsupported_attribute' => 'The SVG uses an attribute that is not allowed.',
+        'unsafe_value' => 'The SVG uses a value that is not allowed.',
+        'invalid_viewbox' => 'The SVG needs a valid viewBox.',
+        'too_deep' => 'The SVG has too many nested groups.',
+        'unsupported_element' => 'The SVG uses an element that is not allowed.',
+        'text_not_allowed' => 'The SVG must not contain text.',
+        'invalid_path' => 'One of the paths is not valid.',
+        'path_too_long' => 'One of the paths is too long.',
+        'total_path_too_long' => 'The paths are longer than allowed.',
+        'too_many_paths' => 'The SVG has too many paths.',
+        'missing_paths' => 'The SVG must contain at least one path.',
+    ],
+
+    'badge_asset' => [
+        'paid_only' => 'Personal badges are available on paid plans.',
+        'username_required' => 'Choose a username before creating a personal badge.',
+        'provider_unknown' => 'This provider or metric is not available.',
+        'params_invalid' => 'The provider parameters are not valid.',
+        'private_unsupported' => 'This metric does not support private repositories.',
+        'credential_required' => 'A personal access token is required for private items.',
+        'credential_not_allowed' => 'A credential is only allowed for private provider badges.',
+        'credential_username_required' => 'Docker private badges require the account username.',
+        'not_provider' => 'Only provider badges can be refreshed.',
+    ],
+
     'attributes' => [
         'amount' => 'amount',
         'code' => 'code',
@@ -182,6 +216,7 @@ return [
         'document' => 'document',
         'email' => 'email',
         'locale' => 'language',
+        'logo' => 'logo',
         'method' => 'method',
         'name' => 'name',
         'newsletter' => 'newsletter',

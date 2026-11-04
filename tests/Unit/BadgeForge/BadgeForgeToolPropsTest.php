@@ -2,9 +2,11 @@
 
 use App\Support\BadgeForge\BadgeForgeToolProps;
 use App\Support\BadgeForge\LogoCatalog;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 uses(TestCase::class);
+uses(RefreshDatabase::class);
 
 /*
 | Ponte entre servidor e cliente (ADR-075).

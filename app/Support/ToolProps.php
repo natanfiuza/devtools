@@ -25,7 +25,7 @@ final class ToolProps
             'ai-sql-builder' => (object) AiToolProps::for($user),
             'base64-image' => (object) Base64ImageToolProps::for($user),
             'share-text' => (object) ShareTextToolProps::for($user, $request),
-            'badgeforge' => (object) BadgeForgeToolProps::for(),
+            'badgeforge' => (object) BadgeForgeToolProps::for($user),
             default => (object) [],
         };
     }

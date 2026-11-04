@@ -1,5 +1,10 @@
 import { parseColorOr } from './color';
-import type { BadgeColor, BadgeForgeToolProps, BadgeSpec } from '../types';
+import type {
+    BadgeColor,
+    BadgeForgeDefaults,
+    BadgeForgeToolProps,
+    BadgeSpec,
+} from '../types';
 
 /**
  * URL canonica do endpoint (ADR-076).
@@ -35,19 +40,23 @@ export interface BuildBadgeUrlOptions {
     format?: BadgeFormat;
     /** Acrescenta `download=1`: a resposta vira `Content-Disposition: attachment`. */
     download?: boolean;
+    /**
+     * Slug para montar `logo=` mesmo quando os paths ainda nao chegaram.
+     * Usado por logos personalizados (`u_<ULID>`), carregados sob demanda.
+     */
+    logoSlug?: string;
 }
 
-export function buildBadgeUrl(
-    origin: string,
-    endpoint: string,
+/**
+ * Query cosmeticos de um badge (estilo, fonte, cores, logo e link), na mesma
+ * ordem para a rota estatica e para o endpoint de provider (F4, ADR-080). Nao
+ * inclui `cacheSeconds`: no modo provider o TTL e do servidor.
+ */
+export function cosmeticParams(
     spec: BadgeSpec,
-    props: BadgeForgeToolProps,
-    options: BuildBadgeUrlOptions = {},
-): string {
-    const defaults = props.defaults;
-    const base = endpoint.replace(/\/+$/, '');
-    const format = options.format ?? 'svg';
-    const path = `${base}/${encodeSegment(spec.label)}/${encodeSegment(spec.message)}.${format}`;
+    defaults: BadgeForgeDefaults,
+    options: { logoSlug?: string | null } = {},
+): string[] {
     const params: string[] = [];
 
     if (spec.style.id !== defaults.style) {
@@ -68,13 +77,15 @@ export function buildBadgeUrl(
         pushColor(params, 'labelColor', spec.labelColor, defaults.labelColor);
     }
 
-    if (spec.logo !== null) {
-        params.push(`logo=${encodeURIComponent(spec.logo.slug)}`);
+    const logoSlug = options.logoSlug ?? spec.logo?.slug ?? null;
+
+    if (logoSlug !== null) {
+        params.push(`logo=${encodeURIComponent(logoSlug)}`);
     }
 
     pushColor(params, 'logoColor', spec.logoColor, defaults.logoColor);
 
-    if (spec.logo !== null && spec.logoSize !== spec.style.logoSize) {
+    if (logoSlug !== null && spec.logoSize !== spec.style.logoSize) {
         params.push(`logoSize=${spec.logoSize}`);
     }
 
@@ -85,6 +96,23 @@ export function buildBadgeUrl(
     if (spec.link !== null) {
         params.push(`link=${encodeURIComponent(spec.link)}`);
     }
+
+    return params;
+}
+
+export function buildBadgeUrl(
+    origin: string,
+    endpoint: string,
+    spec: BadgeSpec,
+    props: BadgeForgeToolProps,
+    options: BuildBadgeUrlOptions = {},
+): string {
+    const base = endpoint.replace(/\/+$/, '');
+    const format = options.format ?? 'svg';
+    const path = `${base}/${encodeSegment(spec.label)}/${encodeSegment(spec.message)}.${format}`;
+    const params = cosmeticParams(spec, props.defaults, {
+        logoSlug: options.logoSlug,
+    });
 
     if (spec.cacheSeconds !== props.limits.cacheSeconds.default) {
         params.push(`cacheSeconds=${spec.cacheSeconds}`);

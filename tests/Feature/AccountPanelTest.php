@@ -4,6 +4,8 @@ use App\Enums\AiRequestStatus;
 use App\Enums\NewsletterSource;
 use App\Enums\SqlDialect;
 use App\Models\AiRequest;
+use App\Models\BadgeCustomLogo;
+use App\Models\BadgePreset;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\Plan;
@@ -467,6 +469,8 @@ it('exporta os dados da conta em JSON para download', function () {
 
     UsageLedger::factory()->for($user)->create(['tokens' => 300]);
     AiRequest::factory()->for($user)->done()->create(['history_visible' => true]);
+    $logo = BadgeCustomLogo::factory()->for($user)->create(['name' => 'Minha marca']);
+    BadgePreset::factory()->for($user)->create(['name' => 'Release']);
     inscricaoDaConta('ana@exemplo.com', ['confirmed_at' => now()]);
 
     $response = $this->actingAs($user)->get(route('profile.export'));
@@ -497,7 +501,14 @@ it('exporta os dados da conta em JSON para download', function () {
         ->and($data['payments'][0]['amount_cents'])->toBe(2990)
         ->and($data['payments'][0]['method'])->toBe('pix')
         ->and($data['usage'])->toHaveCount(1)
-        ->and($data['usage'][0]['tokens'])->toBe(300);
+        ->and($data['usage'][0]['tokens'])->toBe(300)
+        ->and($data['badgeforge']['custom_logos'])->toHaveCount(1)
+        ->and($data['badgeforge']['custom_logos'][0]['name'])->toBe('Minha marca')
+        ->and($data['badgeforge']['custom_logos'][0]['slug'])->toBe('u_'.$logo->id)
+        ->and($data['badgeforge']['custom_logos'][0]['paths'])->toHaveCount(1)
+        ->and($data['badgeforge']['presets'])->toHaveCount(1)
+        ->and($data['badgeforge']['presets'][0]['name'])->toBe('Release')
+        ->and($data['badgeforge']['presets'][0]['form']['label'])->toBe('build');
 });
 
 it('exporta os dados de quem nao tem inscricao nem vinculo social', function () {
@@ -512,5 +523,7 @@ it('exporta os dados de quem nao tem inscricao nem vinculo social', function () 
         ->and($data['subscriptions'])->toBe([])
         ->and($data['payments'])->toBe([])
         ->and($data['ai_requests'])->toBe([])
-        ->and($data['usage'])->toBe([]);
+        ->and($data['usage'])->toBe([])
+        ->and($data['badgeforge']['custom_logos'])->toBe([])
+        ->and($data['badgeforge']['presets'])->toBe([]);
 });

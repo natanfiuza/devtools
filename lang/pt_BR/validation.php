@@ -170,6 +170,40 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'custom_logo' => [
+        'invalid_logo' => 'Este logo não está disponível para a sua conta.',
+        'limit_reached' => 'Você atingiu o limite de logos do seu plano.',
+        'too_large' => 'O arquivo SVG é maior do que o permitido.',
+        'invalid_encoding' => 'O SVG não é um texto UTF-8 válido.',
+        'doctype_not_allowed' => 'O SVG não pode declarar DOCTYPE.',
+        'processing_instruction_not_allowed' => 'O SVG não pode conter instruções de processamento.',
+        'malformed' => 'Não foi possível ler o SVG.',
+        'invalid_root' => 'O arquivo precisa ser um elemento SVG.',
+        'unsupported_attribute' => 'O SVG usa um atributo não permitido.',
+        'unsafe_value' => 'O SVG usa um valor não permitido.',
+        'invalid_viewbox' => 'O SVG precisa de um viewBox válido.',
+        'too_deep' => 'O SVG tem grupos aninhados demais.',
+        'unsupported_element' => 'O SVG usa um elemento não permitido.',
+        'text_not_allowed' => 'O SVG não pode conter texto.',
+        'invalid_path' => 'Um dos caminhos não é válido.',
+        'path_too_long' => 'Um dos caminhos é longo demais.',
+        'total_path_too_long' => 'Os caminhos somam mais do que o permitido.',
+        'too_many_paths' => 'O SVG tem caminhos demais.',
+        'missing_paths' => 'O SVG precisa conter pelo menos um caminho.',
+    ],
+
+    'badge_asset' => [
+        'paid_only' => 'As badges pessoais estão disponíveis em planos pagos.',
+        'username_required' => 'Escolha um nome de usuário antes de criar uma badge pessoal.',
+        'provider_unknown' => 'Este provedor ou métrica não está disponível.',
+        'params_invalid' => 'Os parâmetros do provedor não são válidos.',
+        'private_unsupported' => 'Esta métrica não aceita repositórios privados.',
+        'credential_required' => 'Um token de acesso pessoal é obrigatório para itens privados.',
+        'credential_not_allowed' => 'A credencial só é permitida em badges de provedor privadas.',
+        'credential_username_required' => 'Badges privadas do Docker exigem o nome de usuário da conta.',
+        'not_provider' => 'Só badges de provedor podem ser atualizadas.',
+    ],
+
     'attributes' => [
         'amount' => 'valor',
         'code' => 'código',
@@ -177,6 +211,7 @@ return [
         'document' => 'documento',
         'email' => 'e-mail',
         'locale' => 'idioma',
+        'logo' => 'logo',
         'method' => 'método',
         'name' => 'nome',
         'newsletter' => 'newsletter',

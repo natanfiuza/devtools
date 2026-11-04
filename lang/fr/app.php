@@ -63,6 +63,7 @@ return [
     'footer' => [
         'language' => 'Langue',
         'api_docs' => 'API',
+        'badgeforge_docs' => 'Docs BadgeForge',
         'privacy' => 'Confidentialité',
         'terms' => 'Conditions',
         'donate' => 'Faire un don',

@@ -30,6 +30,10 @@ return [
 
     'endpoint' => '/api/badges/static',
 
+    'provider_endpoint' => '/api/badges',
+
+    'personal_endpoint' => '/b',
+
     'default_style' => 'flat',
 
     'logo_position' => 'left',
@@ -56,6 +60,75 @@ return [
         'max_width' => 600,
         'cache_path' => 'app/data/tools/badgeforge/static',
         'prune_after_hours' => 48,
+    ],
+
+    /*
+    | Logos personalizados (F3, ADR-078): o upload vira viewBox + lista de
+    | paths normalizados no banco; o arquivo cru nunca e guardado nem servido.
+    | O limite de logos e por conta: Free tem teto, pago e ilimitado
+    | (`paid_limit` nulo). O teto de cache garante que excluir/renomear um logo
+    | apareca em no maximo uma hora nos badges ja publicados.
+    */
+    'custom_logos' => [
+        'free_limit' => 2,
+        'paid_limit' => null,
+        'name_max_length' => 80,
+        'max_bytes' => 262144,
+        'max_paths' => 200,
+        'max_path_length' => 4000,
+        'max_total_path_length' => 100000,
+        'max_viewbox_extent' => 10000,
+        'max_document_depth' => 8,
+        'max_cache_seconds' => 3600,
+    ],
+
+    /*
+    | Presets (F3, ADR-079): snapshot do formulario, sem URL publica.
+    */
+    'presets' => [
+        'name_max_length' => 80,
+        'limit' => null,
+    ],
+
+    /*
+    | Gestao autenticada de logos/presets: limite de taxa das escritas.
+    */
+    'management' => [
+        'rate_limit' => 20,
+        'rate_decay_seconds' => 60,
+    ],
+
+    /*
+    | Providers externos (F4, ADR-080): a chamada publica e anonima e o cache
+    | e por URL resolvida. Nenhum token global existe em config/.env - a
+    | credencial e sempre do dono do badge pessoal (ADR-068/ADR-081).
+    */
+    'providers' => [
+        'cache_ttl' => 300,
+        'stale_ttl' => 86400,
+        'fallback_ttl' => 60,
+        'connect_timeout' => 3,
+        'timeout' => 5,
+        'max_body_bytes' => 1048576,
+        'max_param_length' => 200,
+        'user_agent' => 'devtools-badgeforge/1.0',
+        'unavailable_message' => 'unavailable',
+        'unknown_message' => 'unknown',
+        'refresh_rate_limit' => 10,
+        'refresh_rate_decay_seconds' => 60,
+    ],
+
+    /*
+    | Badges pessoais (F4, ADR-081): arquivos sob `personal/{username}` na
+    | base abaixo; o banco guarda o path relativo, nunca o absoluto. O teto de
+    | cache limita o tempo que uma exclusao/renomeacao leva para sumir de CDN.
+    */
+    'personal_badges' => [
+        'name_max_length' => 80,
+        'max_cache_seconds' => 3600,
+        'credential_max_length' => 512,
+        'prune_after_hours' => 48,
+        'path' => 'app/data/tools/badgeforge',
     ],
 
     /*

@@ -170,6 +170,40 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'custom_logo' => [
+        'invalid_logo' => 'Ce logo n’est pas disponible pour votre compte.',
+        'limit_reached' => 'Vous avez atteint la limite de logos de votre forfait.',
+        'too_large' => 'Le fichier SVG dépasse la taille autorisée.',
+        'invalid_encoding' => 'Le SVG n’est pas un texte UTF-8 valide.',
+        'doctype_not_allowed' => 'Le SVG ne doit pas déclarer de DOCTYPE.',
+        'processing_instruction_not_allowed' => 'Le SVG ne doit pas contenir d’instructions de traitement.',
+        'malformed' => 'Le SVG n’a pas pu être lu.',
+        'invalid_root' => 'Le fichier doit être un élément SVG.',
+        'unsupported_attribute' => 'Le SVG utilise un attribut non autorisé.',
+        'unsafe_value' => 'Le SVG utilise une valeur non autorisée.',
+        'invalid_viewbox' => 'Le SVG doit avoir un viewBox valide.',
+        'too_deep' => 'Le SVG contient trop de groupes imbriqués.',
+        'unsupported_element' => 'Le SVG utilise un élément non autorisé.',
+        'text_not_allowed' => 'Le SVG ne doit pas contenir de texte.',
+        'invalid_path' => 'L’un des tracés n’est pas valide.',
+        'path_too_long' => 'L’un des tracés est trop long.',
+        'total_path_too_long' => 'Les tracés dépassent la longueur autorisée.',
+        'too_many_paths' => 'Le SVG contient trop de tracés.',
+        'missing_paths' => 'Le SVG doit contenir au moins un tracé.',
+    ],
+
+    'badge_asset' => [
+        'paid_only' => 'Les badges personnels sont disponibles avec les forfaits payants.',
+        'username_required' => 'Choisissez un nom d’utilisateur avant de créer un badge personnel.',
+        'provider_unknown' => 'Ce fournisseur ou cette métrique n’est pas disponible.',
+        'params_invalid' => 'Les paramètres du fournisseur ne sont pas valides.',
+        'private_unsupported' => 'Cette métrique ne prend pas en charge les dépôts privés.',
+        'credential_required' => 'Un jeton d’accès personnel est requis pour les éléments privés.',
+        'credential_not_allowed' => 'Les identifiants ne sont autorisés que pour les badges de fournisseur privés.',
+        'credential_username_required' => 'Les badges Docker privés exigent le nom d’utilisateur du compte.',
+        'not_provider' => 'Seuls les badges de fournisseur peuvent être actualisés.',
+    ],
+
     'attributes' => [
         'amount' => 'montant',
         'code' => 'code',
@@ -177,6 +211,7 @@ return [
         'document' => 'document',
         'email' => 'e-mail',
         'locale' => 'langue',
+        'logo' => 'logo',
         'method' => 'méthode',
         'name' => 'nom',
         'newsletter' => 'newsletter',

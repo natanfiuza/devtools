@@ -21,6 +21,7 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Middleware\TrustProxies as BaseTrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
@@ -32,6 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            // Imagens publicas fora de `web` e de `api` (F4, ADR-081): sem
+            // sessao, CSRF ou throttle. Os headers globais continuam valendo.
+            Route::group([], base_path('routes/public.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Preferencias escritas pelo navegador (tema, idioma e consentimento)
@@ -89,6 +95,10 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // O PAT de uma badge pessoal nunca volta no `_old_input` de um 422
+        // (F4, ADR-081). O handler e quem grava o input na sessao.
+        $exceptions->dontFlash(['credential']);
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

@@ -170,6 +170,40 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'custom_logo' => [
+        'invalid_logo' => 'Este logo no está disponible para tu cuenta.',
+        'limit_reached' => 'Alcanzaste el límite de logos de tu plan.',
+        'too_large' => 'El archivo SVG es más grande de lo permitido.',
+        'invalid_encoding' => 'El SVG no es un texto UTF-8 válido.',
+        'doctype_not_allowed' => 'El SVG no puede declarar DOCTYPE.',
+        'processing_instruction_not_allowed' => 'El SVG no puede contener instrucciones de procesamiento.',
+        'malformed' => 'No se pudo leer el SVG.',
+        'invalid_root' => 'El archivo debe ser un elemento SVG.',
+        'unsupported_attribute' => 'El SVG usa un atributo no permitido.',
+        'unsafe_value' => 'El SVG usa un valor no permitido.',
+        'invalid_viewbox' => 'El SVG necesita un viewBox válido.',
+        'too_deep' => 'El SVG tiene demasiados grupos anidados.',
+        'unsupported_element' => 'El SVG usa un elemento no permitido.',
+        'text_not_allowed' => 'El SVG no puede contener texto.',
+        'invalid_path' => 'Uno de los trazados no es válido.',
+        'path_too_long' => 'Uno de los trazados es demasiado largo.',
+        'total_path_too_long' => 'Los trazados superan la longitud permitida.',
+        'too_many_paths' => 'El SVG tiene demasiados trazados.',
+        'missing_paths' => 'El SVG debe contener al menos un trazado.',
+    ],
+
+    'badge_asset' => [
+        'paid_only' => 'Las insignias personales están disponibles en planes de pago.',
+        'username_required' => 'Elige un nombre de usuario antes de crear una insignia personal.',
+        'provider_unknown' => 'Este proveedor o métrica no está disponible.',
+        'params_invalid' => 'Los parámetros del proveedor no son válidos.',
+        'private_unsupported' => 'Esta métrica no admite repositorios privados.',
+        'credential_required' => 'Se requiere un token de acceso personal para elementos privados.',
+        'credential_not_allowed' => 'La credencial solo se permite en insignias de proveedor privadas.',
+        'credential_username_required' => 'Las insignias privadas de Docker requieren el nombre de usuario de la cuenta.',
+        'not_provider' => 'Solo se pueden actualizar las insignias de proveedor.',
+    ],
+
     'attributes' => [
         'amount' => 'importe',
         'code' => 'código',
@@ -177,6 +211,7 @@ return [
         'document' => 'documento',
         'email' => 'correo electrónico',
         'locale' => 'idioma',
+        'logo' => 'logo',
         'method' => 'método',
         'name' => 'nombre',
         'newsletter' => 'newsletter',

@@ -88,3 +88,15 @@ documentação diz explicitamente que o provider é anônimo e público.
 - **Badge privado público por obscuridade de URL**: a URL é pública por
   natureza (vai num README); só o ULID não é autorização suficiente para o
   provider, por isso o segredo fica no servidor e o badge é do usuário.
+
+## Emenda da F4 — implementado em 2026-11-03
+
+As decisoes acima estao no codigo e validadas por teste. O item publico e
+lido anonimamente em `GET /api/badges/{provider}/{definition}/{path}` (nenhum
+`Authorization`); o `ProviderFetchRequest` so carrega `ProviderCredential` no
+caminho da badge pessoal. O PAT e coluna `credential` com cast `encrypted`,
+`hidden` junto com `credential_fingerprint`; a chave de cache usa o HMAC, nunca
+o token (ADR-080). Packagist e npm `dm` recusam `private=1` com
+`private_unsupported`; Docker exige `credential_username` non-secret. Os testes
+de nao-vazamento cobrem props, resposta, flash, log, cache e exportacao
+(ADR-081).

@@ -12,6 +12,7 @@ import NewsletterForm from '@/components/NewsletterForm.vue';
 import SearchTrigger from '@/components/SearchTrigger.vue';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
 import {
     Sheet,
     SheetContent,
@@ -242,6 +243,13 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
               {{ t('app.footer.api_docs') }}
             </Link>
             <Link
+              :href="routes.badgeforgeDocs.value"
+              class="hover:text-foreground"
+              data-test="footer-badgeforge-docs"
+            >
+              {{ t('app.footer.badgeforge_docs') }}
+            </Link>
+            <Link
               :href="routes.privacy.value"
               class="hover:text-foreground"
             >
@@ -292,5 +300,6 @@ const isAuthenticated = (): boolean => page.props.auth?.user != null;
     <ConsentBanner />
     <AnalyticsScript />
     <CommandPalette />
+    <Toaster />
   </div>
 </template>

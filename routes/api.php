@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
+use App\Http\Controllers\BadgeForge\ProviderBadgeController;
 use App\Http\Controllers\BadgeForge\StaticBadgeController;
 use App\Http\Middleware\TrackApiTokenUsage;
 use Illuminate\Support\Facades\Route;
@@ -62,4 +63,15 @@ Route::prefix('badges')
             ->where('message', '[^/]+')
             ->where('ext', 'svg|png')
             ->name('static');
+
+        // F4: registrada depois da estatica de proposito. O Symfony casa na
+        // ordem de registro, entao `/api/badges/static/...` continua vencendo
+        // mesmo que `static` casasse o slug de provider. `{path}` aceita `/`
+        // (pacote npm com escopo e `vendor/package`) e o controller separa a
+        // extensao.
+        Route::get('{provider}/{definition}/{path}', ProviderBadgeController::class)
+            ->where('provider', '[a-z0-9][a-z0-9-]*')
+            ->where('definition', '[a-z0-9][a-z0-9-]*')
+            ->where('path', '.+\.(?:svg|png)')
+            ->name('provider');
     });

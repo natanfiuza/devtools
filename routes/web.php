@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Api\Base64ImageController;
 use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\BadgeForgeDocsController;
 use App\Http\Controllers\Base64ImageDownloadController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
@@ -70,6 +71,10 @@ Route::prefix('{locale}')
         // Documentacao publica da API v1 (ADR-057): guia de integracao,
         // endpoints, exemplos e link para a especificacao OpenAPI.
         Route::get('api-docs', ApiDocsController::class)->name('api-docs');
+
+        // Documentacao publica do BadgeForge (F4, ADR-082): providers,
+        // badges pessoais, cache e seguranca, nos cinco idiomas.
+        Route::get('docs/badgeforge', BadgeForgeDocsController::class)->name('badgeforge-docs');
 
         // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
         // so, e o componente de cada tool entra por dentro dela. Sem restricao
@@ -225,6 +230,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
 });
 
 require __DIR__.'/settings.php';
+require __DIR__.'/badgeforge.php';
 require __DIR__.'/auth-social.php';
 require __DIR__.'/newsletter.php';
 require __DIR__.'/admin.php';

@@ -8,6 +8,10 @@ O badge de item privado é uma **badge pessoal**: a URL pública que você coloc
 README leva apenas o identificador opaco da badge (`/b/{username}/{ulid}.svg`),
 nunca o token.
 
+A referência pública da ferramenta, com os exemplos de cada métrica e o campo de
+credencial, fica em `/{idioma}/docs/badgeforge` (link **BadgeForge docs** no rodapé
+do site).
+
 ## 1. Antes de começar
 
 - Sua conta precisa estar em um plano pago e ter uma badge pessoal criada na
@@ -41,9 +45,9 @@ sai em exportação de dados.
 
 - Para trocar: gere outro token com as mesmas permissões, cole sobre o anterior
   e salve; o valor antigo é substituído.
-- Para revogar: apague a credencial na badge (ou apague a badge) e revogue o
-  token em **GitHub → Settings → Developer settings → Personal access tokens →
-  Revoke**. Um token revogado só afeta badges que ainda o usem.
+- Para revogar: apague a badge (não existe "remover credencial" sem recriar) e
+  revogue o token em **GitHub → Settings → Developer settings → Personal access
+  tokens → Revoke**. Um token revogado só afeta badges que ainda o usem.
 - Se a conta for encerrada/anonimizada, a credencial é apagada junto.
 
 ## 5. Se o badge parar de atualizar

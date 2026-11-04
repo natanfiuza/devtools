@@ -1,0 +1,28 @@
+# Glossário Colors
+- Cor base: cor inicial.
+- Shade: tom mais escuro.
+- Tint: tom mais claro.
+- Escala: conjunto ordenado de tons.
+- Harmonia: relação entre cores.
+- Contraste: razão de luminância.
+- WCAG AA/AAA: níveis de acessibilidade.
+- EyeDropper: captura de cor da tela.
+- Papel de cor: função na interface.
+- Protótipo: pré-visualização aplicada.
+- Preset: configuração salva reutilizável.
+- Paleta: conjunto de cores salvo.
+- Token: variável de design.
+- Figma Tokens JSON: formato de tokens para Figma.
+- Style Dictionary: ferramenta de design tokens.
+- OKLCH/OKLab: espaços de cor perceitualmente uniformes.
+- Alpha: transparência.
+- Slug: identificador textual único na URL.
+- Median cut: algoritmo de quantização de cores.
+- OG image: imagem de compartilhamento social.
+- Arquivar: ocultar sem excluir.
+- Curtir: interação social.
+- Seguir: relação entre usuários.
+- Comentário: texto público em paleta.
+- Thread: cadeia de respostas.
+- Denúncia: report de conteúdo.
+- Moderação: filtro automático de conteúdo.

@@ -16,7 +16,9 @@ it('carrega os 25 logos embutidos com viewBox e um unico path', function () {
 
         expect($resolved)->not->toBeNull()
             ->and($resolved->viewBox)->toBe('0 0 24 24')
-            ->and($resolved->pathData)->toStartWith('M');
+            ->and($resolved->paths)->toHaveCount(1)
+            ->and($resolved->paths[0]->d)->toStartWith('M')
+            ->and($resolved->custom)->toBeFalse();
     }
 });
 

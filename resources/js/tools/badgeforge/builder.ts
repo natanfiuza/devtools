@@ -1,8 +1,9 @@
+import { customLogoAsset } from './customLogos';
 import { parseColorOr } from './lib/color';
 import { DEFAULT_FONT, fontAsset } from './lib/fonts';
 import { styleById } from './lib/styles';
 import { logoAsset } from './logos';
-import type { BadgeForgeToolProps, BadgeSpec, BadgeStyle } from './types';
+import type { BadgeForgeToolProps, BadgeLogo, BadgeSpec, BadgeStyle } from './types';
 
 /**
  * Estado do formulario e normalizacao (espelho de `BadgeRequest`).
@@ -88,7 +89,7 @@ export function normalizeBadge(
         logo:
             form.logo === '' || form.logo === NO_LOGO
                 ? null
-                : logoAsset(form.logo),
+                : resolveLogo(form.logo),
         logoColor: parseColorOr(form.logoColor, props.defaults.logoColor),
         logoSize: integer(
             form.logoSize,
@@ -98,13 +99,41 @@ export function normalizeBadge(
         ),
         logoPosition: form.logoPosition === 'right' ? 'right' : 'left',
         link: normalizeLink(form.link, props.limits.linkMaxLength),
-        cacheSeconds: integer(
-            form.cacheSeconds,
-            props.limits.cacheSeconds.default,
-            props.limits.cacheSeconds.min,
-            props.limits.cacheSeconds.max,
-        ),
+        cacheSeconds: cacheSeconds(form, props),
     };
+}
+
+/**
+ * `u_` e o namespace reservado dos logos personalizados; nunca cai no catalogo
+ * embutido. Sem paths carregados o logo fica ausente apenas no preview - a URL
+ * continua correta via `logoSlug` (ver `buildBadgeUrl`).
+ */
+export function isCustomLogoSlug(slug: string | null | undefined): boolean {
+    return typeof slug === 'string' && /^u_/i.test(slug.trim());
+}
+
+function resolveLogo(slug: string): BadgeLogo | null {
+    return isCustomLogoSlug(slug) ? customLogoAsset(slug) : logoAsset(slug);
+}
+
+/**
+ * Logos personalizados podem ser excluidos: o teto de cache garante que a
+ * remocao chegue ao CDN na proxima hora (ADR-078). Espelha `BadgeRequest`.
+ */
+function cacheSeconds(
+    form: BadgeFormState,
+    props: BadgeForgeToolProps,
+): number {
+    const seconds = integer(
+        form.cacheSeconds,
+        props.limits.cacheSeconds.default,
+        props.limits.cacheSeconds.min,
+        props.limits.cacheSeconds.max,
+    );
+
+    return isCustomLogoSlug(form.logo)
+        ? Math.min(seconds, props.limits.customLogos.maxCacheSeconds)
+        : seconds;
 }
 
 /** Trunca por code point, com reticencias - como `BadgeRequest::truncate`. */

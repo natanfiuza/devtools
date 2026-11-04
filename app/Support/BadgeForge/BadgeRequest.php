@@ -12,11 +12,7 @@ namespace App\Support\BadgeForge;
  */
 final class BadgeRequest
 {
-    public function __construct(
-        private readonly StyleCatalog $styles,
-        private readonly LogoCatalog $logos,
-        private readonly BadgeFontCatalog $fonts,
-    ) {}
+    public function __construct(private readonly BadgeSpecBuilder $builder) {}
 
     /**
      * @param  array<string, mixed>  $query
@@ -30,55 +26,7 @@ final class BadgeRequest
             return null;
         }
 
-        $style = $this->styles->get(self::queryString($query, 'style'));
-
-        if ($style->uppercase) {
-            $label = mb_strtoupper($label, 'UTF-8');
-            $message = mb_strtoupper($message, 'UTF-8');
-        }
-
-        $maxLength = (int) config('badgeforge.limits.max_text_length', 100);
-        $label = self::truncate($label, $maxLength);
-        $message = self::truncate($message, $maxLength);
-
-        $labelColor = $style->labelColor
-            ?? Color::parseOr(self::queryString($query, 'labelColor'), (string) config('badgeforge.colors.label'));
-
-        $messageColor = $style->messageColor
-            ?? Color::parseOr(self::queryString($query, 'color'), (string) config('badgeforge.colors.default'));
-
-        $logo = $this->logos->find(self::queryString($query, 'logo'));
-
-        $logoSize = self::integer(
-            self::queryString($query, 'logoSize'),
-            $style->logoSize,
-            (int) config('badgeforge.limits.logo_size.min', 8),
-            (int) config('badgeforge.limits.logo_size.max', 20),
-        );
-
-        $logoPosition = self::queryString($query, 'logoPosition') === 'right' ? 'right' : 'left';
-
-        $cacheSeconds = self::integer(
-            self::queryString($query, 'cacheSeconds'),
-            (int) config('badgeforge.limits.cache_seconds.default', 86400),
-            (int) config('badgeforge.limits.cache_seconds.min', 300),
-            (int) config('badgeforge.limits.cache_seconds.max', 86400),
-        );
-
-        return new BadgeSpec(
-            label: $label,
-            message: $message,
-            style: $style,
-            font: $this->fonts->find(self::queryString($query, 'font')),
-            labelColor: $labelColor,
-            messageColor: $messageColor,
-            logo: $logo,
-            logoColor: Color::parseOr(self::queryString($query, 'logoColor'), (string) config('badgeforge.colors.logo')),
-            logoSize: $logoSize,
-            logoPosition: $logoPosition,
-            link: self::link(self::queryString($query, 'link')),
-            cacheSeconds: $cacheSeconds,
-        );
+        return $this->builder->build($label, $message, $query);
     }
 
     public static function decodeText(string $segment): ?string
@@ -120,46 +68,5 @@ final class BadgeRequest
         }
 
         return implode('', array_slice($characters, 0, $limit - 1)).'…';
-    }
-
-    /**
-     * @param  array<string, mixed>  $query
-     */
-    private static function queryString(array $query, string $key): ?string
-    {
-        $value = $query[$key] ?? null;
-
-        return is_string($value) ? $value : null;
-    }
-
-    private static function integer(?string $raw, int $default, int $min, int $max): int
-    {
-        $value = $raw !== null && preg_match('/^\d{1,9}$/', trim($raw)) === 1
-            ? (int) trim($raw)
-            : $default;
-
-        return max($min, min($max, $value));
-    }
-
-    private static function link(?string $raw): ?string
-    {
-        if ($raw === null) {
-            return null;
-        }
-
-        $value = trim($raw);
-        $maxLength = (int) config('badgeforge.limits.link_max_length', 2048);
-
-        if ($value === '' || mb_strlen($value, 'UTF-8') > $maxLength) {
-            return null;
-        }
-
-        if (preg_match('~^https?://[^\s"\'<>]+$~i', $value) !== 1) {
-            return null;
-        }
-
-        $host = parse_url($value, PHP_URL_HOST);
-
-        return is_string($host) && $host !== '' ? $value : null;
     }
 }

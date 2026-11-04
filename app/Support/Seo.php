@@ -113,6 +113,10 @@ final class Seo
                 'title' => (string) trans('api_docs.meta.title'),
                 'description' => (string) trans('api_docs.meta.description'),
             ],
+            'badgeforge-docs' => [
+                'title' => (string) trans('docs.badgeforge.meta.title'),
+                'description' => (string) trans('docs.badgeforge.meta.description'),
+            ],
             'tools.show' => self::toolMeta($request),
             default => [
                 'title' => (string) config('app.name'),

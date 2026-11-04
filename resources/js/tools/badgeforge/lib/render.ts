@@ -93,7 +93,21 @@ export function renderBadge(spec: BadgeSpec): string {
 
     if (spec.logo !== null) {
         group += `<svg x="${logoX}" y="${logoY}" width="${spec.logoSize}" height="${spec.logoSize}" viewBox="${escapeXml(spec.logo.viewBox)}" aria-hidden="true" focusable="false">`;
-        group += `<path d="${escapeXml(spec.logo.pathData)}" ${fillAttributes(spec.logoColor)}/>`;
+
+        for (const logoPath of spec.logo.paths) {
+            group += `<path d="${escapeXml(logoPath.d)}"`;
+
+            if (logoPath.fillRule !== null) {
+                group += ` fill-rule="${logoPath.fillRule}"`;
+            }
+
+            if (logoPath.clipRule !== null) {
+                group += ` clip-rule="${logoPath.clipRule}"`;
+            }
+
+            group += ` ${fillAttributes(spec.logoColor)}/>`;
+        }
+
         group += '</svg>';
     }
 

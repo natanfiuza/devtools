@@ -122,8 +122,15 @@
 - Compilador de mensagens tolerante: `messageCompiler` customizado que compila a tradução com o core-base e, quando ela é inválida, exibe o texto cru e registra um aviso por chave em vez de lançar e derrubar o render (ADR-060).
 - Badge: imagem de status SVG ou PNG (F2) gerada e servida pelo BadgeForge a partir de uma URL, sem sessao e sem JavaScript (ADR-072).
 - Badge estatica: badge cujo conteudo inteiro vem da propria URL - label, message, estilo, cores, logo, posicao e link.
-- Badge dinamica (de provider): badge cujo conteudo vem da API publica de um servico externo (GitHub, npm, Docker Hub, Packagist); entra na F4 (ADR-068).
-- Badge pessoal: badge criada por usuario pago, servida em `/b/{username}/{ulid}.svg`; e o unico lugar onde cabe item privado, e a URL carrega so o ULID, nunca uma credencial (ADR-064).
+- Badge dinamica (de provider): badge cujo conteudo vem da API publica de um servico externo (GitHub, npm, Docker Hub, Packagist), servida em `/api/badges/{provider}/{definition}/{path}.{svg|png}`; a chamada e anonima para item publico, o valor projetado e cacheado por URL resolvida e falha vira stale/fallback, nunca 500 (F4, ADR-080).
+- Badge pessoal: badge criada por usuario pago, servida em `/b/{username}/{ulid}.{svg|png}`; e o unico lugar onde cabe item privado, a URL carrega so o ULID (nunca credencial), e o arquivo fica em `storage/app/data/tools/badgeforge/personal/{username}/{ulid}.{ext}` (F4, ADR-064 e ADR-081).
+- Definicao de provider: linha de `badge_provider_definitions` que descreve uma metrica (`github/stars`, `npm/dm`, `docker/pulls`...): label, `path_pattern`, params, `url_template`, `client_key` e `extractor_key`. O catalogo e dado; o comportamento HTTP e codigo, e `parser_class` fica inerte (ADR-080).
+- Item publico / item privado: classificacao do dado consultado no provider. Item publico (repositorio, pacote ou imagem aberta) e lido anonimamente; item privado so existe em badge pessoal, com PAT do usuario pagador e escopo minimo (ADR-068).
+- Credencial por badge: PAT do usuario guardado por badge pessoal, cifrado com `APP_KEY` (cast `encrypted`), write-only na UI e nunca reaproveitado de um badge para outro; revogar e excluir a badge (ADR-081).
+- Fingerprint de credencial: HMAC-SHA256 do PAT com `APP_KEY`, prefixado pelo provider e guardado em `credential_fingerprint`; identifica a credencial na chave de cache sem expor o token (ADR-080 e ADR-081).
+- Cache de provider: entrada `badgeforge:provider:{sha256}` com o payload **projetado** (so as metricas exibidas), `etag`, `fetched_at` e `stale_until`; as quatro definicoes do GitHub compartilham a mesma entrada porque a URL e a mesma (ADR-080).
+- Stale-if-error: resposta `200` com o ultimo valor bom quando o provider falha ou limita, sinalizada por `Warning: 110 - "Response is Stale"`; e o que impede um rate limit externo de quebrar a imagem do README (ADR-080).
+- Fallback badge: badge `200` com label da definicao e a mensagem de `providers.unavailable_message` quando nao existe valor bom em cache; fica cacheada por `fallback_ttl` (ou `Retry-After` dentro do limite) e nunca vira 500 (ADR-080).
 - Label / Message: os dois textos da badge - o da esquerda (rotulo) e o da direita (mensagem) - separados por cor de fundo propria; o `aria-label` e `"label: message"`.
 - Estilo da badge: um de `flat`, `flat-square`, `plastic`, `for-the-badge` ou `social`; a geometria inteira vive em `resources/badgeforge/styles.json`, lida pelo PHP e pelo TS (ADR-074).
 - Logo embutido: SVG autoral, so com `<path d>`, registrado em `config/badgeforge.php` e desenhado dentro do documento do badge na cor pedida (ADR-074).
@@ -136,6 +143,9 @@
 - TTL da badge: `cacheSeconds` efetivo, padrao 86400 e clamp 300-86400 em `config/badgeforge.php`, enviado em `Cache-Control: public, max-age=...` (ADR-076).
 - Acesso ao provider: item publico e lido anonimamente na API publica do provider; item privado exige PAT do usuario pagador, cifrado em repouso, vinculado a badge pessoal, revogavel e nunca presente em URL, log ou exportacao (ADR-068).
 - Provider customizado: provider definido por usuario pago em painel (F7), com URL e parse proprios.
-- Preset: configuracao de badge salva por usuario cadastrado para reaproveitar (F3, ADR-066).
+- Preset: snapshot normalizado do formulario de badge, salvo por conta verificada e reaplicado no builder ou no painel; nao tem URL publica, cache nem analytics (F3, ADR-066 e ADR-079).
+- Logo personalizado: SVG multi-path enviado pela conta, aceito somente com `<svg>`, `<g>` e `<path>` e guardado como `viewBox` + paths normalizados; o arquivo cru nunca e servido (F3, ADR-078).
+- Slug opaco: identificador publico que nao revela dono nem caminho de conta; o logo personalizado usa `u_<ULID>` e o namespace `u_` e reservado (ADR-078).
+- Preset orfao: preset cujo logo referenciado deixou de existir (custom apagado ou embutido fora da config); a leitura marca `logoOrphaned` e a UI aplica o preset com `logo = none` (ADR-079).
 
 

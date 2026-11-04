@@ -386,6 +386,50 @@
                 "link": null,
                 "cacheSeconds": 86400
             }
+        },
+        {
+            "name": "custom_multipath_basic",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": {
+                    "viewBox": "0 0 24 24",
+                    "paths": [
+                        { "d": "M12 2L2 22h20z" },
+                        { "d": "M12 6l6 12H6z" }
+                    ]
+                },
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "custom_multipath_fillrule",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": {
+                    "viewBox": "0 0 24 24",
+                    "paths": [
+                        { "d": "M12 2L2 22h20z", "fillRule": "evenodd" },
+                        { "d": "M12 6l6 12H6z", "fillRule": "nonzero", "clipRule": "evenodd" }
+                    ]
+                },
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 12,
+                "logoPosition": "right",
+                "link": null,
+                "cacheSeconds": 86400
+            }
         }
     ]
 }
