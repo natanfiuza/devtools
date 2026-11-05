@@ -351,12 +351,13 @@ throttle da imagem; não há limiter por dono aqui), e os erros saem no envelope
 `Cache-Control: no-store`. A página Inertia de erro 404 nunca responde no
 caminho `b/*`.
 
-## API de gestão (F8 — entregue, ADR-088)
+## API de gestão (F8/F9 — entregue, ADR-088 e ADR-090)
 
 Programática, em `/api/v1/badgeforge`, com token Sanctum emitido em
 `/settings/api-tokens` (`Authorization: Bearer <token>`). O catálogo é
 anônimo; o resto exige `badgeforge:read` (GET) ou `badgeforge:write`
-(POST/DELETE). As abilities são **ortogonais** ao `ai:query` do AI SQL Builder.
+(POST/PATCH/DELETE). As abilities são **ortogonais** ao `ai:query` do AI SQL
+Builder. A F9 fechou o espelho do painel: o que a tela faz, a API faz.
 
 | Método | Caminho | Ability | Retorno |
 | --- | --- | --- | --- |
@@ -364,31 +365,66 @@ anônimo; o resto exige `badgeforge:read` (GET) ou `badgeforge:write`
 | GET | `/api/v1/badgeforge/styles` | anônimo | ids dos estilos |
 | GET | `/api/v1/badgeforge/logos` | `badgeforge:read` | logos do dono + `meta.limit`/`meta.used` |
 | POST | `/api/v1/badgeforge/logos` | `badgeforge:write` | **201** logo criado (`multipart/form-data`: `name`, `logo`) |
+| PATCH | `/api/v1/badgeforge/logos/{ulid}` | `badgeforge:write` | logo renomeado (só metadados) |
 | DELETE | `/api/v1/badgeforge/logos/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
 | GET | `/api/v1/badgeforge/badges` | `badgeforge:read` | badges pessoais do dono, paginado |
 | POST | `/api/v1/badgeforge/badges` | `badgeforge:write` | **201** badge pessoal com `url`/`pngUrl` |
+| PATCH | `/api/v1/badgeforge/badges/{ulid}` | `badgeforge:write` | badge renomeada |
+| PATCH | `/api/v1/badgeforge/badges/{ulid}/credential` | `badgeforge:write` | badge com `credentialSet`/`credentialUsername` |
+| POST | `/api/v1/badgeforge/badges/{ulid}/refresh` | `badgeforge:write` | `{url, pngUrl, generatedAt}` |
 | DELETE | `/api/v1/badgeforge/badges/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/endpoints` | `badgeforge:read` | endpoints JSON do dono, paginado |
+| POST | `/api/v1/badgeforge/endpoints` | `badgeforge:write` | **201** endpoint (**nome + URL de origem**) |
+| PATCH | `/api/v1/badgeforge/endpoints/{ulid}` | `badgeforge:write` | endpoint renomeado (URL imutável) |
+| DELETE | `/api/v1/badgeforge/endpoints/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/custom-providers` | `badgeforge:read` | providers customizados do dono, paginado |
+| POST | `/api/v1/badgeforge/custom-providers` | `badgeforge:write` + pago | **201** provider com `definitions` |
+| PATCH | `/api/v1/badgeforge/custom-providers/{ulid}` | `badgeforge:write` + pago | provider com `name`/`metrics` atualizados |
+| DELETE | `/api/v1/badgeforge/custom-providers/{ulid}` | `badgeforge:write` | permitido após downgrade |
+| GET | `/api/v1/badgeforge/analytics?window=7\|30\|90` | `badgeforge:read` | mesmo shape do painel, **sem** `exportUrl` |
 
 - **Catálogo**: `Cache-Control: public, max-age=<catalog_cache_seconds>` e
   `ETag` do corpo; `If-None-Match` responde **304**.
-- **Lista de badges**: `data` + `meta` (`current_page`, `per_page`, `total`,
+- **Listas**: `data` + `meta` (`current_page`, `per_page`, `total`,
   `last_page`) + `links` (`next`/`previous`); `per_page` padrão 20, máximo 100.
+  Não há `GET` por ID: o recurso vem na lista ou no corpo do POST/PATCH.
+- **PATCH espelha a tela**: recebe a representação completa dos campos
+  mutáveis (não é JSON Merge Patch). Badge, logo e endpoint aceitam só `name`;
+  custom provider aceita `name` + `metrics`, com `url_template` proibido (422)
+  e o conjunto de slugs fixo.
+- **Credencial**: write-only e cifrada, só em badge de provider que aceita item
+  privado e plano pago; a resposta nunca ecoa o valor. Não existe "remover":
+  revogar é excluir a badge. O refresh é síncrono e empilha `api-write`
+  (30/min por token) com `badgeforge-refresh` (10/min por conta).
+- **Endpoints**: Free cadastra, como na tela. A URL de origem é imutável e
+  nunca volta; a resposta leva `id`, `name`, `svgUrl`, `pngUrl` e `createdAt`.
+- **Custom providers**: criar/editar exige plano pago (**403** `forbidden` no
+  Free); excluir continua permitido após downgrade. Template, placeholders e
+  conjunto de métricas são imutáveis. A resposta leva `definitions` com
+  `slug`/`label`/`pointer`/`formatter` — nunca `url_template`.
+- **Analytics**: Free fica nos 30 dias (`free_window_days`), com totais e
+  contagem por imagem; pago escolhe `window=7|30|90` e ganha série, referrers,
+  países, formatos e cache. Janela inválida cai em 30, nunca 422. O CSV
+  continua só na web.
 - **Envelope**: sucesso `{"data": ...}`; erro `ApiError` com `code` estável
-  (`validation_error`, `forbidden`, `not_found`, `rate_limited`). Recurso de
-  outra conta responde **404** `not_found`.
+  (`validation_error`, `forbidden`, `not_found`, `rate_limited`,
+  `badge_unavailable`). Recurso de outra conta responde **404** `not_found`;
+  banco fora no analytics responde **503** `badge_unavailable` com
+  `Retry-After: 60` e `Cache-Control: no-store`.
 - **Regras herdadas**: plano pago e username obrigatório para badge pessoal,
   quota de logo por plano, PAT cifrado e só em item privado de provider que
-  aceita privado, SVG sanitizado no upload. A API delega às mesmas actions e
-  requests da tela, então essas regras não são reimplementadas.
+  aceita privado, SVG sanitizado no upload, SSRF e probe na criação de
+  endpoint/provider customizado. A API delega às mesmas actions e requests da
+  tela, então essas regras não são reimplementadas.
 - **O que não volta**: `viewBox`/paths do logo (só metadados), a credencial da
   badge (só `credentialSet`/`credentialUsername`) e, como sempre, a URL de
-  origem de endpoint/provider custom.
+  origem de endpoint/provider custom e o `exportUrl` do analytics.
 - **Throttle**: `api-read` 120/min e `api-write` 30/min, por token (IP no
   catálogo). O 429 sai no envelope `rate_limited` com `X-RateLimit-*` e
   `Retry-After`.
-- **Fora da F8**: PATCH, rotação de credencial, criação/edição de endpoint ou
-  provider customizado e API JSON de analytics (a superfície continua web +
-  CSV, ADR-086). A gestão web/Inertia segue descrita acima.
+- **Fora da F9**: presets (snapshot do builder, sem URL pública), `GET` por ID,
+  CSV de analytics pela API, superfície de admin e webhooks/bulk. A gestão
+  web/Inertia segue descrita acima.
 
 O contrato de máquina é [`openapi.yaml`](openapi.yaml) (OpenAPI 3.1.0,
-versão **1.8.0**), servido em `GET /openapi/badges.yaml`.
+versão **1.9.0**), servido em `GET /openapi/badges.yaml`.

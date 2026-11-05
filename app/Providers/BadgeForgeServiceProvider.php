@@ -61,9 +61,29 @@ final class BadgeForgeServiceProvider extends ServiceProvider
                 max(1, (int) config('badgeforge.providers.refresh_rate_limit', 10)),
             )
                 ->by('badgeforge-refresh:'.$account)
-                ->response(static fn (): JsonResponse => response()->json([
-                    'message' => __('tools.badgeforge.management.throttled'),
-                ], 429));
+                ->response(static function (Request $request, array $headers): JsonResponse {
+                    // Na API de gestao o 429 segue o envelope (F9, ADR-090);
+                    // a tela continua com o JSON `{message}` que o fetch le.
+                    if ($request->is('api/*')) {
+                        $throttleHeaders = [];
+
+                        foreach ($headers as $name => $value) {
+                            $throttleHeaders[(string) $name] = (string) $value;
+                        }
+
+                        return ApiError::response(
+                            'rate_limited',
+                            'Too many requests.',
+                            429,
+                            null,
+                            $throttleHeaders,
+                        );
+                    }
+
+                    return response()->json([
+                        'message' => __('tools.badgeforge.management.throttled'),
+                    ], 429);
+                });
         });
 
         // Cap por IP nas imagens que nao tem dono para limitar (F8, ADR-089):

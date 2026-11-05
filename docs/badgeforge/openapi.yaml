@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.8.0
+  version: 1.9.0
   summary: Imagens de badge (SVG/PNG) e API de gestão do BadgeForge.
   description: |
     Superfície de máquina do BadgeForge (SPEC-BADGEFORGE §16, ADR-071).
@@ -388,6 +388,48 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/logos/{badgeCustomLogo}:
+    patch:
+      tags: [gestao]
+      operationId: renameLogo
+      summary: Renomeia um logo personalizado
+      description: |
+        O nome é o único campo mutável; paths e `viewBox` continuam sendo o
+        desenho do logo (reenviar é a saída para trocar o conteúdo). Recebe a
+        representação mutável completa (`name`), não JSON Merge Patch. Nome
+        repetido na conta responde 422; com o mesmo nome do próprio logo é
+        aceito.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeCustomLogo'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NameInput'
+      responses:
+        '200':
+          description: Logo renomeado (apenas metadados).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeLogo'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
   /api/v1/badgeforge/logos/{logo}:
     delete:
       tags: [gestao]
@@ -507,6 +549,48 @@ paths:
         '429':
           $ref: '#/components/responses/RateLimited'
   /api/v1/badgeforge/badges/{badgeAsset}:
+    patch:
+      tags: [gestao]
+      operationId: updateBadge
+      summary: Renomeia uma badge pessoal
+      description: |
+        Recebe a representação completa dos campos mutáveis — não é JSON Merge
+        Patch. Hoje o único campo mutável é `name`; `type`, provider,
+        definição, params e `form` são imutáveis (excluir e criar de novo).
+        Renomear exige plano pago, como na tela; Free responde 422. Badge de
+        outra conta responde 404, nunca 403. A credencial não é editada aqui:
+        use `PATCH .../credential`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeAsset'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NameInput'
+      responses:
+        '200':
+          description: Badge renomeada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeAsset'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
     delete:
       tags: [gestao]
       operationId: deleteBadge
@@ -539,6 +623,422 @@ paths:
           $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/badges/{badgeAsset}/credential:
+    patch:
+      tags: [gestao]
+      operationId: updateBadgeCredential
+      summary: Troca a credencial de uma badge pessoal
+      description: |
+        Grava a credencial cifrada e apaga o SVG/PNG em cache para forçar nova
+        renderização. O valor é write-only: nunca é devolvido, nem ecoado em
+        erro. Só vale para badge de provider privado cuja definição aceita
+        credencial (`supportsPrivate`); origem Basic exige
+        `credential_username`. Exige plano pago. Não existe "remover
+        credencial": revogar é excluir a badge.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeAsset'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeCredentialInput'
+      responses:
+        '200':
+          description: Credencial trocada; o estado sai em `credentialSet`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeAsset'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/badges/{badgeAsset}/refresh:
+    post:
+      tags: [gestao]
+      operationId: refreshBadge
+      summary: Regenera a imagem de uma badge de provider
+      description: |
+        Regeneração síncrona, como o botão do painel. Só badge de provider e
+        plano pago; estática responde 422. A rota empilha o limite da API
+        (`api-write`, 30/min por token) e o do refresh (`badgeforge-refresh`,
+        10/min por conta): o mais restrito vence e o 429 sai no envelope
+        `rate_limited`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeAsset'
+      responses:
+        '200':
+          description: Imagem regenerada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeRefreshResult'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/endpoints:
+    get:
+      tags: [gestao]
+      operationId: listEndpoints
+      summary: Endpoints JSON do dono do token
+      description: |
+        Lista paginada, mais recente primeiro. A URL de origem nunca é
+        devolvida: o recurso público é identificado pelo ULID (`svgUrl`/
+        `pngUrl`). `per_page` vai de 1 a 100 (default 20).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: per_page
+          in: query
+          required: false
+          description: Itens por página, de 1 a 100.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Página de endpoints do dono.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta, links]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BadgeEndpoint'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags: [gestao]
+      operationId: createEndpoint
+      summary: Cadastra um endpoint JSON
+      description: |
+        O servidor valida a URL (HTTPS/443, sem userinfo/redirect, só IP
+        público) e busca uma amostra: URL insegura ou payload fora do contrato
+        responde 422. Origem fora do ar, timeout, 429 ou DNS que não resolve
+        **não** bloqueiam o cadastro — a imagem serve stale/fallback até a
+        origem voltar. Free pode cadastrar, como na tela. A URL de origem é
+        imutável e nunca é devolvida.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeEndpointInput'
+      responses:
+        '201':
+          description: Endpoint cadastrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeEndpoint'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/custom-providers:
+    get:
+      tags: [gestao]
+      operationId: listCustomProviders
+      summary: Providers customizados do dono do token
+      description: |
+        Lista paginada, mais recente primeiro. A leitura fica no Free (a
+        criação é paga). O `url_template` nunca é devolvido; `definitions`
+        traz `slug`, `label`, `pointer` (JSON Pointer RFC 6901) e `formatter`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: per_page
+          in: query
+          required: false
+          description: Itens por página, de 1 a 100.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Página de providers customizados do dono.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta, links]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BadgeCustomProvider'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags: [gestao]
+      operationId: createCustomProvider
+      summary: Cadastra um provider customizado
+      description: |
+        Exige plano pago (`badgeforge.paid` → 403 `forbidden`). O servidor
+        valida o template e os placeholders, os JSON Pointers e aponta o probe
+        para `example_path` na origem real: shape/URL insegura responde 422;
+        rede (timeout/DNS/5xx/429) é tolerada. O conjunto de métricas é fixo
+        na criação. `url_template` é write-only e nunca é devolvido.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeCustomProviderInput'
+      responses:
+        '201':
+          description: Provider cadastrado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeCustomProvider'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/custom-providers/{badgeCustomProvider}:
+    patch:
+      tags: [gestao]
+      operationId: updateCustomProvider
+      summary: Edita nome e métricas de um provider customizado
+      description: |
+        Exige plano pago (`badgeforge.paid` → 403). Recebe a representação
+        mutável completa (`name` + `metrics`), não JSON Merge Patch.
+        `url_template` é proibido (imutável), `path_params`/`example_path` não
+        são editáveis e o conjunto de slugs precisa ser exatamente o existente
+        (422 `metrics_fixed`). O probe roda de novo e `metrics_version` sobe.
+        Provider de outra conta responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeCustomProviderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeCustomProviderUpdateInput'
+      responses:
+        '200':
+          description: Provider atualizado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeCustomProvider'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      tags: [gestao]
+      operationId: deleteCustomProvider
+      summary: Exclui um provider customizado
+      description: |
+        Continua permitido depois de um downgrade (a lista sobrevive ao Free),
+        como na tela. Provider de outra conta responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeCustomProviderId'
+      responses:
+        '200':
+          description: Provider excluído.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedResource'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/endpoints/{badgeEndpoint}:
+    patch:
+      tags: [gestao]
+      operationId: updateEndpoint
+      summary: Renomeia um endpoint JSON
+      description: |
+        A URL de origem é imutável (trocar é excluir e cadastrar de novo).
+        Recebe a representação mutável completa (`name`), não JSON Merge
+        Patch. Endpoint de outra conta responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeEndpoint'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NameInput'
+      responses:
+        '200':
+          description: Endpoint renomeado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeEndpoint'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    delete:
+      tags: [gestao]
+      operationId: deleteEndpoint
+      summary: Exclui um endpoint JSON
+      description: |
+        Exclui a linha e a entrada de cache da origem. Endpoint de outra conta
+        responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/BadgeEndpoint'
+      responses:
+        '200':
+          description: Endpoint excluído.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedResource'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/analytics:
+    get:
+      tags: [gestao]
+      operationId: getAnalytics
+      summary: Analytics das imagens do dono do token
+      description: |
+        Espelha o painel do BadgeForge. Free vem com os últimos 30 dias
+        (`free_window_days`): totais e contagem por imagem, sem quebras. Pago
+        escolhe `window=7|30|90` e ganha série diária, referrers, países,
+        formatos e taxa de cache. Janela inválida cai em 30, nunca 422. O
+        `exportUrl` não acompanha a resposta: o CSV é uma rota web por sessão.
+        Só aparecem visualizações das imagens do dono do token.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AnalyticsWindow'
+      responses:
+        '200':
+          description: Analytics da conta.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OwnerAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/BadgeUnavailable'
 components:
   securitySchemes:
     bearerAuth:
@@ -546,8 +1046,9 @@ components:
       scheme: bearer
       description: |
         Personal Access Token do Sanctum com `badgeforge:read` (GET) ou
-        `badgeforge:write` (POST/DELETE), criado em `/settings/api-tokens`. O
-        token `ai:query` do AI SQL Builder não tem acesso a esta superfície.
+        `badgeforge:write` (POST/PATCH/DELETE), criado em
+        `/settings/api-tokens`. O token `ai:query` do AI SQL Builder não tem
+        acesso a esta superfície.
   parameters:
     Label:
       name: label
@@ -655,6 +1156,34 @@ components:
       schema:
         type: string
         pattern: '^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$'
+    BadgeCustomLogo:
+      name: badgeCustomLogo
+      in: path
+      required: true
+      description: ULID opaco do logo personalizado.
+      schema:
+        type: string
+        pattern: '^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$'
+    BadgeCustomProviderId:
+      name: badgeCustomProvider
+      in: path
+      required: true
+      description: ULID opaco do provider customizado.
+      schema:
+        type: string
+        pattern: '^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$'
+    AnalyticsWindow:
+      name: window
+      in: query
+      required: false
+      description: |
+        Janela em dias. Só vale para plano pago e só `7`, `30` ou `90`;
+        qualquer outro valor (ou ausente) cai em 30 em vez de 422. Free fica
+        sempre nos `free_window_days` (30).
+      schema:
+        type: integer
+        enum: [7, 30, 90]
+        default: 30
     Style:
       name: style
       in: query
@@ -914,6 +1443,27 @@ components:
                 error:
                   code: badge_unavailable
                   message: Badge rendering is temporarily unavailable.
+    BadgeUnavailable:
+      description: |
+        Banco ou infraestrutura de analytics indisponível (F9, ADR-090). Nada
+        é cacheado nem devolvido parcial: o cliente deve tentar de novo. A
+        resposta acompanha `Retry-After: 60` e `Cache-Control: no-store`.
+      headers:
+        Retry-After:
+          description: Segundos até tentar de novo.
+          schema:
+            type: string
+            examples: ['60']
+        Cache-Control:
+          $ref: '#/components/headers/CacheControl'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: badge_unavailable
+              message: Badge rendering is temporarily unavailable.
     Unauthenticated:
       description: Token ausente, inválido ou revogado.
       content:
@@ -1102,6 +1652,277 @@ components:
         credential_username:
           type: [string, 'null']
           description: Username exigido pela origem Basic (`auth_type` basic).
+    BadgeEndpoint:
+      type: object
+      required: [id, name, svgUrl, pngUrl]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        svgUrl:
+          type: string
+          description: URL pública da imagem SVG; identificada só pelo ULID.
+        pngUrl:
+          type: string
+        createdAt:
+          type: [string, 'null']
+          format: date-time
+    BadgeEndpointInput:
+      type: object
+      required: [name, url]
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          description: Único na conta.
+        url:
+          type: string
+          maxLength: 2048
+          format: uri
+          writeOnly: true
+          description: |
+            Origem JSON (HTTPS). Validada contra SSRF e amostrada no cadastro;
+            a URL canônica é imutável e nunca é devolvida.
+    BadgeCustomProviderDefinition:
+      type: object
+      required: [slug, label, pointer, formatter]
+      properties:
+        slug:
+          type: string
+          description: Slug da métrica; imutável depois da criação.
+        label:
+          type: string
+        pointer:
+          type: string
+          description: JSON Pointer RFC 6901 no payload da origem.
+        formatter:
+          type: string
+          enum: [text, number, percent]
+    BadgeCustomProvider:
+      type: object
+      required: [id, name, enabled, pathParams, examplePath, definitions]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        enabled:
+          type: boolean
+        pathParams:
+          type: array
+          items:
+            type: string
+          description: Nomes dos placeholders do template, na ordem.
+        examplePath:
+          type: string
+          description: Path usado no probe de criação.
+        definitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/BadgeCustomProviderDefinition'
+        createdAt:
+          type: [string, 'null']
+          format: date-time
+    BadgeCustomProviderInput:
+      type: object
+      required: [name, url_template, path_params, example_path, metrics]
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          description: Único na conta.
+        url_template:
+          type: string
+          maxLength: 2048
+          writeOnly: true
+          description: |
+            Template HTTPS da origem com placeholders dos `path_params`
+            (ex.: `https://api.example.com/repos/{owner}/{repo}`). Imutável
+            depois da criação e nunca devolvido.
+        path_params:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+            pattern: '^[A-Za-z][A-Za-z0-9_]{0,31}$'
+        example_path:
+          type: string
+          maxLength: 512
+          description: Path de exemplo usado no probe de criação.
+        metrics:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/BadgeCustomProviderDefinition'
+    BadgeCustomProviderUpdateInput:
+      type: object
+      required: [name, metrics]
+      description: |
+        Enviar `url_template` é recusado com 422 (`prohibited`): a origem é
+        imutável depois da criação.
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          description: Único na conta; o mesmo nome atual é aceito.
+        metrics:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/BadgeCustomProviderDefinition'
+          description: |
+            Conjunto exato de slugs existente; label, pointer e formatter
+            podem mudar.
+    NameInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          description: |
+            Nome final do recurso, único na conta. PATCH com o mesmo nome é
+            aceito; a representação mutável completa é enviada (não é JSON
+            Merge Patch).
+    BadgeCredentialInput:
+      type: object
+      required: [credential]
+      properties:
+        credential:
+          type: string
+          writeOnly: true
+          maxLength: 512
+          description: Token da origem; cifrado e nunca devolvido.
+        credential_username:
+          type: [string, 'null']
+          maxLength: 80
+          description: Username exigido pela origem Basic (`auth_type` basic).
+    BadgeRefreshResult:
+      type: object
+      required: [url, pngUrl]
+      properties:
+        url:
+          type: [string, 'null']
+          description: URL pública do SVG.
+        pngUrl:
+          type: [string, 'null']
+          description: URL pública do PNG.
+        generatedAt:
+          type: [string, 'null']
+          format: date-time
+    OwnerAnalytics:
+      type: object
+      required: [isPaid, window, windows, freeWindowDays, start, end, totals, subjects, days, referers, countries, formats, cache]
+      description: |
+        Mesmo shape do painel (`OwnerAnalytics`), sem `exportUrl`: o CSV é uma
+        rota web por sessão. Free recebe `windows: []`, `days`/`referers`/
+        `countries`/`formats` vazios e `cache: null`.
+      properties:
+        isPaid:
+          type: boolean
+        window:
+          type: integer
+          description: Janela efetiva em dias (Free ignora o pedido).
+        windows:
+          type: array
+          items:
+            type: integer
+          description: Janelas disponíveis no plano pago; vazio no Free.
+        freeWindowDays:
+          type: integer
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        totals:
+          type: object
+          required: [views, uniques]
+          properties:
+            views:
+              type: integer
+            uniques:
+              type: integer
+        subjects:
+          type: array
+          items:
+            type: object
+            required: [type, id, name, views, uniques]
+            properties:
+              type:
+                type: string
+                enum: [personal, endpoint, custom]
+              id:
+                type: string
+                description: ULID do sujeito; sujeito excluído continua na contagem com `name` vazio.
+              name:
+                type: string
+              views:
+                type: integer
+              uniques:
+                type: integer
+        days:
+          type: array
+          description: Série diária zerada; um ponto por dia da janela. Pago apenas.
+          items:
+            type: object
+            required: [date, views, uniques]
+            properties:
+              date:
+                type: string
+                format: date
+              views:
+                type: integer
+              uniques:
+                type: integer
+        referers:
+          type: array
+          description: Top referrers por domínio; pago apenas.
+          items:
+            type: object
+            required: [domain, views]
+            properties:
+              domain:
+                type: string
+              views:
+                type: integer
+        countries:
+          type: array
+          description: Top países; pago apenas e vazio sem GeoLite2.
+          items:
+            type: object
+            required: [country, views]
+            properties:
+              country:
+                type: string
+              views:
+                type: integer
+        formats:
+          type: array
+          description: Visualizações por formato; pago apenas.
+          items:
+            type: object
+            required: [format, views]
+            properties:
+              format:
+                type: string
+              views:
+                type: integer
+        cache:
+          type: [object, 'null']
+          description: Taxa de cache; pago apenas. Ignora acessos sem `cache_hit`.
+          properties:
+            hits:
+              type: integer
+            total:
+              type: integer
+            rate:
+              type: number
     DeletedResource:
       type: object
       required: [data]

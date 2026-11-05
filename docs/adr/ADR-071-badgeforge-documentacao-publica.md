@@ -27,8 +27,8 @@ A spec é servida em `GET /openapi/badges.yaml` (`application/yaml`,
 `Cache-Control: public, max-age=86400`), ao lado do `/openapi.yaml` existente.
 O `servers[0].url` usa o marcador `%APP_URL%`, resolvido pelo
 `OpenApiController` a partir de `config('app.url')` — o repositório não fixa
-domínio. A versão do contrato é `1.8.0` e a política é aditiva: remoção ou
-mudança de forma só em major.
+domínio. A versão do contrato era `1.8.0` (hoje **1.9.0**, desde a F9/ADR-090)
+e a política é aditiva: remoção ou mudança de forma só em major.
 
 `tests/Feature/BadgeForge/OpenApiContractTest.php` impede o drift: YAML
 parseável, `$ref` sem dangling, versão esperada e paridade bidirecional entre

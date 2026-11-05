@@ -129,3 +129,79 @@ it('recusa um token só de leitura na escrita', function () {
 
     expect(BadgeCustomLogo::query()->count())->toBe(0);
 });
+
+it('renomeia o próprio logo devolvendo só metadados', function () {
+    $user = User::factory()->create();
+    $logo = BadgeCustomLogo::factory()->for($user)->create(['name' => 'Antigo']);
+
+    $response = $this->withToken(writeApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.logos.update', ['badgeCustomLogo' => $logo->id]), [
+            'name' => 'Novo',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.id', (string) $logo->id)
+        ->assertJsonPath('data.name', 'Novo');
+
+    expect($logo->refresh()->name)->toBe('Novo')
+        ->and($response->json('data'))->toHaveKeys(['id', 'slug', 'name', 'viewBox', 'pathCount', 'sizeBytes', 'createdAt'])
+        ->and((string) $response->getContent())->not->toContain('"paths"')
+        ->and((string) $response->getContent())->not->toContain('M12 2L2 22h20z');
+});
+
+it('aceita o PATCH com o mesmo nome e recusa nome repetido na conta', function () {
+    $user = User::factory()->create();
+    $logo = BadgeCustomLogo::factory()->for($user)->create(['name' => 'Igual']);
+    BadgeCustomLogo::factory()->for($user)->create(['name' => 'Outro']);
+
+    $url = route('api.v1.badgeforge.logos.update', ['badgeCustomLogo' => $logo->id]);
+
+    $this->withToken(writeApiToken($user))
+        ->patchJson($url, ['name' => 'Igual'])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Igual');
+
+    $this->withToken(writeApiToken($user))
+        ->patchJson($url, ['name' => 'Outro'])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_error')
+        ->assertJsonCount(1, 'error.details.errors.name');
+
+    expect($logo->refresh()->name)->toBe('Igual');
+});
+
+it('valida o nome no PATCH do logo', function () {
+    $user = User::factory()->create();
+    $logo = BadgeCustomLogo::factory()->for($user)->create(['name' => 'Original']);
+
+    $this->withToken(writeApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.logos.update', ['badgeCustomLogo' => $logo->id]), [])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_error')
+        ->assertJsonCount(1, 'error.details.errors.name');
+
+    expect($logo->refresh()->name)->toBe('Original');
+});
+
+it('responde 404 no PATCH de logo de outra conta', function () {
+    $owner = User::factory()->create();
+    $intruder = User::factory()->create();
+    $logo = BadgeCustomLogo::factory()->for($owner)->create(['name' => 'Antigo']);
+
+    $this->withToken(writeApiToken($intruder))
+        ->patchJson(route('api.v1.badgeforge.logos.update', ['badgeCustomLogo' => $logo->id]), ['name' => 'X'])
+        ->assertStatus(404)
+        ->assertJsonPath('error.code', 'not_found');
+
+    expect($logo->refresh()->name)->toBe('Antigo');
+});
+
+it('recusa o PATCH de logo com token só de leitura', function () {
+    $owner = User::factory()->create();
+    $logo = BadgeCustomLogo::factory()->for($owner)->create(['name' => 'Antigo']);
+
+    $this->withToken(writeApiToken($owner, ['badgeforge:read']))
+        ->patchJson(route('api.v1.badgeforge.logos.update', ['badgeCustomLogo' => $logo->id]), ['name' => 'X'])
+        ->assertStatus(403);
+
+    expect($logo->refresh()->name)->toBe('Antigo');
+});

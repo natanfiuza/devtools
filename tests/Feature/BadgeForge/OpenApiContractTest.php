@@ -152,11 +152,11 @@ it('serve a especificação do BadgeForge com cache público e APP_URL resolvido
     expect($document['servers'][0]['url'])->toBe('https://badge.example.test');
 });
 
-it('documenta versão 3.1.0 e 1.8.0 com paths absolutos', function () {
+it('documenta versão 3.1.0 e 1.9.0 com paths absolutos', function () {
     $document = badgeforgespec();
 
     expect($document['openapi'])->toBe('3.1.0')
-        ->and($document['info']['version'])->toBe('1.8.0');
+        ->and($document['info']['version'])->toBe('1.9.0');
 
     foreach (array_keys(badgeforgedocumentedpaths($document)) as $path) {
         expect($path)->toStartWith('/');

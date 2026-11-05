@@ -4,7 +4,10 @@ use App\Models\BadgeAsset;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Support\BadgeForge\Personal\BadgeAssetStorage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 uses(RefreshDatabase::class);
@@ -156,4 +159,141 @@ it('recusa um token só de leitura na escrita de badges', function () {
         ->assertStatus(403);
 
     expect($user->badgeAssets()->count())->toBe(0);
+});
+
+it('renomeia badge estática e de provider pelo PATCH', function (string $state) {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->{$state}()->create(['name' => 'Antiga']);
+
+    $response = $this->withToken(badgeWriteApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), [
+            'name' => 'Nova',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.id', (string) $asset->id)
+        ->assertJsonPath('data.name', 'Nova')
+        ->assertJsonPath('data.type', $state === 'provider' ? 'provider' : 'static');
+
+    expect($asset->refresh()->name)->toBe('Nova')
+        // A representacao mutavel e so o nome: origem continua intacta.
+        ->and($asset->provider_slug)->toBe($state === 'provider' ? 'github' : null)
+        ->and($response->json('data'))->toHaveKeys(['id', 'name', 'type', 'url', 'pngUrl']);
+})->with(['static', 'provider']);
+
+it('aceita o PATCH com o mesmo nome (unique ignorando o próprio id)', function () {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->static()->create(['name' => 'Mesmo']);
+
+    $this->withToken(badgeWriteApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), [
+            'name' => 'Mesmo',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Mesmo');
+});
+
+it('valida o nome obrigatório no PATCH', function () {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->static()->create(['name' => 'Original']);
+
+    $this->withToken(badgeWriteApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), [])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_error')
+        ->assertJsonCount(1, 'error.details.errors.name');
+
+    expect($asset->refresh()->name)->toBe('Original');
+});
+
+it('recusa o PATCH para conta Free no envelope', function () {
+    $free = badgeWriteApiAccount('freebie', paid: false);
+    $asset = BadgeAsset::factory()->for($free)->static()->create(['name' => 'Original']);
+
+    $this->withToken(badgeWriteApiToken($free))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), [
+            'name' => 'Tentativa',
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_error')
+        ->assertJsonPath('error.details.errors.badge.0', __('validation.badge_asset.paid_only'));
+
+    expect($asset->refresh()->name)->toBe('Original');
+});
+
+it('rotaciona a credencial sem devolvê-la e apaga o cache do arquivo', function () {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->provider()->private()->create();
+
+    $storage = app(BadgeAssetStorage::class);
+    $relative = 'personal/octocat/'.$asset->id.'.svg';
+    $storage->write($relative, '<svg></svg>');
+
+    $asset->forceFill(['svg_path' => $relative])->save();
+    $before = $asset->credential_fingerprint;
+
+    $response = $this->withToken(badgeWriteApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.badges.credential', ['badgeAsset' => $asset->id]), [
+            'credential' => 'ghp_rotacionado_9a',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.id', (string) $asset->id)
+        ->assertJsonPath('data.credentialSet', true);
+
+    $asset->refresh();
+
+    expect($asset->svg_path)->toBeNull()
+        ->and($storage->read($relative))->toBeNull()
+        ->and($asset->credential_fingerprint)->not->toBe($before)
+        ->and(Crypt::decryptString((string) DB::table('badge_assets')->where('id', $asset->id)->value('credential')))
+        ->toBe('ghp_rotacionado_9a')
+        ->and((string) $response->getContent())->not->toContain('ghp_rotacionado_9a')
+        ->and((string) $response->getContent())->not->toContain('"credential"');
+});
+
+it('recusa credencial em badge estática', function () {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->static()->create();
+
+    $this->withToken(badgeWriteApiToken($user))
+        ->patchJson(route('api.v1.badgeforge.badges.credential', ['badgeAsset' => $asset->id]), [
+            'credential' => 'ghp_nao_serve',
+        ])
+        ->assertStatus(422)
+        ->assertJsonPath('error.code', 'validation_error')
+        ->assertJsonPath('error.details.errors.credential.0', __('validation.badge_asset.credential_not_allowed'));
+});
+
+it('responde 404 no PATCH/credencial de badge de outra conta', function () {
+    $owner = badgeWriteApiAccount('owner');
+    $intruder = badgeWriteApiAccount('intruder');
+
+    $asset = BadgeAsset::factory()->for($owner)->provider()->private()->create(['name' => 'Antiga']);
+
+    $this->withToken(badgeWriteApiToken($intruder))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), ['name' => 'X'])
+        ->assertStatus(404)
+        ->assertJsonPath('error.code', 'not_found');
+
+    $this->withToken(badgeWriteApiToken($intruder))
+        ->patchJson(route('api.v1.badgeforge.badges.credential', ['badgeAsset' => $asset->id]), ['credential' => 'x'])
+        ->assertStatus(404)
+        ->assertJsonPath('error.code', 'not_found');
+
+    expect($asset->refresh()->name)->toBe('Antiga')
+        ->and($asset->credential)->toBe('ghp_factory_token');
+});
+
+it('recusa um token só de leitura no PATCH e na credencial', function () {
+    $user = badgeWriteApiAccount();
+    $asset = BadgeAsset::factory()->for($user)->provider()->private()->create(['name' => 'Antiga']);
+
+    $this->withToken(badgeWriteApiToken($user, ['badgeforge:read']))
+        ->patchJson(route('api.v1.badgeforge.badges.update', ['badgeAsset' => $asset->id]), ['name' => 'X'])
+        ->assertStatus(403);
+
+    $this->withToken(badgeWriteApiToken($user, ['badgeforge:read']))
+        ->patchJson(route('api.v1.badgeforge.badges.credential', ['badgeAsset' => $asset->id]), ['credential' => 'x'])
+        ->assertStatus(403);
+
+    expect($asset->refresh()->name)->toBe('Antiga');
 });

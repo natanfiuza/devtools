@@ -121,3 +121,26 @@ com `X-RateLimit-*` e `Retry-After`.
   prefixo versionado do resto da API pública e do contrato OpenAPI 1.8.0.
 - **403 para recurso de outra conta**: revela que o id existe; 404 é a regra
   do resto do BadgeForge.
+
+## Emenda (F9, ADR-090)
+
+A F9 fechou o que esta ADR registrou como fora de escopo: PATCH de badge e
+logo, rotação de credencial, refresh, CRUD de endpoints e de providers
+customizados e a API JSON de analytics entraram em `/api/v1/badgeforge/*`, com
+as mesmas abilities e os mesmos limites (`badgeforge:read`/`badgeforge:write`,
+`api-read`/`api-write`, mais `badgeforge-refresh` no refresh). O contrato
+subiu para **1.9.0** de forma aditiva; nenhum path, campo ou código da 1.8.0
+mudou.
+
+Alterações pontuais:
+
+- O middleware `badgeforge.paid` passou a lançar `AccessDeniedHttpException`
+  (não `abort(403)`) para o envelope `forbidden` valer no Laravel 13.
+- O limiter `badgeforge-refresh` responde `rate_limited` quando o request é
+  `api/*` e mantém o toast da web.
+- `OwnerAnalytics` vai para a API sem `exportUrl`; o CSV continua só na web.
+- Presets e GET por ID continuam fora, agora por decisão da F9 e não por falta
+  de entrega.
+
+As regras de delegação, envelope, 404 de dono e "o que a resposta não leva"
+seguem valendo integralmente.
