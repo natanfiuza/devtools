@@ -114,6 +114,17 @@ return [
             'security_body' => 'The public image uses an opaque identifier instead of the source URL. The template stays on the server, is never returned to the browser and never appears in logs, page props or CSV exports. Requests only use HTTPS, public IPs, port 443, no redirects and no credentials.',
             'manage_cta' => 'Manage custom providers',
         ],
+        'api' => [
+            'title' => 'JSON management API',
+            'intro' => 'Paid accounts manage logos and personal badges with a token, without opening the dashboard. The provider and style catalogue is public and needs no credential.',
+            'base_url_label' => 'Base URL',
+            'abilities_title' => 'Token scopes',
+            'abilities_read' => 'badgeforge:read — list your logos and badges.',
+            'abilities_write' => 'badgeforge:write — create and delete logos and badges.',
+            'token_body' => 'Create the token in your account settings and tick the scopes. The value is shown only once; the API authenticates with Bearer and has its own rate limit.',
+            'tokens_cta' => 'Create a token',
+            'spec_cta' => 'Open the OpenAPI specification',
+        ],
         'cache' => [
             'title' => 'Cache, ETag and stale responses',
             'body' => 'Provider responses are cached for {ttl} seconds. The image is served with ETag and Cache-Control, so a second request is answered with 304 when nothing changed.',

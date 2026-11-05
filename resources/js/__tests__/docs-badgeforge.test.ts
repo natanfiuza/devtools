@@ -128,6 +128,17 @@ const TRADUCOES = {
                 security_body: 'CORPO_SEGURANCA_CUSTOM',
                 manage_cta: 'GERENCIAR_CUSTOM',
             },
+            api: {
+                title: 'SECAO_API',
+                intro: 'INTRO_API',
+                base_url_label: 'URL_BASE_API',
+                abilities_title: 'ESCOPOS_TOKEN',
+                abilities_read: 'ESCOPO_LEITURA',
+                abilities_write: 'ESCOPO_ESCRITA',
+                token_body: 'CORPO_TOKEN',
+                tokens_cta: 'CRIAR_TOKEN',
+                spec_cta: 'ABRIR_SPEC',
+            },
             cache: {
                 title: 'SECAO_CACHE',
                 body: 'CACHE_DE_{ttl}_SEGUNDOS',
@@ -174,6 +185,9 @@ const PADRAO = {
     endpointCacheTtl: 300,
     endpointRateLimits: { anonymous: 60, free: 300, paid: 3000 },
     origin: 'https://devtools.example',
+    jsonApiBaseUrl: '/api/v1/badgeforge',
+    openApiUrl: 'https://devtools.example/openapi/badges.yaml',
+    tokensSettingsUrl: '/pt-br/settings/api-tokens',
 };
 
 function mountDocs(
@@ -309,6 +323,26 @@ describe('BadgeForge Docs', () => {
                 'href',
             ),
         ).toBe('/pt-br/dashboard/badgeforge');
+    });
+
+    it('documenta a API JSON com base, escopos e links da spec e dos tokens', () => {
+        const wrapper = mountDocs();
+
+        const section = wrapper.find('[data-test="badgeforge-docs-api"]');
+
+        expect(section.text()).toContain('INTRO_API');
+        expect(section.text()).toContain('ESCOPO_LEITURA');
+        expect(section.text()).toContain('ESCOPO_ESCRITA');
+        expect(section.text()).toContain('CORPO_TOKEN');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-api-base-url"]').text(),
+        ).toBe('https://devtools.example/api/v1/badgeforge');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-api-tokens"]').attributes('href'),
+        ).toBe('/pt-br/settings/api-tokens');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-api-spec"]').attributes('href'),
+        ).toBe('https://devtools.example/openapi/badges.yaml');
     });
 
     it('interpola o TTL de cache da configuracao', () => {

@@ -7,8 +7,11 @@ GET /api/badges/static/{label}/{message}.{svg|png}
 ```
 
 A imagem é gerada e servida pelo próprio devtools, sem sessão e sem
-autenticação. A rota fica no grupo `api`, fora do prefixo `v1`, e não tem
-throttle próprio.
+autenticação. A rota fica no grupo `api`, fora do prefixo `v1`. Desde a F8
+(ADR-089) ela compartilha o cap por IP `badgeforge-images` com a rota de
+provider e `/b/` (`badgeforge.serving.rate_limit.per_minute`, default
+6000/min); acima do cap a resposta é 429 `rate_limited` com
+`X-RateLimit-*` e `Retry-After`.
 
 ### Caminho
 
@@ -88,8 +91,13 @@ o ULID é a referência opaca, sem nome de usuário ou caminho de conta.
 - `304`: `If-None-Match` igual ao ETag; sem corpo e sem `Content-Type`.
 - `404`: segmento vazio, extensão ausente ou diferente de `svg`/`png` (envelope
   `ApiError`).
+- `429`: cap por IP de imagens excedido; envelope `rate_limited` com
+  `X-RateLimit-*` e `Retry-After`.
 - `503`: PNG pedido em servidor sem a extensão `imagick`; envelope
   `ApiError` com código `image_unavailable`.
+- Todo SVG sai com `Content-Security-Policy: default-src 'none'; style-src
+  'unsafe-inline'` (F8, ADR-089), inclusive quando o documento é aberto direto
+  no navegador.
 - O documento SVG tem `role="img"`, `aria-label="label: message"` e `<title>`
   com o mesmo texto. Nada é registrado em log além de IDs e classes de
   exceção; o conteúdo do badge nunca entra no log da aplicação.
@@ -148,6 +156,10 @@ nunca de um parâmetro de versão. Qualquer outro literal responde 404
 - Provider, definição ou path inválido/desconhecido responde **404** com o
   envelope `ApiError`. A rota estática continua vencendo: `/api/badges/static/...`
   nunca cai aqui.
+- Throttle (F8, ADR-089): a rota usa o cap compartilhado por IP
+  `badgeforge-images` (default 6000/min), como a estática. `QueryException`
+  nesta rota é **404** (provider/definição não resolvidos), não 503.
+  O SVG sai com a CSP fechada de imagem.
 
 ## Endpoint JSON (F5 — entregue)
 
@@ -215,6 +227,13 @@ insegura ou payload fora do contrato vira **422**
 Por **dono**, não por leitor: Free 300/min, pago 3000/min, e ULID
 inválido/desconhecido cai no anônimo 60/min por IP. O 429 sai no envelope
 `rate_limited` com `X-RateLimit-*` e `Retry-After`.
+
+### Erros de infraestrutura (F8, ADR-089)
+
+- ULID inválido/desconhecido/removido → **404** `not_found`.
+- Banco fora (`QueryException`) → **503** `badge_unavailable`, com
+  `Retry-After: 60` e `Cache-Control: no-store`. A falha da **origem** do
+  endpoint continua STALE/fallback 200; o 503 é só da nossa infraestrutura.
 
 ## Provider customizado (F7 — entregue)
 
@@ -325,19 +344,51 @@ privado nunca aparece nela. A imagem é stateless (sem sessão/CSRF), devolve
 (`badgeforge.personal_badges.max_cache_seconds`). `?refresh=1` é ignorado:
 o dono força uma nova geração por `POST /badgeforge/badges/{ulid}/refresh`.
 
-## Metadados e gestão (API pública — fase futura)
+Desde a F8 (ADR-089) a rota divide o cap por IP `badgeforge-images` (que é o
+throttle da imagem; não há limiter por dono aqui), e os erros saem no envelope
+`ApiError`: recurso inexistente, ULID inválido ou dono errado → **404**
+`not_found`; banco fora → **503** `badge_unavailable` com `Retry-After: 60` e
+`Cache-Control: no-store`. A página Inertia de erro 404 nunca responde no
+caminho `b/*`.
 
-A gestão de logos, presets, badges, endpoints e providers customizados é
-web/Inertia autenticada (seção acima), não esta API. Analytics na F7 é
-superfície web + CSV (ADR-086): não há API JSON de analytics. Os caminhos
-abaixo seguem planejados para a F8 (OpenAPI completo e hardening):
+## API de gestão (F8 — entregue, ADR-088)
 
-```text
-GET /api/badgeforge/providers
-GET /api/badgeforge/styles
-GET /api/badgeforge/logos
-POST /api/badgeforge/logos
-DELETE /api/badgeforge/logos/{id}
-POST /api/badgeforge/badges
-GET /api/badgeforge/badges
-```
+Programática, em `/api/v1/badgeforge`, com token Sanctum emitido em
+`/settings/api-tokens` (`Authorization: Bearer <token>`). O catálogo é
+anônimo; o resto exige `badgeforge:read` (GET) ou `badgeforge:write`
+(POST/DELETE). As abilities são **ortogonais** ao `ai:query` do AI SQL Builder.
+
+| Método | Caminho | Ability | Retorno |
+| --- | --- | --- | --- |
+| GET | `/api/v1/badgeforge/providers` | anônimo | catálogo público (mesmo shape dos docs) |
+| GET | `/api/v1/badgeforge/styles` | anônimo | ids dos estilos |
+| GET | `/api/v1/badgeforge/logos` | `badgeforge:read` | logos do dono + `meta.limit`/`meta.used` |
+| POST | `/api/v1/badgeforge/logos` | `badgeforge:write` | **201** logo criado (`multipart/form-data`: `name`, `logo`) |
+| DELETE | `/api/v1/badgeforge/logos/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/badges` | `badgeforge:read` | badges pessoais do dono, paginado |
+| POST | `/api/v1/badgeforge/badges` | `badgeforge:write` | **201** badge pessoal com `url`/`pngUrl` |
+| DELETE | `/api/v1/badgeforge/badges/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+
+- **Catálogo**: `Cache-Control: public, max-age=<catalog_cache_seconds>` e
+  `ETag` do corpo; `If-None-Match` responde **304**.
+- **Lista de badges**: `data` + `meta` (`current_page`, `per_page`, `total`,
+  `last_page`) + `links` (`next`/`previous`); `per_page` padrão 20, máximo 100.
+- **Envelope**: sucesso `{"data": ...}`; erro `ApiError` com `code` estável
+  (`validation_error`, `forbidden`, `not_found`, `rate_limited`). Recurso de
+  outra conta responde **404** `not_found`.
+- **Regras herdadas**: plano pago e username obrigatório para badge pessoal,
+  quota de logo por plano, PAT cifrado e só em item privado de provider que
+  aceita privado, SVG sanitizado no upload. A API delega às mesmas actions e
+  requests da tela, então essas regras não são reimplementadas.
+- **O que não volta**: `viewBox`/paths do logo (só metadados), a credencial da
+  badge (só `credentialSet`/`credentialUsername`) e, como sempre, a URL de
+  origem de endpoint/provider custom.
+- **Throttle**: `api-read` 120/min e `api-write` 30/min, por token (IP no
+  catálogo). O 429 sai no envelope `rate_limited` com `X-RateLimit-*` e
+  `Retry-After`.
+- **Fora da F8**: PATCH, rotação de credencial, criação/edição de endpoint ou
+  provider customizado e API JSON de analytics (a superfície continua web +
+  CSV, ADR-086). A gestão web/Inertia segue descrita acima.
+
+O contrato de máquina é [`openapi.yaml`](openapi.yaml) (OpenAPI 3.1.0,
+versão **1.8.0**), servido em `GET /openapi/badges.yaml`.

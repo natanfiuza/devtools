@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HealthController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureBadgeForgeHasPaidPlan;
 use App\Http\Middleware\EnsureHistoryHasPaidPlan;
@@ -15,6 +16,7 @@ use App\Models\TaskSchedule;
 use App\Support\ApiError;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -35,8 +37,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function (): void {
+            // `/up` com dependencias reais (F8, ADR-089). A rota do framework
+            // e substituida por ter o mesmo metodo+URI; a string `health`
+            // acima continua garantindo a excecao no modo manutencao.
+            Route::get('up', HealthController::class)->name('health');
+
             // Imagens publicas fora de `web` e de `api` (F4, ADR-081): sem
-            // sessao, CSRF ou throttle. Os headers globais continuam valendo.
+            // sessao nem CSRF; o throttle por IP das imagens e a unica
+            // middleware da rota. Os headers globais continuam valendo.
             Route::group([], base_path('routes/public.php'));
         },
     )
@@ -107,21 +115,35 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         // Envelope unico da API: o `code` e o contrato que a tela traduz e que
-        // o cliente da API v1 trata. Vale para `api/ai/*` (sessao, F5) e para
-        // `api/v1/*` (token, F7).
+        // o cliente da API v1 trata. Vale para `api/ai/*` (sessao, F5), para
+        // `api/v1/*` (token, F7) e para `b/*` (imagem pessoal, F8/ADR-089).
         $exceptions->render(function (Throwable $exception, Request $request) {
-            if (! $request->is('api/*')) {
+            if (! $request->is('api/*') && ! $request->is('b/*')) {
                 return null;
             }
 
             return ApiError::from($exception);
         });
 
+        // Falha de infraestrutura na imagem (F8, ADR-089): banco fora vira 503
+        // com `Retry-After`, nunca 404 (que o CDN guardaria como "nao existe")
+        // nem 500. O escopo e so a superficie de imagem; `api/v1` mantem o
+        // comportamento das consultas.
+        $exceptions->render(function (QueryException $exception, Request $request) {
+            if (! $request->is('api/badges/*') && ! $request->is('b/*')) {
+                return null;
+            }
+
+            return ApiError::badgeUnavailable();
+        });
+
         // 404 do site ganha a pagina propria (F7). So troca HTML de navegacao:
-        // API e qualquer requisicao que espera JSON seguem o caminho normal.
+        // API, imagem publica e qualquer requisicao que espera JSON seguem o
+        // caminho normal.
         $exceptions->respond(function (SymfonyResponse $response, Throwable $exception, Request $request) {
             if ($response->getStatusCode() !== 404
                 || $request->is('api/*')
+                || $request->is('b/*')
                 || $request->expectsJson()) {
                 return $response;
             }

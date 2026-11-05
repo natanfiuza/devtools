@@ -90,6 +90,13 @@ return [
             'name' => 'Nome do token',
             'name_placeholder' => 'Ex.: integracao-deploy',
             'submit' => 'Criar token',
+            'abilities_title' => 'Permissões do token',
+            'abilities_help' => 'Escolha o que este token pode fazer. Permissões são independentes: um token de consulta não cria badges.',
+            'abilities' => [
+                'ai_query' => 'AI SQL Builder: enviar consultas e ler resultados.',
+                'badgeforge_read' => 'BadgeForge: listar seus logos e badges pessoais.',
+                'badgeforge_write' => 'BadgeForge: criar e excluir logos e badges pessoais.',
+            ],
         ],
         'once' => [
             'title' => 'Token criado',

@@ -35,6 +35,13 @@ class ApiServiceProvider extends ServiceProvider
             return Limit::perMinute(max(1, (int) config('api.rate_limits.read_per_minute', 120)))
                 ->by('api-read:'.$this->key($request));
         });
+
+        // Escrita da API de gestao do BadgeForge (F8, ADR-088): teto curto
+        // porque cada POST/DELETE altera estado do dono.
+        RateLimiter::for('api-write', function (Request $request): Limit {
+            return Limit::perMinute(max(1, (int) config('api.rate_limits.write_per_minute', 30)))
+                ->by('api-write:'.$this->key($request));
+        });
     }
 
     private function key(Request $request): string

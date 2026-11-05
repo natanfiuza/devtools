@@ -5,11 +5,11 @@ namespace App\Http\Controllers\BadgeForge;
 use App\Enums\BadgeViewSubject;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeAsset;
+use App\Support\ApiError;
 use App\Support\BadgeForge\Analytics\BadgeViewRecorder;
 use App\Support\BadgeForge\BadgeImageResponder;
 use App\Support\BadgeForge\Personal\PersonalBadgeRenderer;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -18,8 +18,9 @@ use Illuminate\Http\Response;
  * Imagem publica de uma badge pessoal (F4, ADR-081).
  *
  * Stateless: sem sessao, sem CSRF, sem auth e sem `?refresh=1`. Resolve o
- * ULID junto do username exato do dono. Um 404 aqui e um corpo vazio direto,
- * nunca a pagina Inertia de erro: a URL e consumida por `<img>` e por READMEs.
+ * ULID junto do username exato do dono. Recurso inexistente responde 404 no
+ * envelope `ApiError` e falha de banco sobe para o handler global, que a
+ * converte em 503 (F8, ADR-089) - nunca a pagina Inertia de erro.
  */
 final class PersonalBadgeController extends Controller
 {
@@ -31,19 +32,14 @@ final class PersonalBadgeController extends Controller
         BadgeImageResponder $responder,
         BadgeViewRecorder $recorder,
     ): Response|JsonResponse {
-        try {
-            $asset = BadgeAsset::query()
-                ->with('user')
-                ->whereKey($badgeAsset)
-                ->whereHas('user', static fn (Builder $query): Builder => $query->where('username', $username))
-                ->first();
-        } catch (QueryException) {
-            // Migracao ainda nao rodou ou banco fora: imagem responde 404.
-            return response('', 404);
-        }
+        $asset = BadgeAsset::query()
+            ->with('user')
+            ->whereKey($badgeAsset)
+            ->whereHas('user', static fn (Builder $query): Builder => $query->where('username', $username))
+            ->first();
 
         if ($asset === null) {
-            return response('', 404);
+            return ApiError::response('not_found', 'Resource not found.', 404);
         }
 
         $badge = $renderer->render($asset);

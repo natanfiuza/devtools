@@ -16,8 +16,9 @@ uses(RefreshDatabase::class);
 | Imagem publica das badges pessoais (F4, ADR-081).
 |
 | Stateless: sem sessao, sem CSRF, sem `?refresh=1`. A URL leva username + ULID
-| e qualquer falha responde 404 direto ou 200 com stale/fallback - nunca a
-| pagina Inertia de erro e nunca um 500.
+| e o erro sai no envelope `ApiError`: recurso inexistente e 404 `not_found`,
+| falha de banco e 503 `badge_unavailable` (F8, ADR-089). Provider fora vira
+| stale/fallback 200 - nunca a pagina Inertia de erro e nunca um 500.
 */
 
 const PERSONAL_SERVING_DIR = 'framework/testing/badgeforge-personal-serving';
@@ -59,11 +60,11 @@ function personalServingUrl(BadgeAsset $asset, string $username = 'natanfiuza', 
     ]);
 }
 
-it('nao passa pelos middlewares da sessao', function () {
+it('nao passa pelos middlewares da sessao, apenas pelo cap de imagens', function () {
     $route = Route::getRoutes()->getByName('badges.personal');
 
     expect($route)->not->toBeNull()
-        ->and($route->gatherMiddleware())->toBe([]);
+        ->and($route->gatherMiddleware())->toBe(['throttle:badgeforge-images']);
 });
 
 it('serve a metrica do provider e grava o arquivo', function () {
@@ -264,30 +265,41 @@ it('degrada para anonimo quando a credencial nao pode ser lida', function () {
     Http::assertSent(fn ($request): bool => ! $request->hasHeader('Authorization'));
 });
 
-it('responde 404 direto para dono errado, inexistente ou banco fora', function () {
+it('responde 404 de recurso no envelope para dono errado, inexistente ou ULID invalido', function () {
     $alice = personalServingAccount('alice');
     $asset = BadgeAsset::factory()->for($alice)->static()->create();
 
-    $wrongOwner = $this->get(personalServingUrl($asset, 'bob'));
-    $wrongOwner->assertNotFound();
-    expect((string) $wrongOwner->getContent())->toBe('');
+    $this->get(personalServingUrl($asset, 'bob'))
+        ->assertNotFound()
+        ->assertHeader('Content-Type', 'application/json')
+        ->assertJsonPath('error.code', 'not_found');
 
     $asset->delete();
 
-    $deleted = $this->get(personalServingUrl($asset, 'alice'));
-    $deleted->assertNotFound();
-    expect((string) $deleted->getContent())->toBe('');
+    $this->get(personalServingUrl($asset, 'alice'))
+        ->assertNotFound()
+        ->assertJsonPath('error.code', 'not_found');
 
-    $other = BadgeAsset::factory()->for($alice)->static()->create();
+    $this->get('/b/alice/not-a-ulid.svg')
+        ->assertNotFound()
+        ->assertJsonPath('error.code', 'not_found');
+});
 
-    $this->get('/b/alice/not-a-ulid.svg')->assertNotFound();
+it('responde 503 de infraestrutura quando o banco esta fora', function () {
+    $alice = personalServingAccount('alice');
+    $asset = BadgeAsset::factory()->for($alice)->static()->create();
 
     Schema::rename('badge_assets', 'badge_assets_gone');
 
     try {
-        $down = $this->get(personalServingUrl($other, 'alice'));
-        $down->assertNotFound();
-        expect((string) $down->getContent())->toBe('');
+        $response = $this->get(personalServingUrl($asset, 'alice'))
+            ->assertStatus(503)
+            ->assertHeader('Retry-After', '60')
+            ->assertJsonPath('error.code', 'badge_unavailable');
+
+        // O Symfony acrescenta `private` ao normalizar; o `no-store` e o que
+        // impede CDN e `<img>` de guardarem o erro.
+        expect((string) $response->headers->get('Cache-Control'))->toContain('no-store');
     } finally {
         Schema::rename('badge_assets_gone', 'badge_assets');
     }

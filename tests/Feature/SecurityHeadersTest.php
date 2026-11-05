@@ -51,6 +51,16 @@ it('emite a CSP em enforce com as diretivas que o site usa', function () {
         ->toContain("object-src 'none'");
 });
 
+it('aplica CSP fechada nas imagens SVG, sem a politica da aplicacao', function () {
+    $response = $this->get('/api/badges/static/build/passing.svg')->assertOk();
+
+    expect((string) $response->headers->get('Content-Type'))->toContain('image/svg+xml')
+        ->and($response->headers->get('Content-Security-Policy'))
+        ->toBe("default-src 'none'; style-src 'unsafe-inline'")
+        // O SVG nao carrega script: nenhuma origem externa liberada.
+        ->and($response->headers->get('Content-Security-Policy'))->not->toContain('googletagmanager');
+});
+
 it('usa o mesmo nonce no header e no script inline do tema', function () {
     $response = $this->get('/pt-br')->assertOk();
 

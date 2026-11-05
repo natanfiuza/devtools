@@ -11,9 +11,9 @@ uses(RefreshDatabase::class);
 |
 | A pagina e publica e indexavel: ela carrega o mesmo catalogo de providers
 | que alimenta o builder (nada de credencial nem asset de conta), as quatro
-| rotas de imagem, os TTLs de cache e os limites do endpoint JSON. O contrato
-| do catalogo e o mesmo da fixture exata da tool, entao o teste compara com
-| ela.
+| rotas de imagem, os TTLs de cache, os limites do endpoint JSON e os
+| ponteiros da API JSON (F8, ADR-088). O contrato do catalogo e o mesmo da
+| fixture exata da tool, entao o teste compara com ela.
 */
 
 function badgeforgeDocsFixture(): array
@@ -45,6 +45,9 @@ it('entrega o catalogo de providers e os endpoints nos cinco idiomas', function 
                 'paid' => (int) config('badgeforge.endpoint.rate_limit.paid'),
             ])
             ->where('origin', rtrim(url('/'), '/'))
+            ->where('jsonApiBaseUrl', '/api/v1/badgeforge')
+            ->where('openApiUrl', route('openapi.badges'))
+            ->where('tokensSettingsUrl', route('api-tokens.index'))
             ->missing('personalBadges')
             ->missing('credential')
         );
@@ -90,5 +93,8 @@ it('acompanha a configuracao de endpoints e de cache', function () {
                 'free' => 22,
                 'paid' => 33,
             ])
+            ->where('jsonApiBaseUrl', '/api/v1/badgeforge')
+            ->where('openApiUrl', route('openapi.badges'))
+            ->where('tokensSettingsUrl', route('api-tokens.index'))
         );
 });

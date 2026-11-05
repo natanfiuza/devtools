@@ -13,6 +13,9 @@ use Inertia\Response;
  * rotas de imagem, o TTL de cache e os limites do endpoint JSON - o suficiente
  * para montar, copiar e entender um badge sem sair da pagina. Nenhuma
  * credencial, nenhum asset de conta e nenhuma URL de origem.
+ *
+ * A secao da API JSON (F8, ADR-088) aponta para a base da gestao, para a tela
+ * de tokens e para a especificacao OpenAPI servida em `/openapi/badges.yaml`.
  */
 final class BadgeForgeDocsController extends Controller
 {
@@ -33,6 +36,9 @@ final class BadgeForgeDocsController extends Controller
                 'paid' => (int) config('badgeforge.endpoint.rate_limit.paid', 3000),
             ],
             'origin' => rtrim(url('/'), '/'),
+            'jsonApiBaseUrl' => '/api/v1/badgeforge',
+            'openApiUrl' => route('openapi.badges'),
+            'tokensSettingsUrl' => route('api-tokens.index'),
         ]);
     }
 }
