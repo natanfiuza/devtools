@@ -22,7 +22,7 @@ Leia SEMPRE: docs/SPEC.md, docs/glossario.md, docs/adr/*, docs/design/DESIGN.md.
 - Especificação: docs/SPEC-BADGEFORGE.md
 - ADRs: docs/adr/ADR-062-badgeforge a ADR-090-badgeforge
 - API: docs/badgeforge/API.md (OpenAPI 3.1.0, contrato 1.9.0 em docs/badgeforge/openapi.yaml, servido em `/openapi/badges.yaml`; semântica em `OPENAPI.md`); documentação pública: `/{locale}/docs/badgeforge`
-- Fase atual: F9 — API de gestão completa (entregue)
+- Fase atual: **nenhuma — track encerrado na F9** (API de gestão completa, entregue em 2026-11-05). Não há F10; o backlog deferido está registrado na ADR-090 e no aceite/relatório da F9.
 - Regras: SVG é o formato canônico; PNG (F2) via Imagick com cache em disco; fontes empacotadas via `?font=` (ADR-077); providers em `/api/badges/{provider}/{definition}/{path}` (ADR-080).
 - Logos personalizados e presets (F3, ADR-078 e ADR-079): SVG multi-path sanitizado persistido só como `viewBox` + paths normalizados; referência pública `u_<ULID>`; limites em `config/badgeforge.php` (Free: 2 logos; pago: ilimitado; presets: ilimitados); gestão web autenticada em `/dashboard/badgeforge` e `/badgeforge/*`; paths buscados sob demanda (nunca nas props); gerar/prever/snippet continua 100% no navegador.
 - Acesso a providers (F4, ADR-068/ADR-080): item público é lido anonimamente na API pública (sem token global em `.env`); PAT é do usuário pagador e só para item privado, cifrado, vinculado ao badge pessoal, e a URL leva apenas o ULID. Cache de provider por URL resolvida, payload projetado (sem descrição/README), condicional, stale-if-error e fallback 200 — nunca 500. `parser_class` é inerte; `client_key`/`extractor_key` resolvem clientes e métricas em código.
