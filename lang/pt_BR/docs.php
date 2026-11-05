@@ -114,6 +114,17 @@ return [
             'security_body' => 'A imagem pública usa um identificador opaco no lugar da URL de origem. O template fica no servidor, nunca volta ao navegador e nunca aparece em log, props de página ou exportação CSV. As requisições só usam HTTPS, IP público, porta 443, sem redirect e sem credenciais.',
             'manage_cta' => 'Gerenciar providers customizados',
         ],
+        'api' => [
+            'title' => 'API JSON de gestão',
+            'intro' => 'Contas pagas gerenciam logos e badges pessoais por token, sem abrir o painel. O catálogo de providers e estilos é público e não exige credencial.',
+            'base_url_label' => 'URL base',
+            'abilities_title' => 'Escopos do token',
+            'abilities_read' => 'badgeforge:read — listar seus logos e badges.',
+            'abilities_write' => 'badgeforge:write — criar e excluir logos e badges.',
+            'token_body' => 'Crie o token nos ajustes da conta e marque os escopos. O valor aparece uma única vez; a API autentica com Bearer e tem limite de requisições próprio.',
+            'tokens_cta' => 'Criar um token',
+            'spec_cta' => 'Abrir a especificação OpenAPI',
+        ],
         'cache' => [
             'title' => 'Cache, ETag e respostas antigas',
             'body' => 'As respostas de provider ficam em cache por {ttl} segundos. A imagem sai com ETag e Cache-Control, então uma segunda requisição recebe 304 quando nada mudou.',

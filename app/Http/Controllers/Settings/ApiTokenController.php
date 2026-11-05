@@ -23,9 +23,28 @@ use Laravel\Sanctum\PersonalAccessToken;
 final class ApiTokenController extends Controller
 {
     /**
-     * Unica ability concedida hoje; a API inteira exige `ai:query`.
+     * Ability do AI SQL Builder; a API `/api/v1/*` inteira a exige. E o
+     * default de um token novo.
      */
     public const ABILITY = 'ai:query';
+
+    /**
+     * Abilities da API de gestao do BadgeForge (F8, ADR-088). Sao ortogonais
+     * ao `ai:query`: cada superficie exige a sua e um token de um nao herda o
+     * acesso do outro.
+     */
+    public const ABILITY_BADGEFORGE_READ = 'badgeforge:read';
+
+    public const ABILITY_BADGEFORGE_WRITE = 'badgeforge:write';
+
+    /**
+     * @var list<string>
+     */
+    public const ABILITIES = [
+        self::ABILITY,
+        self::ABILITY_BADGEFORGE_READ,
+        self::ABILITY_BADGEFORGE_WRITE,
+    ];
 
     public function index(Request $request): Response
     {
@@ -59,6 +78,7 @@ final class ApiTokenController extends Controller
 
         return Inertia::render('settings/ApiTokens', [
             'tokens' => $tokens,
+            'abilities' => self::ABILITIES,
             'stats' => [
                 'totalRequests' => (int) $user->api_requests_count,
                 'totalSqlQueries' => (int) $user->api_sql_queries_count,
@@ -75,9 +95,19 @@ final class ApiTokenController extends Controller
     {
         $user = $this->user($request);
 
+        // Sem escolha explicita o token continua sendo o do AI SQL Builder,
+        // como antes da F8; a lista e filtrada pela allowlist da classe.
+        $abilities = [];
+
+        foreach ((array) $request->validated('abilities', [self::ABILITY]) as $ability) {
+            if (is_string($ability) && in_array($ability, self::ABILITIES, true)) {
+                $abilities[] = $ability;
+            }
+        }
+
         $token = $user->createToken(
             (string) $request->validated('name'),
-            [self::ABILITY],
+            $abilities === [] ? [self::ABILITY] : $abilities,
         );
 
         // Flash: visivel na tela uma unica vez, e nao no historico do navegador

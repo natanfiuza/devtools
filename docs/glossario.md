@@ -168,5 +168,11 @@
 - GeoIP opcional: resolucao do pais da visualizacao por um arquivo GeoLite2 local (`maxmind-db/reader`, caminho em `analytics.geoip_path`); sem arquivo, corrompido ou em IP privado o pais fica nulo e a gravacao segue (ADR-086).
 - Referer domain: host em minusculas extraido do cabecalho `Referer`, sem caminho nem query, nulo quando ausente ou invalido (ADR-086).
 - Hash de privacidade: HMAC-SHA256 com `APP_KEY` sobre o IP e sobre o User-Agent; o UA cru fica truncado e nenhum dos dois aparece em CSV, props ou log (ADR-086).
+- API de gestao do BadgeForge: superficie JSON em `/api/v1/badgeforge/*` para catalogo publico e para os logos e badges pessoais do dono; delega as regras de plano, quota e credencial as mesmas actions da tela e nunca devolve paths de logo nem a credencial (F8, ADR-088).
+- Ability do BadgeForge: escopo gravado no token que separa a API de gestao do `ai:query` - `badgeforge:read` lista logos e badges, `badgeforge:write` cria e exclui; nenhuma das duas e herdada pelo token do AI SQL Builder (F8, ADR-088).
+- Cap de imagens: limite por IP das rotas de imagem anonimas (static, provider e badge pessoal), generoso e configuravel (`badgeforge.serving.rate_limit.per_minute`, default 6000/min), independente do limite por dono do endpoint JSON e do provider customizado; o 429 sai em `rate_limited` com `Retry-After` (F8, ADR-089).
+- CSP de imagem: politica fechada (`default-src 'none'; style-src 'unsafe-inline'`) aplicada a toda resposta `image/svg+xml`, independentemente do `CSP_MODE` do site, para um SVG aberto direto no navegador nao executar script (F8, ADR-089).
+- `badge_unavailable`: codigo do envelope `ApiError` para falha de infraestrutura na superficie de imagem (banco fora): 503 com `Retry-After: 60` e `Cache-Control: no-store`, distinto de `not_found` (recurso inexistente) e de `image_unavailable` (PNG sem Imagick) (F8, ADR-089).
+- Health check com dependencias: `/up` que checa banco, cache e disco do PNG e responde 200 `up` ou 503 `down` com o mapa das sondas, sem carregar a excecao original (F8, ADR-089).
 
 

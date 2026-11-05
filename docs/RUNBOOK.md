@@ -654,6 +654,69 @@ publica de documentacao em `/{locale}/api-docs` (ADR-057). Os contadores de
 requisicoes HTTP e de consultas SQL por token e por conta ficam visiveis em
 `/settings/api-tokens` e em `/admin/users/{user}`.
 
+### BadgeForge: imagens, API de gestão e `/up` (F8)
+
+**Cap de imagens.** Static, provider e `/b/` dividem um limite por IP
+(`badgeforge.serving.rate_limit.per_minute`,
+`BADGEFORGE_SERVING_LIMIT_PER_MINUTE`, default 6000/min). O objetivo e impedir
+varredura direta na origem, nao limitar leitor: GitHub Camo e proxies
+compartilhados concentram muitos leitores no mesmo IP. Acima do cap a imagem
+responde 429 `rate_limited` com `Retry-After`; o limite por dono do endpoint
+JSON e do provider customizado continua separado (Free 300/min, pago
+3000/min). Se aparecer 429 em massa, confira se o trafego vem do CDN antes de
+subir o numero.
+
+```bash
+curl -sI https://devtools.natanfiuza.dev.br/api/badges/static/build/passing.svg \
+  | grep -iE 'cache-control|etag|content-security-policy|x-ratelimit'
+```
+
+**SVG e CSP.** Todo `image/svg+xml` sai com
+`Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`,
+independente de `CSP_MODE`; a politica do site nao se aplica a imagem.
+
+**404 x 503.** Recurso inexistente, ULID invalido ou dono errado e 404
+`not_found` (cacheavel pelo CDN). Banco ou infraestrutura fora em
+`api/badges/*` e `b/*` e 503 `badge_unavailable` com `Retry-After: 60` e
+`Cache-Control: no-store` — o CDN nao guarda o erro no lugar da imagem. Falha
+da origem do endpoint/provider custom continua STALE/fallback 200; nao e 503.
+PNG sem `imagick` continua 503 `image_unavailable`.
+
+**Export de analytics sob 429.** O `badgeforge-management` responde 429 JSON
+(com `Retry-After`) no GET de export CSV e mantem o toast Inertia em
+POST/PATCH/DELETE. Se o CSV vier 429, espere o `Retry-After`; nao ha limite
+proprio para download.
+
+**API de gestão (`/api/v1/badgeforge`).** O token precisa de
+`badgeforge:read` (GET logos/badges) ou `badgeforge:write` (POST/DELETE); o
+`ai:query` do AI SQL Builder nao vale aqui. Crie o token em
+`/settings/api-tokens` (o valor aparece uma vez). O catalogo
+`/providers` e `/styles` e anonimo e cacheavel (ETag/304). Diagnostico:
+
+```bash
+curl -s https://devtools.natanfiuza.dev.br/api/v1/badgeforge/providers | head -c 200
+curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/api/v1/badgeforge/badges
+curl -s https://devtools.natanfiuza.dev.br/openapi/badges.yaml | head -5
+```
+
+| Resposta | Causa |
+| -------- | ----- |
+| 401 | token ausente, invalido ou revogado |
+| 403 | conta nao verificada/suspensa ou token sem `badgeforge:*` |
+| 404 | logo/badge de outra conta ou id inexistente |
+| 422 | plano/username/credencial/SVG invalido (mesma regra da tela) |
+| 429 | `api-read`/`api-write`; respeite o `Retry-After` |
+
+**`/up` com dependencias.** Sai 200 `{"status":"up","checks":{...}}` so quando
+banco (`select 1`), cache (ida e volta) e disco do PNG (escrita/leitura)
+respondem. Qualquer falha vira 503 `down` com o mapa das sondas e
+`Cache-Control: no-store`; o corpo nunca traz a excecao. Use nos monitores e
+antes de tirar uma instancia da rotacao.
+
+```bash
+curl -s https://devtools.natanfiuza.dev.br/up
+```
+
 ## 9. Logs e diagnostico
 
 ```bash
@@ -698,6 +761,9 @@ Problemas que ja sabemos diagnosticar:
 | Pais sempre vazio no analytics | Sem `GeoLite2-Country.mmdb` no caminho configurado, arquivo ilegivel pelo `www-data` ou IP privado: todos os casos sao `null` por desenho (ADR-086), nao erro |
 | Badge de provider customizado responde **404** | ULID desconhecido, provider desabilitado no admin, definicao que nao existe, path com numero de segmentos diferente de `path_params` ou extensao fora de `svg/png`. O 404 e o comportamento correto nesses casos |
 | Badge de provider customizado mostra `unavailable` | A origem falhou e nao havia valor bom em cache: a imagem e fallback 200 com `X-Badge-Cache: MISS`. Confira a origem e o `metrics_version`; nunca vira 500 |
+| Imagem responde **503** `badge_unavailable` | Nossa infraestrutura caiu (banco fora em `api/badges/*` ou `b/*`): consulte `/up`, veja qual sonda esta `false` e o log da aplicacao. O `Retry-After: 60` e o `no-store` sao esperados; nao e a origem do provider |
+| Imagem responde **429** em massa | Cap por IP de imagens atingido: confira se o trafego vem de GitHub Camo/proxy compartilhado antes de ajustar `BADGEFORGE_SERVING_LIMIT_PER_MINUTE` (secao 8) |
+| `/up` responde **503** com `checks.storage=false` | Diretorio de cache do PNG sem escrita para o `www-data`: `chown -R www-data:www-data storage` e confira `badgeforge.png.cache_path`. `checks.cache=false` aponta driver de cache; `database=false`, a conexao |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\BadgeCustomProvider;
 use App\Models\BadgeEndpoint;
 use App\Models\User;
+use App\Support\ApiError;
 use App\Support\BadgeForge\Analytics\CountryReader;
 use App\Support\BadgeForge\Analytics\MaxMindCountryReader;
 use App\Support\BadgeForge\Endpoint\DnsHostResolver;
@@ -63,6 +64,19 @@ final class BadgeForgeServiceProvider extends ServiceProvider
                 ->response(static fn (): JsonResponse => response()->json([
                     'message' => __('tools.badgeforge.management.throttled'),
                 ], 429));
+        });
+
+        // Cap por IP nas imagens que nao tem dono para limitar (F8, ADR-089):
+        // estatica, provider do catalogo e badge pessoal. Generoso por
+        // default e configuravel; e o teto contra varredura, nao o limite de
+        // uso normal. Endpoint e custom seguem com o limite por dono deles.
+        RateLimiter::for('badgeforge-images', function (Request $request): Limit {
+            $decaySeconds = max(1, (int) config('badgeforge.serving.rate_limit.decay_seconds', 60));
+
+            return Limit::perMinutes(
+                max(1, (int) ceil($decaySeconds / 60)),
+                max(1, (int) config('badgeforge.serving.rate_limit.per_minute', 6_000)),
+            )->by('badgeforge-images:'.$request->ip());
         });
 
         // A imagem de endpoint e anonima: o limite e por dono, derivado do
@@ -151,7 +165,27 @@ final class BadgeForgeServiceProvider extends ServiceProvider
                 max(1, (int) config('badgeforge.management.rate_limit', 20)),
             )
                 ->by('badgeforge-management:'.$account)
-                ->response(function (): RedirectResponse {
+                ->response(function (Request $request, array $headers): RedirectResponse|JsonResponse {
+                    // A exportacao de analytics e um GET fora do Inertia: um
+                    // redirect com toast viraria HTML no download. A recusa
+                    // sai no envelope, com os headers do throttle (F8,
+                    // ADR-089); as acoes de dialogo continuam com o toast.
+                    if ($request->isMethod('GET')) {
+                        $throttleHeaders = [];
+
+                        foreach ($headers as $name => $value) {
+                            $throttleHeaders[(string) $name] = (string) $value;
+                        }
+
+                        return ApiError::response(
+                            'rate_limited',
+                            'Too many requests.',
+                            429,
+                            null,
+                            $throttleHeaders,
+                        );
+                    }
+
                     Inertia::flash('toast', [
                         'type' => 'warning',
                         'message' => __('tools.badgeforge.management.throttled'),

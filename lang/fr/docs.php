@@ -115,6 +115,17 @@ return [
             'security_body' => 'L’image publique utilise un identifiant opaque à la place de l’URL source. Le modèle reste sur le serveur, n’est jamais renvoyé au navigateur et n’apparaît jamais dans les logs, les props de page ou les exports CSV. Les requêtes utilisent uniquement HTTPS, des IP publiques, le port 443, sans redirection et sans identifiants.',
             'manage_cta' => 'Gérer les fournisseurs personnalisés',
         ],
+        'api' => [
+            'title' => 'API JSON de gestion',
+            'intro' => 'Les comptes payants gèrent leurs logos et badges personnels avec un jeton, sans ouvrir le tableau de bord. Le catalogue de providers et de styles est public et ne demande aucun identifiant.',
+            'base_url_label' => 'URL de base',
+            'abilities_title' => 'Portées du jeton',
+            'abilities_read' => 'badgeforge:read — lister vos logos et badges.',
+            'abilities_write' => 'badgeforge:write — créer et supprimer logos et badges.',
+            'token_body' => 'Créez le jeton dans les paramètres du compte et cochez les portées. La valeur n’est affichée qu’une fois ; l’API s’authentifie en Bearer et dispose de sa propre limite de requêtes.',
+            'tokens_cta' => 'Créer un jeton',
+            'spec_cta' => 'Ouvrir la spécification OpenAPI',
+        ],
         'cache' => [
             'title' => 'Cache, ETag et réponses périmées',
             'body' => 'Les réponses des providers sont mises en cache pendant {ttl} secondes. L\'image est servie avec ETag et Cache-Control, donc une seconde requête reçoit un 304 quand rien n\'a changé.',

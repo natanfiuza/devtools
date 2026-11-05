@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Controllers\Settings\ApiTokenController;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -38,6 +39,8 @@ class StoreApiTokenRequest extends FormRequest
                     ->where('tokenable_id', $tokenableId)
                     ->where('tokenable_type', $tokenableType),
             ],
+            'abilities' => ['sometimes', 'array', 'min:1'],
+            'abilities.*' => ['string', Rule::in(ApiTokenController::ABILITIES)],
         ];
     }
 }

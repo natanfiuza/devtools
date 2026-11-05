@@ -95,6 +95,9 @@ Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
 Route::get('openapi.yaml', OpenApiController::class)->name('openapi');
 
+// Spec do BadgeForge (F8, ADR-071): cacheavel por um dia, como as imagens.
+Route::get('openapi/badges.yaml', [OpenApiController::class, 'badges'])->name('openapi.badges');
+
 // API do AI SQL Builder (ADR-042). Fica fora do prefixo de idioma porque o
 // cliente manda `Accept: application/json` e o idioma nao muda o recurso. Usa
 // a sessao e o CSRF do grupo `web`; nao ha token de API nesta fase.
@@ -238,10 +241,11 @@ require __DIR__.'/webhooks.php';
 
 // Ultimo recurso para um caminho que nao casou com rota nenhuma. Passa pelo
 // grupo web (idioma, props compartilhadas), entao a 404 sai inteira e no idioma
-// do prefixo da URL (ResolveLocale le o primeiro segmento). A API nunca cai
-// aqui: o abort vira o envelope JSON pelo handler.
+// do prefixo da URL (ResolveLocale le o primeiro segmento). API e imagem
+// publica nunca caem aqui: o abort vira o envelope JSON pelo handler (F8,
+// ADR-089) - por isso a checagem de `b/*` tambem precisa existir.
 Route::fallback(function (Request $request) {
-    abort_if($request->is('api/*'), 404);
+    abort_if($request->is('api/*') || $request->is('b/*'), 404);
 
     return Inertia::render('Error', ['status' => 404])
         ->toResponse($request)

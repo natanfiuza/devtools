@@ -7,6 +7,7 @@ import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogClose,
@@ -36,7 +37,17 @@ const props = defineProps<ApiTokensProps>();
 const { t } = useI18n();
 const routes = useRoutes();
 
-const form = useForm({ name: '' });
+/**
+ * Ability -> chave i18n. O valor tecnico (`ai:query`) e o contrato do
+ * servidor; a descricao visivel vem sempre do tradutor.
+ */
+const ABILITY_KEYS: Record<string, string> = {
+    'ai:query': 'ai_query',
+    'badgeforge:read': 'badgeforge_read',
+    'badgeforge:write': 'badgeforge_write',
+};
+
+const form = useForm({ name: '', abilities: ['ai:query'] as string[] });
 const copied = ref(false);
 const tokenToRevoke = ref<ApiToken | null>(null);
 const isRevoking = ref(false);
@@ -56,6 +67,30 @@ function createToken(): void {
             form.reset();
         },
     });
+}
+
+function abilityLabel(ability: string): string {
+    const key = ABILITY_KEYS[ability];
+
+    return key === undefined
+        ? ability
+        : t(`settings.api_tokens.create.abilities.${key}`);
+}
+
+function toggleAbility(
+    ability: string,
+    checked: boolean | 'indeterminate',
+): void {
+    const selected = new Set(form.abilities);
+
+    if (checked === true) {
+        selected.add(ability);
+    } else {
+        selected.delete(ability);
+    }
+
+    // Mantem a ordem do servidor, e nao a ordem do clique.
+    form.abilities = props.abilities.filter((value) => selected.has(value));
 }
 
 function revokeToken(): void {
@@ -260,33 +295,72 @@ function handlePeriodChange(payload: {
     <!-- Criacao -->
     <form
       data-test="api-token-form"
-      class="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
+      class="space-y-4 rounded-lg border border-border p-4"
       @submit.prevent="createToken"
     >
-      <div class="grid min-w-64 flex-1 gap-2">
-        <Label for="api-token-name">
-          {{ t('settings.api_tokens.create.name') }}
-        </Label>
-        <Input
-          id="api-token-name"
-          v-model="form.name"
-          data-test="api-token-name"
-          :placeholder="
-            t('settings.api_tokens.create.name_placeholder')
-          "
-          maxlength="80"
-          autocomplete="off"
-        />
-        <InputError :message="form.errors.name" />
+      <div class="flex flex-wrap items-end gap-3">
+        <div class="grid min-w-64 flex-1 gap-2">
+          <Label for="api-token-name">
+            {{ t('settings.api_tokens.create.name') }}
+          </Label>
+          <Input
+            id="api-token-name"
+            v-model="form.name"
+            data-test="api-token-name"
+            :placeholder="
+              t('settings.api_tokens.create.name_placeholder')
+            "
+            maxlength="80"
+            autocomplete="off"
+          />
+          <InputError :message="form.errors.name" />
+        </div>
+
+        <Button
+          type="submit"
+          data-test="api-token-criar"
+          :disabled="form.processing"
+        >
+          {{ t('settings.api_tokens.create.submit') }}
+        </Button>
       </div>
 
-      <Button
-        type="submit"
-        data-test="api-token-criar"
-        :disabled="form.processing"
+      <fieldset
+        data-test="api-token-abilities"
+        class="grid gap-2"
       >
-        {{ t('settings.api_tokens.create.submit') }}
-      </Button>
+        <legend class="text-sm font-medium">
+          {{ t('settings.api_tokens.create.abilities_title') }}
+        </legend>
+        <p class="text-xs text-subtle">
+          {{ t('settings.api_tokens.create.abilities_help') }}
+        </p>
+
+        <div
+          v-for="ability in props.abilities"
+          :key="ability"
+          class="flex items-start gap-2"
+        >
+          <Checkbox
+            :id="`api-ability-${ability}`"
+            :model-value="form.abilities.includes(ability)"
+            :data-test="`api-token-ability-${ability}`"
+            class="mt-0.5"
+            @update:model-value="
+              (checked) => toggleAbility(ability, checked)
+            "
+          />
+          <Label
+            :for="`api-ability-${ability}`"
+            class="text-sm leading-snug font-normal"
+          >
+            <span class="font-mono text-xs">{{ ability }}</span>
+            — {{ abilityLabel(ability) }}
+          </Label>
+        </div>
+
+        <InputError :message="form.errors.abilities" />
+      </fieldset>
     </form>
 
     <!-- Lista -->

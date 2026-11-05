@@ -1,0 +1,1155 @@
+openapi: 3.1.0
+info:
+  title: BadgeForge API
+  version: 1.8.0
+  summary: Imagens de badge (SVG/PNG) e API de gestão do BadgeForge.
+  description: |
+    Superfície de máquina do BadgeForge (SPEC-BADGEFORGE §16, ADR-071).
+
+    As rotas de imagem são stateless e anônimas: nenhuma delas aceita sessão,
+    CSRF ou credencial, e a resposta é sempre uma imagem (ou o envelope de
+    erro). A URL pública leva apenas identificadores opacos (ULID) — a URL de
+    origem de um endpoint ou de um provider customizado nunca sai do servidor.
+
+    O SVG é o formato canônico; o PNG é rasterizado pelo Imagick e cacheado em
+    disco pelo sha256 do SVG. Sem a extensão Imagick, o pedido de PNG responde
+    503 `image_unavailable`.
+
+    A API de gestão (`/api/v1/badgeforge/*`) usa Bearer token do Sanctum com as
+    abilities `badgeforge:read` e `badgeforge:write`, criadas em
+    `/settings/api-tokens`.
+
+    Política de compatibilidade: mudanças são aditivas dentro da mesma minor;
+    remoção ou mudança de forma só em major. O `info.version` descreve o
+    contrato, não o arquivo.
+  contact:
+    name: devtools
+    url: https://devtools.natanfiuza.dev.br
+servers:
+  - url: "%APP_URL%"
+    description: Servidor da instância (resolvido de `APP_URL` ao servir a spec).
+tags:
+  - name: estatica
+    description: Badge com label e mensagem literais.
+  - name: endpoint
+    description: Badge alimentada por um endpoint JSON cadastrado.
+  - name: custom
+    description: Badge de um provider declarativo criado pelo dono.
+  - name: provider
+    description: Badge de um provider do catálogo público.
+  - name: pessoal
+    description: Imagem de uma badge pessoal.
+  - name: gestao
+    description: API JSON de gestão do dono (Bearer token com `badgeforge:*`).
+paths:
+  /api/badges/static/{label}/{message}.{ext}:
+    get:
+      tags: [estatica]
+      operationId: getStaticBadge
+      summary: Badge estática renderizada sob demanda
+      description: |
+        Gera o SVG ou o PNG a partir de `label` e `message`. Em ambos os
+        segmentos, `_` vira espaço, `__` vira `_` e `-` é literal; caracteres
+        de controle viram espaço e o texto acima do limite é truncado com
+        reticências. A resposta é cacheável por um dia por padrão e o ETag é o
+        sha256 do corpo.
+      parameters:
+        - $ref: '#/components/parameters/Label'
+        - $ref: '#/components/parameters/Message'
+        - $ref: '#/components/parameters/Ext'
+        - $ref: '#/components/parameters/Style'
+        - $ref: '#/components/parameters/Color'
+        - $ref: '#/components/parameters/LabelColor'
+        - $ref: '#/components/parameters/Logo'
+        - $ref: '#/components/parameters/LogoColor'
+        - $ref: '#/components/parameters/LogoSize'
+        - $ref: '#/components/parameters/LogoPosition'
+        - $ref: '#/components/parameters/Link'
+        - $ref: '#/components/parameters/Font'
+        - $ref: '#/components/parameters/CacheSeconds'
+        - $ref: '#/components/parameters/Download'
+      responses:
+        '200':
+          $ref: '#/components/responses/BadgeImage'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ImageUnavailable'
+  /api/badges/endpoint/{badgeEndpoint}.{ext}:
+    get:
+      tags: [endpoint]
+      operationId: getEndpointBadge
+      summary: Badge de um endpoint JSON cadastrado
+      description: |
+        Resolve o ULID do endpoint e busca a origem no servidor (ADR-083). A
+        origem precisa devolver shields v1 (`schemaVersion: 1`, `label` e
+        `message` não vazios, `color` e `labelColor` opcionais como defaults).
+        A resposta fica em cache por `endpoint.cache_ttl` (300 s); `?refresh=1`
+        e `?cacheSeconds=` são ignorados.
+
+        Falha, timeout ou rate limit da origem servem a última resposta boa
+        (STALE); sem ela, a resposta é um fallback 200 — nunca 500. O fetch é
+        pinado no IP público previamente validado (SSRF, ADR-084) e o throttle
+        é por dono do endpoint.
+      parameters:
+        - $ref: '#/components/parameters/BadgeEndpoint'
+        - $ref: '#/components/parameters/Ext'
+        - $ref: '#/components/parameters/Style'
+        - $ref: '#/components/parameters/LabelOverride'
+        - $ref: '#/components/parameters/ColorOverride'
+        - $ref: '#/components/parameters/LabelColorOverride'
+        - $ref: '#/components/parameters/Logo'
+        - $ref: '#/components/parameters/LogoColor'
+        - $ref: '#/components/parameters/LogoSize'
+        - $ref: '#/components/parameters/LogoPosition'
+        - $ref: '#/components/parameters/Link'
+        - $ref: '#/components/parameters/Font'
+        - $ref: '#/components/parameters/Download'
+      responses:
+        '200':
+          $ref: '#/components/responses/DynamicBadgeImage'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnsafeUrl'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ImageUnavailable'
+  /api/badges/custom/{customProvider}/{definition}/{path}.{ext}:
+    get:
+      tags: [custom]
+      operationId: getCustomProviderBadge
+      summary: Badge de um provider declarativo
+      description: |
+        Provider criado pelo dono com `url_template`, `path_params` e métricas
+        via JSON Pointer RFC 6901 (ADR-087). Não há código, credencial ou
+        header configurável do usuário. O `url_template` nunca aparece na URL
+        pública, em props, CSV, log ou auditoria.
+
+        A resposta fica em cache por `custom_providers.cache_ttl` (300 s), com
+        stale de 86400 s e fallback de 60 s; `?cacheSeconds=` e `?refresh=1`
+        são ignorados. Diferente do endpoint da F5, **qualquer** falha no
+        serving (guard, DNS, fetch, JSON, pointer) vira STALE ou fallback 200 —
+        nunca 422 ou 500. O fetch é pinado no IP público validado (ADR-084) e o
+        throttle é por dono do provider.
+      parameters:
+        - $ref: '#/components/parameters/CustomProvider'
+        - $ref: '#/components/parameters/CustomDefinition'
+        - $ref: '#/components/parameters/CustomPath'
+        - $ref: '#/components/parameters/Ext'
+        - $ref: '#/components/parameters/Style'
+        - $ref: '#/components/parameters/LabelOverride'
+        - $ref: '#/components/parameters/ColorOverride'
+        - $ref: '#/components/parameters/LabelColorOverride'
+        - $ref: '#/components/parameters/Logo'
+        - $ref: '#/components/parameters/LogoColor'
+        - $ref: '#/components/parameters/LogoSize'
+        - $ref: '#/components/parameters/LogoPosition'
+        - $ref: '#/components/parameters/Link'
+        - $ref: '#/components/parameters/Font'
+        - $ref: '#/components/parameters/Download'
+      responses:
+        '200':
+          $ref: '#/components/responses/DynamicBadgeImage'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ImageUnavailable'
+  /api/badges/{provider}/{definition}/{path}:
+    get:
+      tags: [provider]
+      operationId: getProviderBadge
+      summary: Badge de um provider do catálogo
+      description: |
+        Lê a API pública do provider de forma anônima e responde sempre com uma
+        imagem (ADR-080). A resposta do provider fica em cache por
+        `providers.cache_ttl` (300 s); falha ou rate limit servem a última
+        resposta boa (STALE) e, sem ela, um fallback 200 — nunca 500.
+
+        O último segmento carrega a extensão (`.../stars/symfony.svg`), por
+        isso o path não tem `{ext}` separado: um valor que não termine em
+        `.svg` ou `.png` responde 404. Item privado não é servido por esta
+        rota: use uma badge pessoal (ADR-081).
+
+        Provider ou definição desconhecida/desabilitada, path fora do pattern
+        da definição ou URL insegura respondem 404.
+      parameters:
+        - $ref: '#/components/parameters/Provider'
+        - $ref: '#/components/parameters/Definition'
+        - $ref: '#/components/parameters/ProviderPath'
+        - $ref: '#/components/parameters/Style'
+        - $ref: '#/components/parameters/Color'
+        - $ref: '#/components/parameters/LabelColor'
+        - $ref: '#/components/parameters/Logo'
+        - $ref: '#/components/parameters/LogoColor'
+        - $ref: '#/components/parameters/LogoSize'
+        - $ref: '#/components/parameters/LogoPosition'
+        - $ref: '#/components/parameters/Link'
+        - $ref: '#/components/parameters/Font'
+        - $ref: '#/components/parameters/Download'
+      responses:
+        '200':
+          $ref: '#/components/responses/DynamicBadgeImage'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ImageUnavailable'
+  /b/{username}/{badgeAsset}.{ext}:
+    get:
+      tags: [pessoal]
+      operationId: getPersonalBadge
+      summary: Imagem pública de uma badge pessoal
+      description: |
+        Imagem stateless de uma badge pessoal (ADR-081). O username e o ULID
+        juntos identificam o recurso; a URL não carrega credencial nenhuma.
+        A imagem é regenerada quando `expires_at` vence e `?refresh=1` é
+        ignorado — o dono força uma nova geração pela gestão
+        (`POST /badgeforge/badges/{ulid}/refresh`).
+
+        Cada acesso com 200 ou 304 grava uma linha de analytics (ADR-086), de
+        forma síncrona e best-effort: falha do analytics nunca quebra a imagem.
+      parameters:
+        - $ref: '#/components/parameters/Username'
+        - $ref: '#/components/parameters/BadgeAsset'
+        - $ref: '#/components/parameters/Ext'
+        - $ref: '#/components/parameters/Download'
+      responses:
+        '200':
+          $ref: '#/components/responses/PersonalBadgeImage'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ImageUnavailable'
+  /api/v1/badgeforge/providers:
+    get:
+      tags: [gestao]
+      operationId: listProviders
+      summary: Catálogo público de providers e definições
+      description: |
+        Não exige token: o builder do cliente precisa do catálogo antes de
+        citar qualquer credencial. Só entram providers e definições habilitados
+        pelo admin. A resposta é cacheável e tem ETag do próprio corpo; envie
+        `If-None-Match` para receber 304.
+      responses:
+        '200':
+          description: Providers habilitados, cada um com as definições habilitadas.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControl'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Provider'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/styles:
+    get:
+      tags: [gestao]
+      operationId: listStyles
+      summary: Estilos disponíveis
+      description: |
+        Ids dos estilos do catálogo, na ordem de exibição. Um id fora da lista
+        cai em `flat` nas rotas de imagem. Cacheável com ETag, como o catálogo
+        de providers.
+      responses:
+        '200':
+          description: Lista de ids de estilo.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/CacheControl'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    examples: [['flat', 'flat-square', 'plastic']]
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/logos:
+    get:
+      tags: [gestao]
+      operationId: listLogos
+      summary: Logos personalizados do dono do token
+      description: |
+        Apenas metadados: `viewBox`, paths e o SVG cru nunca saem por esta API —
+        nem para o dono. O `slug` (`u_<ULID>`) é o valor aceito em `?logo=` nas
+        rotas de imagem. `meta.limit` é `null` quando o plano não tem teto.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logos do dono, com uso e teto do plano.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BadgeLogo'
+                  meta:
+                    type: object
+                    required: [limit, used]
+                    properties:
+                      limit:
+                        type: [integer, 'null']
+                        description: Teto de logos do plano; `null` = ilimitado.
+                      used:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags: [gestao]
+      operationId: createLogo
+      summary: Envia um logo personalizado
+      description: |
+        `multipart/form-data` com `name` e o arquivo `logo`. O SVG passa pelo
+        sanitizador antes de qualquer gravação: só `viewBox`, paths
+        normalizados e o tamanho do upload entram no banco, e o arquivo cru é
+        descartado. O teto de logos do plano (`meta.limit` da listagem) vale
+        aqui e responde 422 quando atingido.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, logo]
+              properties:
+                name:
+                  type: string
+                  maxLength: 80
+                logo:
+                  type: string
+                  format: binary
+                  description: SVG único, sem script, com `<path>` e `viewBox`.
+      responses:
+        '201':
+          description: Logo criado (apenas metadados).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeLogo'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/logos/{logo}:
+    delete:
+      tags: [gestao]
+      operationId: deleteLogo
+      summary: Exclui um logo personalizado
+      description: |
+        Exclui só o logo do dono do token. Badges publicadas que o usam passam
+        a cair no fallback do catálogo na próxima regeneração (teto de cache
+        de uma hora). Logo de outra conta responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: logo
+          in: path
+          required: true
+          description: ULID do logo.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Logo excluído.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedResource'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/badges:
+    get:
+      tags: [gestao]
+      operationId: listBadges
+      summary: Badges pessoais do dono do token
+      description: |
+        Lista paginada, mais recente primeiro. A lista sobrevive ao downgrade
+        (o dono continua podendo ver e excluir). A credencial nunca é
+        devolvida; `credentialSet` indica se ela existe. `per_page` vai de 1 a
+        100 (default 20).
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: per_page
+          in: query
+          required: false
+          description: Itens por página, de 1 a 100.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Página de badges do dono.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta, links]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BadgeAsset'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+    post:
+      tags: [gestao]
+      operationId: createBadge
+      summary: Cria uma badge pessoal
+      description: |
+        `static` grava o snapshot normalizado e renderiza o SVG inicial;
+        `provider` grava provider/params/credencial **sem fetch** (o primeiro
+        GET público gera a imagem). Criar exige plano pago e `username` na
+        conta: Free responde 422 com `validation_error`. A credencial entra
+        cifrada e nunca é devolvida. Provider privado só existe em definição
+        com `supportsPrivate`; `auth_type` Basic exige `credential_username`.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeAssetInput'
+      responses:
+        '201':
+          description: Badge criada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BadgeAsset'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /api/v1/badgeforge/badges/{badgeAsset}:
+    delete:
+      tags: [gestao]
+      operationId: deleteBadge
+      summary: Exclui uma badge pessoal
+      description: |
+        Exclui a badge e os arquivos SVG/PNG do dono. Continua liberado depois
+        de um downgrade (a lista sobrevive ao Free). Badge de outra conta
+        responde 404, nunca 403.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: badgeAsset
+          in: path
+          required: true
+          description: ULID da badge pessoal.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Badge excluída.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeletedResource'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Personal Access Token do Sanctum com `badgeforge:read` (GET) ou
+        `badgeforge:write` (POST/DELETE), criado em `/settings/api-tokens`. O
+        token `ai:query` do AI SQL Builder não tem acesso a esta superfície.
+  parameters:
+    Label:
+      name: label
+      in: path
+      required: true
+      description: Texto da etiqueta. `_` vira espaço, `__` vira `_`.
+      schema:
+        type: string
+    Message:
+      name: message
+      in: path
+      required: true
+      description: Texto da mensagem, com a mesma decodificação do `label`.
+      schema:
+        type: string
+    Ext:
+      name: ext
+      in: path
+      required: true
+      description: |
+        Formato da imagem. `png` exige a extensão Imagick; sem ela responde 503
+        `image_unavailable`.
+      schema:
+        type: string
+        enum: [svg, png]
+    Provider:
+      name: provider
+      in: path
+      required: true
+      description: |
+        Slug do provider no catálogo público. A lista vigente é servida em
+        `GET /api/v1/badgeforge/providers` e na documentação pública.
+      schema:
+        type: string
+        pattern: '^[a-z0-9][a-z0-9-]*$'
+    Definition:
+      name: definition
+      in: path
+      required: true
+      description: |
+        Slug da definição do provider. Desconhecida ou desabilitada responde
+        404.
+      schema:
+        type: string
+        pattern: '^[a-z0-9][a-z0-9-]*$'
+    ProviderPath:
+      name: path
+      in: path
+      required: true
+      description: |
+        Coordenadas do item no formato da definição — `{owner}/{repo}`,
+        `{package}` (aceita escopo com `/`), `{vendor}/{package}` ou
+        `{namespace}/{repository}`. Nas definições de versão de runtime
+        (laravel, php, python) o valor é o literal `latest`. O último segmento
+        termina em `.svg` ou `.png`.
+      schema:
+        type: string
+    BadgeEndpoint:
+      name: badgeEndpoint
+      in: path
+      required: true
+      description: ULID opaco do endpoint JSON cadastrado.
+      schema:
+        type: string
+        pattern: '^[0-9A-Za-z]{1,64}$'
+    CustomProvider:
+      name: customProvider
+      in: path
+      required: true
+      description: ULID opaco do provider customizado.
+      schema:
+        type: string
+        pattern: '^[0-9A-Za-z]{1,64}$'
+    CustomDefinition:
+      name: definition
+      in: path
+      required: true
+      description: Slug de uma métrica declarada na criação do provider.
+      schema:
+        type: string
+        pattern: '^[a-z0-9][a-z0-9-]*$'
+    CustomPath:
+      name: path
+      in: path
+      required: true
+      description: |
+        Segmentos na mesma quantidade e ordem de `path_params` do provider
+        (ex.: `{owner}/{repo}`). Cada segmento aceita
+        `[A-Za-z0-9._~-]{1,200}`; vazio, `.` e `..` respondem 404.
+      schema:
+        type: string
+    Username:
+      name: username
+      in: path
+      required: true
+      description: Username do dono da badge.
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9_][A-Za-z0-9._-]{0,39}$'
+    BadgeAsset:
+      name: badgeAsset
+      in: path
+      required: true
+      description: ULID opaco da badge pessoal.
+      schema:
+        type: string
+        pattern: '^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$'
+    Style:
+      name: style
+      in: query
+      required: false
+      description: |
+        Id do estilo no catálogo (ex.: `flat`, `flat-square`, `plastic`,
+        `for-the-badge`, `social`). Desconhecido cai em `flat`.
+      schema:
+        type: string
+    Color:
+      name: color
+      in: query
+      required: false
+      description: Cor do fundo da mensagem; inválida cai no default do estilo.
+      schema:
+        type: string
+        examples: ['#9f9f9f']
+    ColorOverride:
+      name: color
+      in: query
+      required: false
+      description: Vence o `color` default devolvido pela origem.
+      schema:
+        type: string
+    LabelColor:
+      name: labelColor
+      in: query
+      required: false
+      description: Cor do fundo da etiqueta; inválida cai no default do estilo.
+      schema:
+        type: string
+        examples: ['#555555']
+    LabelColorOverride:
+      name: labelColor
+      in: query
+      required: false
+      description: Vence o `labelColor` default devolvido pela origem.
+      schema:
+        type: string
+    LabelOverride:
+      name: label
+      in: query
+      required: false
+      description: Sobrescreve o `label` devolvido pela origem.
+      schema:
+        type: string
+    Logo:
+      name: logo
+      in: query
+      required: false
+      description: |
+        Slug de logo embutido ou `u_<ULID>` de logo personalizado (namespace
+        `u_` reservado). Desconhecido, malformado ou excluído é ignorado: o
+        badge sai sem logo, 200.
+      schema:
+        type: string
+    LogoColor:
+      name: logoColor
+      in: query
+      required: false
+      description: Cor do logo; inválida cai no default.
+      schema:
+        type: string
+    LogoSize:
+      name: logoSize
+      in: query
+      required: false
+      description: Tamanho do logo em pixels; fora do intervalo cai no default do estilo.
+      schema:
+        type: integer
+        minimum: 8
+        maximum: 20
+    LogoPosition:
+      name: logoPosition
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [left, right]
+    Link:
+      name: link
+      in: query
+      required: false
+      description: Envolve o SVG em `<a>`; só `http` e `https`.
+      schema:
+        type: string
+        format: uri
+    Font:
+      name: font
+      in: query
+      required: false
+      description: |
+        Id de fonte empacotada (ex.: `fira-code`, `libre-franklin`,
+        `space-grotesk`). Desconhecida cai na pilha do estilo.
+      schema:
+        type: string
+    CacheSeconds:
+      name: cacheSeconds
+      in: query
+      required: false
+      description: |
+        TTL em segundos, com clamp de 300–86400. Com `logo=u_...` o teto cai
+        para `custom_logos.max_cache_seconds` (3600).
+      schema:
+        type: integer
+        minimum: 300
+        maximum: 86400
+        default: 86400
+    Download:
+      name: download
+      in: query
+      required: false
+      description: '`1` responde como anexo (`Content-Disposition`).'
+      schema:
+        type: string
+        enum: ['1']
+  headers:
+    CacheControl:
+      description: Política de cache da imagem.
+      schema:
+        type: string
+        examples: ['public, max-age=86400']
+    ETag:
+      description: sha256 do corpo, entre aspas.
+      schema:
+        type: string
+    ContentDisposition:
+      description: Presente só com `download=1`; inclui `filename*` do RFC 5987.
+      schema:
+        type: string
+    XBadgeCache:
+      description: |
+        Estado do cache da origem: `HIT`, `MISS` ou `STALE`. O fallback (sem
+        valor bom) também sai como `MISS`.
+      schema:
+        type: string
+    Warning:
+      description: '`110 - "Response is Stale"` quando a resposta é stale.'
+      schema:
+        type: string
+    RetryAfter:
+      description: Segundos até a próxima tentativa.
+      schema:
+        type: integer
+  responses:
+    BadgeImage:
+      description: Imagem gerada no servidor.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControl'
+        ETag:
+          $ref: '#/components/headers/ETag'
+        Content-Disposition:
+          $ref: '#/components/headers/ContentDisposition'
+      content:
+        image/svg+xml: {}
+        image/png: {}
+    PersonalBadgeImage:
+      description: Imagem da badge pessoal (inclusive stale).
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControl'
+        ETag:
+          $ref: '#/components/headers/ETag'
+        Content-Disposition:
+          $ref: '#/components/headers/ContentDisposition'
+        Warning:
+          $ref: '#/components/headers/Warning'
+      content:
+        image/svg+xml: {}
+        image/png: {}
+    DynamicBadgeImage:
+      description: Imagem gerada a partir de uma origem externa (inclusive stale e fallback).
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/CacheControl'
+        ETag:
+          $ref: '#/components/headers/ETag'
+        Content-Disposition:
+          $ref: '#/components/headers/ContentDisposition'
+        X-Badge-Cache:
+          $ref: '#/components/headers/XBadgeCache'
+        Warning:
+          $ref: '#/components/headers/Warning'
+      content:
+        image/svg+xml: {}
+        image/png: {}
+    NotModified:
+      description: O `If-None-Match` bate com o ETag atual; o corpo vem vazio.
+      headers:
+        ETag:
+          $ref: '#/components/headers/ETag'
+    NotFound:
+      description: Recurso inexistente, de outra conta ou com formato inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: not_found
+              message: Resource not found.
+    RateLimited:
+      description: Limite de taxa do dono do recurso excedido.
+      headers:
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: rate_limited
+              message: Too many requests.
+    UnsafeUrl:
+      description: A URL guardada no endpoint não passa mais no guard de SSRF.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: unsafe_url
+              message: The endpoint URL is not allowed.
+    ImageUnavailable:
+      description: |
+        Falha transitória na superfície de imagem (F8, ADR-089). Dois códigos
+        estáveis compartilham o 503:
+
+        - `image_unavailable` — PNG pedido sem a extensão Imagick disponível.
+        - `badge_unavailable` — banco ou infraestrutura indisponível. Aqui a
+          resposta acompanha `Retry-After: 60` e `Cache-Control: no-store`,
+          para CDN e `<img>` não guardarem o erro no lugar da imagem.
+
+        Recurso inexistente é 404 `not_found`, nunca 503.
+      headers:
+        Retry-After:
+          description: Presente no `badge_unavailable`; segundos até tentar de novo.
+          schema:
+            type: string
+            examples: ['60']
+        Cache-Control:
+          $ref: '#/components/headers/CacheControl'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            imageUnavailable:
+              value:
+                error:
+                  code: image_unavailable
+                  message: PNG rendering is unavailable.
+            badgeUnavailable:
+              value:
+                error:
+                  code: badge_unavailable
+                  message: Badge rendering is temporarily unavailable.
+    Unauthenticated:
+      description: Token ausente, inválido ou revogado.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: unauthenticated
+              message: Unauthenticated.
+    Forbidden:
+      description: Token sem a ability exigida, ou conta suspensa.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: forbidden
+              message: This action is unauthorized.
+    ValidationError:
+      description: Corpo ou parâmetro inválido.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: validation_error
+              message: The given data was invalid.
+              details:
+                errors:
+                  per_page:
+                    - The per page field must not be greater than 100.
+  schemas:
+    Provider:
+      type: object
+      required: [slug, name, category, requiresAuth, requiresUsername, documentationUrl, definitions]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        requiresAuth:
+          type: boolean
+          description: A origem exige credencial do dono para item privado.
+        requiresUsername:
+          type: boolean
+          description: Além do token, a origem exige um username (Basic).
+        documentationUrl:
+          type: [string, 'null']
+        definitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderDefinition'
+    ProviderDefinition:
+      type: object
+      required: [slug, name, label, supportsPrivate, examplePath, pathPattern, params]
+      properties:
+        slug:
+          type: string
+        name:
+          type: string
+        label:
+          type: string
+        supportsPrivate:
+          type: boolean
+        examplePath:
+          type: string
+        pathPattern:
+          type: string
+        params:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderParam'
+    ProviderParam:
+      type: object
+      required: [name, required, pattern, allowSlash, placeholderKey]
+      properties:
+        name:
+          type: string
+        required:
+          type: boolean
+        pattern:
+          type: string
+        allowSlash:
+          type: boolean
+        placeholderKey:
+          type: string
+          description: Chave de tradução; o texto do placeholder nunca vem do banco.
+    BadgeLogo:
+      type: object
+      required: [id, slug, name, viewBox, pathCount, sizeBytes]
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+          description: Referência pública `u_<ULID>` aceita em `?logo=`.
+        name:
+          type: string
+        viewBox:
+          type: string
+        pathCount:
+          type: integer
+        sizeBytes:
+          type: integer
+        createdAt:
+          type: [string, 'null']
+          format: date-time
+    BadgeAsset:
+      type: object
+      required: [id, name, type, private, credentialSet, url, pngUrl]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum: [static, provider]
+        providerSlug:
+          type: [string, 'null']
+        definitionSlug:
+          type: [string, 'null']
+        params:
+          type: [object, 'null']
+          additionalProperties:
+            type: string
+        private:
+          type: boolean
+        credentialSet:
+          type: boolean
+          description: A credencial existe cifrada; o valor nunca é devolvido.
+        credentialUsername:
+          type: [string, 'null']
+        url:
+          type: [string, 'null']
+          description: URL pública do SVG; nula enquanto a conta não tiver username.
+        pngUrl:
+          type: [string, 'null']
+        lastGeneratedAt:
+          type: [string, 'null']
+          format: date-time
+        expiresAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt:
+          type: [string, 'null']
+          format: date-time
+    BadgeAssetInput:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          maxLength: 80
+          description: Único na conta.
+        type:
+          type: string
+          enum: [static, provider]
+        form:
+          type: [object, 'null']
+          description: Snapshot do formulário da tela; normalizado pelo servidor.
+        provider_slug:
+          type: [string, 'null']
+          description: Obrigatório quando `type` é `provider`.
+        definition_slug:
+          type: [string, 'null']
+          description: Obrigatório quando `type` é `provider`.
+        params:
+          type: [object, 'null']
+          additionalProperties:
+            type: string
+          description: Exatamente os parâmetros exigidos pela definição.
+        private:
+          type: boolean
+          default: false
+        credential:
+          type: [string, 'null']
+          description: |
+            Token da origem; cifrado e nunca devolvido. Só com `private: true`
+            e definição `supportsPrivate`.
+        credential_username:
+          type: [string, 'null']
+          description: Username exigido pela origem Basic (`auth_type` basic).
+    DeletedResource:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [id, deleted]
+          properties:
+            id:
+              type: string
+            deleted:
+              type: boolean
+              enum: [true]
+    PaginationMeta:
+      type: object
+      required: [current_page, per_page, total, last_page]
+      properties:
+        current_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        last_page:
+          type: integer
+    PaginationLinks:
+      type: object
+      required: [next, previous]
+      properties:
+        next:
+          type: [string, 'null']
+        previous:
+          type: [string, 'null']
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Contrato estável; o cliente programa pelo código.
+            message:
+              type: string
+              description: Fallback técnico em inglês; não exibir cru.
+            details:
+              type: object
+              additionalProperties: true
+              description: Dados para corrigir o pedido.

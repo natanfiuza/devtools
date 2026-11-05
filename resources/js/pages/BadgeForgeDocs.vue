@@ -72,6 +72,9 @@ export type BadgeForgeDocsProps = {
     endpointCacheTtl: number;
     endpointRateLimits: BadgeForgeDocsEndpointRateLimits;
     origin: string;
+    jsonApiBaseUrl: string;
+    openApiUrl: string;
+    tokensSettingsUrl: string;
 };
 
 const props = defineProps<BadgeForgeDocsProps>();
@@ -91,6 +94,9 @@ const providerEndpoint = computed(() => trimSlash(props.providerEndpoint));
 const personalEndpoint = computed(() => trimSlash(props.personalEndpoint));
 const jsonEndpoint = computed(() => trimSlash(props.jsonEndpoint));
 const customEndpoint = computed(() => trimSlash(props.customEndpoint));
+const jsonApiBaseUrl = computed(
+    () => `${origin.value}${trimSlash(props.jsonApiBaseUrl)}`,
+);
 
 const toolUrl = computed(() => `/${routes.localeSlug.value}/tools/badgeforge`);
 const dashboardUrl = computed(
@@ -656,6 +662,72 @@ async function copyValue(value: string): Promise<void> {
             {{ t('docs.badgeforge.custom.manage_cta') }}
             <ArrowRight class="size-4" />
           </Link>
+        </Button>
+      </div>
+    </section>
+
+    <!-- API JSON -->
+    <section
+      class="space-y-4"
+      data-test="badgeforge-docs-api"
+    >
+      <h2 class="inline-flex items-center gap-2 text-xl font-semibold tracking-tight">
+        <KeyRound class="size-5 text-accent" />
+        {{ t('docs.badgeforge.api.title') }}
+      </h2>
+      <p class="max-w-3xl text-sm text-muted-foreground">
+        {{ t('docs.badgeforge.api.intro') }}
+      </p>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="space-y-1 rounded-lg border border-border bg-surface p-4">
+          <p class="text-xs text-muted-foreground">
+            {{ t('docs.badgeforge.api.base_url_label') }}
+          </p>
+          <code
+            class="block font-mono text-xs break-all"
+            data-test="badgeforge-docs-api-base-url"
+          >{{ jsonApiBaseUrl }}</code>
+        </div>
+
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="text-sm font-semibold">
+            {{ t('docs.badgeforge.api.abilities_title') }}
+          </h3>
+          <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+            <li>{{ t('docs.badgeforge.api.abilities_read') }}</li>
+            <li>{{ t('docs.badgeforge.api.abilities_write') }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="max-w-3xl text-sm text-muted-foreground">
+        {{ t('docs.badgeforge.api.token_body') }}
+      </p>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          as-child
+          data-test="badgeforge-docs-api-tokens"
+        >
+          <Link :href="tokensSettingsUrl">
+            <KeyRound class="size-4" />
+            {{ t('docs.badgeforge.api.tokens_cta') }}
+          </Link>
+        </Button>
+        <Button
+          as-child
+          variant="outline"
+          data-test="badgeforge-docs-api-spec"
+        >
+          <a
+            :href="openApiUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ t('docs.badgeforge.api.spec_cta') }}
+            <ExternalLink class="size-4" />
+          </a>
         </Button>
       </div>
     </section>

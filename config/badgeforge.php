@@ -91,11 +91,26 @@ return [
     ],
 
     /*
-    | Gestao autenticada de logos/presets: limite de taxa das escritas.
+    | Gestao autenticada de logos/presets: limite de taxa das escritas e
+    | cache do catalogo publico da API JSON (F8, ADR-088).
     */
     'management' => [
         'rate_limit' => 20,
         'rate_decay_seconds' => 60,
+        'catalog_cache_seconds' => (int) env('BADGEFORGE_CATALOG_CACHE_SECONDS', 300),
+    ],
+
+    /*
+    | Cap generoso por IP nas imagens anonimas que nao tem dono para limitar:
+    | estatica, provider do catalogo e badge pessoal (F8, ADR-089). Nao
+    | substitui os limites por dono do endpoint/custom: existe para conter
+    | varredura e abuso que o CDN nao absorver, sem furar badge popular.
+    */
+    'serving' => [
+        'rate_limit' => [
+            'per_minute' => (int) env('BADGEFORGE_SERVING_LIMIT_PER_MINUTE', 6000),
+            'decay_seconds' => 60,
+        ],
     ],
 
     /*

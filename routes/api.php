@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\V1\BadgeForge\BadgeAssetController;
+use App\Http\Controllers\Api\V1\BadgeForge\BadgeLogoController;
+use App\Http\Controllers\Api\V1\BadgeForge\CatalogController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
@@ -50,12 +53,70 @@ Route::prefix('v1')
     });
 
 /*
+| BadgeForge - API JSON de gestao (F8, ADR-088).
+|
+| Fora do grupo `v1/` de proposito: o token do AI SQL Builder (`ai:query`)
+| nao pode ganhar escrita em badges por heranca de grupo. O catalogo e
+| anonimo e cacheavel; logos e badges exigem as abilities `badgeforge:*`,
+| que sao emitidas pela tela `/settings/api-tokens`.
+*/
+Route::prefix('v1/badgeforge')
+    ->name('api.v1.badgeforge.')
+    ->group(function (): void {
+        Route::get('providers', [CatalogController::class, 'providers'])
+            ->middleware('throttle:api-read')
+            ->name('providers');
+
+        Route::get('styles', [CatalogController::class, 'styles'])
+            ->middleware('throttle:api-read')
+            ->name('styles');
+
+        Route::middleware([
+            'auth:sanctum',
+            'active',
+            'verified',
+            'abilities:badgeforge:read',
+            TrackApiTokenUsage::class,
+            'throttle:api-read',
+        ])->group(function (): void {
+            Route::get('logos', [BadgeLogoController::class, 'index'])->name('logos.index');
+
+            Route::get('badges', [BadgeAssetController::class, 'index'])->name('badges.index');
+        });
+
+        // A escrita tem grupo e ability proprios: `badgeforge:read` nao cria
+        // nem exclui nada. O `whereUlid` faz um id inventado responder 404
+        // antes de chegar ao banco.
+        Route::middleware([
+            'auth:sanctum',
+            'active',
+            'verified',
+            'abilities:badgeforge:write',
+            TrackApiTokenUsage::class,
+            'throttle:api-write',
+        ])->group(function (): void {
+            Route::post('logos', [BadgeLogoController::class, 'store'])->name('logos.store');
+
+            Route::delete('logos/{logo}', [BadgeLogoController::class, 'destroy'])
+                ->whereUlid('logo')
+                ->name('logos.destroy');
+
+            Route::post('badges', [BadgeAssetController::class, 'store'])->name('badges.store');
+
+            Route::delete('badges/{badgeAsset}', [BadgeAssetController::class, 'destroy'])
+                ->whereUlid('badgeAsset')
+                ->name('badges.destroy');
+        });
+    });
+
+/*
 | BadgeForge - badges estaticas (SPEC-BADGEFORGE §6, ADR-076).
 |
-| Stateless como o resto de `api/`: sem sessao, sem CSRF e sem throttle -
-| estaticas nao consomem cota (SPEC §11). O `where` explicito em `message`
-| e obrigatorio: o requisito padrao do Symfony exclui o ponto e usa
-| quantificador possessivo, o que impediria `1.0.0.svg`.
+| Stateless como o resto de `api/`: sem sessao e sem CSRF. Estaticas nao
+| consomem cota (SPEC §11), mas as imagens anonimas ganham o cap por IP
+| `badgeforge-images` (F8, ADR-089) - generoso, contra varredura. O `where`
+| explicito em `message` e obrigatorio: o requisito padrao do Symfony exclui o
+| ponto e usa quantificador possessivo, o que impediria `1.0.0.svg`.
 */
 Route::prefix('badges')
     ->name('badges.')
@@ -64,6 +125,7 @@ Route::prefix('badges')
             ->where('label', '[^/]+')
             ->where('message', '[^/]+')
             ->where('ext', 'svg|png')
+            ->middleware('throttle:badgeforge-images')
             ->name('static');
 
         // F5: a URL publica leva so o ULID; a URL de origem fica no servidor.
@@ -95,5 +157,6 @@ Route::prefix('badges')
             ->where('provider', '[a-z0-9][a-z0-9-]*')
             ->where('definition', '[a-z0-9][a-z0-9-]*')
             ->where('path', '.+\.(?:svg|png)')
+            ->middleware('throttle:badgeforge-images')
             ->name('provider');
     });

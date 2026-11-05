@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\BadgeForge;
 
+use App\Actions\BadgeForge\ParseCustomLogoUpload;
 use App\Actions\BadgeForge\StoreCustomLogo;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BadgeForge\StoreCustomLogoRequest;
@@ -9,13 +10,10 @@ use App\Http\Requests\BadgeForge\UpdateCustomLogoRequest;
 use App\Models\BadgeCustomLogo;
 use App\Models\User;
 use App\Support\BadgeForge\CustomLogoRepository;
-use App\Support\BadgeForge\CustomLogoSvgParser;
-use App\Support\BadgeForge\InvalidCustomLogoException;
 use App\Support\BadgeForge\LogoPath;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 /**
@@ -29,29 +27,12 @@ class CustomLogoController extends Controller
 {
     public function store(
         StoreCustomLogoRequest $request,
-        CustomLogoSvgParser $parser,
+        ParseCustomLogoUpload $parse,
         StoreCustomLogo $store,
     ): RedirectResponse {
-        $user = $this->user($request);
-        $file = $request->file('logo');
+        $parsed = $parse($request->file('logo'));
 
-        if ($file === null || ! $file->isValid()) {
-            throw ValidationException::withMessages([
-                'logo' => __('validation.file', ['attribute' => __('validation.attributes.logo')]),
-            ]);
-        }
-
-        $contents = (string) file_get_contents((string) $file->getRealPath());
-
-        try {
-            $parsed = $parser->parse($contents, (int) $file->getSize());
-        } catch (InvalidCustomLogoException $exception) {
-            throw ValidationException::withMessages([
-                'logo' => __('validation.custom_logo.'.$exception->reason),
-            ]);
-        }
-
-        $store($user, (string) $request->validated('name'), $parsed);
+        $store($this->user($request), (string) $request->validated('name'), $parsed);
 
         Inertia::flash('toast', [
             'type' => 'success',

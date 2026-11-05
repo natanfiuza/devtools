@@ -90,6 +90,13 @@ return [
             'name' => 'Nom du jeton',
             'name_placeholder' => 'Ex. : intégration-déploiement',
             'submit' => 'Créer le jeton',
+            'abilities_title' => 'Permissions du jeton',
+            'abilities_help' => 'Choisissez ce que ce jeton peut faire. Les permissions sont indépendantes : un jeton de requête ne crée pas de badges.',
+            'abilities' => [
+                'ai_query' => 'AI SQL Builder : envoyer des requêtes et lire les résultats.',
+                'badgeforge_read' => 'BadgeForge : lister vos logos et badges personnels.',
+                'badgeforge_write' => 'BadgeForge : créer et supprimer des logos et badges personnels.',
+            ],
         ],
         'once' => [
             'title' => 'Jeton créé',
