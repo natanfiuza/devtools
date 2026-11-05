@@ -103,6 +103,18 @@ return [
             'manage_cta' => 'Gérer les endpoints JSON',
         ],
 
+        'custom' => [
+            'title' => 'Fournisseurs personnalisés',
+            'intro' => 'Les comptes payants peuvent transformer tout document JSON public en badge. Vous déclarez un modèle d’URL HTTPS, les paramètres du chemin et un JSON Pointer par métrique ; le serveur exécute uniquement ce mappage déclaratif.',
+            'url_label' => 'Format d’URL',
+            'paid_title' => 'Offres payantes uniquement',
+            'paid_body' => 'La création et la modification exigent une offre payante. Après un downgrade, les badges existants continuent d’être servis et peuvent être copiés et supprimés, mais pas modifiés.',
+            'pointer_title' => 'JSON Pointer',
+            'pointer_body' => 'Chaque métrique lit une valeur scalaire avec RFC 6901, par exemple /stargazers_count ou /items/0/score. Une valeur absente ou non scalaire affiche le message neutre au lieu de casser l’image.',
+            'security_title' => 'URL opaque et source privée',
+            'security_body' => 'L’image publique utilise un identifiant opaque à la place de l’URL source. Le modèle reste sur le serveur, n’est jamais renvoyé au navigateur et n’apparaît jamais dans les logs, les props de page ou les exports CSV. Les requêtes utilisent uniquement HTTPS, des IP publiques, le port 443, sans redirection et sans identifiants.',
+            'manage_cta' => 'Gérer les fournisseurs personnalisés',
+        ],
         'cache' => [
             'title' => 'Cache, ETag et réponses périmées',
             'body' => 'Les réponses des providers sont mises en cache pendant {ttl} secondes. L\'image est servie avec ETag et Cache-Control, donc une seconde requête reçoit un 304 quand rien n\'a changé.',

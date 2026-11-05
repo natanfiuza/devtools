@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureBadgeForgeHasPaidPlan;
 use App\Http\Middleware\EnsureHistoryHasPaidPlan;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAppearance;
@@ -66,6 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => EnsureAccountIsActive::class,
             'history.paid' => EnsureHistoryHasPaidPlan::class,
+            'badgeforge.paid' => EnsureBadgeForgeHasPaidPlan::class,
             // O Sanctum v4 nao registra estes aliases sozinho; a API publica
             // usa `abilities:ai:query` em toda rota (ADR-050).
             'abilities' => CheckAbilities::class,
@@ -98,7 +100,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // O PAT de uma badge pessoal nunca volta no `_old_input` de um 422
         // (F4, ADR-081) - e a URL de origem de um endpoint tambem nao (F5,
         // ADR-084). O handler e quem grava o input na sessao.
-        $exceptions->dontFlash(['credential', 'url']);
+        $exceptions->dontFlash(['credential', 'url', 'url_template']);
 
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),

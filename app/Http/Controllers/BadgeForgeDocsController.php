@@ -24,6 +24,7 @@ final class BadgeForgeDocsController extends Controller
             'providerEndpoint' => (string) config('badgeforge.provider_endpoint', '/api/badges'),
             'personalEndpoint' => (string) config('badgeforge.personal_endpoint', '/b'),
             'jsonEndpoint' => (string) config('badgeforge.endpoint.path', '/api/badges/endpoint'),
+            'customEndpoint' => (string) config('badgeforge.custom_providers.path', '/api/badges/custom'),
             'cacheTtl' => (int) config('badgeforge.providers.cache_ttl', 300),
             'endpointCacheTtl' => (int) config('badgeforge.endpoint.cache_ttl', 300),
             'endpointRateLimits' => [

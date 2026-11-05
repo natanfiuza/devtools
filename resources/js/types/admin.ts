@@ -284,6 +284,69 @@ export type AdminOutputTargetRow = {
     sort: number;
 };
 
+/** Provider do catalogo global do BadgeForge (F7): so o estado edita. */
+export type AdminBadgeProviderDefinitionRow = {
+    id: number;
+    slug: string;
+    name: string;
+    label: string;
+    enabled: boolean;
+};
+
+export type AdminBadgeProviderRow = {
+    id: number;
+    slug: string;
+    name: string;
+    category: string;
+    enabled: boolean;
+    definitions: AdminBadgeProviderDefinitionRow[];
+};
+
+/**
+ * Provider customizado na visao do admin: aqui - e so aqui - a origem
+ * (`urlTemplate` e `pointer`) chega ao navegador.
+ */
+export type AdminBadgeCustomProviderDefinitionRow = {
+    id: string;
+    slug: string;
+    label: string;
+    pointer: string;
+    formatter: string;
+};
+
+export type AdminBadgeCustomProviderRow = {
+    id: string;
+    name: string;
+    ownerName: string;
+    ownerEmail: string;
+    urlTemplate: string;
+    pathParams: string[];
+    examplePath: string;
+    enabled: boolean;
+    createdAt: string | null;
+    definitions: AdminBadgeCustomProviderDefinitionRow[];
+};
+
+/** Volume global do BadgeForge, lido do agregado diario (sem unicos). */
+export type AdminBadgeAnalyticsDay = {
+    date: string;
+    views: number;
+    cacheHits: number;
+};
+
+export type AdminBadgeAnalytics = {
+    window: number;
+    windows: number[];
+    start: string;
+    end: string;
+    totals: {
+        views: number;
+        cacheHits: number;
+        cacheRate: number | null;
+    };
+    days: AdminBadgeAnalyticsDay[];
+};
+
 /** Metadados do cache de IA; prompt, schema e resposta nunca saem do servidor. */
 export type AdminAiCacheRow = {
     id: number;

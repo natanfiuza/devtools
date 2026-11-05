@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\BadgeCustomProvider;
 use App\Models\BadgeEndpoint;
 use App\Models\User;
+use App\Support\BadgeForge\Analytics\CountryReader;
+use App\Support\BadgeForge\Analytics\MaxMindCountryReader;
 use App\Support\BadgeForge\Endpoint\DnsHostResolver;
 use App\Support\BadgeForge\Endpoint\HostResolver;
 use App\Support\BadgeForge\Providers\ProviderCatalog;
@@ -31,6 +34,13 @@ final class BadgeForgeServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ProviderCatalog::class);
         $this->app->bind(HostResolver::class, DnsHostResolver::class);
+
+        // GeoLite2 e opcional: o leitor abre o arquivo na primeira consulta e
+        // devolve `null` quando ele nao existe ou esta corrompido. O caminho
+        // vem da config; testes trocam o binding por um leitor controlado.
+        $this->app->singleton(CountryReader::class, static fn (): CountryReader => new MaxMindCountryReader(
+            (string) config('badgeforge.analytics.geoip_path', ''),
+        ));
     }
 
     public function boot(): void
@@ -90,6 +100,42 @@ final class BadgeForgeServiceProvider extends ServiceProvider
                 max(1, (int) ceil($decaySeconds / 60)),
                 $perMinute,
             )->by('badgeforge-endpoint:'.$account);
+        });
+
+        // Imagem de provider customizado (F7, ADR-087): mesmo desenho do
+        // endpoint, com o limite do dono do ULID; invalido/desconhecido ou
+        // banco fora cai no anonimo por IP.
+        RateLimiter::for('badgeforge-custom', function (Request $request): Limit {
+            $decaySeconds = max(1, (int) config('badgeforge.custom_providers.rate_limit.decay_seconds', 60));
+            $perMinute = max(1, (int) config('badgeforge.custom_providers.rate_limit.anonymous', 60));
+            $account = 'guest:'.$request->ip();
+
+            $id = $request->route('customProvider');
+
+            if (is_string($id) && Str::isUlid($id)) {
+                try {
+                    $provider = BadgeCustomProvider::query()->with('user')->find($id);
+                    $owner = $provider?->user;
+
+                    if ($owner instanceof User) {
+                        $isFree = $owner->effectivePlan()->isFree();
+                        $account = 'user:'.$owner->getKey();
+                        $perMinute = max(1, (int) config(
+                            $isFree
+                                ? 'badgeforge.custom_providers.rate_limit.free'
+                                : 'badgeforge.custom_providers.rate_limit.paid',
+                            $isFree ? 300 : 3_000,
+                        ));
+                    }
+                } catch (Throwable) {
+                    // Banco fora: segue no anonimo, sem 500.
+                }
+            }
+
+            return Limit::perMinutes(
+                max(1, (int) ceil($decaySeconds / 60)),
+                $perMinute,
+            )->by('badgeforge-custom:'.$account);
         });
 
         RateLimiter::for('badgeforge-management', function (Request $request): Limit {

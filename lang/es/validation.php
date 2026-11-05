@@ -217,6 +217,21 @@ return [
         'invalid_payload' => 'El endpoint no devolvió un badge JSON válido de shields.',
     ],
 
+    'badge_custom_provider' => [
+        'url_length' => 'La plantilla es más larga de lo permitido.',
+        'url_chars' => 'La plantilla contiene caracteres no permitidos.',
+        'scheme' => 'Solo se aceptan plantillas HTTPS.',
+        'userinfo' => 'Quita el usuario y la contraseña de la plantilla.',
+        'host' => 'Este host no está permitido.',
+        'port' => 'Solo se acepta el puerto 443.',
+        'unresolvable' => 'No se pudo resolver el host.',
+        'unsafe_ip' => 'El host resuelve a una dirección privada o reservada.',
+        'redirect' => 'El origen redirige a otra dirección.',
+        'invalid_payload' => 'El origen no devolvió un objeto JSON.',
+        'example_path' => 'El path de ejemplo no coincide con los parámetros del path.',
+        'pointer_missing' => 'Un JSON Pointer no resolvió a un valor escalar en la respuesta de ejemplo.',
+    ],
+
     'attributes' => [
         'amount' => 'importe',
         'code' => 'código',

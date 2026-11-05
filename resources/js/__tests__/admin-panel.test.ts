@@ -117,6 +117,9 @@ const traducoes = {
             webhooks: 'EVENTOS_DE_WEBHOOK',
             output_targets: 'ALVOS_DE_SAIDA',
             ai_cache: 'CACHE_DE_IA',
+            badgeforge_providers: 'PROVIDERS_BF',
+            badgeforge_custom_providers: 'PROVIDERS_CUSTOM_BF',
+            badgeforge_analytics: 'VOLUME_BF',
             audit: 'AUDITORIA',
             panel: 'PAINEL',
             back_to_site: 'VOLTAR_AO_SITE',
@@ -207,7 +210,7 @@ beforeEach(() => {
 });
 
 describe('navegacao do painel', () => {
-    it('lista as onze secoes com o caminho de cada uma', () => {
+    it('lista as quatorze secoes com o caminho de cada uma', () => {
         const wrapper = montarPainel();
 
         const itens = wrapper.findAll('nav a');
@@ -223,6 +226,9 @@ describe('navegacao do painel', () => {
             'EVENTOS_DE_WEBHOOK',
             'ALVOS_DE_SAIDA',
             'CACHE_DE_IA',
+            'PROVIDERS_BF',
+            'PROVIDERS_CUSTOM_BF',
+            'VOLUME_BF',
             'AUDITORIA',
         ]);
         expect(itens.map((item) => item.attributes('href'))).toEqual([
@@ -236,6 +242,9 @@ describe('navegacao do painel', () => {
             '/admin/webhooks',
             '/admin/output-targets',
             '/admin/ai-cache',
+            '/admin/badgeforge/providers',
+            '/admin/badgeforge/custom-providers',
+            '/admin/badgeforge/analytics',
             '/admin/audit',
         ]);
     });

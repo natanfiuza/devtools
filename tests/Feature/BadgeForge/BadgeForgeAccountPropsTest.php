@@ -43,6 +43,7 @@ it('descreve a conta Free com o limite de dois logos', function () {
         'canSavePresets' => true,
         'canCreatePersonalBadges' => false,
         'canCreateEndpointBadges' => true,
+        'canCreateCustomProviders' => false,
         'isPaid' => false,
     ])
         ->and($props['limits']['customLogos']['limit'])->toBe(2)

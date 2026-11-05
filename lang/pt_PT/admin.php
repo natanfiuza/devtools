@@ -26,6 +26,9 @@ return [
         'audit' => 'Auditoria',
         'output_targets' => 'Alvos de saída',
         'ai_cache' => 'Cache de IA',
+        'badgeforge_providers' => 'Fornecedores do BadgeForge',
+        'badgeforge_custom_providers' => 'Fornecedores personalizados',
+        'badgeforge_analytics' => 'Volume do BadgeForge',
         'back_to_site' => 'Voltar ao site',
     ],
 
@@ -466,6 +469,57 @@ return [
         'empty' => 'Nada registado ainda.',
     ],
 
+    'badge_providers' => [
+        'title' => 'Fornecedores do BadgeForge',
+        'description' => 'O catálogo global de fornecedores e métricas. Desativar um remove a rota pública e a documentação sem apagar o histórico.',
+        'readonly' => 'Só o estado ativo/inativo é editado aqui; slug, template e parser vêm da migração.',
+        'provider' => 'Fornecedor',
+        'definition' => 'Métrica',
+        'category' => 'Categoria',
+        'enabled' => 'Ativo',
+        'disabled' => 'Desativado',
+        'toggle' => 'Ativar ou desativar este fornecedor',
+        'toggle_definition' => 'Ativar ou desativar esta métrica',
+        'empty' => 'Nenhum fornecedor no catálogo.',
+    ],
+
+    'badge_custom_providers' => [
+        'title' => 'Fornecedores personalizados',
+        'description' => 'Fornecedores JSON criados pelas contas pagas. O admin vê a origem para investigar; fora deste ecrã ela nunca sai do servidor.',
+        'name' => 'Nome',
+        'owner' => 'Proprietário',
+        'template' => 'Template de origem',
+        'params' => 'Parâmetros do path',
+        'example' => 'Path de exemplo',
+        'metrics' => 'Métricas',
+        'metric' => 'Métrica',
+        'pointer' => 'Pointer',
+        'formatter' => 'Formatação',
+        'state' => 'Estado',
+        'enabled' => 'Ativo',
+        'disabled' => 'Desativado',
+        'toggle' => 'Desativar ou reativar este fornecedor',
+        'readonly' => 'O admin desativa e nunca elimina: o dado é do proprietário.',
+        'empty' => 'Nenhum fornecedor personalizado.',
+        'created_at' => 'Criado em',
+    ],
+
+    'badgeforge_analytics' => [
+        'title' => 'Volume do BadgeForge',
+        'description' => 'Visualizações agregadas por dia. O agregado guarda 400 dias; visitantes únicos ficam na área do proprietário.',
+        'window' => 'Período',
+        'window_days' => '{days} dias',
+        'views' => 'Visualizações',
+        'cache_rate' => 'Taxa de cache',
+        'cache_detail' => '{hits} visualizações servidas do cache',
+        'cache_none' => 'Sem dados de cache',
+        'day' => 'Dia',
+        'cache_hits' => 'Do cache',
+        'no_data' => 'Nenhuma visualização no período.',
+        'bar_title' => '{date}: {views} visualizações',
+        'note' => 'Os números vêm do agregado diário, que não permite deduplicar visitantes entre dimensões.',
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'E-mail verificado',
@@ -486,6 +540,15 @@ return [
         ],
         'output_target' => [
             'updated' => 'Alvo de saída atualizado',
+        ],
+        'provider' => [
+            'updated' => 'Fornecedor atualizado',
+        ],
+        'definition' => [
+            'updated' => 'Métrica do fornecedor atualizada',
+        ],
+        'custom_provider' => [
+            'updated' => 'Fornecedor personalizado atualizado',
         ],
         'ai_cache' => [
             'pruned' => 'Cache de IA podada',
@@ -527,6 +590,10 @@ return [
         'subscriber_already_removed' => 'O subscritor já estava cancelado.',
         'output_target_saved' => 'Alvo atualizado.',
         'output_target_unchanged' => 'O alvo já estava neste estado.',
+        'badge_provider_saved' => 'Fornecedor atualizado.',
+        'badge_provider_unchanged' => 'O fornecedor já estava neste estado.',
+        'badge_custom_provider_saved' => 'Fornecedor personalizado atualizado.',
+        'badge_custom_provider_unchanged' => 'O fornecedor personalizado já estava neste estado.',
         'ai_cache_pruned' => 'Respostas expiradas removidas da cache.',
         'ai_cache_empty' => 'Nenhuma resposta expirada na cache.',
         'plan_saved' => 'Plano atualizado.',

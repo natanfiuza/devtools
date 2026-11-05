@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\BadgeForge;
 
+use App\Enums\BadgeViewSubject;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeEndpoint;
 use App\Support\ApiError;
+use App\Support\BadgeForge\Analytics\BadgeViewRecorder;
 use App\Support\BadgeForge\BadgeImageResponder;
 use App\Support\BadgeForge\Endpoint\EndpointBadgeComposer;
 use App\Support\BadgeForge\Endpoint\EndpointMetricsResult;
@@ -30,6 +32,7 @@ final class EndpointBadgeController extends Controller
         EndpointBadgeComposer $composer,
         StaticBadgeRenderer $renderer,
         BadgeImageResponder $responder,
+        BadgeViewRecorder $recorder,
     ): Response|JsonResponse {
         $extension = $request->route('ext');
 
@@ -53,7 +56,7 @@ final class EndpointBadgeController extends Controller
             $headers['Warning'] = '110 - "Response is Stale"';
         }
 
-        return $responder->respond(
+        $response = $responder->respond(
             $request,
             $badge->spec,
             $renderer->render($badge->spec),
@@ -61,5 +64,19 @@ final class EndpointBadgeController extends Controller
             null,
             $headers,
         );
+
+        if (in_array($response->getStatusCode(), [200, 304], true)) {
+            $recorder->record(
+                $request,
+                BadgeViewSubject::Endpoint,
+                (string) $badgeEndpoint->getKey(),
+                $badgeEndpoint->user,
+                cacheHit: $badge->status !== EndpointMetricsResult::MISS,
+                format: strtolower($extension),
+                style: $badge->spec->style->id,
+            );
+        }
+
+        return $response;
     }
 }

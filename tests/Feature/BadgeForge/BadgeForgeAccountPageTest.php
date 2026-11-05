@@ -67,6 +67,7 @@ it('devolve o visitante da tool sem gestao', function () {
                 'canSavePresets' => false,
                 'canCreatePersonalBadges' => false,
                 'canCreateEndpointBadges' => false,
+                'canCreateCustomProviders' => false,
                 'isPaid' => false,
             ])
         );

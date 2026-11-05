@@ -175,6 +175,7 @@ function toolPropsFor(
             canSavePresets: paid,
             canCreatePersonalBadges: paid,
             canCreateEndpointBadges: true,
+            canCreateCustomProviders: paid,
             isPaid: paid,
         },
         personalBadges: overrides.personalBadges ?? [BADGE],

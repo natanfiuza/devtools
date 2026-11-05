@@ -26,6 +26,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import { login as loginRoute, pricing as pricingRoute } from '@/routes';
 import { badgeforge as badgeforgeDashboard } from '@/routes/dashboard';
+import CustomProviderForm from './CustomProviderForm.vue';
+import CustomProviderPreview from './CustomProviderPreview.vue';
 import LogoLibraryDialog from './LogoLibraryDialog.vue';
 import ModeTabs from './ModeTabs.vue';
 import PersonalBadgeDialog from './PersonalBadgeDialog.vue';
@@ -42,6 +44,7 @@ import {
     type BadgeFormState,
 } from './builder';
 import { customLogoAsset, loadCustomLogo } from './customLogos';
+import { defaultCustomProviderForm } from './lib/customProviderUrl';
 import { DEFAULT_FONT } from './lib/fonts';
 import { defaultProviderForm } from './lib/providerUrl';
 import { badgeDimensions, renderBadge } from './lib/render';
@@ -95,6 +98,7 @@ const SWATCHES = [
 
 const form = ref<BadgeFormState>(defaultForm(props));
 const providerForm = ref(defaultProviderForm(props));
+const customProviderForm = ref(defaultCustomProviderForm(props));
 const mode = ref<BadgeMode>('static');
 const darkBackground = ref(false);
 const format = ref<BadgeFormat>('svg');
@@ -394,7 +398,10 @@ onMounted(() => {
       </Button>
     </div>
 
-    <ModeTabs v-model="mode" />
+    <ModeTabs
+      v-model="mode"
+      :show-custom="props.customProviders.length > 0"
+    />
 
     <div
       v-if="mode === 'static'"
@@ -892,6 +899,22 @@ onMounted(() => {
           </Tabs>
         </div>
       </section>
+    </div>
+
+    <!-- Provider customizado do dono (F7, ADR-087): so com provider criado. -->
+    <div
+      v-else-if="mode === 'custom' && props.customProviders.length > 0"
+      class="grid gap-6 lg:grid-cols-2"
+      data-test="badge-custom-mode"
+    >
+      <CustomProviderForm
+        v-model="customProviderForm"
+        :tool-props="props"
+      />
+      <CustomProviderPreview
+        :form="customProviderForm"
+        :tool-props="props"
+      />
     </div>
 
     <div

@@ -24,21 +24,46 @@ final class EndpointHttpClient
      */
     public function fetch(EndpointFetchRequest $request, ?EndpointPayloadParser $parser = null): EndpointFetchResult
     {
+        $body = $this->fetchBody($request);
+
+        if ($body->notModified) {
+            return new EndpointFetchResult(null, $body->etag, true);
+        }
+
+        return new EndpointFetchResult(
+            payload: ($parser ?? new EndpointPayloadParser)->parse($body->body ?? ''),
+            etag: $body->etag,
+        );
+    }
+
+    /**
+     * Corpo cru da chamada pinada, sem parser de contrato (F7, ADR-087).
+     *
+     * O provider customizado usa o mesmo pin de DNS, limites e fail-closed do
+     * endpoint, mas decodifica um documento JSON arbitrario. `configKey`
+     * escolhe somente timeouts, user-agent e teto de corpo; a pinagem e sempre
+     * a mesma.
+     *
+     * @throws EndpointFetchException
+     */
+    public function fetchBody(EndpointFetchRequest $request, string $configKey = 'badgeforge.endpoint'): EndpointBodyResult
+    {
         if ((bool) config('badgeforge.endpoint.require_curl', true) && ! $this->curlAvailable()) {
             throw new EndpointFetchException(EndpointFetchReason::CurlUnavailable);
         }
 
+        $maxBytes = max(1, (int) config($configKey.'.max_body_bytes', 524_288));
         $options = $this->options($request->target);
         $options['sink'] = new LimitedResponseSink(
             Utils::streamFor(Utils::tryFopen('php://temp', 'w+')),
-            max(1, (int) config('badgeforge.endpoint.max_body_bytes', 524_288)),
+            $maxBytes,
         );
 
         $pending = Http::withOptions($options)
             ->withHeaders(['Accept' => 'application/json'])
-            ->withUserAgent((string) config('badgeforge.endpoint.user_agent', 'devtools-badgeforge/1.0'))
-            ->connectTimeout(max(1, (int) config('badgeforge.endpoint.connect_timeout', 3)))
-            ->timeout(max(1, (int) config('badgeforge.endpoint.timeout', 5)))
+            ->withUserAgent((string) config($configKey.'.user_agent', 'devtools-badgeforge/1.0'))
+            ->connectTimeout(max(1, (int) config($configKey.'.connect_timeout', 3)))
+            ->timeout(max(1, (int) config($configKey.'.timeout', 5)))
             ->withoutRedirecting();
 
         if ($request->etag !== null && $request->etag !== '') {
@@ -68,7 +93,7 @@ final class EndpointHttpClient
         }
 
         if ($response->status() === 304) {
-            return new EndpointFetchResult(null, $request->etag, true);
+            return new EndpointBodyResult(null, $request->etag, true);
         }
 
         if ($response->redirect()) {
@@ -86,10 +111,8 @@ final class EndpointHttpClient
 
         $this->assertContentType($response);
 
-        $body = $this->bodyWithinLimit($response);
-
-        return new EndpointFetchResult(
-            payload: ($parser ?? new EndpointPayloadParser)->parse($body),
+        return new EndpointBodyResult(
+            body: $this->bodyWithinLimit($response, $maxBytes),
             etag: $this->etagFrom($response),
         );
     }
@@ -138,9 +161,8 @@ final class EndpointHttpClient
     /**
      * @throws EndpointFetchException
      */
-    private function bodyWithinLimit(Response $response): string
+    private function bodyWithinLimit(Response $response, int $maxBytes): string
     {
-        $maxBytes = max(1, (int) config('badgeforge.endpoint.max_body_bytes', 524_288));
         $contentLength = (int) ($response->header('Content-Length') ?: 0);
 
         if ($contentLength > $maxBytes) {

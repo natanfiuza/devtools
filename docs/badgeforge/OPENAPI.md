@@ -1,17 +1,18 @@
 # OpenAPI BadgeForge (resumo)
 
-A superfície das F1–F6 está implementada: badges estáticas, PNG/fontes, logos
+A superfície das F1–F7 está implementada: badges estáticas, PNG/fontes, logos
 personalizados (`logo=u_<ULID>`), badges de provider (nove providers, quinze
-definições, incluindo cobertura e versões de runtime), badges pessoais e a
-badge de endpoint JSON. O OpenAPI completo em 3.1 é entregue na F8
-(`ADR-071`). A gestão de logos, presets, badges pessoais e endpoints é
-web/Inertia autenticada e não faz parte desta API.
+definições, incluindo cobertura e versões de runtime), badges pessoais, a
+badge de endpoint JSON e a badge de provider customizado. O OpenAPI completo
+em 3.1 é entregue na F8 (`ADR-071`). A gestão de logos, presets, badges
+pessoais, endpoints e providers customizados é web/Inertia autenticada e não
+faz parte desta API; analytics na F7 é superfície web + CSV (ADR-086).
 
 ```yaml
 openapi: 3.1.0
 info:
   title: BadgeForge API
-  version: 1.6.0
+  version: 1.7.0
 paths:
   /api/badges/static/{label}/{message}.{ext}:
     get:
@@ -314,6 +315,108 @@ paths:
           description: URL guardada não passa mais no guard de SSRF (código unsafe_url)
         "429":
           description: Rate limit do dono do endpoint (envelope rate_limited)
+        "503":
+          description: PNG pedido sem a extensão imagick
+  /api/badges/custom/{ulid}/{definition}/{path}.{ext}:
+    get:
+      summary: Custom provider badge
+      description: >
+        Badge de um provider criado pelo usuário (ADR-087). O provider mapeia,
+        de forma declarativa, campos de um JSON público para métricas via JSON
+        Pointer (RFC 6901) e formatador `text|number|percent`; não há código,
+        credencial ou header configurável do usuário. A URL é stateless e
+        anônima; o ULID é a única identidade pública e o `url_template` nunca
+        aparece nela, em props, CSV, log ou auditoria (só o dono vê o pointer e
+        o admin vê template/pointer na própria tela). A resposta do provider
+        fica em cache por `custom_providers.cache_ttl` (300 s), com stale de
+        86400 s e fallback de 60 s; `?cacheSeconds=` e `?refresh=1` são
+        ignorados. Diferente do endpoint da F5, qualquer falha no serving
+        (guard, DNS, fetch, JSON, pointer) vira STALE ou fallback 200, nunca
+        422 ou 500. O fetch é pinado no IP público validado (SSRF, ADR-084) e
+        o throttle é por dono do provider.
+      parameters:
+        - name: ulid
+          in: path
+          required: true
+          description: ULID opaco do provider customizado.
+          schema: { type: string, pattern: "^[0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{26}$" }
+        - name: definition
+          in: path
+          required: true
+          description: Slug de uma métrica declarada na criação do provider.
+          schema: { type: string, pattern: "^[a-z0-9][a-z0-9-]*$" }
+        - name: path
+          in: path
+          required: true
+          description: >
+            Segmentos do `path` no mesmo número e ordem de `path_params` do
+            provider (ex.: `{owner}/{repo}`). Cada segmento aceita
+            `[A-Za-z0-9._~-]{1,200}`; vazio, `.` e `..` são inválidos e a URL
+            responde 404.
+          schema: { type: string }
+        - name: ext
+          in: path
+          required: true
+          schema: { type: string, enum: [svg, png] }
+        - name: style
+          in: query
+          schema: { type: string, default: flat }
+        - name: label
+          in: query
+          description: Sobrescreve o `label` da métrica.
+          schema: { type: string }
+        - name: color
+          in: query
+          schema: { type: string }
+        - name: labelColor
+          in: query
+          schema: { type: string }
+        - name: logo
+          in: query
+          schema: { type: string }
+        - name: logoColor
+          in: query
+          schema: { type: string }
+        - name: logoSize
+          in: query
+          schema: { type: integer, minimum: 8, maximum: 20 }
+        - name: logoPosition
+          in: query
+          schema: { type: string, enum: [left, right] }
+        - name: link
+          in: query
+          schema: { type: string, format: uri }
+        - name: font
+          in: query
+          schema: { type: string, enum: [fira-code, libre-franklin, space-grotesk] }
+        - name: download
+          in: query
+          schema: { type: string, enum: ["1"] }
+      responses:
+        "200":
+          description: Badge image (inclusive stale e fallback)
+          headers:
+            Cache-Control:
+              schema: { type: string, example: "public, max-age=300" }
+            ETag:
+              schema: { type: string }
+            X-Badge-Cache:
+              description: HIT, MISS ou STALE. O fallback (sem valor bom) também sai como MISS.
+              schema: { type: string }
+            Warning:
+              description: '110 - "Response is Stale" quando a resposta é stale.'
+              schema: { type: string }
+          content:
+            image/svg+xml: {}
+            image/png: {}
+        "304":
+          description: Not modified (If-None-Match igual ao ETag)
+        "404":
+          description: >
+            ULID desconhecido, provider desabilitado pelo admin, definição
+            inexistente, path fora do contrato ou extensão diferente de svg/png
+        "429":
+          description: Rate limit do dono do provider customizado (envelope rate_limited)
         "503":
           description: PNG pedido sem a extensão imagick
 ```

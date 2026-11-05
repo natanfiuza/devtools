@@ -6,8 +6,50 @@
  * cores vem dos JSONs de `resources/badgeforge`, os mesmos lidos pelo PHP.
  */
 
-/** Modo do construtor: badge estatica local ou badge de provider (F4). */
-export type BadgeMode = 'static' | 'provider';
+/**
+ * Modo do construtor: badge estatica local, badge de provider (F4) ou provider
+ * customizado do dono (F7, ADR-087).
+ */
+export type BadgeMode = 'static' | 'provider' | 'custom';
+
+/** Formatadores aceitos por uma metrica customizada (espelho do enum PHP). */
+export type CustomMetricFormatter = 'text' | 'number' | 'percent';
+
+/** Metrica de um provider customizado; o slug e imutavel depois da criacao. */
+export interface BadgeForgeCustomProviderDefinition {
+    slug: string;
+    label: string;
+    pointer: string;
+    formatter: CustomMetricFormatter;
+}
+
+/**
+ * Provider customizado do dono (F7, ADR-087). A origem (`urlTemplate`) fica no
+ * servidor: o cliente so recebe a identidade e as coordenadas de path.
+ */
+export interface BadgeForgeCustomProvider {
+    id: string;
+    name: string;
+    enabled: boolean;
+    examplePath: string;
+    pathParams: string[];
+    definitions: BadgeForgeCustomProviderDefinition[];
+}
+
+/** Limites do provider customizado; `limit: null` = ilimitado; `0` = sem criacao. */
+export interface BadgeForgeCustomProviderLimits {
+    limit: number | null;
+    used: number;
+    nameMaxLength: number;
+    urlMaxLength: number;
+    examplePathMaxLength: number;
+    slugMaxLength: number;
+    labelMaxLength: number;
+    pointerMaxLength: number;
+    maxMetrics: number;
+    maxPathParams: number;
+    paramMaxLength: number;
+}
 
 export interface BadgeForgeLogo {
     slug: string;
@@ -32,6 +74,7 @@ export interface BadgeForgeLimits {
     personalBadges: BadgeForgePersonalBadgeLimits;
     endpointBadges: BadgeForgeEndpointBadgeLimits;
     providers: { maxParamLength: number };
+    customProviders: BadgeForgeCustomProviderLimits;
 }
 
 /** `limit: null` = ilimitado (pago); `0` = criacao bloqueada. */
@@ -70,6 +113,8 @@ export interface BadgeForgeManagement {
     canSavePresets: boolean;
     canCreatePersonalBadges: boolean;
     canCreateEndpointBadges: boolean;
+    /** Criar/editar provider customizado e so no pago (F7, ADR-087). */
+    canCreateCustomProviders: boolean;
     isPaid: boolean;
 }
 
@@ -181,6 +226,7 @@ export interface BadgeForgeToolProps {
     endpoint: string;
     providerEndpoint: string;
     personalEndpoint: string;
+    customEndpoint: string;
     styles: string[];
     logos: BadgeForgeLogo[];
     fonts: BadgeFont[];
@@ -192,6 +238,7 @@ export interface BadgeForgeToolProps {
     presets: BadgeForgePreset[];
     personalBadges: BadgeForgePersonalBadge[];
     endpointBadges: BadgeForgeEndpointBadge[];
+    customProviders: BadgeForgeCustomProvider[];
 }
 
 /** Cor resolvida: hexadecimal canonico (#rrggbb) e alfa entre 0 e 1. */

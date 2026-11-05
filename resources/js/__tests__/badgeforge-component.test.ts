@@ -144,6 +144,7 @@ function managedProps(
             canSavePresets: true,
             canCreatePersonalBadges: false,
             canCreateEndpointBadges: true,
+            canCreateCustomProviders: false,
             isPaid: false,
         },
         customLogos: [CUSTOM_LOGO],
