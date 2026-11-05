@@ -102,6 +102,18 @@ return [
             'security_body' => 'Solo HTTPS en el puerto 443, sin redirecciones, y todas las IP resueltas deben ser públicas. La conexión se fija a la IP validada, así que un cambio de DNS entre la comprobación y la petición no puede llegar a una dirección interna. La URL de origen queda en el servidor: no está en la página, ni en los logs, ni en la URL de la imagen.',
             'manage_cta' => 'Gestionar endpoints JSON',
         ],
+        'custom' => [
+            'title' => 'Proveedores personalizados',
+            'intro' => 'Las cuentas de pago pueden convertir cualquier documento JSON público en una insignia. Tú declaras una plantilla de URL HTTPS, los parámetros del path y un JSON Pointer por métrica; el servidor solo ejecuta ese mapeo declarativo.',
+            'url_label' => 'Formato de URL',
+            'paid_title' => 'Solo planes de pago',
+            'paid_body' => 'Crear y editar requiere un plan de pago. Tras un downgrade las insignias existentes siguen sirviendo y se pueden copiar y eliminar, pero no editar.',
+            'pointer_title' => 'JSON Pointer',
+            'pointer_body' => 'Cada métrica lee un valor escalar con RFC 6901, por ejemplo /stargazers_count o /items/0/score. Un valor ausente o no escalar cae en el mensaje neutro en lugar de romper la imagen.',
+            'security_title' => 'URL opaca y origen privado',
+            'security_body' => 'La imagen pública usa un identificador opaco en lugar del URL de origen. La plantilla se queda en el servidor, nunca vuelve al navegador y nunca aparece en logs, props de página ni exportaciones CSV. Las peticiones solo usan HTTPS, IP públicas, puerto 443, sin redirecciones y sin credenciales.',
+            'manage_cta' => 'Gestionar proveedores personalizados',
+        ],
         'cache' => [
             'title' => 'Caché, ETag y respuestas antiguas',
             'body' => 'Las respuestas de provider se guardan en caché durante {ttl} segundos. La imagen sale con ETag y Cache-Control, así que una segunda petición recibe 304 cuando nada cambió.',

@@ -178,6 +178,64 @@ return [
     ],
 
     /*
+    | Providers customizados (F7, ADR-087): o dono pago descreve um JSON
+    | externo por template + JSON Pointer, sem credencial. A URL publica e o
+    | ULID; o template fica no servidor. O probe usa o mesmo guard SSRF do
+    | endpoint (scheme/porta/CIDRs/depth acima) e os TTLs daqui.
+    */
+    'custom_providers' => [
+        'path' => '/api/badges/custom',
+        'limit' => (int) env('BADGEFORGE_CUSTOM_PROVIDERS_LIMIT', 10),
+        'name_max_length' => 80,
+        'url_max_length' => 2048,
+        'example_path_max_length' => 512,
+        'slug_max_length' => 32,
+        'label_max_length' => 80,
+        'pointer_max_length' => 256,
+        'max_metrics' => 10,
+        'max_path_params' => 5,
+        'param_max_length' => 200,
+        'cache_ttl' => 300,
+        'max_cache_ttl' => 3600,
+        'stale_ttl' => 86400,
+        'fallback_ttl' => 60,
+        'connect_timeout' => 3,
+        'timeout' => 5,
+        'max_body_bytes' => 524288,
+        'max_json_depth' => 32,
+        'user_agent' => 'devtools-badgeforge/1.0',
+        'unavailable_message' => 'unavailable',
+        'rate_limit' => [
+            'anonymous' => (int) env('BADGEFORGE_CUSTOM_LIMIT_ANONYMOUS', 60),
+            'free' => (int) env('BADGEFORGE_CUSTOM_LIMIT_FREE', 300),
+            'paid' => (int) env('BADGEFORGE_CUSTOM_LIMIT_PAID', 3000),
+            'decay_seconds' => 60,
+        ],
+    ],
+
+    /*
+    | Analytics das imagens com dono (F7, ADR-086). O bruto guarda cada acesso
+    | por ate 90 dias; o agregado diario sobrevive 400. IP/UA viram HMAC com
+    | APP_KEY; o UA cru e truncado. GeoIP e opcional: sem o arquivo, pais fica
+    | nulo e nada mais muda. Nenhum destino configuravel por usuario.
+    */
+    'analytics' => [
+        'raw_retention_days' => 90,
+        'daily_retention_days' => 400,
+        'free_window_days' => 30,
+        'paid_windows' => [7, 30, 90],
+        'admin_windows' => [7, 30, 90, 400],
+        'aggregate_days' => 7,
+        'top_limit' => 10,
+        'export_chunk' => 500,
+        'user_agent_max_length' => 512,
+        'geoip_path' => env(
+            'BADGEFORGE_GEOIP_DB',
+            storage_path('app/data/geoip/GeoLite2-Country.mmdb'),
+        ),
+    ],
+
+    /*
     | Logos embutidos: slug -> arquivo. O viewBox e o path sao lidos do
     | proprio SVG; o catalogo recusa arquivo que nao tenha exatamente um
     | <path> e o <svg> raiz.

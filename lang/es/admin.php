@@ -26,6 +26,9 @@ return [
         'audit' => 'Auditoría',
         'output_targets' => 'Destinos de salida',
         'ai_cache' => 'Caché de IA',
+        'badgeforge_providers' => 'Providers de BadgeForge',
+        'badgeforge_custom_providers' => 'Providers personalizados',
+        'badgeforge_analytics' => 'Volumen de BadgeForge',
         'back_to_site' => 'Volver al sitio',
     ],
 
@@ -466,6 +469,57 @@ return [
         'empty' => 'Nada registrado todavía.',
     ],
 
+    'badge_providers' => [
+        'title' => 'Providers de BadgeForge',
+        'description' => 'El catálogo global de providers y métricas. Apagar uno quita la ruta pública y la documentación sin borrar el historial.',
+        'readonly' => 'Aquí solo se edita el estado activo/inactivo; slug, plantilla y parser vienen de la migración.',
+        'provider' => 'Provider',
+        'definition' => 'Métrica',
+        'category' => 'Categoría',
+        'enabled' => 'Activo',
+        'disabled' => 'Apagado',
+        'toggle' => 'Activar o apagar este provider',
+        'toggle_definition' => 'Activar o apagar esta métrica',
+        'empty' => 'Ningún provider en el catálogo.',
+    ],
+
+    'badge_custom_providers' => [
+        'title' => 'Providers personalizados',
+        'description' => 'Providers JSON creados por cuentas pagas. El admin ve el origen para investigar; fuera de esta pantalla nunca sale del servidor.',
+        'name' => 'Nombre',
+        'owner' => 'Propietario',
+        'template' => 'Plantilla de origen',
+        'params' => 'Parámetros del path',
+        'example' => 'Path de ejemplo',
+        'metrics' => 'Métricas',
+        'metric' => 'Métrica',
+        'pointer' => 'Pointer',
+        'formatter' => 'Formato',
+        'state' => 'Estado',
+        'enabled' => 'Activo',
+        'disabled' => 'Apagado',
+        'toggle' => 'Deshabilitar o rehabilitar este provider',
+        'readonly' => 'El admin deshabilita y nunca elimina: el dato es del propietario.',
+        'empty' => 'Ningún provider personalizado.',
+        'created_at' => 'Creado',
+    ],
+
+    'badgeforge_analytics' => [
+        'title' => 'Volumen de BadgeForge',
+        'description' => 'Visualizaciones agregadas por día. El agregado guarda 400 días; los visitantes únicos quedan en el área del propietario.',
+        'window' => 'Período',
+        'window_days' => '{days} días',
+        'views' => 'Visualizaciones',
+        'cache_rate' => 'Proporción de caché',
+        'cache_detail' => '{hits} visualizaciones servidas desde caché',
+        'cache_none' => 'Sin datos de caché',
+        'day' => 'Día',
+        'cache_hits' => 'Desde caché',
+        'no_data' => 'Ninguna visualización en el período.',
+        'bar_title' => '{date}: {views} visualizaciones',
+        'note' => 'Los números vienen del agregado diario, que no permite deduplicar visitantes entre dimensiones.',
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'Correo verificado',
@@ -486,6 +540,15 @@ return [
         ],
         'output_target' => [
             'updated' => 'Destino de salida actualizado',
+        ],
+        'provider' => [
+            'updated' => 'Provider actualizado',
+        ],
+        'definition' => [
+            'updated' => 'Métrica del provider actualizada',
+        ],
+        'custom_provider' => [
+            'updated' => 'Provider personalizado actualizado',
         ],
         'ai_cache' => [
             'pruned' => 'Caché de IA depurada',
@@ -527,6 +590,10 @@ return [
         'subscriber_already_removed' => 'El suscriptor ya estaba dado de baja.',
         'output_target_saved' => 'Destino actualizado.',
         'output_target_unchanged' => 'El destino ya estaba en este estado.',
+        'badge_provider_saved' => 'Provider actualizado.',
+        'badge_provider_unchanged' => 'El provider ya estaba en este estado.',
+        'badge_custom_provider_saved' => 'Provider personalizado actualizado.',
+        'badge_custom_provider_unchanged' => 'El provider personalizado ya estaba en este estado.',
         'ai_cache_pruned' => 'Respuestas expiradas eliminadas del caché.',
         'ai_cache_empty' => 'No hay respuestas expiradas en el caché.',
         'plan_saved' => 'Plan actualizado.',

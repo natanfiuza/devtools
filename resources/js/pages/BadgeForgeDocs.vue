@@ -67,6 +67,7 @@ export type BadgeForgeDocsProps = {
     providerEndpoint: string;
     personalEndpoint: string;
     jsonEndpoint: string;
+    customEndpoint: string;
     cacheTtl: number;
     endpointCacheTtl: number;
     endpointRateLimits: BadgeForgeDocsEndpointRateLimits;
@@ -89,6 +90,7 @@ const staticEndpoint = computed(() => trimSlash(props.staticEndpoint));
 const providerEndpoint = computed(() => trimSlash(props.providerEndpoint));
 const personalEndpoint = computed(() => trimSlash(props.personalEndpoint));
 const jsonEndpoint = computed(() => trimSlash(props.jsonEndpoint));
+const customEndpoint = computed(() => trimSlash(props.customEndpoint));
 
 const toolUrl = computed(() => `/${routes.localeSlug.value}/tools/badgeforge`);
 const dashboardUrl = computed(
@@ -109,6 +111,10 @@ const personalUrlFormat = computed(
 
 const jsonUrlFormat = computed(
     () => `${origin.value}${jsonEndpoint.value}/{ulid}.svg`,
+);
+
+const customUrlFormat = computed(
+    () => `${origin.value}${customEndpoint.value}/{id}/{metric}/{path}.svg`,
 );
 
 const jsonContract = `{
@@ -581,6 +587,73 @@ async function copyValue(value: string): Promise<void> {
         >
           <Link :href="dashboardUrl">
             {{ t('docs.badgeforge.endpoint.manage_cta') }}
+            <ArrowRight class="size-4" />
+          </Link>
+        </Button>
+      </div>
+    </section>
+
+    <!-- Custom providers -->
+    <section
+      class="space-y-4"
+      data-test="badgeforge-docs-custom"
+    >
+      <h2 class="text-xl font-semibold tracking-tight">
+        {{ t('docs.badgeforge.custom.title') }}
+      </h2>
+      <p class="max-w-3xl text-sm text-muted-foreground">
+        {{ t('docs.badgeforge.custom.intro') }}
+      </p>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="space-y-1 rounded-lg border border-border bg-surface p-4">
+          <p class="text-xs text-muted-foreground">
+            {{ t('docs.badgeforge.custom.url_label') }}
+          </p>
+          <code
+            class="block font-mono text-xs break-all"
+            data-test="badgeforge-docs-custom-url"
+          >{{ customUrlFormat }}</code>
+        </div>
+
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="text-sm font-semibold">
+            {{ t('docs.badgeforge.custom.paid_title') }}
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            {{ t('docs.badgeforge.custom.paid_body') }}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="text-sm font-semibold">
+            {{ t('docs.badgeforge.custom.pointer_title') }}
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            {{ t('docs.badgeforge.custom.pointer_body') }}
+          </p>
+        </div>
+
+        <div class="space-y-2 rounded-lg border border-border bg-surface p-4">
+          <h3 class="inline-flex items-center gap-2 text-sm font-semibold">
+            <ShieldCheck class="size-4 text-accent" />
+            {{ t('docs.badgeforge.custom.security_title') }}
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            {{ t('docs.badgeforge.custom.security_body') }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          as-child
+          data-test="badgeforge-docs-custom-manage"
+        >
+          <Link :href="dashboardUrl">
+            {{ t('docs.badgeforge.custom.manage_cta') }}
             <ArrowRight class="size-4" />
           </Link>
         </Button>

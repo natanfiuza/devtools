@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\OutputTargetController;
 use App\Http\Controllers\Api\V1\SqlQueryController;
+use App\Http\Controllers\BadgeForge\CustomProviderBadgeController;
 use App\Http\Controllers\BadgeForge\EndpointBadgeController;
 use App\Http\Controllers\BadgeForge\ProviderBadgeController;
 use App\Http\Controllers\BadgeForge\StaticBadgeController;
@@ -73,6 +74,17 @@ Route::prefix('badges')
             ->where('ext', 'svg|png')
             ->middleware('throttle:badgeforge-endpoint')
             ->name('endpoint');
+
+        // F7: provider customizado (ADR-087). Tambem vem antes do provider
+        // generico; `custom` e slug reservado no catalogo. O path aceita `/`
+        // (owner/repo) e o controller valida exatamente N segmentos.
+        Route::get('custom/{customProvider}/{definition}/{path}.{ext}', CustomProviderBadgeController::class)
+            ->where('customProvider', '[0-9A-Za-z]{1,64}')
+            ->where('definition', '[a-z0-9][a-z0-9-]*')
+            ->where('path', '.+')
+            ->where('ext', 'svg|png')
+            ->middleware('throttle:badgeforge-custom')
+            ->name('custom');
 
         // F4: registrada depois da estatica de proposito. O Symfony casa na
         // ordem de registro, entao `/api/badges/static/...` continua vencendo

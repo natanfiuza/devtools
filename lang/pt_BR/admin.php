@@ -26,6 +26,9 @@ return [
         'audit' => 'Auditoria',
         'output_targets' => 'Alvos de saída',
         'ai_cache' => 'Cache de IA',
+        'badgeforge_providers' => 'Providers do BadgeForge',
+        'badgeforge_custom_providers' => 'Providers customizados',
+        'badgeforge_analytics' => 'Volume do BadgeForge',
         'back_to_site' => 'Voltar ao site',
     ],
 
@@ -466,6 +469,57 @@ return [
         'empty' => 'Nada registrado ainda.',
     ],
 
+    'badge_providers' => [
+        'title' => 'Providers do BadgeForge',
+        'description' => 'O catálogo global de providers e métricas. Desligar um tira a rota pública e a documentação sem apagar o histórico.',
+        'readonly' => 'Só o estado ligado/desligado é editado aqui; slug, template e parser vêm da migração.',
+        'provider' => 'Provider',
+        'definition' => 'Métrica',
+        'category' => 'Categoria',
+        'enabled' => 'Ativo',
+        'disabled' => 'Desligado',
+        'toggle' => 'Ligar ou desligar este provider',
+        'toggle_definition' => 'Ligar ou desligar esta métrica',
+        'empty' => 'Nenhum provider no catálogo.',
+    ],
+
+    'badge_custom_providers' => [
+        'title' => 'Providers customizados',
+        'description' => 'Providers JSON criados pelas contas pagas. O admin vê a origem para investigar; fora desta tela ela nunca sai do servidor.',
+        'name' => 'Nome',
+        'owner' => 'Dono',
+        'template' => 'Template de origem',
+        'params' => 'Parâmetros do path',
+        'example' => 'Path de exemplo',
+        'metrics' => 'Métricas',
+        'metric' => 'Métrica',
+        'pointer' => 'Pointer',
+        'formatter' => 'Formatação',
+        'state' => 'Estado',
+        'enabled' => 'Ativo',
+        'disabled' => 'Desligado',
+        'toggle' => 'Desabilitar ou reabilitar este provider',
+        'readonly' => 'O admin desabilita e nunca exclui: o dado é do dono.',
+        'empty' => 'Nenhum provider customizado.',
+        'created_at' => 'Criado em',
+    ],
+
+    'badgeforge_analytics' => [
+        'title' => 'Volume do BadgeForge',
+        'description' => 'Visualizações agregadas por dia. O agregado guarda 400 dias; visitantes únicos ficam na área do dono.',
+        'window' => 'Período',
+        'window_days' => '{days} dias',
+        'views' => 'Visualizações',
+        'cache_rate' => 'Taxa de cache',
+        'cache_detail' => '{hits} visualizações servidas do cache',
+        'cache_none' => 'Sem dados de cache',
+        'day' => 'Dia',
+        'cache_hits' => 'Do cache',
+        'no_data' => 'Nenhuma visualização no período.',
+        'bar_title' => '{date}: {views} visualizações',
+        'note' => 'Os números vêm do agregado diário, que não permite deduplicar visitantes entre dimensões.',
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'E-mail verificado',
@@ -486,6 +540,15 @@ return [
         ],
         'output_target' => [
             'updated' => 'Alvo de saída atualizado',
+        ],
+        'provider' => [
+            'updated' => 'Provider atualizado',
+        ],
+        'definition' => [
+            'updated' => 'Métrica do provider atualizada',
+        ],
+        'custom_provider' => [
+            'updated' => 'Provider customizado atualizado',
         ],
         'ai_cache' => [
             'pruned' => 'Cache de IA podado',
@@ -527,6 +590,10 @@ return [
         'subscriber_already_removed' => 'O assinante já estava descadastrado.',
         'output_target_saved' => 'Alvo atualizado.',
         'output_target_unchanged' => 'O alvo já estava neste estado.',
+        'badge_provider_saved' => 'Provider atualizado.',
+        'badge_provider_unchanged' => 'O provider já estava neste estado.',
+        'badge_custom_provider_saved' => 'Provider customizado atualizado.',
+        'badge_custom_provider_unchanged' => 'O provider customizado já estava neste estado.',
         'ai_cache_pruned' => 'Respostas expiradas removidas do cache.',
         'ai_cache_empty' => 'Nenhuma resposta expirada no cache.',
         'plan_saved' => 'Plano atualizado.',

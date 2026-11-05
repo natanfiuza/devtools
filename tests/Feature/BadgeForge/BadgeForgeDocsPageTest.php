@@ -36,6 +36,7 @@ it('entrega o catalogo de providers e os endpoints nos cinco idiomas', function 
             ->where('providerEndpoint', (string) config('badgeforge.provider_endpoint'))
             ->where('personalEndpoint', (string) config('badgeforge.personal_endpoint'))
             ->where('jsonEndpoint', (string) config('badgeforge.endpoint.path'))
+            ->where('customEndpoint', (string) config('badgeforge.custom_providers.path'))
             ->where('cacheTtl', (int) config('badgeforge.providers.cache_ttl'))
             ->where('endpointCacheTtl', (int) config('badgeforge.endpoint.cache_ttl'))
             ->where('endpointRateLimits', [
@@ -66,6 +67,7 @@ it('acompanha a configuracao de endpoints e de cache', function () {
         'badgeforge.provider_endpoint' => '/api/badges',
         'badgeforge.personal_endpoint' => '/b',
         'badgeforge.endpoint.path' => '/api/badges/endpoint',
+        'badgeforge.custom_providers.path' => '/api/badges/custom',
         'badgeforge.providers.cache_ttl' => 120,
         'badgeforge.endpoint.cache_ttl' => 90,
         'badgeforge.endpoint.rate_limit.anonymous' => 11,
@@ -80,6 +82,7 @@ it('acompanha a configuracao de endpoints e de cache', function () {
             ->where('providerEndpoint', '/api/badges')
             ->where('personalEndpoint', '/b')
             ->where('jsonEndpoint', '/api/badges/endpoint')
+            ->where('customEndpoint', '/api/badges/custom')
             ->where('cacheTtl', 120)
             ->where('endpointCacheTtl', 90)
             ->where('endpointRateLimits', [

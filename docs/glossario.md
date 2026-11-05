@@ -147,7 +147,7 @@
 - ETag da badge: hash sha256 do SVG enviado no header; `If-None-Match` igual responde 304 sem corpo (ADR-076).
 - TTL da badge: `cacheSeconds` efetivo, padrao 86400 e clamp 300-86400 em `config/badgeforge.php`, enviado em `Cache-Control: public, max-age=...` (ADR-076).
 - Acesso ao provider: item publico e lido anonimamente na API publica do provider; item privado exige PAT do usuario pagador, cifrado em repouso, vinculado a badge pessoal, revogavel e nunca presente em URL, log ou exportacao (ADR-068).
-- Provider customizado: provider definido por usuario pago em painel (F7), com URL e parse proprios.
+- Provider customizado: provider do proprio usuario pago (F7), servido em `/api/badges/custom/{ulid}/{definition}/{path}.{svg|png}` e descrito por um `url_template` com placeholders de path e metricas declarativas; nao tem codigo, credencial nem header configuravel, fica fora do catalogo global e dos docs de providers e a URL publica e opaca (ADR-087).
 - Preset: snapshot normalizado do formulario de badge, salvo por conta verificada e reaplicado no builder ou no painel; nao tem URL publica, cache nem analytics (F3, ADR-066 e ADR-079).
 - Logo personalizado: SVG multi-path enviado pela conta, aceito somente com `<svg>`, `<g>` e `<path>` e guardado como `viewBox` + paths normalizados; o arquivo cru nunca e servido (F3, ADR-078).
 - Slug opaco: identificador publico que nao revela dono nem caminho de conta; o logo personalizado usa `u_<ULID>` e o namespace `u_` e reservado (ADR-078).
@@ -157,5 +157,16 @@
 - Versao de runtime: ultima versao estavel publicada por um provider de runtime (`v13.40.0`, `8.5.12`, `3.15.2`); no Laravel e a primeira entrada de `versions[]` que nao termina em `-dev` (ADR-085).
 - Percentual de cobertura: valor de 0 a 100 lido da branch padrao e formatado como inteiro (`66.89` vira `67%`, `94.148` vira `94%`); fora do intervalo ou shape invalido vira fallback 200, nunca 500 (F6, ADR-085).
 - Path literal: segmento fixo de `path_pattern` usado por definicoes sem params (`latest`), validado contra `[A-Za-z0-9._-]+` no servidor e no builder; vazio, com `{`, barra ou dot segment responde 404 (F6, ADR-085).
+- Template de URL do provider customizado: URL HTTPS com placeholders `{nome}` que precisam ser exatamente os mesmos (e na mesma ordem) de `path_params`; o servidor so a renderiza com os segmentos do path (`rawurlencode`) e a origem nunca sai do servidor - so o dono recebe o pointer e o admin ve template/pointer na propria tela (ADR-087).
+- Metrica customizada: linha de `badge_custom_provider_definitions` com `slug`, `label`, `pointer` e `formatter`; o `slug` e imutavel e o conjunto de metricas e fixo na criacao do provider (ADR-087).
+- JSON Pointer: notacao RFC 6901 que aponta um no dentro do documento JSON (`/stargazers_count`, `/data/0/name`), com `~0` e `~1` para escapar `~` e `/`; no provider customizado so escalar vira badge, e ausente, objeto ou array cai no fallback (ADR-087).
+- Formatter da metrica customizada: um de `text`, `number` ou `percent` - como o valor extraido vira a message da badge; `number` e `percent` reusam a formatacao dos providers globais (ADR-087).
+- Visualizacao: leitura de uma imagem com dono - badge pessoal, endpoint JSON ou badge de provider customizado - gravada em `badge_views` tanto em 200 quanto em 304, uma linha por acesso e sem dedupe; e a unidade do analytics (F7, ADR-086).
+- Visitante unico: contagem de `COUNT(DISTINCT ip_hash)` no periodo; o IP nunca e guardado em claro, so o HMAC-SHA256 com `APP_KEY`, entao nao e pessoa identificada e nao sobrevive a troca da chave (ADR-086).
+- Agregado diario: linha de `badge_view_dailies` com o mesmo recorte de sujeito, dia, pais, referer, formato e definicao, com `views`, `unique_visitors` e `cache_hits`; alimenta o historico longo (400 dias) e a tela do admin e e reconstruido de forma idempotente a partir do bruto (ADR-086).
+- Taxa de cache: proporcao de visualizacoes servidas do cache no periodo; no provider custom o STALE conta como hit e o fallback conta como miss (ADR-086).
+- GeoIP opcional: resolucao do pais da visualizacao por um arquivo GeoLite2 local (`maxmind-db/reader`, caminho em `analytics.geoip_path`); sem arquivo, corrompido ou em IP privado o pais fica nulo e a gravacao segue (ADR-086).
+- Referer domain: host em minusculas extraido do cabecalho `Referer`, sem caminho nem query, nulo quando ausente ou invalido (ADR-086).
+- Hash de privacidade: HMAC-SHA256 com `APP_KEY` sobre o IP e sobre o User-Agent; o UA cru fica truncado e nenhum dos dois aparece em CSV, props ou log (ADR-086).
 
 

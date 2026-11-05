@@ -15,6 +15,8 @@ import {
     destroy as destroyPreset,
     update as updatePreset,
 } from '@/routes/badgeforge/presets';
+import AnalyticsPanel from '@/tools/badgeforge/AnalyticsPanel.vue';
+import CustomProvidersPanel from '@/tools/badgeforge/CustomProvidersPanel.vue';
 import EndpointBadgesPanel from '@/tools/badgeforge/EndpointBadgesPanel.vue';
 import LogoPreview from '@/tools/badgeforge/LogoPreview.vue';
 import LogoUploadForm from '@/tools/badgeforge/LogoUploadForm.vue';
@@ -45,6 +47,7 @@ const presets = props.toolProps.presets;
 const logoLimits = props.toolProps.limits.customLogos;
 const presetLimits = props.toolProps.limits.presets;
 const personalLimits = props.toolProps.limits.personalBadges;
+const customProviderLimits = props.toolProps.limits.customProviders;
 
 const previewId = ref<string | null>(null);
 const previewLogo = ref<BadgeLogo | null>(null);
@@ -234,6 +237,22 @@ function deletePreset(preset: BadgeForgePreset): void {
             }}
           </dd>
         </div>
+
+        <div class="flex items-center justify-between gap-4 px-4 py-2">
+          <dt class="text-sm text-subtle">
+            {{ t('account.badgeforge.limit_custom_providers') }}
+          </dt>
+          <dd class="text-sm">
+            {{
+              customProviderLimits.limit === null
+                ? t('account.badgeforge.unlimited')
+                : t('account.badgeforge.used_of', {
+                  used: customProviderLimits.used,
+                  limit: customProviderLimits.limit,
+                })
+            }}
+          </dd>
+        </div>
       </dl>
 
       <div
@@ -252,6 +271,11 @@ function deletePreset(preset: BadgeForgePreset): void {
         </Button>
       </div>
     </section>
+
+    <AnalyticsPanel
+      :analytics="props.analytics ?? null"
+      :upgrade-url="upgradeUrl"
+    />
 
     <section class="space-y-3">
       <h3 class="text-sm font-medium">
@@ -565,6 +589,11 @@ function deletePreset(preset: BadgeForgePreset): void {
     </section>
 
     <PersonalBadgesPanel
+      :tool-props="toolProps"
+      :upgrade-url="upgradeUrl"
+    />
+
+    <CustomProvidersPanel
       :tool-props="toolProps"
       :upgrade-url="upgradeUrl"
     />

@@ -222,6 +222,21 @@ return [
         'invalid_payload' => 'The endpoint did not return a valid shields JSON badge.',
     ],
 
+    'badge_custom_provider' => [
+        'url_length' => 'The template is longer than allowed.',
+        'url_chars' => 'The template contains characters that are not allowed.',
+        'scheme' => 'Only HTTPS templates are accepted.',
+        'userinfo' => 'Remove the username and password from the template.',
+        'host' => 'This host is not allowed.',
+        'port' => 'Only port 443 is accepted.',
+        'unresolvable' => 'The host could not be resolved.',
+        'unsafe_ip' => 'The host resolves to a private or reserved address.',
+        'redirect' => 'The source redirects to another address.',
+        'invalid_payload' => 'The source did not return a JSON object.',
+        'example_path' => 'The example path does not match the path parameters.',
+        'pointer_missing' => 'A JSON Pointer did not resolve to a scalar value in the example response.',
+    ],
+
     'attributes' => [
         'amount' => 'amount',
         'code' => 'code',

@@ -3,10 +3,13 @@ import { Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     BadgePercent,
+    Blocks,
     Boxes,
+    ChartColumn,
     ClipboardList,
     CreditCard,
     Database,
+    Hexagon,
     LayoutGrid,
     Mail,
     ScrollText,
@@ -85,6 +88,21 @@ const navItems = computed<NavItem[]>(() => [
         title: t('admin.nav.ai_cache'),
         href: admin.aiCache.index.url(),
         icon: Database,
+    },
+    {
+        title: t('admin.nav.badgeforge_providers'),
+        href: admin.badgeforge.providers.index.url(),
+        icon: Hexagon,
+    },
+    {
+        title: t('admin.nav.badgeforge_custom_providers'),
+        href: admin.badgeforge.customProviders.index.url(),
+        icon: Blocks,
+    },
+    {
+        title: t('admin.nav.badgeforge_analytics'),
+        href: admin.badgeforge.analytics.index.url(),
+        icon: ChartColumn,
     },
     {
         title: t('admin.nav.audit'),

@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\BadgeForge\AnalyticsExportController;
 use App\Http\Controllers\BadgeForge\BadgeForgeAccountController;
 use App\Http\Controllers\BadgeForge\BadgePresetController;
 use App\Http\Controllers\BadgeForge\CustomLogoController;
+use App\Http\Controllers\BadgeForge\CustomProviderManagementController;
 use App\Http\Controllers\BadgeForge\EndpointManagementController;
 use App\Http\Controllers\BadgeForge\PersonalBadgeManagementController;
 use Illuminate\Support\Facades\Route;
@@ -70,6 +72,26 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         Route::delete('badgeforge/endpoints/{badgeEndpoint}', [EndpointManagementController::class, 'destroy'])
             ->whereUlid('badgeEndpoint')
             ->name('badgeforge.endpoints.destroy');
+
+        // Providers customizados (F7, ADR-087). Criar/editar exige plano pago;
+        // excluir segue liberado no downgrade. A URL publica e opaca e fica em
+        // `routes/api.php`.
+        Route::middleware('badgeforge.paid')->group(function (): void {
+            Route::post('badgeforge/custom-providers', [CustomProviderManagementController::class, 'store'])
+                ->name('badgeforge.custom-providers.store');
+            Route::patch('badgeforge/custom-providers/{badgeCustomProvider}', [CustomProviderManagementController::class, 'update'])
+                ->whereUlid('badgeCustomProvider')
+                ->name('badgeforge.custom-providers.update');
+        });
+        Route::delete('badgeforge/custom-providers/{badgeCustomProvider}', [CustomProviderManagementController::class, 'destroy'])
+            ->whereUlid('badgeCustomProvider')
+            ->name('badgeforge.custom-providers.destroy');
+
+        // Exportacao de analytics (F7, ADR-086): so pago; o CSV nao carrega
+        // IP, hash de IP nem User-Agent.
+        Route::get('badgeforge/analytics/export', AnalyticsExportController::class)
+            ->middleware('badgeforge.paid')
+            ->name('badgeforge.analytics.export');
     });
 
     Route::post('badgeforge/badges/{badgeAsset}/refresh', [PersonalBadgeManagementController::class, 'refresh'])

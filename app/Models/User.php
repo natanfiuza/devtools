@@ -327,6 +327,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Providers JSON customizados da conta (F7, ADR-087).
+     *
+     * @return HasMany<BadgeCustomProvider, $this>
+     */
+    public function badgeCustomProviders(): HasMany
+    {
+        return $this->hasMany(BadgeCustomProvider::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

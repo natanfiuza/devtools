@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\BadgeForge;
 
+use App\Enums\BadgeViewSubject;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeAsset;
+use App\Support\BadgeForge\Analytics\BadgeViewRecorder;
 use App\Support\BadgeForge\BadgeImageResponder;
 use App\Support\BadgeForge\Personal\PersonalBadgeRenderer;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +29,7 @@ final class PersonalBadgeController extends Controller
         string $badgeAsset,
         PersonalBadgeRenderer $renderer,
         BadgeImageResponder $responder,
+        BadgeViewRecorder $recorder,
     ): Response|JsonResponse {
         try {
             $asset = BadgeAsset::query()
@@ -51,7 +54,7 @@ final class PersonalBadgeController extends Controller
             ? ['Warning' => '110 - "Response is Stale"']
             : [];
 
-        return $responder->respond(
+        $response = $responder->respond(
             $request,
             $badge->spec,
             $badge->svg,
@@ -59,5 +62,19 @@ final class PersonalBadgeController extends Controller
             $extension === 'png' ? $badge->png : null,
             $headers,
         );
+
+        // Analytics so depois do responder: um 503 (sem Imagick) nao conta.
+        if (in_array($response->getStatusCode(), [200, 304], true)) {
+            $recorder->record(
+                $request,
+                BadgeViewSubject::Personal,
+                (string) $asset->getKey(),
+                $asset->user,
+                format: $extension,
+                style: $badge->spec->style->id,
+            );
+        }
+
+        return $response;
     }
 }

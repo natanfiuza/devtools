@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\AiCacheController;
 use App\Http\Controllers\Admin\AuditController;
+use App\Http\Controllers\Admin\BadgeAnalyticsAdminController;
+use App\Http\Controllers\Admin\BadgeCustomProviderAdminController;
+use App\Http\Controllers\Admin\BadgeProviderAdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\OutputTargetController;
@@ -113,6 +116,26 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
         Route::get('ai-cache', [AiCacheController::class, 'index'])->name('ai-cache.index');
         Route::delete('ai-cache/expired', [AiCacheController::class, 'destroyExpired'])
             ->name('ai-cache.destroy-expired');
+
+        // BadgeForge (F7): catalogo global, providers customizados e volume.
+        // O catalogo so liga/desliga; o custom so desabilita; o volume e
+        // leitura do agregado diario.
+        Route::get('badgeforge/providers', [BadgeProviderAdminController::class, 'index'])
+            ->name('badgeforge.providers.index');
+        Route::patch('badgeforge/providers/{provider}', [BadgeProviderAdminController::class, 'update'])
+            ->name('badgeforge.providers.update');
+        Route::patch(
+            'badgeforge/providers/{provider}/definitions/{definition}',
+            [BadgeProviderAdminController::class, 'updateDefinition'],
+        )->name('badgeforge.provider-definitions.update');
+
+        Route::get('badgeforge/custom-providers', [BadgeCustomProviderAdminController::class, 'index'])
+            ->name('badgeforge.custom-providers.index');
+        Route::patch('badgeforge/custom-providers/{customProvider}', [BadgeCustomProviderAdminController::class, 'update'])
+            ->name('badgeforge.custom-providers.update');
+
+        Route::get('badgeforge/analytics', [BadgeAnalyticsAdminController::class, 'index'])
+            ->name('badgeforge.analytics.index');
 
         Route::get('audit', AuditController::class)->name('audit.index');
     });

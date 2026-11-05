@@ -5,8 +5,9 @@ BadgeForge é uma plataforma de badges SVG/PNG integrada ao devtools.natanfiuza.
 
 ## 2. Perfis
 - Anônimo: badges estáticas, estilos, logos embutidos, preview, snippets, download.
-- Cadastrado (F3): até 2 logos personalizados (`custom_logos.free_limit`, em config), presets ilimitados, JSON endpoint (F5), analytics básico (F7).
-- Pago: logos personalizados ilimitados, badges pessoais (F4, entregue), providers customizados (F7), analytics completo, exportação CSV, sem limite de badges pessoais.
+- Cadastrado (F3): até 2 logos personalizados (`custom_logos.free_limit`, em config), presets ilimitados, JSON endpoint (F5), analytics de 30 dias (F7, entregue).
+- Pago: logos personalizados ilimitados, badges pessoais (F4, entregue), providers customizados até `custom_providers.limit` (F7, entregue), analytics completo com janelas 7/30/90 e exportação CSV (F7), sem limite de badges pessoais.
+- Admin: vê o catálogo, os providers customizados (com template e pointer), desabilita providers/definições e acompanha o volume global em 7/30/90/400 dias.
 
 ## 3. Formatos
 - SVG: formato canônico (F1, ADR-073).
@@ -47,6 +48,11 @@ GET /api/badges/endpoint/{ulid}.{svg|png}  (F5, entregue)
 
 Apenas cadastrados: o dono cadastra nome + URL de origem em `/dashboard/badgeforge` e a URL pública leva só o ULID. A imagem é stateless e anônima como a badge pessoal; ULID desconhecido responde 404. HTTPS obrigatório (porta 443), SSRF bloqueado com DNS pinado, sem redirect; contrato shields v1 (`schemaVersion=1`, `label`/`message` obrigatórios, `color`/`labelColor` opcionais) e TTL fixo de 300 s — `?cacheSeconds=` e `?refresh=1` são ignorados. O tipo está no SPEC §6 por causa da referência; a decisão completa está na ADR-083 e a defesa em rede na ADR-084.
 
+### Provider customizado
+GET /api/badges/custom/{ulid}/{definition}/{path}.{svg|png}  (F7, entregue)
+
+Apenas plano pago cria e edita (limite em `custom_providers.limit`, default 10; `null` = ilimitado); o Free continua servindo, copiando e excluindo após downgrade, mas recebe 403 para criar/editar. O dono declara um template HTTPS, os placeholders do path e, por métrica, um JSON Pointer (RFC 6901) e um formatador `text|number|percent`. A URL pública é opaca e stateless; o template nunca sai do servidor. Template e conjunto de métricas são imutáveis (trocar = excluir e recriar); `label`, `pointer` e `formatter` são editáveis. O cadastro valida a origem com um `example_path` concreto: shape inválido responde 422, falha de rede é tolerada. Qualquer falha no serving vira stale/fallback 200, nunca 500. A imagem participa do analytics com `definition` preenchida (ADR-086, ADR-087).
+
 ### Pessoal
 GET /b/{username}/{ulid}.{svg|png}  (F4, entregue)
 
@@ -63,9 +69,17 @@ Cache estático do PNG (F2): `storage/app/data/tools/badgeforge/static/{sha256(s
 
 Tabelas:
 - badge_assets (F4, ADR-081): id ULID, **user_id obrigatório** (FK em cascata), name, type (`static|provider`), private, provider_slug, definition_slug, params (JSON), form (JSON — snapshot cosmético), credential (cifrado), credential_username, credential_fingerprint, credential_set_at, svg_path, png_path, etag, bytes, last_generated_at, expires_at, timestamps; único por `(user_id, name)` e índice `(user_id, created_at)`. **Desvio consciente do SPEC anterior**: não há coluna `slug` (o identificador público é o ULID) nem `source_path` (equivale a `svg_path`/`png_path`); `user_id` deixou de ser nullable porque não existe badge anônima.
-- badge_asset_views: id, badge_asset_id, user_id nullable, ip_hash, user_agent_hash, user_agent, referer_domain, country, format, style, cache_hit, viewed_at.
-
 - badge_endpoints (F5, ADR-083): id ULID, **user_id obrigatório** (FK em cascata), name (80), url (2048 — URL canônica de origem), timestamps; único por `(user_id, name)` e índice `(user_id, created_at)`. Não há coluna de segredo nem de payload: o corpo da origem nunca é persistido. A URL é `#[Hidden]` no model e fica fora de props, flash e log; exportação é a exceção explícita (dado do dono, download dele).
+
+Analytics (F7, ADR-086; substitui o desenho do ADR-063):
+
+- badge_views: id bigint, subject_type (`personal|endpoint|custom`), subject_id (ULID), user_id (FK em cascata), definition (nula em pessoal/endpoint), ip_hash (HMAC-SHA256), user_agent_hash (HMAC-SHA256), user_agent truncado, referer_domain, country (2 letras ou nula), format, style, cache_hit, viewed_at; índices `(subject_type, subject_id, viewed_at)`, `(user_id, viewed_at)` e `(viewed_at)`.
+- badge_view_dailies: mesmas dimensões de sujeito + `day`, `country`/`referer_domain`/`format`/`definition` com default `''`, `views`, `unique_visitors`, `cache_hits`; único por `(subject_type, subject_id, day, country, referer_domain, format, definition)`, índices `(user_id, day)` e `(day)`. O default vazio evita NULL duplicado no único do MySQL.
+
+Providers customizados (F7, ADR-087):
+
+- badge_custom_providers: id ULID, user_id (FK em cascata), name (80), url_template (2048, `#[Hidden]`), path_params (JSON ordenado), example_path (512), metrics_version (uint, namespace de cache), enabled, timestamps; único por `(user_id, name)` e índice `(user_id, created_at)`.
+- badge_custom_provider_definitions: id ULID, provider_id (FK em cascata), slug (32), label (80), pointer (256), formatter (`text|number|percent`), sort, timestamps; único por `(provider_id, slug)` e índice `(provider_id, sort)`.
 
 F3 (ADR-078, ADR-079):
 - badge_custom_logos: id ULID, user_id, name, view_box, paths (JSON), path_count, size_bytes, timestamps; único por (user_id, name). Guarda só o SVG normalizado — o arquivo enviado nunca vai para banco ou disco.
@@ -88,7 +102,7 @@ Providers iniciais (F4, entregue): github, npm, packagist, docker — sempre cha
 
 Providers da F6 (entregue, ADR-085): codecov (`coverage`, `totals.coverage`), coveralls (`coverage`, `covered_percent`), laravel (`v` e `dt` de `stats.json`, uma chamada para as duas), php (`version` do primeiro release de `php.net`) e python (`latest` do `endoflife.date`). Categorias novas: `coverage` e `runtime`. Os cinco são públicos e sem PAT (`supports_private=false`). Cobertura é percentual inteiro da branch padrão. As definições de runtime usam `required_params=[]` e `path_pattern=latest`; o parser e o builder só aceitam esse literal.
 
-Providers customizados: apenas pagos. Configuráveis via painel (F7).
+Providers customizados (F7, entregue, ADR-087): apenas plano pago cria e edita, com limite `custom_providers.limit` (default 10; `null` = ilimitado). A tabela é própria (`badge_custom_providers` + `badge_custom_provider_definitions`) e não se mistura ao catálogo global: `custom` é slug reservado e a rota `/api/badges/custom/...` é registrada antes da rota genérica. O mapeamento é declarativo — template HTTPS + `path_params` + JSON Pointer RFC 6901 por métrica, com formatadores `text`, `number` e `percent`. `text` normaliza e trunca pelo limite do badge; `number` e `percent` reusam o `ProviderMetricFormatter`. Nenhum código, credencial ou header do usuário é executado. Template e conjunto de métricas são imutáveis; `label`, `pointer` e `formatter` são editáveis e incrementam `metrics_version`. O dono nunca recebe `url_template`; recebe `pointer` (é ele quem edita). O admin vê template e pointer para investigar, pode desabilitar (URL vira 404) e nunca exclui; desabilitado, o provider continua na lista do dono para que ele possa excluir.
 
 ## 9. Acesso e credenciais
 - Item **público**: lido anonimamente na API pública do provider. Não há token global por provider em `.env`, `config/` ou banco.
@@ -105,6 +119,7 @@ F4 (entregue): `credential` usa cast `encrypted` e a coluna é `hidden` com `cre
 - Provider (F4/F6): 300s padrão (`providers.cache_ttl`), cache por URL resolvida com payload projetado; `stale_ttl` (86400 s) guarda o último valor bom; falha sem entrada vira fallback 200 com `fallback_ttl` (60 s, ou `Retry-After` dentro do limite). Headers `X-Badge-Cache: HIT|MISS|STALE` e `Warning: 110` quando stale. Store de cache fora do ar degrada para fetch direto/fallback (ADR-080). A chave inclui o slug do provider: `laravel/v/latest` e `laravel/dt/latest` compartilham a entrada porque o client projeta versão e downloads juntos; `packagist/dt` continua numa entrada separada, mesmo usando o mesmo host (ADR-085).
 - Badge pessoal (F4): o arquivo é servido de disco com `expires_at` no futuro; vencido, regenera sob lock e regrava. Exclusão/renomeação aparecem em no máximo `personal_badges.max_cache_seconds` (3600 s).
 - Endpoint JSON (F5, ADR-083): chave `badgeforge:endpoint:v1:sha256(url canônica)` — dois cadastros da mesma origem compartilham a entrada e a chave não revela host/path. TTL fixo em `endpoint.cache_ttl` (300 s), limitado por `max_cache_ttl` (3600 s); `stale_ttl` (86400 s) guarda o último valor bom; `fallback_ttl` (60 s) é o TTL do fallback. HIT/MISS/STALE sob `Cache::lock`, `If-None-Match` quando a origem manda `ETag` (304 renova `fetched_at`), `X-Badge-Cache` e `Warning: 110` no stale; sem entrada, fallback 200 com `label` = nome do cadastro e `message` = `endpoint.unavailable_message`. Store fora do ar degrada para fetch direto e, se este falhar, fallback — nunca 500.
+- Provider customizado (F7, ADR-087): chave `badgeforge:custom:v1:{ulid}:{metricsVersion}:sha256(url renderizada)`; TTL 300 s, `stale_ttl` 86400 s e `fallback_ttl` 60 s (todos em `custom_providers`). Só os escalares extraídos são cacheados. `metrics_version` é incrementado a cada update para que um pointer alterado nunca sirva o valor antigo. `?cacheSeconds=` e `?refresh=1` são ignorados. HIT/MISS/STALE sob lock, `X-Badge-Cache` e `Warning: 110` no stale; qualquer falha (guard, resolve, fetch, JSON, pointer) vira stale/fallback 200.
 - PNG: mesmo TTL do SVG.
 - Invalidação: `?refresh=1` apenas em badge própria com sessão; a rota pública de provider e a imagem pessoal **ignoram** o parâmetro. Atualizar badge pessoal é `POST /badgeforge/badges/{id}/refresh` autenticado do dono (ADR-069 e ADR-081).
 - Admin pode limpar cache manualmente.
@@ -119,13 +134,19 @@ F4 (entregue): a rota pública de provider não tem throttle próprio — o cach
 
 F5 (entregue, ADR-084): `throttle:badgeforge-endpoint` na rota pública, com o limite **do dono** do endpoint — Free `endpoint.rate_limit.free` (300/min), pago `endpoint.rate_limit.paid` (3000/min); ULID inválido/desconhecido ou banco fora cai no anônimo `endpoint.rate_limit.anonymous` (60/min) por IP, sem 500. “Anônimo” é o leitor sem conta; o destino sempre tem dono, e um README popular não pode derrubar a imagem de todos. O `ThrottleRequests` roda antes do binding, então o limiter valida o ULID cru com `Str::isUlid` e consulta o plano na hora (sem cache, para upgrade/downgrade valerem imediatamente). O 429 sai no envelope `rate_limited` com `X-RateLimit-*` e `Retry-After`.
 
+F7 (entregue, ADR-087): `throttle:badgeforge-custom` na rota de provider customizado, com o mesmo desenho — limite do dono (Free `custom_providers.rate_limit.free` 300/min, pago `custom_providers.rate_limit.paid` 3000/min), ULID inválido/desconhecido ou banco fora cai no anônimo `custom_providers.rate_limit.anonymous` (60/min) por IP, sem 500. As escritas de gestão (`POST/PATCH/DELETE /badgeforge/custom-providers`) reusam `throttle:badgeforge-management` e o gate `badgeforge.paid`.
+
 ## 12. Analytics
 - GA apenas na interface web, com consentimento.
-- Banco próprio registra acessos a imagens.
-- Campos: badge_asset_id, user_id, ip_hash, user_agent_hash, user_agent, referer_domain, country, format, style, cache_hit, viewed_at.
-- Cadastrado: visualização por badge.
-- Pago: série temporal, top referrers, países, formatos, exportação CSV.
-- Exportação em lote disponível para pagos.
+- Banco próprio registra acessos a imagens **com dono**: badge pessoal, endpoint JSON e provider customizado (F7, entregue, ADR-086). Estática e provider global não gravam.
+- Registro síncrono e best-effort: conta 200 e 304, uma linha por acesso, sem dedupe; falha de analytics nunca impede a imagem.
+- Campos: `subject_type`, `subject_id`, `user_id`, `definition`, `ip_hash`, `user_agent_hash`, `user_agent` truncado, `referer_domain`, `country`, `format`, `style`, `cache_hit`, `viewed_at`.
+- Privacidade: IP e UA viram HMAC-SHA256 com `APP_KEY`; referer guarda só o host; país vem de GeoLite2 local opcional (`analytics.geoip_path`) e fica `null` sem o arquivo.
+- Cadastrado/Free: janela fixa de 30 dias, totais e únicos por imagem + totais da conta.
+- Pago: janela 7/30/90, série diária zero-filled, top referrers, países, formatos, taxa de cache, tabela por sujeito e exportação CSV **sem** `ip_hash`/UA.
+- Admin: janelas 7/30/90/400 a partir do agregado diário, com o aviso de que únicos não são somáveis entre dias.
+- Retenção: bruto 90 dias, agregado diário 400 dias. `badgeforge:analytics:aggregate` reconstrói os últimos 7 dias a cada hora; `badgeforge:analytics:prune` roda diariamente. Agendados em `task_schedules`.
+- Exportação em lote disponível para pagos (`GET /badgeforge/analytics/export`, 403 no Free).
 
 ## 13. Presets
 Usuários cadastrados podem salvar presets: label, message, estilo, fonte, cores, logo (`none`, embutido ou `u_<ULID>`), logoSize, logoPosition, link e cacheSeconds. Preset é um **snapshot normalizado do formulário**, não uma badge publicada: não tem URL, cache, analytics nem registro de acesso (F3, ADR-079).
@@ -138,8 +159,9 @@ Usuários cadastrados podem salvar presets: label, message, estilo, fonte, cores
 ## 14. Documentação
 - Pública em `/{locale}/docs/badgeforge` (F4, entregue): cinco idiomas, tabela por provider gerada do catálogo, snippets copiáveis, badge pessoal/PAT, cache/stale, erros e segurança. Indexável, com meta de servidor, sitemap e link no rodapé (ADR-082).
 - Endpoint JSON (F5, entregue): nova seção na mesma página, com URL pública, contrato shields v1, TTL fixo, fallback e a regra de que a URL de origem só é cadastrada na dashboard — nunca exposta.
+- Provider customizado (F7, entregue): seção curta na mesma página (ADR-087), explicando que é recurso pago, o formato da URL opaca, o JSON Pointer, a imutabilidade do template e que a origem nunca sai do servidor. Nenhum template de usuário aparece nos docs.
 - Página por provider (a partir da F4, entregue dentro da página única).
-- A OpenAPI documenta provider, badge pessoal e endpoint JSON como entregues em v1.6.0 (nove providers, quinze definições e o path literal de runtime); o 3.1 completo é F8.
+- A OpenAPI documenta provider, badge pessoal, endpoint JSON e provider customizado como entregues em v1.7.0 (nove providers, quinze definições, o path literal de runtime e a rota `/api/badges/custom/...`); o 3.1 completo é F8.
 - Tutoriais: guias do **usuário pagador** para item privado (GitHub, npm, Docker) em `docs/tutorial/`; Packagist é sempre público e não tem tutorial de PAT. Os tutoriais apontam para a página pública e para o fluxo real de revogação (excluir a badge).
 - Exceção de idioma: o label/message da **imagem** são neutros (nomes próprios e números), porque a URL é pública e cacheada; a interface e a documentação são traduzidas (ADR-082).
 
@@ -150,7 +172,9 @@ Usuários cadastrados podem salvar presets: label, message, estilo, fonte, cores
 - SSRF protection (F5, entregue, ADR-084): `EndpointUrlGuard` exige HTTPS/443, sem userinfo, host ASCII válido e URL canônica; `EndpointTargetResolver` resolve A+AAAA e exige **todos** os IPs públicos (`IpAddressClassifier` com CIDRs da config, normalizando `::ffff:`); o fetch pina a conexão no IP validado com `CURLOPT_RESOLVE`, `CURLOPT_NOPROXY=*`, `proxy: ''`, `CURLOPT_PROTOCOLS=CURLPROTO_HTTPS` e `FOLLOWLOCATION=false` (3xx vira `redirected`). Sem `ext-curl` falha fechado (`require_curl`), nunca cai num handler que não pina. URL insegura na criação vira 422 `validation.badge_endpoint.*`; no serving a falha de rede vira stale/fallback 200.
 - Rate limit global; o endpoint estático não tem throttle próprio na F1.
 - Gestão autenticada (F3): rotas sob `auth, verified, active`, escritas em `throttle:badgeforge-management`, e registro de outra conta responde **404** (nunca 403).
-- Hash de IP (analytics, a partir da F7).
+- Analytics (F7, ADR-086): IP e UA só como HMAC-SHA256 com `APP_KEY`; UA cru truncado em 512; referer só host; GeoIP local opcional; CSV sem PII.
+- Provider customizado (F7, ADR-087): mesma defesa SSRF da F5 (HTTPS/443, sem userinfo/redirect, todos os IPs públicos, conexão pinada, fail-closed sem curl), com 422 no cadastro e fallback 200 no serving. `url_template` é `#[Hidden]`, `dontFlash` e nunca entra em props do dono, builder, docs, CSV, log ou auditoria. Exceções explícitas: o dono recebe o `pointer` (é ele quem o edita) e o admin recebe template/pointer na tela de custom providers.
+- Admin (F7): `/admin/badgeforge/*` sob `can:access-admin`; desabilitar provider, definição ou provider customizado registra auditoria **sem** a URL de origem. O admin nunca exclui provider customizado.
 - Auditoria.
 - Credenciais: nenhum token global em `.env`; PAT do usuário só para item privado, cifrado, nunca em URL ou log (ADR-068).
 
@@ -161,7 +185,7 @@ F3: logos personalizados + presets + contas. **Entregue em 2026-11-02** — ver 
 F4: providers GitHub/npm/Packagist/Docker + badges pessoais + PAT + docs públicas. **Entregue em 2026-11-03** — ver `docs/acceptance/BADGEFORGE-FASE-4.md`, ADR-080, ADR-081 e ADR-082.
 F5: endpoint JSON + SSRF. **Entregue em 2026-11-04** — ver `docs/acceptance/BADGEFORGE-FASE-5.md`, ADR-083 e ADR-084.
 F6: providers Codecov/Coveralls/Laravel/PHP/Python. **Entregue em 2026-11-04** — ver `docs/acceptance/BADGEFORGE-FASE-6.md` e ADR-085.
-F7: providers customizados + analytics completo + admin.
+F7: providers customizados + analytics completo + admin. **Entregue em 2026-11-04** — ver `docs/acceptance/BADGEFORGE-FASE-7.md`, ADR-086 e ADR-087.
 F8: OpenAPI + documentação + hardening.
 
 ## 17. Critérios de aceite
@@ -177,5 +201,8 @@ F8: OpenAPI + documentação + hardening.
 - Docs por provider (F4, entregue em `/{locale}/docs/badgeforge`).
 - Provider nunca vira 500 na imagem: falha é stale/fallback 200; PATH/URL inválidos são 404; badge pessoal desconhecida é 404 de corpo vazio, nunca HTML.
 - Nenhum PAT em props, log, erro, flash, cache ou exportação; `badge_assets.credential` é cifrado e a chave de cache leva só o fingerprint.
-- Analytics registrado (F7).
+- Provider customizado (F7, entregue): só pago cria/edita (Free 403), limite por plano, URL opaca, template imutável, métricas fixas na criação, probe com `example_path` (shape 422; rede tolerada), serving nunca 500 (stale/fallback 200), 404 para ULID/definição/path inválidos ou provider desabilitado, e `custom` nunca resolve pela rota genérica.
+- Analytics (F7, entregue): pessoal, endpoint e custom gravam 200 e 304; estática e provider global não gravam; IP/UA só como HMAC; UA truncado; referer só host; GeoIP ausente vira `null`; tabela ausente não derruba a imagem; CSV do dono sem hashes/UA; Free limitado a 30 dias e CSV 403; admin lê o agregado em 7/30/90/400.
+- Retenção e agregação (F7): agregação horária idempotente dos últimos 7 dias e poda diária (bruto 90, dailies 400); comandos em `task_schedules`.
+- Admin BadgeForge (F7): catálogo e definições alternáveis, custom providers com dono e métricas, template/pointer visíveis só no admin, desabilitar derruba a rota (404) e o toggle é auditado sem a origem; sem exclusão.
 - Nenhuma credencial exposta: item público é anônimo; PAT de usuário só em item privado, cifrado e fora da URL e do log.

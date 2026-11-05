@@ -102,6 +102,18 @@ return [
             'security_body' => 'Only HTTPS on port 443, no redirects, and every resolved IP must be public. The connection is pinned to the validated IP, so a DNS change between the check and the fetch cannot reach an internal address. The source URL stays on the server: it is not in the page, the logs or the image URL.',
             'manage_cta' => 'Manage JSON endpoints',
         ],
+        'custom' => [
+            'title' => 'Custom providers',
+            'intro' => 'Paid accounts can turn any public JSON document into a badge. You declare an HTTPS URL template, the path parameters and one JSON Pointer per metric; the server only runs that declarative mapping.',
+            'url_label' => 'URL format',
+            'paid_title' => 'Paid plans only',
+            'paid_body' => 'Creating and editing require a paid plan. After a downgrade existing badges keep serving and can still be copied and deleted, but not edited.',
+            'pointer_title' => 'JSON Pointer',
+            'pointer_body' => 'Each metric reads one scalar value with RFC 6901, for example /stargazers_count or /items/0/score. A missing or non-scalar value falls back to the neutral message instead of breaking the image.',
+            'security_title' => 'Opaque URL and private source',
+            'security_body' => 'The public image uses an opaque identifier instead of the source URL. The template stays on the server, is never returned to the browser and never appears in logs, page props or CSV exports. Requests only use HTTPS, public IPs, port 443, no redirects and no credentials.',
+            'manage_cta' => 'Manage custom providers',
+        ],
         'cache' => [
             'title' => 'Cache, ETag and stale responses',
             'body' => 'Provider responses are cached for {ttl} seconds. The image is served with ETag and Cache-Control, so a second request is answered with 304 when nothing changed.',

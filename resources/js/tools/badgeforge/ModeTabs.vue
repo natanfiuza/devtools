@@ -1,22 +1,35 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import type { BadgeMode } from './types';
 
 /**
- * Abas do construtor (F4).
+ * Abas do construtor (F4, F7).
  *
  * O modo estatico continua 100% local (ADR-002); o modo provider troca o
- * formulario por metrica + params e a previa por uma `<img>` do servidor.
+ * formulario por metrica + params e a previa por uma `<img>` do servidor. A
+ * aba de provider customizado so aparece para quem tem ao menos um provider
+ * (F7, ADR-087): sem provider, a URL nao existiria.
  */
 
-defineProps<{ modelValue: BadgeMode }>();
+const props = withDefaults(
+    defineProps<{
+        modelValue: BadgeMode;
+        showCustom?: boolean;
+    }>(),
+    { showCustom: false },
+);
 
 const emit = defineEmits<{ 'update:modelValue': [value: BadgeMode] }>();
 
 const { t } = useI18n();
 
-const MODES = ['static', 'provider'] as const;
+const modes = computed<readonly BadgeMode[]>(() =>
+    props.showCustom
+        ? (['static', 'provider', 'custom'] as const)
+        : (['static', 'provider'] as const),
+);
 </script>
 
 <template>
@@ -26,7 +39,7 @@ const MODES = ['static', 'provider'] as const;
     data-test="badge-modes"
   >
     <Button
-      v-for="mode in MODES"
+      v-for="mode in modes"
       :key="mode"
       type="button"
       size="sm"

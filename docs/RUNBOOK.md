@@ -79,6 +79,12 @@ DONATIONS_SEND_RECEIPTS=true
 DONATIONS_PIX_KEY=
 DONATIONS_PIX_HOLDER=
 DONATIONS_PIX_CITY=
+
+# BadgeForge (F7). Tudo optional: sem o arquivo GeoLite2 o pais da visualizacao
+# fica nulo e nada quebra; o limite de providers customizados tem default no
+# config (10) e nenhum dos dois e obrigatorio para a imagem funcionar.
+# BADGEFORGE_GEOIP_DB=/var/www/devtools/storage/app/data/geoip/GeoLite2-Country.mmdb
+# BADGEFORGE_CUSTOM_PROVIDERS_LIMIT=10
 ```
 
 Permissoes e a primeira carga:
@@ -336,8 +342,9 @@ scheduler:
 * * * * * cd /var/www/devtools && php artisan schedule:run >> storage/logs/schedule.log 2>&1
 ```
 
-Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune` e
-`history:prune` nunca rodam. As linhas semeadas pelas migrations (fuso
+Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune`,
+`history:prune`, `badgeforge:analytics:aggregate` e `badgeforge:analytics:prune`
+nunca rodam. As linhas semeadas pelas migrations (fuso
 `America/Recife`, `APP_TIMEZONE`):
 
 | Comando | Expressao | Para que |
@@ -346,6 +353,8 @@ Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune` e
 | `payments:expire` | `*/5 * * * *` | marca `pending -> expired` em checkout e doacao vencidos |
 | `webhooks:prune --days=30` | `30 3 * * *` | apaga eventos de webhook com mais de 30 dias |
 | `history:prune` | `45 3 * * *` | apaga historico de consultas com mais de 90 dias (F7) |
+| `badgeforge:analytics:aggregate` | `13 * * * *` | reconstroi as ultimas 7 dailies a partir do bruto (F7) |
+| `badgeforge:analytics:prune` | `17 4 * * *` | apaga bruto com mais de 90 dias e dailies com mais de 400 (F7) |
 
 `last_run_at` existe na tabela mas **nao e atualizada**: confira a execucao
 pelos logs (`schedule.log`, `worker.log`) ou pelo efeito no banco. Nao ha tela
@@ -356,12 +365,15 @@ de agendamentos; mudar horario e migration ou SQL.
 php artisan payments:expire --dry-run
 php artisan webhooks:prune --dry-run
 php artisan history:prune --dry-run
+php artisan badgeforge:analytics:prune --dry-run
 
 # Execucao manual, se precisar:
 php artisan accounts:purge-deleted --days=30
 php artisan payments:expire
 php artisan webhooks:prune --days=30
 php artisan history:prune
+php artisan badgeforge:analytics:aggregate --days=7
+php artisan badgeforge:analytics:prune
 ```
 
 O guia completo das tres pecas (deploy, agendador e worker) esta em
@@ -393,6 +405,54 @@ e exclusao (o Free recebe 403 e ve o CTA de upgrade).
 ```bash
 php artisan history:prune --dry-run          # lista o que sairia
 php artisan history:prune --days=30          # janela menor, em manutencao
+```
+
+### BadgeForge: analytics e providers customizados (F7)
+
+As imagens com dono (badge pessoal, endpoint JSON e provider customizado) gravam
+uma linha em `badge_views` a cada 200/304. O registro e **sincrono e
+best-effort**: se o banco falhar, a imagem continua saindo e a visualizacao e
+perdida - nao ha retry e nao ha fila para isso. Badge estatica e provider global
+nao gravam.
+
+- **Retencao**: bruto 90 dias, agregado diario 400 dias. O dono le o bruto; a
+  tela do admin le as dailies. `badgeforge:analytics:aggregate` reconstroi os
+  ultimos 7 dias de forma idempotente (apaga e reinsere o dia); `...:prune`
+  apaga o bruto e as dailies fora da janela. Ambos dependem do **worker** e do
+  cron do `schedule:run` (secao 5) - sem eles as linhas semeadas em
+  `task_schedules` nunca executam.
+- **Ordem**: agregacao de hora em hora (`13 * * * *`) antes da poda diaria
+  (`17 4 * * *`). Se a poda rodar manualmente antes de uma agregacao atrasada,
+  o dia que so existe no bruto e perdido; rode `badgeforge:analytics:aggregate`
+  primeiro.
+- **Privacidade**: nao existe IP nem User-Agent cru no banco; `ip_hash` e
+  `user_agent_hash` sao HMAC-SHA256 com `APP_KEY`. Trocar a `APP_KEY` (secao 7)
+  muda todos os hashes, entao "visitantes unicos" recomecam na rotacao - a
+  contagem antiga nao e comparavel. CSV exportado pelo dono nunca leva hash.
+- **GeoLite2 (opcional)**: baixe o `GeoLite2-Country.mmdb`, coloque em
+  `storage/app/data/geoip/` (ou aponte `BADGEFORGE_GEOIP_DB` para outro
+  caminho) e garanta leitura pelo `www-data`. Sem arquivo, corrompido ou em IP
+  privado, o pais fica nulo e nada quebra. Depois do deploy:
+
+```bash
+sudo install -o www-data -g www-data -m 644 GeoLite2-Country.mmdb \
+  /var/www/devtools/storage/app/data/geoip/GeoLite2-Country.mmdb
+php artisan optimize:clear && php artisan optimize   # so se mudou a variavel
+```
+
+- **Providers customizados**: so plano pago cria/edita; o limite conta por dono
+  e vem de `badgeforge.custom_providers.limit` (`BADGEFORGE_CUSTOM_PROVIDERS_LIMIT`,
+  default 10). O template e imutavel - trocar exige excluir e recriar. O admin
+  ve o template/pointer na tela `/admin/badgeforge/custom-providers` e pode
+  desabilitar (a URL publica passa a 404); ele **nao** exclui. Origem fora do ar
+  vira STALE/fallback 200, com `X-Badge-Cache` dizendo o que aconteceu.
+
+```bash
+# Volume do bruto e das dailies (o dono le o bruto; o admin, o diario):
+php artisan tinker --execute="dump(DB::table('badge_views')->count(), DB::table('badge_view_dailies')->count());"
+
+# Reconstruir um periodo maior, em manutencao (idempotente):
+php artisan badgeforge:analytics:aggregate --days=30
 ```
 
 ## 6. Backup
@@ -634,6 +694,10 @@ Problemas que ja sabemos diagnosticar:
 | Doacao recusada/vencida sem explicacao, ou paga que ficou `pending` | Rode `php artisan donations:check <ulid>` (detalhes em [guides/mercado-pago.md](guides/mercado-pago.md#8-consulta-sob-demanda-e-diagnóstico-de-doações-adr-059)): ele **grava** o estado sincronizado e imprime `status`, `status_detail`, `live_mode`, `collector_id` e o prazo do QR. `live_mode=false` = token de teste; `rejected_by_bank`/`rejected_high_risk`/`rejected_by_regulations` sao do banco ou da conta do provedor, nao do codigo (ADR-059) |
 | Renovacao nao acontece e o acesso segue | Preapproval cancelada (`renewal_canceled_at`) ou cartao recusado (`renewal_failed_at`); o acesso vale ate `current_period_end`. O aviso sai uma vez por periodo |
 | `webhook_events` cresce sem parar | `webhooks:prune` nao roda: falta o cron do `schedule:run` (secao 5) ou o worker esta parado |
+| Analytics do BadgeForge nao avanca e `/admin/badgeforge/analytics` fica vazio | `badgeforge:analytics:aggregate` nao roda: falta o cron do `schedule:run`, o worker esta parado ou a linha sumiu de `task_schedules` (secao 5). O dono le o bruto, entao a tela dele pode ter dados enquanto o admin, que le as dailies, ainda nao tem |
+| Pais sempre vazio no analytics | Sem `GeoLite2-Country.mmdb` no caminho configurado, arquivo ilegivel pelo `www-data` ou IP privado: todos os casos sao `null` por desenho (ADR-086), nao erro |
+| Badge de provider customizado responde **404** | ULID desconhecido, provider desabilitado no admin, definicao que nao existe, path com numero de segmentos diferente de `path_params` ou extensao fora de `svg/png`. O 404 e o comportamento correto nesses casos |
+| Badge de provider customizado mostra `unavailable` | A origem falhou e nao havia valor bom em cache: a imagem e fallback 200 com `X-Badge-Cache: MISS`. Confira a origem e o `metrics_version`; nunca vira 500 |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 

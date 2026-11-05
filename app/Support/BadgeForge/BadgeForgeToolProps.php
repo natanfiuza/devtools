@@ -4,6 +4,8 @@ namespace App\Support\BadgeForge;
 
 use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
+use App\Models\BadgeCustomProvider;
+use App\Models\BadgeCustomProviderDefinition;
 use App\Models\BadgeEndpoint;
 use App\Models\BadgePreset;
 use App\Models\User;
@@ -38,12 +40,14 @@ final class BadgeForgeToolProps
         $presets = $canManage ? self::presets($user) : [];
         $personalBadges = self::personalBadges($user);
         $endpointBadges = self::endpointBadges($user);
+        $customProviders = $canManage ? self::customProviders($user) : [];
         $personalLimit = $isPaid ? null : 0;
 
         return [
             'endpoint' => (string) config('badgeforge.static_endpoint', '/api/badges/static'),
             'providerEndpoint' => (string) config('badgeforge.provider_endpoint', '/api/badges'),
             'personalEndpoint' => (string) config('badgeforge.personal_endpoint', '/b'),
+            'customEndpoint' => (string) config('badgeforge.custom_providers.path', '/api/badges/custom'),
             'styles' => app(StyleCatalog::class)->ids(),
             'logos' => self::logosByName(),
             'fonts' => app(BadgeFontCatalog::class)->metadata(),
@@ -100,6 +104,25 @@ final class BadgeForgeToolProps
                 'providers' => [
                     'maxParamLength' => (int) config('badgeforge.providers.max_param_length', 200),
                 ],
+                // Providers customizados (F7, ADR-087): criar/editar e so no
+                // pago, entao o Free recebe `0` e o convidado nao gerencia.
+                'customProviders' => [
+                    'limit' => $canManage
+                        ? self::nullableLimit($isPaid
+                            ? config('badgeforge.custom_providers.limit')
+                            : 0)
+                        : 0,
+                    'used' => count($customProviders),
+                    'nameMaxLength' => (int) config('badgeforge.custom_providers.name_max_length', 80),
+                    'urlMaxLength' => (int) config('badgeforge.custom_providers.url_max_length', 2048),
+                    'examplePathMaxLength' => (int) config('badgeforge.custom_providers.example_path_max_length', 512),
+                    'slugMaxLength' => (int) config('badgeforge.custom_providers.slug_max_length', 32),
+                    'labelMaxLength' => (int) config('badgeforge.custom_providers.label_max_length', 80),
+                    'pointerMaxLength' => (int) config('badgeforge.custom_providers.pointer_max_length', 256),
+                    'maxMetrics' => (int) config('badgeforge.custom_providers.max_metrics', 10),
+                    'maxPathParams' => (int) config('badgeforge.custom_providers.max_path_params', 5),
+                    'paramMaxLength' => (int) config('badgeforge.custom_providers.param_max_length', 200),
+                ],
             ],
             'defaults' => [
                 'style' => (string) config('badgeforge.default_style', 'flat'),
@@ -114,12 +137,14 @@ final class BadgeForgeToolProps
                 'canCreatePersonalBadges' => $canManage && $isPaid,
                 // "Apenas cadastrados" e a regra do endpoint: Free cadastra.
                 'canCreateEndpointBadges' => $canManage,
+                'canCreateCustomProviders' => $canManage && $isPaid,
                 'isPaid' => $isPaid,
             ],
             'customLogos' => $customLogos,
             'presets' => $presets,
             'personalBadges' => $personalBadges,
             'endpointBadges' => $endpointBadges,
+            'customProviders' => $customProviders,
         ];
     }
 
@@ -212,6 +237,50 @@ final class BadgeForgeToolProps
         ])->all();
 
         return array_values($badges);
+    }
+
+    /**
+     * Providers customizados do dono (F7, ADR-087): identidade, coordenadas e
+     * metricas, sem `url_template` - a origem e segredo de operacao e nunca
+     * entra em prop. O pointer viaja porque e o dono quem o edita; o builder so
+     * precisa de id, definicoes e params. Sobrevive ao downgrade, porque servir
+     * e excluir continuam valendo. Uma migracao ainda nao aplicada devolve
+     * lista vazia em vez de derrubar a pagina.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function customProviders(User $user): array
+    {
+        try {
+            $providers = $user->badgeCustomProviders()
+                ->with(['definitions' => static fn ($query) => $query->get([
+                    'id', 'provider_id', 'slug', 'label', 'pointer', 'formatter', 'sort',
+                ])])
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get(['id', 'name', 'path_params', 'example_path', 'enabled', 'created_at']);
+        } catch (QueryException) {
+            return [];
+        }
+
+        return array_values($providers->map(static fn (BadgeCustomProvider $provider): array => [
+            'id' => (string) $provider->getKey(),
+            'name' => (string) $provider->name,
+            'enabled' => (bool) $provider->enabled,
+            'examplePath' => (string) $provider->example_path,
+            'pathParams' => array_map(
+                static fn (mixed $name): string => (string) $name,
+                (array) $provider->path_params,
+            ),
+            'definitions' => $provider->definitions->map(
+                static fn (BadgeCustomProviderDefinition $definition): array => [
+                    'slug' => (string) $definition->slug,
+                    'label' => (string) $definition->label,
+                    'pointer' => (string) $definition->pointer,
+                    'formatter' => $definition->formatter->value,
+                ],
+            )->values()->all(),
+        ])->all());
     }
 
     /**

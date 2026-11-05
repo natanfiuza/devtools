@@ -2,6 +2,7 @@
     "endpoint": "/api/badges/static",
     "providerEndpoint": "/api/badges",
     "personalEndpoint": "/b",
+    "customEndpoint": "/api/badges/custom",
     "styles": [
         "flat",
         "flat-square",
@@ -547,6 +548,19 @@
         },
         "providers": {
             "maxParamLength": 200
+        },
+        "customProviders": {
+            "limit": 0,
+            "used": 0,
+            "nameMaxLength": 80,
+            "urlMaxLength": 2048,
+            "examplePathMaxLength": 512,
+            "slugMaxLength": 32,
+            "labelMaxLength": 80,
+            "pointerMaxLength": 256,
+            "maxMetrics": 10,
+            "maxPathParams": 5,
+            "paramMaxLength": 200
         }
     },
     "defaults": {
@@ -561,10 +575,12 @@
         "canSavePresets": false,
         "canCreatePersonalBadges": false,
         "canCreateEndpointBadges": false,
+        "canCreateCustomProviders": false,
         "isPaid": false
     },
     "customLogos": [],
     "presets": [],
     "personalBadges": [],
-    "endpointBadges": []
+    "endpointBadges": [],
+    "customProviders": []
 }

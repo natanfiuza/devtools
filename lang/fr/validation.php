@@ -217,6 +217,21 @@ return [
         'invalid_payload' => 'L\'endpoint n\'a pas renvoyé de badge JSON shields valide.',
     ],
 
+    'badge_custom_provider' => [
+        'url_length' => 'Le modèle dépasse la longueur autorisée.',
+        'url_chars' => 'Le modèle contient des caractères non autorisés.',
+        'scheme' => 'Seuls les modèles HTTPS sont acceptés.',
+        'userinfo' => 'Retirez l’utilisateur et le mot de passe du modèle.',
+        'host' => 'Cet hôte n’est pas autorisé.',
+        'port' => 'Seul le port 443 est accepté.',
+        'unresolvable' => 'L’hôte n’a pas pu être résolu.',
+        'unsafe_ip' => 'L’hôte résout vers une adresse privée ou réservée.',
+        'redirect' => 'La source redirige vers une autre adresse.',
+        'invalid_payload' => 'La source n’a pas renvoyé d’objet JSON.',
+        'example_path' => 'Le chemin d’exemple ne correspond pas aux paramètres du chemin.',
+        'pointer_missing' => 'Un JSON Pointer n’a pas résolu vers une valeur scalaire dans la réponse d’exemple.',
+    ],
+
     'attributes' => [
         'amount' => 'montant',
         'code' => 'code',

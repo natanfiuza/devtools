@@ -116,6 +116,18 @@ const TRADUCOES = {
                 security_body: 'CORPO_SEGURANCA_ENDPOINT',
                 manage_cta: 'GERENCIAR_ENDPOINTS',
             },
+            custom: {
+                title: 'SECAO_CUSTOM',
+                intro: 'INTRO_CUSTOM',
+                url_label: 'URL_CUSTOM',
+                paid_title: 'PAGO_CUSTOM',
+                paid_body: 'CORPO_PAGO_CUSTOM',
+                pointer_title: 'POINTER_CUSTOM',
+                pointer_body: 'CORPO_POINTER_CUSTOM',
+                security_title: 'SEGURANCA_CUSTOM',
+                security_body: 'CORPO_SEGURANCA_CUSTOM',
+                manage_cta: 'GERENCIAR_CUSTOM',
+            },
             cache: {
                 title: 'SECAO_CACHE',
                 body: 'CACHE_DE_{ttl}_SEGUNDOS',
@@ -157,6 +169,7 @@ const PADRAO = {
     providerEndpoint: '/api/badges',
     personalEndpoint: '/b',
     jsonEndpoint: '/api/badges/endpoint',
+    customEndpoint: '/api/badges/custom',
     cacheTtl: 300,
     endpointCacheTtl: 300,
     endpointRateLimits: { anonymous: 60, free: 300, paid: 3000 },
@@ -274,6 +287,25 @@ describe('BadgeForge Docs', () => {
         ).toContain('PAGO_9');
         expect(
             wrapper.find('[data-test="badgeforge-docs-json-manage"]').attributes(
+                'href',
+            ),
+        ).toBe('/pt-br/dashboard/badgeforge');
+    });
+
+    it('documenta o provider customizado com URL opaca e JSON Pointer', () => {
+        const wrapper = mountDocs();
+
+        const section = wrapper.find('[data-test="badgeforge-docs-custom"]');
+
+        expect(section.text()).toContain('INTRO_CUSTOM');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-custom-url"]').text(),
+        ).toBe('https://devtools.example/api/badges/custom/{id}/{metric}/{path}.svg');
+        expect(section.text()).toContain('CORPO_PAGO_CUSTOM');
+        expect(section.text()).toContain('CORPO_POINTER_CUSTOM');
+        expect(section.text()).toContain('CORPO_SEGURANCA_CUSTOM');
+        expect(
+            wrapper.find('[data-test="badgeforge-docs-custom-manage"]').attributes(
                 'href',
             ),
         ).toBe('/pt-br/dashboard/badgeforge');

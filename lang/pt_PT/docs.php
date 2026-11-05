@@ -102,6 +102,18 @@ return [
             'security_body' => 'Apenas HTTPS na porta 443, sem redirect, e todos os IPs resolvidos têm de ser públicos. A ligação é fixada no IP validado, por isso uma mudança de DNS entre a verificação e o pedido não alcança um endereço interno. O URL de origem fica no servidor: não está na página, no log nem no URL da imagem.',
             'manage_cta' => 'Gerir endpoints JSON',
         ],
+        'custom' => [
+            'title' => 'Fornecedores personalizados',
+            'intro' => 'Contas pagas podem transformar qualquer documento JSON público numa badge. Declara um template de URL HTTPS, os parâmetros do caminho e um JSON Pointer por métrica; o servidor apenas executa esse mapeamento declarativo.',
+            'url_label' => 'Formato do URL',
+            'paid_title' => 'Apenas planos pagos',
+            'paid_body' => 'Criar e editar exigem plano pago. Após um downgrade as badges existentes continuam a servir e podem ser copiadas e eliminadas, mas não editadas.',
+            'pointer_title' => 'JSON Pointer',
+            'pointer_body' => 'Cada métrica lê um valor escalar com RFC 6901, por exemplo /stargazers_count ou /items/0/score. Valor ausente ou não escalar cai na mensagem neutra em vez de quebrar a imagem.',
+            'security_title' => 'URL opaco e origem privada',
+            'security_body' => 'A imagem pública usa um identificador opaco em vez do URL de origem. O template fica no servidor, nunca volta ao navegador e nunca aparece em log, props de página ou exportação CSV. Os pedidos apenas usam HTTPS, IP público, porta 443, sem redirect e sem credenciais.',
+            'manage_cta' => 'Gerir fornecedores personalizados',
+        ],
         'cache' => [
             'title' => 'Cache, ETag e respostas antigas',
             'body' => 'As respostas de provider ficam em cache durante {ttl} segundos. A imagem sai com ETag e Cache-Control, por isso um segundo pedido recebe 304 quando nada mudou.',
