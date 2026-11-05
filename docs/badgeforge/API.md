@@ -1,0 +1,430 @@
+# API BadgeForge
+
+## Estática (F1/F2 — disponível)
+
+```text
+GET /api/badges/static/{label}/{message}.{svg|png}
+```
+
+A imagem é gerada e servida pelo próprio devtools, sem sessão e sem
+autenticação. A rota fica no grupo `api`, fora do prefixo `v1`. Desde a F8
+(ADR-089) ela compartilha o cap por IP `badgeforge-images` com a rota de
+provider e `/b/` (`badgeforge.serving.rate_limit.per_minute`, default
+6000/min); acima do cap a resposta é 429 `rate_limited` com
+`X-RateLimit-*` e `Retry-After`.
+
+### Caminho
+
+- `label` e `message`: texto do badge, sem barra. `_` vira espaço, `__` vira
+  `_`; a barra é escrita `%252F` (dupla codificação: o router decodifica o path
+  antes do match). `-` e `.` são literais.
+- A extensão é obrigatória e vale `svg` ou `png`; outro valor (ou URL sem
+  extensão) responde 404. Para o PNG, o caminho termina em `.../message.png` —
+  não em `.svg.png`.
+- O SVG é o formato canônico. O PNG é rasterizado na primeira requisição e
+  depois servido do cache em disco (ver `ADR-067` e `ADR-077`).
+- Texto acima de 100 caracteres é truncado com `…`; segmento vazio dá 404.
+
+### Query
+
+| Parâmetro | Padrão | Regra |
+|---|---|---|
+| `style` | `flat` | `flat`, `flat-square`, `plastic`, `for-the-badge`, `social`; outro valor → `flat` |
+| `color` | `#9f9f9f` | cor inválida → padrão |
+| `labelColor` | `#555555` | cor inválida → padrão |
+| `logo` | — | slug embutido ou `u_<ULID>` de logo personalizado; desconhecido/apagado → badge sem logo |
+| `logoColor` | `#ffffff` | cor inválida → padrão |
+| `logoSize` | 10 (14 em `for-the-badge`) | clamp 8–20 |
+| `logoPosition` | `left` | `left` ou `right`; outro → `left` |
+| `link` | — | só `http`/`https`; outro → sem âncora |
+| `cacheSeconds` | 86400 | inteiro com clamp 300–86400; inválido → padrão; no máximo 3600 com `logo=u_...` |
+| `font` | pilha do estilo | `fira-code`, `libre-franklin` ou `space-grotesk`; outro valor → pilha do estilo |
+| `download` | — | `1` acrescenta `Content-Disposition: attachment`; outro valor é ignorado |
+
+Cores aceitam nomes CSS (148), apelidos de badge (`brightgreen`, `critical`…),
+hex 3/4/6/8, `rgb()`, `rgba()`, `hsl()`, `hsla()` e `transparent`. Cores com
+transparência saem como `fill` + `fill-opacity`.
+
+O estilo `social` fixa as próprias cores (`#555555` e `#007ec6`): `color` e
+`labelColor` não têm efeito nele.
+
+### Logo personalizado (`?logo=u_<ULID>`, F3)
+
+O prefixo `u_` é um namespace reservado: o catálogo embutido nunca usa esses
+slugs. O endpoint de imagem **não exige autenticação** e continua stateless —
+o ULID é a referência opaca, sem nome de usuário ou caminho de conta.
+
+- O logo é um SVG multi-path sanitizado no upload: só `<svg>`, `<g>` e `<path>`
+  com `viewBox`, `d`, `fill-rule` e `clip-rule`. O arquivo cru nunca é
+  persistido nem servido (ADR-078).
+- Slug malformado, ULID inexistente, logo apagado ou banco indisponível →
+  **200 sem logo**, nunca 4xx. Badges já publicados continuam válidos.
+- Badge com logo personalizado tem `cacheSeconds` limitado a
+  `custom_logos.max_cache_seconds` (3600 s), para que renomear/excluir o logo
+  apareça em no máximo 1 h. O teto normal (86400 s) vale para os embutidos.
+- O ETag continua sendo o sha256 do corpo servido, então a mudança do logo
+  muda o ETag naturalmente.
+
+### Exemplos
+
+```text
+/api/badges/static/build/passing.svg
+/api/badges/static/build/passing.svg?style=for-the-badge&logo=github
+/api/badges/static/ci%252Fcd/passing.svg?color=brightgreen
+/api/badges/static/vers%C3%A3o/1.0.0.svg
+/api/badges/static/build/passing.png?font=space-grotesk
+/api/badges/static/build/passing.svg?download=1
+/api/badges/static/build/passing.png?download=1
+```
+
+### Resposta
+
+- `200`: `Content-Type: image/svg+xml; charset=utf-8` ou `image/png`,
+  `Cache-Control: public, max-age=<cacheSeconds>`, `ETag: "<sha256>"`.
+- PNG: 1× natural (fundo transparente), reduzido proporcionalmente só quando a
+  largura passa de 600 px (`badgeforge.png.max_width`). A rasterização exige a
+  extensão `imagick`; o arquivo fica em
+  `storage/app/data/tools/badgeforge/static/{sha256(svg)}.png` e a segunda
+  requisição do mesmo SVG lê do disco.
+- `download=1`: `Content-Disposition: attachment; filename="<label>-<message>.<ext>"`
+  com a variante RFC 5987 (`filename*=UTF-8''...`) para acentos.
+- `304`: `If-None-Match` igual ao ETag; sem corpo e sem `Content-Type`.
+- `404`: segmento vazio, extensão ausente ou diferente de `svg`/`png` (envelope
+  `ApiError`).
+- `429`: cap por IP de imagens excedido; envelope `rate_limited` com
+  `X-RateLimit-*` e `Retry-After`.
+- `503`: PNG pedido em servidor sem a extensão `imagick`; envelope
+  `ApiError` com código `image_unavailable`.
+- Todo SVG sai com `Content-Security-Policy: default-src 'none'; style-src
+  'unsafe-inline'` (F8, ADR-089), inclusive quando o documento é aberto direto
+  no navegador.
+- O documento SVG tem `role="img"`, `aria-label="label: message"` e `<title>`
+  com o mesmo texto. Nada é registrado em log além de IDs e classes de
+  exceção; o conteúdo do badge nunca entra no log da aplicação.
+
+## Provider (F4/F6 — entregue)
+
+```text
+GET /api/badges/{provider}/{definition}/{path}.svg
+```
+
+`{definition}` é a métrica (`stars`, `forks`, `issues`, `license`, `v`, `dm`,
+`dt`, `pulls`, `coverage`) e `{path}` são as coordenadas do item no formato
+daquela métrica. Exemplos:
+
+```text
+/api/badges/github/stars/natanfiuza/devtools.svg
+/api/badges/npm/v/laravel.svg
+/api/badges/packagist/dt/laravel/framework.svg
+/api/badges/docker/pulls/library/nginx.svg
+/api/badges/codecov/coverage/psf/requests.svg
+/api/badges/coveralls/coverage/twbs/bootstrap.svg
+/api/badges/laravel/v/latest.svg
+/api/badges/laravel/dt/latest.svg
+/api/badges/php/v/latest.svg
+/api/badges/python/v/latest.svg
+```
+
+Nas definições de versão de runtime (Laravel, PHP e Python) o `{path}` é o
+literal `latest`: a URL é estável e o valor atualizado vem do cache,
+nunca de um parâmetro de versão. Qualquer outro literal responde 404
+(ADR-085).
+
+- **Item público** (repositório, pacote, imagem pública): o servidor consulta a
+  API pública do provider de forma **anônima**; nenhum token global existe em
+  `.env` ou config.
+- **Item privado**: só para usuário pagador e só em badge pessoal. O PAT é do
+  usuário, cifrado em repouso e vinculado ao badge; a URL pública leva apenas o
+  ULID. Ver `ADR-068` e `docs/tutorial/`.
+- Packagist não hospeda pacote privado: o acesso é sempre público; npm `dm`
+  (contagem de downloads) também é sempre público. Codecov, Coveralls,
+  Laravel, PHP e Python são públicos e não aceitam item privado.
+- Cobertura (Codecov e Coveralls) é o percentual inteiro da **branch padrão**
+  do serviço (`66.89` vira `67%`, `94.148` vira `94%`); não há `?branch=` na
+  rota pública.
+- Cache padrão de 300 s (`badgeforge.providers.cache_ttl`), por URL resolvida:
+  GitHub `stars`/`forks`/`issues`/`license` compartilham a mesma entrada (a URL
+  da API é a mesma); Laravel `v`/`dt` também, porque o client projeta versão e
+  downloads de uma única chamada a `stats.json`; npm `v`/`dm` e Packagist
+  `dt`/`v` têm entradas separadas.
+- `stale-if-error`: provider fora do ar, 429 ou timeout servem a última
+  resposta boa com `Warning: 110` e `X-Badge-Cache: STALE`; sem resposta
+  anterior, a imagem sai 200 com o rótulo da métrica e `unavailable`.
+- Cosmético (`style`, `color`, `labelColor`, `logo`, `logoSize`, `font`,
+  `download=1`, `png`) funciona igual à badge estática. `cacheSeconds` e
+  `refresh` são **ignorados** nesta rota: o TTL é do servidor.
+- Provider, definição ou path inválido/desconhecido responde **404** com o
+  envelope `ApiError`. A rota estática continua vencendo: `/api/badges/static/...`
+  nunca cai aqui.
+- Throttle (F8, ADR-089): a rota usa o cap compartilhado por IP
+  `badgeforge-images` (default 6000/min), como a estática. `QueryException`
+  nesta rota é **404** (provider/definição não resolvidos), não 503.
+  O SVG sai com a CSP fechada de imagem.
+
+## Endpoint JSON (F5 — entregue)
+
+```text
+GET /api/badges/endpoint/{ulid}.{svg|png}
+```
+
+A imagem é stateless e anônima, como a badge pessoal: o ULID é a única
+identidade pública e a URL de origem **nunca** aparece nela. O cadastro é feito
+pelo dono em `/dashboard/badgeforge` (nome + URL); ler o README não exige
+sessão. ULID desconhecido responde **404** no envelope `ApiError` (ADR-083).
+
+### Contrato de origem (shields v1)
+
+O servidor busca a URL cadastrada e aceita **apenas** o núcleo shields v1:
+
+```json
+{
+  "schemaVersion": 1,
+  "label": "deploys",
+  "message": "green",
+  "color": "brightgreen",
+  "labelColor": "blue"
+}
+```
+
+- `schemaVersion` precisa ser exatamente `1`.
+- `label` e `message` são strings obrigatórias e não vazias (após `trim`).
+- `color`/`labelColor` são opcionais e viram **defaults**: a query
+  (`?color=`, `?labelColor=`) vence.
+- Precisam vir com `Content-Type: application/json` (ou `+json`) e corpo até
+  `endpoint.max_body_bytes`; lista, escalar, JSON inválido, content-type
+  diferente ou redirect são recusados.
+- `logoSvg`, `namedLogo`, `style`, `cacheSeconds` e `link` do JSON são
+  ignorados: cosméticos vêm da query e o TTL é do servidor.
+- Cosmético (`style`, `logo`, `logoSize`, `font`, `download=1`, `png`) funciona
+  como nas demais rotas. `?label=` sobrescreve o label da origem.
+
+### Cache e falhas
+
+- Chave `badgeforge:endpoint:v1:sha256(url canônica)` — a chave não revela host
+  nem path, e dois cadastros da mesma origem compartilham a entrada.
+- TTL fixo em `endpoint.cache_ttl` (300 s), limitado por `max_cache_ttl`
+  (3600 s). `?cacheSeconds=` e `?refresh=1` são **ignorados**.
+- `X-Badge-Cache: HIT|MISS|STALE`; quando a origem manda `ETag`, a revalidação
+  usa `If-None-Match` e um `304` renova a entrada.
+- Origem fora do ar, 429 ou timeout servem o último valor bom (`STALE` +
+  `Warning: 110`); sem valor bom, a imagem sai **200** com o nome do endpoint e
+  a mensagem `unavailable` — nunca 500.
+- Uma URL guardada que não passa mais no guard responde **422** `unsafe_url`.
+
+### SSRF
+
+Antes de qualquer conexão: HTTPS na porta 443, sem userinfo, host ASCII válido,
+sem redirect; resolução A+AAAA e **todos** os IPs precisam ser públicos;
+conexão pinada no IP validado (`CURLOPT_RESOLVE`), proxy de ambiente
+desabilitado (`CURLOPT_NOPROXY=*`, `proxy: ''`) e só `CURLPROTO_HTTPS`. Sem a
+extensão `curl` o fetch falha fechado (`curl_unavailable`). Na criação, URL
+insegura ou payload fora do contrato vira **422**
+`validation.badge_endpoint.*`; falha de rede não bloqueia o cadastro
+(ADR-084).
+
+### Rate limit
+
+Por **dono**, não por leitor: Free 300/min, pago 3000/min, e ULID
+inválido/desconhecido cai no anônimo 60/min por IP. O 429 sai no envelope
+`rate_limited` com `X-RateLimit-*` e `Retry-After`.
+
+### Erros de infraestrutura (F8, ADR-089)
+
+- ULID inválido/desconhecido/removido → **404** `not_found`.
+- Banco fora (`QueryException`) → **503** `badge_unavailable`, com
+  `Retry-After: 60` e `Cache-Control: no-store`. A falha da **origem** do
+  endpoint continua STALE/fallback 200; o 503 é só da nossa infraestrutura.
+
+## Provider customizado (F7 — entregue)
+
+```text
+GET /api/badges/custom/{ulid}/{definition}/{path}.{svg|png}
+```
+
+A imagem é stateless e anônima: o ULID é a única identidade pública e o
+**template de origem nunca aparece na URL**. O dono cadastra o provider em
+`/dashboard/badgeforge` (nome, template HTTPS, placeholders e métricas);
+qualquer pessoa com o link renderiza a imagem (ADR-087).
+
+- Só plano pago **cria e edita** (`badgeforge.paid`, 403 no Free), com limite em
+  `custom_providers.limit` (default 10; `null` = ilimitado). Após downgrade a
+  URL continua servindo, pode ser copiada e excluída, mas não editada.
+- `{definition}` é o slug da métrica declarada pelo dono; `{path}` é o caminho
+  que preenche os `path_params` do template (`owner/repo`, por exemplo). Path
+  com número de segmentos ou caracteres diferente do declarado responde
+  **404**.
+- Cada métrica tem um **JSON Pointer** (RFC 6901) e um formatador:
+  - `text`: valor escalar normalizado e truncado pelo formato do badge;
+  - `number`: inteiro/decimal com sufixo `k`/`M`/`B`, como nos providers;
+  - `percent`: percentual inteiro de 0 a 100.
+- Template e conjunto de métricas são imutáveis (trocar = excluir e recriar).
+  Nome do provider, `label`, `pointer` e `formatter` são editáveis; o `slug` da
+  métrica não muda.
+- `?cacheSeconds=` e `?refresh=1` são ignorados; cosméticos (`style`, `color`,
+  `logo`, `font`, `download=1`, `png`) funcionam como nas demais rotas.
+- ULID inválido/desconhecido, definição fora do conjunto, path inválido ou
+  provider desabilitado no admin respondem **404** no envelope `ApiError`.
+
+### Cache e falhas do provider customizado
+
+- Chave
+  `badgeforge:custom:v1:{ulid}:{metricsVersion}:sha256(url renderizada)`; só os
+  escalares extraídos são cacheados.
+- TTL 300 s, `stale_ttl` 86400 s e `fallback_ttl` 60 s (todos em
+  `custom_providers`). `X-Badge-Cache: HIT|MISS|STALE`; `Warning: 110` no
+  stale.
+- **Qualquer** falha no serving — guard, resolve, fetch, JSON inválido ou
+  pointer ausente/não escalar — vira stale/fallback **200**, nunca 422/500.
+  Sem valor bom, a imagem sai com o label da métrica e `unavailable`.
+
+### SSRF e rate limit do provider customizado
+
+Mesma defesa do endpoint JSON: HTTPS na porta 443, sem userinfo/redirect,
+resolução A+AAAA com todos os IPs públicos, conexão pinada e fail-closed sem
+`curl`. No **cadastro**, o probe usa um `example_path` concreto: URL insegura,
+redirect, JSON inválido ou pointer ausente/não escalar respondem **422**
+`validation.badge_custom_provider.*`; timeout, DNS, 5xx e 429 são tolerados.
+
+Por **dono**: Free 300/min, pago 3000/min; ULID inválido/desconhecido cai no
+anônimo 60/min por IP. O 429 sai no envelope `rate_limited` com
+`X-RateLimit-*` e `Retry-After`.
+
+## Gestão da conta (F3 — web/Inertia, não é API pública)
+
+Estas rotas são da área autenticada (sessão + CSRF, `auth, verified, active`);
+não há API pública de gestão na F3.
+
+| Método | Caminho | Ação |
+|---|---|---|
+| GET | `/dashboard/badgeforge` | página da conta (limites, logos, presets e badges pessoais) |
+| POST | `/badgeforge/logos` | upload SVG + parse (multipart) |
+| GET | `/badgeforge/logos/{ulid}` | JSON `{viewBox, paths}` — só o dono |
+| PATCH | `/badgeforge/logos/{ulid}` | renomear |
+| DELETE | `/badgeforge/logos/{ulid}` | excluir |
+| POST | `/badgeforge/presets` | criar snapshot |
+| PATCH | `/badgeforge/presets/{ulid}` | renomear |
+| DELETE | `/badgeforge/presets/{ulid}` | excluir |
+| POST | `/badgeforge/badges` | criar badge pessoal (só plano pago) |
+| PATCH | `/badgeforge/badges/{ulid}` | renomear badge |
+| PATCH | `/badgeforge/badges/{ulid}/credential` | definir/trocar o PAT da badge |
+| POST | `/badgeforge/badges/{ulid}/refresh` | forçar nova geração (provider) |
+| DELETE | `/badgeforge/badges/{ulid}` | excluir badge e arquivos |
+| POST | `/badgeforge/endpoints` | cadastrar endpoint JSON (nome + URL de origem) |
+| PATCH | `/badgeforge/endpoints/{ulid}` | renomear endpoint (a URL é imutável) |
+| DELETE | `/badgeforge/endpoints/{ulid}` | excluir endpoint e esquecer a chave de cache |
+| POST | `/badgeforge/custom-providers` | criar provider customizado (só plano pago) |
+| PATCH | `/badgeforge/custom-providers/{ulid}` | editar nome, label, pointer e formatter |
+| DELETE | `/badgeforge/custom-providers/{ulid}` | excluir provider e esquecer a chave de cache |
+| GET | `/badgeforge/analytics/export` | CSV do período (só plano pago, 403 no Free) |
+
+Regras: escritas em `throttle:badgeforge-management` (o refresh tem limiter
+próprio, `badgeforge-refresh`); registro de outra conta responde **404**; SVG
+inválido responde **422** com `validation.custom_logo.<code>`; limites em
+`config/badgeforge.php` (Free: 2 logos; pago: ilimitado; presets: ilimitados).
+Os paths nunca viajam nas props da página — são buscados sob demanda no `GET` do
+logo. Badge pessoal é imutável em provider/params: para mudar, crie outra e
+exclua a antiga. O PAT é write-only e nunca volta na resposta.
+
+A página pública `/{locale}/docs/badgeforge` documenta as cinco rotas de
+imagem, as nove métricas, o fluxo de credencial, o contrato do endpoint JSON e,
+na F7, o provider customizado (URL opaca, JSON Pointer, template imutável) nos
+cinco idiomas. O painel do dono em `/dashboard/badgeforge` concentra logos,
+presets, badges pessoais, endpoints, providers customizados e o painel de
+analytics.
+
+## Pessoal (F4 — entregue)
+
+```text
+GET /b/{username}/{ulid}.svg
+```
+
+Apenas usuários pagos criam. A URL carrega só o ULID opaco; o PAT de item
+privado nunca aparece nela. A imagem é stateless (sem sessão/CSRF), devolve
+`ETag`/`304` e `Cache-Control` com teto de 3600 s
+(`badgeforge.personal_badges.max_cache_seconds`). `?refresh=1` é ignorado:
+o dono força uma nova geração por `POST /badgeforge/badges/{ulid}/refresh`.
+
+Desde a F8 (ADR-089) a rota divide o cap por IP `badgeforge-images` (que é o
+throttle da imagem; não há limiter por dono aqui), e os erros saem no envelope
+`ApiError`: recurso inexistente, ULID inválido ou dono errado → **404**
+`not_found`; banco fora → **503** `badge_unavailable` com `Retry-After: 60` e
+`Cache-Control: no-store`. A página Inertia de erro 404 nunca responde no
+caminho `b/*`.
+
+## API de gestão (F8/F9 — entregue, ADR-088 e ADR-090)
+
+Programática, em `/api/v1/badgeforge`, com token Sanctum emitido em
+`/settings/api-tokens` (`Authorization: Bearer <token>`). O catálogo é
+anônimo; o resto exige `badgeforge:read` (GET) ou `badgeforge:write`
+(POST/PATCH/DELETE). As abilities são **ortogonais** ao `ai:query` do AI SQL
+Builder. A F9 fechou o espelho do painel: o que a tela faz, a API faz.
+
+| Método | Caminho | Ability | Retorno |
+| --- | --- | --- | --- |
+| GET | `/api/v1/badgeforge/providers` | anônimo | catálogo público (mesmo shape dos docs) |
+| GET | `/api/v1/badgeforge/styles` | anônimo | ids dos estilos |
+| GET | `/api/v1/badgeforge/logos` | `badgeforge:read` | logos do dono + `meta.limit`/`meta.used` |
+| POST | `/api/v1/badgeforge/logos` | `badgeforge:write` | **201** logo criado (`multipart/form-data`: `name`, `logo`) |
+| PATCH | `/api/v1/badgeforge/logos/{ulid}` | `badgeforge:write` | logo renomeado (só metadados) |
+| DELETE | `/api/v1/badgeforge/logos/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/badges` | `badgeforge:read` | badges pessoais do dono, paginado |
+| POST | `/api/v1/badgeforge/badges` | `badgeforge:write` | **201** badge pessoal com `url`/`pngUrl` |
+| PATCH | `/api/v1/badgeforge/badges/{ulid}` | `badgeforge:write` | badge renomeada |
+| PATCH | `/api/v1/badgeforge/badges/{ulid}/credential` | `badgeforge:write` | badge com `credentialSet`/`credentialUsername` |
+| POST | `/api/v1/badgeforge/badges/{ulid}/refresh` | `badgeforge:write` | `{url, pngUrl, generatedAt}` |
+| DELETE | `/api/v1/badgeforge/badges/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/endpoints` | `badgeforge:read` | endpoints JSON do dono, paginado |
+| POST | `/api/v1/badgeforge/endpoints` | `badgeforge:write` | **201** endpoint (**nome + URL de origem**) |
+| PATCH | `/api/v1/badgeforge/endpoints/{ulid}` | `badgeforge:write` | endpoint renomeado (URL imutável) |
+| DELETE | `/api/v1/badgeforge/endpoints/{ulid}` | `badgeforge:write` | `{data: {id, deleted: true}}` |
+| GET | `/api/v1/badgeforge/custom-providers` | `badgeforge:read` | providers customizados do dono, paginado |
+| POST | `/api/v1/badgeforge/custom-providers` | `badgeforge:write` + pago | **201** provider com `definitions` |
+| PATCH | `/api/v1/badgeforge/custom-providers/{ulid}` | `badgeforge:write` + pago | provider com `name`/`metrics` atualizados |
+| DELETE | `/api/v1/badgeforge/custom-providers/{ulid}` | `badgeforge:write` | permitido após downgrade |
+| GET | `/api/v1/badgeforge/analytics?window=7\|30\|90` | `badgeforge:read` | mesmo shape do painel, **sem** `exportUrl` |
+
+- **Catálogo**: `Cache-Control: public, max-age=<catalog_cache_seconds>` e
+  `ETag` do corpo; `If-None-Match` responde **304**.
+- **Listas**: `data` + `meta` (`current_page`, `per_page`, `total`,
+  `last_page`) + `links` (`next`/`previous`); `per_page` padrão 20, máximo 100.
+  Não há `GET` por ID: o recurso vem na lista ou no corpo do POST/PATCH.
+- **PATCH espelha a tela**: recebe a representação completa dos campos
+  mutáveis (não é JSON Merge Patch). Badge, logo e endpoint aceitam só `name`;
+  custom provider aceita `name` + `metrics`, com `url_template` proibido (422)
+  e o conjunto de slugs fixo.
+- **Credencial**: write-only e cifrada, só em badge de provider que aceita item
+  privado e plano pago; a resposta nunca ecoa o valor. Não existe "remover":
+  revogar é excluir a badge. O refresh é síncrono e empilha `api-write`
+  (30/min por token) com `badgeforge-refresh` (10/min por conta).
+- **Endpoints**: Free cadastra, como na tela. A URL de origem é imutável e
+  nunca volta; a resposta leva `id`, `name`, `svgUrl`, `pngUrl` e `createdAt`.
+- **Custom providers**: criar/editar exige plano pago (**403** `forbidden` no
+  Free); excluir continua permitido após downgrade. Template, placeholders e
+  conjunto de métricas são imutáveis. A resposta leva `definitions` com
+  `slug`/`label`/`pointer`/`formatter` — nunca `url_template`.
+- **Analytics**: Free fica nos 30 dias (`free_window_days`), com totais e
+  contagem por imagem; pago escolhe `window=7|30|90` e ganha série, referrers,
+  países, formatos e cache. Janela inválida cai em 30, nunca 422. O CSV
+  continua só na web.
+- **Envelope**: sucesso `{"data": ...}`; erro `ApiError` com `code` estável
+  (`validation_error`, `forbidden`, `not_found`, `rate_limited`,
+  `badge_unavailable`). Recurso de outra conta responde **404** `not_found`;
+  banco fora no analytics responde **503** `badge_unavailable` com
+  `Retry-After: 60` e `Cache-Control: no-store`.
+- **Regras herdadas**: plano pago e username obrigatório para badge pessoal,
+  quota de logo por plano, PAT cifrado e só em item privado de provider que
+  aceita privado, SVG sanitizado no upload, SSRF e probe na criação de
+  endpoint/provider customizado. A API delega às mesmas actions e requests da
+  tela, então essas regras não são reimplementadas.
+- **O que não volta**: `viewBox`/paths do logo (só metadados), a credencial da
+  badge (só `credentialSet`/`credentialUsername`) e, como sempre, a URL de
+  origem de endpoint/provider custom e o `exportUrl` do analytics.
+- **Throttle**: `api-read` 120/min e `api-write` 30/min, por token (IP no
+  catálogo). O 429 sai no envelope `rate_limited` com `X-RateLimit-*` e
+  `Retry-After`.
+- **Fora da F9**: presets (snapshot do builder, sem URL pública), `GET` por ID,
+  CSV de analytics pela API, superfície de admin e webhooks/bulk. A gestão
+  web/Inertia segue descrita acima.
+
+O contrato de máquina é [`openapi.yaml`](openapi.yaml) (OpenAPI 3.1.0,
+versão **1.9.0**), servido em `GET /openapi/badges.yaml`.

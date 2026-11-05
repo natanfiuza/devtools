@@ -26,6 +26,9 @@ return [
         'audit' => 'Audit log',
         'output_targets' => 'Output targets',
         'ai_cache' => 'AI cache',
+        'badgeforge_providers' => 'BadgeForge providers',
+        'badgeforge_custom_providers' => 'Custom providers',
+        'badgeforge_analytics' => 'BadgeForge volume',
         'back_to_site' => 'Back to site',
     ],
 
@@ -466,6 +469,57 @@ return [
         'empty' => 'Nothing recorded yet.',
     ],
 
+    'badge_providers' => [
+        'title' => 'BadgeForge providers',
+        'description' => 'The global catalog of providers and metrics. Turning one off removes the public route and the docs without deleting history.',
+        'readonly' => 'Only the on/off state is edited here; slug, template and parser come from the migration.',
+        'provider' => 'Provider',
+        'definition' => 'Metric',
+        'category' => 'Category',
+        'enabled' => 'On',
+        'disabled' => 'Off',
+        'toggle' => 'Turn this provider on or off',
+        'toggle_definition' => 'Turn this metric on or off',
+        'empty' => 'No providers in the catalog.',
+    ],
+
+    'badge_custom_providers' => [
+        'title' => 'Custom providers',
+        'description' => 'JSON providers created by paid accounts. The admin sees the source to investigate; outside this screen it never leaves the server.',
+        'name' => 'Name',
+        'owner' => 'Owner',
+        'template' => 'Source template',
+        'params' => 'Path parameters',
+        'example' => 'Example path',
+        'metrics' => 'Metrics',
+        'metric' => 'Metric',
+        'pointer' => 'Pointer',
+        'formatter' => 'Format',
+        'state' => 'State',
+        'enabled' => 'On',
+        'disabled' => 'Off',
+        'toggle' => 'Disable or re-enable this provider',
+        'readonly' => 'The admin disables and never deletes: the data belongs to the owner.',
+        'empty' => 'No custom providers.',
+        'created_at' => 'Created',
+    ],
+
+    'badgeforge_analytics' => [
+        'title' => 'BadgeForge volume',
+        'description' => 'Views aggregated by day. The aggregate keeps 400 days; unique visitors stay in the owner area.',
+        'window' => 'Period',
+        'window_days' => '{days} days',
+        'views' => 'Views',
+        'cache_rate' => 'Cache share',
+        'cache_detail' => '{hits} views served from cache',
+        'cache_none' => 'No cache data',
+        'day' => 'Day',
+        'cache_hits' => 'From cache',
+        'no_data' => 'No views in this period.',
+        'bar_title' => '{date}: {views} views',
+        'note' => 'Numbers come from the daily aggregate, which cannot deduplicate visitors across dimensions.',
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'Email verified',
@@ -486,6 +540,15 @@ return [
         ],
         'output_target' => [
             'updated' => 'Output target updated',
+        ],
+        'provider' => [
+            'updated' => 'Provider updated',
+        ],
+        'definition' => [
+            'updated' => 'Provider metric updated',
+        ],
+        'custom_provider' => [
+            'updated' => 'Custom provider updated',
         ],
         'ai_cache' => [
             'pruned' => 'AI cache pruned',
@@ -527,6 +590,10 @@ return [
         'subscriber_already_removed' => 'The subscriber was already unsubscribed.',
         'output_target_saved' => 'Target updated.',
         'output_target_unchanged' => 'The target was already in this state.',
+        'badge_provider_saved' => 'Provider updated.',
+        'badge_provider_unchanged' => 'The provider was already in this state.',
+        'badge_custom_provider_saved' => 'Custom provider updated.',
+        'badge_custom_provider_unchanged' => 'The custom provider was already in this state.',
         'ai_cache_pruned' => 'Expired responses removed from the cache.',
         'ai_cache_empty' => 'No expired responses in the cache.',
         'plan_saved' => 'Plan updated.',

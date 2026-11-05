@@ -1,0 +1,586 @@
+{
+    "endpoint": "/api/badges/static",
+    "providerEndpoint": "/api/badges",
+    "personalEndpoint": "/b",
+    "customEndpoint": "/api/badges/custom",
+    "styles": [
+        "flat",
+        "flat-square",
+        "plastic",
+        "for-the-badge",
+        "social"
+    ],
+    "logos": [
+        {
+            "slug": "composer",
+            "name": "Composer"
+        },
+        {
+            "slug": "docker",
+            "name": "Docker"
+        },
+        {
+            "slug": "github",
+            "name": "GitHub"
+        },
+        {
+            "slug": "gitlab",
+            "name": "GitLab"
+        },
+        {
+            "slug": "gitpr",
+            "name": "GitPR"
+        },
+        {
+            "slug": "html",
+            "name": "HTML"
+        },
+        {
+            "slug": "javascript",
+            "name": "JavaScript"
+        },
+        {
+            "slug": "json",
+            "name": "JSON"
+        },
+        {
+            "slug": "laravel",
+            "name": "Laravel"
+        },
+        {
+            "slug": "markdown",
+            "name": "Markdown"
+        },
+        {
+            "slug": "mysql",
+            "name": "MySQL"
+        },
+        {
+            "slug": "node",
+            "name": "Node.js"
+        },
+        {
+            "slug": "npm",
+            "name": "npm"
+        },
+        {
+            "slug": "pest",
+            "name": "Pest"
+        },
+        {
+            "slug": "php",
+            "name": "PHP"
+        },
+        {
+            "slug": "phpunit",
+            "name": "PHPUnit"
+        },
+        {
+            "slug": "postgresql",
+            "name": "PostgreSQL"
+        },
+        {
+            "slug": "python",
+            "name": "Python"
+        },
+        {
+            "slug": "react",
+            "name": "React"
+        },
+        {
+            "slug": "redis",
+            "name": "Redis"
+        },
+        {
+            "slug": "symfony",
+            "name": "Symfony"
+        },
+        {
+            "slug": "tailwind",
+            "name": "Tailwind CSS"
+        },
+        {
+            "slug": "typescript",
+            "name": "TypeScript"
+        },
+        {
+            "slug": "vite",
+            "name": "Vite"
+        },
+        {
+            "slug": "vue",
+            "name": "Vue"
+        }
+    ],
+    "fonts": [
+        {
+            "slug": "fira-code",
+            "name": "Fira Code",
+            "stack": "Fira Code,DejaVu Sans,monospace"
+        },
+        {
+            "slug": "libre-franklin",
+            "name": "Libre Franklin",
+            "stack": "Libre Franklin,DejaVu Sans,sans-serif"
+        },
+        {
+            "slug": "space-grotesk",
+            "name": "Space Grotesk",
+            "stack": "Space Grotesk,DejaVu Sans,sans-serif"
+        }
+    ],
+    "providers": [
+        {
+            "slug": "github",
+            "name": "GitHub",
+            "category": "vcs",
+            "requiresAuth": true,
+            "requiresUsername": false,
+            "documentationUrl": "https://docs.github.com/en/rest/repos/repos",
+            "definitions": [
+                {
+                    "slug": "stars",
+                    "name": "GitHub stars",
+                    "label": "stars",
+                    "supportsPrivate": true,
+                    "examplePath": "natanfiuza/devtools",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                },
+                {
+                    "slug": "forks",
+                    "name": "GitHub forks",
+                    "label": "forks",
+                    "supportsPrivate": true,
+                    "examplePath": "natanfiuza/devtools",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                },
+                {
+                    "slug": "issues",
+                    "name": "GitHub issues",
+                    "label": "issues",
+                    "supportsPrivate": true,
+                    "examplePath": "natanfiuza/devtools",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                },
+                {
+                    "slug": "license",
+                    "name": "GitHub license",
+                    "label": "license",
+                    "supportsPrivate": true,
+                    "examplePath": "natanfiuza/devtools",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "npm",
+            "name": "npm",
+            "category": "package",
+            "requiresAuth": true,
+            "requiresUsername": false,
+            "documentationUrl": "https://github.com/npm/registry/blob/main/docs/REGISTRY-API.md",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "npm version",
+                    "label": "npm",
+                    "supportsPrivate": true,
+                    "examplePath": "vue",
+                    "pathPattern": "{package}",
+                    "params": [
+                        {
+                            "name": "package",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9@][A-Za-z0-9@._/-]{0,213}",
+                            "allowSlash": true,
+                            "placeholderKey": "package"
+                        }
+                    ]
+                },
+                {
+                    "slug": "dm",
+                    "name": "npm downloads",
+                    "label": "downloads",
+                    "supportsPrivate": false,
+                    "examplePath": "vue",
+                    "pathPattern": "{package}",
+                    "params": [
+                        {
+                            "name": "package",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9@][A-Za-z0-9@._/-]{0,213}",
+                            "allowSlash": true,
+                            "placeholderKey": "package"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "packagist",
+            "name": "Packagist",
+            "category": "package",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://packagist.org/apidoc",
+            "definitions": [
+                {
+                    "slug": "dt",
+                    "name": "Packagist downloads",
+                    "label": "downloads",
+                    "supportsPrivate": false,
+                    "examplePath": "laravel/framework",
+                    "pathPattern": "{vendor}/{package}",
+                    "params": [
+                        {
+                            "name": "vendor",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "vendor"
+                        },
+                        {
+                            "name": "package",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "package"
+                        }
+                    ]
+                },
+                {
+                    "slug": "v",
+                    "name": "Packagist version",
+                    "label": "version",
+                    "supportsPrivate": false,
+                    "examplePath": "laravel/framework",
+                    "pathPattern": "{vendor}/{package}",
+                    "params": [
+                        {
+                            "name": "vendor",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "vendor"
+                        },
+                        {
+                            "name": "package",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9][A-Za-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "package"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "docker",
+            "name": "Docker Hub",
+            "category": "container",
+            "requiresAuth": true,
+            "requiresUsername": true,
+            "documentationUrl": "https://docs.docker.com/reference/api/hub/latest/",
+            "definitions": [
+                {
+                    "slug": "pulls",
+                    "name": "Docker Hub pulls",
+                    "label": "pulls",
+                    "supportsPrivate": true,
+                    "examplePath": "library/postgres",
+                    "pathPattern": "{namespace}/{repository}",
+                    "params": [
+                        {
+                            "name": "namespace",
+                            "required": true,
+                            "pattern": "[a-z0-9][a-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "namespace"
+                        },
+                        {
+                            "name": "repository",
+                            "required": true,
+                            "pattern": "[a-z0-9][a-z0-9._-]{0,99}",
+                            "allowSlash": false,
+                            "placeholderKey": "repository"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "codecov",
+            "name": "Codecov",
+            "category": "coverage",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://docs.codecov.com/reference",
+            "definitions": [
+                {
+                    "slug": "coverage",
+                    "name": "Codecov coverage",
+                    "label": "coverage",
+                    "supportsPrivate": false,
+                    "examplePath": "psf/requests",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "coveralls",
+            "name": "Coveralls",
+            "category": "coverage",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://docs.coveralls.io/api-reference",
+            "definitions": [
+                {
+                    "slug": "coverage",
+                    "name": "Coveralls coverage",
+                    "label": "coverage",
+                    "supportsPrivate": false,
+                    "examplePath": "twbs/bootstrap",
+                    "pathPattern": "{owner}/{repo}",
+                    "params": [
+                        {
+                            "name": "owner",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?",
+                            "allowSlash": false,
+                            "placeholderKey": "owner"
+                        },
+                        {
+                            "name": "repo",
+                            "required": true,
+                            "pattern": "[A-Za-z0-9._-]{1,100}",
+                            "allowSlash": false,
+                            "placeholderKey": "repo"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "laravel",
+            "name": "Laravel",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://laravel.com/docs/releases",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "Laravel version",
+                    "label": "laravel",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                },
+                {
+                    "slug": "dt",
+                    "name": "Laravel downloads",
+                    "label": "downloads",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
+        },
+        {
+            "slug": "php",
+            "name": "PHP",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://www.php.net/releases/",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "PHP version",
+                    "label": "php",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
+        },
+        {
+            "slug": "python",
+            "name": "Python",
+            "category": "runtime",
+            "requiresAuth": false,
+            "requiresUsername": false,
+            "documentationUrl": "https://endoflife.date/python",
+            "definitions": [
+                {
+                    "slug": "v",
+                    "name": "Python version",
+                    "label": "python",
+                    "supportsPrivate": false,
+                    "examplePath": "latest",
+                    "pathPattern": "latest",
+                    "params": []
+                }
+            ]
+        }
+    ],
+    "limits": {
+        "maxTextLength": 100,
+        "logoSize": {
+            "min": 8,
+            "max": 20
+        },
+        "cacheSeconds": {
+            "default": 86400,
+            "min": 300,
+            "max": 86400
+        },
+        "linkMaxLength": 2048,
+        "png": {
+            "maxWidth": 600
+        },
+        "customLogos": {
+            "limit": 0,
+            "used": 0,
+            "maxBytes": 262144,
+            "maxPaths": 200,
+            "maxPathLength": 4000,
+            "maxTotalPathLength": 100000,
+            "maxCacheSeconds": 3600,
+            "nameMaxLength": 80
+        },
+        "presets": {
+            "limit": 0,
+            "used": 0,
+            "nameMaxLength": 80
+        },
+        "personalBadges": {
+            "limit": 0,
+            "used": 0,
+            "nameMaxLength": 80
+        },
+        "endpointBadges": {
+            "nameMaxLength": 80,
+            "urlMaxLength": 2048
+        },
+        "providers": {
+            "maxParamLength": 200
+        },
+        "customProviders": {
+            "limit": 0,
+            "used": 0,
+            "nameMaxLength": 80,
+            "urlMaxLength": 2048,
+            "examplePathMaxLength": 512,
+            "slugMaxLength": 32,
+            "labelMaxLength": 80,
+            "pointerMaxLength": 256,
+            "maxMetrics": 10,
+            "maxPathParams": 5,
+            "paramMaxLength": 200
+        }
+    },
+    "defaults": {
+        "style": "flat",
+        "color": "#9f9f9f",
+        "labelColor": "#555555",
+        "logoColor": "#ffffff",
+        "logoPosition": "left"
+    },
+    "management": {
+        "canManage": false,
+        "canSavePresets": false,
+        "canCreatePersonalBadges": false,
+        "canCreateEndpointBadges": false,
+        "canCreateCustomProviders": false,
+        "isPaid": false
+    },
+    "customLogos": [],
+    "presets": [],
+    "personalBadges": [],
+    "endpointBadges": [],
+    "customProviders": []
+}

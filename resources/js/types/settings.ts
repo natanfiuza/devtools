@@ -61,6 +61,8 @@ export type ApiTokenUsageStats = {
 
 export type ApiTokensProps = {
     tokens: ApiToken[];
+    /** Abilities que a conta pode conceder a um token novo. */
+    abilities: string[];
     plainTextToken: string | null;
     stats?: ApiTokensStats;
     usageStats?: ApiTokenUsageStats;

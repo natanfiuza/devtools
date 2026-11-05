@@ -19,6 +19,9 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Os hosts liberados sao os que o site realmente usa: Google Analytics (so
  * depois do aceite, ADR-013) e Cloudflare Turnstile (cadastro, ADR-052).
+ * Imagem SVG recebe uma politica propria e fechada (`default-src 'none'`),
+ * porque a da aplicacao nao vale para um documento carregado sozinho (F8,
+ * ADR-089).
  */
 final class SecurityHeaders
 {
@@ -55,7 +58,13 @@ final class SecurityHeaders
 
         $mode = (string) config('security.csp.mode', 'enforce');
 
-        if ($mode !== 'off') {
+        // Um SVG servido como documento (aberto direto ou embutido) carrega
+        // recursos por conta propria: a politica da aplicacao nao se aplica e
+        // a restritiva abaixo garante que a imagem nao busque nada (F8,
+        // ADR-089).
+        if (str_starts_with((string) $response->headers->get('Content-Type'), 'image/svg+xml')) {
+            $response->headers->set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+        } elseif ($mode !== 'off') {
             $header = $mode === 'report-only'
                 ? 'Content-Security-Policy-Report-Only'
                 : 'Content-Security-Policy';

@@ -79,6 +79,12 @@ DONATIONS_SEND_RECEIPTS=true
 DONATIONS_PIX_KEY=
 DONATIONS_PIX_HOLDER=
 DONATIONS_PIX_CITY=
+
+# BadgeForge (F7). Tudo optional: sem o arquivo GeoLite2 o pais da visualizacao
+# fica nulo e nada quebra; o limite de providers customizados tem default no
+# config (10) e nenhum dos dois e obrigatorio para a imagem funcionar.
+# BADGEFORGE_GEOIP_DB=/var/www/devtools/storage/app/data/geoip/GeoLite2-Country.mmdb
+# BADGEFORGE_CUSTOM_PROVIDERS_LIMIT=10
 ```
 
 Permissoes e a primeira carga:
@@ -336,8 +342,9 @@ scheduler:
 * * * * * cd /var/www/devtools && php artisan schedule:run >> storage/logs/schedule.log 2>&1
 ```
 
-Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune` e
-`history:prune` nunca rodam. As linhas semeadas pelas migrations (fuso
+Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune`,
+`history:prune`, `badgeforge:analytics:aggregate` e `badgeforge:analytics:prune`
+nunca rodam. As linhas semeadas pelas migrations (fuso
 `America/Recife`, `APP_TIMEZONE`):
 
 | Comando | Expressao | Para que |
@@ -346,6 +353,8 @@ Sem essa linha, `accounts:purge-deleted`, `payments:expire`, `webhooks:prune` e
 | `payments:expire` | `*/5 * * * *` | marca `pending -> expired` em checkout e doacao vencidos |
 | `webhooks:prune --days=30` | `30 3 * * *` | apaga eventos de webhook com mais de 30 dias |
 | `history:prune` | `45 3 * * *` | apaga historico de consultas com mais de 90 dias (F7) |
+| `badgeforge:analytics:aggregate` | `13 * * * *` | reconstroi as ultimas 7 dailies a partir do bruto (F7) |
+| `badgeforge:analytics:prune` | `17 4 * * *` | apaga bruto com mais de 90 dias e dailies com mais de 400 (F7) |
 
 `last_run_at` existe na tabela mas **nao e atualizada**: confira a execucao
 pelos logs (`schedule.log`, `worker.log`) ou pelo efeito no banco. Nao ha tela
@@ -356,12 +365,15 @@ de agendamentos; mudar horario e migration ou SQL.
 php artisan payments:expire --dry-run
 php artisan webhooks:prune --dry-run
 php artisan history:prune --dry-run
+php artisan badgeforge:analytics:prune --dry-run
 
 # Execucao manual, se precisar:
 php artisan accounts:purge-deleted --days=30
 php artisan payments:expire
 php artisan webhooks:prune --days=30
 php artisan history:prune
+php artisan badgeforge:analytics:aggregate --days=7
+php artisan badgeforge:analytics:prune
 ```
 
 O guia completo das tres pecas (deploy, agendador e worker) esta em
@@ -393,6 +405,54 @@ e exclusao (o Free recebe 403 e ve o CTA de upgrade).
 ```bash
 php artisan history:prune --dry-run          # lista o que sairia
 php artisan history:prune --days=30          # janela menor, em manutencao
+```
+
+### BadgeForge: analytics e providers customizados (F7)
+
+As imagens com dono (badge pessoal, endpoint JSON e provider customizado) gravam
+uma linha em `badge_views` a cada 200/304. O registro e **sincrono e
+best-effort**: se o banco falhar, a imagem continua saindo e a visualizacao e
+perdida - nao ha retry e nao ha fila para isso. Badge estatica e provider global
+nao gravam.
+
+- **Retencao**: bruto 90 dias, agregado diario 400 dias. O dono le o bruto; a
+  tela do admin le as dailies. `badgeforge:analytics:aggregate` reconstroi os
+  ultimos 7 dias de forma idempotente (apaga e reinsere o dia); `...:prune`
+  apaga o bruto e as dailies fora da janela. Ambos dependem do **worker** e do
+  cron do `schedule:run` (secao 5) - sem eles as linhas semeadas em
+  `task_schedules` nunca executam.
+- **Ordem**: agregacao de hora em hora (`13 * * * *`) antes da poda diaria
+  (`17 4 * * *`). Se a poda rodar manualmente antes de uma agregacao atrasada,
+  o dia que so existe no bruto e perdido; rode `badgeforge:analytics:aggregate`
+  primeiro.
+- **Privacidade**: nao existe IP nem User-Agent cru no banco; `ip_hash` e
+  `user_agent_hash` sao HMAC-SHA256 com `APP_KEY`. Trocar a `APP_KEY` (secao 7)
+  muda todos os hashes, entao "visitantes unicos" recomecam na rotacao - a
+  contagem antiga nao e comparavel. CSV exportado pelo dono nunca leva hash.
+- **GeoLite2 (opcional)**: baixe o `GeoLite2-Country.mmdb`, coloque em
+  `storage/app/data/geoip/` (ou aponte `BADGEFORGE_GEOIP_DB` para outro
+  caminho) e garanta leitura pelo `www-data`. Sem arquivo, corrompido ou em IP
+  privado, o pais fica nulo e nada quebra. Depois do deploy:
+
+```bash
+sudo install -o www-data -g www-data -m 644 GeoLite2-Country.mmdb \
+  /var/www/devtools/storage/app/data/geoip/GeoLite2-Country.mmdb
+php artisan optimize:clear && php artisan optimize   # so se mudou a variavel
+```
+
+- **Providers customizados**: so plano pago cria/edita; o limite conta por dono
+  e vem de `badgeforge.custom_providers.limit` (`BADGEFORGE_CUSTOM_PROVIDERS_LIMIT`,
+  default 10). O template e imutavel - trocar exige excluir e recriar. O admin
+  ve o template/pointer na tela `/admin/badgeforge/custom-providers` e pode
+  desabilitar (a URL publica passa a 404); ele **nao** exclui. Origem fora do ar
+  vira STALE/fallback 200, com `X-Badge-Cache` dizendo o que aconteceu.
+
+```bash
+# Volume do bruto e das dailies (o dono le o bruto; o admin, o diario):
+php artisan tinker --execute="dump(DB::table('badge_views')->count(), DB::table('badge_view_dailies')->count());"
+
+# Reconstruir um periodo maior, em manutencao (idempotente):
+php artisan badgeforge:analytics:aggregate --days=30
 ```
 
 ## 6. Backup
@@ -594,6 +654,78 @@ publica de documentacao em `/{locale}/api-docs` (ADR-057). Os contadores de
 requisicoes HTTP e de consultas SQL por token e por conta ficam visiveis em
 `/settings/api-tokens` e em `/admin/users/{user}`.
 
+### BadgeForge: imagens, API de gestão e `/up` (F8)
+
+**Cap de imagens.** Static, provider e `/b/` dividem um limite por IP
+(`badgeforge.serving.rate_limit.per_minute`,
+`BADGEFORGE_SERVING_LIMIT_PER_MINUTE`, default 6000/min). O objetivo e impedir
+varredura direta na origem, nao limitar leitor: GitHub Camo e proxies
+compartilhados concentram muitos leitores no mesmo IP. Acima do cap a imagem
+responde 429 `rate_limited` com `Retry-After`; o limite por dono do endpoint
+JSON e do provider customizado continua separado (Free 300/min, pago
+3000/min). Se aparecer 429 em massa, confira se o trafego vem do CDN antes de
+subir o numero.
+
+```bash
+curl -sI https://devtools.natanfiuza.dev.br/api/badges/static/build/passing.svg \
+  | grep -iE 'cache-control|etag|content-security-policy|x-ratelimit'
+```
+
+**SVG e CSP.** Todo `image/svg+xml` sai com
+`Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`,
+independente de `CSP_MODE`; a politica do site nao se aplica a imagem.
+
+**404 x 503.** Recurso inexistente, ULID invalido ou dono errado e 404
+`not_found` (cacheavel pelo CDN). Banco ou infraestrutura fora em
+`api/badges/*` e `b/*` e 503 `badge_unavailable` com `Retry-After: 60` e
+`Cache-Control: no-store` — o CDN nao guarda o erro no lugar da imagem. Falha
+da origem do endpoint/provider custom continua STALE/fallback 200; nao e 503.
+PNG sem `imagick` continua 503 `image_unavailable`.
+
+**Export de analytics sob 429.** O `badgeforge-management` responde 429 JSON
+(com `Retry-After`) no GET de export CSV e mantem o toast Inertia em
+POST/PATCH/DELETE. Se o CSV vier 429, espere o `Retry-After`; nao ha limite
+proprio para download.
+
+**API de gestão (`/api/v1/badgeforge`, F8/F9).** O token precisa de
+`badgeforge:read` (todo GET, inclusive analytics) ou `badgeforge:write`
+(POST/PATCH/DELETE); o `ai:query` do AI SQL Builder nao vale aqui. Crie o
+token em `/settings/api-tokens` (o valor aparece uma vez). O catalogo
+`/providers` e `/styles` e anonimo e cacheavel (ETag/304). Diagnostico:
+
+```bash
+curl -s https://devtools.natanfiuza.dev.br/api/v1/badgeforge/providers | head -c 200
+curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/api/v1/badgeforge/badges
+curl -s -H "Authorization: Bearer <token>" 'https://devtools.natanfiuza.dev.br/api/v1/badgeforge/analytics?window=30'
+curl -s https://devtools.natanfiuza.dev.br/openapi/badges.yaml | head -5
+```
+
+**Refresh e analytics.** `POST /badges/{ulid}/refresh` empilha `api-write`
+(30/min por token) e `badgeforge-refresh` (10/min por conta); se o segundo
+estourar, o 429 sai no envelope com `Retry-After`. `GET /analytics` le o bruto
+(`badge_views`): tabela ausente ou banco fora responde 503 `badge_unavailable`
+com `Retry-After: 60`/`no-store`, distinto de 404. Custom provider so cria e
+edita no plano pago (403 `forbidden` no Free); excluir continua liberado.
+
+| Resposta | Causa |
+| -------- | ----- |
+| 401 | token ausente, invalido ou revogado |
+| 403 | conta nao verificada/suspensa, token sem `badgeforge:*` ou plano Free em POST/PATCH de custom provider |
+| 404 | recurso de outra conta ou id inexistente |
+| 422 | plano/username/credencial/SVG/URL/template invalido (mesma regra da tela) |
+| 429 | `api-read`/`api-write`/`badgeforge-refresh`; respeite o `Retry-After` |
+| 503 | `badge_unavailable` no analytics quando o bruto esta indisponivel |
+
+**`/up` com dependencias.** Sai 200 `{"status":"up","checks":{...}}` so quando
+banco (`select 1`), cache (ida e volta) e disco do PNG (escrita/leitura)
+respondem. Qualquer falha vira 503 `down` com o mapa das sondas e
+`Cache-Control: no-store`; o corpo nunca traz a excecao. Use nos monitores e
+antes de tirar uma instancia da rotacao.
+
+```bash
+curl -s https://devtools.natanfiuza.dev.br/up
+```
+
 ## 9. Logs e diagnostico
 
 ```bash
@@ -634,6 +766,13 @@ Problemas que ja sabemos diagnosticar:
 | Doacao recusada/vencida sem explicacao, ou paga que ficou `pending` | Rode `php artisan donations:check <ulid>` (detalhes em [guides/mercado-pago.md](guides/mercado-pago.md#8-consulta-sob-demanda-e-diagnóstico-de-doações-adr-059)): ele **grava** o estado sincronizado e imprime `status`, `status_detail`, `live_mode`, `collector_id` e o prazo do QR. `live_mode=false` = token de teste; `rejected_by_bank`/`rejected_high_risk`/`rejected_by_regulations` sao do banco ou da conta do provedor, nao do codigo (ADR-059) |
 | Renovacao nao acontece e o acesso segue | Preapproval cancelada (`renewal_canceled_at`) ou cartao recusado (`renewal_failed_at`); o acesso vale ate `current_period_end`. O aviso sai uma vez por periodo |
 | `webhook_events` cresce sem parar | `webhooks:prune` nao roda: falta o cron do `schedule:run` (secao 5) ou o worker esta parado |
+| Analytics do BadgeForge nao avanca e `/admin/badgeforge/analytics` fica vazio | `badgeforge:analytics:aggregate` nao roda: falta o cron do `schedule:run`, o worker esta parado ou a linha sumiu de `task_schedules` (secao 5). O dono le o bruto, entao a tela dele pode ter dados enquanto o admin, que le as dailies, ainda nao tem |
+| Pais sempre vazio no analytics | Sem `GeoLite2-Country.mmdb` no caminho configurado, arquivo ilegivel pelo `www-data` ou IP privado: todos os casos sao `null` por desenho (ADR-086), nao erro |
+| Badge de provider customizado responde **404** | ULID desconhecido, provider desabilitado no admin, definicao que nao existe, path com numero de segmentos diferente de `path_params` ou extensao fora de `svg/png`. O 404 e o comportamento correto nesses casos |
+| Badge de provider customizado mostra `unavailable` | A origem falhou e nao havia valor bom em cache: a imagem e fallback 200 com `X-Badge-Cache: MISS`. Confira a origem e o `metrics_version`; nunca vira 500 |
+| Imagem responde **503** `badge_unavailable` | Nossa infraestrutura caiu (banco fora em `api/badges/*` ou `b/*`): consulte `/up`, veja qual sonda esta `false` e o log da aplicacao. O `Retry-After: 60` e o `no-store` sao esperados; nao e a origem do provider |
+| Imagem responde **429** em massa | Cap por IP de imagens atingido: confira se o trafego vem de GitHub Camo/proxy compartilhado antes de ajustar `BADGEFORGE_SERVING_LIMIT_PER_MINUTE` (secao 8) |
+| `/up` responde **503** com `checks.storage=false` | Diretorio de cache do PNG sem escrita para o `www-data`: `chown -R www-data:www-data storage` e confira `badgeforge.png.cache_path`. `checks.cache=false` aponta driver de cache; `database=false`, a conexao |
 
 Depois de mexer em permissao ou arquivo na mao, o par canonico e:
 

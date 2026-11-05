@@ -1,4 +1,5 @@
 import {
+    BadgeCheck,
     CreditCard,
     History,
     KeyRound,
@@ -13,7 +14,7 @@ import { useI18n } from 'vue-i18n';
 import { dashboard } from '@/routes';
 import { index as apiTokens } from '@/routes/api-tokens';
 import { edit as editAppearance } from '@/routes/appearance';
-import { billing, history } from '@/routes/dashboard';
+import { badgeforge, billing, history } from '@/routes/dashboard';
 import { edit as editProfile } from '@/routes/profile';
 import { edit as editSecurity } from '@/routes/security';
 import type { NavItem } from '@/types';
@@ -55,6 +56,11 @@ export function useAccountNav(): ComputedRef<AccountNavGroup[]> {
                     title: t('account.nav.billing'),
                     href: billing.url(),
                     icon: CreditCard,
+                },
+                {
+                    title: t('account.nav.badgeforge'),
+                    href: badgeforge.url(),
+                    icon: BadgeCheck,
                 },
             ],
         },

@@ -16,21 +16,25 @@ import type { ApiToken, ApiTokensProps } from '@/types';
  * rotas sao as geradas pelo wayfinder.
  */
 
-const { routerMock, formPost, formReset, formFields } = vi.hoisted(() => ({
-    routerMock: {
-        get: vi.fn(),
-        post: vi.fn(),
-        delete: vi.fn(),
-        patch: vi.fn(),
-    },
-    formPost: vi.fn(),
-    formReset: vi.fn(),
-    formFields: {
-        name: '',
-        errors: {} as Record<string, string>,
-        processing: false,
-    },
-}));
+const { routerMock, formPost, formReset, formFields, formRef } = vi.hoisted(
+    () => ({
+        routerMock: {
+            get: vi.fn(),
+            post: vi.fn(),
+            delete: vi.fn(),
+            patch: vi.fn(),
+        },
+        formPost: vi.fn(),
+        formReset: vi.fn(),
+        formFields: {
+            name: '',
+            abilities: ['ai:query'],
+            errors: {} as Record<string, string>,
+            processing: false,
+        },
+        formRef: { current: null as unknown },
+    }),
+);
 
 vi.mock('@inertiajs/vue3', async () => {
     const { reactive } = await import('vue');
@@ -41,9 +45,12 @@ vi.mock('@inertiajs/vue3', async () => {
         reset: formReset,
     });
 
+    formRef.current = form;
+
     return {
         useForm: () => {
             form.name = '';
+            form.abilities = [...formFields.abilities];
             form.errors = {};
             form.processing = false;
 
@@ -96,6 +103,13 @@ const traducoes = {
                 name: 'NOME_TOKEN',
                 name_placeholder: 'DICA_NOME_TOKEN',
                 submit: 'CRIAR_TOKEN',
+                abilities_title: 'PERMISSOES_TOKEN',
+                abilities_help: 'ESCOLHA_PERMISSOES',
+                abilities: {
+                    ai_query: 'PERMISSAO_AI',
+                    badgeforge_read: 'PERMISSAO_LEITURA',
+                    badgeforge_write: 'PERMISSAO_ESCRITA',
+                },
             },
             once: {
                 title: 'TOKEN_CRIADO',
@@ -160,9 +174,16 @@ function i18nDoTeste() {
     return i18n;
 }
 
+const ABILITIES = ['ai:query', 'badgeforge:read', 'badgeforge:write'];
+
 function montar(props: Partial<ApiTokensProps> = {}): VueWrapper {
     return mount(ApiTokens, {
-        props: { tokens: [], plainTextToken: null, ...props },
+        props: {
+            tokens: [],
+            abilities: ABILITIES,
+            plainTextToken: null,
+            ...props,
+        },
         global: { plugins: [i18nDoTeste()] },
     });
 }
@@ -280,6 +301,37 @@ describe('criacao', () => {
             expect.anything(),
         );
         expect(formReset).toHaveBeenCalled();
+    });
+
+    it('comeca só com ai:query e deixa conceder as abilities do BadgeForge', async () => {
+        const wrapper = montar();
+
+        const ai = wrapper.get('[data-test="api-token-ability-ai:query"]');
+        const read = wrapper.get(
+            '[data-test="api-token-ability-badgeforge:read"]',
+        );
+        const write = wrapper.get(
+            '[data-test="api-token-ability-badgeforge:write"]',
+        );
+
+        expect(ai.attributes('data-state')).toBe('checked');
+        expect(read.attributes('data-state')).toBe('unchecked');
+        expect(write.attributes('data-state')).toBe('unchecked');
+        expect(wrapper.text()).toContain('PERMISSOES_TOKEN');
+        expect(wrapper.text()).toContain('PERMISSAO_LEITURA');
+
+        await write.trigger('click');
+
+        expect(write.attributes('data-state')).toBe('checked');
+        expect(
+            (formRef.current as { abilities: string[] }).abilities,
+        ).toEqual(['ai:query', 'badgeforge:write']);
+
+        await ai.trigger('click');
+
+        expect(
+            (formRef.current as { abilities: string[] }).abilities,
+        ).toEqual(['badgeforge:write']);
     });
 
     it('mostra o valor uma vez e copia para a area de transferencia', async () => {

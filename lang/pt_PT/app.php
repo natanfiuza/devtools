@@ -62,6 +62,7 @@ return [
     'footer' => [
         'language' => 'Idioma',
         'api_docs' => 'API',
+        'badgeforge_docs' => 'Docs do BadgeForge',
         'privacy' => 'Privacidade',
         'terms' => 'Termos',
         'donate' => 'Doar',

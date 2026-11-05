@@ -1,0 +1,45 @@
+# 🚨 Relatório do Linter GitPR
+
+## ⚠️ Avisos
+
+- 👀 Lembrete: Você criou/modificou a função na linha 16 de app/Actions/BadgeForge/RenameCustomLogo.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 30 de app/Http/Controllers/Api/V1/BadgeForge/AnalyticsController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 83 de app/Http/Controllers/Api/V1/BadgeForge/BadgeAssetController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 99 de app/Http/Controllers/Api/V1/BadgeForge/BadgeAssetController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 118 de app/Http/Controllers/Api/V1/BadgeForge/BadgeAssetController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 29 de app/Http/Controllers/Api/V1/BadgeForge/BadgeCustomProviderController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 68 de app/Http/Controllers/Api/V1/BadgeForge/BadgeCustomProviderController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 83 de app/Http/Controllers/Api/V1/BadgeForge/BadgeCustomProviderController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 95 de app/Http/Controllers/Api/V1/BadgeForge/BadgeCustomProviderController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 108 de app/Http/Controllers/Api/V1/BadgeForge/BadgeCustomProviderController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 28 de app/Http/Controllers/Api/V1/BadgeForge/BadgeEndpointController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 66 de app/Http/Controllers/Api/V1/BadgeForge/BadgeEndpointController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 76 de app/Http/Controllers/Api/V1/BadgeForge/BadgeEndpointController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 88 de app/Http/Controllers/Api/V1/BadgeForge/BadgeEndpointController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 101 de app/Http/Controllers/Api/V1/BadgeForge/BadgeEndpointController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 72 de app/Http/Controllers/Api/V1/BadgeForge/BadgeLogoController.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 25 de app/Http/Resources/ApiBadgeCustomProviderResource.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 22 de app/Http/Resources/ApiBadgeEndpointResource.php. Garantiu que o DocBlock está atualizado?
+- Possível credencial embutida no código em tests/Feature/BadgeForge/ManagementApi/AbilityIsolationTest.php (linha 56).
+- Possível credencial embutida no código em tests/Feature/BadgeForge/ManagementApi/AbilityIsolationTest.php (linha 74).
+- 👀 Lembrete: Você criou/modificou a função na linha 22 de tests/Feature/BadgeForge/ManagementApi/AnalyticsApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 38 de tests/Feature/BadgeForge/ManagementApi/AnalyticsApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 46 de tests/Feature/BadgeForge/ManagementApi/AnalyticsApiTest.php. Garantiu que o DocBlock está atualizado?
+- Possível credencial embutida no código em tests/Feature/BadgeForge/ManagementApi/AnalyticsApiTest.php (linha 92).
+- 👀 Lembrete: Você criou/modificou a função na linha 42 de tests/Feature/BadgeForge/ManagementApi/BadgeRefreshApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 47 de tests/Feature/BadgeForge/ManagementApi/BadgeRefreshApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 63 de tests/Feature/BadgeForge/ManagementApi/BadgeRefreshApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 24 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 31 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 33 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 40 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 52 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 68 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 76 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 87 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 98 de tests/Feature/BadgeForge/ManagementApi/CustomProviderApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 23 de tests/Feature/BadgeForge/ManagementApi/EndpointApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 30 de tests/Feature/BadgeForge/ManagementApi/EndpointApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 32 de tests/Feature/BadgeForge/ManagementApi/EndpointApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 39 de tests/Feature/BadgeForge/ManagementApi/EndpointApiTest.php. Garantiu que o DocBlock está atualizado?
+- 👀 Lembrete: Você criou/modificou a função na linha 55 de tests/Feature/BadgeForge/ManagementApi/EndpointApiTest.php. Garantiu que o DocBlock está atualizado?

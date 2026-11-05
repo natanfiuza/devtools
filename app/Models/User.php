@@ -287,6 +287,56 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Logos personalizados do BadgeForge (F3, ADR-078).
+     *
+     * @return HasMany<BadgeCustomLogo, $this>
+     */
+    public function badgeCustomLogos(): HasMany
+    {
+        return $this->hasMany(BadgeCustomLogo::class);
+    }
+
+    /**
+     * Presets do formulario do BadgeForge (F3, ADR-079).
+     *
+     * @return HasMany<BadgePreset, $this>
+     */
+    public function badgePresets(): HasMany
+    {
+        return $this->hasMany(BadgePreset::class);
+    }
+
+    /**
+     * Badges pessoais publicados pela conta (F4, ADR-081).
+     *
+     * @return HasMany<BadgeAsset, $this>
+     */
+    public function badgeAssets(): HasMany
+    {
+        return $this->hasMany(BadgeAsset::class);
+    }
+
+    /**
+     * Endpoints JSON cadastrados pela conta (F5, ADR-083).
+     *
+     * @return HasMany<BadgeEndpoint, $this>
+     */
+    public function badgeEndpoints(): HasMany
+    {
+        return $this->hasMany(BadgeEndpoint::class);
+    }
+
+    /**
+     * Providers JSON customizados da conta (F7, ADR-087).
+     *
+     * @return HasMany<BadgeCustomProvider, $this>
+     */
+    public function badgeCustomProviders(): HasMany
+    {
+        return $this->hasMany(BadgeCustomProvider::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

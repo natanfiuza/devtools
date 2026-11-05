@@ -50,6 +50,27 @@ final class ApiError
     }
 
     /**
+     * Falha de infraestrutura na superficie de imagem (F8, ADR-089).
+     *
+     * Banco fora ou dependencia indisponivel: nada foi gerado nem cacheado, e
+     * o cliente deve tentar de novo. `no-store` impede CDN e `<img>` de
+     * guardarem o erro no lugar da imagem.
+     */
+    public static function badgeUnavailable(): JsonResponse
+    {
+        return self::response(
+            'badge_unavailable',
+            'Badge rendering is temporarily unavailable.',
+            503,
+            null,
+            [
+                'Retry-After' => '60',
+                'Cache-Control' => 'no-store',
+            ],
+        );
+    }
+
+    /**
      * Converte excecoes conhecidas para o envelope. Devolve nulo para o que
      * nao pertence ao contrato da API, deixando o handler padrao responder.
      */

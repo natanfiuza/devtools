@@ -32,6 +32,7 @@ final class Sitemap
         'donate',
         'contact',
         'api-docs',
+        'badgeforge-docs',
     ];
 
     /**

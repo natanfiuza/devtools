@@ -22,6 +22,9 @@ return [
         // Leitura inclui o polling: uma integracao que acompanha varias
         // solicitacoes ao mesmo tempo precisa de folga.
         'read_per_minute' => (int) env('API_RATE_READ_PER_MINUTE', 120),
+
+        // Escrita da API de gestao do BadgeForge (F8, ADR-088).
+        'write_per_minute' => (int) env('API_RATE_WRITE_PER_MINUTE', 30),
     ],
 
     'pagination' => [

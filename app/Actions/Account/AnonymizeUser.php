@@ -2,9 +2,11 @@
 
 namespace App\Actions\Account;
 
+use App\Actions\BadgeForge\DeleteBadgeEndpoint;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Support\BadgeForge\Personal\BadgeAssetStorage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -32,6 +34,11 @@ final class AnonymizeUser
      * Dominio reservado pela RFC 2606: nunca resolve, nunca recebe e-mail.
      */
     private const PLACEHOLDER_DOMAIN = 'removido.invalid';
+
+    public function __construct(
+        private readonly BadgeAssetStorage $storage,
+        private readonly DeleteBadgeEndpoint $deleteEndpoints,
+    ) {}
 
     public function __invoke(User $user): void
     {
@@ -83,6 +90,26 @@ final class AnonymizeUser
             // `usage_ledger` fica - e consumo, nao identificacao.
             $user->aiRequests()->delete();
             $user->tokens()->delete();
+
+            // Logos e presets do BadgeForge sao dado da pessoa (F3, ADR-078 e
+            // ADR-079). Badges estaticas ja publicadas sao stateless: a URL
+            // leva o ULID e passa a renderizar sem logo.
+            $user->badgeCustomLogos()->delete();
+            $user->badgePresets()->delete();
+
+            // Badges pessoais (F4, ADR-081) saem com os arquivos: a URL
+            // username+ULID deixa de existir, e nao so o token.
+            foreach ($user->badgeAssets()->get() as $asset) {
+                $this->storage->delete($asset->svg_path);
+                $this->storage->delete($asset->png_path);
+                $asset->delete();
+            }
+
+            // Endpoints JSON (F5, ADR-083): a linha leva a URL de origem e a
+            // chave de cache leva o hash dela. As duas saem juntas.
+            foreach ($user->badgeEndpoints()->get() as $endpoint) {
+                ($this->deleteEndpoints)($endpoint);
+            }
 
             DB::table('sessions')->where('user_id', $id)->delete();
         });

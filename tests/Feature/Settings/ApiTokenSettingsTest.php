@@ -211,3 +211,48 @@ it('permite filtrar metricas de uso pelo mes anterior ou periodo customizado', f
             ->where('usageStats.period.startDate', '2026-05-01')
             ->where('usageStats.period.endDate', '2026-05-15'));
 });
+
+it('oferece as abilities ao formulário e cria o token só com ai:query por padrão', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('api-tokens.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('abilities', ['ai:query', 'badgeforge:read', 'badgeforge:write']));
+
+    $this->actingAs($user)
+        ->post(route('api-tokens.store'), ['name' => 'integracao'])
+        ->assertSessionHasNoErrors();
+
+    $token = $user->tokens()->sole();
+
+    expect($token->abilities)->toBe(['ai:query']);
+});
+
+it('concede as abilities do BadgeForge quando escolhidas', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('api-tokens.store'), [
+            'name' => 'badgeforge',
+            'abilities' => ['badgeforge:read', 'badgeforge:write'],
+        ])
+        ->assertSessionHasNoErrors();
+
+    $token = $user->tokens()->sole();
+
+    expect($token->abilities)->toBe(['badgeforge:read', 'badgeforge:write']);
+});
+
+it('recusa ability fora da allowlist', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('api-tokens.store'), [
+            'name' => 'invalido',
+            'abilities' => ['ai:query', 'admin:all'],
+        ])
+        ->assertSessionHasErrors('abilities.1');
+
+    expect($user->tokens()->count())->toBe(0);
+});

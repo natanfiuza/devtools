@@ -51,6 +51,7 @@ export type UseRoutesReturn = {
     donate: ComputedRef<string>;
     contact: ComputedRef<string>;
     apiDocs: ComputedRef<string>;
+    badgeforgeDocs: ComputedRef<string>;
     subscribe: (plan?: string) => string;
     /** Pagina de status da doacao: o ULID e o identificador publico. */
     donationStatus: (ulid: string) => string;
@@ -124,6 +125,9 @@ export function useRoutes(): UseRoutesReturn {
         donate: url(donate),
         contact: url(contact),
         apiDocs: computed<string>(() => `/${slug.value}/api-docs`),
+        badgeforgeDocs: computed<string>(
+            () => `/${slug.value}/docs/badgeforge`,
+        ),
         subscribe: (plan?: string) =>
             subscribe.url(plan ? { query: { plan } } : undefined),
         donationStatus: (ulid: string) =>

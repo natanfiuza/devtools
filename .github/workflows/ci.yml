@@ -1,0 +1,83 @@
+# Gates da casa em cada push/PR (F8, ADR-089).
+#
+# Sem lockfile versionado (ADR-014), a instalacao e `composer install` /
+# `npm install`, nunca `composer ci` nem `npm ci`. Os audits entram como gate
+# proprio: advisory sem correcao vira excecao documentada aqui, nunca
+# `continue-on-error` no passo inteiro.
+#
+# `npm run format:check` fica FORA do gate por divida pre-existente
+# documentada: 162 arquivos versionados (inclusive `Dashboard.vue`, intocado
+# nesta fase) nao passam no Prettier do repo. Reformata-los num PR de F8
+# esconderia a mudanca real; a excecao e explicita e mensuravel, e nao um
+# `continue-on-error` que mascare falhas novas. Quando a divida for paga,
+# adicione o passo.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    name: Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, sqlite3, curl, zip, gd, imagick
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Node install
+        run: npm install --no-audit --no-fund
+
+      - name: Preparar ambiente
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Composer audit
+        run: composer audit --no-ansi
+
+      - name: NPM audit (high)
+        run: npm audit --audit-level=high
+
+      # Equivalente a `composer ci:check` menos o `format:check` excluido acima.
+      - name: Pint + PHPStan + Pest
+        run: composer test
+
+      - name: ESLint
+        run: npm run lint:check
+
+      - name: Vue TSC
+        run: npm run types:check
+
+      - name: Vitest
+        run: npm run test
+
+      - name: Build
+        run: npm run build

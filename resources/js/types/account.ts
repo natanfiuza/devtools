@@ -8,6 +8,7 @@
 
 // `Paginator` e a forma da paginacao do Laravel, nao uma coisa do painel
 // administrativo; mora em `./admin` por ter nascido la.
+import type { BadgeForgeToolProps } from '@/tools/badgeforge/types';
 import type { Paginator } from './admin';
 
 /** Plano vigente da conta (`User::effectivePlan`). */
@@ -122,6 +123,75 @@ export type AccountHistoryItem = {
     sql: string | null;
     summary: string | null;
     errorCode: string | null;
+};
+
+/** Ponto da serie diaria de visualizacoes (F7, ADR-086). */
+export type AccountBadgeForgeAnalyticsDay = {
+    date: string;
+    views: number;
+    uniques: number;
+};
+
+/** Contagem por imagem do dono; `name` vazio quando o sujeito foi excluido. */
+export type AccountBadgeForgeAnalyticsSubject = {
+    type: 'personal' | 'endpoint' | 'custom';
+    id: string;
+    name: string;
+    views: number;
+    uniques: number;
+};
+
+export type AccountBadgeForgeAnalyticsReferer = {
+    domain: string;
+    views: number;
+};
+
+export type AccountBadgeForgeAnalyticsCountry = {
+    country: string;
+    views: number;
+};
+
+export type AccountBadgeForgeAnalyticsFormat = {
+    format: string;
+    views: number;
+};
+
+/**
+ * Analytics da conta (`OwnerAnalytics`): Free recebe so totais e por imagem;
+ * pago ganha serie, quebras, taxa de cache e CSV.
+ */
+export type AccountBadgeForgeAnalytics = {
+    isPaid: boolean;
+    window: number;
+    windows: number[];
+    freeWindowDays: number;
+    start: string;
+    end: string;
+    totals: {
+        views: number;
+        uniques: number;
+    };
+    subjects: AccountBadgeForgeAnalyticsSubject[];
+    days: AccountBadgeForgeAnalyticsDay[];
+    referers: AccountBadgeForgeAnalyticsReferer[];
+    countries: AccountBadgeForgeAnalyticsCountry[];
+    formats: AccountBadgeForgeAnalyticsFormat[];
+    cache: {
+        hits: number;
+        total: number;
+        rate: number | null;
+    } | null;
+    exportUrl: string | null;
+};
+
+/** Props do BadgeForge da conta (`/dashboard/badgeforge`, ADR-079). */
+export type AccountBadgeForgeProps = {
+    /** Mesmo contrato da tool: a pagina de conta nao recalcula limites. */
+    toolProps: BadgeForgeToolProps;
+    /** `null` quando a migracao de analytics ainda nao foi aplicada. */
+    analytics?: AccountBadgeForgeAnalytics | null;
+    toolUrl: string;
+    upgradeUrl: string;
 };
 
 /** Props do Historico (`/dashboard/history`). */

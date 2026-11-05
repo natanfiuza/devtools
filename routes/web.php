@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Api\Base64ImageController;
 use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\Auth\SetPasswordController;
+use App\Http\Controllers\BadgeForgeDocsController;
 use App\Http\Controllers\Base64ImageDownloadController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
@@ -71,6 +72,10 @@ Route::prefix('{locale}')
         // endpoints, exemplos e link para a especificacao OpenAPI.
         Route::get('api-docs', ApiDocsController::class)->name('api-docs');
 
+        // Documentacao publica do BadgeForge (F4, ADR-082): providers,
+        // badges pessoais, cache e seguranca, nos cinco idiomas.
+        Route::get('docs/badgeforge', BadgeForgeDocsController::class)->name('badgeforge-docs');
+
         // Rota generica das ferramentas (docs/SPEC.md secao 4): a pagina e uma
         // so, e o componente de cada tool entra por dentro dela. Sem restricao
         // de formato no slug - o 404 de tool que nao funciona e regra de
@@ -89,6 +94,9 @@ Route::prefix('{locale}')
 Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('robots.txt', RobotsController::class)->name('robots');
 Route::get('openapi.yaml', OpenApiController::class)->name('openapi');
+
+// Spec do BadgeForge (F8, ADR-071): cacheavel por um dia, como as imagens.
+Route::get('openapi/badges.yaml', [OpenApiController::class, 'badges'])->name('openapi.badges');
 
 // API do AI SQL Builder (ADR-042). Fica fora do prefixo de idioma porque o
 // cliente manda `Accept: application/json` e o idioma nao muda o recurso. Usa
@@ -225,6 +233,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
 });
 
 require __DIR__.'/settings.php';
+require __DIR__.'/badgeforge.php';
 require __DIR__.'/auth-social.php';
 require __DIR__.'/newsletter.php';
 require __DIR__.'/admin.php';
@@ -232,10 +241,11 @@ require __DIR__.'/webhooks.php';
 
 // Ultimo recurso para um caminho que nao casou com rota nenhuma. Passa pelo
 // grupo web (idioma, props compartilhadas), entao a 404 sai inteira e no idioma
-// do prefixo da URL (ResolveLocale le o primeiro segmento). A API nunca cai
-// aqui: o abort vira o envelope JSON pelo handler.
+// do prefixo da URL (ResolveLocale le o primeiro segmento). API e imagem
+// publica nunca caem aqui: o abort vira o envelope JSON pelo handler (F8,
+// ADR-089) - por isso a checagem de `b/*` tambem precisa existir.
 Route::fallback(function (Request $request) {
-    abort_if($request->is('api/*'), 404);
+    abort_if($request->is('api/*') || $request->is('b/*'), 404);
 
     return Inertia::render('Error', ['status' => 404])
         ->toResponse($request)

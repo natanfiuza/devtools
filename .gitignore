@@ -50,3 +50,4 @@ composer.lock
 /deploy/deploy-instaled.sh.novo
 /deploy/deploy-instaled.sh.bak-*
 storage/framework/locks/
+.gitpr/conf/github.yml

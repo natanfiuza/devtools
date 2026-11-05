@@ -1,0 +1,435 @@
+{
+    "cases": [
+        {
+            "name": "flat_basic",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_logo_left",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": "github",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_logo_right",
+            "spec": {
+                "label": "coverage",
+                "message": "98%",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": "phpunit",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "right",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_link",
+            "spec": {
+                "label": "docs",
+                "message": "latest",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#007ec6", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": "https://example.com/docs?x=1&y=2",
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_transparent",
+            "spec": {
+                "label": "status",
+                "message": "transparent",
+                "style": "flat",
+                "labelColor": { "hex": "#000000", "alpha": 0 },
+                "messageColor": { "hex": "#000000", "alpha": 0 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_rgba",
+            "spec": {
+                "label": "status",
+                "message": "rgba",
+                "style": "flat",
+                "labelColor": { "hex": "#000000", "alpha": 0.5 },
+                "messageColor": { "hex": "#007ec6", "alpha": 0.6 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_hsl",
+            "spec": {
+                "label": "status",
+                "message": "hsl",
+                "style": "flat",
+                "labelColor": { "hex": "#003366", "alpha": 0.8 },
+                "messageColor": { "hex": "#0063c7", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_named_colors",
+            "spec": {
+                "label": "coverage",
+                "message": "98%",
+                "style": "flat",
+                "labelColor": { "hex": "#44cc11", "alpha": 1 },
+                "messageColor": { "hex": "#8a2be2", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_square_basic",
+            "spec": {
+                "label": "license",
+                "message": "MIT",
+                "style": "flat-square",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#9f9f9f", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_square_logo_left",
+            "spec": {
+                "label": "docker",
+                "message": "24.0",
+                "style": "flat-square",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#9f9f9f", "alpha": 1 },
+                "logo": "docker",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "plastic_basic",
+            "spec": {
+                "label": "coverage",
+                "message": "98%",
+                "style": "plastic",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "plastic_logo_right",
+            "spec": {
+                "label": "database",
+                "message": "16",
+                "style": "plastic",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#9f9f9f", "alpha": 1 },
+                "logo": "postgresql",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "right",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "for_the_badge_basic",
+            "spec": {
+                "label": "BUILD",
+                "message": "PASSING",
+                "style": "for-the-badge",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 14,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "for_the_badge_logo_left",
+            "spec": {
+                "label": "BUILD",
+                "message": "PASSING",
+                "style": "for-the-badge",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": "github",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 14,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "social_basic",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "social",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#007ec6", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "social_logo_right",
+            "spec": {
+                "label": "package",
+                "message": "1.0.0",
+                "style": "social",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#007ec6", "alpha": 1 },
+                "logo": "npm",
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "right",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "unicode_accents",
+            "spec": {
+                "label": "Ação",
+                "message": "café crème",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "unicode_cjk",
+            "spec": {
+                "label": "状態",
+                "message": "成功",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "xss_text",
+            "spec": {
+                "label": "<script>alert(1)</script>",
+                "message": "\" onload=\"alert(2)\"",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "logo_color_transparent",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": "github",
+                "logoColor": { "hex": "#000000", "alpha": 0 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "internal_spaces",
+            "spec": {
+                "label": "hello world",
+                "message": "two  spaces",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_font_space_grotesk",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "space-grotesk",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_font_fira_code",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "fira-code",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "flat_font_libre_franklin",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "font": "libre-franklin",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": null,
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "custom_multipath_basic",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": {
+                    "viewBox": "0 0 24 24",
+                    "paths": [
+                        { "d": "M12 2L2 22h20z" },
+                        { "d": "M12 6l6 12H6z" }
+                    ]
+                },
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 10,
+                "logoPosition": "left",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        },
+        {
+            "name": "custom_multipath_fillrule",
+            "spec": {
+                "label": "build",
+                "message": "passing",
+                "style": "flat",
+                "labelColor": { "hex": "#555555", "alpha": 1 },
+                "messageColor": { "hex": "#44cc11", "alpha": 1 },
+                "logo": {
+                    "viewBox": "0 0 24 24",
+                    "paths": [
+                        { "d": "M12 2L2 22h20z", "fillRule": "evenodd" },
+                        { "d": "M12 6l6 12H6z", "fillRule": "nonzero", "clipRule": "evenodd" }
+                    ]
+                },
+                "logoColor": { "hex": "#ffffff", "alpha": 1 },
+                "logoSize": 12,
+                "logoPosition": "right",
+                "link": null,
+                "cacheSeconds": 86400
+            }
+        }
+    ]
+}
