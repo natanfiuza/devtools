@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Api\V1\BadgeForge;
 
 use App\Actions\BadgeForge\CreateBadgeAsset;
 use App\Actions\BadgeForge\DeleteBadgeAsset;
+use App\Actions\BadgeForge\RefreshBadgeAsset;
+use App\Actions\BadgeForge\SetBadgeAssetCredential;
+use App\Actions\BadgeForge\UpdateBadgeAsset;
 use App\Http\Controllers\Api\V1\Concerns\ResolvesApiIdentity;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BadgeForge\SetBadgeAssetCredentialRequest;
 use App\Http\Requests\BadgeForge\StoreBadgeAssetRequest;
+use App\Http\Requests\BadgeForge\UpdateBadgeAssetRequest;
 use App\Http\Resources\ApiBadgeAssetResource;
 use App\Models\BadgeAsset;
 use Illuminate\Http\JsonResponse;
@@ -69,6 +74,65 @@ final class BadgeAssetController extends Controller
             ['data' => (new ApiBadgeAssetResource($asset))->toArray($request)],
             201,
         );
+    }
+
+    /**
+     * Renomeacao (F9, ADR-090): a representacao mutavel e so o nome, como na
+     * tela; provider, definicao, params e form ficam imutaveis.
+     */
+    public function update(
+        UpdateBadgeAssetRequest $request,
+        BadgeAsset $badgeAsset,
+        UpdateBadgeAsset $update,
+    ): JsonResponse {
+        $this->ensureOwner($request, $badgeAsset);
+
+        $asset = $update($this->apiUser($request), $badgeAsset, (string) $request->validated('name'));
+
+        return response()->json(['data' => (new ApiBadgeAssetResource($asset))->toArray($request)]);
+    }
+
+    /**
+     * Troca write-only do PAT (F9, ADR-090): o valor nunca e devolvido, so o
+     * estado. A action mantem as regras de plano, provider privado e cifra.
+     */
+    public function credential(
+        SetBadgeAssetCredentialRequest $request,
+        BadgeAsset $badgeAsset,
+        SetBadgeAssetCredential $setCredential,
+    ): JsonResponse {
+        $this->ensureOwner($request, $badgeAsset);
+
+        $username = $request->validated('credential_username');
+
+        $asset = $setCredential(
+            $this->apiUser($request),
+            $badgeAsset,
+            (string) $request->validated('credential'),
+            is_string($username) ? $username : null,
+        );
+
+        return response()->json(['data' => (new ApiBadgeAssetResource($asset))->toArray($request)]);
+    }
+
+    public function refresh(
+        Request $request,
+        BadgeAsset $badgeAsset,
+        RefreshBadgeAsset $refresh,
+    ): JsonResponse {
+        $this->ensureOwner($request, $badgeAsset);
+
+        // A action devolve o desenho, mas persiste no proprio model vinculado;
+        // a resposta le os campos atualizados dele, como no JSON da tela.
+        $refresh($this->apiUser($request), $badgeAsset);
+
+        return response()->json([
+            'data' => [
+                'url' => $badgeAsset->publicSvgUrl(),
+                'pngUrl' => $badgeAsset->publicPngUrl(),
+                'generatedAt' => $badgeAsset->last_generated_at?->toIso8601String(),
+            ],
+        ]);
     }
 
     public function destroy(Request $request, BadgeAsset $badgeAsset, DeleteBadgeAsset $delete): JsonResponse

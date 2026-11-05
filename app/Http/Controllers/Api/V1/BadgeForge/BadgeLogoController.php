@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V1\BadgeForge;
 
 use App\Actions\BadgeForge\ParseCustomLogoUpload;
+use App\Actions\BadgeForge\RenameCustomLogo;
 use App\Actions\BadgeForge\StoreCustomLogo;
 use App\Http\Controllers\Api\V1\Concerns\ResolvesApiIdentity;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BadgeForge\StoreCustomLogoRequest;
+use App\Http\Requests\BadgeForge\UpdateCustomLogoRequest;
 use App\Http\Resources\ApiBadgeLogoResource;
 use App\Models\BadgeCustomLogo;
 use App\Support\BadgeForge\BadgeForgeQuota;
@@ -61,6 +63,22 @@ final class BadgeLogoController extends Controller
             ['data' => (new ApiBadgeLogoResource($logo))->toArray($request)],
             201,
         );
+    }
+
+    /**
+     * Renomeacao (F9, ADR-090): o nome e o unico campo mutavel do logo; o
+     * desenho normalizado continua fora da API.
+     */
+    public function update(
+        UpdateCustomLogoRequest $request,
+        BadgeCustomLogo $badgeCustomLogo,
+        RenameCustomLogo $rename,
+    ): JsonResponse {
+        $this->ensureOwner($request, $badgeCustomLogo);
+
+        $logo = $rename($badgeCustomLogo, (string) $request->validated('name'));
+
+        return response()->json(['data' => (new ApiBadgeLogoResource($logo))->toArray($request)]);
     }
 
     public function destroy(Request $request, BadgeCustomLogo $logo): JsonResponse

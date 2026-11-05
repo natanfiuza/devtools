@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\V1\BadgeForge\AnalyticsController;
 use App\Http\Controllers\Api\V1\BadgeForge\BadgeAssetController;
+use App\Http\Controllers\Api\V1\BadgeForge\BadgeCustomProviderController;
+use App\Http\Controllers\Api\V1\BadgeForge\BadgeEndpointController;
 use App\Http\Controllers\Api\V1\BadgeForge\BadgeLogoController;
 use App\Http\Controllers\Api\V1\BadgeForge\CatalogController;
 use App\Http\Controllers\Api\V1\MeController;
@@ -82,6 +85,13 @@ Route::prefix('v1/badgeforge')
             Route::get('logos', [BadgeLogoController::class, 'index'])->name('logos.index');
 
             Route::get('badges', [BadgeAssetController::class, 'index'])->name('badges.index');
+
+            Route::get('endpoints', [BadgeEndpointController::class, 'index'])->name('endpoints.index');
+
+            Route::get('custom-providers', [BadgeCustomProviderController::class, 'index'])
+                ->name('custom-providers.index');
+
+            Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics');
         });
 
         // A escrita tem grupo e ability proprios: `badgeforge:read` nao cria
@@ -97,15 +107,61 @@ Route::prefix('v1/badgeforge')
         ])->group(function (): void {
             Route::post('logos', [BadgeLogoController::class, 'store'])->name('logos.store');
 
+            Route::patch('logos/{badgeCustomLogo}', [BadgeLogoController::class, 'update'])
+                ->whereUlid('badgeCustomLogo')
+                ->name('logos.update');
+
             Route::delete('logos/{logo}', [BadgeLogoController::class, 'destroy'])
                 ->whereUlid('logo')
                 ->name('logos.destroy');
 
             Route::post('badges', [BadgeAssetController::class, 'store'])->name('badges.store');
 
+            Route::patch('badges/{badgeAsset}', [BadgeAssetController::class, 'update'])
+                ->whereUlid('badgeAsset')
+                ->name('badges.update');
+
+            Route::patch('badges/{badgeAsset}/credential', [BadgeAssetController::class, 'credential'])
+                ->whereUlid('badgeAsset')
+                ->name('badges.credential');
+
+            // O refresh dispara chamada externa: empilha o limite da tela
+            // (10/min por conta) com o `api-write` do grupo.
+            Route::post('badges/{badgeAsset}/refresh', [BadgeAssetController::class, 'refresh'])
+                ->whereUlid('badgeAsset')
+                ->middleware('throttle:badgeforge-refresh')
+                ->name('badges.refresh');
+
             Route::delete('badges/{badgeAsset}', [BadgeAssetController::class, 'destroy'])
                 ->whereUlid('badgeAsset')
                 ->name('badges.destroy');
+
+            // Endpoint JSON: Free cadastra, como na tela. A URL de origem e
+            // imutavel e nunca volta nas respostas; o probe/SSRF fica na action.
+            Route::post('endpoints', [BadgeEndpointController::class, 'store'])->name('endpoints.store');
+
+            Route::patch('endpoints/{badgeEndpoint}', [BadgeEndpointController::class, 'update'])
+                ->whereUlid('badgeEndpoint')
+                ->name('endpoints.update');
+
+            Route::delete('endpoints/{badgeEndpoint}', [BadgeEndpointController::class, 'destroy'])
+                ->whereUlid('badgeEndpoint')
+                ->name('endpoints.destroy');
+
+            // Provider customizado: criar/editar sao pagos (`badgeforge.paid`
+            // -> 403); excluir segue permitido apos downgrade, como na tela.
+            Route::middleware('badgeforge.paid')->group(function (): void {
+                Route::post('custom-providers', [BadgeCustomProviderController::class, 'store'])
+                    ->name('custom-providers.store');
+
+                Route::patch('custom-providers/{badgeCustomProvider}', [BadgeCustomProviderController::class, 'update'])
+                    ->whereUlid('badgeCustomProvider')
+                    ->name('custom-providers.update');
+            });
+
+            Route::delete('custom-providers/{badgeCustomProvider}', [BadgeCustomProviderController::class, 'destroy'])
+                ->whereUlid('badgeCustomProvider')
+                ->name('custom-providers.destroy');
         });
     });
 

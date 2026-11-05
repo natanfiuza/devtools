@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\BadgeForge;
 
 use App\Actions\BadgeForge\ParseCustomLogoUpload;
+use App\Actions\BadgeForge\RenameCustomLogo;
 use App\Actions\BadgeForge\StoreCustomLogo;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BadgeForge\StoreCustomLogoRequest;
@@ -71,12 +72,11 @@ class CustomLogoController extends Controller
     public function update(
         UpdateCustomLogoRequest $request,
         BadgeCustomLogo $badgeCustomLogo,
+        RenameCustomLogo $rename,
     ): RedirectResponse {
         $this->ensureOwner($request, $badgeCustomLogo);
 
-        $badgeCustomLogo->forceFill([
-            'name' => (string) $request->validated('name'),
-        ])->save();
+        $rename($badgeCustomLogo, (string) $request->validated('name'));
 
         Inertia::flash('toast', [
             'type' => 'success',

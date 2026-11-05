@@ -687,25 +687,34 @@ PNG sem `imagick` continua 503 `image_unavailable`.
 POST/PATCH/DELETE. Se o CSV vier 429, espere o `Retry-After`; nao ha limite
 proprio para download.
 
-**API de gestão (`/api/v1/badgeforge`).** O token precisa de
-`badgeforge:read` (GET logos/badges) ou `badgeforge:write` (POST/DELETE); o
-`ai:query` do AI SQL Builder nao vale aqui. Crie o token em
-`/settings/api-tokens` (o valor aparece uma vez). O catalogo
+**API de gestão (`/api/v1/badgeforge`, F8/F9).** O token precisa de
+`badgeforge:read` (todo GET, inclusive analytics) ou `badgeforge:write`
+(POST/PATCH/DELETE); o `ai:query` do AI SQL Builder nao vale aqui. Crie o
+token em `/settings/api-tokens` (o valor aparece uma vez). O catalogo
 `/providers` e `/styles` e anonimo e cacheavel (ETag/304). Diagnostico:
 
 ```bash
 curl -s https://devtools.natanfiuza.dev.br/api/v1/badgeforge/providers | head -c 200
 curl -s -H "Authorization: Bearer <token>" https://devtools.natanfiuza.dev.br/api/v1/badgeforge/badges
+curl -s -H "Authorization: Bearer <token>" 'https://devtools.natanfiuza.dev.br/api/v1/badgeforge/analytics?window=30'
 curl -s https://devtools.natanfiuza.dev.br/openapi/badges.yaml | head -5
 ```
+
+**Refresh e analytics.** `POST /badges/{ulid}/refresh` empilha `api-write`
+(30/min por token) e `badgeforge-refresh` (10/min por conta); se o segundo
+estourar, o 429 sai no envelope com `Retry-After`. `GET /analytics` le o bruto
+(`badge_views`): tabela ausente ou banco fora responde 503 `badge_unavailable`
+com `Retry-After: 60`/`no-store`, distinto de 404. Custom provider so cria e
+edita no plano pago (403 `forbidden` no Free); excluir continua liberado.
 
 | Resposta | Causa |
 | -------- | ----- |
 | 401 | token ausente, invalido ou revogado |
-| 403 | conta nao verificada/suspensa ou token sem `badgeforge:*` |
-| 404 | logo/badge de outra conta ou id inexistente |
-| 422 | plano/username/credencial/SVG invalido (mesma regra da tela) |
-| 429 | `api-read`/`api-write`; respeite o `Retry-After` |
+| 403 | conta nao verificada/suspensa, token sem `badgeforge:*` ou plano Free em POST/PATCH de custom provider |
+| 404 | recurso de outra conta ou id inexistente |
+| 422 | plano/username/credencial/SVG/URL/template invalido (mesma regra da tela) |
+| 429 | `api-read`/`api-write`/`badgeforge-refresh`; respeite o `Retry-After` |
+| 503 | `badge_unavailable` no analytics quando o bruto esta indisponivel |
 
 **`/up` com dependencias.** Sai 200 `{"status":"up","checks":{...}}` so quando
 banco (`select 1`), cache (ida e volta) e disco do PNG (escrita/leitura)
