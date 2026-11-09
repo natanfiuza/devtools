@@ -33,6 +33,7 @@ const MVP = [
     'regex-tester',
     'markdown-to-pdf',
     'badgeforge',
+    'html-color-picker',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */
@@ -102,10 +103,26 @@ describe('registro', () => {
         );
 
         for (const tool of allTools) {
+            const group = tool.group === undefined ? '' : `${tool.group}/`;
+
             expect(toolPath(tool, 'en'), tool.slug).toBe(
-                tool.status === 'available' ? `/en/tools/${tool.slug}` : null,
+                tool.status === 'available'
+                    ? `/en/tools/${group}${tool.slug}`
+                    : null,
             );
         }
+
+        // Tool agrupada: o grupo entra na URL (ADR-116). A tool plana continua
+        // no caminho de sempre.
+        const colors = allTools.find(
+            (tool) => tool.slug === 'html-color-picker',
+        );
+
+        expect(colors?.group).toBe('colors');
+        expect(toolPath(colors as ToolManifest, 'pt-br')).toBe(
+            '/pt-br/tools/colors/html-color-picker',
+        );
+        expect(toolPath(toolAt(0), 'pt-br')).toBe('/pt-br/tools/json-viewer');
     });
 
     /*

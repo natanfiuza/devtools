@@ -85,6 +85,15 @@ Route::prefix('{locale}')
             ->defaults('slug', 'share-text')
             ->name('tools.share-text.view');
 
+        // Tools de um grupo (ADR-116): o manifest declara `group` e a URL ganha
+        // um nivel - `/{locale}/tools/colors/html-color-picker`. Fica antes da
+        // rota plana e tem nome proprio, que e a chave unica do Laravel e o que
+        // Seo, Sitemap e Wayfinder consultam. O formato do grupo e de URL, nao
+        // de negocio: o par grupo+slug e conferido no registro (Tools::findForUrl).
+        Route::get('tools/{group}/{slug}', ToolController::class)
+            ->where('group', '[a-z][a-z0-9-]*')
+            ->name('tools.show.grouped');
+
         Route::get('tools/{slug}', ToolController::class)->name('tools.show');
     });
 

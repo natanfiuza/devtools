@@ -117,7 +117,7 @@ final class Seo
                 'title' => (string) trans('docs.badgeforge.meta.title'),
                 'description' => (string) trans('docs.badgeforge.meta.description'),
             ],
-            'tools.show' => self::toolMeta($request),
+            'tools.show', 'tools.show.grouped' => self::toolMeta($request),
             default => [
                 'title' => (string) config('app.name'),
                 'description' => (string) trans('app.tagline'),
@@ -275,19 +275,20 @@ final class Seo
         $route = $request->route();
         $name = $route?->getName();
 
-        // Só a rota da tool tem imagem propria: nas outras nem se abre o
+        // So as rotas de tool tem imagem propria: nas outras nem se abre o
         // registro.
-        if (! is_string($name) || $name !== 'tools.show') {
+        if (! is_string($name) || ! in_array($name, ['tools.show', 'tools.show.grouped'], true)) {
             return null;
         }
 
         $slug = $route->parameter('slug');
+        $group = $route->parameter('group');
 
         if (! is_string($slug)) {
             return null;
         }
 
-        $tool = Tools::find($slug);
+        $tool = Tools::findForUrl($slug, is_string($group) ? $group : null);
 
         return $tool === null || $tool['status'] !== 'available' ? null : $slug;
     }

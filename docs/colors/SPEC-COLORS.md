@@ -1,15 +1,17 @@
-# SPEC - Grupo Colors (v1.0)
+# SPEC - Grupo Colors (v1.1)
 
 ## 1. Visão
 Grupo Colors do devtools com HTML Color Picker e Color Palette Generator.
 Processamento local no navegador. Backend para contas, paletas, presets, favoritos, OG images, social, moderação e analytics.
 
 ## 2. URLs
-- /tools/colors
-- /tools/colors/html-color-picker
-- /tools/colors/palette-generator
-- /colors/p/{slug} (paleta pública)
-- /dashboard/colors/palettes (Minhas Paletas)
+Todas as rotas do site são prefixadas por `{locale}`. Os códigos de idioma aparecem como `pt-BR`/`pt-PT` na documentação, `pt_BR`/`pt_PT` no código e `pt-br`/`pt-pt` no slug da URL.
+
+- `/{locale}/tools/colors` — landing do grupo (fora da Fase 1)
+- `/{locale}/tools/colors/html-color-picker`
+- `/{locale}/tools/colors/palette-generator`
+- `/{locale}/colors/p/{slug}` (paleta pública)
+- `/{locale}/dashboard/colors/palettes` (Minhas Paletas)
 
 ## 3. Formatos
 HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
@@ -21,18 +23,18 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Sliders.
 - Contraste WCAG.
 - Shades/tints.
-- Histórico ilimitado.
-- Favoritos.
+- Histórico local de 50 cores na Fase 1 (ADR-118); histórico de cadastrado no backend, sem limite funcional, na Fase 5.
+- Favoritos locais de 50 cores na Fase 1; favoritos sincronizados entre Picker e Generator na Fase 5.
 - Copiar.
 - Alpha.
 
 ## 5. Palette Generator
 - Cor base.
-- Escala: anônimo 50-950; cadastrado 5,7,9,11 tons.
+- Escala: sempre os 11 tons fixos `50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950` (ADR-101). A escolha de 5, 7, 9 ou 11 pertence somente à extração de imagem (§9, ADR-099).
 - Harmonias HSL e OKLCH.
-- Exportações: HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, Figma Tokens, Style Dictionary, código.
-- Importação de imagem e extração de paleta (5,7,9,11 cores).
-- Importação de JSON (Figma/Style Dictionary).
+- Exportações: HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, tokens W3C DTCG (importáveis por Tokens Studio e Figma Variables), Style Dictionary, código. Sem API do Figma.
+- Importação de imagem e extração de paleta (5, 7, 9, 11 cores).
+- Importação de JSON (W3C DTCG / Style Dictionary).
 - Importação por URL de imagem.
 - Presets.
 - Favoritos.
@@ -40,23 +42,23 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 ## 6. Paletas salvas
 - Apenas cadastrados.
 - Nome, descrição opcional, tags, visibilidade.
-- Limite: free 25, pago ilimitado.
+- Limite: Free 25 paletas; pago sem limite funcional (ADR-096).
 - Versão do algoritmo registrada.
 - Duplicar paleta pública.
 - Renomear e reordenar tags.
-- Arquivar paleta (soft delete).
+- Arquivar paleta (ADR-119): some da lista padrão (filtro próprio a mostra), URL pública responde 404 e a paleta continua restaurável. Paleta arquivada **conta** na cota Free. Excluir é definitivo, libera cota e não pode ser desfeito.
 - Favoritar paleta de outro usuário.
 - Seguir usuário.
-- Curtir paleta pública (anônimo por IP hash).
-- Comentar paleta pública (threads, apenas logados).
+- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte; IP só como sinal antiabuso (ADR-112).
+- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111).
 
 ## 7. Compartilhamento
-- Paleta pública: /colors/p/{slug}
+- Paleta pública: `/{locale}/colors/p/{slug}`
 - SEO: title, description, OG image.
 - Duplicar para editar.
 - Compartilhar por URL.
-- OG image gerada no cliente, enviada e salva em public/og.
-- OG image dinâmica por paleta.
+- OG estática das páginas de tools: gerada pelo comando existente `php artisan seo:og-image` e versionada em `public/og/<slug>.png`.
+- OG dinâmica por paleta: gerada no cliente, enviada e salva em `storage/app/data/og_paleta_image`; nunca versionada no Git.
 - Regenerar OG image manualmente.
 
 ## 8. Protótipos
@@ -85,8 +87,8 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Layouts: horizontal, vertical, card.
 
 ## 11. Social
-- Curtir paleta pública (anônimo por IP hash).
-- Comentar paleta pública (threads, apenas logados).
+- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte (ADR-112).
+- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111).
 - Seguir usuário (login obrigatório).
 - Favoritar paleta.
 - Denunciar comentário (login).
@@ -98,7 +100,7 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 ## 12. Moderação
 - Filtro de palavras local.
 - IA moderadora: DeepSeek.
-- Cache permanente em ai_caches (nunca expira).
+- Cache em `ai_cache` (singular; a tabela real do projeto). A decisão de cache "permanente" exige definir na Fase 7 um sentinela de `expires_at`, pois a coluna é obrigatória.
 - Fila assíncrona.
 - Status: pending, approved, rejected, flagged.
 - Admin revisa flagged.
@@ -116,13 +118,14 @@ Componentes: ColorSwatch, ContrastBadge, ColorInput, ShadeScale, PaletteCard, Pr
 - Pest: auth, CRUD, limites, visibilidade, slug, archive, likes, comments, follows, reports, moderação.
 
 ## 16. Fases
-F1: grupo + HTML Color Picker completo.
-F2: Palette Generator básico + escalas + exportações.
-F3: harmonias + contraste + importação/exportação imagem.
-F4: salvamento + protótipos + compartilhamento + OG image.
-F5: presets, favoritos, tokens, exportação avançada.
-F6: social (curtir, comentar, seguir) + exportação paleta como imagem.
-F7: moderação IA + denúncias + notificações.
+F1: grupo + HTML Color Picker completo (histórico e favoritos locais).
+F2: Palette Generator — escala fixa de 11 tons, exportações CSS/SCSS/JSON/Tailwind v3/v4.
+F3: harmonias + importação de imagem e de URL com extração de 5/7/9/11 cores.
+F4: paletas salvas + protótipos + compartilhamento + OG dinâmica.
+F5: organização pessoal (histórico e favoritos no backend, presets) + tokens W3C DTCG/Style Dictionary + exportação avançada.
+F6: social (curtir anônimo, seguir) + exportação de paleta como imagem.
+F7: comentários + moderação IA + denúncias + notificações.
+F8: auditoria final e relatório de aceite.
 
 ## 17. Critérios de aceite
 - EyeDropper com fallback.
@@ -133,9 +136,9 @@ F7: moderação IA + denúncias + notificações.
 - Testes verdes.
 - Limites aplicados.
 - SEO da paleta pública.
-- OG image gerada no cliente e salva em public/og.
+- OG estática das tools versionada em `public/og`; OG dinâmica de paleta em `storage/app/data/og_paleta_image`, nunca versionada.
 - Protótipo exportável em PNG e SVG.
 - Paleta exportável como imagem tipográfica (PNG/SVG).
-- Curtir, comentar (threads), seguir funcionando.
-- Moderação DeepSeek com cache permanente.
+- Curtir, comentar (threads de 2 níveis), seguir funcionando.
+- Moderação DeepSeek com cache em `ai_cache`.
 - Notificações e-mail + app imediatas.

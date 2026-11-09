@@ -4,7 +4,7 @@ import { defineComponent, h } from 'vue';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Home from '@/pages/Home.vue';
 import Pricing from '@/pages/Pricing.vue';
-import { allTools, availableTools } from '@/tools/registry';
+import { allTools, availableTools, toolPath } from '@/tools/registry';
 import type { PublicPlan } from '@/types';
 
 /**
@@ -69,6 +69,7 @@ const toolTraducoes: Record<string, unknown> = {
         time: 'CAT_TEMPO',
         text: 'CAT_TEXTO',
         badges: 'CAT_IMAGENS',
+        colors: 'CAT_CORES',
     },
 };
 
@@ -346,11 +347,12 @@ describe('grid de ferramentas', () => {
 
         // E todo link aponta para a pagina de uma tool do registro.
         for (const link of links) {
-            const slug = link.attributes('href')?.replace('/pt-br/tools/', '');
+            const href = link.attributes('href');
 
-            expect(allTools.find((tool) => tool.slug === slug)?.status).toBe(
-                'available',
-            );
+            expect(
+                allTools.find((tool) => toolPath(tool, 'pt-br') === href)
+                    ?.status,
+            ).toBe('available');
         }
     });
 
@@ -368,7 +370,7 @@ describe('grid de ferramentas', () => {
         const todas = wrapper.get('[data-test="tool-chip-all"]');
         expect(todas.text()).toBe('TODAS');
         expect(todas.attributes('aria-pressed')).toBe('true');
-        expect(wrapper.findAll('[data-test^="tool-chip-"]')).toHaveLength(8);
+        expect(wrapper.findAll('[data-test^="tool-chip-"]')).toHaveLength(9);
 
         // SQL tem duas tools no catalogo.
         const sql = wrapper.get('[data-test="tool-chip-sql"]');

@@ -1,8 +1,8 @@
 # Social
 
 ## Recursos
-- Curtir paleta pública (anônimo por IP hash).
-- Comentar paleta pública (threads, logados, 255 chars).
+- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte (ADR-112); IP só como sinal antiabuso.
+- Comentar paleta pública (threads de no máximo 2 níveis, logados, 255 chars; ADR-111).
 - Seguir usuário (login).
 - Favoritar paleta.
 - Denunciar comentário (login).
@@ -10,7 +10,7 @@
 
 ## Moderação
 - Filtro de palavras.
-- IA DeepSeek (cache permanente ai_caches).
+- IA DeepSeek (cache em `ai_cache`; "permanente" exige sentinela de `expires_at` na Fase 7).
 - Fila.
 - Status: pending, approved, rejected, flagged.
 - Admin revisa flagged.

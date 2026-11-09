@@ -29,7 +29,7 @@ final class StructuredData
                 self::organization(),
                 self::website(),
             ],
-            'tools.show' => self::tool($request),
+            'tools.show', 'tools.show.grouped' => self::tool($request),
             default => [],
         };
     }

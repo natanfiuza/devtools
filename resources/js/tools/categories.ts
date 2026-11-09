@@ -14,6 +14,7 @@ export const categories: ToolCategory[] = [
     { id: 'time', icon: 'clock' },
     { id: 'text', icon: 'type' },
     { id: 'badges', icon: 'image' },
+    { id: 'colors', icon: 'palette' },
 ];
 
 export const categoryOrder: ToolCategoryId[] = categories.map(

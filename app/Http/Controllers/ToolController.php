@@ -37,7 +37,14 @@ class ToolController extends Controller
         // idioma. Pelo nome, a assinatura nao depende da ordem da URL.
         $slug = $request->route('slug');
 
-        $tool = is_string($slug) ? Tools::find($slug) : null;
+        // A rota plana nao tem o parametro; a agrupada tem (ADR-116). O par
+        // slug+grupo e conferido no registro, entao `/tools/colors/json-viewer`
+        // e `/tools/html-color-picker` nao encontram nada.
+        $group = $request->route('group');
+
+        $tool = is_string($slug)
+            ? Tools::findForUrl($slug, is_string($group) ? $group : null)
+            : null;
 
         abort_if($tool === null || $tool['status'] !== 'available', 404);
 

@@ -61,6 +61,69 @@ return [
         ],
     ],
 
+    /*
+    | Superficie compartilhada entre tools. O seletor de cor e usado por mais
+    | de uma ferramenta, entao seus textos sairam de `tools.<slug>.*`.
+    */
+    'shared' => [
+        'color_picker' => [
+            'color_input' => [
+                'label' => 'Cor',
+                'placeholder' => '#7c3aed, rgb(124 58 237), oklch(54% 0.24 293)…',
+                'hint' => 'Aceita HEX, RGB, HSL, OKLCH, OKLab e nomes CSS. A cor é aplicada enquanto você digita, assim que o texto é válido.',
+                'empty' => 'Digite uma cor para começar.',
+                'syntax' => 'Não foi possível entender esse formato. Confira o código e tente de novo.',
+                'range' => 'Um dos valores está fora do intervalo permitido.',
+                'unknown_name' => 'Não existe uma cor CSS com esse nome.',
+            ],
+
+            'area' => [
+                'label' => 'Saturação e brilho',
+                'hint' => 'As setas ajustam 1 ponto; com Shift, 10 pontos.',
+            ],
+
+            'hue' => [
+                'label' => 'Matiz',
+            ],
+
+            'alpha' => [
+                'label' => 'Opacidade',
+            ],
+
+            'channels' => [
+                'title' => 'Canais',
+                'rgb' => 'RGB',
+                'hsl' => 'HSL',
+                'red' => 'Vermelho',
+                'green' => 'Verde',
+                'blue' => 'Azul',
+                'hue' => 'Matiz',
+                'saturation' => 'Saturação',
+                'lightness' => 'Luminosidade',
+            ],
+
+            'preview' => [
+                'native' => 'Escolher no seletor do navegador',
+            ],
+
+            'formats' => [
+                'title' => 'Formato da cor',
+                'hex' => 'HEX',
+                'hex8' => 'HEX8',
+                'rgb' => 'RGB',
+                'rgba' => 'RGBA',
+                'hsl' => 'HSL',
+                'hsla' => 'HSLA',
+                'oklch' => 'OKLCH',
+                'oklab' => 'OKLab',
+                'name' => 'Nome CSS',
+                'copy' => 'Copiar {format}',
+                'copied' => 'Copiado: {value}',
+                'name_hint' => 'O nome CSS é a cor mais próxima; pode variar um pouco do código.',
+            ],
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -69,6 +132,80 @@ return [
         'time' => 'Data e hora',
         'text' => 'Texto',
         'badges' => 'Imagens',
+        'colors' => 'Cores',
+    ],
+
+    'html-color-picker' => [
+        'name' => 'HTML Color Picker',
+        'description' => 'Escolha uma cor, converta entre HEX, RGB, HSL e OKLCH e confira o contraste WCAG antes de usar.',
+        'keywords' => 'cor, hex, rgb, hsl, oklch, contraste, wcag, conta-gotas, tons, tintas',
+        'intro' => 'Escolha uma cor na tela ou digite um código, ajuste na área 2D e nos sliders e confira o contraste WCAG contra preto e branco. Tudo roda no seu navegador: nenhuma cor sai da página.',
+
+        'preview' => [
+            'alpha' => '{percent}% de opacidade',
+            'eyedropper' => 'Conta-gotas da tela',
+            'eyedropper_image' => 'Conta-gotas por imagem',
+            'gamut' => 'Essa cor está fora do gamut sRGB. O valor digitado ({source}) foi reduzido em croma para {value}, mantendo luminosidade e matiz.',
+        ],
+
+        'image' => [
+            'title' => 'Conta-gotas por imagem',
+            'description' => 'A imagem é lida no seu navegador e nunca é enviada. Clique na imagem ou use as setas para escolher o pixel e confirme.',
+            'choose' => 'Escolher uma imagem',
+            'error' => 'Não foi possível ler essa imagem. Tente outra.',
+            'instructions' => 'Clique ou use as setas para escolher o pixel; Enter aplica.',
+            'apply' => 'Usar esta cor',
+        ],
+
+        'contrast' => [
+            'title' => 'Contraste WCAG',
+            'description' => 'A opacidade é composta sobre o fundo escolhido antes da conta.',
+            'backdrop' => 'Fundo',
+            'white' => 'Branco',
+            'black' => 'Preto',
+            'custom' => 'Personalizado',
+            'black_text' => 'Texto preto ({ratio}:1 {verdict})',
+            'white_text' => 'Texto branco ({ratio}:1 {verdict})',
+            'pass_word' => 'passa',
+            'fail_word' => 'não passa',
+            'aa_normal' => 'AA',
+            'aaa_normal' => 'AAA',
+            'aa_large' => 'AA grande',
+            'aaa_large' => 'AAA grande',
+            'large_note' => 'Texto grande: 18,66 px em negrito ou 24 px normal.',
+        ],
+
+        'shades' => [
+            'title' => 'Tons',
+            'description' => 'Dez versões mais escuras, em OKLab, com a mesma opacidade.',
+        ],
+
+        'tints' => [
+            'title' => 'Tintas',
+            'description' => 'Dez versões mais claras, em OKLab, com a mesma opacidade.',
+        ],
+
+        'history' => [
+            'title' => 'Histórico',
+            'description' => 'As últimas cores que você aplicou, só neste navegador.',
+            'clear' => 'Limpar',
+            'empty' => 'Nenhuma cor aplicada ainda.',
+        ],
+
+        'favorites' => [
+            'title' => 'Favoritos',
+            'description' => 'Cores guardadas só neste navegador.',
+            'add' => 'Favoritar cor atual',
+            'remove' => 'Remover dos favoritos',
+            'clear' => 'Limpar',
+            'empty' => 'Nenhum favorito ainda.',
+        ],
+
+        'tabs' => [
+            'contrast' => 'Contraste',
+            'shades' => 'Tons',
+            'library' => 'Biblioteca',
+        ],
     ],
 
     'json-viewer' => [

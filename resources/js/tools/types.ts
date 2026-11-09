@@ -11,13 +11,28 @@
 export type ToolStatus = 'soon' | 'available' | 'hidden';
 
 export type ToolCategoryId =
-    'json' | 'sql' | 'encode' | 'security' | 'time' | 'text' | 'badges';
+    | 'json'
+    | 'sql'
+    | 'encode'
+    | 'security'
+    | 'time'
+    | 'text'
+    | 'badges'
+    | 'colors';
+
+/**
+ * Namespace de URL de uma tool (`/{locale}/tools/<group>/<slug>`). E so de
+ * URL: nao troca a categoria e nao tem landing propria (ADR-116).
+ */
+export type ToolGroupId = 'colors';
 
 export interface ToolManifest {
     /** Identificador da tool; e tambem o nome do diretorio e o prefixo das chaves de traducao. */
     slug: string;
     status: ToolStatus;
     category: ToolCategoryId;
+    /** Quando existe, a URL da tool ganha um nivel e `toolPath` o respeita. */
+    group?: ToolGroupId;
     /** Nome no mapa de `icons.ts` - o JSON nao carrega componente. */
     icon: string;
     /** Ordem de exibicao (menor primeiro). */

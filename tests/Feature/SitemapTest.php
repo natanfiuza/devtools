@@ -33,7 +33,8 @@ function sitemapGroups(): array
     $pages = [['home', []], ['pricing', []], ['privacy', []], ['terms', []], ['donate', []], ['contact', []], ['api-docs', []], ['badgeforge-docs', []]];
 
     foreach (Tools::available() as $tool) {
-        $pages[] = ['tools.show', ['slug' => (string) $tool['slug']]];
+        [$name, $params] = Tools::routeFor($tool);
+        $pages[] = [$name, $params];
     }
 
     $groups = [];
@@ -176,6 +177,18 @@ it('lista a pagina de cada tool que funciona', function () {
                 route('tools.show', ['locale' => $locale['slug'], 'slug' => $slug]),
             );
         }
+
+        // A tool agrupada entra pela rota aninhada, nao pela plana (ADR-116).
+        expect($xml)
+            ->toContain(route('tools.show.grouped', [
+                'locale' => $locale['slug'],
+                'group' => 'colors',
+                'slug' => 'html-color-picker',
+            ]))
+            ->not->toContain(route('tools.show', [
+                'locale' => $locale['slug'],
+                'slug' => 'html-color-picker',
+            ]));
     }
 });
 

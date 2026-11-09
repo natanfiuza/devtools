@@ -1,28 +1,35 @@
 # Glossário Colors
+- Grupo de tool: namespace opcional do manifesto (`group`) que aninha a URL de uma tool em `/{locale}/tools/{group}/{slug}`; não é categoria e não tem landing própria (ADR-116).
 - Cor base: cor inicial.
+- Cor canônica: representação usada para deduplicar histórico e favoritos — sRGB com alpha, normalizada (alpha 0 vira transparente), comparada antes de qualquer formatação (ADR-118).
 - Shade: tom mais escuro.
 - Tint: tom mais claro.
-- Escala: conjunto ordenado de tons.
+- Escala: conjunto ordenado de 11 tons `50–950`; a escolha de 5/7/9/11 cores pertence só à extração de imagem (ADR-101).
 - Harmonia: relação entre cores.
 - Contraste: razão de luminância.
 - WCAG AA/AAA: níveis de acessibilidade.
+- Classificação sem arredondamento: AA/AAA é decidido pelo valor cru da razão; o número exibido é arredondado só para leitura (ADR-117).
 - EyeDropper: captura de cor da tela.
+- Gamut mapping: trazer um OKLCH/OKLab fora do sRGB para dentro da gama reduzindo o croma por busca binária e preservando L e H (ADR-117).
+- Histórico local: as 50 últimas cores guardadas em `localStorage` pelo picker na Fase 1 (ADR-118).
+- Favorito: cor (Fase 1, local) ou paleta (fases seguintes) marcada para reuso.
 - Papel de cor: função na interface.
 - Protótipo: pré-visualização aplicada.
 - Preset: configuração salva reutilizável.
 - Paleta: conjunto de cores salvo.
 - Token: variável de design.
-- Figma Tokens JSON: formato de tokens para Figma.
+- W3C DTCG JSON: formato de design tokens com `$type`/`$value`, importável por Tokens Studio e Figma Variables; substitui o rótulo "Figma Tokens" da documentação antiga (ADR-095).
 - Style Dictionary: ferramenta de design tokens.
-- OKLCH/OKLab: espaços de cor perceitualmente uniformes.
+- OKLCH/OKLab: espaços de cor perceptualmente uniformes.
 - Alpha: transparência.
 - Slug: identificador textual único na URL.
 - Median cut: algoritmo de quantização de cores.
-- OG image: imagem de compartilhamento social.
-- Arquivar: ocultar sem excluir.
-- Curtir: interação social.
+- OG image: imagem de compartilhamento social; a de tool é estática e versionada, a de paleta é dinâmica e não versionada (ADR-105).
+- Arquivar: ocultar sem excluir; a URL pública responde 404, a paleta é restaurável e continua contando na cota (ADR-119).
+- Excluir: remoção definitiva de uma paleta; libera cota e não pode ser desfeita (ADR-119).
+- Curtir: interação social; anônimo usa identificador assinado de primeira parte (ADR-112).
 - Seguir: relação entre usuários.
 - Comentário: texto público em paleta.
-- Thread: cadeia de respostas.
+- Thread: cadeia de respostas, com no máximo 2 níveis (ADR-111).
 - Denúncia: report de conteúdo.
 - Moderação: filtro automático de conteúdo.

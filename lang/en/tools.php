@@ -61,6 +61,69 @@ return [
         ],
     ],
 
+    /*
+    | Interface shared between tools. The colour picker is used by more than
+    | one tool, so its texts live here instead of `tools.<slug>.*`.
+    */
+    'shared' => [
+        'color_picker' => [
+            'color_input' => [
+                'label' => 'Colour',
+                'placeholder' => '#7c3aed, rgb(124 58 237), oklch(54% 0.24 293)…',
+                'hint' => 'Accepts HEX, RGB, HSL, OKLCH, OKLab and CSS names. The colour is applied as you type once the text is valid.',
+                'empty' => 'Type a colour to start.',
+                'syntax' => 'That format could not be understood. Check the code and try again.',
+                'range' => 'One of the values is outside the allowed range.',
+                'unknown_name' => 'There is no CSS colour with that name.',
+            ],
+
+            'area' => [
+                'label' => 'Saturation and brightness',
+                'hint' => 'Arrow keys adjust 1 point; hold Shift for 10.',
+            ],
+
+            'hue' => [
+                'label' => 'Hue',
+            ],
+
+            'alpha' => [
+                'label' => 'Opacity',
+            ],
+
+            'channels' => [
+                'title' => 'Channels',
+                'rgb' => 'RGB',
+                'hsl' => 'HSL',
+                'red' => 'Red',
+                'green' => 'Green',
+                'blue' => 'Blue',
+                'hue' => 'Hue',
+                'saturation' => 'Saturation',
+                'lightness' => 'Lightness',
+            ],
+
+            'preview' => [
+                'native' => 'Pick with the browser picker',
+            ],
+
+            'formats' => [
+                'title' => 'Colour formats',
+                'hex' => 'HEX',
+                'hex8' => 'HEX8',
+                'rgb' => 'RGB',
+                'rgba' => 'RGBA',
+                'hsl' => 'HSL',
+                'hsla' => 'HSLA',
+                'oklch' => 'OKLCH',
+                'oklab' => 'OKLab',
+                'name' => 'CSS name',
+                'copy' => 'Copy {format}',
+                'copied' => 'Copied: {value}',
+                'name_hint' => 'The CSS name is the closest match; it may differ slightly from the code.',
+            ],
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -69,6 +132,80 @@ return [
         'time' => 'Date and time',
         'text' => 'Text',
         'badges' => 'Images',
+        'colors' => 'Colors',
+    ],
+
+    'html-color-picker' => [
+        'name' => 'HTML Color Picker',
+        'description' => 'Pick a colour, convert it between HEX, RGB, HSL and OKLCH and check WCAG contrast before using it.',
+        'keywords' => 'color, colour, hex, rgb, hsl, oklch, contrast, wcag, eyedropper, shades, tints',
+        'intro' => 'Pick a colour from the screen or type a code, adjust it on the 2D area and the sliders, and check the WCAG contrast against black and white. Everything runs in your browser: no colour ever leaves the page.',
+
+        'preview' => [
+            'alpha' => '{percent}% opacity',
+            'eyedropper' => 'Screen eyedropper',
+            'eyedropper_image' => 'Eyedropper from an image',
+            'gamut' => 'That colour is outside the sRGB gamut. The value you typed ({source}) was reduced in chroma to {value}, keeping lightness and hue.',
+        ],
+
+        'image' => [
+            'title' => 'Eyedropper from an image',
+            'description' => 'The image is read in your browser and never uploaded. Click it or use the arrow keys to choose a pixel, then confirm.',
+            'choose' => 'Choose an image',
+            'error' => 'That image could not be read. Try another one.',
+            'instructions' => 'Click or use the arrow keys to choose a pixel; Enter applies.',
+            'apply' => 'Use this colour',
+        ],
+
+        'contrast' => [
+            'title' => 'WCAG contrast',
+            'description' => 'Opacity is composited over the chosen background before the calculation.',
+            'backdrop' => 'Background',
+            'white' => 'White',
+            'black' => 'Black',
+            'custom' => 'Custom',
+            'black_text' => 'Black text ({ratio}:1 {verdict})',
+            'white_text' => 'White text ({ratio}:1 {verdict})',
+            'pass_word' => 'pass',
+            'fail_word' => 'fail',
+            'aa_normal' => 'AA',
+            'aaa_normal' => 'AAA',
+            'aa_large' => 'AA large',
+            'aaa_large' => 'AAA large',
+            'large_note' => 'Large text: 18.66 px bold or 24 px regular.',
+        ],
+
+        'shades' => [
+            'title' => 'Shades',
+            'description' => 'Ten darker versions in OKLab, with the same opacity.',
+        ],
+
+        'tints' => [
+            'title' => 'Tints',
+            'description' => 'Ten lighter versions in OKLab, with the same opacity.',
+        ],
+
+        'history' => [
+            'title' => 'History',
+            'description' => 'The colours you applied most recently, only in this browser.',
+            'clear' => 'Clear',
+            'empty' => 'No colour applied yet.',
+        ],
+
+        'favorites' => [
+            'title' => 'Favourites',
+            'description' => 'Colours saved only in this browser.',
+            'add' => 'Favourite current colour',
+            'remove' => 'Remove from favourites',
+            'clear' => 'Clear',
+            'empty' => 'No favourites yet.',
+        ],
+
+        'tabs' => [
+            'contrast' => 'Contrast',
+            'shades' => 'Shades',
+            'library' => 'Library',
+        ],
     ],
 
     'json-viewer' => [
