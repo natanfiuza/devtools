@@ -1,0 +1,19 @@
+{
+    "slug": "palette-generator",
+    "status": "available",
+    "category": "colors",
+    "group": "colors",
+    "icon": "swatch-book",
+    "order": 110,
+    "keywords": [
+        "palette",
+        "color scale",
+        "shades",
+        "tints",
+        "tailwind",
+        "css variables",
+        "scss",
+        "design tokens",
+        "oklch"
+    ]
+}

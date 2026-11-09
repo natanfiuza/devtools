@@ -88,12 +88,13 @@ it('declara a ferramenta e o caminho de navegacao na pagina da tool', function (
 
 it('cobre cada ferramenta que funciona', function () {
     foreach (Tools::available() as $tool) {
-        $blocks = structuredDataBlocks(
-            $this->get('/pt-br/tools/'.(string) $tool['slug'])->assertOk()->getContent(),
-        );
+        [$name, $params] = Tools::routeFor($tool);
+        $url = route($name, ['locale' => 'pt-br', ...$params], false);
+
+        $blocks = structuredDataBlocks($this->get($url)->assertOk()->getContent());
 
         expect($blocks[0]['@type'] ?? null)->toBe('SoftwareApplication')
-            ->and($blocks[0]['url'] ?? null)->toBe(url('/pt-br/tools/'.(string) $tool['slug']));
+            ->and($blocks[0]['url'] ?? null)->toBe(url($url));
     }
 });
 

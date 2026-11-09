@@ -7,9 +7,11 @@ import {
     FileText,
     Image,
     KeyRound,
+    Palette,
     Regex,
     ShieldCheck,
     Sparkles,
+    SwatchBook,
     Type,
     Wrench,
 } from '@lucide/vue';
@@ -32,9 +34,11 @@ const icons: Record<string, Component> = {
     'file-text': FileText,
     image: Image,
     'key-round': KeyRound,
+    palette: Palette,
     regex: Regex,
     'shield-check': ShieldCheck,
     sparkles: Sparkles,
+    'swatch-book': SwatchBook,
     type: Type,
 };
 

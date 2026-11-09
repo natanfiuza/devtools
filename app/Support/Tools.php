@@ -27,7 +27,7 @@ final class Tools
      * compartilhamento de cada tool (app/Console/Commands/GenerateOgImage.php):
      * termos do proprio manifest, sem frase em idioma nenhum.
      *
-     * @return list<array{slug: string, status: string, order: int, keywords: list<string>}>
+     * @return list<array{slug: string, status: string, group: string|null, order: int, keywords: list<string>}>
      */
     public static function all(): array
     {
@@ -45,6 +45,7 @@ final class Tools
             $decoded = json_decode($contents, true);
             $slug = is_array($decoded) ? ($decoded['slug'] ?? null) : null;
             $status = is_array($decoded) ? ($decoded['status'] ?? null) : null;
+            $group = is_array($decoded) ? ($decoded['group'] ?? null) : null;
             $order = is_array($decoded) ? ($decoded['order'] ?? 0) : 0;
 
             /** @var list<string> $keywords */
@@ -60,6 +61,7 @@ final class Tools
             $tools[] = [
                 'slug' => $slug,
                 'status' => $status,
+                'group' => is_string($group) && $group !== '' ? $group : null,
                 'order' => is_int($order) ? $order : 0,
                 'keywords' => $keywords,
             ];
@@ -75,7 +77,7 @@ final class Tools
      * Tools que ja funcionam - as unicas que entram no sitemap e as unicas com
      * imagem de compartilhamento propria.
      *
-     * @return list<array{slug: string, status: string, order: int, keywords: list<string>}>
+     * @return list<array{slug: string, status: string, group: string|null, order: int, keywords: list<string>}>
      */
     public static function available(): array
     {
@@ -94,7 +96,7 @@ final class Tools
      * O slug vem cru da URL: quem monta nome de arquivo a partir dele precisa
      * validar o formato antes (`resources/js/tools/<slug>/manifest.json`).
      *
-     * @return array{slug: string, status: string, order: int, keywords: list<string>}|null
+     * @return array{slug: string, status: string, group: string|null, order: int, keywords: list<string>}|null
      */
     public static function find(string $slug): ?array
     {
@@ -105,5 +107,61 @@ final class Tools
         }
 
         return null;
+    }
+
+    /**
+     * A tool que a URL pede - o par slug + grupo, sem tolerancia.
+     *
+     * Esta e a unica regra que decide qual URL de tool existe (ADR-116): tool
+     * com grupo so responde na URL aninhada, tool sem grupo so na plana. O
+     * `null` do grupo e o da rota `tools.show`; o grupo da URL agrupada chega
+     * como string. Os dois lados sao comparados com o registro - nunca com a
+     * URL crua - e o que nao casa da o mesmo 404 do slug desconhecido.
+     *
+     * @return array{slug: string, status: string, group: string|null, order: int, keywords: list<string>}|null
+     */
+    public static function findForUrl(string $slug, ?string $group): ?array
+    {
+        foreach (self::all() as $tool) {
+            if ($tool['slug'] === $slug && $tool['group'] === $group) {
+                return $tool;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Os grupos de URL em uso, na ordem do catalogo.
+     *
+     * @return list<string>
+     */
+    public static function groups(): array
+    {
+        $groups = [];
+
+        foreach (self::all() as $tool) {
+            if ($tool['group'] !== null) {
+                $groups[$tool['group']] = true;
+            }
+        }
+
+        return array_keys($groups);
+    }
+
+    /**
+     * Nome da rota e parametros de uma tool, com ou sem grupo.
+     *
+     * E o que o sitemap usa para montar a URL de cada tool sem repetir a regra
+     * do `findForUrl` em cada leitor.
+     *
+     * @param  array{slug: string, group: string|null}  $tool
+     * @return array{0: string, 1: array<string, string>}
+     */
+    public static function routeFor(array $tool): array
+    {
+        return $tool['group'] === null
+            ? ['tools.show', ['slug' => $tool['slug']]]
+            : ['tools.show.grouped', ['group' => $tool['group'], 'slug' => $tool['slug']]];
     }
 }

@@ -1,7 +1,7 @@
 # Minhas Paletas
 
 ## URL
-/dashboard/colors/palettes
+/{locale}/dashboard/colors/palettes
 
 ## Recursos
 - Busca server-side por nome, descrição e tags.
@@ -10,7 +10,8 @@
 - Paginação server-side.
 - Editar.
 - Duplicar.
-- Arquivar.
-- Excluir.
+- Arquivar (ADR-119): some da lista padrão, aparece em filtro próprio, URL pública responde 404 e a paleta continua restaurável. Conta na cota Free.
+- Restaurar.
+- Excluir (definitivo, libera cota e não pode ser desfeito).
 - Compartilhar.
 - Ver protótipo.

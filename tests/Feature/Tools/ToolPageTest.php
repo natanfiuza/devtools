@@ -76,6 +76,34 @@ it('da 404 para slug desconhecido, tool `soon` e tool `hidden`', function () {
     $this->get('/pt-br/tools/nao-existe')->assertNotFound();
 });
 
+it('serve a tool agrupada so na URL aninhada', function () {
+    // A URL canonica e a aninhada (ADR-116); a plana da 404, e o grupo errado
+    // tambem. A tool sem grupo continua respondendo na URL plana - e nao na
+    // aninhada, que e o outro lado da mesma regra.
+    $this->get('/pt-br/tools/colors/html-color-picker')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tools/Show')
+            ->where('slug', 'html-color-picker')
+            ->where('seo.noindex', false)
+        );
+
+    $this->get('/pt-br/tools/colors/palette-generator')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tools/Show')
+            ->where('slug', 'palette-generator')
+            ->where('seo.noindex', false)
+        );
+
+    $this->get('/pt-br/tools/html-color-picker')->assertNotFound();
+    $this->get('/pt-br/tools/palette-generator')->assertNotFound();
+    $this->get('/pt-br/tools/outro/html-color-picker')->assertNotFound();
+    $this->get('/pt-br/tools/outro/palette-generator')->assertNotFound();
+    $this->get('/pt-br/tools/colors/json-viewer')->assertNotFound();
+    $this->get('/pt-br/tools/colors')->assertNotFound();
+});
+
 it('nao monta caminho a partir do slug da URL', function () {
     // A pagina recebe o slug **do registro**, nunca o da URL: um caminho
     // disfarcado de slug nao encontra tool nenhuma e nao vira leitura de

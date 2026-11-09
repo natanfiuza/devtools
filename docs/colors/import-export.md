@@ -8,7 +8,7 @@
 - Importar por URL de imagem.
 
 ## JSON
-- Importar Figma Tokens.
+- Importar tokens W3C DTCG (Tokens Studio / Figma Variables).
 - Importar Style Dictionary.
 - Importar paleta JSON.
 

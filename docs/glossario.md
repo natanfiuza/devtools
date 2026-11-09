@@ -74,6 +74,7 @@
 - Exportacao de dados: download imediato dos dados da conta em JSON; nada fica guardado no servidor e credenciais (senha, tokens) nao saem no arquivo.
 - Tool disponivel: tool com `status: available` no manifesto; e a unica que tem pagina, card linkado, entrada no sitemap e imagem OG propria (`soon` aparece com selo e nao navega; `hidden` nao aparece em lugar nenhum).
 - Pagina da tool: `/{locale}/tools/{slug}`, uma so para todas as ferramentas - cabecalho e metas vem do registro e o componente da tool entra por glob lazy; slug desconhecido, `soon` e `hidden` dao o mesmo 404 (ADR-029).
+- Grupo de tool: namespace opcional do manifesto (`group`) que aninha a URL de uma tool em `/{locale}/tools/{group}/{slug}` (rota `tools.show.grouped`); a URL plana da tool agrupada da 404, o grupo nao muda a categoria e nao tem landing propria (ADR-116).
 - Shell da tool: a casca que toda ferramenta compartilha dentro da pagina - barra de acoes, os dois paineis (entrada | saida) com divisor arrastavel, faixa de status e de atalhos; no mobile os mesmos paineis viram abas (ADR-029).
 - Limite de entrada: teto em bytes do texto que uma tool aceita analisar, de `config/tools.php` (`TOOLS_MAX_INPUT_BYTES`, padrao 5 MB); passar dele nao bloqueia a digitacao, bloqueia a analise, e o limite protege o navegador de quem usa.
 - Arvore (do JSON): a saida do viewer em linhas, uma por no, com colapso; e a mesma coisa que o editor mostra, com as mesmas cores de token.

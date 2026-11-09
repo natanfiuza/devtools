@@ -26,6 +26,8 @@ function mvpToolSlugs(): array
         'regex-tester',
         'markdown-to-pdf',
         'badgeforge',
+        'html-color-picker',
+        'palette-generator',
     ];
 }
 
@@ -100,7 +102,40 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'regex-tester',
         'markdown-to-pdf',
         'badgeforge',
+        'html-color-picker',
+        'palette-generator',
     ]);
+});
+
+/*
+| Grupo de URL (ADR-116): a tool que declara `group` so responde na URL
+| aninhada; a plana continua valendo para todo o resto do catalogo.
+*/
+it('declara o grupo de URL e o resolve pelo par slug+grupo', function () {
+    expect(Tools::groups())->toBe(['colors']);
+    expect(Tools::findForUrl('html-color-picker', 'colors'))->not->toBeNull();
+    expect(Tools::findForUrl('html-color-picker', null))->toBeNull();
+    expect(Tools::findForUrl('palette-generator', 'colors'))->not->toBeNull();
+    expect(Tools::findForUrl('palette-generator', null))->toBeNull();
+    expect(Tools::findForUrl('json-viewer', null))->not->toBeNull();
+    expect(Tools::findForUrl('json-viewer', 'colors'))->toBeNull();
+    expect(Tools::findForUrl('nao-existe', 'colors'))->toBeNull();
+    expect(Tools::find('html-color-picker')['group'])->toBe('colors');
+    expect(Tools::find('palette-generator')['group'])->toBe('colors');
+    expect(Tools::find('json-viewer')['group'])->toBeNull();
+});
+
+it('monta a rota de cada tool respeitando o grupo', function () {
+    [$flatName, $flatParams] = Tools::routeFor((array) Tools::find('json-viewer'));
+    [$groupedName, $groupedParams] = Tools::routeFor((array) Tools::find('html-color-picker'));
+    [$paletteName, $paletteParams] = Tools::routeFor((array) Tools::find('palette-generator'));
+
+    expect($flatName)->toBe('tools.show');
+    expect($flatParams)->toBe(['slug' => 'json-viewer']);
+    expect($groupedName)->toBe('tools.show.grouped');
+    expect($groupedParams)->toBe(['group' => 'colors', 'slug' => 'html-color-picker']);
+    expect($paletteName)->toBe('tools.show.grouped');
+    expect($paletteParams)->toBe(['group' => 'colors', 'slug' => 'palette-generator']);
 });
 
 it('ordena pelo campo order e nao devolve a tool escondida', function () {

@@ -61,6 +61,69 @@ return [
         ],
     ],
 
+    /*
+    | Interface partagée entre outils. Le sélecteur de couleur est utilisé par
+    | plusieurs outils : ses textes vivent ici et non dans `tools.<slug>.*`.
+    */
+    'shared' => [
+        'color_picker' => [
+            'color_input' => [
+                'label' => 'Couleur',
+                'placeholder' => '#7c3aed, rgb(124 58 237), oklch(54% 0.24 293)…',
+                'hint' => 'Accepte HEX, RGB, HSL, OKLCH, OKLab et les noms CSS. La couleur s’applique pendant la saisie dès que le texte est valide.',
+                'empty' => 'Saisissez une couleur pour commencer.',
+                'syntax' => 'Ce format n’a pas pu être compris. Vérifiez le code et réessayez.',
+                'range' => 'Une des valeurs est hors de la plage autorisée.',
+                'unknown_name' => 'Aucune couleur CSS ne porte ce nom.',
+            ],
+
+            'area' => [
+                'label' => 'Saturation et luminosité',
+                'hint' => 'Les flèches ajustent de 1 point ; avec Maj, de 10.',
+            ],
+
+            'hue' => [
+                'label' => 'Teinte',
+            ],
+
+            'alpha' => [
+                'label' => 'Opacité',
+            ],
+
+            'channels' => [
+                'title' => 'Canaux',
+                'rgb' => 'RGB',
+                'hsl' => 'HSL',
+                'red' => 'Rouge',
+                'green' => 'Vert',
+                'blue' => 'Bleu',
+                'hue' => 'Teinte',
+                'saturation' => 'Saturation',
+                'lightness' => 'Luminosité',
+            ],
+
+            'preview' => [
+                'native' => 'Choisir avec le sélecteur du navigateur',
+            ],
+
+            'formats' => [
+                'title' => 'Formats de couleur',
+                'hex' => 'HEX',
+                'hex8' => 'HEX8',
+                'rgb' => 'RGB',
+                'rgba' => 'RGBA',
+                'hsl' => 'HSL',
+                'hsla' => 'HSLA',
+                'oklch' => 'OKLCH',
+                'oklab' => 'OKLab',
+                'name' => 'Nom CSS',
+                'copy' => 'Copier {format}',
+                'copied' => 'Copié : {value}',
+                'name_hint' => 'Le nom CSS est la couleur la plus proche ; il peut différer légèrement du code.',
+            ],
+        ],
+    ],
+
     'categories' => [
         'json' => 'JSON',
         'sql' => 'SQL',
@@ -69,6 +132,144 @@ return [
         'time' => 'Date et heure',
         'text' => 'Texte',
         'badges' => 'Images',
+        'colors' => 'Couleurs',
+    ],
+
+    'html-color-picker' => [
+        'name' => 'HTML Color Picker',
+        'description' => 'Choisissez une couleur, convertissez-la entre HEX, RGB, HSL et OKLCH et vérifiez le contraste WCAG avant de l’utiliser.',
+        'keywords' => 'couleur, hex, rgb, hsl, oklch, contraste, wcag, pipette, nuances, teintes',
+        'intro' => 'Choisissez une couleur à l’écran ou saisissez un code, ajustez-la dans la zone 2D et les curseurs, et vérifiez le contraste WCAG sur noir et blanc. Tout s’exécute dans votre navigateur : aucune couleur ne quitte la page.',
+
+        'preview' => [
+            'alpha' => '{percent} % d’opacité',
+            'eyedropper' => 'Pipette de l’écran',
+            'eyedropper_image' => 'Pipette depuis une image',
+            'gamut' => 'Cette couleur est hors du gamut sRGB. La valeur saisie ({source}) a été réduite en chroma vers {value}, en conservant la luminosité et la teinte.',
+        ],
+
+        'image' => [
+            'title' => 'Pipette depuis une image',
+            'description' => 'L’image est lue dans votre navigateur et n’est jamais envoyée. Cliquez sur l’image ou utilisez les flèches pour choisir un pixel, puis confirmez.',
+            'choose' => 'Choisir une image',
+            'error' => 'Impossible de lire cette image. Essayez-en une autre.',
+            'instructions' => 'Cliquez ou utilisez les flèches pour choisir un pixel ; Entrée applique.',
+            'apply' => 'Utiliser cette couleur',
+        ],
+
+        'contrast' => [
+            'title' => 'Contraste WCAG',
+            'description' => 'L’opacité est composée sur le fond choisi avant le calcul.',
+            'backdrop' => 'Fond',
+            'white' => 'Blanc',
+            'black' => 'Noir',
+            'custom' => 'Personnalisé',
+            'black_text' => 'Texte noir ({ratio}:1 {verdict})',
+            'white_text' => 'Texte blanc ({ratio}:1 {verdict})',
+            'pass_word' => 'réussit',
+            'fail_word' => 'échoue',
+            'aa_normal' => 'AA',
+            'aaa_normal' => 'AAA',
+            'aa_large' => 'AA grand',
+            'aaa_large' => 'AAA grand',
+            'large_note' => 'Grand texte : 18,66 px en gras ou 24 px normal.',
+        ],
+
+        'shades' => [
+            'title' => 'Nuances sombres',
+            'description' => 'Dix versions plus sombres, en OKLab, avec la même opacité.',
+        ],
+
+        'tints' => [
+            'title' => 'Nuances claires',
+            'description' => 'Dix versions plus claires, en OKLab, avec la même opacité.',
+        ],
+
+        'history' => [
+            'title' => 'Historique',
+            'description' => 'Les dernières couleurs appliquées, uniquement dans ce navigateur.',
+            'clear' => 'Effacer',
+            'empty' => 'Aucune couleur appliquée pour l’instant.',
+        ],
+
+        'favorites' => [
+            'title' => 'Favoris',
+            'description' => 'Couleurs enregistrées uniquement dans ce navigateur.',
+            'add' => 'Ajouter la couleur actuelle aux favoris',
+            'remove' => 'Retirer des favoris',
+            'clear' => 'Effacer',
+            'empty' => 'Aucun favori pour l’instant.',
+        ],
+
+        'tabs' => [
+            'contrast' => 'Contraste',
+            'shades' => 'Nuances',
+            'library' => 'Bibliothèque',
+        ],
+    ],
+
+    'palette-generator' => [
+        'name' => 'Color Palette Generator',
+        'description' => 'Générez une échelle de 11 tons à partir d’une couleur et exportez-la en CSS, SCSS, JSON et Tailwind.',
+        'keywords' => 'palette, échelle de couleurs, tons, teintes, tailwind, variables css, scss, jetons de design, oklch',
+        'intro' => 'Choisissez une couleur de base et obtenez aussitôt une échelle de 11 tons en OKLCH, avec le contraste WCAG sur chaque ton et les valeurs converties de la base. Copiez un ton ou toute l’échelle et téléchargez-la en CSS, SCSS, JSON, Tailwind v3 ou Tailwind v4. Tout s’exécute dans votre navigateur : aucune couleur ne quitte la page.',
+
+        'base' => [
+            'title' => 'Couleur de base',
+            'badge' => 'Base',
+            'copy' => 'Copier {format}',
+            'copied' => 'Copié : {value}',
+            'nearest' => 'Ton le plus proche : {tone}',
+            'not_500' => 'La base n’est pas le ton 500. Elle reste intacte ; l’échelle ne change pas.',
+            'matches_500' => 'La base est le ton 500 de l’échelle.',
+            'clipped' => 'Chroma réduit pour tenir dans le sRGB.',
+            'alpha_note' => 'Le contraste prend en compte le ton composé sur un fond de même polarité que le texte.',
+        ],
+
+        'scale' => [
+            'title' => 'Échelle de 11 tons',
+            'description' => 'Luminosité fixe en OKLCH ; le chroma suit la couleur de base.',
+            'copy_scale' => 'Copier l’échelle',
+            'copied_scale' => 'Échelle copiée : {count} tons',
+            'tone_copy' => 'Copier {tone}',
+            'tone_copied' => 'Copié : {value}',
+            'contrast_black' => 'Texte noir {ratio}:1',
+            'contrast_white' => 'Texte blanc {ratio}:1',
+            'pass' => 'réussit {level}',
+            'fail' => 'échoue {level}',
+            'clipped_badge' => 'Chroma limité',
+            'clipped_summary' => 'Tons à chroma limité : {tones}',
+            'algorithm_version' => 'Algorithme v{version}',
+            'base_tone_badge' => 'Le plus proche',
+        ],
+
+        'export' => [
+            'title' => 'Exporter',
+            'description' => 'Copiez ou téléchargez l’échelle prête pour votre projet.',
+            'name_label' => 'Nom de la palette',
+            'name_hint' => 'Utilisé dans les variables : {slug}',
+            'name_invalid' => 'Le nom sera normalisé en {slug}.',
+            'copy' => 'Copier',
+            'copied' => '{name} copié',
+            'download' => 'Télécharger',
+            'tabs' => [
+                'css' => 'CSS',
+                'scss' => 'SCSS',
+                'json' => 'JSON',
+                'tailwind_v3' => 'Tailwind v3',
+                'tailwind_v4' => 'Tailwind v4',
+            ],
+        ],
+
+        'empty' => [
+            'title' => 'Choisissez une couleur de base',
+            'body' => 'Dès qu’une couleur valide existe, les 11 tons apparaissent ici.',
+            'restore' => 'Restaurer l’exemple',
+        ],
+
+        'state' => [
+            'stale' => 'La couleur saisie n’est pas valide ; l’échelle précédente reste affichée.',
+        ],
     ],
 
     'json-viewer' => [

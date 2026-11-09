@@ -1,0 +1,23 @@
+{
+    "slug": "html-color-picker",
+    "status": "available",
+    "category": "colors",
+    "group": "colors",
+    "icon": "palette",
+    "order": 100,
+    "keywords": [
+        "color",
+        "colour",
+        "hex",
+        "rgb",
+        "hsl",
+        "oklch",
+        "oklab",
+        "contrast",
+        "wcag",
+        "eyedropper",
+        "shades",
+        "tints",
+        "palette"
+    ]
+}

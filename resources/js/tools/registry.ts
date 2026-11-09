@@ -53,9 +53,15 @@ export function toolPath(
     tool: ToolManifest,
     localeSlug: string,
 ): string | null {
-    return tool.status === 'available'
-        ? `/${localeSlug}/tools/${tool.slug}`
-        : null;
+    if (tool.status !== 'available') {
+        return null;
+    }
+
+    // Tool agrupada ganha um nivel a mais na URL (ADR-116); a plana continua
+    // igual para todo o catalogo existente.
+    const group = tool.group === undefined ? '' : `${tool.group}/`;
+
+    return `/${localeSlug}/tools/${group}${tool.slug}`;
 }
 
 /**

@@ -194,6 +194,8 @@ F7: providers customizados + analytics completo + admin. **Entregue em 2026-11-0
 F8: OpenAPI + documentação + hardening. **Entregue em 2026-11-05** — ver `docs/acceptance/BADGEFORGE-FASE-8.md`, ADR-088 e ADR-089.
 F9: API de gestão completa. **Entregue em 2026-11-05** — ver `docs/acceptance/BADGEFORGE-FASE-9.md` e ADR-090.
 
+**Track encerrado na F9 (2026-11-05): não há F10.** O backlog deferido — presets, GET por ID, CSV de analytics por API, API de admin, webhooks/bulk, viewer embutido, meta-schema, página de status, features adiadas de F3–F7 e pendentes operacionais — permanece fora de escopo e está registrado na ADR-090, no aceite e no relatório da F9.
+
 ## 17. Critérios de aceite
 - Pest e Vitest verdes em cada fase.
 - SVG válido e acessível (`role="img"`, `<title>`, `aria-label`).

@@ -55,7 +55,9 @@ final class Sitemap
         }
 
         foreach (Tools::available() as $tool) {
-            $urls = [...$urls, ...self::entries('tools.show', ['slug' => $tool['slug']])];
+            [$name, $params] = Tools::routeFor($tool);
+
+            $urls = [...$urls, ...self::entries($name, $params)];
         }
 
         return $urls;

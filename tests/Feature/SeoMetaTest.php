@@ -264,8 +264,9 @@ it('aponta o card de cada tool que funciona para o PNG dela', function () {
     foreach (Tools::available() as $tool) {
         $slug = (string) $tool['slug'];
         $relative = trim((string) config('seo.image.tools_dir'), '/')."/{$slug}.png";
+        [$name, $params] = Tools::routeFor($tool);
 
-        expect($this->get("/pt-br/tools/{$slug}")->assertOk()->getContent())
+        expect($this->get(route($name, ['locale' => 'pt-br', ...$params], false))->assertOk()->getContent())
             ->toContain('<meta property="og:image" content="'.seoOgUrl($relative).'">');
     }
 });
@@ -319,7 +320,7 @@ it('marca como noindex as telas de conta e o desafio de dois fatores', function 
 });
 
 it('mantem as paginas publicas fora da lista de noindex', function () {
-    foreach (['home', 'pricing', 'privacy', 'terms', 'donate', 'api-docs', 'badgeforge-docs', 'tools.show'] as $name) {
+    foreach (['home', 'pricing', 'privacy', 'terms', 'donate', 'api-docs', 'badgeforge-docs', 'tools.show', 'tools.show.grouped'] as $name) {
         $route = Route::getRoutes()->getByName($name);
 
         expect($route)->not->toBeNull("Rota ausente: {$name}");
