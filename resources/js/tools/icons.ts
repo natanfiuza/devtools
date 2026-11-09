@@ -11,6 +11,7 @@ import {
     Regex,
     ShieldCheck,
     Sparkles,
+    SwatchBook,
     Type,
     Wrench,
 } from '@lucide/vue';
@@ -37,6 +38,7 @@ const icons: Record<string, Component> = {
     regex: Regex,
     'shield-check': ShieldCheck,
     sparkles: Sparkles,
+    'swatch-book': SwatchBook,
     type: Type,
 };
 

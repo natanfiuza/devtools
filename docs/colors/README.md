@@ -1,7 +1,7 @@
 # Colors — índice da documentação
 
 Track do grupo Colors do devtools: HTML Color Picker e Color Palette Generator.
-Estado atual: **Fase 1 implementada** (HTML Color Picker completo, incluindo área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA). A **Fase 2** (Color Palette Generator) está planejada e será executada na branch `feature/colors-fase-2`, depois do commit da Fase 1.
+Estado atual: **Fases 1 e 2 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4, tudo no navegador e sem persistência.
 
 ## Documentos
 
@@ -24,7 +24,7 @@ Estado atual: **Fase 1 implementada** (HTML Color Picker completo, incluindo ár
 
 ## ADRs de Colors
 
-Numeração vigente: **ADR-091 a ADR-119**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
+Numeração vigente: **ADR-091 a ADR-120**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
 Os números 057–086 que a especificação original citava já estavam ocupados no repositório (`docs/adr/`), por isso os 25 ADRs de Colors foram renumerados em 2026-11-07, sem mudar o conteúdo além das emendas da Fase 1.
 
 | antigo | novo | | antigo | novo | | antigo | novo |
@@ -40,7 +40,7 @@ Os números 057–086 que a especificação original citava já estavam ocupados
 |  |  | | 076 | 105 | | 085 | 114 |
 |  |  | |  |  | | 086 | 115 |
 
-ADRs criados na Fase 1:
+ADRs criados nas Fases 1 e 2:
 
 | ADR | Tema |
 |---|---|
@@ -48,6 +48,7 @@ ADRs criados na Fase 1:
 | 117 | núcleo de cor próprio e gamut |
 | 118 | persistência local do picker |
 | 119 | arquivamento de paleta |
+| 120 | algoritmo da escala de 11 tons (escada OKLCH literal, croma relativo e base intacta) |
 
 ## Emendas de 2026-11-07
 

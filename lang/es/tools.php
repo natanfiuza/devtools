@@ -208,6 +208,70 @@ return [
         ],
     ],
 
+    'palette-generator' => [
+        'name' => 'Color Palette Generator',
+        'description' => 'Genera una escala de 11 tonos a partir de un color y expórtala a CSS, SCSS, JSON y Tailwind.',
+        'keywords' => 'paleta, escala de colores, tonos, matices, tailwind, variables css, scss, tokens de diseño, oklch',
+        'intro' => 'Elige un color base y obtén al instante una escala de 11 tonos en OKLCH, con contraste WCAG en cada tono y los valores convertidos de la base. Copia un tono o la escala completa y descárgala en CSS, SCSS, JSON, Tailwind v3 o Tailwind v4. Todo se ejecuta en tu navegador: ningún color sale de la página.',
+
+        'base' => [
+            'title' => 'Color base',
+            'badge' => 'Base',
+            'copy' => 'Copiar {format}',
+            'copied' => 'Copiado: {value}',
+            'nearest' => 'Tono más cercano: {tone}',
+            'not_500' => 'La base no es el tono 500. Se mantuvo intacta; la escala sigue igual.',
+            'matches_500' => 'La base es el tono 500 de la escala.',
+            'clipped' => 'Croma reducido para caber en sRGB.',
+            'alpha_note' => 'El contraste considera el tono compuesto sobre el fondo de la misma polaridad del texto.',
+        ],
+
+        'scale' => [
+            'title' => 'Escala de 11 tonos',
+            'description' => 'Luminosidad fija en OKLCH; el croma acompaña al color base.',
+            'copy_scale' => 'Copiar escala',
+            'copied_scale' => 'Escala copiada: {count} tonos',
+            'tone_copy' => 'Copiar {tone}',
+            'tone_copied' => 'Copiado: {value}',
+            'contrast_black' => 'Texto negro {ratio}:1',
+            'contrast_white' => 'Texto blanco {ratio}:1',
+            'pass' => 'pasa {level}',
+            'fail' => 'no pasa {level}',
+            'clipped_badge' => 'Croma limitado',
+            'clipped_summary' => 'Tonos con croma limitado: {tones}',
+            'algorithm_version' => 'Algoritmo v{version}',
+            'base_tone_badge' => 'Más cercano',
+        ],
+
+        'export' => [
+            'title' => 'Exportar',
+            'description' => 'Copia o descarga la escala lista para tu proyecto.',
+            'name_label' => 'Nombre de la paleta',
+            'name_hint' => 'Se usa en las variables: {slug}',
+            'name_invalid' => 'El nombre se normalizará a {slug}.',
+            'copy' => 'Copiar',
+            'copied' => '{name} copiado',
+            'download' => 'Descargar',
+            'tabs' => [
+                'css' => 'CSS',
+                'scss' => 'SCSS',
+                'json' => 'JSON',
+                'tailwind_v3' => 'Tailwind v3',
+                'tailwind_v4' => 'Tailwind v4',
+            ],
+        ],
+
+        'empty' => [
+            'title' => 'Elige un color base',
+            'body' => 'En cuanto haya un color válido, los 11 tonos aparecen aquí.',
+            'restore' => 'Restaurar ejemplo',
+        ],
+
+        'state' => [
+            'stale' => 'El color escrito no es válido; la escala anterior sigue en pantalla.',
+        ],
+    ],
+
     'json-viewer' => [
         'name' => 'JSON Viewer',
         'description' => 'Explora, formatea y valida JSON en árbol, con búsqueda y copia de cualquier ruta.',
