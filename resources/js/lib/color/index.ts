@@ -13,3 +13,4 @@ export * from './format';
 export * from './gamut';
 export * from './contrast';
 export * from './mix';
+export * from './scale';

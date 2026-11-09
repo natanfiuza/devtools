@@ -34,6 +34,7 @@ const MVP = [
     'markdown-to-pdf',
     'badgeforge',
     'html-color-picker',
+    'palette-generator',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */

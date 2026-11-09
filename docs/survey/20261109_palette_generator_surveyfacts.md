@@ -1,14 +1,14 @@
 # Survey — Colors Fase 2: Color Palette Generator
 
 - Data: 2026-11-09
-- Branch: `feature/colors-fase-1`
+- Branch: `feature/colors-fase-2` (survey iniciado em `feature/colors-fase-1`; a F1 foi commitada em `4bd143e`)
 - Task: verificar a Fase 1 e iniciar a Fase 2 (`docs/colors/PROMPT-Fase2-gerador_paletas.md`)
 
 ## 1. Contexto da tarefa
 
 O pedido foi (a) verificar se a Fase 1 do track Colors estava totalmente concluída e (b) iniciar a Fase 2 (Color Palette Generator). A verificação encontrou os gates verdes, mas uma lacuna funcional na F1: `docs/colors/html-color-picker.md:13` exige sliders RGB/RGBA e HSL/HSLA, e a implementação tinha apenas área 2D, matiz e alpha. No grill, o usuário decidiu corrigir a lacuna **antes** da F2.
 
-Não foi criada branch nova: a F1 está sem commit, então `feature/colors-fase-2` carregaria as mudanças da F1 e não isolaria nada. F1 + F2 seguem no mesmo PR em `feature/colors-fase-1`. Nada é commitado/pushado por mim; o usuário aprova via gitpr.
+A lacuna foi fechada na branch `feature/colors-fase-1` (setters RGB/HSL, `ChannelSliders`, `ColorPickerControls` e extração da superfície compartilhada), commitada pelo usuário em `4bd143e` e enviada. A Fase 2 segue na branch `feature/colors-fase-2`, criada a partir da F1. Nada é commitado/pushado por mim; o usuário aprova via gitpr. A árvore de decisões da F2 foi esgotada na rodada anterior; nenhuma decisão ficou em aberto.
 
 ## 2. Verificação da Fase 1
 

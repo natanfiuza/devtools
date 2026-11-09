@@ -51,3 +51,4 @@ composer.lock
 /deploy/deploy-instaled.sh.bak-*
 storage/framework/locks/
 .gitpr/conf/github.yml
+.gitpr/conf/issue.yml

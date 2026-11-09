@@ -88,8 +88,18 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->where('seo.noindex', false)
         );
 
+    $this->get('/pt-br/tools/colors/palette-generator')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tools/Show')
+            ->where('slug', 'palette-generator')
+            ->where('seo.noindex', false)
+        );
+
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();
+    $this->get('/pt-br/tools/palette-generator')->assertNotFound();
     $this->get('/pt-br/tools/outro/html-color-picker')->assertNotFound();
+    $this->get('/pt-br/tools/outro/palette-generator')->assertNotFound();
     $this->get('/pt-br/tools/colors/json-viewer')->assertNotFound();
     $this->get('/pt-br/tools/colors')->assertNotFound();
 });

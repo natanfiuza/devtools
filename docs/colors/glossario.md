@@ -5,6 +5,12 @@
 - Shade: tom mais escuro.
 - Tint: tom mais claro.
 - Escala: conjunto ordenado de 11 tons `50–950`; a escolha de 5/7/9/11 cores pertence só à extração de imagem (ADR-101).
+- Escala determinística: a escada de luminosidade OKLCH e os fatores de croma são literais e versionados; a mesma base produz sempre os mesmos 11 tons (ADR-120).
+- Tom mais próximo: tom da escada cuja luminosidade fixa está mais perto da luminosidade da base (empate fica com o mais claro); ele carrega o croma da base e recebe o selo na tela (ADR-120).
+- Fator de croma relativo: proporção do croma da base aplicada a cada tom; o croma do tom `t` é `base.c * fator[t] / fator[maisPróximo]` (ADR-120).
+- Base intacta: a cor informada pelo usuário nunca é alterada nem movida para o tom 500; se não coincidir com ele, a tela avisa (ADR-120).
+- Tom cortado (clipped): tom cujo croma pedido não cabe no sRGB e foi reduzido pelo gamut mapping, preservando L e H; listado na interface e no estado da escala (ADR-120).
+- JSON autodescritivo: o JSON exportado traz `name`, `algorithmVersion` e `colors`, sem depender da tela para ser interpretado (ADR-120).
 - Harmonia: relação entre cores.
 - Contraste: razão de luminância.
 - WCAG AA/AAA: níveis de acessibilidade.

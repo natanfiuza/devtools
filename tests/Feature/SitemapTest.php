@@ -178,17 +178,19 @@ it('lista a pagina de cada tool que funciona', function () {
             );
         }
 
-        // A tool agrupada entra pela rota aninhada, nao pela plana (ADR-116).
-        expect($xml)
-            ->toContain(route('tools.show.grouped', [
-                'locale' => $locale['slug'],
-                'group' => 'colors',
-                'slug' => 'html-color-picker',
-            ]))
-            ->not->toContain(route('tools.show', [
-                'locale' => $locale['slug'],
-                'slug' => 'html-color-picker',
-            ]));
+        // As tools agrupadas entram pela rota aninhada, nao pela plana (ADR-116).
+        foreach (['html-color-picker', 'palette-generator'] as $slug) {
+            expect($xml)
+                ->toContain(route('tools.show.grouped', [
+                    'locale' => $locale['slug'],
+                    'group' => 'colors',
+                    'slug' => $slug,
+                ]))
+                ->not->toContain(route('tools.show', [
+                    'locale' => $locale['slug'],
+                    'slug' => $slug,
+                ]));
+        }
     }
 });
 
