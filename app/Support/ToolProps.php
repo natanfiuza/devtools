@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Support\Ai\AiToolProps;
 use App\Support\BadgeForge\BadgeForgeToolProps;
 use App\Support\Base64Image\Base64ImageToolProps;
+use App\Support\Colors\ColorsToolProps;
 use App\Support\ShareText\ShareTextToolProps;
 use Illuminate\Http\Request;
 
@@ -26,6 +27,7 @@ final class ToolProps
             'base64-image' => (object) Base64ImageToolProps::for($user),
             'share-text' => (object) ShareTextToolProps::for($user, $request),
             'badgeforge' => (object) BadgeForgeToolProps::for($user),
+            'palette-generator' => (object) ColorsToolProps::for(),
             default => (object) [],
         };
     }

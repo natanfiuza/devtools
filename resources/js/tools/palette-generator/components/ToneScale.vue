@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Copy } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CopyStatusIcon from '@/components/colors/CopyStatusIcon.vue';
 import { Button } from '@/components/ui/button';
+import { useCopyConfirmation } from '@/composables/useCopyFeedback';
 import type { PaletteScale } from '@/lib/color';
 import ToneCard from './ToneCard.vue';
 
@@ -20,6 +21,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { copied, confirm } = useCopyConfirmation();
 
 const scaleText = computed(() =>
     props.scale.tones.map((tone) => `${tone.tone}: ${tone.hex}`).join('\n'),
@@ -28,12 +30,16 @@ const scaleText = computed(() =>
 const clippedText = computed(() => props.scale.clippedTones.join(', '));
 
 async function onCopyScale(): Promise<void> {
-    await props.copy(
+    const ok = await props.copy(
         scaleText.value,
         t('tools.palette-generator.scale.copied_scale', {
             count: props.scale.tones.length,
         }),
     );
+
+    if (ok) {
+        confirm();
+    }
 }
 </script>
 
@@ -58,7 +64,7 @@ async function onCopyScale(): Promise<void> {
         data-test="scale-copy"
         @click="onCopyScale"
       >
-        <Copy aria-hidden="true" />
+        <CopyStatusIcon :copied="copied" />
         {{ t('tools.palette-generator.scale.copy_scale') }}
       </Button>
     </div>

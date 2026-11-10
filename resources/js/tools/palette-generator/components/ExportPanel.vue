@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Copy, Download } from '@lucide/vue';
+import { Download } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CopyStatusIcon from '@/components/colors/CopyStatusIcon.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCopyConfirmation } from '@/composables/useCopyFeedback';
 import type { PaletteScale } from '@/lib/color';
 import { downloadText } from '@/lib/download';
 import {
@@ -29,6 +31,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { copied, confirm } = useCopyConfirmation();
 
 const name = ref('primary');
 const active = ref<PaletteExportFormat>('css');
@@ -63,10 +66,14 @@ async function onCopy(): Promise<void> {
         return;
     }
 
-    await props.copy(
+    const ok = await props.copy(
         file.contents,
         t('tools.palette-generator.export.copied', { name: file.filename }),
     );
+
+    if (ok) {
+        confirm();
+    }
 }
 
 function onDownload(): void {
@@ -165,7 +172,7 @@ function onDownload(): void {
         data-test="export-copy"
         @click="onCopy"
       >
-        <Copy aria-hidden="true" />
+        <CopyStatusIcon :copied="copied" />
         {{ t('tools.palette-generator.export.copy') }}
       </Button>
       <Button

@@ -15,6 +15,9 @@ import { writeClipboard } from '@/lib/clipboard';
 /** Quanto tempo o recado fica na tela, em milissegundos. */
 export const FEEDBACK_MS = 2500;
 
+/** Quanto tempo o icone de copiar fica como check, em milissegundos. */
+export const COPY_CONFIRMATION_MS = 2000;
+
 export interface CopyFeedback {
     /** O recado na tela, ja traduzido; `null` quando nao ha nenhum. */
     message: Ref<string | null>;
@@ -26,6 +29,41 @@ export interface CopyFeedback {
      */
     copy: (value: string, success?: string) => Promise<boolean>;
     clear: () => void;
+}
+
+export interface CopyConfirmation {
+    /** `true` enquanto o botao deve mostrar o check no lugar do icone. */
+    copied: Ref<boolean>;
+    /** Marca o check; copiar de novo reinicia a contagem. */
+    confirm: () => void;
+}
+
+/**
+ * O check que aparece no proprio botao de copiar.
+ *
+ * O recado da barra de baixo continua sendo o `useCopyFeedback`; aqui e so o
+ * icone, que vira check verde por `COPY_CONFIRMATION_MS` e volta. Cada botao
+ * tem o seu, porque cada um copia um valor diferente.
+ */
+export function useCopyConfirmation(): CopyConfirmation {
+    const copied = ref(false);
+
+    let timer = 0;
+
+    function confirm(): void {
+        copied.value = true;
+
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+            copied.value = false;
+        }, COPY_CONFIRMATION_MS);
+    }
+
+    onBeforeUnmount(() => {
+        window.clearTimeout(timer);
+    });
+
+    return { copied, confirm };
 }
 
 export function useCopyFeedback(): CopyFeedback {

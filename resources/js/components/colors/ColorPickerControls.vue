@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { Pipette } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@/components/ui/button';
 import type { ColorState } from '@/composables/useColorState';
 import { formatHex, formatHex8 } from '@/lib/color';
+import { isEyeDropperSupported, pickScreenColor } from '@/lib/eyedropper';
 import AlphaSlider from './AlphaSlider.vue';
 import ChannelSliders from './ChannelSliders.vue';
 import ColorArea from './ColorArea.vue';
@@ -12,12 +15,17 @@ import { withCurrentAlpha } from './lib/applyHex';
 import { checkerboardStyle, cssColor } from './lib/style';
 
 /**
- * O picker compacto: swatch, campo de texto, area 2D, matiz, opacidade e os
- * sliders de canal. Reutilizado por qualquer tool que precise escolher uma cor.
+ * O picker compacto: swatch, campo de texto, conta-gotas, area 2D, matiz,
+ * opacidade e os sliders de canal. Reutilizado por qualquer tool que precise
+ * escolher uma cor.
  *
  * O estado chega pronto (`ColorState`) e continua sendo a unica porta de
  * escrita. O erro `empty` nao aparece aqui: campo vazio e um estado da pagina
  * que usa o componente, nao um erro de formato.
+ *
+ * O conta-gotas so aparece quando o navegador tem a API `EyeDropper`; onde
+ * ela nao existe (Firefox, por exemplo) a cor continua vindo do campo, da
+ * area 2D ou dos sliders.
  */
 
 const props = defineProps<{
@@ -28,6 +36,9 @@ const { t } = useI18n();
 
 const { rgba, hsv, hsl, text, error } = props.state;
 
+const eyedropperSupported = isEyeDropperSupported();
+const picking = ref(false);
+
 const value = computed(() =>
     rgba.value.a < 1 ? formatHex8(rgba.value) : formatHex(rgba.value),
 );
@@ -36,18 +47,31 @@ const displayedError = computed(() =>
     error.value === 'empty' ? null : error.value,
 );
 
-function onNative(event: Event): void {
-    const color = withCurrentAlpha(
-        (event.target as HTMLInputElement).value,
-        rgba.value,
-    );
+/**
+ * Mede a tela e aplica a cor escolhida preservando o alpha atual - a tela
+ * entrega um pixel opaco, mas a transparencia da base e uma escolha da pessoa.
+ */
+async function eyedropper(): Promise<void> {
+    picking.value = true;
 
-    if (color === null) {
-        return;
+    try {
+        const hex = await pickScreenColor();
+
+        if (hex === null) {
+            return;
+        }
+
+        const color = withCurrentAlpha(hex, rgba.value);
+
+        if (color === null) {
+            return;
+        }
+
+        props.state.setColor(color);
+        props.state.finalize();
+    } finally {
+        picking.value = false;
     }
-
-    props.state.setColor(color);
-    props.state.finalize();
 }
 </script>
 
@@ -70,16 +94,21 @@ function onNative(event: Event): void {
       >
         {{ value }}
       </code>
-      <input
-        type="color"
-        :value="formatHex(rgba)"
-        :aria-label="t('tools.shared.color_picker.preview.native')"
-        :title="t('tools.shared.color_picker.preview.native')"
-        class="size-9 shrink-0 cursor-pointer rounded-md border bg-transparent p-1"
-        data-test="picker-native"
-        @input="onNative"
-      >
     </div>
+
+    <Button
+      v-if="eyedropperSupported"
+      type="button"
+      variant="outline"
+      size="sm"
+      class="self-start"
+      :disabled="picking"
+      data-test="picker-eyedropper"
+      @click="eyedropper"
+    >
+      <Pipette aria-hidden="true" />
+      {{ t('tools.shared.color_picker.preview.eyedropper') }}
+    </Button>
 
     <ColorInputField
       :model-value="text"

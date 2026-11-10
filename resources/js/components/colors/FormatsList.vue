@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Copy } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { COPY_CONFIRMATION_MS } from '@/composables/useCopyFeedback';
 import { Button } from '@/components/ui/button';
 import { formatAll, type ColorFormat, type Rgba } from '@/lib/color';
+import CopyStatusIcon from './CopyStatusIcon.vue';
 
 /**
  * Todos os formatos de saida, cada um com o proprio copiar.
@@ -21,6 +22,15 @@ const { t } = useI18n();
 
 const rows = computed(() => formatAll(props.rgba));
 
+/** Qual linha acabou de copiar - so o icone dela vira check. */
+const copiedFormat = ref<ColorFormat | null>(null);
+
+let timer = 0;
+
+onBeforeUnmount(() => {
+    window.clearTimeout(timer);
+});
+
 function labelFor(format: ColorFormat): string {
     return t(`tools.shared.color_picker.formats.${format}`);
 }
@@ -32,10 +42,21 @@ function copyLabel(format: ColorFormat): string {
 }
 
 async function onCopy(format: ColorFormat, value: string): Promise<void> {
-    await props.copy(
+    const copied = await props.copy(
         value,
         t('tools.shared.color_picker.formats.copied', { value }),
     );
+
+    if (!copied) {
+        return;
+    }
+
+    copiedFormat.value = format;
+
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+        copiedFormat.value = null;
+    }, COPY_CONFIRMATION_MS);
 }
 </script>
 
@@ -65,9 +86,10 @@ async function onCopy(format: ColorFormat, value: string): Promise<void> {
           size="icon-sm"
           :aria-label="copyLabel(row.format)"
           :title="copyLabel(row.format)"
+          :data-test="`format-copy-${row.format}`"
           @click="onCopy(row.format, row.value)"
         >
-          <Copy aria-hidden="true" />
+          <CopyStatusIcon :copied="copiedFormat === row.format" />
         </Button>
       </li>
     </ul>

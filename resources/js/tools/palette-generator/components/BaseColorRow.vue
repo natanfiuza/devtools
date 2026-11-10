@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Copy } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CopyStatusIcon from '@/components/colors/CopyStatusIcon.vue';
 import FormatsList from '@/components/colors/FormatsList.vue';
 import { checkerboardStyle, cssColor } from '@/components/colors/lib/style';
 import { Button } from '@/components/ui/button';
+import { useCopyConfirmation } from '@/composables/useCopyFeedback';
 import { formatHex, formatHex8, type PaletteScale } from '@/lib/color';
 
 /**
@@ -21,6 +22,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { copied, confirm } = useCopyConfirmation();
 
 const hex = computed(() =>
     props.scale.base.a < 1
@@ -35,10 +37,14 @@ const nearestClipped = computed(() =>
 );
 
 async function onCopy(): Promise<void> {
-    await props.copy(
+    const ok = await props.copy(
         hex.value,
         t('tools.palette-generator.base.copied', { value: hex.value }),
     );
+
+    if (ok) {
+        confirm();
+    }
 }
 </script>
 
@@ -97,7 +103,7 @@ async function onCopy(): Promise<void> {
           data-test="base-copy"
           @click="onCopy"
         >
-          <Copy aria-hidden="true" />
+          <CopyStatusIcon :copied="copied" />
         </Button>
       </div>
 

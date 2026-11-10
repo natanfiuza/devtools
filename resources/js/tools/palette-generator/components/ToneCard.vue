@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Copy } from '@lucide/vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CopyStatusIcon from '@/components/colors/CopyStatusIcon.vue';
 import { checkerboardStyle, cssColor } from '@/components/colors/lib/style';
 import { Button } from '@/components/ui/button';
+import { useCopyConfirmation } from '@/composables/useCopyFeedback';
 import type { ContrastVerdict, PaletteToneResult } from '@/lib/color';
 
 /**
@@ -21,6 +22,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { copied, confirm } = useCopyConfirmation();
 
 interface ContrastLine {
     key: 'black' | 'white';
@@ -54,12 +56,16 @@ const copyLabel = computed(() =>
 );
 
 async function onCopy(): Promise<void> {
-    await props.copy(
+    const ok = await props.copy(
         props.tone.hex,
         t('tools.palette-generator.scale.tone_copied', {
             value: props.tone.hex,
         }),
     );
+
+    if (ok) {
+        confirm();
+    }
 }
 </script>
 
@@ -105,7 +111,7 @@ async function onCopy(): Promise<void> {
         :data-test="`tone-copy-${tone.tone}`"
         @click="onCopy"
       >
-        <Copy aria-hidden="true" />
+        <CopyStatusIcon :copied="copied" />
       </Button>
     </div>
 

@@ -86,9 +86,13 @@ final class SecurityHeaders
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' https://www.googletagmanager.com https://challenges.cloudflare.com",
             "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: https://www.google-analytics.com https://*.google-analytics.com",
+            // `blob:` e a previa da imagem importada (ADR-122): o objeto nasce
+            // de um Blob local e nunca aponta para outra origem.
+            "img-src 'self' data: blob: https://www.google-analytics.com https://*.google-analytics.com",
             "font-src 'self' data:",
-            "connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://challenges.cloudflare.com",
+            // `https:` libera a busca direta da imagem por URL nas tools do
+            // cliente (ADR-122): sem proxy, a origem e a do usuario.
+            "connect-src 'self' https: https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://challenges.cloudflare.com",
             'frame-src https://challenges.cloudflare.com',
             "frame-ancestors 'none'",
             "base-uri 'self'",

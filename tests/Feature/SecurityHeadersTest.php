@@ -41,9 +41,11 @@ it('emite a CSP em enforce com as diretivas que o site usa', function () {
         ->toContain('https://www.googletagmanager.com')
         ->toContain('https://challenges.cloudflare.com')
         ->toContain("style-src 'self' 'unsafe-inline'")
-        ->toContain("img-src 'self' data:")
+        // ADR-122: `blob:` para a previa local e `https:` para a imagem
+        // buscada direto na origem, sem proxy.
+        ->toContain("img-src 'self' data: blob:")
         ->toContain("font-src 'self' data:")
-        ->toContain("connect-src 'self'")
+        ->toContain("connect-src 'self' https:")
         ->toContain('frame-src https://challenges.cloudflare.com')
         ->toContain("frame-ancestors 'none'")
         ->toContain("base-uri 'self'")

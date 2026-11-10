@@ -4,7 +4,8 @@
  * A API `EyeDropper` nao existe em todo navegador (Firefox, por exemplo, nao
  * a tem). Aqui ela e opcional: quando existe, devolve o HEX escolhido; quando
  * nao existe - ou o usuario cancela - devolve `null` e quem chama decide
- * (a tool cai no amostrador por imagem).
+ * (o HTML Color Picker cai no amostrador por imagem; o gerador de paleta so
+ * mostra o botao quando ha suporte).
  */
 
 interface EyeDropperResult {

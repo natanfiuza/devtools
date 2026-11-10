@@ -3,7 +3,7 @@ import {
     isAbortError,
     isEyeDropperSupported,
     pickScreenColor,
-} from '@/tools/html-color-picker/lib/eyedropper';
+} from '@/lib/eyedropper';
 
 /**
  * Conta-gotas da tela (ADR-117): presente, ausente, cancelado e falha.

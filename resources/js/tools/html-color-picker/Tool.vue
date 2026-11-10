@@ -7,7 +7,7 @@ import ColorArea from '@/components/colors/ColorArea.vue';
 import ColorInputField from '@/components/colors/ColorInputField.vue';
 import FormatsList from '@/components/colors/FormatsList.vue';
 import HueSlider from '@/components/colors/HueSlider.vue';
-import { opaqueColor, withCurrentAlpha } from '@/components/colors/lib/applyHex';
+import { opaqueColor } from '@/components/colors/lib/applyHex';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useColorState } from '@/composables/useColorState';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
@@ -71,17 +71,6 @@ function applyColor(color: Rgba): void {
     state.finalize();
 }
 
-function applyNative(hex: string): void {
-    const color = withCurrentAlpha(hex, rgba.value);
-
-    if (color === null) {
-        return;
-    }
-
-    state.setColor(color);
-    state.finalize();
-}
-
 function applyPicked(hex: string): void {
     const color = opaqueColor(hex);
 
@@ -132,7 +121,6 @@ onMounted(() => {
             :rgba="rgba"
             :out-of-gamut="outOfGamut"
             :gamut-source="gamutSource"
-            @native="applyNative"
             @picked="applyPicked"
           />
 
