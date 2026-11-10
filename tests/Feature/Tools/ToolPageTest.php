@@ -86,6 +86,8 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->component('tools/Show')
             ->where('slug', 'html-color-picker')
             ->where('seo.noindex', false)
+            // O picker nao importa imagem no servidor: continua sem pacote.
+            ->where('toolProps', [])
         );
 
     $this->get('/pt-br/tools/colors/palette-generator')
@@ -94,6 +96,8 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->component('tools/Show')
             ->where('slug', 'palette-generator')
             ->where('seo.noindex', false)
+            // Os tetos da importacao de imagem saem de config/tools.php.
+            ->has('toolProps.image')
         );
 
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();
@@ -102,6 +106,25 @@ it('serve a tool agrupada so na URL aninhada', function () {
     $this->get('/pt-br/tools/outro/palette-generator')->assertNotFound();
     $this->get('/pt-br/tools/colors/json-viewer')->assertNotFound();
     $this->get('/pt-br/tools/colors')->assertNotFound();
+});
+
+it('entrega os limites de imagem do gerador vindos da configuracao', function () {
+    config([
+        'tools.limits.colors_image.max_bytes' => 1234,
+        'tools.limits.colors_image.max_side' => 77,
+        'tools.limits.colors_image.max_pixels' => 999,
+        'tools.limits.colors_image.analysis_side' => 64,
+        'tools.limits.colors_image.fetch_timeout_ms' => 321,
+    ]);
+
+    $this->get('/pt-br/tools/colors/palette-generator')->assertOk()->assertInertia(
+        fn (Assert $page) => $page
+            ->where('toolProps.image.maxBytes', 1234)
+            ->where('toolProps.image.maxSide', 77)
+            ->where('toolProps.image.maxPixels', 999)
+            ->where('toolProps.image.analysisSide', 64)
+            ->where('toolProps.image.fetchTimeoutMs', 321),
+    );
 });
 
 it('nao monta caminho a partir do slug da URL', function () {

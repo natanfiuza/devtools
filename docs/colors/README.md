@@ -1,7 +1,7 @@
 # Colors — índice da documentação
 
 Track do grupo Colors do devtools: HTML Color Picker e Color Palette Generator.
-Estado atual: **Fases 1 e 2 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4, tudo no navegador e sem persistência.
+Estado atual: **Fases 1, 2 e 3 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). Tudo roda no navegador e nada é persistido.
 
 ## Documentos
 
@@ -24,7 +24,7 @@ Estado atual: **Fases 1 e 2 implementadas**. A Fase 1 entregou o HTML Color Pick
 
 ## ADRs de Colors
 
-Numeração vigente: **ADR-091 a ADR-120**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
+Numeração vigente: **ADR-091 a ADR-122**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
 Os números 057–086 que a especificação original citava já estavam ocupados no repositório (`docs/adr/`), por isso os 25 ADRs de Colors foram renumerados em 2026-11-07, sem mudar o conteúdo além das emendas da Fase 1.
 
 | antigo | novo | | antigo | novo | | antigo | novo |
@@ -40,7 +40,7 @@ Os números 057–086 que a especificação original citava já estavam ocupados
 |  |  | | 076 | 105 | | 085 | 114 |
 |  |  | |  |  | | 086 | 115 |
 
-ADRs criados nas Fases 1 e 2:
+ADRs criados nas Fases 1, 2 e 3:
 
 | ADR | Tema |
 |---|---|
@@ -49,6 +49,8 @@ ADRs criados nas Fases 1 e 2:
 | 118 | persistência local do picker |
 | 119 | arquivamento de paleta |
 | 120 | algoritmo da escala de 11 tons (escada OKLCH literal, croma relativo e base intacta) |
+| 121 | harmonias (ângulos, monocromática relativa, OKLCH padrão, auxiliares fora dos exports) |
+| 122 | extração de cores de imagem local/URL (color-thief/MMCQ, worker, limites, CORS sem proxy, memória) |
 
 ## Emendas de 2026-11-07
 

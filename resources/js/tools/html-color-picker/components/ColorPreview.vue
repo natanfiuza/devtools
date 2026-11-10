@@ -10,19 +10,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { formatColor, formatHex, type Rgba } from '@/lib/color';
-import { isEyeDropperSupported, pickScreenColor } from '../lib/eyedropper';
+import { formatColor, type Rgba } from '@/lib/color';
+import { isEyeDropperSupported, pickScreenColor } from '@/lib/eyedropper';
 import { checkerboardStyle, cssColor } from '@/components/colors/lib/style';
 import ImageSampler from './ImageSampler.vue';
 
 /**
- * Previa: o quadrado grande, o seletor nativo, o conta-gotas e o aviso de
- * gamut.
+ * Previa: o quadrado grande, o conta-gotas e o aviso de gamut.
  *
- * O `input[type=color]` do navegador nao conhece alpha - quem chama preserva
- * a opacidade atual ao aplicar o HEX. O conta-gotas nativo, quando existe,
- * mede a tela e devolve cor opaca; quando nao existe, o mesmo botao abre o
- * amostrador por imagem.
+ * O conta-gotas nativo, quando existe, mede a tela e devolve cor opaca; quando
+ * nao existe, o mesmo botao abre o amostrador por imagem.
  */
 
 const props = defineProps<{
@@ -32,8 +29,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    /** HEX vindo do seletor nativo (alpha deve ser preservado). */
-    native: [hex: string];
     /** HEX vindo da tela ou da imagem (cor opaca). */
     picked: [hex: string];
 }>();
@@ -70,10 +65,6 @@ async function eyedropper(): Promise<void> {
     }
 }
 
-function onNative(event: Event): void {
-    emit('native', (event.target as HTMLInputElement).value);
-}
-
 function onImagePicked(hex: string): void {
     emit('picked', hex);
     imageOpen.value = false;
@@ -108,22 +99,12 @@ function onImagePicked(hex: string): void {
           }}
         </p>
         <div class="mt-2 flex flex-wrap items-center gap-2">
-          <input
-            type="color"
-            :value="formatHex(rgba)"
-            :aria-label="
-              t('tools.shared.color_picker.preview.native')
-            "
-            :title="t('tools.shared.color_picker.preview.native')"
-            class="size-9 cursor-pointer rounded-md border bg-transparent p-1"
-            data-test="native-color-input"
-            @input="onNative"
-          >
           <Button
             type="button"
             variant="outline"
             size="sm"
             :disabled="busy"
+            data-test="color-eyedropper"
             @click="eyedropper"
           >
             <Pipette aria-hidden="true" />

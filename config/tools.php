@@ -76,6 +76,24 @@ return [
             'free_max_bytes' => (int) env('TOOLS_SHARE_TEXT_FREE_MAX_BYTES', 5 * 1024 * 1024),
             'paid_max_bytes' => (int) env('TOOLS_SHARE_TEXT_PAID_MAX_BYTES', 25 * 1024 * 1024),
         ],
+
+        /*
+        | Limites da importacao de imagem do Color Palette Generator (ADR-122).
+        |
+        | A imagem nunca sai do navegador: os tetos existem para poupar a maquina
+        | de quem usa, e sao aplicados antes de decodificar (bytes) e depois de
+        | decodificar (dimensoes e pixels). `analysis_side` e o lado maximo da
+        | copia reduzida em que a quantizacao roda; `fetch_timeout_ms` e o teto da
+        | busca por URL. Nenhum deles mora no cliente: a pagina recebe este bloco
+        | por `ColorsToolProps`.
+        */
+        'colors_image' => [
+            'max_bytes' => (int) env('TOOLS_COLORS_IMAGE_MAX_BYTES', 10 * 1024 * 1024),
+            'max_side' => (int) env('TOOLS_COLORS_IMAGE_MAX_SIDE', 4096),
+            'max_pixels' => (int) env('TOOLS_COLORS_IMAGE_MAX_PIXELS', 16_000_000),
+            'analysis_side' => (int) env('TOOLS_COLORS_IMAGE_ANALYSIS_SIDE', 512),
+            'fetch_timeout_ms' => (int) env('TOOLS_COLORS_IMAGE_FETCH_TIMEOUT_MS', 8000),
+        ],
     ],
 
 ];

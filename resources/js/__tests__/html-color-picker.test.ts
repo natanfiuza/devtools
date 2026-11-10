@@ -1,14 +1,20 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { nextTick } from 'vue';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ColorArea from '@/components/colors/ColorArea.vue';
 import {
     opaqueColor,
     withCurrentAlpha,
 } from '@/components/colors/lib/applyHex';
 import { useColorState } from '@/composables/useColorState';
+import { COPY_CONFIRMATION_MS } from '@/composables/useCopyFeedback';
 import type { Rgba } from '@/lib/color';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Tool from '@/tools/html-color-picker/Tool.vue';
+
+const { writeClipboard } = vi.hoisted(() => ({ writeClipboard: vi.fn() }));
+
+vi.mock('@/lib/clipboard', () => ({ writeClipboard }));
 
 /**
  * Comportamento do estado e da area 2D (ADR-117).
@@ -152,25 +158,49 @@ describe('Tool', () => {
         expect(wrapper.find('[data-test="color-input"]').exists()).toBe(true);
         expect(
             wrapper.find('[data-test="native-color-input"]').exists(),
-        ).toBe(true);
+        ).toBe(false);
+        expect(wrapper.find('[data-test="color-eyedropper"]').exists()).toBe(
+            true,
+        );
         expect(wrapper.find('[data-test="alpha-slider"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="channels-tabs"]').exists()).toBe(true);
         expect(
             wrapper.find('[data-test="channel-slider-r"]').exists(),
         ).toBe(true);
     });
+});
 
-    it('o seletor nativo mantem o alpha atual', async () => {
+describe('copiar formatos', () => {
+    beforeEach(() => {
         localStorage.clear();
+        writeClipboard.mockReset();
+        writeClipboard.mockResolvedValue(undefined);
+        vi.useFakeTimers();
+    });
 
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('troca só o icone copiado por um check e volta', async () => {
         const wrapper = mount(Tool, { global: { plugins: [i18n()] } });
+        const hex = wrapper.get('[data-test="format-copy-hex"]');
+        const rgb = wrapper.get('[data-test="format-copy-rgb"]');
 
-        await wrapper.get('[data-test="alpha-slider"]').setValue('50');
-        await wrapper.get('[data-test="native-color-input"]').setValue('#00ff00');
+        expect(hex.find('[data-test="copy-icon"]').exists()).toBe(true);
 
-        const field = wrapper.get<HTMLInputElement>('[data-test="color-input"]');
+        await hex.trigger('click');
+        await vi.advanceTimersByTimeAsync(0);
+        await nextTick();
 
-        expect(field.element.value).toBe('#00ff0080');
+        expect(hex.find('[data-test="copied-icon"]').exists()).toBe(true);
+        expect(rgb.find('[data-test="copied-icon"]').exists()).toBe(false);
+
+        await vi.advanceTimersByTimeAsync(COPY_CONFIRMATION_MS);
+        await nextTick();
+
+        expect(hex.find('[data-test="copy-icon"]').exists()).toBe(true);
+        expect(hex.find('[data-test="copied-icon"]').exists()).toBe(false);
     });
 });
 

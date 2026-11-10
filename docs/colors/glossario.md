@@ -11,7 +11,13 @@
 - Base intacta: a cor informada pelo usuário nunca é alterada nem movida para o tom 500; se não coincidir com ele, a tela avisa (ADR-120).
 - Tom cortado (clipped): tom cujo croma pedido não cabe no sRGB e foi reduzido pelo gamut mapping, preservando L e H; listado na interface e no estado da escala (ADR-120).
 - JSON autodescritivo: o JSON exportado traz `name`, `algorithmVersion` e `colors`, sem depender da tela para ser interpretado (ADR-120).
-- Harmonia: relação entre cores.
+- Harmonia: conjunto de cores derivado da base por rotação de matiz (complementar, análoga, triádica, tetrádica) ou por variação de luminosidade (monocromática); a base entra no conjunto e as harmonias são auxiliares, fora dos exports da escala (ADR-121).
+- Método da harmonia: espaço em que a harmonia é calculada; OKLCH (padrão, gira a matiz mantendo L e croma) ou HSL (gira a matiz mantendo S e L) (ADR-121).
+- Cor dominante: cor de uma imagem escolhida pela quantização, exibida com HEX e percentual; fica separada da escala 50–950 (ADR-099, ADR-122).
+- Peso: número de pixels visíveis atribuídos a uma cor dominante na imagem analisada (ADR-122).
+- Percentual da cor: peso dividido pelos pixels visíveis da imagem, com duas casas decimais; não vem da população interna da biblioteca (ADR-122).
+- MMCQ: modified median cut quantization, o algoritmo de quantização usado na extração de imagem (ADR-122).
+- CORS: regra do navegador que permite ou bloqueia a leitura de uma imagem de outra origem; a importação por URL depende do CORS da origem e nunca é contornada por proxy (ADR-108, ADR-122).
 - Contraste: razão de luminância.
 - WCAG AA/AAA: níveis de acessibilidade.
 - Classificação sem arredondamento: AA/AAA é decidido pelo valor cru da razão; o número exibido é arredondado só para leitura (ADR-117).
@@ -29,7 +35,7 @@
 - OKLCH/OKLab: espaços de cor perceptualmente uniformes.
 - Alpha: transparência.
 - Slug: identificador textual único na URL.
-- Median cut: algoritmo de quantização de cores.
+- Median cut: algoritmo de quantização de cores; na F3 é o MMCQ da color-thief, com opção OKLCH (ADR-122).
 - OG image: imagem de compartilhamento social; a de tool é estática e versionada, a de paleta é dinâmica e não versionada (ADR-105).
 - Arquivar: ocultar sem excluir; a URL pública responde 404, a paleta é restaurável e continua contando na cota (ADR-119).
 - Excluir: remoção definitiva de uma paleta; libera cota e não pode ser desfeita (ADR-119).

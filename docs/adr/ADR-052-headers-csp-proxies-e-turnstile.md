@@ -136,3 +136,16 @@ relatorios, e um endpoint publico de CSP viraria superficie de abuso.
   equivalente; o cadastro e o alvo.
 - **Turnstile obrigatorio com chave ausente**: deixaria o cadastro quebrado no
   local e em qualquer ambiente sem as chaves.
+
+## Emenda 2026-11-09
+
+A extracao de cores de imagem do Color Palette Generator (ADR-122) fez duas
+aberturas na politica:
+
+- `img-src` ganhou `blob:`, para a previa da imagem importada criada com
+  `URL.createObjectURL` e revogada ao trocar de imagem ou desmontar;
+- `connect-src` ganhou `https:`, para a busca direta da imagem por URL na tool
+  (CORS na origem, sem proxy e sem requisicao ao servidor da aplicacao).
+
+Nao ha host novo fixo: a origem e qualquer URL HTTPS escolhida pela pessoa.
+`script-src` continua sem `unsafe-inline`, e as demais diretivas seguem iguais.
