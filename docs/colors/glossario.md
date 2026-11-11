@@ -26,15 +26,25 @@
 - Histórico local: as 50 últimas cores guardadas em `localStorage` pelo picker na Fase 1 (ADR-118).
 - Favorito: cor (Fase 1, local) ou paleta (fases seguintes) marcada para reuso.
 - Papel de cor: função na interface.
-- Protótipo: pré-visualização aplicada.
+- Protótipo: pré-visualização aplicada; no Colors é vetorial, ver Protótipo vetorial (ADR-126).
 - Preset: configuração salva reutilizável.
-- Paleta: conjunto de cores salvo.
+- Paleta: conjunto de cores salvo por um usuário cadastrado, do tipo `scale` (base + 11 tons) ou `extracted` (base + 5/7/9/11 cores de uma imagem) (ADR-123).
 - Token: variável de design.
 - W3C DTCG JSON: formato de design tokens com `$type`/`$value`, importável por Tokens Studio e Figma Variables; substitui o rótulo "Figma Tokens" da documentação antiga (ADR-095).
 - Style Dictionary: ferramenta de design tokens.
 - OKLCH/OKLab: espaços de cor perceptualmente uniformes.
 - Alpha: transparência.
-- Slug: identificador textual único na URL.
+- Slug: identificador textual único na URL; nasce na primeira publicação, é global e não muda ao renomear (ADR-123, ADR-124).
+- Cores efetivas: as cores gravadas na paleta quando ela foi salva; reabrir a paleta mostra exatamente essas cores, sem recalcular nada (ADR-123).
+- Cota: número de paletas que a conta pode manter (Free 25, pago sem limite funcional); arquivadas contam, só a exclusão definitiva libera (ADR-096).
+- Paleta arquivada: paleta retirada da lista padrão, com URL pública em 404, restaurável e ainda contando na cota (ADR-119).
+- Publicar: tornar a paleta `public`, o que libera a página pública e a entrada no sitemap; não muda o slug (ADR-124).
+- Uso (duplicações): quantas vezes **outros** usuários duplicaram a paleta; cumulativo e não decresce quando a cópia é excluída (ADR-124).
+- Duplicação: cópia autenticada de uma paleta (pública ou própria), que nasce privada, sem OG, com as cores, papéis, tags e versões copiados (ADR-124).
+- Rascunho de paleta: cópia temporária da base/tipo/cores extraídas/aba guardada no navegador de quem não está logado, para retomar após o login (ADR-096, ADR-123).
+- Papel de cor claro/escuro: posição semântica de uma cor (por exemplo, `background` ou `text`) definida uma vez por tema, `light` e `dark`, e reutilizada pelo site e pelo mobile (ADR-126).
+- Protótipo vetorial: prévia de site ou mobile desenhada como SVG por um renderizador próprio, em que o PNG exportado é a rasterização do mesmo SVG (ADR-126).
+- OG dinâmica de paleta: imagem 1200×630 desenhada no cliente a partir dos papéis do tema claro, enviada pela paleta e servida só enquanto a paleta for pública e ativa (ADR-105, ADR-125).
 - Median cut: algoritmo de quantização de cores; na F3 é o MMCQ da color-thief, com opção OKLCH (ADR-122).
 - OG image: imagem de compartilhamento social; a de tool é estática e versionada, a de paleta é dinâmica e não versionada (ADR-105).
 - Arquivar: ocultar sem excluir; a URL pública responde 404, a paleta é restaurável e continua contando na cota (ADR-119).

@@ -142,15 +142,16 @@ final class Locales
         }
 
         $segments = explode('/', trim($request->path(), '/'));
-        $query = $request->getQueryString();
-        $suffix = $query === null ? '' : '?'.$query;
 
+        // Query string fica de fora do canonical e do hreflang: `?duplicate=1`
+        // (e qualquer filtro) muda a tela, nao a pagina. O `og:url` usa o
+        // mesmo valor, entao as duas metas seguem iguais.
         $urls = [];
 
         foreach (self::all() as $locale) {
             $segments[0] = $locale['slug'];
 
-            $urls[$locale['html']] = url(implode('/', $segments).$suffix);
+            $urls[$locale['html']] = url(implode('/', $segments));
         }
 
         return $urls;

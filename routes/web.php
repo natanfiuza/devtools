@@ -243,6 +243,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
 
 require __DIR__.'/settings.php';
 require __DIR__.'/badgeforge.php';
+require __DIR__.'/colors.php';
 require __DIR__.'/auth-social.php';
 require __DIR__.'/newsletter.php';
 require __DIR__.'/admin.php';

@@ -15,7 +15,16 @@ export function downloadText(
     text: string,
     type = 'application/json',
 ): void {
-    const url = URL.createObjectURL(new Blob([text], { type }));
+    downloadBlob(filename, new Blob([text], { type }));
+}
+
+/**
+ * Baixa um `Blob` ja montado (PNG dos prototipos e da OG, por exemplo).
+ *
+ * Mesma ancora de `downloadText`; o `Blob` continua so na memoria da pagina.
+ */
+export function downloadBlob(filename: string, blob: Blob): void {
+    const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
 
     anchor.href = url;

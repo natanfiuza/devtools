@@ -66,6 +66,7 @@ return [
         'contact',
         'api_docs',
         'docs',
+        'colors',
         'errors',
     ],
 

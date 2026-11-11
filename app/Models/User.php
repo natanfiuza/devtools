@@ -337,6 +337,26 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Paletas salvas pela conta (F4, ADR-123).
+     *
+     * @return HasMany<ColorPalette, $this>
+     */
+    public function colorPalettes(): HasMany
+    {
+        return $this->hasMany(ColorPalette::class);
+    }
+
+    /**
+     * Tags de paleta da conta (F4, ADR-103).
+     *
+     * @return HasMany<ColorTag, $this>
+     */
+    public function colorTags(): HasMany
+    {
+        return $this->hasMany(ColorTag::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

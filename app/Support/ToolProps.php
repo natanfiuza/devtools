@@ -27,7 +27,7 @@ final class ToolProps
             'base64-image' => (object) Base64ImageToolProps::for($user),
             'share-text' => (object) ShareTextToolProps::for($user, $request),
             'badgeforge' => (object) BadgeForgeToolProps::for($user),
-            'palette-generator' => (object) ColorsToolProps::for(),
+            'palette-generator' => (object) ColorsToolProps::for($user),
             default => (object) [],
         };
     }

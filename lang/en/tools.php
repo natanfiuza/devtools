@@ -258,12 +258,14 @@ return [
             ],
             'results_title' => 'Dominant colours · {count}',
             'percentage' => '{value}% of the pixels',
+            'percentage_unknown' => 'weight not stored',
             'copy' => 'Copy',
             'copied' => 'Copied: {value}',
             'use_as_base' => 'Use as base',
             'use_file' => 'Use a local file',
             'insufficient' => 'The image has fewer than {requested} distinct colours; {found} were found.',
             'algorithm_version' => 'Algorithm v{version}',
+            'source_unknown' => 'source not recorded',
             'source_file' => 'File: {name}',
             'source_url' => 'Image from {host}',
             'errors' => [
@@ -338,6 +340,11 @@ return [
 
         'state' => [
             'stale' => 'The typed colour is not valid; the previous scale stays on screen.',
+        ],
+
+        'save' => [
+            'action' => 'Save palette',
+            'draft_restored' => 'Your palette is back. Review it and save.',
         ],
     ],
 

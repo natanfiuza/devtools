@@ -9,6 +9,7 @@ return [
         'history' => 'Historial',
         'billing' => 'Facturas',
         'badgeforge' => 'BadgeForge',
+        'palettes' => 'Mis Paletas',
         'back_to_site' => 'Volver al sitio',
     ],
 
