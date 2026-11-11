@@ -258,12 +258,14 @@ return [
             ],
             'results_title' => 'Couleurs dominantes · {count}',
             'percentage' => '{value} % des pixels',
+            'percentage_unknown' => 'poids non enregistré',
             'copy' => 'Copier',
             'copied' => 'Copié : {value}',
             'use_as_base' => 'Utiliser comme base',
             'use_file' => 'Utiliser un fichier local',
             'insufficient' => 'L’image contient moins de {requested} couleurs distinctes ; {found} ont été trouvées.',
             'algorithm_version' => 'Algorithme v{version}',
+            'source_unknown' => 'source non enregistrée',
             'source_file' => 'Fichier : {name}',
             'source_url' => 'Image de {host}',
             'errors' => [
@@ -338,6 +340,11 @@ return [
 
         'state' => [
             'stale' => 'La couleur saisie n’est pas valide ; l’échelle précédente reste affichée.',
+        ],
+
+        'save' => [
+            'action' => 'Enregistrer la palette',
+            'draft_restored' => 'Votre palette est revenue. Vérifiez-la et enregistrez.',
         ],
     ],
 

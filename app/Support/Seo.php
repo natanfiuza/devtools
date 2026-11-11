@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\ColorPalette;
+use App\Support\Colors\PaletteOgStorage;
 use Illuminate\Http\Request;
 
 /**
@@ -118,6 +120,7 @@ final class Seo
                 'description' => (string) trans('docs.badgeforge.meta.description'),
             ],
             'tools.show', 'tools.show.grouped' => self::toolMeta($request),
+            'colors.palettes.show' => self::paletteMeta($request),
             default => [
                 'title' => (string) config('app.name'),
                 'description' => (string) trans('app.tagline'),
@@ -204,6 +207,104 @@ final class Seo
     }
 
     /**
+     * Metas da pagina publica de uma paleta.
+     *
+     * O titulo e o nome da paleta; a descricao e a do dono quando existe e,
+     * senao, uma frase montada com a contagem de cores e as tags. A paleta e
+     * lida pela mesma regra da rota (publica, ativa e com slug), entao nenhum
+     * dado de paleta privada ou arquivada entra em meta.
+     *
+     * @return array{title: string, description: string}
+     */
+    private static function paletteMeta(Request $request): array
+    {
+        $palette = self::palette($request);
+
+        if ($palette === null) {
+            return [
+                'title' => (string) config('app.name'),
+                'description' => (string) trans('app.tagline'),
+            ];
+        }
+
+        $description = trim((string) $palette->description);
+
+        if ($description === '') {
+            $tags = $palette->tags
+                ->map(static fn ($tag): string => $tag->name)
+                ->implode(', ');
+
+            $key = $tags === '' ? 'colors.meta.description_no_tags' : 'colors.meta.description';
+
+            $description = (string) trans($key, [
+                'count' => (int) $palette->colors_count,
+                'tags' => $tags,
+            ]);
+        }
+
+        return [
+            'title' => $palette->name,
+            'description' => $description,
+        ];
+    }
+
+    /**
+     * A paleta da pagina publica, pela mesma visibilidade da rota.
+     */
+    private static function palette(Request $request): ?ColorPalette
+    {
+        $route = $request->route();
+
+        if ($route?->getName() !== 'colors.palettes.show') {
+            return null;
+        }
+
+        $slug = $route->parameter('slug');
+
+        if (! is_string($slug)) {
+            return null;
+        }
+
+        return ColorPalette::query()
+            ->publiclyVisible()
+            ->with('tags')
+            ->where('slug', $slug)
+            ->first();
+    }
+
+    /**
+     * A imagem OG gerada pelo dono, quando a paleta e publica e o arquivo esta
+     * em disco. Sem ela, a pagina cai na imagem padrao do site.
+     *
+     * @return array{url: string, width: int, height: int, alt: string}|null
+     */
+    private static function paletteImage(Request $request): ?array
+    {
+        $palette = self::palette($request);
+
+        if ($palette === null || ! $palette->hasOg()) {
+            return null;
+        }
+
+        if (! (new PaletteOgStorage)->exists($palette->id)) {
+            return null;
+        }
+
+        $locale = $request->route()?->parameter('locale');
+
+        return [
+            'url' => route('colors.palettes.og', [
+                'locale' => is_string($locale) ? $locale : app()->getLocale(),
+                'slug' => $palette->slug,
+                'v' => $palette->og_version,
+            ]),
+            'width' => (int) config('colors.og.width', 1200),
+            'height' => (int) config('colors.og.height', 630),
+            'alt' => (string) trans('colors.meta.image_alt', ['name' => $palette->name]),
+        ];
+    }
+
+    /**
      * A introducao das paginas legais interpolada como o vue-i18n faz.
      *
      * O Laravel troca `:chave`; o texto de `legal.*.intro` usa `{app}`, que no
@@ -226,6 +327,12 @@ final class Seo
      */
     private static function image(Request $request): array
     {
+        $palette = self::paletteImage($request);
+
+        if ($palette !== null) {
+            return $palette;
+        }
+
         $url = self::imageUrl((string) config('seo.image.file'));
         // A descricao diz o que a imagem mostra: a marca e a frase do site.
         $alt = trans('app.brand').' - '.trans('app.tagline');

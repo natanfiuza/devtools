@@ -4,7 +4,7 @@
 /{locale}/tools/colors/palette-generator
 
 ## Estado
-**Fase 3 implementada** (2026-11-09): escala determinística de 11 tons a partir de uma cor base, contraste por tom, identificação da base, valores convertidos, cópia e exportações (F2); harmonias complementar, análoga, triádica, tetrádica e monocromática em OKLCH e HSL (ADR-121); e extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS com worker, cancelamento e limites configuráveis (ADR-122). Tudo no navegador e sem persistência. Tokens W3C DTCG/Style Dictionary, protótipos e salvar paleta continuam nas fases seguintes.
+**Fase 4 implementada** (2026-11-11): além da escala determinística de 11 tons, das harmonias e da extração de imagem da F2/F3, o gerador agora **salva paletas** (Free 25 / pago ilimitado, com cota sob lock e arquivadas contando — ADR-096, ADR-123), reabre pelo editor com as **cores efetivas persistidas** (sem recalcular) e com os **papéis** claro/escuro gravados, e ganhou a aba **Protótipo** com site/mobile em SVG vetorial e PNG 1x/2x (ADR-126). O anônimo tem rascunho em `sessionStorage` por 24 h e é levado ao login. A OG dinâmica é gerada após o salvamento (ADR-125). Tokens W3C DTCG/Style Dictionary, presets e favoritos no backend continuam na F5.
 
 ## Entrada
 A **cor base** (HEX/HEX8 e demais formatos do picker compacto, com alpha), que alimenta a escala e as harmonias; e, na aba de extração, uma **imagem local** ou uma **URL HTTPS**. A escala é sempre a de 11 tons fixos (ADR-101); 5/7/9/11 pertence só à extração de imagem.
@@ -46,6 +46,15 @@ Todo botão de copiar (formato, base, tom, escala, exportação, harmonia e cor 
 8. A paleta extraída sobrevive à troca de abas e ao "usar como base" e some ao recarregar (só memória).
 9. Nenhuma imagem ou cor sai do navegador e nenhum limite numérico está escrito no cliente.
 
+## Critérios de aceite da Fase 4
+1. “Salvar” autenticado abre o modal (nome, descrição, visibilidade, tags) e cria a paleta; anônimo grava o rascunho e vai ao login, retomando de onde parou.
+2. Escala salva grava a base e os 11 tons efetivos; extraída salva a base escolhida e as 5/7/9/11 cores na ordem de peso, com a origem reduzida a `{kind,label|host}` — nunca imagem, URL completa, blob ou percentual.
+3. Reabrir a paleta mostra exatamente as cores gravadas (escala congelada); a primeira troca de base descongela e recalcula.
+4. O editor tem as mesmas abas do gerador e a aba Protótipo (site/mobile × claro/escuro), com os 8 papéis persistidos e editáveis.
+5. Falhar a geração da OG não desfaz o salvamento; o aviso e o botão “Gerar imagem” aparecem.
+6. Paleta arquivada abre somente leitura até ser restaurada.
+7. Toda string visível vem do i18n nos 5 idiomas e o único tráfego de ferramenta é o das ações de conta (salvar, OG, tags).
+
 ## Escalas
 - Sempre os 11 tons fixos: `50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950` (ADR-101).
 - A escolha de 5, 7, 9 ou 11 cores pertence **somente** à extração de imagem (`import-export.md`, ADR-099), nunca à escala do gerador.
@@ -68,5 +77,9 @@ Todo botão de copiar (formato, base, tom, escala, exportação, harmonia e cor 
 ## Exportações
 HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, tokens W3C DTCG (importáveis por Tokens Studio e Figma Variables), Style Dictionary, código.
 
-## Protótipos
-Site e mobile, light/dark, papéis editáveis, exportar PNG 1x/2x e SVG.
+## Protótipos (Fase 4)
+
+- Aba no gerador (e no editor de paleta salva): site 1200×900 (header, hero, botões, links, cards, formulário, footer) e mobile 390×844 (tabs no topo, **sem** bottom nav), em tema claro e escuro.
+- Renderizador SVG vetorial próprio e determinístico; o PNG 1x/2x é a rasterização do **mesmo** SVG, com a fonte embutida só na exportação (ADR-126).
+- 8 papéis fixos (`primary`, `secondary`, `accent`, `background`, `surface`, `text`, `text_muted`, `border`) por tema, editáveis com “Restaurar padrões” e persistidos na paleta; site e mobile compartilham os papéis. Padrões da escala: 600/700/400/50/100/950/600/200 (claro) e 600/700/400/950/900/50/400/800 (escuro); da extraída: as 3 primeiras cores por peso e neutros em OKLCH a partir da base.
+- Exportar SVG e PNG 1x/2x baixa localmente; nenhuma captura de tela e nenhuma dependência nova.

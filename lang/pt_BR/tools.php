@@ -258,12 +258,14 @@ return [
             ],
             'results_title' => 'Cores dominantes · {count}',
             'percentage' => '{value}% dos pixels',
+            'percentage_unknown' => 'peso não salvo',
             'copy' => 'Copiar',
             'copied' => 'Copiado: {value}',
             'use_as_base' => 'Usar como base',
             'use_file' => 'Usar um arquivo local',
             'insufficient' => 'A imagem tem menos de {requested} cores distintas; foram encontradas {found}.',
             'algorithm_version' => 'Algoritmo v{version}',
+            'source_unknown' => 'origem não registrada',
             'source_file' => 'Arquivo: {name}',
             'source_url' => 'Imagem de {host}',
             'errors' => [
@@ -338,6 +340,11 @@ return [
 
         'state' => [
             'stale' => 'A cor digitada não é válida; a escala anterior continua na tela.',
+        ],
+
+        'save' => [
+            'action' => 'Salvar paleta',
+            'draft_restored' => 'Sua paleta voltou. Revise e salve.',
         ],
     ],
 

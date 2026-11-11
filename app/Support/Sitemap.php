@@ -2,7 +2,9 @@
 
 namespace App\Support;
 
+use App\Models\ColorPalette;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Sitemap do site (docs/SPEC.md secao 7).
@@ -58,6 +60,48 @@ final class Sitemap
             [$name, $params] = Tools::routeFor($tool);
 
             $urls = [...$urls, ...self::entries($name, $params)];
+        }
+
+        return [...$urls, ...self::palettes()];
+    }
+
+    /**
+     * Paletas publicas ativas, em todos os idiomas.
+     *
+     * A mesma URL responde em qualquer locale (o slug e global); cada entrada
+     * leva as cinco irmas, como as demais paginas. O limite vem da config para
+     * que o sitemap nao cresca sem teto enquanto o acervo for pequeno. A tabela
+     * pode ainda nao existir durante o deploy: nesse caso a lista e vazia, e
+     * nunca um 500.
+     *
+     * @return list<array{loc: string, alternates: array<string, string>, xdefault: string}>
+     */
+    private static function palettes(): array
+    {
+        if (! Schema::hasTable('color_palettes')) {
+            return [];
+        }
+
+        $limit = (int) config('colors.palettes.sitemap_limit', 500);
+
+        if ($limit <= 0) {
+            return [];
+        }
+
+        $urls = [];
+
+        $palettes = ColorPalette::query()
+            ->publiclyVisible()
+            ->orderByDesc('updated_at')
+            ->limit($limit)
+            ->get(['slug']);
+
+        foreach ($palettes as $palette) {
+            if (! is_string($palette->slug) || $palette->slug === '') {
+                continue;
+            }
+
+            $urls = [...$urls, ...self::entries('colors.palettes.show', ['slug' => $palette->slug])];
         }
 
         return $urls;

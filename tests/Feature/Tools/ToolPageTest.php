@@ -96,8 +96,12 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->component('tools/Show')
             ->where('slug', 'palette-generator')
             ->where('seo.noindex', false)
-            // Os tetos da importacao de imagem saem de config/tools.php.
+            // Os tetos da importacao de imagem saem de config/tools.php; o
+            // modal de salvar recebe os limites e, para o visitante sem conta,
+            // nenhuma tag.
             ->has('toolProps.image')
+            ->has('toolProps.palette')
+            ->where('toolProps.palette.tags', [])
         );
 
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();

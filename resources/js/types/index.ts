@@ -2,6 +2,7 @@ export * from './account';
 export * from './admin';
 export * from './analytics';
 export * from './auth';
+export * from './colors';
 export * from './donations';
 export * from './home';
 export * from './i18n';

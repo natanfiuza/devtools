@@ -6,12 +6,14 @@ import {
     LayoutGrid,
     Palette,
     ShieldCheck,
+    SwatchBook,
     UserRound,
 } from '@lucide/vue';
 import type { ComputedRef } from 'vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dashboard } from '@/routes';
+import { index as palettesIndex } from '@/routes/dashboard/colors/palettes';
 import { index as apiTokens } from '@/routes/api-tokens';
 import { edit as editAppearance } from '@/routes/appearance';
 import { badgeforge, billing, history } from '@/routes/dashboard';
@@ -61,6 +63,11 @@ export function useAccountNav(): ComputedRef<AccountNavGroup[]> {
                     title: t('account.nav.badgeforge'),
                     href: badgeforge.url(),
                     icon: BadgeCheck,
+                },
+                {
+                    title: t('account.nav.palettes'),
+                    href: palettesIndex.url(),
+                    icon: SwatchBook,
                 },
             ],
         },

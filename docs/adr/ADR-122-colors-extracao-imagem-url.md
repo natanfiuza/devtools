@@ -89,3 +89,6 @@ Nenhum desses números é escrito no cliente.
 - **Aceitar `http:` ou userinfo em URL**: mistura de conteúdo ativo e credenciais na URL; o caminho é HTTPS puro.
 - **Reusar o cliente de worker genérico**: o fallback reexecutaria um buffer já transferido; o cliente dedicado evita a corrupção.
 - **Persistir a paleta extraída em `localStorage`**: fora do escopo da F3 e incompatível com o modelo de paletas da F4.
+
+## Emenda 2026-11-11
+A F4 persiste a extração como **cores efetivas** (ADR-123): `colors.items` com `{hex}` na ordem de peso e `colors_count = items.length`; `base` é uma das cores; `source` guarda só `{kind:'file',label}` ou `{kind:'url',host}`; `algorithm_version` (1) fica informativo e abrir a paleta **não** re-quantiza a imagem. Os `roles` padrão da extraída derivam da base em OKLCH e são gravados junto (ADR-126). Nenhuma imagem, URL completa, blob ou percentual é persistido; o rascunho anônimo em `sessionStorage` guarda só base, tipo, cores e aba, por 24 h.

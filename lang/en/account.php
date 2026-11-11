@@ -9,6 +9,7 @@ return [
         'history' => 'History',
         'billing' => 'Invoices',
         'badgeforge' => 'BadgeForge',
+        'palettes' => 'My palettes',
         'back_to_site' => 'Back to site',
     ],
 

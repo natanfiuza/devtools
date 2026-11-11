@@ -7,7 +7,7 @@
 - Pesos e percentuais são recalculados sobre os pixels visíveis (alpha ≥ 0,5); cores ordenadas por peso decrescente.
 - Imagem com menos cores que o pedido devolve as existentes com aviso; imagem toda transparente é erro.
 - Limites de bytes, lado, pixels, tamanho de análise e timeout vêm de `config/tools.php` (`limits.colors_image`).
-- Permitir salvar direto: **Fase 4** (a paleta extraída fica em memória, pronta para o botão Salvar).
+- Permitir salvar direto: **implementado na Fase 4** — a paleta extraída é salva como `kind=extracted` com base, 5/7/9/11 cores na ordem de peso e origem `{kind,label|host}`, mesmo com `sufficient: false` (com aviso); reabrir nunca re-quantiza (ADR-122, emenda; ADR-123).
 - Importar por URL de imagem: só HTTPS, CORS direto na origem, `content-type` raster e corte por stream em `max_bytes`; bloqueio de CORS oferece o arquivo local (ADR-122).
 
 ## JSON
@@ -18,6 +18,5 @@
 ## Exportação
 - Individual por cor.
 - Paleta completa.
-- Protótipo PNG 1x/2x.
-- Protótipo SVG.
+- Protótipo SVG vetorial (fonte única) e PNG 1x/2x rasterizado do **mesmo** SVG, com a fonte embutida na exportação — implementado na Fase 4 (ADR-126).
 - Paleta como imagem tipográfica (horizontal, vertical, card).

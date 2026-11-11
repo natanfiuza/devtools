@@ -40,6 +40,9 @@ export function resolveLayout(name: string): unknown {
         // casca da home, sem sidebar nem barra de conta.
         case name.startsWith('tools/'):
             return PublicLayout;
+        // A pagina publica de uma paleta (F4) tambem e indexavel e sem autor.
+        case name.startsWith('colors/'):
+            return PublicLayout;
         case name.startsWith('auth/'):
             return AuthLayout;
         // O painel tem layout proprio: nao herda o header publico nem a

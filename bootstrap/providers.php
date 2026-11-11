@@ -4,6 +4,7 @@ use App\Providers\AiServiceProvider;
 use App\Providers\ApiServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\BadgeForgeServiceProvider;
+use App\Providers\ColorsServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\PaymentsServiceProvider;
 
@@ -14,4 +15,5 @@ return [
     ApiServiceProvider::class,
     PaymentsServiceProvider::class,
     BadgeForgeServiceProvider::class,
+    ColorsServiceProvider::class,
 ];

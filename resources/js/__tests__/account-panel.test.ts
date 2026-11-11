@@ -105,6 +105,7 @@ const traducoes = {
             history: 'HISTORICO',
             billing: 'FATURAS',
             badgeforge: 'BADGEFORGE',
+            palettes: 'MINHAS_PALETAS',
             back_to_site: 'VOLTAR_AO_SITE',
         },
         history: {
@@ -286,7 +287,7 @@ describe('navegacao da conta', () => {
         expect(
             secoes.map((grupo) => grupo.findAll('a').map((a) => a.text())),
         ).toEqual([
-            ['VISAO_GERAL', 'HISTORICO', 'FATURAS', 'BADGEFORGE'],
+            ['VISAO_GERAL', 'HISTORICO', 'FATURAS', 'BADGEFORGE', 'MINHAS_PALETAS'],
             ['PERFIL', 'SEGURANCA', 'APARENCIA', 'TOKENS_DE_API'],
         ]);
 
@@ -300,6 +301,7 @@ describe('navegacao da conta', () => {
             '/dashboard/history',
             '/dashboard/billing',
             '/dashboard/badgeforge',
+            '/dashboard/colors/palettes',
             '/settings/profile',
             '/settings/security',
             '/settings/appearance',
@@ -326,6 +328,7 @@ describe('navegacao da conta', () => {
         ['/dashboard/history', 'HISTORICO'],
         ['/dashboard/billing', 'FATURAS'],
         ['/dashboard/badgeforge', 'BADGEFORGE'],
+        ['/dashboard/colors/palettes', 'MINHAS_PALETAS'],
         ['/settings/profile', 'PERFIL'],
         ['/settings/security', 'SEGURANCA'],
         ['/settings/appearance', 'APARENCIA'],
@@ -357,7 +360,13 @@ describe('navegacao da conta', () => {
             grupos(wrapper)[0]
                 ?.findAll('a')
                 .map((a) => a.text()),
-        ).toEqual(['VISAO_GERAL', 'HISTORICO', 'FATURAS', 'BADGEFORGE']);
+        ).toEqual([
+            'VISAO_GERAL',
+            'HISTORICO',
+            'FATURAS',
+            'BADGEFORGE',
+            'MINHAS_PALETAS',
+        ]);
     });
 
     it('mantem as faturas abertas quando a lista muda de pagina', () => {

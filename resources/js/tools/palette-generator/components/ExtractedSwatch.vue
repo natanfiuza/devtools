@@ -13,6 +13,10 @@ import type { ExtractedColor } from '../lib/extract';
  *
  * O percentual e o peso real (pixels visiveis atribuidos a cor), nao uma
  * estimativa; a barra abaixo do quadrado repete a informacao em tamanho.
+ *
+ * Paleta salva nao guarda peso (ADR-122); ao reabrir no editor o percentual vem
+ * zerado, e zero nao existe na extracao de verdade, entao a tela diz que o peso
+ * nao foi salvo em vez de inventar uma fatia.
  */
 
 const props = defineProps<{
@@ -28,9 +32,11 @@ const { copied, confirm } = useCopyConfirmation();
 
 const colorStyle = computed(() => ({ backgroundColor: cssColor(props.color.rgba) }));
 const percentage = computed(() =>
-    t('tools.palette-generator.extraction.percentage', {
-        value: props.color.percentage,
-    }),
+    props.color.percentage <= 0
+        ? t('tools.palette-generator.extraction.percentage_unknown')
+        : t('tools.palette-generator.extraction.percentage', {
+              value: props.color.percentage,
+          }),
 );
 const label = computed(() => `${props.color.hex} (${percentage.value})`);
 
