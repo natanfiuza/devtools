@@ -90,6 +90,10 @@ return [
                 'label' => 'Opacidade',
             ],
 
+            'preview' => [
+                'eyedropper' => 'Conta-gotas do ecrã',
+            ],
+
             'channels' => [
                 'title' => 'Canais',
                 'rgb' => 'RGB',
