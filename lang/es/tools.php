@@ -90,6 +90,10 @@ return [
                 'label' => 'Opacidad',
             ],
 
+            'preview' => [
+                'eyedropper' => 'Cuentagotas de pantalla',
+            ],
+
             'channels' => [
                 'title' => 'Canales',
                 'rgb' => 'RGB',

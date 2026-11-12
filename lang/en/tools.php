@@ -90,6 +90,10 @@ return [
                 'label' => 'Opacity',
             ],
 
+            'preview' => [
+                'eyedropper' => 'Screen eyedropper',
+            ],
+
             'channels' => [
                 'title' => 'Channels',
                 'rgb' => 'RGB',

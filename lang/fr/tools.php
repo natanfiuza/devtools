@@ -90,6 +90,10 @@ return [
                 'label' => 'Opacité',
             ],
 
+            'preview' => [
+                'eyedropper' => 'Pipette de l’écran',
+            ],
+
             'channels' => [
                 'title' => 'Canaux',
                 'rgb' => 'RGB',
