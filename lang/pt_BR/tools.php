@@ -122,6 +122,43 @@ return [
                 'name_hint' => 'O nome CSS é a cor mais próxima; pode variar um pouco do código.',
             ],
         ],
+
+        'library' => [
+            'history' => [
+                'title' => 'Histórico',
+                'description' => [
+                    'account' => 'As cores que você aplicou por último, salvas na sua conta e compartilhadas com o gerador.',
+                    'local' => 'As últimas cores que você aplicou, só neste navegador. Entre na conta para guardá-las.',
+                ],
+                'clear' => 'Limpar',
+                'empty' => 'Nenhuma cor aplicada ainda.',
+            ],
+
+            'favorites' => [
+                'title' => 'Favoritos',
+                'description' => [
+                    'account' => 'Cores salvas na sua conta, compartilhadas entre o seletor de cor e o gerador de paletas.',
+                    'local' => 'Cores guardadas só neste navegador.',
+                ],
+                'add' => 'Favoritar cor atual',
+                'remove' => 'Remover dos favoritos',
+                'clear' => 'Limpar',
+                'empty' => 'Nenhum favorito ainda.',
+            ],
+
+            'import' => [
+                'button' => 'Importar histórico do navegador ({count})',
+                'title' => 'Importar histórico do navegador',
+                'description' => 'Enviar {count} cor(es) salvas neste navegador para a sua conta. A lista local é limpa após a importação e duplicatas são ignoradas.',
+                'confirm' => 'Importar',
+                'cancel' => 'Cancelar',
+                'busy' => 'Importando…',
+                'success' => 'Importadas {count} cor(es) para a sua conta.',
+                'error' => 'A importação falhou. O histórico local foi mantido; tente novamente.',
+            ],
+
+            'load_more' => 'Carregar mais',
+        ],
     ],
 
     'categories' => [
@@ -185,22 +222,6 @@ return [
             'description' => 'Dez versões mais claras, em OKLab, com a mesma opacidade.',
         ],
 
-        'history' => [
-            'title' => 'Histórico',
-            'description' => 'As últimas cores que você aplicou, só neste navegador.',
-            'clear' => 'Limpar',
-            'empty' => 'Nenhuma cor aplicada ainda.',
-        ],
-
-        'favorites' => [
-            'title' => 'Favoritos',
-            'description' => 'Cores guardadas só neste navegador.',
-            'add' => 'Favoritar cor atual',
-            'remove' => 'Remover dos favoritos',
-            'clear' => 'Limpar',
-            'empty' => 'Nenhum favorito ainda.',
-        ],
-
         'tabs' => [
             'contrast' => 'Contraste',
             'shades' => 'Tons',
@@ -218,6 +239,7 @@ return [
             'scale' => 'Escala',
             'harmonies' => 'Harmonias',
             'extraction' => 'Extração',
+            'library' => 'Biblioteca',
         ],
 
         'harmonies' => [

@@ -33,6 +33,14 @@ it('entrega os limites de imagem e de paleta da configuracao', function () {
             'tagNameMaxLength' => 30,
             'tags' => [],
         ],
+        'library' => [
+            'authenticated' => false,
+            'anonymousHistoryLimit' => 20,
+            'anonymousFavoritesLimit' => 50,
+            'historyPerPage' => 100,
+            'favoritesPerPage' => 100,
+            'importBatch' => 200,
+        ],
     ]);
 });
 
@@ -47,6 +55,11 @@ it('respeita os limites configurados', function () {
         'colors.palettes.description_max_length' => 250,
         'colors.tags.per_palette' => 4,
         'colors.tags.name_max_length' => 12,
+        'colors.library.anonymous_history_limit' => 7,
+        'colors.library.anonymous_favorites_limit' => 9,
+        'colors.library.history_per_page' => 30,
+        'colors.library.favorites_per_page' => 31,
+        'colors.library.import_batch' => 32,
     ]);
 
     $props = ColorsToolProps::for();
@@ -64,6 +77,14 @@ it('respeita os limites configurados', function () {
         'tagsPerPalette' => 4,
         'tagNameMaxLength' => 12,
         'tags' => [],
+    ]);
+    expect($props['library'])->toBe([
+        'authenticated' => false,
+        'anonymousHistoryLimit' => 7,
+        'anonymousFavoritesLimit' => 9,
+        'historyPerPage' => 30,
+        'favoritesPerPage' => 31,
+        'importBatch' => 32,
     ]);
 });
 
@@ -101,4 +122,11 @@ it('entrega as tags da conta na ordem global do usuario', function () {
         ['id' => $first->id, 'name' => 'web'],
         ['id' => $second->id, 'name' => 'brand'],
     ]);
+});
+
+it('marca a biblioteca como da conta quando ha usuario', function () {
+    $user = User::factory()->create();
+
+    expect(ColorsToolProps::library($user)['authenticated'])->toBeTrue()
+        ->and(ColorsToolProps::library()['authenticated'])->toBeFalse();
 });

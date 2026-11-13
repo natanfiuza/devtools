@@ -4,8 +4,9 @@ import type { Rgba } from '@/lib/color';
 /**
  * Biblioteca local do picker (ADR-118).
  *
- * Historico e favoritos vivem so no `localStorage`, com chave versionada e
- * limite de 50 cada. A chave guardada e a cor canonica (`#rrggbbaa`, ou
+ * Historico e favoritos vivem so no `localStorage` para o anonimo, com chave
+ * versionada. O historico anonimo foi reduzido a 20 na F5 (ADR-132); os
+ * favoritos continuam em 50. A chave guardada e a cor canonica (`#rrggbbaa`, ou
  * `transparent`), entao `#ff0000` e `#ff0000ff` sao a mesma entrada.
  *
  * Toda leitura valida o formato e todo acesso e protegido: `localStorage`
@@ -13,7 +14,7 @@ import type { Rgba } from '@/lib/color';
  * quebrar a tool.
  */
 
-export const HISTORY_LIMIT = 50;
+export const HISTORY_LIMIT = 20;
 export const FAVORITES_LIMIT = 50;
 
 export const STORAGE_KEYS = {
@@ -27,6 +28,20 @@ export interface ColorStorageLike {
     getItem(key: string): string | null;
     setItem(key: string, value: string): void;
 }
+
+/**
+ * Tetos locais. O anonimo tem historico menor (F5, ADR-132); os numeros
+ * chegam do servidor e estes defaults so valem em teste/SSR.
+ */
+export interface ColorStorageLimits {
+    history: number;
+    favorites: number;
+}
+
+const DEFAULT_LIMITS: ColorStorageLimits = {
+    history: HISTORY_LIMIT,
+    favorites: FAVORITES_LIMIT,
+};
 
 export interface ColorLibrary {
     readHistory(): string[];
@@ -110,9 +125,10 @@ function writeKeys(
 
 export function createColorLibrary(
     storage: ColorStorageLike | null,
+    limits: ColorStorageLimits = DEFAULT_LIMITS,
 ): ColorLibrary {
-    let history = readKeys(storage, STORAGE_KEYS.history, HISTORY_LIMIT);
-    let favorites = readKeys(storage, STORAGE_KEYS.favorites, FAVORITES_LIMIT);
+    let history = readKeys(storage, STORAGE_KEYS.history, limits.history);
+    let favorites = readKeys(storage, STORAGE_KEYS.favorites, limits.favorites);
 
     function remember(keys: string[], color: Rgba, limit: number): string[] {
         const key = canonicalKey(color);
@@ -125,14 +141,14 @@ export function createColorLibrary(
         readFavorites: () => [...favorites],
 
         addHistory(color) {
-            history = remember(history, color, HISTORY_LIMIT);
+            history = remember(history, color, limits.history);
             writeKeys(storage, STORAGE_KEYS.history, history);
 
             return [...history];
         },
 
         addFavorite(color) {
-            favorites = remember(favorites, color, FAVORITES_LIMIT);
+            favorites = remember(favorites, color, limits.favorites);
             writeKeys(storage, STORAGE_KEYS.favorites, favorites);
 
             return [...favorites];

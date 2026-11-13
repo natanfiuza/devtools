@@ -4,6 +4,7 @@ import { Plus, Tags } from '@lucide/vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import DeletePaletteDialog from '@/components/colors/DeletePaletteDialog.vue';
+import FavoritePaletteCard from '@/components/colors/FavoritePaletteCard.vue';
 import PaletteCard from '@/components/colors/PaletteCard.vue';
 import PalettePagination from '@/components/colors/PalettePagination.vue';
 import TagManagerDialog from '@/components/colors/TagManagerDialog.vue';
@@ -21,16 +22,20 @@ import palettesRoutes from '@/routes/dashboard/colors/palettes';
 import type {
     PaletteRow,
     PaletteSort,
+    PaletteTab,
     PalettesIndexProps,
 } from '@/types/colors';
 
 /**
- * Minhas Paletas (F4, ADR-104/ADR-109).
+ * Minhas Paletas (F4, ADR-104/ADR-109; F5, ADR-128).
  *
  * Busca, filtro e ordenacao sao do servidor: cada mudanca refaz a visita com
  * `preserveState` e `replace`, entao a query string conta a historia da tela e
  * o voltar do navegador funciona. A busca espera 300 ms; os selects vao na
  * hora. A cota aparece no topo porque arquivadas continuam ocupando vaga.
+ *
+ * A aba Favoritas tambem e do servidor (`?tab=favorites`): so paletas publicas
+ * de outras contas, paginadas, sem os filtros da aba "Minhas paletas".
  */
 
 const props = defineProps<PalettesIndexProps>();
@@ -40,6 +45,7 @@ const { t } = useI18n();
 /** `all` no lugar de vazio: o Select do reka-ui trata "" como sem valor. */
 const ALL = 'all';
 
+const tab = ref<PaletteTab>(props.tab);
 const search = ref(props.filters.q);
 const status = ref(props.filters.status);
 const tag = ref(props.filters.tag ?? ALL);
@@ -53,12 +59,20 @@ let timer = 0;
 function query(
     overrides: Partial<Record<string, string | number | null>>,
 ): Record<string, string | number> {
+    const filters: Record<string, string | null> =
+        tab.value === 'favorites'
+            ? {}
+            : {
+                  q: search.value.trim(),
+                  status: status.value,
+                  tag: tag.value === ALL ? null : tag.value,
+                  sort: sort.value,
+                  direction: direction.value,
+              };
+
     const values: Record<string, string | number | null> = {
-        q: search.value.trim(),
-        status: status.value,
-        tag: tag.value === ALL ? null : tag.value,
-        sort: sort.value,
-        direction: direction.value,
+        tab: tab.value === 'favorites' ? 'favorites' : null,
+        ...filters,
         ...overrides,
     };
 
@@ -83,11 +97,12 @@ let lastVisited = JSON.stringify(query({}));
 
 function visit(
     overrides: Partial<Record<string, string | number | null>> = {},
+    only?: string[],
 ): void {
     const values = query(overrides);
     const key = JSON.stringify(values);
 
-    if (key === lastVisited) {
+    if (key === lastVisited && only === undefined) {
         return;
     }
 
@@ -97,6 +112,7 @@ function visit(
         preserveState: true,
         preserveScroll: true,
         replace: true,
+        only,
     });
 }
 
@@ -157,6 +173,36 @@ function goToPage(page: number): void {
     visit({ page });
 }
 
+/** Paginador da aba visivel; o das favoritas so vem quando ela esta ativa. */
+const activePaginator = computed(() =>
+    tab.value === 'favorites'
+        ? (props.favorites ?? props.palettes)
+        : props.palettes,
+);
+
+function setTab(value: PaletteTab): void {
+    if (tab.value === value) {
+        return;
+    }
+
+    tab.value = value;
+    window.clearTimeout(timer);
+    visit({ page: 1 });
+}
+
+/** Remover um favorito recarrega a aba; pagina que esvaziou volta uma. */
+function onFavoriteRemoved(): void {
+    const current = props.favorites;
+    const page =
+        current !== null &&
+        current.data.length === 1 &&
+        current.current_page > 1
+            ? current.current_page - 1
+            : (current?.current_page ?? 1);
+
+    visit({ page }, ['favorites']);
+}
+
 function clearFilters(): void {
     search.value = '';
     status.value = 'active';
@@ -187,7 +233,10 @@ const SORTS: PaletteSort[] = [
         <h2 class="text-xl font-semibold">
           {{ t('colors.list.title') }}
         </h2>
-        <p class="mt-1 text-sm text-muted-foreground">
+        <p
+          v-if="tab === 'mine'"
+          class="mt-1 text-sm text-muted-foreground"
+        >
           {{ quotaText }}
         </p>
       </div>
@@ -217,7 +266,45 @@ const SORTS: PaletteSort[] = [
       </div>
     </header>
 
+    <nav
+      class="flex gap-1 border-b border-border"
+      role="tablist"
+      data-test="palettes-tabs"
+    >
+      <button
+        type="button"
+        role="tab"
+        class="-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors"
+        :class="
+          tab === 'mine'
+            ? 'border-primary text-foreground'
+            : 'border-transparent text-muted-foreground hover:text-foreground'
+        "
+        :aria-selected="tab === 'mine'"
+        data-test="palettes-tab-mine"
+        @click="setTab('mine')"
+      >
+        {{ t('colors.favorites.tab_mine') }}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors"
+        :class="
+          tab === 'favorites'
+            ? 'border-primary text-foreground'
+            : 'border-transparent text-muted-foreground hover:text-foreground'
+        "
+        :aria-selected="tab === 'favorites'"
+        data-test="palettes-tab-favorites"
+        @click="setTab('favorites')"
+      >
+        {{ t('colors.favorites.tab_favorites') }}
+      </button>
+    </nav>
+
     <section
+      v-if="tab === 'mine'"
       class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
       data-test="palettes-filters"
     >
@@ -347,58 +434,99 @@ const SORTS: PaletteSort[] = [
       </div>
     </section>
 
-    <div
-      v-if="palettes.data.length === 0"
-      class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border px-6 py-10 text-center"
-      data-test="palettes-empty"
-    >
-      <p class="text-base font-medium">
-        {{ hasFilters ? t('colors.list.empty_search') : t('colors.list.empty_title') }}
-      </p>
-      <p
-        v-if="!hasFilters"
-        class="max-w-md text-sm text-muted-foreground"
+    <template v-if="tab === 'mine'">
+      <div
+        v-if="palettes.data.length === 0"
+        class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border px-6 py-10 text-center"
+        data-test="palettes-empty"
       >
-        {{ t('colors.list.empty_description') }}
-      </p>
-      <Button
-        v-if="hasFilters"
-        variant="outline"
-        size="sm"
-        data-test="palettes-empty-clear"
-        @click="clearFilters"
-      >
-        {{ t('colors.list.clear') }}
-      </Button>
-      <Button
-        v-else
-        as-child
-        size="sm"
-      >
-        <Link :href="palettesRoutes.create.url()">
-          {{ t('colors.list.empty_cta') }}
-        </Link>
-      </Button>
-    </div>
+        <p class="text-base font-medium">
+          {{ hasFilters ? t('colors.list.empty_search') : t('colors.list.empty_title') }}
+        </p>
+        <p
+          v-if="!hasFilters"
+          class="max-w-md text-sm text-muted-foreground"
+        >
+          {{ t('colors.list.empty_description') }}
+        </p>
+        <Button
+          v-if="hasFilters"
+          variant="outline"
+          size="sm"
+          data-test="palettes-empty-clear"
+          @click="clearFilters"
+        >
+          {{ t('colors.list.clear') }}
+        </Button>
+        <Button
+          v-else
+          as-child
+          size="sm"
+        >
+          <Link :href="palettesRoutes.create.url()">
+            {{ t('colors.list.empty_cta') }}
+          </Link>
+        </Button>
+      </div>
 
-    <ul
-      v-else
-      class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-      data-test="palettes-list"
-    >
-      <li
-        v-for="palette in palettes.data"
-        :key="palette.id"
+      <ul
+        v-else
+        class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        data-test="palettes-list"
       >
-        <PaletteCard
-          :palette="palette"
-          @delete="deleting = $event"
-        />
-      </li>
-    </ul>
+        <li
+          v-for="palette in palettes.data"
+          :key="palette.id"
+        >
+          <PaletteCard
+            :palette="palette"
+            @delete="deleting = $event"
+          />
+        </li>
+      </ul>
+    </template>
+
+    <template v-else>
+      <div
+        v-if="(favorites?.data.length ?? 0) === 0"
+        class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border px-6 py-10 text-center"
+        data-test="favorites-empty"
+      >
+        <p class="text-base font-medium">
+          {{ t('colors.favorites.empty_title') }}
+        </p>
+        <p class="max-w-md text-sm text-muted-foreground">
+          {{ t('colors.favorites.empty_description') }}
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          data-test="favorites-empty-cta"
+          @click="setTab('mine')"
+        >
+          {{ t('colors.favorites.empty_cta') }}
+        </Button>
+      </div>
+
+      <ul
+        v-else
+        class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        data-test="favorites-list"
+      >
+        <li
+          v-for="entry in favorites?.data ?? []"
+          :key="entry.id"
+        >
+          <FavoritePaletteCard
+            :palette="entry"
+            @removed="onFavoriteRemoved"
+          />
+        </li>
+      </ul>
+    </template>
 
     <PalettePagination
-      :paginator="palettes"
+      :paginator="activePaginator"
       @select="goToPage"
     />
 

@@ -5,66 +5,75 @@ import AlphaSlider from '@/components/colors/AlphaSlider.vue';
 import ChannelSliders from '@/components/colors/ChannelSliders.vue';
 import ColorArea from '@/components/colors/ColorArea.vue';
 import ColorInputField from '@/components/colors/ColorInputField.vue';
+import FavoritesPanel from '@/components/colors/FavoritesPanel.vue';
 import FormatsList from '@/components/colors/FormatsList.vue';
+import HistoryPanel from '@/components/colors/HistoryPanel.vue';
 import HueSlider from '@/components/colors/HueSlider.vue';
 import { opaqueColor } from '@/components/colors/lib/applyHex';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useColorState } from '@/composables/useColorState';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
-import { canonicalKey, parseColor, type Rgba } from '@/lib/color';
+import type { Rgba } from '@/lib/color';
+import { useColorLibrary } from '@/lib/colors/library';
+import type { ColorLibraryToolProps } from '@/types/colors';
 import ColorPreview from './components/ColorPreview.vue';
 import ContrastPanel from './components/ContrastPanel.vue';
-import FavoritesPanel from './components/FavoritesPanel.vue';
-import HistoryPanel from './components/HistoryPanel.vue';
 import ShadesTintsPanel from './components/ShadesTintsPanel.vue';
-import { browserStorage, createColorLibrary } from './lib/storage';
 
 /**
  * HTML Color Picker (`/{locale}/tools/colors/html-color-picker`).
  *
  * Uma unica porta de escrita (`useColorState`) alimenta a area 2D, os sliders,
  * o campo de texto e a previa; o historico so recebe cores finalizadas
- * (pointerup/blur/Enter), nunca cada quadro do arraste. Tudo roda no navegador:
- * a unica persistencia e o `localStorage` local.
+ * (pointerup/blur/Enter), nunca cada quadro do arraste. O anonimo guarda
+ * historico e favoritos no `localStorage`; quem esta logado usa a biblioteca
+ * da conta, compartilhada com o gerador (F5, ADR-127).
  */
 
 const DEFAULT_COLOR: Rgba = { r: 124, g: 58, b: 237, a: 1 };
+
+const props = defineProps<{
+    /** Biblioteca entregue pelo servidor via `ToolProps` (F5). */
+    library?: ColorLibraryToolProps;
+}>();
 
 const { t } = useI18n();
 const copyFeedback = useCopyFeedback();
 const feedback = copyFeedback.message;
 
-const library = createColorLibrary(browserStorage());
+const {
+    historyColors,
+    favoriteColors,
+    importable,
+    loadingMore,
+    hasMoreHistory,
+    hasMoreFavorites,
+    load,
+    loadMoreHistory,
+    loadMoreFavorites,
+    addHistory,
+    isFavorite: isLibraryFavorite,
+    toggleFavorite,
+    clearHistory,
+    clearFavorites,
+    importLocalHistory,
+    saveLast,
+    readLast,
+} = useColorLibrary(props.library);
 
-const historyKeys = ref<string[]>([]);
-const favoriteKeys = ref<string[]>([]);
+const importing = ref(false);
 
 const state = useColorState({
     initial: DEFAULT_COLOR,
     onFinalize: (color) => {
-        historyKeys.value = library.addHistory(color);
-        library.saveLast(color);
+        addHistory(color);
+        saveLast(color);
     },
 });
 
 const { rgba, hsv, hsl, text, error, gamutSource, outOfGamut } = state;
 
-const isFavorite = computed(() =>
-    favoriteKeys.value.includes(canonicalKey(rgba.value)),
-);
-
-function parseKey(key: string): Rgba | null {
-    const result = parseColor(key);
-
-    return result.ok ? result.color.rgba : null;
-}
-
-function colorsFromKeys(keys: string[]): Rgba[] {
-    return keys.map(parseKey).filter((color): color is Rgba => color !== null);
-}
-
-const historyColors = computed(() => colorsFromKeys(historyKeys.value));
-const favoriteColors = computed(() => colorsFromKeys(favoriteKeys.value));
+const isFavorite = computed(() => isLibraryFavorite(rgba.value));
 
 function applyColor(color: Rgba): void {
     state.setColor(color);
@@ -82,29 +91,36 @@ function applyPicked(hex: string): void {
     state.finalize();
 }
 
-function toggleFavorite(): void {
-    favoriteKeys.value = isFavorite.value
-        ? library.removeFavorite(rgba.value)
-        : library.addFavorite(rgba.value);
+function toggleCurrentFavorite(): void {
+    toggleFavorite(rgba.value);
 }
 
-function clearHistory(): void {
-    historyKeys.value = library.clearHistory();
+async function importHistory(): Promise<void> {
+    if (importing.value) {
+        return;
+    }
+
+    importing.value = true;
+
+    try {
+        const count = await importLocalHistory();
+
+        feedback.value = t('tools.shared.library.import.success', { count });
+    } catch {
+        feedback.value = t('tools.shared.library.import.error');
+    } finally {
+        importing.value = false;
+    }
 }
 
-function clearFavorites(): void {
-    favoriteKeys.value = library.clearFavorites();
-}
-
-onMounted(() => {
-    const last = library.readLast();
+onMounted(async () => {
+    const last = readLast();
 
     if (last !== null) {
         state.setColor(last);
     }
 
-    historyKeys.value = library.readHistory();
-    favoriteKeys.value = library.readFavorites();
+    await load();
 });
 </script>
 
@@ -203,14 +219,25 @@ onMounted(() => {
             <FavoritesPanel
               :colors="favoriteColors"
               :is-favorite="isFavorite"
+              :authenticated="props.library?.authenticated === true"
+              :more="hasMoreFavorites"
+              :loading-more="loadingMore"
               @apply="applyColor"
-              @toggle="toggleFavorite"
+              @toggle="toggleCurrentFavorite"
               @clear="clearFavorites"
+              @more="loadMoreFavorites"
             />
             <HistoryPanel
               :colors="historyColors"
+              :authenticated="props.library?.authenticated === true"
+              :importable="importable"
+              :importing="importing"
+              :more="hasMoreHistory"
+              :loading-more="loadingMore"
               @apply="applyColor"
               @clear="clearHistory"
+              @import="importHistory"
+              @more="loadMoreHistory"
             />
           </TabsContent>
         </Tabs>

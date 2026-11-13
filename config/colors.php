@@ -47,6 +47,28 @@ return [
         'name_max_length' => (int) env('COLORS_TAG_NAME_MAX_LENGTH', 30),
     ],
 
+    /*
+    | Biblioteca pessoal de cores (F5, ADR-127/ADR-132). O historico da conta
+    | nao tem cota funcional; a pagina e o lote de importacao sao tetos de
+    | transporte, nao de armazenamento.
+    */
+    'library' => [
+        'history_per_page' => (int) env('COLORS_HISTORY_PER_PAGE', 100),
+
+        'favorites_per_page' => (int) env('COLORS_FAVORITES_PER_PAGE', 100),
+
+        'import_batch' => (int) env('COLORS_HISTORY_IMPORT_BATCH', 200),
+
+        /*
+        | O anonimo continua sem conta e sem requisicao. O historico local foi
+        | reduzido para caber melhor na oferta de importar depois do login;
+        | os favoritos seguem com o teto do ADR-118 (ADR-132).
+        */
+        'anonymous_history_limit' => (int) env('COLORS_ANONYMOUS_HISTORY_LIMIT', 20),
+
+        'anonymous_favorites_limit' => (int) env('COLORS_ANONYMOUS_FAVORITES_LIMIT', 50),
+    ],
+
     'slug' => [
         'max_length' => (int) env('COLORS_SLUG_MAX_LENGTH', 60),
 
@@ -90,6 +112,7 @@ return [
     'rates' => [
         'management_per_minute' => (int) env('COLORS_MANAGEMENT_RATE_LIMIT', 60),
         'og_per_minute' => (int) env('COLORS_OG_RATE_LIMIT', 10),
+        'library_per_minute' => (int) env('COLORS_LIBRARY_RATE_LIMIT', 120),
     ],
 
     /*

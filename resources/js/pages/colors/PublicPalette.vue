@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Copy, Download, FlaskConical, RotateCcw } from '@lucide/vue';
+import { Copy, Download, FlaskConical, RotateCcw, Star } from '@lucide/vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PageHead from '@/components/PageHead.vue';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
+import { colorsApi } from '@/lib/colors/api';
 import {
     buildPaletteScale,
     formatHex,
@@ -55,6 +56,34 @@ const localeSlug = computed(() => page.props.localeSlug ?? 'en');
 const testing = ref(false);
 const baseInput = ref(props.palette.colors.base);
 const baseInputEl = ref<InstanceType<typeof Input> | null>(null);
+
+/** Favorito da conta (F5, ADR-128): escrita otimista com volta na falha. */
+const favorited = ref(props.favorited);
+const favoriting = ref(false);
+const favoriteFailed = ref(false);
+
+async function toggleFavorite(): Promise<void> {
+    if (favoriting.value) {
+        return;
+    }
+
+    const next = !favorited.value;
+
+    favorited.value = next;
+    favoriting.value = true;
+    favoriteFailed.value = false;
+
+    try {
+        await colorsApi(`/palettes/${props.palette.id}/favorite`, {
+            method: next ? 'POST' : 'DELETE',
+        });
+    } catch {
+        favorited.value = !next;
+        favoriteFailed.value = true;
+    } finally {
+        favoriting.value = false;
+    }
+}
 
 const items = computed<PaletteColorItem[]>(() => props.palette.colors.items);
 const hexes = computed<string[]>(() => items.value.map((item) => item.hex));
@@ -325,7 +354,27 @@ onMounted(() => {
       </p>
     </section>
 
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+      <Button
+        v-if="canFavorite"
+        type="button"
+        :variant="favorited ? 'secondary' : 'outline'"
+        :disabled="favoriting"
+        :aria-pressed="favorited"
+        data-test="public-favorite"
+        @click="toggleFavorite"
+      >
+        <Star
+          class="size-4"
+          :class="favorited ? 'fill-current' : ''"
+        />
+        {{
+          favorited
+            ? t('colors.public.favorited')
+            : t('colors.public.favorite')
+        }}
+      </Button>
+
       <Button
         v-if="authenticated"
         type="button"
@@ -357,6 +406,15 @@ onMounted(() => {
         <FlaskConical class="size-4" />
         {{ t('colors.public.experiment_toggle') }}
       </Button>
+
+      <p
+        v-if="favoriteFailed"
+        class="text-xs text-destructive"
+        role="alert"
+        data-test="public-favorite-error"
+      >
+        {{ t('colors.public.favorite_error') }}
+      </p>
     </div>
 
     <section

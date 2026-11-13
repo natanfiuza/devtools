@@ -5,6 +5,7 @@ import { Select } from '@/components/ui/select';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import PalettesIndex from '@/pages/dashboard/colors/PalettesIndex.vue';
 import type {
+    FavoritePaletteRow,
     PaletteFilters,
     PaletteRow,
     PalettesIndexProps,
@@ -98,6 +99,17 @@ const TRADUCOES = {
             preview_alt: 'PREVIA {name}',
             results: '{from}-{to} DE {total}',
         },
+        favorites: {
+            tab_mine: 'ABA_MINHAS',
+            tab_favorites: 'ABA_FAVORITAS',
+            empty_title: 'SEM_FAVORITAS',
+            empty_description: 'DICA_FAVORITAS',
+            empty_cta: 'VER_MINHAS',
+            favorited_at: 'FAVORITA_EM {date}',
+            remove: 'REMOVER_FAVORITO',
+            removing: 'REMOVENDO_FAVORITO',
+            remove_error: 'ERRO_REMOVER_FAVORITO',
+        },
         actions: {
             edit: 'EDITAR',
             prototype: 'PROTOTIPO',
@@ -184,10 +196,23 @@ function row(overrides: Partial<PaletteRow> = {}): PaletteRow {
     };
 }
 
+function favoriteRow(
+    overrides: Partial<FavoritePaletteRow> = {},
+): FavoritePaletteRow {
+    return {
+        ...row(),
+        slug: 'oceano-publica',
+        visibility: 'public',
+        favorited_at: '2026-11-12T10:00:00+00:00',
+        ...overrides,
+    };
+}
+
 function props(
     overrides: Partial<PalettesIndexProps> = {},
 ): PalettesIndexProps {
     return {
+        tab: 'mine',
         palettes: {
             data: [row()],
             current_page: 1,
@@ -197,6 +222,7 @@ function props(
             from: 1,
             to: 1,
         },
+        favorites: null,
         filters: FILTERS,
         tags: [
             { id: 'tag-1', name: 'web' },
@@ -229,6 +255,10 @@ function query<T extends HTMLElement>(selector: string): T {
     }
 
     return element;
+}
+
+function exists(selector: string): boolean {
+    return document.querySelector(selector) !== null;
 }
 
 async function typeSearch(value: string): Promise<void> {
@@ -461,5 +491,73 @@ describe('Minhas Paletas', () => {
 
         expect(rows).toHaveLength(2);
         expect(rows[0]?.textContent).toContain('web');
+    });
+
+    it('mostra as abas e alterna para Favoritas pelo servidor', async () => {
+        mountPage();
+
+        expect(
+            query('[data-test="palettes-tabs"]').textContent,
+        ).toContain('ABA_MINHAS');
+
+        query<HTMLButtonElement>(
+            '[data-test="palettes-tab-favorites"]',
+        ).click();
+        await nextTick();
+
+        expect(routerMock.get).toHaveBeenCalledWith(
+            '/dashboard/colors/palettes',
+            { tab: 'favorites', page: 1 },
+            expect.objectContaining({
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            }),
+        );
+    });
+
+    it('na aba Favoritas esconde os filtros e lista as paletas salvas', () => {
+        mountPage({
+            tab: 'favorites',
+            favorites: {
+                data: [favoriteRow()],
+                current_page: 1,
+                last_page: 1,
+                per_page: 20,
+                total: 1,
+                from: 1,
+                to: 1,
+            },
+        });
+
+        expect(exists('[data-test="palettes-filters"]')).toBe(false);
+        expect(exists('[data-test="palettes-tabs"]')).toBe(true);
+
+        const list = query('[data-test="favorites-list"]');
+
+        expect(list.textContent).toContain('Oceano');
+        expect(list.textContent).toContain('FAVORITA_EM');
+        expect(exists('[data-test="favorite-palette-remove"]')).toBe(true);
+        expect(exists('[data-test="palettes-list"]')).toBe(false);
+    });
+
+    it('mostra o estado vazio das favoritas', () => {
+        mountPage({
+            tab: 'favorites',
+            favorites: {
+                data: [],
+                current_page: 1,
+                last_page: 1,
+                per_page: 20,
+                total: 0,
+                from: null,
+                to: null,
+            },
+        });
+
+        expect(
+            query('[data-test="favorites-empty"]').textContent,
+        ).toContain('SEM_FAVORITAS');
+        expect(exists('[data-test="palettes-empty"]')).toBe(false);
     });
 });

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\Colors\ColorFavoriteController;
+use App\Http\Controllers\Api\Colors\ColorHistoryController;
+use App\Http\Controllers\Api\Colors\PaletteFavoriteController;
 use App\Http\Controllers\Colors\PaletteController;
 use App\Http\Controllers\Colors\PaletteDuplicationController;
 use App\Http\Controllers\Colors\PaletteIntentController;
@@ -15,6 +18,41 @@ use Illuminate\Support\Facades\Route;
 // (ADR-022), porque o dono ja escolheu o idioma na sessao. A pagina publica
 // e a unica com `{locale}`, para canonical/hreflang e SEO.
 Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
+    // Biblioteca pessoal de cores (F5, ADR-127). JSON consumido pelo
+    // navegador; o anonimo continua no localStorage. As escritas usam um
+    // limiter proprio porque o picker pode finalizar com frequencia.
+    Route::prefix('api/tools/colors')
+        ->name('api.tools.colors.')
+        ->group(function (): void {
+            Route::get('history', [ColorHistoryController::class, 'index'])
+                ->name('history.index');
+            Route::get('favorites', [ColorFavoriteController::class, 'index'])
+                ->name('favorites.index');
+
+            Route::middleware('throttle:colors-library')->group(function (): void {
+                Route::post('history', [ColorHistoryController::class, 'store'])
+                    ->name('history.store');
+                Route::delete('history', [ColorHistoryController::class, 'destroy'])
+                    ->name('history.destroy');
+                Route::post('history/import', [ColorHistoryController::class, 'import'])
+                    ->name('history.import');
+
+                Route::post('favorites', [ColorFavoriteController::class, 'store'])
+                    ->name('favorites.store');
+                Route::delete('favorites', [ColorFavoriteController::class, 'destroy'])
+                    ->name('favorites.destroy');
+
+                // Paletas publicas de outras contas (F5, ADR-128). O vinculo
+                // e da conta; a paleta nao e copiada.
+                Route::post('palettes/{colorPalette}/favorite', [PaletteFavoriteController::class, 'store'])
+                    ->whereUlid('colorPalette')
+                    ->name('palettes.favorite.store');
+                Route::delete('palettes/{colorPalette}/favorite', [PaletteFavoriteController::class, 'destroy'])
+                    ->whereUlid('colorPalette')
+                    ->name('palettes.favorite.destroy');
+            });
+        });
+
     Route::get('dashboard/colors/palettes', [PaletteController::class, 'index'])
         ->name('dashboard.colors.palettes.index');
 

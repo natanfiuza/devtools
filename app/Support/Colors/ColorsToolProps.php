@@ -23,6 +23,14 @@ final class ColorsToolProps
      *         tagsPerPalette: int,
      *         tagNameMaxLength: int,
      *         tags: list<array{id: string, name: string}>
+     *     },
+     *     library: array{
+     *         authenticated: bool,
+     *         anonymousHistoryLimit: int,
+     *         anonymousFavoritesLimit: int,
+     *         historyPerPage: int,
+     *         favoritesPerPage: int,
+     *         importBatch: int
      *     }
      * }
      */
@@ -41,6 +49,34 @@ final class ColorsToolProps
                         ->all() ?? [],
                 ),
             ],
+            'library' => self::library($user),
+        ];
+    }
+
+    /**
+     * Props da biblioteca pessoal de cores (F5, ADR-127/ADR-132).
+     *
+     * O anonimo nao faz requisicao: estes numeros so governam o `localStorage`
+     * e a oferta de importar o historico local para quem esta logado.
+     *
+     * @return array{
+     *     authenticated: bool,
+     *     anonymousHistoryLimit: int,
+     *     anonymousFavoritesLimit: int,
+     *     historyPerPage: int,
+     *     favoritesPerPage: int,
+     *     importBatch: int
+     * }
+     */
+    public static function library(?User $user = null): array
+    {
+        return [
+            'authenticated' => $user !== null,
+            'anonymousHistoryLimit' => (int) config('colors.library.anonymous_history_limit', 20),
+            'anonymousFavoritesLimit' => (int) config('colors.library.anonymous_favorites_limit', 50),
+            'historyPerPage' => (int) config('colors.library.history_per_page', 100),
+            'favoritesPerPage' => (int) config('colors.library.favorites_per_page', 100),
+            'importBatch' => (int) config('colors.library.import_batch', 200),
         ];
     }
 

@@ -12,11 +12,13 @@ use App\Http\Requests\Colors\DeletePaletteRequest;
 use App\Http\Requests\Colors\StorePaletteRequest;
 use App\Http\Requests\Colors\UpdatePaletteRequest;
 use App\Models\ColorPalette;
+use App\Models\ColorPaletteFavorite;
 use App\Models\User;
 use App\Support\Colors\ColorsToolProps;
 use App\Support\Colors\PaletteData;
 use App\Support\Colors\PalettePresenter;
 use App\Support\Colors\PaletteQuota;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,6 +45,7 @@ class PaletteController extends Controller
     ): Response {
         $user = $this->user($request);
         $filters = $this->filters($request);
+        $tab = $request->query('tab') === 'favorites' ? 'favorites' : 'mine';
 
         $query = ColorPalette::query()->forUser((int) $user->getKey())->with('tags');
 
@@ -57,7 +60,11 @@ class PaletteController extends Controller
             ->through(static fn (ColorPalette $palette): array => $presenter->row($palette));
 
         return Inertia::render('dashboard/colors/PalettesIndex', [
+            'tab' => $tab,
             'palettes' => $palettes,
+            'favorites' => $tab === 'favorites'
+                ? $this->favorites($user, $presenter)
+                : null,
             'filters' => $filters,
             'tags' => $user->colorTags()
                 ->orderBy('position')
@@ -105,6 +112,8 @@ class PaletteController extends Controller
             // O editor reusa o workspace do gerador, que tambem importa imagem.
             'form' => ColorsToolProps::formLimits(),
             'image' => ColorsToolProps::imageLimits(),
+            // O editor tambem abre a biblioteca compartilhada de cores (F5).
+            'library' => ColorsToolProps::library($user),
         ]);
     }
 
@@ -180,6 +189,28 @@ class PaletteController extends Controller
         ]);
 
         return redirect()->route('dashboard.colors.palettes.index');
+    }
+
+    /**
+     * Favoritas: so paletas que continuam publicas e ativas (F5, ADR-128).
+     *
+     * O vinculo guarda apenas a referencia; o retrato vem da origem. Paleta
+     * que virou privada, foi arquivada ou excluida some da lista sem apagar o
+     * favorito - se voltar a ser publica, ela reaparece.
+     *
+     * @return LengthAwarePaginator<int, array<string, mixed>>
+     */
+    private function favorites(User $user, PalettePresenter $presenter): LengthAwarePaginator
+    {
+        return ColorPaletteFavorite::query()
+            ->forUser((int) $user->getKey())
+            ->whereHas('palette', static fn (Builder $palette): Builder => $palette->publiclyVisible())
+            ->with('palette.tags')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate((int) config('colors.palettes.per_page', 20))
+            ->withQueryString()
+            ->through(static fn (ColorPaletteFavorite $favorite): array => $presenter->favoriteRow($favorite));
     }
 
     /**

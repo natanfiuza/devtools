@@ -122,6 +122,43 @@ return [
                 'name_hint' => 'The CSS name is the closest match; it may differ slightly from the code.',
             ],
         ],
+
+        'library' => [
+            'history' => [
+                'title' => 'History',
+                'description' => [
+                    'account' => 'The colours you applied most recently, saved in your account and shared with the generator.',
+                    'local' => 'The colours you applied most recently, only in this browser. Sign in to keep them in your account.',
+                ],
+                'clear' => 'Clear',
+                'empty' => 'No colour applied yet.',
+            ],
+
+            'favorites' => [
+                'title' => 'Favourites',
+                'description' => [
+                    'account' => 'Colours saved in your account, shared between the colour picker and the palette generator.',
+                    'local' => 'Colours saved only in this browser.',
+                ],
+                'add' => 'Favourite current colour',
+                'remove' => 'Remove from favourites',
+                'clear' => 'Clear',
+                'empty' => 'No favourites yet.',
+            ],
+
+            'import' => [
+                'button' => 'Import browser history ({count})',
+                'title' => 'Import browser history',
+                'description' => 'Send {count} colour(s) saved in this browser to your account. The local list is cleared after the import and duplicates are ignored.',
+                'confirm' => 'Import',
+                'cancel' => 'Cancel',
+                'busy' => 'Importing…',
+                'success' => 'Imported {count} colour(s) into your account.',
+                'error' => 'The import failed. Your local history was kept; try again.',
+            ],
+
+            'load_more' => 'Load more',
+        ],
     ],
 
     'categories' => [
@@ -185,22 +222,6 @@ return [
             'description' => 'Ten lighter versions in OKLab, with the same opacity.',
         ],
 
-        'history' => [
-            'title' => 'History',
-            'description' => 'The colours you applied most recently, only in this browser.',
-            'clear' => 'Clear',
-            'empty' => 'No colour applied yet.',
-        ],
-
-        'favorites' => [
-            'title' => 'Favourites',
-            'description' => 'Colours saved only in this browser.',
-            'add' => 'Favourite current colour',
-            'remove' => 'Remove from favourites',
-            'clear' => 'Clear',
-            'empty' => 'No favourites yet.',
-        ],
-
         'tabs' => [
             'contrast' => 'Contrast',
             'shades' => 'Shades',
@@ -218,6 +239,7 @@ return [
             'scale' => 'Scale',
             'harmonies' => 'Harmonies',
             'extraction' => 'Extraction',
+            'library' => 'Library',
         ],
 
         'harmonies' => [

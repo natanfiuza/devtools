@@ -98,6 +98,18 @@ return [
         'results' => '{from}–{to} de {total}',
     ],
 
+    'favorites' => [
+        'tab_mine' => 'Minhas paletas',
+        'tab_favorites' => 'Favoritas',
+        'empty_title' => 'Nenhuma paleta favorita ainda',
+        'empty_description' => 'Abra uma paleta pública e toque na estrela para guardá-la aqui.',
+        'empty_cta' => 'Ver minhas paletas',
+        'favorited_at' => 'Favoritada em {date}',
+        'remove' => 'Remover dos favoritos',
+        'removing' => 'Removendo…',
+        'remove_error' => 'Não foi possível remover. Tente de novo.',
+    ],
+
     'actions' => [
         'edit' => 'Editar',
         'prototype' => 'Protótipo',
@@ -183,6 +195,9 @@ return [
         'experiment_invalid' => 'Cor inválida. Use HEX, RGB, HSL ou um nome de cor.',
         'experiment_reset' => 'Voltar à base publicada',
         'experiment_duplicate_hint' => 'Ao duplicar, esta base vira a sua paleta nova.',
+        'favorite' => 'Favoritar',
+        'favorited' => 'Favoritada',
+        'favorite_error' => 'Não foi possível atualizar o favorito. Tente de novo.',
     ],
 
     'og' => [

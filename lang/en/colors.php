@@ -98,6 +98,18 @@ return [
         'results' => '{from}–{to} of {total}',
     ],
 
+    'favorites' => [
+        'tab_mine' => 'My palettes',
+        'tab_favorites' => 'Favorites',
+        'empty_title' => 'No favorite palettes yet',
+        'empty_description' => 'Open a public palette and tap the star to keep it here.',
+        'empty_cta' => 'See my palettes',
+        'favorited_at' => 'Favorited {date}',
+        'remove' => 'Remove from favorites',
+        'removing' => 'Removing…',
+        'remove_error' => 'Could not remove it. Try again.',
+    ],
+
     'actions' => [
         'edit' => 'Edit',
         'prototype' => 'Prototype',
@@ -183,6 +195,9 @@ return [
         'experiment_invalid' => 'Invalid color. Use HEX, RGB, HSL or a color name.',
         'experiment_reset' => 'Back to the published base',
         'experiment_duplicate_hint' => 'When you duplicate, this base becomes your new palette.',
+        'favorite' => 'Add to favorites',
+        'favorited' => 'Favorited',
+        'favorite_error' => 'Could not update the favorite. Try again.',
     ],
 
     'og' => [

@@ -383,6 +383,14 @@ function props(overrides: Partial<PaletteEditorData> = {}): PaletteEditorProps {
             tagNameMaxLength: 30,
         },
         image: IMAGE_LIMITS,
+        library: {
+            authenticated: true,
+            anonymousHistoryLimit: 20,
+            anonymousFavoritesLimit: 50,
+            historyPerPage: 100,
+            favoritesPerPage: 100,
+            importBatch: 200,
+        },
     };
 }
 

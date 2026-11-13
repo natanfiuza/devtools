@@ -86,8 +86,10 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->component('tools/Show')
             ->where('slug', 'html-color-picker')
             ->where('seo.noindex', false)
-            // O picker nao importa imagem no servidor: continua sem pacote.
-            ->where('toolProps', [])
+            // O picker nao importa imagem no servidor; so recebe os numeros
+            // da biblioteca (historico/favoritos do anonimo, F5).
+            ->has('toolProps.library')
+            ->where('toolProps.library.authenticated', false)
         );
 
     $this->get('/pt-br/tools/colors/palette-generator')

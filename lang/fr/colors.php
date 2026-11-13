@@ -98,6 +98,18 @@ return [
         'results' => '{from}–{to} sur {total}',
     ],
 
+    'favorites' => [
+        'tab_mine' => 'Mes palettes',
+        'tab_favorites' => 'Favorites',
+        'empty_title' => 'Aucune palette favorite pour le moment',
+        'empty_description' => 'Ouvrez une palette publique et touchez l’étoile pour la garder ici.',
+        'empty_cta' => 'Voir mes palettes',
+        'favorited_at' => 'Ajoutée aux favoris le {date}',
+        'remove' => 'Retirer des favoris',
+        'removing' => 'Retrait…',
+        'remove_error' => 'Impossible de la retirer. Réessayez.',
+    ],
+
     'actions' => [
         'edit' => 'Modifier',
         'prototype' => 'Prototype',
@@ -183,6 +195,9 @@ return [
         'experiment_invalid' => 'Couleur invalide. Utilisez HEX, RGB, HSL ou un nom de couleur.',
         'experiment_reset' => 'Revenir à la base publiée',
         'experiment_duplicate_hint' => 'En dupliquant, cette base devient votre nouvelle palette.',
+        'favorite' => 'Ajouter aux favoris',
+        'favorited' => 'Dans les favoris',
+        'favorite_error' => 'Impossible de mettre à jour le favori. Réessayez.',
     ],
 
     'og' => [

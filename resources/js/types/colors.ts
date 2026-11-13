@@ -66,6 +66,9 @@ export type PaletteSort =
 
 export type PaletteStatus = 'active' | 'archived';
 
+/** Aba de Minhas Paletas: as da conta ou as publicas favoritadas (F5). */
+export type PaletteTab = 'mine' | 'favorites';
+
 /** Filtros aceitos na querystring de Minhas Paletas (ADR-109). */
 export type PaletteFilters = {
     q: string;
@@ -138,13 +141,22 @@ export type PalettePublic = {
 /** Props da pagina publica (`PublicPaletteController@show`). */
 export type PublicPaletteProps = {
     palette: PalettePublic;
+    /** A conta logada ja favoritou esta paleta (F5, ADR-128). */
+    favorited: boolean;
+    /** So conta logada e paleta de outra pessoa podem favoritar. */
+    canFavorite: boolean;
     /** URL da OG propria; `null` quando o dono ainda nao gerou. */
     ogUrl: string | null;
 };
 
+/** Linha da aba Favoritas: o retrato atual da origem + quando foi salva. */
+export type FavoritePaletteRow = PaletteRow & {
+    favorited_at: string | null;
+};
+
 /** Paginacao do Laravel ja serializada pelo Inertia. */
-export type PalettePaginator = {
-    data: PaletteRow[];
+export type PalettePaginator<T extends PaletteRow = PaletteRow> = {
+    data: T[];
     current_page: number;
     last_page: number;
     per_page: number;
@@ -183,11 +195,31 @@ export type PaletteFormLimits = Pick<
 
 /** Props de Minhas Paletas (`PaletteController@index`). */
 export type PalettesIndexProps = {
+    /** Aba atual; `favorites` traz o paginador de paletas favoritadas. */
+    tab: PaletteTab;
     palettes: PalettePaginator;
+    favorites: PalettePaginator<FavoritePaletteRow> | null;
     filters: PaletteFilters;
     tags: PaletteTag[];
     limits: PaletteLimits;
     form: PaletteFormLimits;
+};
+
+/**
+ * Biblioteca pessoal de cores (F5, ADR-127/ADR-132).
+ *
+ * `authenticated` diz se historico/favoritos vao para a conta; os demais
+ * numeros vem de `config/colors.php` via `ColorsToolProps::library` e nunca
+ * sao fixados no cliente. Para o anonimo os dois primeiros limites governam
+ * o `localStorage` e o lote sobe no `importBatch`.
+ */
+export type ColorLibraryToolProps = {
+    authenticated: boolean;
+    anonymousHistoryLimit: number;
+    anonymousFavoritesLimit: number;
+    historyPerPage: number;
+    favoritesPerPage: number;
+    importBatch: number;
 };
 
 /** Props do editor (`PaletteController@edit`). */
@@ -197,6 +229,7 @@ export type PaletteEditorProps = {
     limits: PaletteLimits;
     form: PaletteFormLimits;
     image: ImageLimits;
+    library: ColorLibraryToolProps;
 };
 
 /** Corpo enviado a `POST/PATCH /dashboard/colors/palettes`. */

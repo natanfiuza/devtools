@@ -197,6 +197,41 @@ function i18n() {
                             name_hint: 'Dica do nome',
                         },
                     },
+                    library: {
+                        history: {
+                            title: 'Histórico',
+                            description: {
+                                account: 'Histórico da conta.',
+                                local: 'Histórico deste navegador.',
+                            },
+                            clear: 'Limpar',
+                            empty: 'Nenhuma cor aplicada ainda.',
+                        },
+                        favorites: {
+                            title: 'Favoritos',
+                            description: {
+                                account: 'Favoritos da conta.',
+                                local: 'Favoritos deste navegador.',
+                            },
+                            add: 'Favoritar cor atual',
+                            remove: 'Remover dos favoritos',
+                            clear: 'Limpar',
+                            empty: 'Nenhum favorito ainda.',
+                        },
+                        import: {
+                            button: 'Importar histórico do navegador ({count})',
+                            title: 'Importar histórico do navegador',
+                            description:
+                                'Enviar {count} cor(es) deste navegador para a sua conta.',
+                            confirm: 'Importar',
+                            cancel: 'Cancelar',
+                            busy: 'Importando…',
+                            success:
+                                'Importadas {count} cor(es) para a sua conta.',
+                            error: 'A importação falhou.',
+                        },
+                        load_more: 'Carregar mais',
+                    },
                 },
                 'palette-generator': {
                     name: 'Color Palette Generator',
@@ -204,6 +239,7 @@ function i18n() {
                         scale: 'Escala',
                         harmonies: 'Harmonias',
                         extraction: 'Extração',
+                        library: 'Biblioteca',
                     },
                     harmonies: {
                         title: 'Harmonias',
@@ -412,6 +448,7 @@ function harmonyHexes(wrapper: ReturnType<typeof mountTool>): string[] {
 beforeEach(() => {
     document.body.innerHTML = '';
     sessionStorage.clear();
+    localStorage.clear();
     pageState.url = TOOL_URL;
     pageState.props.auth.user = null;
     pageState.props.auth.isAdmin = false;
@@ -648,6 +685,32 @@ describe('Tool', () => {
 
         expect(wrapper.find('[data-test="extraction-panel"]').exists()).toBe(
             true,
+        );
+    });
+
+    it('mostra a biblioteca compartilhada e favorita a cor base', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.get('[data-test="page-tab-library"]').trigger('mousedown');
+
+        expect(wrapper.find('[data-test="history-empty"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="favorites-empty"]').exists()).toBe(
+            true,
+        );
+
+        await wrapper.get('[data-test="favorites-toggle"]').trigger('click');
+        await flushPromises();
+
+        expect(wrapper.get('[data-test="favorites-toggle"]').text()).toContain(
+            'Remover dos favoritos',
+        );
+        expect(
+            JSON.parse(
+                String(localStorage.getItem('colors.picker.favorites.v1')),
+            ),
+        ).toEqual(['#6366f1ff']);
+        expect(wrapper.find('[data-test="favorites-empty"]').exists()).toBe(
+            false,
         );
     });
 
