@@ -168,6 +168,7 @@ function initialTab(): string {
         tab === 'scale' ||
         tab === 'harmonies' ||
         tab === 'extraction' ||
+        tab === 'library' ||
         tab === 'prototype'
     ) {
         return tab;
@@ -521,6 +522,7 @@ function save(): void {
       <GeneratorWorkspace
         ref="workspace"
         :image="image"
+        :library="props.library"
         :initial-base="palette.colors.base"
         :initial-scale="initialScale"
         :initial-extracted="initialExtracted"

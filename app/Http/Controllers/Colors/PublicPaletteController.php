@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Colors;
 
 use App\Http\Controllers\Controller;
 use App\Models\ColorPalette;
+use App\Models\ColorPaletteFavorite;
+use App\Models\User;
 use App\Support\Colors\PaletteOgStorage;
 use App\Support\Colors\PalettePresenter;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +23,7 @@ use Inertia\Response;
 class PublicPaletteController extends Controller
 {
     public function show(
+        Request $request,
         string $locale,
         string $slug,
         PalettePresenter $presenter,
@@ -32,9 +36,23 @@ class PublicPaletteController extends Controller
             ->firstOrFail();
 
         $hasOg = $palette->hasOg() && $og->exists($palette->id);
+        $user = $request->user();
+
+        // A estrela so aparece para quem pode favoritar: conta logada e
+        // paleta de outra pessoa (F5, ADR-128). O dono ja a tem na lista.
+        $canFavorite = $user instanceof User
+            && (int) $palette->user_id !== (int) $user->getKey();
+
+        $favorited = $canFavorite
+            && ColorPaletteFavorite::query()
+                ->forUser((int) $user->getKey())
+                ->where('color_palette_id', $palette->id)
+                ->exists();
 
         return Inertia::render('colors/PublicPalette', [
             'palette' => $presenter->public($palette),
+            'favorited' => $favorited,
+            'canFavorite' => $canFavorite,
             'ogUrl' => $hasOg
                 ? URL::route('colors.palettes.og', [
                     'locale' => $locale,

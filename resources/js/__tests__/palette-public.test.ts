@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { defineComponent, h, nextTick } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildPaletteScale, parseColor, type Rgba } from '@/lib/color';
@@ -15,26 +15,35 @@ import type { PalettePublic, PublicPaletteProps } from '@/types/colors';
  * so existe na memoria da pagina - ate o momento de duplicar.
  */
 
-const { routerMock, pageState, exportProps, writeClipboard, downloadText } =
-    vi.hoisted(() => ({
-        routerMock: {
-            get: vi.fn(),
-            post: vi.fn(),
-            patch: vi.fn(),
-            delete: vi.fn(),
+const {
+    routerMock,
+    pageState,
+    exportProps,
+    writeClipboard,
+    downloadText,
+    fetchMock,
+} = vi.hoisted(() => ({
+    routerMock: {
+        get: vi.fn(),
+        post: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+    },
+    pageState: {
+        url: '/en/colors/p/oceano',
+        props: {
+            localeSlug: 'en',
+            auth: { user: null as { id: number } | null },
+            seo: { meta: { title: 'Oceano' } },
         },
-        pageState: {
-            url: '/en/colors/p/oceano',
-            props: {
-                localeSlug: 'en',
-                auth: { user: null as { id: number } | null },
-                seo: { meta: { title: 'Oceano' } },
-            },
-        },
-        exportProps: { current: null as Record<string, unknown> | null },
-        writeClipboard: vi.fn(),
-        downloadText: vi.fn(),
-    }));
+    },
+    exportProps: { current: null as Record<string, unknown> | null },
+    writeClipboard: vi.fn(),
+    downloadText: vi.fn(),
+    fetchMock: vi.fn(),
+}));
+
+vi.stubGlobal('fetch', fetchMock);
 
 vi.mock('@inertiajs/vue3', () => ({
     router: routerMock,
@@ -115,6 +124,9 @@ const TRADUCOES = {
             experiment_invalid: 'COR_INVALIDA',
             experiment_reset: 'VOLTAR_BASE',
             experiment_duplicate_hint: 'DUPLICAR_COM_BASE',
+            favorite: 'FAVORITAR',
+            favorited: 'FAVORITADA',
+            favorite_error: 'ERRO_FAVORITO',
         },
     },
 };
@@ -166,13 +178,25 @@ function palette(overrides: Partial<PalettePublic> = {}): PalettePublic {
     };
 }
 
-function props(overrides: Partial<PalettePublic> = {}): PublicPaletteProps {
-    return { palette: palette(overrides), ogUrl: null };
+function props(
+    overrides: Partial<PalettePublic> = {},
+    extra: Partial<PublicPaletteProps> = {},
+): PublicPaletteProps {
+    return {
+        palette: palette(overrides),
+        favorited: false,
+        canFavorite: false,
+        ogUrl: null,
+        ...extra,
+    };
 }
 
-function mountPage(overrides: Partial<PalettePublic> = {}) {
+function mountPage(
+    overrides: Partial<PalettePublic> = {},
+    extra: Partial<PublicPaletteProps> = {},
+) {
     return mount(PublicPalette, {
-        props: props(overrides),
+        props: props(overrides, extra),
         global: { plugins: [i18n()] },
         attachTo: document.body,
     });
@@ -216,6 +240,11 @@ describe('Pagina publica de paleta', () => {
         writeClipboard.mockReset();
         writeClipboard.mockResolvedValue(undefined);
         downloadText.mockReset();
+        fetchMock.mockReset();
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ favorited: true }),
+        });
         exportProps.current = null;
         pageState.url = '/en/colors/p/oceano';
         pageState.props.auth = { user: null };
@@ -432,5 +461,77 @@ describe('Pagina publica de paleta', () => {
         await nextTick();
 
         expect(exists('[data-test="public-experiment"]')).toBe(true);
+    });
+
+    it('so mostra a estrela quando a conta pode favoritar', () => {
+        mountPage();
+
+        expect(exists('[data-test="public-favorite"]')).toBe(false);
+
+        mountPage({}, { canFavorite: true });
+
+        expect(exists('[data-test="public-favorite"]')).toBe(true);
+    });
+
+    it('favorita e desfavorita de forma otimista pela API', async () => {
+        mountPage({}, { canFavorite: true });
+
+        expect(
+            query('[data-test="public-favorite"]').textContent,
+        ).toContain('FAVORITAR');
+
+        await click('[data-test="public-favorite"]');
+        await flushPromises();
+
+        expect(
+            query('[data-test="public-favorite"]').textContent,
+        ).toContain('FAVORITADA');
+        expect(
+            query('[data-test="public-favorite"]').getAttribute(
+                'aria-pressed',
+            ),
+        ).toBe('true');
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock.mock.calls[0]?.[0]).toBe(
+            '/api/tools/colors/palettes/01KPALETTE00000000000000001/favorite',
+        );
+        expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
+            method: 'POST',
+            credentials: 'same-origin',
+        });
+
+        await click('[data-test="public-favorite"]');
+        await flushPromises();
+
+        expect(
+            query('[data-test="public-favorite"]').textContent,
+        ).toContain('FAVORITAR');
+        expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({
+            method: 'DELETE',
+        });
+    });
+
+    it('volta a estrela e avisa quando a API falha', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            json: async () => ({ error: { code: 'rate_limited' } }),
+        });
+
+        mountPage({}, { canFavorite: true });
+
+        await click('[data-test="public-favorite"]');
+        await flushPromises();
+
+        expect(
+            query('[data-test="public-favorite"]').textContent,
+        ).toContain('FAVORITAR');
+        expect(
+            query('[data-test="public-favorite"]').getAttribute(
+                'aria-pressed',
+            ),
+        ).toBe('false');
+        expect(
+            query('[data-test="public-favorite-error"]').textContent,
+        ).toContain('ERRO_FAVORITO');
     });
 });

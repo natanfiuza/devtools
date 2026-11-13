@@ -11,7 +11,7 @@ import {
     savePaletteDraft,
 } from '@/lib/saveDraft';
 import palettes from '@/routes/dashboard/colors/palettes';
-import type { PaletteToolProps } from '@/types/colors';
+import type { ColorLibraryToolProps, PaletteToolProps } from '@/types/colors';
 import GeneratorWorkspace from './GeneratorWorkspace.vue';
 import type { ImageLimits } from './lib/imageLimits';
 
@@ -34,6 +34,8 @@ const props = defineProps<{
     image: ImageLimits;
     /** Limites do modal e tags da conta, entregues pelo servidor (ADR-123). */
     palette: PaletteToolProps;
+    /** Biblioteca de cores da conta ou local do anonimo (F5). */
+    library?: ColorLibraryToolProps;
 }>();
 
 const { t } = useI18n();
@@ -139,6 +141,7 @@ onMounted(() => {
     <GeneratorWorkspace
       ref="workspace"
       :image="props.image"
+      :library="props.library"
     />
 
     <SavePaletteDialog

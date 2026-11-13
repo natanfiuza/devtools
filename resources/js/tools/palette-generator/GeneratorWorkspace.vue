@@ -1,7 +1,9 @@
 ﻿<script setup lang="ts">
-import { computed, ref, useSlots, watch } from 'vue';
+import { computed, onMounted, ref, useSlots, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ColorPickerControls from '@/components/colors/ColorPickerControls.vue';
+import FavoritesPanel from '@/components/colors/FavoritesPanel.vue';
+import HistoryPanel from '@/components/colors/HistoryPanel.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useColorState } from '@/composables/useColorState';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
@@ -13,13 +15,14 @@ import {
     type PaletteScale,
     type Rgba,
 } from '@/lib/color';
+import { useColorLibrary } from '@/lib/colors/library';
 import type { WorkspaceSnapshot } from '@/lib/paletteSave';
 import type {
     DraftExtractedPalette,
     PaletteDraft,
     PaletteDraftTab,
 } from '@/lib/saveDraft';
-import type { PaletteKind } from '@/types/colors';
+import type { ColorLibraryToolProps, PaletteKind } from '@/types/colors';
 import BaseColorRow from './components/BaseColorRow.vue';
 import EmptyPalette from './components/EmptyPalette.vue';
 import ExportPanel from './components/ExportPanel.vue';
@@ -40,7 +43,9 @@ import type { ImageLimits } from './lib/imageLimits';
  *
  * A escala salva e congelada: vem dos HEX persistidos (`buildFrozenScale`, do
  * lado de quem chama) e a primeira mudanca de base descongela e recalcula.
- * Aqui nao ha storage nem requisicao: quem salva e a pagina.
+ * Quem salva a paleta e a pagina; daqui so sai a biblioteca de cores da F5
+ * (historico/favoritos), que e a mesma do picker e usa a conta so quando ha
+ * sessao - o anonimo continua no `localStorage`.
  */
 
 const props = defineProps<{
@@ -54,6 +59,8 @@ const props = defineProps<{
     initialExtracted?: ExtractedPalette | null;
     /** Aba inicial; aceita a aba extra do editor (`prototype`). */
     initialTab?: string;
+    /** Biblioteca da conta (F5); ausente = anonimo no `localStorage`. */
+    library?: ColorLibraryToolProps;
 }>();
 
 const slots = useSlots();
@@ -86,8 +93,34 @@ function exampleColor(): Rgba {
     return parsed.color.rgba;
 }
 
+const {
+    historyColors,
+    favoriteColors,
+    importable,
+    loadingMore,
+    hasMoreHistory,
+    hasMoreFavorites,
+    load: loadLibrary,
+    loadMoreHistory,
+    loadMoreFavorites,
+    addHistory,
+    isFavorite: isLibraryFavorite,
+    toggleFavorite,
+    clearHistory,
+    clearFavorites,
+    importLocalHistory,
+} = useColorLibrary(props.library);
+
+const importing = ref(false);
+
 const state = useColorState({
     initial: rgbaOf(props.initialBase ?? '') ?? exampleColor(),
+    // Toda base finalizada entra no historico compartilhado, como no picker.
+    onFinalize: (color) => addHistory(color),
+});
+
+onMounted(() => {
+    void loadLibrary();
 });
 
 const scale = computed(
@@ -233,6 +266,30 @@ function notify(message: string): void {
     feedback.value = message;
 }
 
+const currentIsFavorite = computed(() => isLibraryFavorite(state.rgba.value));
+
+function toggleCurrentFavorite(): void {
+    toggleFavorite(state.rgba.value);
+}
+
+async function importHistory(): Promise<void> {
+    if (importing.value) {
+        return;
+    }
+
+    importing.value = true;
+
+    try {
+        const count = await importLocalHistory();
+
+        notify(t('tools.shared.library.import.success', { count }));
+    } catch {
+        notify(t('tools.shared.library.import.error'));
+    } finally {
+        importing.value = false;
+    }
+}
+
 defineExpose({
     snapshot,
     draft,
@@ -271,7 +328,7 @@ defineExpose({
             :class="
               hasExtraTabs
                 ? 'flex w-full flex-wrap'
-                : 'grid w-full grid-cols-3'
+                : 'grid w-full grid-cols-4'
             "
           >
             <TabsTrigger
@@ -291,6 +348,12 @@ defineExpose({
               data-test="page-tab-extraction"
             >
               {{ t('tools.palette-generator.tabs.extraction') }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="library"
+              data-test="page-tab-library"
+            >
+              {{ t('tools.palette-generator.tabs.library') }}
             </TabsTrigger>
             <slot name="tabs-extra" />
           </TabsList>
@@ -367,6 +430,35 @@ defineExpose({
               :image="image"
               :copy="copyFeedback.copy"
               @use-base="useBase"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="library"
+            class="mt-3 flex flex-col gap-4"
+          >
+            <FavoritesPanel
+              :colors="favoriteColors"
+              :is-favorite="currentIsFavorite"
+              :authenticated="props.library?.authenticated === true"
+              :more="hasMoreFavorites"
+              :loading-more="loadingMore"
+              @apply="useBase"
+              @toggle="toggleCurrentFavorite"
+              @clear="clearFavorites"
+              @more="loadMoreFavorites"
+            />
+            <HistoryPanel
+              :colors="historyColors"
+              :authenticated="props.library?.authenticated === true"
+              :importable="importable"
+              :importing="importing"
+              :more="hasMoreHistory"
+              :loading-more="loadingMore"
+              @apply="useBase"
+              @clear="clearHistory"
+              @import="importHistory"
+              @more="loadMoreHistory"
             />
           </TabsContent>
 

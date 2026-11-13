@@ -1,43 +1,47 @@
 <script setup lang="ts">
 import { Star, StarOff } from '@lucide/vue';
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import { formatHex, type Rgba } from '@/lib/color';
 import SwatchButton from '@/components/colors/SwatchButton.vue';
 
 /**
- * Favoritos locais (ate 50) e o botao que alterna a cor atual.
+ * Favoritos do picker e do gerador (F5, ADR-127).
  *
- * A estrela e o unico controle que escreve aqui, entao o painel nunca muda
- * sozinho enquanto o usuario navega pelas cores.
+ * A mesma lista de cores aparece nas duas tools; o anonimo guarda no
+ * navegador e quem esta logado na conta. A estrela e o unico controle que
+ * escreve aqui, entao o painel nunca muda sozinho enquanto o usuario navega.
  */
 
-const props = defineProps<{
-    colors: Rgba[];
-    isFavorite: boolean;
-}>();
+withDefaults(
+    defineProps<{
+        colors: Rgba[];
+        isFavorite: boolean;
+        authenticated: boolean;
+        more?: boolean;
+        loadingMore?: boolean;
+    }>(),
+    {
+        more: false,
+        loadingMore: false,
+    },
+);
 
 const emit = defineEmits<{
     apply: [color: Rgba];
     toggle: [];
     clear: [];
+    more: [];
 }>();
 
 const { t } = useI18n();
-
-const toggleLabel = computed(() =>
-    props.isFavorite
-        ? t('tools.html-color-picker.favorites.remove')
-        : t('tools.html-color-picker.favorites.add'),
-);
 </script>
 
 <template>
   <section class="rounded-xl border bg-card p-4">
     <div class="flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold">
-        {{ t('tools.html-color-picker.favorites.title') }}
+        {{ t('tools.shared.library.favorites.title') }}
       </h2>
       <Button
         v-if="colors.length > 0"
@@ -46,11 +50,15 @@ const toggleLabel = computed(() =>
         size="sm"
         @click="emit('clear')"
       >
-        {{ t('tools.html-color-picker.favorites.clear') }}
+        {{ t('tools.shared.library.favorites.clear') }}
       </Button>
     </div>
     <p class="mt-1 text-xs text-muted-foreground">
-      {{ t('tools.html-color-picker.favorites.description') }}
+      {{
+        authenticated
+          ? t('tools.shared.library.favorites.description.account')
+          : t('tools.shared.library.favorites.description.local')
+      }}
     </p>
 
     <Button
@@ -59,6 +67,7 @@ const toggleLabel = computed(() =>
       size="sm"
       class="mt-3"
       :aria-pressed="isFavorite"
+      data-test="favorites-toggle"
       @click="emit('toggle')"
     >
       <Star
@@ -69,14 +78,19 @@ const toggleLabel = computed(() =>
         v-else
         aria-hidden="true"
       />
-      {{ toggleLabel }}
+      {{
+        isFavorite
+          ? t('tools.shared.library.favorites.remove')
+          : t('tools.shared.library.favorites.add')
+      }}
     </Button>
 
     <p
       v-if="colors.length === 0"
       class="mt-3 text-sm text-muted-foreground"
+      data-test="favorites-empty"
     >
-      {{ t('tools.html-color-picker.favorites.empty') }}
+      {{ t('tools.shared.library.favorites.empty') }}
     </p>
 
     <div
@@ -91,5 +105,18 @@ const toggleLabel = computed(() =>
         @select="emit('apply', color)"
       />
     </div>
+
+    <Button
+      v-if="more"
+      type="button"
+      variant="ghost"
+      size="sm"
+      class="mt-3"
+      :disabled="loadingMore"
+      data-test="favorites-more"
+      @click="emit('more')"
+    >
+      {{ t('tools.shared.library.load_more') }}
+    </Button>
   </section>
 </template>

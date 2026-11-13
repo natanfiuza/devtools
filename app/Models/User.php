@@ -357,6 +357,36 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Historico de cores da conta (F5, ADR-127).
+     *
+     * @return HasMany<ColorHistoryEntry, $this>
+     */
+    public function colorHistoryEntries(): HasMany
+    {
+        return $this->hasMany(ColorHistoryEntry::class);
+    }
+
+    /**
+     * Cores favoritas da conta (F5, ADR-127).
+     *
+     * @return HasMany<ColorFavorite, $this>
+     */
+    public function colorFavorites(): HasMany
+    {
+        return $this->hasMany(ColorFavorite::class);
+    }
+
+    /**
+     * Paletas publicas de outras contas favoritadas (F5, ADR-128).
+     *
+     * @return HasMany<ColorPaletteFavorite, $this>
+     */
+    public function favoritePalettes(): HasMany
+    {
+        return $this->hasMany(ColorPaletteFavorite::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

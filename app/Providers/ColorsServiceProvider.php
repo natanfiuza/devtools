@@ -27,6 +27,12 @@ final class ColorsServiceProvider extends ServiceProvider
         RateLimiter::for('colors-og', function (Request $request): Limit {
             return $this->limit($request, 'og_per_minute', 'colors og');
         });
+
+        // Historico/favoritos de cores (F5, ADR-127): escrita frequente,
+        // limiter proprio para nao competir com a gestao de paletas.
+        RateLimiter::for('colors-library', function (Request $request): Limit {
+            return $this->limit($request, 'library_per_minute', 'colors library');
+        });
     }
 
     private function limit(Request $request, string $key, string $bucket): Limit

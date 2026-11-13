@@ -3,6 +3,7 @@
 namespace App\Support\Colors;
 
 use App\Models\ColorPalette;
+use App\Models\ColorPaletteFavorite;
 use App\Models\ColorTag;
 
 /**
@@ -61,6 +62,18 @@ final class PalettePresenter
             'tags' => $this->tags($palette),
             'updated_at' => $palette->updated_at?->toIso8601String(),
         ];
+    }
+
+    /**
+     * Linha da aba Favoritas: o retrato atual da origem + quando foi salva.
+     *
+     * @return array<string, mixed>
+     */
+    public function favoriteRow(ColorPaletteFavorite $favorite): array
+    {
+        return array_merge($this->row($favorite->palette), [
+            'favorited_at' => $favorite->created_at?->toIso8601String(),
+        ]);
     }
 
     /**

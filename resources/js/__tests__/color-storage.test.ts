@@ -9,7 +9,8 @@ import type { ColorStorageLike } from '@/tools/html-color-picker/lib/storage';
 import type { Rgba } from '@/lib/color';
 
 /**
- * Biblioteca local (ADR-118): chave canonica, caps 50/50, leitura tolerante.
+ * Biblioteca local (ADR-118): chave canonica, cap 20/50 (F5, ADR-132) e
+ * leitura tolerante.
  */
 
 const RED: Rgba = { r: 255, g: 0, b: 0, a: 1 };
@@ -60,6 +61,24 @@ describe('createColorLibrary', () => {
         expect(library.addHistory(CLEAR)).toEqual(['transparent']);
     });
 
+    it('aceita limites vindos do servidor', () => {
+        const library = createColorLibrary(new FakeStorage(), {
+            history: 2,
+            favorites: 1,
+        });
+
+        library.addHistory(RED);
+        library.addHistory(BLUE);
+        library.addHistory({ r: 0, g: 255, b: 0, a: 1 });
+
+        expect(library.readHistory()).toHaveLength(2);
+
+        library.addFavorite(RED);
+        library.addFavorite(BLUE);
+
+        expect(library.readFavorites()).toEqual(['#0000ffff']);
+    });
+
     it('coloca a cor mais recente primeiro e respeita o cap', () => {
         const library = createColorLibrary(new FakeStorage());
 
@@ -75,7 +94,7 @@ describe('createColorLibrary', () => {
         const keys = library.readHistory();
 
         expect(keys).toHaveLength(HISTORY_LIMIT);
-        expect(keys[0]).toBe('#360000ff');
+        expect(keys[0]).toBe('#180000ff');
         expect(keys).not.toContain('#000000ff');
     });
 
@@ -170,7 +189,7 @@ describe('createColorLibrary', () => {
             favorites: 'colors.picker.favorites.v1',
             last: 'colors.picker.last.v1',
         });
-        expect(HISTORY_LIMIT).toBe(50);
+        expect(HISTORY_LIMIT).toBe(20);
         expect(FAVORITES_LIMIT).toBe(50);
     });
 });

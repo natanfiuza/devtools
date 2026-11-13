@@ -28,6 +28,9 @@ final class ToolProps
             'share-text' => (object) ShareTextToolProps::for($user, $request),
             'badgeforge' => (object) BadgeForgeToolProps::for($user),
             'palette-generator' => (object) ColorsToolProps::for($user),
+            // O picker so usa o bloco `library`: a biblioteca local do anonimo
+            // e, para quem esta logado, historico e favoritos da conta (F5).
+            'html-color-picker' => (object) ['library' => ColorsToolProps::library($user)],
             default => (object) [],
         };
     }
