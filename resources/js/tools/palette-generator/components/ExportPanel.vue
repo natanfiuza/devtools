@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCopyConfirmation } from '@/composables/useCopyFeedback';
 import type { PaletteScale } from '@/lib/color';
 import { downloadText } from '@/lib/download';
+import type { PaletteRoles } from '@/types/colors';
 import {
     PALETTE_EXPORT_FORMATS,
     buildAllExports,
@@ -18,16 +19,20 @@ import {
 } from '../lib/exporters';
 
 /**
- * Exportacao: nome, cinco formatos e as duas saidas (copiar e baixar).
+ * Exportacao: nome, formatos da escala e design tokens, e as duas saidas
+ * (copiar e baixar).
  *
  * O nome e livre, mas tudo que sai daqui usa o slug sanitizado; quando o texto
  * difere do slug, a pagina avisa qual nome sera usado. O conteudo de cada aba
- * e gerado na hora, sem estado escondido.
+ * e gerado na hora, sem estado escondido. `roles` so existe no editor: com
+ * ele, CSS/SCSS/JSON e os formatos de token ganham a camada semantica.
  */
 
 const props = defineProps<{
     scale: PaletteScale;
     copy: (value: string, success?: string) => Promise<boolean>;
+    /** Papeis claro/escuro do editor; ausente no gerador. */
+    roles?: PaletteRoles;
 }>();
 
 const { t } = useI18n();
@@ -38,7 +43,9 @@ const active = ref<PaletteExportFormat>('css');
 
 const slug = computed(() => sanitizePaletteName(name.value));
 const renamed = computed(() => slug.value !== name.value);
-const files = computed(() => buildAllExports(props.scale, name.value));
+const files = computed(() =>
+    buildAllExports(props.scale, name.value, props.roles),
+);
 const activeFile = computed<PaletteExportFile | undefined>(() =>
     files.value.find((file) => file.format === active.value),
 );
@@ -98,6 +105,13 @@ function onDownload(): void {
       </h2>
       <p class="mt-1 text-xs text-muted-foreground">
         {{ t('tools.palette-generator.export.description') }}
+      </p>
+      <p
+        v-if="roles"
+        class="mt-1 text-xs text-muted-foreground"
+        data-test="export-semantic-note"
+      >
+        {{ t('tools.palette-generator.export.semantic_included') }}
       </p>
     </div>
 

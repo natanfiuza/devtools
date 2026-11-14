@@ -6,6 +6,7 @@ import {
     parseColor,
     type Rgba,
 } from '@/lib/color';
+import { PALETTE_ROLES, PALETTE_THEMES } from '@/lib/palettePayload';
 import {
     PALETTE_EXPORT_FORMATS,
     buildAllExports,
@@ -13,6 +14,8 @@ import {
     sanitizePaletteName,
     type PaletteExportFormat,
 } from '@/tools/palette-generator/lib/exporters';
+import { COLOR_TOKEN_FORMAT_VERSION } from '@/tools/palette-generator/lib/tokenExporters';
+import type { PaletteRoleColors, PaletteRoles } from '@/types/colors';
 
 /**
  * Exportadores da F2.
@@ -52,6 +55,18 @@ const EXPECTED_FILE: Record<
     json: {
         filename: 'primary.json',
         mime: 'application/json;charset=utf-8',
+    },
+    dtcg: {
+        filename: 'primary.tokens.json',
+        mime: 'application/json;charset=utf-8',
+    },
+    'style-dictionary': {
+        filename: 'primary.style-dictionary.json',
+        mime: 'application/json;charset=utf-8',
+    },
+    typescript: {
+        filename: 'primary.tokens.ts',
+        mime: 'text/typescript;charset=utf-8',
     },
     'tailwind-v3': {
         filename: 'tailwind.primary.config.js',
@@ -152,12 +167,18 @@ describe('buildPaletteExport — valores opacos', () => {
         const contents = buildPaletteExport(SCALE, 'json', 'primary').contents;
         const parsed = JSON.parse(contents) as {
             name: string;
+            formatVersion: number;
             algorithmVersion: number;
+            clippedTones: number[];
             colors: Record<string, string>;
+            semantic?: unknown;
         };
 
         expect(parsed.name).toBe('primary');
+        expect(parsed.formatVersion).toBe(COLOR_TOKEN_FORMAT_VERSION);
         expect(parsed.algorithmVersion).toBe(PALETTE_ALGORITHM_VERSION);
+        expect(parsed.clippedTones).toEqual(SCALE.clippedTones);
+        expect(parsed.semantic).toBeUndefined();
         expect(Object.keys(parsed.colors)).toEqual(
             PALETTE_TONES.map(String),
         );
@@ -266,16 +287,12 @@ describe('buildPaletteExport — valores com alpha', () => {
 });
 
 describe('buildAllExports', () => {
-    it('devolve os cinco formatos na ordem canonica', () => {
+    it('devolve todos os formatos na ordem canonica', () => {
         const files = buildAllExports(SCALE, 'primary');
 
-        expect(files.map((file) => file.format)).toEqual([
-            'css',
-            'scss',
-            'json',
-            'tailwind-v3',
-            'tailwind-v4',
-        ]);
+        expect(files.map((file) => file.format)).toEqual(
+            PALETTE_EXPORT_FORMATS,
+        );
         expect(files.map((file) => file.filename)).toEqual(
             PALETTE_EXPORT_FORMATS.map(
                 (format) => EXPECTED_FILE[format].filename,
@@ -302,5 +319,97 @@ describe('buildAllExports', () => {
         };
 
         expect(Object.keys(parsed.colors)).toHaveLength(PALETTE_TONES.length);
+    });
+});
+
+const LIGHT_ROLES: PaletteRoleColors = {
+    primary: '#332211',
+    secondary: '#443322',
+    accent: '#554433',
+    background: '#fefefe',
+    surface: '#f5f5f5',
+    text: '#111111',
+    text_muted: '#555555',
+    border: '#dddddd',
+};
+
+const DARK_ROLES: PaletteRoleColors = {
+    primary: '#aabbcc',
+    secondary: '#99aabb',
+    accent: '#8899aa',
+    background: '#0a0a0a',
+    surface: '#151515',
+    text: '#fafafa',
+    text_muted: '#a0a0a0',
+    border: '#333333',
+};
+
+const ROLES: PaletteRoles = { light: LIGHT_ROLES, dark: DARK_ROLES };
+
+const SEMANTIC_LINES = PALETTE_THEMES.flatMap((theme) =>
+    PALETTE_ROLES.map((role) => `${theme}-${role}`),
+);
+
+describe('buildPaletteExport — papeis semanticos', () => {
+    it('sem roles, CSS/SCSS/JSON nao ganham a camada semantica', () => {
+        const css = buildPaletteExport(SCALE, 'css', 'primary').contents;
+        const scss = buildPaletteExport(SCALE, 'scss', 'primary').contents;
+        const json = JSON.parse(
+            buildPaletteExport(SCALE, 'json', 'primary').contents,
+        ) as { semantic?: unknown };
+
+        expect(css).not.toContain('--color-light-');
+        expect(scss).not.toContain('$color-light-');
+        expect(json.semantic).toBeUndefined();
+    });
+
+    it('CSS poe os 8 papeis de cada tema depois das 11 primitivas', () => {
+        const css = buildPaletteExport(SCALE, 'css', 'primary', ROLES).contents;
+        const variables = variablesOf(css, '    --color-');
+
+        expect(variables).toHaveLength(PALETTE_TONES.length + 16);
+        expect(variables.slice(PALETTE_TONES.length)).toEqual(
+            SEMANTIC_LINES.map((key) => {
+                const separator = key.indexOf('-');
+                const theme = key.slice(0, separator) as 'light' | 'dark';
+                const role = key.slice(separator + 1) as keyof PaletteRoleColors;
+
+                return `    --color-${key}: ${ROLES[theme][role]};`;
+            }),
+        );
+    });
+
+    it('SCSS usa !default nos papeis', () => {
+        const scss = buildPaletteExport(SCALE, 'scss', 'primary', ROLES).contents;
+
+        expect(scss).toContain(
+            `$color-light-primary: ${LIGHT_ROLES.primary} !default;`,
+        );
+        expect(scss).toContain(
+            `$color-dark-border: ${DARK_ROLES.border} !default;`,
+        );
+    });
+
+    it('JSON aninha os papeis por tema', () => {
+        const json = JSON.parse(
+            buildPaletteExport(SCALE, 'json', 'primary', ROLES).contents,
+        ) as { semantic: PaletteRoles };
+
+        expect(json.semantic).toEqual(ROLES);
+        expect(Object.keys(json.semantic.light)).toEqual([...PALETTE_ROLES]);
+    });
+
+    it('Tailwind continua so com primitivas mesmo com roles', () => {
+        for (const format of ['tailwind-v3', 'tailwind-v4'] as const) {
+            const contents = buildPaletteExport(
+                SCALE,
+                format,
+                'primary',
+                ROLES,
+            ).contents;
+
+            expect(contents).not.toContain('light-primary');
+            expect(contents).not.toContain('dark-primary');
+        }
     });
 });
