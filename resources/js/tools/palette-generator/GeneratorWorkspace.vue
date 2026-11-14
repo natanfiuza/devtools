@@ -157,6 +157,24 @@ function baseHex(): string {
         : formatHex(state.rgba.value);
 }
 
+/**
+ * Aplica a base de um preset do gerador (F5, ADR-093).
+ *
+ * O preset guarda so a entrada; a escala e harmonias voltam a ser derivadas
+ * pelo algoritmo atual. A troca entra no historico como qualquer outra.
+ */
+function applyBaseHex(hex: string): boolean {
+    const rgba = rgbaOf(hex);
+
+    if (rgba === null) {
+        return false;
+    }
+
+    useBase(rgba);
+
+    return true;
+}
+
 function draftTab(): SaveTab {
     return activeTab.value === 'harmonies' || activeTab.value === 'extraction'
         ? activeTab.value
@@ -299,6 +317,8 @@ defineExpose({
     activeTab,
     scale,
     extracted,
+    baseHex,
+    applyBaseHex,
     rgba: state.rgba,
 });
 </script>

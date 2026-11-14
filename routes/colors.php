@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Colors\ColorFavoriteController;
 use App\Http\Controllers\Api\Colors\ColorHistoryController;
+use App\Http\Controllers\Api\Colors\ColorPresetController;
 use App\Http\Controllers\Api\Colors\PaletteFavoriteController;
 use App\Http\Controllers\Colors\PaletteController;
 use App\Http\Controllers\Colors\PaletteDuplicationController;
@@ -28,6 +29,10 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
                 ->name('history.index');
             Route::get('favorites', [ColorFavoriteController::class, 'index'])
                 ->name('favorites.index');
+            // Presets do gerador (F5, ADR-093): configuracao da conta, nao
+            // paleta. A leitura alimenta o dialogo do gerador.
+            Route::get('presets', [ColorPresetController::class, 'index'])
+                ->name('presets.index');
 
             Route::middleware('throttle:colors-library')->group(function (): void {
                 Route::post('history', [ColorHistoryController::class, 'store'])
@@ -41,6 +46,15 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
                     ->name('favorites.store');
                 Route::delete('favorites', [ColorFavoriteController::class, 'destroy'])
                     ->name('favorites.destroy');
+
+                Route::post('presets', [ColorPresetController::class, 'store'])
+                    ->name('presets.store');
+                Route::patch('presets/{colorPreset}', [ColorPresetController::class, 'update'])
+                    ->whereUlid('colorPreset')
+                    ->name('presets.update');
+                Route::delete('presets/{colorPreset}', [ColorPresetController::class, 'destroy'])
+                    ->whereUlid('colorPreset')
+                    ->name('presets.destroy');
 
                 // Paletas publicas de outras contas (F5, ADR-128). O vinculo
                 // e da conta; a paleta nao e copiada.

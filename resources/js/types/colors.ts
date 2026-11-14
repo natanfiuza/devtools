@@ -222,6 +222,37 @@ export type ColorLibraryToolProps = {
     importBatch: number;
 };
 
+/**
+ * Preset do gerador da conta (F5, ADR-093).
+ *
+ * Guarda apenas a entrada da geracao (nome + cor base). A escala e derivada
+ * pelo algoritmo ao aplicar; visibilidade, URL publica e cota de paletas nao
+ * existem aqui - isso e o que separa um preset de uma paleta salva.
+ */
+export type ColorPreset = {
+    id: string;
+    name: string;
+    base: string;
+    created_at: string | null;
+    updated_at: string | null;
+};
+
+/** Teto configurado em `config('colors.presets.limit')`; `null` = sem limite. */
+export type ColorPresetLimits = {
+    limit: number | null;
+    used: number;
+};
+
+/** Resposta de `GET /api/tools/colors/presets`. */
+export type ColorPresetList = {
+    data: ColorPreset[];
+    limits: ColorPresetLimits;
+    /** Tetos do formulario, vindos da config; o cliente nao os fixa. */
+    form: {
+        name_max_length: number;
+    };
+};
+
 /** Props do editor (`PaletteController@edit`). */
 export type PaletteEditorProps = {
     palette: PaletteEditor;

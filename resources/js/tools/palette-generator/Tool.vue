@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import PresetDialog from '@/components/colors/PresetDialog.vue';
 import SavePaletteDialog from '@/components/colors/SavePaletteDialog.vue';
 import { Button } from '@/components/ui/button';
 import type { PaletteSaveSource, WorkspaceSnapshot } from '@/lib/paletteSave';
@@ -44,6 +45,8 @@ const page = usePage();
 const workspace = ref<InstanceType<typeof GeneratorWorkspace> | null>(null);
 const dialogOpen = ref(false);
 const saveSource = ref<PaletteSaveSource | null>(null);
+const presetsOpen = ref(false);
+const presetBase = ref('');
 
 const authenticated = computed(() => page.props.auth?.user != null);
 const canSave = computed(() => workspace.value?.isEmpty !== true);
@@ -89,6 +92,32 @@ function requestSave(): void {
     router.visit(palettes.create.url());
 }
 
+/** O dialogo de presets sempre parte da base que esta no gerador. */
+function openPresets(): void {
+    const current = workspace.value;
+
+    if (current === null) {
+        return;
+    }
+
+    presetBase.value = current.baseHex();
+    presetsOpen.value = true;
+}
+
+/**
+ * Aplicar repoe a base; a escala volta a ser derivada e o historico registra
+ * a troca. O dialogo fecha sozinho ao emitir.
+ */
+function applyPreset(base: string): void {
+    const current = workspace.value;
+
+    if (current === null || !current.applyBaseHex(base)) {
+        return;
+    }
+
+    current.notify(t('colors.presets.applied'));
+}
+
 /** `?save=1` e a volta do intent de criacao, depois do login. */
 function wantsSave(): boolean {
     const query = page.url.includes('?')
@@ -126,7 +155,17 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex justify-end">
+    <div class="flex flex-wrap justify-end gap-2">
+      <Button
+        v-if="authenticated"
+        type="button"
+        size="sm"
+        variant="outline"
+        data-test="palette-presets"
+        @click="openPresets"
+      >
+        {{ t('colors.presets.open') }}
+      </Button>
       <Button
         type="button"
         size="sm"
@@ -149,6 +188,15 @@ onMounted(() => {
       :source="saveSource"
       :palette="props.palette"
       @close="dialogOpen = false"
+    />
+
+    <PresetDialog
+      v-if="authenticated && presetsOpen"
+      :open="presetsOpen"
+      :base="presetBase"
+      :has-base="canSave"
+      @close="presetsOpen = false"
+      @apply="applyPreset"
     />
   </div>
 </template>
