@@ -58,4 +58,9 @@ apenas valida e mostra a prévia. O estado da página só muda ao clicar em
 - Individual por cor.
 - Paleta completa.
 - Protótipo SVG vetorial (fonte única) e PNG 1x/2x rasterizado do **mesmo** SVG, com a fonte embutida na exportação — implementado na Fase 4 (ADR-126).
-- Paleta como imagem tipográfica (horizontal, vertical, card).
+- Paleta como imagem tipográfica (horizontal 1600×500, vertical 1080×1920, card
+  1080×1080) — implementada na Fase 6 (ADR-138): nome truncado com `…`, cada HEX
+  na ordem da paleta, marca fixa `devtools.natanfiuza.dev.br`, SVG sanitizado por
+  construção e PNG 1×/2× do mesmo SVG. A fonte (Libre Franklin) é embutida só na
+  exportação; a prévia é o SVG puro. Tudo roda no navegador, no editor e na
+  página pública, e nada é enviado ao servidor.

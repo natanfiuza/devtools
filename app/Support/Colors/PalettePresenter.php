@@ -5,6 +5,7 @@ namespace App\Support\Colors;
 use App\Models\ColorPalette;
 use App\Models\ColorPaletteFavorite;
 use App\Models\ColorTag;
+use App\Models\User;
 
 /**
  * Shapes de paleta para Inertia (F4, ADR-123/ADR-124).
@@ -91,9 +92,40 @@ final class PalettePresenter
             'colors' => $palette->colors,
             'colors_count' => $palette->colors_count,
             'duplications_count' => $palette->duplications_count,
+            'likes_count' => ProfilePresenter::likesCount($palette),
             'slug' => $palette->slug,
             'tags' => $this->tags($palette),
+            'author' => $this->author($palette),
             'updated_at' => $palette->updated_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Byline do autor na pagina publica (F6, ADR-134/ADR-135).
+     *
+     * A conta aparece quando tem username e continua visivel; conta suspensa,
+     * anonimizada, excluida ou sem username nao vira byline. O autor e lido da
+     * relacao `user`, que ja vem carregada pelo controller.
+     *
+     * @return array{id: int, name: string, username: string, avatar: string|null}|null
+     */
+    public function author(ColorPalette $palette): ?array
+    {
+        // `find` devolve `?User`: conta soft-deleted nao vira byline.
+        $user = User::query()->find($palette->user_id);
+
+        if (! $user instanceof User
+            || $user->username === null
+            || $user->isSuspended()
+            || $user->isAnonymized()) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $user->getKey(),
+            'name' => $user->name,
+            'username' => $user->username,
+            'avatar' => ProfilePresenter::avatar($user),
         ];
     }
 

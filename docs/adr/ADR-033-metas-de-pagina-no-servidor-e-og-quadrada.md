@@ -79,3 +79,11 @@ os dois casos sem imagens por rede.
   (ADR-014); um card que depende de requisicao quebra o compartilhamento.
 - **Trocar para `twitter:card=summary`** (card quadrado pequeno) - o card
   grande carrega titulo e descricao ao lado, que e o objetivo da mudanca.
+
+## Emenda 2026-11-14
+
+O perfil público da F6 (`colors.profiles.show`, ADR-134) entra no resolvedor de
+metas sem mudar a fonte única: `Seo::profileMeta()` monta título e descrição
+traduzidos e usa a mesma consulta de visibilidade da rota. Sem perfil visível,
+valem o nome do app e a `app.tagline`; o controller responde 404 antes de
+qualquer renderização. O perfil é indexável, mas não entra no sitemap.

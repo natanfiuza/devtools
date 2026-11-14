@@ -60,3 +60,12 @@ Mutações do dashboard usam `throttle:colors-management` (60/min por conta) e o
 - **Sitemap sem limite**: cresce com o acervo e sem índice próprio; o teto configurável resolve enquanto o volume é pequeno.
 - **Incrementar "uso" também na autocópia**: mediria organização pessoal, não adoção por outros.
 - **Gerar a OG no servidor**: contraria o processamento no cliente e a ADR-125; o servidor só valida e guarda.
+
+## Emenda 2026-11-14
+
+A ressalva da seção 4 ("a página é a paleta, não o perfil") valeu até a F4.
+Desde a F6 a página pública mostra byline do autor com link para
+`/{locale}/u/{username}`, curtida com contador e seguir (ADR-134, ADR-135,
+ADR-136), além da seção recolhível de imagem (ADR-138). A duplicação, o
+canonical/hreflang sem query e o sitemap com teto não mudaram; o perfil é
+indexável e fica fora do sitemap.

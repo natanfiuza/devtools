@@ -26,6 +26,7 @@ import type { WorkspaceSnapshot } from '@/lib/paletteSave';
 import publicPalettes from '@/routes/colors/palettes';
 import palettes from '@/routes/dashboard/colors/palettes';
 import GeneratorWorkspace from '@/tools/palette-generator/GeneratorWorkspace.vue';
+import PaletteImagePanel from '@/tools/palette-generator/image/PaletteImagePanel.vue';
 import type {
     ExtractedColor,
     ExtractionCount,
@@ -194,7 +195,8 @@ function initialTab(): string {
         tab === 'harmonies' ||
         tab === 'extraction' ||
         tab === 'library' ||
-        tab === 'prototype'
+        tab === 'prototype' ||
+        tab === 'image'
     ) {
         return tab;
     }
@@ -572,6 +574,12 @@ function save(): void {
           >
             {{ t('colors.prototype.tab') }}
           </TabsTrigger>
+          <TabsTrigger
+            value="image"
+            data-test="palette-editor-tab-image"
+          >
+            {{ t('colors.image.tab') }}
+          </TabsTrigger>
         </template>
 
         <template #panels-extra>
@@ -582,6 +590,15 @@ function save(): void {
             <PrototypePanel
               v-model:roles="roles"
               :defaults="roleDefaults"
+            />
+          </TabsContent>
+          <TabsContent
+            value="image"
+            class="mt-3"
+          >
+            <PaletteImagePanel
+              :name="palette.name"
+              :colors="palette.colors.items.map((item) => item.hex)"
             />
           </TabsContent>
         </template>

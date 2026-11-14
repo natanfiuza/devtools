@@ -54,6 +54,18 @@ return [
     ],
 
     /*
+    | Social das paletas publicas (F6, ADR-135 a ADR-137). O cookie anonimo e
+    | first-party e cifrado; `cookie_days` e o unico prazo de retencao do
+    | vinculo no navegador. O perfil publico pagina as paletas do autor com o
+    | mesmo cuidado de consulta da lista da conta.
+    */
+    'social' => [
+        'cookie_days' => (int) env('COLORS_ANON_COOKIE_DAYS', 365),
+
+        'profile_per_page' => (int) env('COLORS_PROFILE_PER_PAGE', 12),
+    ],
+
+    /*
     | Presets do gerador (F5, ADR-093). Guardam apenas a entrada da geracao
     | (nome + cor base), nunca as cores derivadas. `limit = null` significa
     | sem limite funcional; um teto operacional, se necessario, vem daqui.
@@ -150,6 +162,7 @@ return [
         'management_per_minute' => (int) env('COLORS_MANAGEMENT_RATE_LIMIT', 60),
         'og_per_minute' => (int) env('COLORS_OG_RATE_LIMIT', 10),
         'library_per_minute' => (int) env('COLORS_LIBRARY_RATE_LIMIT', 120),
+        'social_per_minute' => (int) env('COLORS_SOCIAL_RATE_LIMIT', 60),
     ],
 
     /*

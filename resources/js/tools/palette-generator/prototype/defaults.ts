@@ -22,14 +22,20 @@ export const PROTOTYPE_TEMPLATES: readonly PrototypeTemplate[] = [
     'mobile',
 ];
 
-export const PROTOTYPE_SIZES: Record<PrototypeDocumentKind, PrototypeSize> = {
+/**
+ * Tipos que este catalogo desenha. A imagem tipografica (F6, ADR-138) usa o
+ * mesmo serializador, mas tem medidas e composicao proprias.
+ */
+export type PrototypeBuildKind = Exclude<PrototypeDocumentKind, 'image'>;
+
+export const PROTOTYPE_SIZES: Record<PrototypeBuildKind, PrototypeSize> = {
     site: { width: 1200, height: 900 },
     mobile: { width: 390, height: 844 },
     og: { width: 1200, height: 630 },
 };
 
 export type PrototypeBuildInput = {
-    kind: PrototypeDocumentKind;
+    kind: PrototypeBuildKind;
     theme: PaletteTheme;
     roles: PaletteRoleColors;
     copy: PrototypeCopy;

@@ -331,6 +331,26 @@ const TRADUCOES = {
                 description_too_long: 'DESCRICAO_LONGA {max}',
             },
         },
+        image: {
+            tab: 'IMAGEM',
+            title: 'IMAGEM_TITULO',
+            description: 'IMAGEM_DESCRICAO',
+            layout_label: 'FORMATO',
+            layout_horizontal: 'HORIZONTAL',
+            layout_vertical: 'VERTICAL',
+            layout_card: 'CARTAO',
+            size_horizontal: '1600 × 500 px',
+            size_vertical: '1080 × 1920 px',
+            size_card: '1080 × 1080 px',
+            note: 'NOME_E_HEX',
+            open: 'GERAR_IMAGEM',
+            close: 'FECHAR',
+            preview_alt: 'PREVIA {layout} DE {name}',
+            download_svg: 'BAIXAR_SVG',
+            download_png: 'BAIXAR_PNG',
+            download_png_2x: 'BAIXAR_PNG_2X',
+            png_error: 'ERRO_PNG',
+        },
         prototype: {
             tab: 'PROTOTIPO',
             title: 'PROTOTIPO_TITULO',
@@ -825,6 +845,26 @@ describe('PaletteEditor', () => {
         expect(
             document.querySelector('[data-test="prototype-preview"]'),
         ).not.toBeNull();
+    });
+
+    it('abre a aba Imagem e monta o painel pela query', async () => {
+        pageState.url =
+            '/dashboard/colors/palettes/01KPALETTE00000000000000001/edit?tab=image';
+
+        mountEditor();
+        await nextTick();
+
+        expect(
+            (workspaceProps.current as { initialTab: string }).initialTab,
+        ).toBe('image');
+        expect(
+            document.querySelector('[data-test="palette-image-panel"]'),
+        ).not.toBeNull();
+        expect(
+            document
+                .querySelector('[data-test="palette-image-preview"]')
+                ?.getAttribute('width'),
+        ).toBe('1600');
     });
 
     it('leva no PATCH os papeis editados na aba Prototipo', async () => {

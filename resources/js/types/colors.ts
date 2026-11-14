@@ -122,6 +122,20 @@ export type PaletteEditor = {
     updated_at: string | null;
 };
 
+/**
+ * Autor publico de uma paleta (F6, ADR-134).
+ *
+ * E a byline da pagina publica: nome, username e avatar. E-mail, papel e
+ * qualquer outro dado da conta ficam de fora. Conta suspensa ou anonimizada
+ * nao aparece - nesse caso `author` e `null`.
+ */
+export type PaletteAuthor = {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string | null;
+};
+
 /** O que a pagina publica recebe: sem papeis, origem ou arquivamento. */
 export type PalettePublic = {
     id: string;
@@ -132,9 +146,13 @@ export type PalettePublic = {
     algorithm_version: number;
     colors: PaletteColors;
     colors_count: number;
+    /** Curtidas ativas (F6, ADR-135). */
+    likes_count: number;
     duplications_count: number;
     slug: string | null;
     tags: PaletteTag[];
+    /** Byline; `null` quando o autor nao e uma conta visivel. */
+    author: PaletteAuthor | null;
     updated_at: string | null;
 };
 
@@ -145,8 +163,53 @@ export type PublicPaletteProps = {
     favorited: boolean;
     /** So conta logada e paleta de outra pessoa podem favoritar. */
     canFavorite: boolean;
+    /** O visitante atual ja curtiu (conta ou cookie anonimo). */
+    liked: boolean;
+    /** O dono nao curte a propria paleta; qualquer outro visitante curte. */
+    canLike: boolean;
+    /** A conta logada segue o autor. */
+    following: boolean;
+    /** So conta logada e paleta de outra pessoa podem seguir o autor. */
+    canFollow: boolean;
     /** URL da OG propria; `null` quando o dono ainda nao gerou. */
     ogUrl: string | null;
+};
+
+/** Resposta de `POST/DELETE /api/tools/colors/palettes/{id}/like`. */
+export type PaletteLikeState = {
+    liked: boolean;
+    likes_count: number;
+};
+
+/** Resposta de `POST/DELETE /api/tools/colors/users/{id}/follow`. */
+export type UserFollowState = {
+    following: boolean;
+    followers_count: number;
+};
+
+/** Perfil publico (`PublicProfileController@show`); nunca traz e-mail. */
+export type PublicProfile = {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string | null;
+    followers_count: number;
+    following_count: number;
+    member_since: string | null;
+};
+
+/** Linha do perfil: a paleta publica mais as curtidas ativas. */
+export type ProfilePaletteRow = PaletteRow & {
+    likes_count: number;
+};
+
+/** Props da pagina de perfil publico. */
+export type PublicProfileProps = {
+    profile: PublicProfile;
+    palettes: PalettePaginator<ProfilePaletteRow>;
+    following: boolean;
+    canFollow: boolean;
+    isOwnProfile: boolean;
 };
 
 /** Linha da aba Favoritas: o retrato atual da origem + quando foi salva. */

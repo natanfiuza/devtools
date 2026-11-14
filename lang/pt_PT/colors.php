@@ -7,6 +7,57 @@ return [
         'image_alt' => ':name — paleta de cores',
     ],
 
+    'profile' => [
+        'meta' => [
+            'title' => 'Paletas de :name',
+            'description' => 'Paletas públicas criadas por :name no :app.',
+        ],
+        'own_badge' => 'O seu perfil',
+        'following_zero' => 'Não segue ninguém',
+        'following_one' => 'A seguir 1 conta',
+        'following_many' => 'A seguir :count contas',
+        'member_since' => 'Membro desde :date',
+        'palettes_title' => 'Paletas públicas',
+        'empty_title' => 'Nenhuma paleta pública ainda',
+        'empty_description' => 'Quando esta conta publicar uma paleta, ela aparece aqui.',
+    ],
+
+    'social' => [
+        'like' => 'Gostar',
+        'liked' => 'Gosto dado',
+        'like_error' => 'Não foi possível gostar. Tente novamente.',
+        'likes_zero' => 'Sem gostos',
+        'likes_one' => '1 gosto',
+        'likes_many' => ':count gostos',
+        'follow' => 'Seguir',
+        'following' => 'A seguir',
+        'follow_error' => 'Não foi possível seguir. Tente novamente.',
+        'followers_zero' => 'Sem seguidores',
+        'followers_one' => '1 seguidor',
+        'followers_many' => ':count seguidores',
+    ],
+
+    'image' => [
+        'tab' => 'Imagem',
+        'title' => 'Imagem da paleta',
+        'description' => 'Exporte as cores como imagem para apresentações, publicações e documentação. A pré-visualização e o download são gerados no navegador.',
+        'layout_label' => 'Formato',
+        'layout_horizontal' => 'Horizontal',
+        'layout_vertical' => 'Vertical',
+        'layout_card' => 'Cartão',
+        'size_horizontal' => '1600 × 500 px',
+        'size_vertical' => '1080 × 1920 px',
+        'size_card' => '1080 × 1080 px',
+        'note' => 'Nome, códigos HEX e a marca do devtools.',
+        'open' => 'Gerar imagem',
+        'close' => 'Fechar',
+        'preview_alt' => 'Pré-visualização {layout} da paleta {name}',
+        'download_svg' => 'Descarregar SVG',
+        'download_png' => 'Descarregar PNG',
+        'download_png_2x' => 'Descarregar PNG (2x)',
+        'png_error' => 'Não foi possível gerar o PNG neste navegador.',
+    ],
+
     'palette' => [
         'copy_suffix' => ' (cópia)',
     ],
@@ -210,6 +261,7 @@ return [
 
     'public' => [
         'copy_hex' => 'Copiar HEX',
+        'by' => 'Por :name',
         'copied' => 'Cores copiadas.',
         'copied_hex' => '{hex} copiado.',
         'extracted_title' => 'Cores da imagem',

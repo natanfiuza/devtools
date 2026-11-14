@@ -127,6 +127,41 @@ const TRADUCOES = {
             favorite: 'FAVORITAR',
             favorited: 'FAVORITADA',
             favorite_error: 'ERRO_FAVORITO',
+            by: 'POR {name}',
+        },
+        image: {
+            tab: 'IMAGEM',
+            title: 'IMAGEM_TITULO',
+            description: 'IMAGEM_DESCRICAO',
+            layout_label: 'FORMATO',
+            layout_horizontal: 'HORIZONTAL',
+            layout_vertical: 'VERTICAL',
+            layout_card: 'CARTAO',
+            size_horizontal: '1600 × 500 px',
+            size_vertical: '1080 × 1920 px',
+            size_card: '1080 × 1080 px',
+            note: 'NOME_E_HEX',
+            open: 'GERAR_IMAGEM',
+            close: 'FECHAR',
+            preview_alt: 'PREVIA {layout} DE {name}',
+            download_svg: 'BAIXAR_SVG',
+            download_png: 'BAIXAR_PNG',
+            download_png_2x: 'BAIXAR_PNG_2X',
+            png_error: 'ERRO_PNG',
+        },
+        social: {
+            like: 'CURTIR',
+            liked: 'CURTIDA',
+            like_error: 'ERRO_CURTIDA',
+            likes_zero: 'SEM_CURTIDAS',
+            likes_one: '1_CURTIDA',
+            likes_many: '{count}_CURTIDAS',
+            follow: 'SEGUIR',
+            following: 'SEGUINDO',
+            follow_error: 'ERRO_SEGUIR',
+            followers_zero: 'SEM_SEGUIDORES',
+            followers_one: '1_SEGUIDOR',
+            followers_many: '{count}_SEGUIDORES',
         },
     },
 };
@@ -173,6 +208,8 @@ function palette(overrides: Partial<PalettePublic> = {}): PalettePublic {
         duplications_count: 0,
         slug: 'oceano',
         tags: [{ id: 'tag-1', name: 'web' }],
+        author: { id: 42, name: 'Ana', username: 'ana', avatar: null },
+        likes_count: 3,
         updated_at: '2026-11-10T12:00:00+00:00',
         ...overrides,
     };
@@ -186,6 +223,10 @@ function props(
         palette: palette(overrides),
         favorited: false,
         canFavorite: false,
+        liked: false,
+        canLike: true,
+        following: false,
+        canFollow: false,
         ogUrl: null,
         ...extra,
     };
@@ -533,5 +574,144 @@ describe('Pagina publica de paleta', () => {
         expect(
             query('[data-test="public-favorite-error"]').textContent,
         ).toContain('ERRO_FAVORITO');
+    });
+
+    it('abre a imagem tipografica so quando pedida', async () => {
+        mountPage();
+
+        expect(exists('[data-test="public-image"]')).toBe(true);
+        expect(exists('[data-test="palette-image-panel"]')).toBe(false);
+        expect(
+            query('[data-test="public-image-toggle"]').textContent,
+        ).toContain('GERAR_IMAGEM');
+
+        await click('[data-test="public-image-toggle"]');
+
+        expect(exists('[data-test="palette-image-panel"]')).toBe(true);
+        expect(
+            query('[data-test="public-image-toggle"]').textContent,
+        ).toContain('FECHAR');
+        expect(
+            query('[data-test="palette-image-preview"]').getAttribute(
+                'width',
+            ),
+        ).toBe('1600');
+
+        await click('[data-test="public-image-toggle"]');
+
+        expect(exists('[data-test="palette-image-panel"]')).toBe(false);
+    });
+
+    it('mostra a byline do autor com link para o perfil', () => {
+        mountPage();
+
+        const link = query<HTMLAnchorElement>(
+            '[data-test="public-palette-author-link"]',
+        );
+
+        expect(link.getAttribute('href')).toBe('/en/u/ana');
+        expect(link.textContent).toContain('Ana');
+        expect(link.getAttribute('aria-label')).toBe('POR Ana');
+    });
+
+    it('esconde a byline quando o autor nao e uma conta visivel', () => {
+        mountPage({ author: null });
+
+        expect(exists('[data-test="public-palette-author"]')).toBe(false);
+    });
+
+    it('curte de forma otimista e aceita a contagem do servidor', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ liked: true, likes_count: 4 }),
+        });
+
+        mountPage();
+
+        expect(
+            query('[data-test="palette-likes-count"]').textContent,
+        ).toContain('3_CURTIDAS');
+
+        await click('[data-test="palette-like"]');
+        await flushPromises();
+
+        expect(fetchMock.mock.calls[0]?.[0]).toBe(
+            '/api/tools/colors/palettes/01KPALETTE00000000000000001/like',
+        );
+        expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
+        expect(
+            query('[data-test="palette-like"]').textContent,
+        ).toContain('CURTIDA');
+        expect(
+            query('[data-test="palette-likes-count"]').textContent,
+        ).toContain('4_CURTIDAS');
+        expect(
+            query('[data-test="palette-like"]').getAttribute('aria-pressed'),
+        ).toBe('true');
+
+        await click('[data-test="palette-like"]');
+        await flushPromises();
+
+        expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({
+            method: 'DELETE',
+        });
+    });
+
+    it('desfaz a curtida e avisa quando a API falha', async () => {
+        fetchMock.mockResolvedValue({
+            ok: false,
+            json: async () => ({}),
+        });
+
+        mountPage();
+
+        await click('[data-test="palette-like"]');
+        await flushPromises();
+
+        expect(
+            query('[data-test="palette-like"]').textContent,
+        ).toContain('CURTIR');
+        expect(
+            query('[data-test="palette-likes-count"]').textContent,
+        ).toContain('3_CURTIDAS');
+        expect(
+            query('[data-test="palette-like-error"]').textContent,
+        ).toContain('ERRO_CURTIDA');
+    });
+
+    it('o dono ve a contagem sem o botao de curtir', () => {
+        mountPage({}, { canLike: false });
+
+        expect(exists('[data-test="palette-like"]')).toBe(false);
+        expect(
+            query('[data-test="palette-likes-count"]').textContent,
+        ).toContain('3_CURTIDAS');
+    });
+
+    it('segue o autor so quando a conta pode seguir', async () => {
+        fetchMock.mockResolvedValue({
+            ok: true,
+            json: async () => ({ following: true, followers_count: 1 }),
+        });
+
+        mountPage();
+
+        expect(exists('[data-test="follow-button"]')).toBe(false);
+
+        mountPage({}, { canFollow: true });
+
+        expect(
+            query('[data-test="follow-button"]').textContent,
+        ).toContain('SEGUIR');
+
+        await click('[data-test="follow-button"]');
+        await flushPromises();
+
+        expect(fetchMock.mock.calls[0]?.[0]).toBe(
+            '/api/tools/colors/users/42/follow',
+        );
+        expect(
+            query('[data-test="follow-button"]').textContent,
+        ).toContain('SEGUINDO');
     });
 });

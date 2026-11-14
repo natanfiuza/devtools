@@ -12,8 +12,11 @@ import type { PaletteRole, PaletteTheme } from '@/types/colors';
 /** Os templates fixos do prototipo; a OG usa o mesmo renderizador. */
 export type PrototypeTemplate = 'site' | 'mobile';
 
-/** Tipo de documento: os dois templates e a imagem de compartilhamento. */
-export type PrototypeDocumentKind = PrototypeTemplate | 'og';
+/**
+ * Tipo de documento: os dois templates, a imagem de compartilhamento e a
+ * imagem tipografica exportavel da paleta (F6, ADR-138).
+ */
+export type PrototypeDocumentKind = PrototypeTemplate | 'og' | 'image';
 
 export type PrototypeSize = {
     width: number;

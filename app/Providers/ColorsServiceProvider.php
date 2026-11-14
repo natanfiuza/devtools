@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Support\Colors\AnonymousIdentity;
+use Closure;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -33,6 +35,21 @@ final class ColorsServiceProvider extends ServiceProvider
         RateLimiter::for('colors-library', function (Request $request): Limit {
             return $this->limit($request, 'library_per_minute', 'colors library');
         });
+
+        // Curtir e seguir (F6, ADR-135/ADR-136). A conta tem chave propria; o
+        // visitante e limitado por IP em HMAC, sem IP em texto no cache.
+        RateLimiter::for('colors-social', function (Request $request): Limit {
+            $user = $request->user();
+            $account = $user instanceof User
+                ? 'user:'.$user->getKey()
+                : 'ip:'.AnonymousIdentity::ipKey($request);
+
+            $perMinute = max(1, (int) config('colors.rates.social_per_minute', 60));
+
+            return Limit::perMinute($perMinute)
+                ->by('colors social:'.$account)
+                ->response($this->rejection());
+        });
     }
 
     private function limit(Request $request, string $key, string $bucket): Limit
@@ -46,17 +63,22 @@ final class ColorsServiceProvider extends ServiceProvider
 
         return Limit::perMinute($perMinute)
             ->by($bucket.':'.$account)
-            ->response(static function (Request $request) {
-                if ($request->header('X-Inertia') !== null) {
-                    Inertia::flash('toast', [
-                        'type' => 'error',
-                        'message' => __('colors.validation.rate_limited'),
-                    ]);
+            ->response($this->rejection());
+    }
 
-                    return back();
-                }
+    private function rejection(): Closure
+    {
+        return static function (Request $request) {
+            if ($request->header('X-Inertia') !== null) {
+                Inertia::flash('toast', [
+                    'type' => 'error',
+                    'message' => __('colors.validation.rate_limited'),
+                ]);
 
-                return response()->json(['message' => __('colors.validation.rate_limited')], 429);
-            });
+                return back();
+            }
+
+            return response()->json(['message' => __('colors.validation.rate_limited')], 429);
+        };
     }
 }

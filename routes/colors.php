@@ -4,12 +4,15 @@ use App\Http\Controllers\Api\Colors\ColorFavoriteController;
 use App\Http\Controllers\Api\Colors\ColorHistoryController;
 use App\Http\Controllers\Api\Colors\ColorPresetController;
 use App\Http\Controllers\Api\Colors\PaletteFavoriteController;
+use App\Http\Controllers\Api\Colors\PaletteLikeController;
+use App\Http\Controllers\Api\Colors\UserFollowController;
 use App\Http\Controllers\Colors\PaletteController;
 use App\Http\Controllers\Colors\PaletteDuplicationController;
 use App\Http\Controllers\Colors\PaletteIntentController;
 use App\Http\Controllers\Colors\PaletteOgController;
 use App\Http\Controllers\Colors\PaletteTagController;
 use App\Http\Controllers\Colors\PublicPaletteController;
+use App\Http\Controllers\Colors\PublicProfileController;
 use App\Support\Locales;
 use Illuminate\Support\Facades\Route;
 
@@ -65,6 +68,19 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
                     ->whereUlid('colorPalette')
                     ->name('palettes.favorite.destroy');
             });
+        });
+
+    // Seguir contas (F6, ADR-136): exige login e usa o limiter social.
+    Route::prefix('api/tools/colors')
+        ->name('api.tools.colors.')
+        ->middleware('throttle:colors-social')
+        ->group(function (): void {
+            Route::post('users/{user}/follow', [UserFollowController::class, 'store'])
+                ->whereNumber('user')
+                ->name('users.follow.store');
+            Route::delete('users/{user}/follow', [UserFollowController::class, 'destroy'])
+                ->whereNumber('user')
+                ->name('users.follow.destroy');
         });
 
     Route::get('dashboard/colors/palettes', [PaletteController::class, 'index'])
@@ -127,11 +143,33 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         ->name('dashboard.colors.palettes.edit');
 });
 
+// Curtidas de paletas publicas (F6, ADR-135). O visitante curte sem conta,
+// por isso a rota fica fora do grupo autenticado; a sessao e o CSRF continuam
+// valendo e o limiter separa conta de IP anonimo.
+Route::prefix('api/tools/colors')
+    ->name('api.tools.colors.')
+    ->middleware('throttle:colors-social')
+    ->group(function (): void {
+        Route::post('palettes/{colorPalette}/like', [PaletteLikeController::class, 'store'])
+            ->whereUlid('colorPalette')
+            ->name('palettes.like.store');
+        Route::delete('palettes/{colorPalette}/like', [PaletteLikeController::class, 'destroy'])
+            ->whereUlid('colorPalette')
+            ->name('palettes.like.destroy');
+    });
+
 // Pagina publica compartilhada entre idiomas: o slug e global e imutavel.
 Route::prefix('{locale}')
     ->whereIn('locale', Locales::slugs())
     ->group(function (): void {
         $slug = '[a-z0-9-]{1,60}';
+
+        // Perfil publico por username (F6, ADR-134): indexavel, fora do
+        // sitemap e com o mesmo 404 para conta inexistente, suspensa ou
+        // anonimizada.
+        Route::get('u/{username}', [PublicProfileController::class, 'show'])
+            ->where('username', '[a-z0-9_]{3,30}')
+            ->name('colors.profiles.show');
 
         Route::get('colors/p/{slug}', [PublicPaletteController::class, 'show'])
             ->where('slug', $slug)

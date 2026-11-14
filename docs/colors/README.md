@@ -1,7 +1,7 @@
 # Colors — índice da documentação
 
 Track do grupo Colors do devtools: HTML Color Picker e Color Palette Generator.
-Estado atual: **Fases 1, 2, 3, 4 e 5 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). A **Fase 5** acrescentou a biblioteca pessoal de cores — histórico e favoritos da conta, sem limite funcional e compartilhados pelo Picker e pelo Generator, com o anônimo reduzido a 20 de histórico e 50 de favoritos e importação explícita para a conta (ADR-127, ADR-131, ADR-132) —, favoritos de paletas públicas sem duplicata (ADR-128), presets do gerador como entrada da geração (ADR-129) e exportação e importação validadas de tokens W3C DTCG, Style Dictionary e JSON nativo (ADR-130, ADR-133). O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
+Estado atual: **Fases 1, 2, 3, 4, 5 e 6 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). A **Fase 5** acrescentou a biblioteca pessoal de cores — histórico e favoritos da conta, sem limite funcional e compartilhados pelo Picker e pelo Generator, com o anônimo reduzido a 20 de histórico e 50 de favoritos e importação explícita para a conta (ADR-127, ADR-131, ADR-132) —, favoritos de paletas públicas sem duplicata (ADR-128), presets do gerador como entrada da geração (ADR-129) e exportação e importação validadas de tokens W3C DTCG, Style Dictionary e JSON nativo (ADR-130, ADR-133). A **Fase 6** abriu o social — curtir paleta pública inclusive anônimo por identidade first-party reivindicada no login (ADR-135), seguir contas e perfil público por username (ADR-134, ADR-136), notificações só no canal `database` (ADR-137) — e a exportação da paleta como imagem tipográfica horizontal, vertical e card (ADR-138), sem comentários, denúncias, moderação, bloqueio, e-mail ou sino. O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
 
 ## Documentos
 
@@ -15,6 +15,7 @@ Estado atual: **Fases 1, 2, 3, 4 e 5 implementadas**. A Fase 1 entregou o HTML C
 | `export-formats.md` | CSS, Tailwind, W3C DTCG e Style Dictionary |
 | `minhas-paletas.md` | dashboard de paletas salvas |
 | `paleta-publica.md` | página pública da paleta, SEO e OG |
+| `perfil-publico.md` | perfil público por username, visibilidade e SEO |
 | `og-image.md` | OG estática de tool versus OG dinâmica de paleta |
 | `moderacao.md` | moderação de comentários |
 | `social.md` | curtidas, comentários, follows e notificações |
@@ -24,7 +25,7 @@ Estado atual: **Fases 1, 2, 3, 4 e 5 implementadas**. A Fase 1 entregou o HTML C
 
 ## ADRs de Colors
 
-Numeração vigente: **ADR-091 a ADR-133**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
+Numeração vigente: **ADR-091 a ADR-138**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
 Os números 057–086 que a especificação original citava já estavam ocupados no repositório (`docs/adr/`), por isso os 25 ADRs de Colors foram renumerados em 2026-11-07, sem mudar o conteúdo além das emendas da Fase 1.
 
 | antigo | novo | | antigo | novo | | antigo | novo |
@@ -62,6 +63,11 @@ ADRs criados nas Fases 1–5:
 | 131 | biblioteca de cores compartilhada entre Picker e Generator (conta × local, escrita otimista) |
 | 132 | histórico anônimo reduzido (20/50) e importação explícita do histórico local |
 | 133 | importação validada de tokens (parser puro, limites, diagnóstico, rascunho estendido) |
+| 134 | perfil público por username (404 uniforme, paletas públicas, contadores, SEO fora do sitemap) |
+| 135 | curtidas e identidade anônima (linha permanente, cookie first-party, claim no login, API sem identificador) |
+| 136 | seguir contas (linha permanente por par, login, 404 uniforme, contagem ativa) |
+| 137 | notificações no canal database (AfterCommit, `notified_at` atômico, sem PII) |
+| 138 | imagem tipográfica da paleta (três formatos fixos, marca fixa, SVG sanitizado, fonte só na exportação) |
 
 ## Emendas de 2026-11-07
 
@@ -97,6 +103,26 @@ As decisões anteriores foram preservadas; cada ADR afetado ganhou uma seção "
 - o anônimo continua só com `localStorage` (20 histórico/50 favoritos) e o rascunho pode carregar escala e papéis opcionais (ADR-096);
 - histórico e favoritos locais continuam sendo o modo anônimo; para logado passam a vir da conta e o histórico anônimo cai para 20 (ADR-118);
 - rascunho em `sessionStorage` ganha `scale?`/`roles?` com assinatura, sem virar paleta anônima (ADR-123 §7).
+
+## Emendas de 2026-11-14 (Fase 6)
+
+As decisões anteriores foram preservadas; cada ADR afetado ganhou uma seção
+"Emenda 2026-11-14":
+
+- metas de página resolvidas no servidor passam a cobrir o perfil público (ADR-033);
+- a paleta pública mostra autor, curtida, seguir e imagem; comentários e
+  denúncias continuam fora (ADR-098, ADR-124);
+- o social entregue é curtir/seguir/perfil, com notificação só no banco; moderação
+  e anti-spam além do throttle seguem pendentes (ADR-106);
+- a imagem da paleta é implementada nos três formatos, no cliente e sem
+  referência externa (ADR-107, ADR-115);
+- identidade anônima first-party, reivindicação no login e dedupe transacional
+  ficam implementados (ADR-112);
+- notificações passam a ser só `database`, uma por relação, sem e-mail/sino
+  (ADR-113);
+- a imagem reusa o serializador do protótipo, mas não o catálogo de medidas nem o
+  tipo de documento (ADR-126);
+- favorito e curtida são relações distintas que coexistem (ADR-128).
 
 ## Regras de manutenção
 

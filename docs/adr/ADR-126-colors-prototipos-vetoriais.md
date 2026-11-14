@@ -63,3 +63,12 @@ O renderizador é puro e não traduz nada: `PrototypeCopy` carrega os textos (ma
 - **Papéis calculados só no servidor**: o gerador precisa deles antes de salvar e a edição é local; o backend só valida e persiste o que chegou.
 - **Embutir a fonte no preview**: pagaria ~290 kB por abertura; o app já tem a fonte e a exportação paga o custo uma vez.
 - **Comparar PNG byte a byte no CI**: frágil entre versões de navegador/canvas; estrutura + snapshots + matriz manual cobrem melhor.
+
+## Emenda 2026-11-14
+
+A imagem tipográfica da paleta (ADR-138) reusa o serializador `renderSvg`, o
+`rasterizeSvg`, os nós `rect`/`text`, o `readableOn` e a fonte embutida deste
+ADR, mas tem medidas e composição próprias. `PrototypeDocumentKind` ganhou
+`'image'`, e o catálogo de tamanhos/protótipos usa
+`PrototypeBuildKind = Exclude<..., 'image'>`: converter a imagem num protótipo
+misturaria duas finalidades.

@@ -52,8 +52,14 @@
 - OG image: imagem de compartilhamento social; a de tool é estática e versionada, a de paleta é dinâmica e não versionada (ADR-105).
 - Arquivar: ocultar sem excluir; a URL pública responde 404, a paleta é restaurável e continua contando na cota (ADR-119).
 - Excluir: remoção definitiva de uma paleta; libera cota e não pode ser desfeita (ADR-119).
-- Curtir: interação social; anônimo usa identificador assinado de primeira parte (ADR-112).
-- Seguir: relação entre usuários.
+- Curtida: relação entre uma paleta pública e uma conta ou uma identidade anônima, guardada como linha permanente com `liked_at`/`notified_at`; descurtir só desativa e a contagem lê só as linhas ativas (ADR-135).
+- Identidade anônima: cookie first-party `colors_anon`, cifrado, `HttpOnly` e `SameSite=Lax`, com valor aleatório de 32 bytes em hex, emitido só depois de uma curtida e sem relação com IP, sessão ou conta; o IP só vira chave HMAC do limitador (ADR-135).
+- Reivindicação de curtidas: no login, passar as curtidas do cookie anônimo para a conta, mesclando conflitos e descartando o identificador, sem duplicar linhas nem avisos (ADR-135).
+- Perfil público: página `/{locale}/u/{username}` com nome, avatar, contadores e paletas públicas do autor; 404 uniforme para conta inexistente, suspensa ou anonimizada, indexável e fora do sitemap (ADR-134).
+- Seguir: relação permanente entre duas contas, uma linha por par, com `followed_at` nulo como “não segue”; exige login e não tem lista pública de seguidores (ADR-136).
+- Notificação de relação: aviso de curtida ou follow gravado apenas no canal `database`, depois do commit e no máximo uma vez por relação, garantido por `notified_at` atômico; sem e-mail, sino ou preferências na F6 (ADR-137).
+- Imagem tipográfica da paleta: imagem gerada no navegador com o nome, os HEX e a marca fixa, nos formatos horizontal 1600×500, vertical 1080×1920 e card 1080×1080; SVG sanitizado e PNG rasterizado do mesmo SVG (ADR-138).
+- Marca fixa: assinatura `devtools.natanfiuza.dev.br` presente em toda imagem tipográfica da paleta (ADR-138).
 - Comentário: texto público em paleta.
 - Thread: cadeia de respostas, com no máximo 2 níveis (ADR-111).
 - Denúncia: report de conteúdo.
