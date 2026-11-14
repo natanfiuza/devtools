@@ -1,5 +1,10 @@
-import { parseColor } from '@/lib/color';
-import type { PaletteKind, PaletteSource } from '@/types/colors';
+import { PALETTE_TONES, parseColor } from '@/lib/color';
+import { PALETTE_ROLES, PALETTE_THEMES } from '@/lib/palettePayload';
+import type {
+    PaletteKind,
+    PaletteRoles,
+    PaletteSource,
+} from '@/types/colors';
 
 /**
  * Rascunho do gerador para quem ainda nao esta logado (F4, ADR-096).
@@ -30,14 +35,40 @@ export interface DraftExtractedPalette {
     source: PaletteSource;
 }
 
+/**
+ * Escala importada de um arquivo de tokens (F5, Etapa 6).
+ *
+ * Sem isto o rascunho do anonimo so levaria a base e o login recalculava a
+ * escala; a importacao precisa atravessar o login exatamente como foi lida,
+ * inclusive os tons com croma cortado.
+ */
+export interface DraftScale {
+    items: { hex: string; tone: number }[];
+    algorithmVersion: number;
+    clippedTones: number[];
+}
+
 export interface PaletteDraft {
     version: 1;
     savedAt: number;
     kind: PaletteKind;
     base: string;
     extracted: DraftExtractedPalette | null;
+    /** So para escalas importadas; `null` no fluxo normal do gerador. */
+    scale: DraftScale | null;
+    /** Semânticas importadas; `null` quando o arquivo nao as trouxe. */
+    roles: PaletteRoles | null;
     tab: PaletteDraftTab;
 }
+
+/** Entrada de `savePaletteDraft`; os campos novos sao opcionais. */
+export type PaletteDraftInput = Omit<
+    PaletteDraft,
+    'version' | 'savedAt' | 'scale' | 'roles'
+> & {
+    scale?: DraftScale | null;
+    roles?: PaletteRoles | null;
+};
 
 /** O minimo de `Storage` que o rascunho usa (facilita testar). */
 export interface DraftStorageLike {
@@ -49,6 +80,8 @@ export interface DraftStorageLike {
 const TABS: readonly PaletteDraftTab[] = ['scale', 'harmonies', 'extraction'];
 
 const EXTRACTION_COUNTS = [5, 7, 9, 11];
+
+const TONE_VALUES: readonly number[] = PALETTE_TONES;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -64,6 +97,72 @@ function isHex(value: unknown): value is string {
 
 function isCount(value: unknown): value is number {
     return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+/**
+ * Escala importada so vale com os 11 tons unicos conhecidos, cada um HEX.
+ * Qualquer desvio descarta o campo, nao o rascunho inteiro.
+ */
+function validScale(value: unknown): value is DraftScale {
+    if (
+        !isRecord(value) ||
+        !Array.isArray(value.items) ||
+        value.items.length !== TONE_VALUES.length ||
+        !Array.isArray(value.clippedTones) ||
+        !isCount(value.algorithmVersion)
+    ) {
+        return false;
+    }
+
+    if (
+        !value.clippedTones.every(
+            (tone) =>
+                typeof tone === 'number' && TONE_VALUES.includes(tone),
+        )
+    ) {
+        return false;
+    }
+
+    const seen = new Set<number>();
+
+    for (const item of value.items) {
+        if (
+            !isRecord(item) ||
+            !isHex(item.hex) ||
+            typeof item.tone !== 'number' ||
+            !TONE_VALUES.includes(item.tone) ||
+            seen.has(item.tone)
+        ) {
+            return false;
+        }
+
+        seen.add(item.tone);
+    }
+
+    return seen.size === TONE_VALUES.length;
+}
+
+/** Papeis so valem completos: 8 papeis HEX nos dois temas. */
+function validRoles(value: unknown): value is PaletteRoles {
+    if (!isRecord(value)) {
+        return false;
+    }
+
+    for (const theme of PALETTE_THEMES) {
+        const colors = value[theme];
+
+        if (!isRecord(colors)) {
+            return false;
+        }
+
+        for (const role of PALETTE_ROLES) {
+            if (!isHex(colors[role])) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 function validSource(value: unknown): value is PaletteSource {
@@ -130,19 +229,26 @@ function draftFrom(parsed: unknown, now: number): PaletteDraft | null {
         return null;
     }
 
+    // Campos novos sao tolerantes: rascunho antigo (sem eles) e rascunho com
+    // escala/papeis corrompidos continuam restaurando a base.
+    const scale = validScale(parsed.scale) ? parsed.scale : null;
+    const roles = validRoles(parsed.roles) ? parsed.roles : null;
+
     return {
         version: 1,
         savedAt: parsed.savedAt,
         kind: parsed.kind,
         base: parsed.base,
         extracted: parsed.kind === 'extracted' ? parsed.extracted : null,
+        scale: parsed.kind === 'scale' ? scale : null,
+        roles,
         tab: parsed.tab,
     };
 }
 
 /** Grava o rascunho; devolve o que foi gravado, ou `null` sem storage. */
 export function savePaletteDraft(
-    draft: Omit<PaletteDraft, 'version' | 'savedAt'>,
+    draft: PaletteDraftInput,
     storage: DraftStorageLike | null = browserSessionStorage(),
     now = Date.now(),
 ): PaletteDraft | null {
@@ -155,6 +261,8 @@ export function savePaletteDraft(
         version: 1,
         savedAt: now,
         extracted: draft.kind === 'extracted' ? draft.extracted : null,
+        scale: draft.kind === 'scale' ? (draft.scale ?? null) : null,
+        roles: draft.roles ?? null,
     };
 
     try {

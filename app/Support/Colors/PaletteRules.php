@@ -84,7 +84,7 @@ final class PaletteRules
         return [
             'source' => ['nullable', 'array:kind,label,host'],
             'source.kind' => ['required_with:source', 'in:file,url'],
-            'source.label' => ['required_if:source.kind,file', 'nullable', 'string', 'max:80'],
+            'source.label' => ['required_if:source.kind,file', 'nullable', 'string', 'max:'.(int) config('colors.palettes.source_label_max_length', 80)],
             'source.host' => ['required_if:source.kind,url', 'nullable', 'string', 'max:120'],
         ];
     }

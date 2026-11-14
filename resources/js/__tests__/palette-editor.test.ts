@@ -22,22 +22,28 @@ import type {
  * congela a tela ate restaurar.
  */
 
-const { routerMock, pageState, workspaceProps } = vi.hoisted(() => ({
-    routerMock: {
-        get: vi.fn(),
-        post: vi.fn(),
-        patch: vi.fn(),
-        delete: vi.fn(),
-    },
-    pageState: {
-        url: '/dashboard/colors/palettes/01KPALETTE00000000000000001/edit',
-        props: {
-            localeSlug: 'pt-br',
-            auth: { user: { id: 1 } },
+const { routerMock, pageState, workspaceProps, workspaceCalls } = vi.hoisted(
+    () => ({
+        routerMock: {
+            get: vi.fn(),
+            post: vi.fn(),
+            patch: vi.fn(),
+            delete: vi.fn(),
         },
-    },
-    workspaceProps: { current: null as Record<string, unknown> | null },
-}));
+        pageState: {
+            url: '/dashboard/colors/palettes/01KPALETTE00000000000000001/edit',
+            props: {
+                localeSlug: 'pt-br',
+                auth: { user: { id: 1 } },
+            },
+        },
+        workspaceProps: { current: null as Record<string, unknown> | null },
+        workspaceCalls: {
+            applied: [] as unknown[],
+            notified: [] as string[],
+        },
+    }),
+);
 
 vi.mock('@inertiajs/vue3', () => ({
     router: routerMock,
@@ -82,6 +88,7 @@ vi.mock('@/tools/palette-generator/GeneratorWorkspace.vue', async () => {
                 initialScale: { type: Object, default: null },
                 initialExtracted: { type: Object, default: null },
                 initialTab: { type: String, default: '' },
+                roles: { type: Object, default: null },
             },
             setup(props, { expose, slots }) {
                 workspaceProps.current = props as unknown as Record<
@@ -121,7 +128,14 @@ vi.mock('@/tools/palette-generator/GeneratorWorkspace.vue', async () => {
                     activeTab: computed(() => props.initialTab),
                     scale: computed(() => props.initialScale),
                     extracted: computed(() => props.initialExtracted),
+                    roles: computed(() => props.roles),
                     rgba: computed(() => null),
+                    applyImported: (palette: unknown) => {
+                        workspaceCalls.applied.push(palette);
+                    },
+                    notify: (message: string) => {
+                        workspaceCalls.notified.push(message);
+                    },
                 });
 
                 // O workspace real envolve os slots num `Tabs` do reka-ui; o
@@ -149,6 +163,75 @@ vi.mock('@/tools/palette-generator/GeneratorWorkspace.vue', async () => {
     };
 });
 
+/**
+ * O dialogo tem teste proprio; aqui ele e um botao que emite uma importacao
+ * pronta, com e sem papeis semanticos.
+ */
+vi.mock('@/components/colors/TokenImportDialog.vue', async () => {
+    const { defineComponent, h } = await import('vue');
+    const { PALETTE_TONES } = await import('@/lib/color');
+    const { buildFrozenScale } = await import('@/lib/frozenScale');
+    const { rolesFromScaleItems } = await import('@/lib/palettePayload');
+
+    const items = PALETTE_TONES.map((tone) => ({ tone, hex: '#aa1122' }));
+    const scale = buildFrozenScale({
+        base: '#aa1122',
+        items,
+        algorithmVersion: 1,
+    });
+    const withRoles = {
+        format: 'native',
+        kind: 'scale',
+        base: '#aa1122',
+        scale,
+        extracted: null,
+        roles: rolesFromScaleItems(items),
+        tokenCount: 11,
+        name: 'aurora',
+    };
+    const withoutRoles = { ...withRoles, roles: null };
+
+    return {
+        default: defineComponent({
+            name: 'TokenImportDialogStub',
+            props: {
+                open: { type: Boolean, default: false },
+                tokens: { type: Object, default: null },
+                sourceLabelMaxLength: { type: Number, default: 0 },
+            },
+            emits: ['close', 'apply'],
+            setup(props, { emit }) {
+                const apply = (palette: unknown) => {
+                    emit('apply', palette);
+                    emit('close');
+                };
+
+                return () =>
+                    props.open
+                        ? h('div', [
+                              h(
+                                  'button',
+                                  {
+                                      'data-test': 'import-stub-apply',
+                                      onClick: () => apply(withRoles),
+                                  },
+                                  'importar com papeis',
+                              ),
+                              h(
+                                  'button',
+                                  {
+                                      'data-test': 'import-stub-apply-no-roles',
+                                      onClick: () => apply(withoutRoles),
+                                  },
+                                  'importar sem papeis',
+                              ),
+                          ])
+                        : null;
+            },
+        }),
+    };
+});
+
 // A rasterizacao real precisa de canvas; o documento e testado em
 // `palette-og.test.ts`. Aqui interessa quando o editor manda gerar e o que
 // acontece quando a geracao falha.
@@ -164,6 +247,14 @@ vi.mock('@/lib/paletteOg', async (importOriginal) => {
 });
 
 const TRADUCOES = {
+    tools: {
+        shared: {
+            token_import: {
+                button: 'IMPORTAR_TOKENS',
+                applied: 'TOKENS_APLICADOS',
+            },
+        },
+    },
     colors: {
         list: {
             kind_scale: 'ESCALA',
@@ -381,6 +472,14 @@ function props(overrides: Partial<PaletteEditorData> = {}): PaletteEditorProps {
             descriptionMaxLength: 500,
             tagsPerPalette: 10,
             tagNameMaxLength: 30,
+            sourceLabelMaxLength: 80,
+        },
+        tokens: {
+            maxBytes: 524288,
+            maxTokens: 5000,
+            maxDepth: 40,
+            maxReferenceDepth: 10,
+            maxDiagnostics: 20,
         },
         image: IMAGE_LIMITS,
         library: {
@@ -462,6 +561,8 @@ describe('PaletteEditor', () => {
         pageState.url =
             '/dashboard/colors/palettes/01KPALETTE00000000000000001/edit';
         workspaceProps.current = null;
+        workspaceCalls.applied.length = 0;
+        workspaceCalls.notified.length = 0;
         document.body.innerHTML = '';
     });
 
@@ -591,11 +692,66 @@ describe('PaletteEditor', () => {
         expect(
             document.querySelector('[data-test="palette-editor-save"]'),
         ).toBeNull();
+        expect(
+            document.querySelector('[data-test="palette-editor-import"]'),
+        ).toBeNull();
 
         const archived = query('[data-test="palette-editor-archived"]');
 
         expect(archived.textContent).toContain('ARQUIVADA_TITULO');
         expect(archived.textContent).toContain('RESTAURAR');
+    });
+
+    it('aplica papeis importados no workspace e no PATCH', async () => {
+        mountEditor();
+        await nextTick();
+
+        expect(
+            query('[data-test="palette-editor-import"]').textContent,
+        ).toContain('IMPORTAR_TOKENS');
+
+        query<HTMLButtonElement>('[data-test="palette-editor-import"]').click();
+        await nextTick();
+
+        query<HTMLButtonElement>('[data-test="import-stub-apply"]').click();
+        await nextTick();
+
+        expect(workspaceCalls.applied).toHaveLength(1);
+        expect(workspaceCalls.notified).toContain('TOKENS_APLICADOS');
+
+        await save();
+
+        const roles = patchBody().roles as {
+            light: Record<string, string>;
+            dark: Record<string, string>;
+        };
+
+        expect(roles.light.primary).toBe('#aa1122');
+        expect(roles.dark.primary).toBe('#aa1122');
+    });
+
+    it('importacao sem papeis mantem os papeis atuais no PATCH', async () => {
+        mountEditor();
+        await nextTick();
+
+        query<HTMLButtonElement>('[data-test="palette-editor-import"]').click();
+        await nextTick();
+
+        query<HTMLButtonElement>(
+            '[data-test="import-stub-apply-no-roles"]',
+        ).click();
+        await nextTick();
+
+        expect(workspaceCalls.applied).toHaveLength(1);
+
+        await save();
+
+        const roles = patchBody().roles as {
+            light: Record<string, string>;
+        };
+        const expected = rolesFromScaleItems(SCALE_ITEMS);
+
+        expect(roles.light).toEqual(expected.light);
     });
 
     it('devolve os erros do servidor para o campo e para o aviso', async () => {

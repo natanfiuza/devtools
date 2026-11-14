@@ -1,0 +1,15 @@
+{
+    "format": "style-dictionary",
+    "kind": "extracted",
+    "base": "#ff7a45",
+    "clippedTones": [],
+    "items": [
+        { "hex": "#ff7a45" },
+        { "hex": "#13a8a8" },
+        { "hex": "#237804" },
+        { "hex": "#722ed1" },
+        { "hex": "#d4b106" }
+    ],
+    "roles": null,
+    "tokenCount": 5
+}

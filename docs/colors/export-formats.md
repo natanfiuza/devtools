@@ -14,7 +14,7 @@ Arquivos gerados (`{name}` = slug):
 |---|---|---|---|
 | CSS | comentário com nome e versão do algoritmo + `:root { --color-{name}-50: …; }` | `{name}.css` | `text/css;charset=utf-8` |
 | SCSS | `$color-{name}-50: … !default;` | `{name}.scss` | `text/x-scss;charset=utf-8` |
-| JSON | `{ "name", "formatVersion", "algorithmVersion", "clippedTones", "colors": { "50": … } }` indentado | `{name}.json` | `application/json;charset=utf-8` |
+| JSON | `{ "name", "formatVersion", "algorithmVersion", "base", "clippedTones", "colors": { "50": … } }` indentado | `{name}.json` | `application/json;charset=utf-8` |
 | Tailwind v3 | `module.exports = { theme: { extend: { colors: { {name}: { 50: '#…' } } } } }` | `tailwind.{name}.config.js` | `text/javascript;charset=utf-8` |
 | Tailwind v4 | `@theme { --color-{name}-50: …; }` | `{name}.tailwind.css` | `text/css;charset=utf-8` |
 
@@ -22,7 +22,7 @@ Todos terminam com uma quebra de linha; o formato é determinístico (mesma esca
 
 ## Fase 5 — design tokens (implementado)
 
-Exporta as 11 primitivas e, quando o painel recebe os papéis do editor, os 8 papéis × 2 temas. O gerador puro não tem papéis (ADR-126): ali a saída é só primitiva. Sem `roles`, os cinco formatos da F2 continuam byte a byte iguais; o JSON nativo ganhou apenas campos aditivos (`formatVersion`, `clippedTones`).
+Exporta as 11 primitivas e, quando o painel recebe os papéis do editor, os 8 papéis × 2 temas. O gerador puro não tem papéis (ADR-126): ali a saída é só primitiva. Sem `roles`, os cinco formatos da F2 continuam byte a byte iguais; o JSON nativo ganhou apenas campos aditivos (`formatVersion`, `clippedTones` e, na Etapa 6, `base` — por isso ele é o formato de ida e volta).
 
 Versão do formato: `COLOR_TOKEN_FORMAT_VERSION = 1`, registrada no DTCG (`$extensions["devtools.colors"]`), no JSON nativo (`formatVersion`) e no cabeçalho de CSS/SCSS/TypeScript. O JSON do Style Dictionary fica limpo — o schema clássico não tem slot de metadados — e a versão aparece no painel.
 
@@ -31,6 +31,16 @@ Versão do formato: `COLOR_TOKEN_FORMAT_VERSION = 1`, registrada no DTCG (`$exte
 | W3C DTCG | `{name}.tokens.json` | `application/json;charset=utf-8` |
 | Style Dictionary | `{name}.style-dictionary.json` | `application/json;charset=utf-8` |
 | TypeScript | `{name}.tokens.ts` | `text/typescript;charset=utf-8` |
+
+### Ida e volta
+
+O JSON nativo, o DTCG e o Style Dictionary podem ser importados de volta pelo
+**Importar tokens** (Fase 5, Etapa 6). O teste de ida e volta compara base, os
+11 tons e os papéis — não bytes: a escala importada é regravada com a versão
+atual do algoritmo, e os formatos não guardam o mesmo conjunto de metadados.
+Style Dictionary não tem slot de base e usa o tom 500; o JSON nativo e o DTCG
+preservam a base e `clippedTones`. Detalhes da validação em
+[import-export.md](./import-export.md#importação-validada-fase-5-etapa-6).
 
 ### Nomes
 

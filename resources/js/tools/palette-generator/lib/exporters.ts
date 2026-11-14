@@ -3,6 +3,7 @@ import { PALETTE_ROLES, PALETTE_THEMES } from '@/lib/palettePayload';
 import type { PaletteRoles } from '@/types/colors';
 import {
     COLOR_TOKEN_FORMAT_VERSION,
+    baseHex,
     buildDtcgTokens,
     buildStyleDictionaryTokens,
     buildTypeScriptTokens,
@@ -162,6 +163,9 @@ function buildJson(
         name,
         formatVersion: COLOR_TOKEN_FORMAT_VERSION,
         algorithmVersion: scale.algorithmVersion,
+        // Campo aditivo da Etapa 6: sem ele a importacao de um arquivo nativo
+        // nao teria como preservar a base escolhida (a versao continua 1).
+        base: baseHex(scale),
         clippedTones: scale.clippedTones,
         colors,
     };

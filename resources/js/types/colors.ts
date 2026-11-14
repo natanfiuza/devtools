@@ -184,14 +184,34 @@ export type PaletteToolProps = {
     descriptionMaxLength: number;
     tagsPerPalette: number;
     tagNameMaxLength: number;
+    /** Rotulo da origem extraida/importada (nome do arquivo). */
+    sourceLabelMaxLength: number;
     tags: PaletteTag[];
 };
 
 /** Tetos do formulario de paleta (ColorsToolProps::formLimits). */
 export type PaletteFormLimits = Pick<
     PaletteToolProps,
-    'nameMaxLength' | 'descriptionMaxLength' | 'tagsPerPalette' | 'tagNameMaxLength'
+    | 'nameMaxLength'
+    | 'descriptionMaxLength'
+    | 'tagsPerPalette'
+    | 'tagNameMaxLength'
+    | 'sourceLabelMaxLength'
 >;
+
+/**
+ * Tetos da importacao validada de tokens (F5, Etapa 6).
+ *
+ * Vem de `config/colors.php` via `ColorsToolProps::tokenImportLimits`; a
+ * leitura do arquivo e 100% no navegador e nenhum numero e fixado no cliente.
+ */
+export type TokenImportLimits = {
+    maxBytes: number;
+    maxTokens: number;
+    maxDepth: number;
+    maxReferenceDepth: number;
+    maxDiagnostics: number;
+};
 
 /** Props de Minhas Paletas (`PaletteController@index`). */
 export type PalettesIndexProps = {
@@ -261,6 +281,7 @@ export type PaletteEditorProps = {
     form: PaletteFormLimits;
     image: ImageLimits;
     library: ColorLibraryToolProps;
+    tokens: TokenImportLimits;
 };
 
 /** Corpo enviado a `POST/PATCH /dashboard/colors/palettes`. */

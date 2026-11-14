@@ -78,8 +78,15 @@ it('entrega os limites do editor junto com os da importacao de imagem', function
             ->where('palette.id', $palette->id)
             ->where('form.nameMaxLength', 80)
             ->where('form.tagsPerPalette', 10)
+            ->where('form.sourceLabelMaxLength', 80)
             ->where('image.maxBytes', 10 * 1024 * 1024)
-            ->where('image.analysisSide', 512));
+            ->where('image.analysisSide', 512)
+            // O editor tambem importa tokens, sem requisicao ao servidor.
+            ->where('tokens.maxBytes', 512 * 1024)
+            ->where('tokens.maxTokens', 5000)
+            ->where('tokens.maxDepth', 40)
+            ->where('tokens.maxReferenceDepth', 10)
+            ->where('tokens.maxDiagnostics', 20));
 });
 
 it('busca no servidor por nome, descricao e tag', function () {
@@ -237,6 +244,38 @@ it('recusa base fora das cores extraidas, versao desconhecida e origem na escala
         ->assertSessionHasErrors('source');
 
     expect(ColorPalette::count())->toBe(0);
+});
+
+it('aplica o limite configurado do rotulo de origem', function () {
+    $user = User::factory()->create();
+    $label = str_repeat('a', 81);
+    $items = [
+        ['hex' => '#112233'],
+        ['hex' => '#334455'],
+        ['hex' => '#556677'],
+        ['hex' => '#778899'],
+        ['hex' => '#99aabb'],
+    ];
+
+    $payload = static fn (): array => httpScalePayload([
+        'kind' => 'extracted',
+        'colors' => ['base' => '#334455', 'items' => $items],
+        'roles' => ColorPaletteFactory::rolesFromExtracted(),
+        'source' => ['kind' => 'file', 'label' => $label],
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('dashboard.colors.palettes.store'), $payload())
+        ->assertSessionHasErrors('source.label');
+
+    // O teto e o da configuracao, nao um 80 fixo no validador.
+    config(['colors.palettes.source_label_max_length' => 100]);
+
+    $this->actingAs($user)
+        ->post(route('dashboard.colors.palettes.store'), $payload())
+        ->assertSessionHasNoErrors();
+
+    expect(ColorPalette::count())->toBe(1);
 });
 
 it('aplica a cota Free no servidor', function () {

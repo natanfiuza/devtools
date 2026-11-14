@@ -159,6 +159,86 @@ return [
 
             'load_more' => 'Cargar más',
         ],
+
+        'token_import' => [
+            'button' => 'Importar tokens',
+            'applied' => 'Tokens aplicados.',
+            'title' => 'Importar tokens de diseño',
+            'description' => 'Lee el JSON nativo de la herramienta, W3C DTCG (Tokens Studio o Figma Variables) o Style Dictionary. El archivo se lee en tu navegador y nunca se envía.',
+            'choose' => 'Elegir un archivo JSON',
+            'hint' => 'Hasta {size}. También puedes soltar el archivo aquí.',
+            'reading' => 'Leyendo el archivo…',
+
+            'file_errors' => [
+                'file_too_large' => 'El archivo supera el límite de {limit}.',
+                'file_type' => 'Elige un archivo .json.',
+                'file_unreadable' => 'No se pudo leer el archivo. Prueba con otro.',
+            ],
+
+            'diagnostics' => [
+                'title' => 'Diagnóstico',
+                'errors' => 'Errores',
+                'warnings' => 'Avisos',
+                'hidden' => '{count} diagnóstico(s) más sin mostrar.',
+                'path' => 'en {path}',
+            ],
+
+            'preview' => [
+                'title' => 'Vista previa',
+                'format' => 'Formato',
+                'kind' => 'Tipo',
+                'base' => 'Color base',
+                'colors_label' => 'Colores',
+                'colors' => '{count} colores',
+                'roles' => 'Roles semánticos incluidos',
+                'no_roles' => 'Sin roles semánticos completos',
+                'name' => 'Nombre en el archivo: {name}',
+                'filename' => 'Archivo: {name}',
+                'apply' => 'Aplicar',
+                'cancel' => 'Cancelar',
+                'replace' => 'Elegir otro archivo',
+                'apply_hint' => 'La paleta actual solo cambia al aplicar.',
+            ],
+
+            'formats' => [
+                'native' => 'JSON de la herramienta',
+                'dtcg' => 'W3C DTCG',
+                'style-dictionary' => 'Style Dictionary',
+            ],
+
+            'kinds' => [
+                'scale' => 'Escala de 11 tonos',
+                'extracted' => 'Paleta extraída',
+            ],
+
+            'codes' => [
+                'empty_file' => 'El archivo está vacío.',
+                'too_large' => 'El archivo supera el límite de {max}.',
+                'invalid_json' => 'El JSON no es válido (línea {line}, columna {column}).',
+                'root_not_object' => 'La raíz del archivo debe ser un objeto JSON.',
+                'unsupported_format' => 'No se encontró ningún token de color reconocible.',
+                'ambiguous_format' => 'El archivo mezcla más de un estilo de token.',
+                'unsupported_format_version' => 'La versión del formato ({found}) no es compatible; esta herramienta lee la versión {expected}.',
+                'too_deep' => 'La estructura supera la profundidad máxima de {max}.',
+                'too_many_tokens' => 'El archivo tiene más de {max} tokens.',
+                'forbidden_key' => 'La clave “{key}” no está permitida.',
+                'mixed_token_styles' => 'Aparecen tokens de estilos diferentes en el mismo grupo.',
+                'invalid_structure' => 'La estructura de la paleta no es reconocible.',
+                'no_colors' => 'El archivo no tiene colores para importar.',
+                'ambiguous_palette' => 'Hay más de una paleta posible; deja solo una para importar.',
+                'unsupported_color_count' => 'El grupo tiene {count} colores; usa 5, 7, 9 u 11.',
+                'missing_tones' => 'Faltan tonos en la escala: {missing}.',
+                'invalid_color' => 'Un valor de color no es un HEX válido.',
+                'unknown_reference' => 'La referencia “{reference}” no existe en el archivo.',
+                'reference_not_color' => 'La referencia “{reference}” no apunta a un color.',
+                'reference_cycle' => 'Las referencias forman un ciclo.',
+                'reference_depth' => 'Las referencias superan la profundidad máxima de {max}.',
+                'algorithm_version_mismatch' => 'El archivo se generó con el algoritmo v{found}; los colores se mantendrán como están.',
+                'non_color_ignored' => 'Se ignoraron los tokens que no son color.',
+                'semantic_incomplete' => 'El bloque de roles semánticos está incompleto; se mantendrán los roles actuales.',
+                'extra_colors_ignored' => 'Se ignoraron los colores fuera de la paleta.',
+            ],
+        ],
     ],
 
     'categories' => [

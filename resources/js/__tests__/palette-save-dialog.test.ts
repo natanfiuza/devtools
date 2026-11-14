@@ -6,7 +6,7 @@ import { buildPaletteScale, parseColor, type Rgba } from '@/lib/color';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import type { PaletteSaveSource } from '@/lib/paletteSave';
 import type { ExtractedPalette } from '@/tools/palette-generator/lib/extractedPalette';
-import type { PaletteToolProps } from '@/types/colors';
+import type { PaletteRoles, PaletteToolProps } from '@/types/colors';
 
 /**
  * Modal de salvar a paleta (F4, ADR-123).
@@ -65,11 +65,35 @@ const EXTRACTED_SOURCE: PaletteSaveSource = {
     base: '#ff0000',
 };
 
+const IMPORTED_ROLES: PaletteRoles = {
+    light: {
+        primary: '#101010',
+        secondary: '#202020',
+        accent: '#303030',
+        background: '#fefefe',
+        surface: '#f8f8f8',
+        text: '#050505',
+        text_muted: '#606060',
+        border: '#dddddd',
+    },
+    dark: {
+        primary: '#a0a0a0',
+        secondary: '#909090',
+        accent: '#808080',
+        background: '#050505',
+        surface: '#151515',
+        text: '#fafafa',
+        text_muted: '#b0b0b0',
+        border: '#333333',
+    },
+};
+
 const PALETTE: PaletteToolProps = {
     nameMaxLength: 80,
     descriptionMaxLength: 500,
     tagsPerPalette: 10,
     tagNameMaxLength: 30,
+    sourceLabelMaxLength: 80,
     tags: [{ id: 'tag-web', name: 'web' }],
 };
 
@@ -229,6 +253,26 @@ describe('SavePaletteDialog', () => {
             tags: ['web'],
         });
         expect((body.colors as { items: unknown[] }).items).toHaveLength(11);
+    });
+
+    it('usa os papéis importados no lugar dos defaults', async () => {
+        await mountDialog({
+            kind: 'scale',
+            scale: SCALE,
+            roles: IMPORTED_ROLES,
+        });
+
+        await typeName('Oceano');
+        await submit();
+
+        expect(postMock).toHaveBeenCalledTimes(1);
+
+        const [, body] = postMock.mock.calls[0] as [
+            string,
+            Record<string, unknown>,
+        ];
+
+        expect(body.roles).toEqual(IMPORTED_ROLES);
     });
 
     it('salva a extraída insuficiente com aviso', async () => {

@@ -114,6 +114,8 @@ class PaletteController extends Controller
             'image' => ColorsToolProps::imageLimits(),
             // O editor tambem abre a biblioteca compartilhada de cores (F5).
             'library' => ColorsToolProps::library($user),
+            // Importacao validada de tokens: o arquivo e lido no navegador.
+            'tokens' => ColorsToolProps::tokenImportLimits(),
         ]);
     }
 

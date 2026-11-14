@@ -103,6 +103,9 @@ it('serve a tool agrupada so na URL aninhada', function () {
             // nenhuma tag.
             ->has('toolProps.image')
             ->has('toolProps.palette')
+            // A importacao de tokens tambem le so no navegador; os tetos vem
+            // de config/colors.php (F5, Etapa 6).
+            ->has('toolProps.tokens')
             ->where('toolProps.palette.tags', [])
         );
 
@@ -121,6 +124,11 @@ it('entrega os limites de imagem do gerador vindos da configuracao', function ()
         'tools.limits.colors_image.max_pixels' => 999,
         'tools.limits.colors_image.analysis_side' => 64,
         'tools.limits.colors_image.fetch_timeout_ms' => 321,
+        'colors.tokens.import.max_bytes' => 4096,
+        'colors.tokens.import.max_tokens' => 123,
+        'colors.tokens.import.max_depth' => 9,
+        'colors.tokens.import.max_reference_depth' => 4,
+        'colors.tokens.import.max_diagnostics' => 6,
     ]);
 
     $this->get('/pt-br/tools/colors/palette-generator')->assertOk()->assertInertia(
@@ -129,7 +137,12 @@ it('entrega os limites de imagem do gerador vindos da configuracao', function ()
             ->where('toolProps.image.maxSide', 77)
             ->where('toolProps.image.maxPixels', 999)
             ->where('toolProps.image.analysisSide', 64)
-            ->where('toolProps.image.fetchTimeoutMs', 321),
+            ->where('toolProps.image.fetchTimeoutMs', 321)
+            ->where('toolProps.tokens.maxBytes', 4096)
+            ->where('toolProps.tokens.maxTokens', 123)
+            ->where('toolProps.tokens.maxDepth', 9)
+            ->where('toolProps.tokens.maxReferenceDepth', 4)
+            ->where('toolProps.tokens.maxDiagnostics', 6),
     );
 });
 

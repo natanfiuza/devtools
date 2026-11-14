@@ -234,6 +234,7 @@ function props(
             descriptionMaxLength: 500,
             tagsPerPalette: 10,
             tagNameMaxLength: 30,
+            sourceLabelMaxLength: 80,
         },
         ...overrides,
     };

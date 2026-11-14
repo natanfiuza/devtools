@@ -22,6 +22,7 @@ final class ColorsToolProps
      *         descriptionMaxLength: int,
      *         tagsPerPalette: int,
      *         tagNameMaxLength: int,
+     *         sourceLabelMaxLength: int,
      *         tags: list<array{id: string, name: string}>
      *     },
      *     library: array{
@@ -31,6 +32,13 @@ final class ColorsToolProps
      *         historyPerPage: int,
      *         favoritesPerPage: int,
      *         importBatch: int
+     *     },
+     *     tokens: array{
+     *         maxBytes: int,
+     *         maxTokens: int,
+     *         maxDepth: int,
+     *         maxReferenceDepth: int,
+     *         maxDiagnostics: int
      *     }
      * }
      */
@@ -50,6 +58,7 @@ final class ColorsToolProps
                 ),
             ],
             'library' => self::library($user),
+            'tokens' => self::tokenImportLimits(),
         ];
     }
 
@@ -100,7 +109,7 @@ final class ColorsToolProps
      * Tetos do formulario de paleta, usados pelo modal de salvar e pelo
      * editor. A configuracao continua sendo a unica fonte dos numeros.
      *
-     * @return array{nameMaxLength: int, descriptionMaxLength: int, tagsPerPalette: int, tagNameMaxLength: int}
+     * @return array{nameMaxLength: int, descriptionMaxLength: int, tagsPerPalette: int, tagNameMaxLength: int, sourceLabelMaxLength: int}
      */
     public static function formLimits(): array
     {
@@ -109,6 +118,26 @@ final class ColorsToolProps
             'descriptionMaxLength' => (int) config('colors.palettes.description_max_length'),
             'tagsPerPalette' => (int) config('colors.tags.per_palette'),
             'tagNameMaxLength' => (int) config('colors.tags.name_max_length'),
+            'sourceLabelMaxLength' => (int) config('colors.palettes.source_label_max_length'),
+        ];
+    }
+
+    /**
+     * Tetos da importacao validada de tokens (F5, Etapa 6).
+     *
+     * A leitura acontece inteira no navegador; estes numeros protegem a aba de
+     * arquivos de terceiros e governam quantos diagnosticos a tela mostra.
+     *
+     * @return array{maxBytes: int, maxTokens: int, maxDepth: int, maxReferenceDepth: int, maxDiagnostics: int}
+     */
+    public static function tokenImportLimits(): array
+    {
+        return [
+            'maxBytes' => (int) config('colors.tokens.import.max_bytes'),
+            'maxTokens' => (int) config('colors.tokens.import.max_tokens'),
+            'maxDepth' => (int) config('colors.tokens.import.max_depth'),
+            'maxReferenceDepth' => (int) config('colors.tokens.import.max_reference_depth'),
+            'maxDiagnostics' => (int) config('colors.tokens.import.max_diagnostics'),
         ];
     }
 }

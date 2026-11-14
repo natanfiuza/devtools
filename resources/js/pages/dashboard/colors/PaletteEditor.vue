@@ -7,6 +7,7 @@ import DeletePaletteDialog from '@/components/colors/DeletePaletteDialog.vue';
 import OgImageButton from '@/components/colors/OgImageButton.vue';
 import PaletteActions from '@/components/colors/PaletteActions.vue';
 import PaletteMetaForm from '@/components/colors/PaletteMetaForm.vue';
+import TokenImportDialog from '@/components/colors/TokenImportDialog.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TabsContent, TabsTrigger } from '@/components/ui/tabs';
@@ -30,6 +31,7 @@ import type {
     ExtractionCount,
 } from '@/tools/palette-generator/lib/extractContract';
 import type { ExtractedPalette } from '@/tools/palette-generator/lib/extractedPalette';
+import type { ImportedPalette } from '@/tools/palette-generator/lib/tokenImport';
 import PrototypePanel from '@/tools/palette-generator/prototype/PrototypePanel.vue';
 import type {
     PaletteDetails,
@@ -100,6 +102,29 @@ const saving = ref(false);
 const localError = ref<string | null>(null);
 const serverErrors = ref<Record<string, string>>({});
 const deleting = ref(false);
+const importOpen = ref(false);
+
+/**
+ * Importacao de tokens (F5, Etapa 6): o workspace troca escala/extraida e
+ * guarda os papeis importados; aqui a copia editavel acompanha, para que o
+ * "Salvar" seguinte persista exatamente o que foi importado. Sem papeis no
+ * arquivo, os atuais do editor continuam valendo.
+ */
+function applyTokens(imported: ImportedPalette): void {
+    const current = workspace.value;
+
+    if (current === null) {
+        return;
+    }
+
+    current.applyImported(imported);
+
+    if (imported.roles !== null) {
+        roles.value = cloneRoles(imported.roles);
+    }
+
+    current.notify(t('tools.shared.token_import.applied'));
+}
 
 const nameValid = computed(() => {
     const value = name.value.trim();
@@ -434,6 +459,17 @@ function save(): void {
           v-if="!palette.archived"
           type="button"
           size="sm"
+          variant="outline"
+          data-test="palette-editor-import"
+          @click="importOpen = true"
+        >
+          {{ t('tools.shared.token_import.button') }}
+        </Button>
+
+        <Button
+          v-if="!palette.archived"
+          type="button"
+          size="sm"
           :disabled="!canSave || saving"
           data-test="palette-editor-save"
           @click="save"
@@ -551,6 +587,14 @@ function save(): void {
         </template>
       </GeneratorWorkspace>
     </template>
+
+    <TokenImportDialog
+      :open="importOpen"
+      :tokens="props.tokens"
+      :source-label-max-length="form.sourceLabelMaxLength"
+      @apply="applyTokens"
+      @close="importOpen = false"
+    />
 
     <DeletePaletteDialog
       :open="deleting"
