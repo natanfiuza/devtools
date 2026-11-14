@@ -1,4 +1,4 @@
-# SPEC - Grupo Colors (v1.1)
+# SPEC - Grupo Colors (v1.2)
 
 ## 1. Visão
 Grupo Colors do devtools com HTML Color Picker e Color Palette Generator.
@@ -23,8 +23,8 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Sliders.
 - Contraste WCAG.
 - Shades/tints.
-- Histórico local de 50 cores na Fase 1 (ADR-118); histórico de cadastrado no backend, sem limite funcional, na Fase 5.
-- Favoritos locais de 50 cores na Fase 1; favoritos sincronizados entre Picker e Generator na Fase 5.
+- Histórico de cadastrado no backend, sem limite funcional e paginado por cursor (Fase 5, ADR-127); o anônimo mantém histórico local reduzido a 20 (ADR-132).
+- Favoritos de cor da conta, sincronizados entre Picker e Generator (Fase 5, ADR-127, ADR-131); o anônimo mantém 50 favoritos locais (ADR-132).
 - Copiar.
 - Alpha.
 
@@ -32,12 +32,12 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Cor base.
 - Escala: sempre os 11 tons fixos `50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950` (ADR-101). A escolha de 5, 7, 9 ou 11 pertence somente à extração de imagem (§9, ADR-099).
 - Harmonias HSL e OKLCH.
-- Exportações: HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, tokens W3C DTCG (importáveis por Tokens Studio e Figma Variables), Style Dictionary, código. Sem API do Figma.
+- Exportações: HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, tokens W3C DTCG (importáveis por Tokens Studio e Figma Variables), Style Dictionary, TypeScript e código. Primitivas (11 tons) e, quando o editor fornece papéis, semânticas (8 papéis × claro/escuro); versão do formato 1; sem API do Figma (Fase 5, ADR-130).
 - Importação de imagem e extração de paleta (5, 7, 9, 11 cores).
-- Importação de JSON (W3C DTCG / Style Dictionary).
+- Importação validada de tokens: JSON nativo, W3C DTCG e Style Dictionary, com limites, diagnóstico e sem executar o arquivo (Fase 5, ADR-133).
 - Importação por URL de imagem.
-- Presets.
-- Favoritos.
+- Presets do gerador (nome + cor base) por conta, sem consumir cota de paleta (Fase 5, ADR-129).
+- Favoritos de cor da conta, compartilhados pelas duas tools, e de paletas públicas de outras contas (Fase 5, ADR-127, ADR-128).
 
 ## 6. Paletas salvas
 - Apenas cadastrados.
@@ -47,10 +47,10 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Cores efetivas persistidas — escala (base + 11 tons) ou extraída (base + 5/7/9/11 cores + origem sem imagem) — e nunca recalculadas ao abrir. Papéis semânticos fixos (8 × claro/escuro) salvos na paleta e editáveis (ADR-123, ADR-126).
 - Tags como entidade do usuário: renomear reflete em todas as paletas e reordenar vale para a conta (ADR-103).
 - Duplicar paleta pública ou própria, respeitando a cota; “Uso” é o número de duplicações feitas por **outros** usuários (ADR-124).
-- Rascunho anônimo em `sessionStorage` (24 h, só base/tipo/cores extraídas/aba) que leva ao login (ADR-096, ADR-123).
+- Rascunho anônimo em `sessionStorage` (24 h, base/tipo/cores extraídas/aba e, desde a Fase 5, escala e papéis opcionais) que leva ao login (ADR-096, ADR-123, emenda de 2026-11-14).
 - Renomear e reordenar tags.
 - Arquivar paleta (ADR-119): some da lista padrão (filtro próprio a mostra), URL pública responde 404 e a paleta continua restaurável. Paleta arquivada **conta** na cota Free. Excluir é definitivo, libera cota e não pode ser desfeito.
-- Favoritar paleta de outro usuário.
+- Favoritar paleta pública de outro usuário, sem copiar nem contar “Uso”; a aba **Favoritas** mostra o que ainda é público e ativo (Fase 5, ADR-128).
 - Seguir usuário.
 - Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte; IP só como sinal antiabuso (ADR-112).
 - Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111).
@@ -117,15 +117,15 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 Componentes: ColorSwatch, ContrastBadge, ColorInput, ShadeScale, PaletteCard, PrototypeSite, PrototypeMobile, ExportPanel, TagInput, CommentThread, FollowButton, LikeButton, ReportButton, NotificationBell.
 
 ## 15. Testes
-- Vitest: conversões, contraste, escalas, harmonias, exportadores, importação, extração, OG image, export paleta imagem.
-- Pest: auth, CRUD, limites, visibilidade, slug, archive, likes, comments, follows, reports, moderação.
+- Vitest: conversões, contraste, escalas, harmonias, exportadores, importação de imagem e de tokens (parser, diálogo, workspace, rascunho), biblioteca pessoal, favoritos de paletas, presets, extração, OG image, export paleta imagem.
+- Pest: auth, CRUD, limites, visibilidade, slug, archive, biblioteca (histórico/favoritos/importação explícita), favoritos de paletas, presets, fixtures de tokens validadas contra `PaletteRules`, likes, comments, follows, reports, moderação.
 
 ## 16. Fases
 F1: grupo + HTML Color Picker completo (histórico e favoritos locais).
 F2: Palette Generator — escala fixa de 11 tons, exportações CSS/SCSS/JSON/Tailwind v3/v4.
 F3: harmonias + importação de imagem e de URL com extração de 5/7/9/11 cores.
 F4: paletas salvas + protótipos + compartilhamento + OG dinâmica — **implementada em 2026-11-11** (ADR-123 a ADR-126).
-F5: organização pessoal (histórico e favoritos no backend, presets) + tokens W3C DTCG/Style Dictionary + exportação avançada.
+F5: organização pessoal (histórico e favoritos no backend, biblioteca compartilhada, presets) + tokens W3C DTCG/Style Dictionary + exportação e importação validadas — **implementada em 2026-11-14** (ADR-127 a ADR-133).
 F6: social (curtir anônimo, seguir) + exportação de paleta como imagem.
 F7: comentários + moderação IA + denúncias + notificações.
 F8: auditoria final e relatório de aceite.
@@ -135,6 +135,10 @@ F8: auditoria final e relatório de aceite.
 - Contraste correto.
 - Escala correta.
 - Exportações válidas.
+- Biblioteca pessoal: histórico sem limite funcional e favoritos da conta, iguais nas duas tools; anônimo com 20/50 e importação explícita do histórico.
+- Favoritos de paletas públicas sem duplicata, sem cópia e sem contar “Uso”; aba Favoritas coerente com a visibilidade atual.
+- Presets do gerador entendidos como entrada (nome + base), sem consumir cota de paleta.
+- Exportação de tokens primitivos e semânticos com versão de formato, alpha e gamut documentados; importação validada dos três formatos com diagnóstico sem descartar o estado e sem executar o arquivo.
 - i18n completo.
 - Testes verdes.
 - Limites aplicados.

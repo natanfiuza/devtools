@@ -23,15 +23,18 @@
 - Classificação sem arredondamento: AA/AAA é decidido pelo valor cru da razão; o número exibido é arredondado só para leitura (ADR-117).
 - EyeDropper: captura de cor da tela.
 - Gamut mapping: trazer um OKLCH/OKLab fora do sRGB para dentro da gama reduzindo o croma por busca binária e preservando L e H (ADR-117).
-- Histórico local: as 50 últimas cores guardadas em `localStorage` pelo picker na Fase 1 (ADR-118).
-- Favorito: cor (Fase 1, local) ou paleta (fases seguintes) marcada para reuso.
+- Histórico local: as 20 últimas cores guardadas em `localStorage` pelo picker para o anônimo (F5, ADR-132); quem está logado usa o histórico da conta (ADR-127).
+- Favorito: cor guardada para reuso — na conta ou no `localStorage` do anônimo (ADR-127, ADR-132) — ou paleta pública de outra conta (ADR-128).
 - Papel de cor: função na interface.
 - Protótipo: pré-visualização aplicada; no Colors é vetorial, ver Protótipo vetorial (ADR-126).
-- Preset: configuração salva reutilizável.
+- Preset: entrada da geração salva pela conta (nome + cor base); não guarda cores derivadas, não é paleta e não consome cota (ADR-129).
 - Paleta: conjunto de cores salvo por um usuário cadastrado, do tipo `scale` (base + 11 tons) ou `extracted` (base + 5/7/9/11 cores de uma imagem) (ADR-123).
-- Token: variável de design.
-- W3C DTCG JSON: formato de design tokens com `$type`/`$value`, importável por Tokens Studio e Figma Variables; substitui o rótulo "Figma Tokens" da documentação antiga (ADR-095).
-- Style Dictionary: ferramenta de design tokens.
+- Token: primitiva ou semântica de design exportada pela ferramenta; a primitiva é um tom da escala e a semântica é um papel claro/escuro (ADR-130).
+- Token primitivo: um dos 11 tons `50–950` exportados como token; existe no gerador e no editor (ADR-130).
+- Token semântico: um dos 8 papéis em `light`/`dark`, exportado só quando o editor fornece os papéis; é valor literal, não alias da primitiva (ADR-130).
+- Versão do formato: contrato numérico dos tokens (`COLOR_TOKEN_FORMAT_VERSION = 1`), registrado no JSON nativo, no DTCG e no cabeçalho de CSS/SCSS/TypeScript; a importação recusa versão incompatível (ADR-130, ADR-133).
+- W3C DTCG JSON: formato de design tokens com `$type`/`$value`, importável por Tokens Studio e Figma Variables e também de volta pela ferramenta; substitui o rótulo "Figma Tokens" da documentação antiga (ADR-095, ADR-130, ADR-133).
+- Style Dictionary: formato clássico de design tokens com `value`/`type`, sem slot de metadados; na ida e volta usa o tom 500 como base (ADR-095, ADR-133).
 - OKLCH/OKLab: espaços de cor perceptualmente uniformes.
 - Alpha: transparência.
 - Slug: identificador textual único na URL; nasce na primeira publicação, é global e não muda ao renomear (ADR-123, ADR-124).
@@ -41,7 +44,7 @@
 - Publicar: tornar a paleta `public`, o que libera a página pública e a entrada no sitemap; não muda o slug (ADR-124).
 - Uso (duplicações): quantas vezes **outros** usuários duplicaram a paleta; cumulativo e não decresce quando a cópia é excluída (ADR-124).
 - Duplicação: cópia autenticada de uma paleta (pública ou própria), que nasce privada, sem OG, com as cores, papéis, tags e versões copiados (ADR-124).
-- Rascunho de paleta: cópia temporária da base/tipo/cores extraídas/aba guardada no navegador de quem não está logado, para retomar após o login (ADR-096, ADR-123).
+- Rascunho de paleta: cópia temporária da base/tipo/cores extraídas/aba e, desde a F5, escala e papéis opcionais, guardada no navegador de quem não está logado para retomar após o login; não é paleta anônima (ADR-096, ADR-123 e emenda de 2026-11-14, ADR-133).
 - Papel de cor claro/escuro: posição semântica de uma cor (por exemplo, `background` ou `text`) definida uma vez por tema, `light` e `dark`, e reutilizada pelo site e pelo mobile (ADR-126).
 - Protótipo vetorial: prévia de site ou mobile desenhada como SVG por um renderizador próprio, em que o PNG exportado é a rasterização do mesmo SVG (ADR-126).
 - OG dinâmica de paleta: imagem 1200×630 desenhada no cliente a partir dos papéis do tema claro, enviada pela paleta e servida só enquanto a paleta for pública e ativa (ADR-105, ADR-125).
@@ -55,3 +58,15 @@
 - Thread: cadeia de respostas, com no máximo 2 níveis (ADR-111).
 - Denúncia: report de conteúdo.
 - Moderação: filtro automático de conteúdo.
+- Biblioteca pessoal: histórico e favoritos de cores de uma conta, com histórico sem limite funcional e favoritos sincronizados entre Picker e Generator; o anônimo tem a versão local reduzida (ADR-127, ADR-131, ADR-132).
+- Histórico da conta: cores usadas por um usuário logado, uma linha por cor canônica, ordenadas pela mais recente e paginadas por cursor (ADR-127).
+- Favorito de paleta: vínculo entre a conta e uma paleta pública de outra conta, sem copiar a paleta, consumir cota ou contar “Uso” (ADR-128).
+- Aba Favoritas: visão de Minhas Paletas que lista as paletas públicas favoritadas; oculta sem apagar o vínculo quando a origem deixa de ser pública e a traz de volta se ela voltar (ADR-128).
+- Importação explícita do histórico: ação do painel que leva o histórico local para a conta em lotes, só depois da confirmação do usuário e sem limpar o navegador antes de todos os lotes passarem (ADR-132).
+- Importação validada: leitura de um arquivo de tokens com detecção de formato, limites, resolução de aliases e diagnóstico, sem executar código; o estado só muda ao clicar em **Aplicar** (ADR-133).
+- Diagnóstico: conjunto de erros e avisos de uma importação, com código interno, severidade, caminho e parâmetros; a mensagem crua do `JSON.parse` nunca vai para a tela (ADR-133).
+- Prévia/Aplicar: a prévia mostra o que o arquivo contém sem alterar a página; **Aplicar** efetiva a escala ou a extraída quando não há erro (ADR-133).
+- Alias: referência `{caminho}` de um token a outro, resolvida como dado na importação, com limite de encadeamento; não é execução (ADR-133).
+- Ciclo: encadeamento de aliases que volta a um token já visitado; a importação recusa com diagnóstico em vez de entrar em loop (ADR-133).
+- Assinatura do snapshot: identificação de tipo + base + tons/cores que decide se os papéis importados ainda valem; trocar a base, aplicar preset ou editar a extração os descarta (ADR-133).
+- Ida e volta: exportar tokens e importá-los de novo, comparando base, 11 tons e papéis — não bytes, porque a escala é regravada com a versão atual do algoritmo (ADR-130, ADR-133).

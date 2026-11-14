@@ -21,3 +21,11 @@
 - Gerenciar tags: renomear reflete em todas as paletas; reordenar vale para a conta (ADR-103).
 
 Toda escrita passa por `throttle:colors-management`; paleta de outra conta responde 404.
+
+## Aba Favoritas (Fase 5, ADR-128)
+
+- Segunda visão da mesma página, com as paletas públicas de **outras contas** que a conta favoritou; a fonte é o vínculo em `color_palette_favorites`, único por `(user, palette)`.
+- Lista por slug público e respeita a visibilidade atual: paleta que deixou de ser pública (despublicada ou arquivada) some da aba **sem apagar o vínculo** e volta a aparecer se a origem voltar a ser pública e ativa.
+- Favoritar e desfavoritar são idempotentes (`POST`/`DELETE /api/tools/colors/palettes/{palette}/favorite`): repetir não duplica nada.
+- Não copia a paleta, não consome cota e não aumenta o “Uso” da origem; abrir a favorita leva à página pública, e editar/copiar continuam exigindo os fluxos normais.
+- Anônimo não vê a aba (a rota é autenticada); paleta própria responde 403, e privada, arquivada ou inexistente respondem 404 uniforme.

@@ -20,7 +20,7 @@ Arquivos gerados (`{name}` = slug):
 
 Todos terminam com uma quebra de linha; o formato é determinístico (mesma escala → mesmos bytes). O download usa o MIME acima.
 
-## Fase 5 — design tokens (implementado)
+## Fase 5 — design tokens (implementado, ADR-130)
 
 Exporta as 11 primitivas e, quando o painel recebe os papéis do editor, os 8 papéis × 2 temas. O gerador puro não tem papéis (ADR-126): ali a saída é só primitiva. Sem `roles`, os cinco formatos da F2 continuam byte a byte iguais; o JSON nativo ganhou apenas campos aditivos (`formatVersion`, `clippedTones` e, na Etapa 6, `base` — por isso ele é o formato de ida e volta).
 
@@ -32,7 +32,7 @@ Versão do formato: `COLOR_TOKEN_FORMAT_VERSION = 1`, registrada no DTCG (`$exte
 | Style Dictionary | `{name}.style-dictionary.json` | `application/json;charset=utf-8` |
 | TypeScript | `{name}.tokens.ts` | `text/typescript;charset=utf-8` |
 
-### Ida e volta
+### Ida e volta (ADR-133)
 
 O JSON nativo, o DTCG e o Style Dictionary podem ser importados de volta pelo
 **Importar tokens** (Fase 5, Etapa 6). O teste de ida e volta compara base, os

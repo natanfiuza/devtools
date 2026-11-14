@@ -1,7 +1,7 @@
 # Colors — índice da documentação
 
 Track do grupo Colors do devtools: HTML Color Picker e Color Palette Generator.
-Estado atual: **Fases 1, 2, 3 e 4 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
+Estado atual: **Fases 1, 2, 3, 4 e 5 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). A **Fase 5** acrescentou a biblioteca pessoal de cores — histórico e favoritos da conta, sem limite funcional e compartilhados pelo Picker e pelo Generator, com o anônimo reduzido a 20 de histórico e 50 de favoritos e importação explícita para a conta (ADR-127, ADR-131, ADR-132) —, favoritos de paletas públicas sem duplicata (ADR-128), presets do gerador como entrada da geração (ADR-129) e exportação e importação validadas de tokens W3C DTCG, Style Dictionary e JSON nativo (ADR-130, ADR-133). O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
 
 ## Documentos
 
@@ -24,7 +24,7 @@ Estado atual: **Fases 1, 2, 3 e 4 implementadas**. A Fase 1 entregou o HTML Colo
 
 ## ADRs de Colors
 
-Numeração vigente: **ADR-091 a ADR-126**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
+Numeração vigente: **ADR-091 a ADR-133**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
 Os números 057–086 que a especificação original citava já estavam ocupados no repositório (`docs/adr/`), por isso os 25 ADRs de Colors foram renumerados em 2026-11-07, sem mudar o conteúdo além das emendas da Fase 1.
 
 | antigo | novo | | antigo | novo | | antigo | novo |
@@ -40,7 +40,7 @@ Os números 057–086 que a especificação original citava já estavam ocupados
 |  |  | | 076 | 105 | | 085 | 114 |
 |  |  | |  |  | | 086 | 115 |
 
-ADRs criados nas Fases 1–4:
+ADRs criados nas Fases 1–5:
 
 | ADR | Tema |
 |---|---|
@@ -55,6 +55,13 @@ ADRs criados nas Fases 1–4:
 | 124 | página pública, canonical/SEO/sitemap, duplicação e “uso” |
 | 125 | OG dinâmica (cliente, upload validado, storage, `og_version`, serving) |
 | 126 | protótipos vetoriais (papéis/temas, renderer SVG, PNG do mesmo SVG, fidelidade) |
+| 127 | biblioteca pessoal de cores (histórico e favoritos da conta, chave canônica, sem limite funcional) |
+| 128 | favoritos de paletas públicas (vínculo sem cópia, 403/404, aba Favoritas) |
+| 129 | presets como entrada da geração (nome + base, sem cota de paleta) |
+| 130 | exportação de tokens v1 (primitivas + semânticas, versão, alpha/gamut, DTCG/SD/TS) |
+| 131 | biblioteca de cores compartilhada entre Picker e Generator (conta × local, escrita otimista) |
+| 132 | histórico anônimo reduzido (20/50) e importação explícita do histórico local |
+| 133 | importação validada de tokens (parser puro, limites, diagnóstico, rascunho estendido) |
 
 ## Emendas de 2026-11-07
 
@@ -80,6 +87,16 @@ As decisões anteriores foram preservadas; cada ADR afetado ganhou uma seção "
 - OG dinâmica: upload validado, `og_version`, invalidação visual e serving só para pública ativa (ADR-105);
 - slug liberado no arquivamento e reivindicado na restauração quando livre (ADR-119);
 - shape persistido da extração: cores efetivas, papéis e origem reduzida, sem re-quantizar (ADR-122).
+
+## Emendas de 2026-11-14 (Fase 5)
+
+As decisões anteriores foram preservadas; cada ADR afetado ganhou uma seção "Emenda 2026-11-14":
+
+- preset é apenas nome + base, sem cores derivadas, papéis ou tema (ADR-093);
+- exportação de tokens v1: primitivas + semânticas opcionais, versão do formato, alpha/gamut e metadados por formato (ADR-095);
+- o anônimo continua só com `localStorage` (20 histórico/50 favoritos) e o rascunho pode carregar escala e papéis opcionais (ADR-096);
+- histórico e favoritos locais continuam sendo o modo anônimo; para logado passam a vir da conta e o histórico anônimo cai para 20 (ADR-118);
+- rascunho em `sessionStorage` ganha `scale?`/`roles?` com assinatura, sem virar paleta anônima (ADR-123 §7).
 
 ## Regras de manutenção
 
