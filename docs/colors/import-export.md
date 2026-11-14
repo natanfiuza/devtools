@@ -11,12 +11,12 @@
 - Importar por URL de imagem: só HTTPS, CORS direto na origem, `content-type` raster e corte por stream em `max_bytes`; bloqueio de CORS oferece o arquivo local (ADR-122).
 
 ## JSON e design tokens
-- Exportar W3C DTCG, Style Dictionary, TypeScript e o JSON nativo da paleta — implementado na Etapa 5 da Fase 5 (ADR-095); o DTCG é importável pelo Tokens Studio e pelas Figma Variables, sem API do Figma.
-- Importar tokens W3C DTCG (Tokens Studio / Figma Variables), Style Dictionary e JSON nativo — Etapa 6: validação de estrutura, tamanho, profundidade, referências e ciclos; nada é executado e um diagnóstico nunca descarta o estado atual.
+- Exportar W3C DTCG, Style Dictionary, TypeScript e o JSON nativo da paleta — implementado na Etapa 5 da Fase 5 (**ADR-130**, emenda da ADR-095); o DTCG é importável pelo Tokens Studio e pelas Figma Variables, sem API do Figma.
+- Importar tokens W3C DTCG (Tokens Studio / Figma Variables), Style Dictionary e JSON nativo — Etapa 6 (**ADR-133**): validação de estrutura, tamanho, profundidade, referências e ciclos; nada é executado e um diagnóstico nunca descarta o estado atual.
 
 ### Importação validada (Fase 5, Etapa 6)
 
-Disponível no gerador (sempre) e no editor (só quando a paleta não está arquivada). O
+Decisão registrada na ADR-133. Disponível no gerador (sempre) e no editor (só quando a paleta não está arquivada). O
 botão **Importar tokens** abre a leitura de um arquivo `.json`; escolher o arquivo
 apenas valida e mostra a prévia. O estado da página só muda ao clicar em
 **Aplicar**, e só quando a leitura terminou sem erro.

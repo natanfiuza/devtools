@@ -13,6 +13,7 @@
 - SEO: title, description, canonical e hreflang **sem** query string.
 - OG image dinâmica 1200×630, gerada no cliente e servida só para paleta pública ativa; fallback para a OG padrão do site (ADR-125).
 - Tags.
+- Estrela de favorito (Fase 5, ADR-128): o servidor entrega `canFavorite` e `favorited` e o botão alterna `POST`/`DELETE /api/tools/colors/palettes/{palette}/favorite`. Favoritar é só um vínculo da conta com a paleta: não copia, não consome cota, não conta “Uso” e aparece na aba **Favoritas** de Minhas Paletas.
 
 ## Regras
 
@@ -20,7 +21,8 @@
 - Slug único e compartilhado entre locales.
 - Canonical sem `?duplicate=1` e sem qualquer query.
 - OG image enviada como imagem pela paleta e validada no servidor; a URL leva `?v={og_version}`.
-- A página **não** mostra autor nem controles sociais (curtir/comentar/seguir/denunciar) — esses pertencem às fases F6/F7 (ADR-098, ADR-124). Também não mostra protótipo.
+- Favoritar exige conta: a rota é autenticada, a própria paleta responde **403** e paleta que não é pública/ativa responde **404** (o mesmo 404 da página) — favoritar nunca revela o que não está no ar.
+- A página **não** mostra autor nem controles sociais (curtir/comentar/seguir/denunciar) — esses pertencem às fases F6/F7 (ADR-098, ADR-124). A exceção é a estrela de favorito da Fase 5, que é um vínculo da conta e não uma interação social pública. Também não mostra protótipo.
 
 ## Fora desta fase
 

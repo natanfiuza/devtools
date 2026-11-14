@@ -72,3 +72,6 @@ Gerar, converter, harmonizar e extrair continuam **100% no navegador**. Salvar, 
 - **Tags como texto no JSON da paleta**: não permitiria renomear em massa nem ordenar por usuário (ADR-103).
 - **Paleta anônima no backend**: cota, slug e dono não fariam sentido; o rascunho local cobre a intenção.
 - **Sincronizar a escala no servidor**: contraria o processamento local e não há necessidade — o cliente já tem o resultado.
+
+## Emenda 2026-11-14
+O §7 muda em um ponto, sem transformar o rascunho em paleta anônima: o `colors.palette.draft.v1` passa a aceitar `scale?` (11 `{tone, hex}`) e `roles?` (8 papéis × `light`/`dark`) opcionais, para preservar uma escala importada de tokens e suas semânticas através do login (ADR-133). A leitura continua tolerante — campo inválido é descartado sem invalidar o rascunho —, o TTL de 24 h e a ausência de imagem/URL completa permanecem, e o rascunho some após salvar ou expirar. Uma assinatura (tipo + base + tons/cores) decide se os papéis ainda valem ao restaurar ou se foram invalidados por troca de base, preset ou edição da extração. O restante da decisão — inclusive a cota e o slug pressuporem dono — continua valendo.

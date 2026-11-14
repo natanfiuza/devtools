@@ -4,7 +4,7 @@
 /{locale}/tools/colors/palette-generator
 
 ## Estado
-**Fase 4 implementada** (2026-11-11): além da escala determinística de 11 tons, das harmonias e da extração de imagem da F2/F3, o gerador agora **salva paletas** (Free 25 / pago ilimitado, com cota sob lock e arquivadas contando — ADR-096, ADR-123), reabre pelo editor com as **cores efetivas persistidas** (sem recalcular) e com os **papéis** claro/escuro gravados, e ganhou a aba **Protótipo** com site/mobile em SVG vetorial e PNG 1x/2x (ADR-126). O anônimo tem rascunho em `sessionStorage` por 24 h e é levado ao login. A OG dinâmica é gerada após o salvamento (ADR-125). Tokens W3C DTCG/Style Dictionary, presets e favoritos no backend continuam na F5.
+**Fase 5 implementada** (2026-11-14): o gerador mantém a escala determinística de 11 tons, as harmonias, a extração de imagem e o salvamento da F2–F4 e ganha a **biblioteca pessoal de cores** compartilhada com o picker (histórico e favoritos da conta; anônimo com 20 histórico/50 favoritos e importação explícita — ADR-127, ADR-131, ADR-132), **presets** como entrada da geração (nome + base, sem consumir cota — ADR-129) e **tokens W3C DTCG, Style Dictionary e TypeScript**, com primitivas e, no editor, semânticas claro/escuro (ADR-130). A **importação validada** de JSON nativo, DTCG e Style Dictionary vale no gerador e no editor, sem executar o arquivo e sem descartar o estado em caso de erro (ADR-133). O anônimo continua com rascunho em `sessionStorage` por 24 h, agora podendo carregar escala e papéis importados (ADR-096, ADR-123, emenda de 2026-11-14).
 
 ## Entrada
 A **cor base** (HEX/HEX8 e demais formatos do picker compacto, com alpha), que alimenta a escala e as harmonias; e, na aba de extração, uma **imagem local** ou uma **URL HTTPS**. A escala é sempre a de 11 tons fixos (ADR-101); 5/7/9/11 pertence só à extração de imagem.
@@ -55,6 +55,17 @@ Todo botão de copiar (formato, base, tom, escala, exportação, harmonia e cor 
 6. Paleta arquivada abre somente leitura até ser restaurada.
 7. Toda string visível vem do i18n nos 5 idiomas e o único tráfego de ferramenta é o das ações de conta (salvar, OG, tags).
 
+## Critérios de aceite da Fase 5
+1. Para quem está logado, histórico e favoritos de cor vêm da conta — sem limite funcional, paginados por cursor — e são a **mesma lista** mostrada no HTML Color Picker; favoritar aqui aparece lá e vice-versa (ADR-127, ADR-131).
+2. O anônimo mantém 20 no histórico e 50 nos favoritos no `localStorage`, sem deduplicar por formatação (a chave é a cor canônica) e sem nenhuma requisição ao servidor (ADR-132).
+3. O painel da biblioteca importa o histórico local para a conta só por ação explícita, em lotes; nada é importado no login e o `localStorage` só é limpo depois de todos os lotes passarem (ADR-132).
+4. Presets guardam apenas nome + cor base, pertencem à conta e não consomem cota de paleta; aplicar um preset troca a base e recalcula a escala (ADR-129).
+5. A exportação entrega os três formatos de tokens — W3C DTCG, Style Dictionary e TypeScript — além de CSS, SCSS e JSON nativo, sempre com as 11 primitivas e, no editor, com os 8 papéis × claro/escuro quando existem; a versão do formato é 1 e o alpha sai em HEX8 onde o formato aceita (ADR-130).
+6. A importação validada aceita JSON nativo, DTCG e Style Dictionary, mostra a prévia e só altera o estado ao clicar em **Aplicar**; erro de estrutura, tamanho, profundidade, alias ou ciclo vira diagnóstico e **nunca** descarta a escala ou os papéis atuais (ADR-133).
+7. A ida e volta (exportar e importar de novo) preserva base, 11 tons e papéis no editor; no gerador puro só as primitivas voltam (ADR-130, ADR-133).
+8. O rascunho anônimo continua em `sessionStorage` por 24 h e, desde a F5, pode carregar escala e papéis importados, descartando os papéis quando a assinatura do snapshot muda (ADR-096, ADR-123, ADR-133).
+9. Toda string visível vem do i18n nos cinco idiomas e o tráfego de rede da ferramenta segue restrito às ações de conta.
+
 ## Escalas
 - Sempre os 11 tons fixos: `50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950` (ADR-101).
 - A escolha de 5, 7, 9 ou 11 cores pertence **somente** à extração de imagem (`import-export.md`, ADR-099), nunca à escala do gerador.
@@ -83,3 +94,25 @@ HEX, RGB, HSL, OKLCH, OKLab, CSS, SCSS, JSON, Tailwind v3/v4, tokens W3C DTCG (i
 - Renderizador SVG vetorial próprio e determinístico; o PNG 1x/2x é a rasterização do **mesmo** SVG, com a fonte embutida só na exportação (ADR-126).
 - 8 papéis fixos (`primary`, `secondary`, `accent`, `background`, `surface`, `text`, `text_muted`, `border`) por tema, editáveis com “Restaurar padrões” e persistidos na paleta; site e mobile compartilham os papéis. Padrões da escala: 600/700/400/50/100/950/600/200 (claro) e 600/700/400/950/900/50/400/800 (escuro); da extraída: as 3 primeiras cores por peso e neutros em OKLCH a partir da base.
 - Exportar SVG e PNG 1x/2x baixa localmente; nenhuma captura de tela e nenhuma dependência nova.
+
+## Organização pessoal e tokens (Fase 5)
+
+### Biblioteca de cores
+- Uma única biblioteca no cliente (`useColorLibrary`), usada pelo picker e pelo gerador: mesmo histórico, mesmos favoritos, mesma chave canônica e mesmos painéis (ADR-131).
+- Logado: histórico e favoritos são dados da conta, sem limite funcional, lidos por cursor e gravados de forma otimista com reversão em falha (ADR-127). Anônimo: 20 no histórico e 50 nos favoritos, tudo no `localStorage` e sem requisição (ADR-132).
+- O histórico local entra na conta apenas pela ação explícita do painel, em lotes de até 200; o navegador só é limpo depois que todos os lotes passam (ADR-132).
+
+### Presets
+- Entrada da geração: nome (até 60 caracteres, único por conta) + cor base (ADR-129). Nada de escala, papéis ou tema — o preset não é paleta e não consome cota.
+- Criar, renomear, aplicar e excluir no painel do gerador; aplicar troca a base e a escala acompanha. O teto por conta é opcional em `config/colors.php` (`presets.limit`, default `null` = sem teto).
+
+### Exportação de tokens
+- Formatos: W3C DTCG JSON, Style Dictionary, TypeScript (`const`), CSS, SCSS e JSON nativo — todos com `COLOR_TOKEN_FORMAT_VERSION = 1` no cabeçalho/metadados (ADR-130).
+- Primitivas: os 11 tons `50–950`. Semânticas: os 8 papéis × `light`/`dark`, só quando a paleta tem os papéis (editor); o gerador puro exporta apenas primitivas.
+- DTCG leva metadados em `$extensions["devtools.colors"]`; Style Dictionary sai limpo (`value`/`type`), usando o tom 500 como base na volta; o JSON nativo carrega os metadados. Alpha preservado em HEX8 onde o formato aceita e o gamut fora do sRGB é sinalizado (ADR-117, ADR-130). Sem API do Figma.
+
+### Importação validada de tokens
+- Aceita JSON nativo, W3C DTCG e Style Dictionary; a detecção é estrutural e arquivo ambíguo é recusado com diagnóstico (ADR-133).
+- Só `JSON.parse`: nada é executado. Limites de arquivo (512 KiB), tokens/nós (5000), profundidade da árvore (40), encadeamento de aliases (10) e diagnósticos exibidos (20) vêm de `config/colors.php` e chegam por `ToolProps`.
+- A prévia mostra base, tons e papéis sem tocar na página; **Aplicar** só habilita sem erro. Alias é resolvido como dado, ciclo é recusado, papéis incompletos são descartados com aviso e o snapshot assinado decide se os papéis ainda valem.
+- Não existe endpoint de importação: o arquivo nunca sai do navegador.
