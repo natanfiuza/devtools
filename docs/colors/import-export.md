@@ -10,10 +10,9 @@
 - Permitir salvar direto: **implementado na Fase 4** — a paleta extraída é salva como `kind=extracted` com base, 5/7/9/11 cores na ordem de peso e origem `{kind,label|host}`, mesmo com `sufficient: false` (com aviso); reabrir nunca re-quantiza (ADR-122, emenda; ADR-123).
 - Importar por URL de imagem: só HTTPS, CORS direto na origem, `content-type` raster e corte por stream em `max_bytes`; bloqueio de CORS oferece o arquivo local (ADR-122).
 
-## JSON
-- Importar tokens W3C DTCG (Tokens Studio / Figma Variables).
-- Importar Style Dictionary.
-- Importar paleta JSON.
+## JSON e design tokens
+- Exportar W3C DTCG, Style Dictionary, TypeScript e o JSON nativo da paleta — implementado na Etapa 5 da Fase 5 (ADR-095); o DTCG é importável pelo Tokens Studio e pelas Figma Variables, sem API do Figma.
+- Importar tokens W3C DTCG (Tokens Studio / Figma Variables), Style Dictionary e JSON nativo — Etapa 6: validação de estrutura, tamanho, profundidade, referências e ciclos; nada é executado e um diagnóstico nunca descarta o estado atual.
 
 ## Exportação
 - Individual por cor.

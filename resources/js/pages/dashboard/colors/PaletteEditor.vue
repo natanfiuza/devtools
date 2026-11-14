@@ -523,6 +523,7 @@ function save(): void {
         ref="workspace"
         :image="image"
         :library="props.library"
+        :roles="roles"
         :initial-base="palette.colors.base"
         :initial-scale="initialScale"
         :initial-extracted="initialExtracted"

@@ -22,7 +22,11 @@ import type {
     PaletteDraft,
     PaletteDraftTab,
 } from '@/lib/saveDraft';
-import type { ColorLibraryToolProps, PaletteKind } from '@/types/colors';
+import type {
+    ColorLibraryToolProps,
+    PaletteKind,
+    PaletteRoles,
+} from '@/types/colors';
 import BaseColorRow from './components/BaseColorRow.vue';
 import EmptyPalette from './components/EmptyPalette.vue';
 import ExportPanel from './components/ExportPanel.vue';
@@ -61,6 +65,8 @@ const props = defineProps<{
     initialTab?: string;
     /** Biblioteca da conta (F5); ausente = anonimo no `localStorage`. */
     library?: ColorLibraryToolProps;
+    /** Papeis claro/escuro do editor (F5); ausente no gerador. */
+    roles?: PaletteRoles;
 }>();
 
 const slots = useSlots();
@@ -410,6 +416,7 @@ defineExpose({
               <ExportPanel
                 :scale="scale"
                 :copy="copyFeedback.copy"
+                :roles="roles"
               />
             </template>
           </TabsContent>

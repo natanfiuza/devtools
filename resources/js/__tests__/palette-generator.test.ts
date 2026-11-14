@@ -348,10 +348,15 @@ function i18n() {
                         copy: 'Copiar',
                         copied: '{name} copiado',
                         download: 'Baixar',
+                        semantic_included:
+                            'Os papéis semânticos do protótipo estão incluídos.',
                         tabs: {
                             css: 'CSS',
                             scss: 'SCSS',
                             json: 'JSON',
+                            dtcg: 'DTCG',
+                            style_dictionary: 'Style Dictionary',
+                            typescript: 'TypeScript',
                             tailwind_v3: 'Tailwind v3',
                             tailwind_v4: 'Tailwind v4',
                         },
@@ -607,6 +612,22 @@ describe('Tool', () => {
             expect.stringContaining('"colors"'),
             'application/json;charset=utf-8',
         );
+    });
+
+    it('exporta tokens DTCG no gerador, sempre sem semanticas', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.get('[data-test="export-tab-dtcg"]').trigger('mousedown');
+
+        const code = wrapper.get('[data-test="export-code"]').text();
+
+        expect(code).toContain('"$type": "color"');
+        expect(code).toContain('"$value"');
+        expect(code).toContain('"formatVersion": 1');
+        expect(code).not.toContain('"semantic"');
+        expect(
+            wrapper.find('[data-test="export-semantic-note"]').exists(),
+        ).toBe(false);
     });
 
     it('avisa o slug quando o nome precisa ser normalizado', async () => {
