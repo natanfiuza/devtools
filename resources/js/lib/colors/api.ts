@@ -8,7 +8,7 @@
 
 const BASE = '/api/tools/colors';
 
-export type ColorsApiMethod = 'GET' | 'POST' | 'DELETE';
+export type ColorsApiMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 function csrfToken(): string {
     if (typeof document === 'undefined') {

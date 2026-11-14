@@ -387,6 +387,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Presets do gerador salvos pela conta (F5, ADR-093).
+     *
+     * @return HasMany<ColorPreset, $this>
+     */
+    public function colorPresets(): HasMany
+    {
+        return $this->hasMany(ColorPreset::class);
+    }
+
+    /**
      * Conta criada por login social nasce sem senha (ADR-023).
      */
     public function hasPassword(): bool

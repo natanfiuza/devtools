@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { nextTick, reactive } from 'vue';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COPY_CONFIRMATION_MS } from '@/composables/useCopyFeedback';
 import {
     buildHarmony,
@@ -402,6 +402,36 @@ function i18n() {
                         description_too_long:
                             'A descrição pode ter até {max} caracteres.',
                     },
+                },
+                presets: {
+                    open: 'Presets',
+                    title: 'Presets do gerador',
+                    description: 'Um preset guarda a base.',
+                    name_label: 'Nome do preset',
+                    name_placeholder: 'Azul da marca',
+                    current_base: 'Cor base: {hex}',
+                    create: 'Salvar preset',
+                    saving: 'Salvando…',
+                    loading: 'Carregando presets…',
+                    load_error: 'Não foi possível carregar os presets.',
+                    retry: 'Tentar de novo',
+                    empty: 'Nenhum preset ainda.',
+                    apply: 'Aplicar',
+                    applied: 'Preset aplicado.',
+                    rename: 'Renomear',
+                    rename_save: 'Salvar',
+                    renaming: 'Salvando…',
+                    cancel: 'Cancelar',
+                    delete: 'Excluir',
+                    deleting: 'Excluindo…',
+                    confirm_delete: 'Excluir “{name}”?',
+                    confirm_delete_hint: 'Sai da sua conta.',
+                    updated_at: 'Atualizado em {date}',
+                    limit_reached: 'Limite de presets ({max}).',
+                    duplicate: 'Já tem um preset com este nome.',
+                    empty_base: 'Escolha uma cor base.',
+                    error: 'Não foi possível salvar o preset.',
+                    close: 'Fechar',
                 },
             },
         },
@@ -1052,5 +1082,85 @@ describe('Tool · salvar', () => {
 
         expect(dialog()).toBeNull();
         expect(postMock).not.toHaveBeenCalled();
+    });
+});
+
+describe('Tool · presets', () => {
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    function presetListResponse() {
+        return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+                data: [
+                    {
+                        id: '01JZZZZZZZZZZZZZZZZZZZZZZZ',
+                        name: 'Verde',
+                        base: '#22aa66',
+                        created_at: '2026-11-13T00:00:00+00:00',
+                        updated_at: '2026-11-13T00:00:00+00:00',
+                    },
+                ],
+                limits: { limit: null, used: 1 },
+                form: { name_max_length: 60 },
+            }),
+        };
+    }
+
+    it('só mostra o botão de presets para quem tem conta', async () => {
+        const guest = mountTool();
+
+        expect(guest.find('[data-test="palette-presets"]').exists()).toBe(
+            false,
+        );
+
+        pageState.props.auth.user = { id: 7 };
+
+        const member = mountTool();
+
+        await flushPromises();
+
+        expect(member.find('[data-test="palette-presets"]').exists()).toBe(
+            true,
+        );
+    });
+
+    it('aplicar um preset volta a base, fecha o diálogo e avisa', async () => {
+        pageState.props.auth.user = { id: 7 };
+
+        const fetchMock = vi.fn(async () => presetListResponse());
+        vi.stubGlobal('fetch', fetchMock);
+
+        const wrapper = mountTool();
+
+        await wrapper.get('[data-test="palette-presets"]').trigger('click');
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledWith(
+            '/api/tools/colors/presets',
+            expect.objectContaining({ method: 'GET' }),
+        );
+
+        const apply = document.querySelector(
+            '[data-test="preset-apply"]',
+        ) as HTMLButtonElement | null;
+
+        if (apply === null) {
+            throw new Error('botão de aplicar preset ausente');
+        }
+
+        apply.click();
+        await flushPromises();
+
+        expect(wrapper.get('[data-test="base-value"]').text()).toBe('#22aa66');
+        expect(wrapper.get('[data-test="palette-feedback"]').text()).toContain(
+            'Preset aplicado.',
+        );
+        expect(
+            document.querySelector('[data-test="presets-dialog"]'),
+        ).toBeNull();
     });
 });

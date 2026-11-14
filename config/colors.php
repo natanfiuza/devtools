@@ -48,6 +48,17 @@ return [
     ],
 
     /*
+    | Presets do gerador (F5, ADR-093). Guardam apenas a entrada da geracao
+    | (nome + cor base), nunca as cores derivadas. `limit = null` significa
+    | sem limite funcional; um teto operacional, se necessario, vem daqui.
+    */
+    'presets' => [
+        'name_max_length' => (int) env('COLORS_PRESET_NAME_MAX_LENGTH', 60),
+
+        'limit' => env('COLORS_PRESETS_LIMIT') === null ? null : (int) env('COLORS_PRESETS_LIMIT'),
+    ],
+
+    /*
     | Biblioteca pessoal de cores (F5, ADR-127/ADR-132). O historico da conta
     | nao tem cota funcional; a pagina e o lote de importacao sao tetos de
     | transporte, nao de armazenamento.
