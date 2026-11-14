@@ -14,6 +14,15 @@
 - OG image dinâmica 1200×630, gerada no cliente e servida só para paleta pública ativa; fallback para a OG padrão do site (ADR-125).
 - Tags.
 - Estrela de favorito (Fase 5, ADR-128): o servidor entrega `canFavorite` e `favorited` e o botão alterna `POST`/`DELETE /api/tools/colors/palettes/{palette}/favorite`. Favoritar é só um vínculo da conta com a paleta: não copia, não consome cota, não conta “Uso” e aparece na aba **Favoritas** de Minhas Paletas.
+- Byline do autor (Fase 6, ADR-134): nome, avatar e link para
+  `/{locale}/u/{username}` quando a conta tem username e continua visível.
+- Curtir (Fase 6, ADR-135): `liked`/`canLike` e `likes_count`; a conta curte pelo
+  login e o visitante por identidade anônima first-party, sem identificador na
+  resposta. O dono não curte a própria paleta.
+- Seguir o autor (Fase 6, ADR-136): `following`/`canFollow`; exige login e o
+  botão aparece junto à byline.
+- Gerar imagem (Fase 6, ADR-138): seção recolhível com os três formatos
+  tipográficos, disponível também a visitante; nada é enviado ao servidor.
 
 ## Regras
 
@@ -22,11 +31,14 @@
 - Canonical sem `?duplicate=1` e sem qualquer query.
 - OG image enviada como imagem pela paleta e validada no servidor; a URL leva `?v={og_version}`.
 - Favoritar exige conta: a rota é autenticada, a própria paleta responde **403** e paleta que não é pública/ativa responde **404** (o mesmo 404 da página) — favoritar nunca revela o que não está no ar.
-- A página **não** mostra autor nem controles sociais (curtir/comentar/seguir/denunciar) — esses pertencem às fases F6/F7 (ADR-098, ADR-124). A exceção é a estrela de favorito da Fase 5, que é um vínculo da conta e não uma interação social pública. Também não mostra protótipo.
+- A página mostra autor visível, curtir, seguir e a seção de imagem desde a F6
+  (ADR-134 a ADR-138). Comentários, respostas, denúncia e moderação continuam
+  fora (F7); protótipo não é exibido nesta página.
+- A estrela de favorito da F5 é um vínculo da conta, independente da curtida
+  anônima/conta: as duas relações coexistem sem se influenciar.
 
 ## Fora desta fase
 
-- Curtir (inclusive anônimo, ADR-112): F6.
-- Seguir autor: F6.
-- Comentários em threads de 2 níveis (ADR-111) e denúncia: F7.
-- Autor na página pública: fora de escopo.
+- Comentários em threads de 2 níveis (ADR-111), denúncia e moderação: F7.
+- E-mail, sino e preferências de notificação: F7.
+- Lista de seguidores/seguindo e bloqueio: não implementados.

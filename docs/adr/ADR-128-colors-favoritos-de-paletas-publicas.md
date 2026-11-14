@@ -44,3 +44,11 @@ O vínculo não cria paleta, então não passa pela cota (ADR-096), não gera sl
 - **Permitir favoritar a própria paleta**: duplicaria a lista de Minhas Paletas e confundiria “favorito” com “minha”.
 - **Manter o favorito visível quando a paleta fica privada/arquivada**: exporia ou quebraria links; ocultar sem apagar preserva a intenção e o retorno.
 - **Notificar o dono a cada favorito**: isso é interação social e pertence à F6/F7, não à organização pessoal.
+
+## Emenda 2026-11-14
+
+A F6 introduziu a curtida (ADR-135) e manteve o favorito intacto: são relações
+diferentes, com tabelas, ações e contadores diferentes. A estrela da página
+pública continua dependendo de `canFavorite` (conta logada e não dona), e a
+curtida aparece independentemente dela, inclusive para o visitante anônimo.
+Favoritar não notifica, como antes.

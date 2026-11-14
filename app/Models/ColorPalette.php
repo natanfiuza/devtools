@@ -116,6 +116,18 @@ class ColorPalette extends Model
     }
 
     /**
+     * Curtidas da paleta, ativas e inativas (F6, ADR-135).
+     *
+     * A contagem publica sempre aplica o escopo `active`.
+     *
+     * @return HasMany<ColorPaletteLike, $this>
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(ColorPaletteLike::class, 'color_palette_id');
+    }
+
+    /**
      * @return HasMany<ColorPalette, $this>
      */
     public function duplicates(): HasMany

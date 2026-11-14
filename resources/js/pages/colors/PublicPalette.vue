@@ -4,11 +4,14 @@ import { Copy, Download, FlaskConical, RotateCcw, Star } from '@lucide/vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PageHead from '@/components/PageHead.vue';
+import FollowButton from '@/components/colors/FollowButton.vue';
+import LikeButton from '@/components/colors/LikeButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
+import { useInitials } from '@/composables/useInitials';
 import { colorsApi } from '@/lib/colors/api';
 import {
     buildPaletteScale,
@@ -19,8 +22,10 @@ import {
 import { downloadText } from '@/lib/download';
 import { buildFrozenScale } from '@/lib/frozenScale';
 import { payloadFromScale } from '@/lib/palettePayload';
+import colorsProfiles from '@/routes/colors/profiles';
 import duplicatePalettes from '@/routes/colors/palettes/duplicate';
 import ExportPanel from '@/tools/palette-generator/components/ExportPanel.vue';
+import PaletteImagePanel from '@/tools/palette-generator/image/PaletteImagePanel.vue';
 import type {
     PaletteColorItem,
     PaletteColors,
@@ -32,9 +37,12 @@ import type {
  * Pagina publica de uma paleta (F4, ADR-124).
  *
  * Vitrine: nome, descricao, tags, uso, data e as cores persistidas, com copia e
- * download. Nao ha autor, curtidas nem comentarios. A escala reusa o painel de
- * exportacao do gerador, montada a partir dos HEX gravados (`buildFrozenScale`),
- * para o visitante ver exatamente o que o dono viu.
+ * download. A byline do autor (F6, ADR-134) leva ao perfil publico e oferece
+ * seguir; a curtida (ADR-135) vale para conta e para o visitante anonimo, que
+ * recebe o cookie na propria resposta da API. Nao ha comentarios nesta fase.
+ * A escala reusa o painel de exportacao do gerador, montada a partir dos HEX
+ * gravados (`buildFrozenScale`), para o visitante ver exatamente o que o dono
+ * viu.
  *
  * "Testar nova base" recalcula uma escala **so na memoria**: a URL, o canonical
  * e a OG continuam os da paleta publicada. "Duplicar" exige conta; quem tem
@@ -52,8 +60,20 @@ const feedback = copyFeedback.message;
 
 const authenticated = computed(() => page.props.auth?.user != null);
 const localeSlug = computed(() => page.props.localeSlug ?? 'en');
+const { getInitials } = useInitials();
+
+/** Link do perfil do autor; o perfil e publico e indexavel (F6, ADR-134). */
+const authorUrl = computed<string | null>(() =>
+    props.palette.author === null
+        ? null
+        : colorsProfiles.show.url({
+              locale: localeSlug.value,
+              username: props.palette.author.username,
+          }),
+);
 
 const testing = ref(false);
+const imageOpen = ref(false);
 const baseInput = ref(props.palette.colors.base);
 const baseInputEl = ref<InstanceType<typeof Input> | null>(null);
 
@@ -273,6 +293,45 @@ onMounted(() => {
         {{ palette.description }}
       </p>
 
+      <div
+        v-if="palette.author !== null"
+        class="flex flex-wrap items-center gap-2"
+        data-test="public-palette-author"
+      >
+        <img
+          v-if="palette.author.avatar !== null"
+          :src="palette.author.avatar"
+          :alt="palette.author.name"
+          class="size-8 rounded-full border border-border object-cover"
+        >
+        <span
+          v-else
+          class="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground"
+          :aria-label="palette.author.name"
+        >
+          {{ getInitials(palette.author.name) }}
+        </span>
+
+        <Link
+          :href="authorUrl ?? '#'"
+          class="text-sm font-medium hover:underline"
+          :aria-label="t('colors.public.by', { name: palette.author.name })"
+          data-test="public-palette-author-link"
+        >
+          {{ palette.author.name }}
+        </Link>
+        <span class="text-xs text-muted-foreground">
+          @{{ palette.author.username }}
+        </span>
+
+        <FollowButton
+          :user-id="palette.author.id"
+          :following="following"
+          :can-follow="canFollow"
+          data-test="public-palette-follow"
+        />
+      </div>
+
       <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <Badge variant="outline">
           {{ t(`colors.list.kind_${palette.kind}`) }}
@@ -355,6 +414,14 @@ onMounted(() => {
     </section>
 
     <div class="flex flex-wrap items-center gap-2">
+      <LikeButton
+        :palette-id="palette.id"
+        :liked="liked"
+        :likes-count="palette.likes_count"
+        :can-like="canLike"
+        data-test="public-like"
+      />
+
       <Button
         v-if="canFavorite"
         type="button"
@@ -542,6 +609,38 @@ onMounted(() => {
           {{ t('colors.public.download_hex') }}
         </Button>
       </div>
+    </section>
+
+    <section
+      class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+      data-test="public-image"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-sm font-semibold">
+            {{ t('colors.image.title') }}
+          </h2>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {{ t('colors.image.description') }}
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          :aria-expanded="imageOpen"
+          data-test="public-image-toggle"
+          @click="imageOpen = !imageOpen"
+        >
+          {{ imageOpen ? t('colors.image.close') : t('colors.image.open') }}
+        </Button>
+      </div>
+
+      <PaletteImagePanel
+        v-if="imageOpen"
+        :name="palette.name"
+        :colors="hexes"
+      />
     </section>
   </article>
 </template>

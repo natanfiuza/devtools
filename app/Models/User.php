@@ -387,6 +387,36 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Curtidas de paletas feitas pela conta (F6, ADR-135).
+     *
+     * @return HasMany<ColorPaletteLike, $this>
+     */
+    public function paletteLikes(): HasMany
+    {
+        return $this->hasMany(ColorPaletteLike::class, 'user_id');
+    }
+
+    /**
+     * Relações de seguir iniciadas pela conta (F6, ADR-136).
+     *
+     * @return HasMany<UserFollow, $this>
+     */
+    public function following(): HasMany
+    {
+        return $this->hasMany(UserFollow::class, 'follower_id');
+    }
+
+    /**
+     * Relações de seguidores da conta (F6, ADR-136).
+     *
+     * @return HasMany<UserFollow, $this>
+     */
+    public function followers(): HasMany
+    {
+        return $this->hasMany(UserFollow::class, 'followed_id');
+    }
+
+    /**
      * Presets do gerador salvos pela conta (F5, ADR-093).
      *
      * @return HasMany<ColorPreset, $this>

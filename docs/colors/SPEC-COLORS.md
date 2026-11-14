@@ -1,4 +1,4 @@
-# SPEC - Grupo Colors (v1.2)
+# SPEC - Grupo Colors (v1.3)
 
 ## 1. Visão
 Grupo Colors do devtools com HTML Color Picker e Color Palette Generator.
@@ -11,6 +11,7 @@ As rotas públicas do site são prefixadas por `{locale}`. Os códigos de idioma
 - `/{locale}/tools/colors/html-color-picker`
 - `/{locale}/tools/colors/palette-generator`
 - `/{locale}/colors/p/{slug}` (paleta pública)
+- `/{locale}/u/{username}` (perfil público, Fase 6 — ADR-134)
 - `/dashboard/colors/palettes` (Minhas Paletas) — o dashboard **não** tem prefixo de locale (ADR-022)
 
 ## 3. Formatos
@@ -51,9 +52,9 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Renomear e reordenar tags.
 - Arquivar paleta (ADR-119): some da lista padrão (filtro próprio a mostra), URL pública responde 404 e a paleta continua restaurável. Paleta arquivada **conta** na cota Free. Excluir é definitivo, libera cota e não pode ser desfeito.
 - Favoritar paleta pública de outro usuário, sem copiar nem contar “Uso”; a aba **Favoritas** mostra o que ainda é público e ativo (Fase 5, ADR-128).
-- Seguir usuário.
-- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte; IP só como sinal antiabuso (ADR-112).
-- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111).
+- Seguir conta (login obrigatório, perfil público em `/{locale}/u/{username}`; Fase 6, ADR-136).
+- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte; IP só como sinal antiabuso e chave do limitador (Fase 6, ADR-135).
+- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111) — Fase 7.
 
 ## 7. Compartilhamento
 - Paleta pública: `/{locale}/colors/p/{slug}`
@@ -83,22 +84,31 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Importar paleta a partir de URL de imagem.
 
 ## 10. Exportação de paleta como imagem
-- Formato tipográfico.
-- PNG e SVG.
-- Cliente gera, usuário baixa.
-- Marca d'água fixa do devtools.
-- Layouts: horizontal, vertical, card.
+
+- Formato tipográfico com o nome, cada HEX (HEX8 com alpha aceito) e a marca fixa
+  `devtools.natanfiuza.dev.br` (Fase 6, ADR-138).
+- PNG (1× e 2×) e SVG, do mesmo documento; a fonte é embutida só na exportação.
+- Layouts com medidas fixas: horizontal 1600×500, vertical 1080×1920 e card
+  1080×1080.
+- Cliente gera e baixa, no editor e na página pública; nada é enviado ao
+  servidor e o SVG é sanitizado por construção (sem referência externa).
+- Nome truncado com `…` (26/22/22 caracteres) e cores inválidas descartadas.
 
 ## 11. Social
-- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte (ADR-112).
-- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111).
-- Seguir usuário (login obrigatório).
-- Favoritar paleta.
-- Denunciar comentário (login).
-- Editar e excluir próprio comentário.
-- Notificações: curtida, comentário, resposta, follow.
-- Notificação imediata por e-mail e no app.
-- Silenciar notificações de paleta específica.
+
+- Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de
+  primeira parte (Fase 6, ADR-112 e ADR-135); IP apenas como chave HMAC do
+  limitador, nunca gravado nem devolvido.
+- Reivindicar as curtidas anônimas no login, sem duplicar e com uma notificação
+  por relação (Fase 6, ADR-135).
+- Seguir conta com login obrigatório e perfil público (Fase 6, ADR-134 e
+  ADR-136).
+- Favoritar paleta (Fase 5, ADR-128), independente da curtida.
+- Notificações de curtida e follow apenas no canal `database`, gravadas depois do
+  commit e com no máximo um aviso por relação (Fase 6, ADR-137); sem e-mail,
+  sino, preferências ou contador de não lidas.
+- Comentar, responder, denunciar, editar/excluir comentário, moderar, bloquear e
+  silenciar por paleta ficam para a Fase 7; a Fase 6 não cria essas superfícies.
 
 ## 12. Moderação
 - Filtro de palavras local.
@@ -110,15 +120,32 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Limite: 255 caracteres por comentário.
 
 ## 13. Analytics
+
 - GA na interface.
-- Banco registra: criação, salvamento, exportação, visualização pública, curtida, comentário, follow, denúncia.
+- A Fase 6 não criou eventos de analytics: curtidas, seguidores e seguindo são
+  lidos como linhas ativas, não como histórico de eventos. Eventos de criação,
+  salvamento, exportação, visualização pública, curtida, comentário, follow e
+  denúncia permanecem para a fase que abrir analytics.
 
 ## 14. Frontend
-Componentes: ColorSwatch, ContrastBadge, ColorInput, ShadeScale, PaletteCard, PrototypeSite, PrototypeMobile, ExportPanel, TagInput, CommentThread, FollowButton, LikeButton, ReportButton, NotificationBell.
+Componentes implementados: ColorSwatch, ContrastBadge, ColorInput, ShadeScale,
+PaletteCard, PrototypeSite, PrototypeMobile, ExportPanel, TagInput,
+FollowButton, LikeButton, ProfilePaletteCard e PaletteImagePanel.
+CommentThread, ReportButton e NotificationBell pertencem à Fase 7.
 
 ## 15. Testes
-- Vitest: conversões, contraste, escalas, harmonias, exportadores, importação de imagem e de tokens (parser, diálogo, workspace, rascunho), biblioteca pessoal, favoritos de paletas, presets, extração, OG image, export paleta imagem.
-- Pest: auth, CRUD, limites, visibilidade, slug, archive, biblioteca (histórico/favoritos/importação explícita), favoritos de paletas, presets, fixtures de tokens validadas contra `PaletteRules`, likes, comments, follows, reports, moderação.
+
+- Vitest: conversões, contraste, escalas, harmonias, exportadores, importação de
+  imagem e de tokens (parser, diálogo, workspace, rascunho), biblioteca pessoal,
+  favoritos de paletas, presets, extração, OG image, export da paleta como
+  imagem (dimensões, marca, HEX/HEX8, escaping, sanitização, determinismo,
+  fonte só na exportação, 1×/2×), curtir/seguir otimistas, perfil público e
+  integração nas duas telas.
+- Pest: auth, CRUD, limites, visibilidade, slug, archive, biblioteca
+  (histórico/favoritos/importação explícita), favoritos de paletas, presets,
+  fixtures de tokens validadas contra `PaletteRules`, curtidas (idempotência,
+  concorrência, anônimo e privacidade), follows, reivindicação no login, perfil
+  público e SEO. Comentários, denúncias e moderação pertencem à Fase 7.
 
 ## 16. Fases
 F1: grupo + HTML Color Picker completo (histórico e favoritos locais).
@@ -126,8 +153,8 @@ F2: Palette Generator — escala fixa de 11 tons, exportações CSS/SCSS/JSON/Ta
 F3: harmonias + importação de imagem e de URL com extração de 5/7/9/11 cores.
 F4: paletas salvas + protótipos + compartilhamento + OG dinâmica — **implementada em 2026-11-11** (ADR-123 a ADR-126).
 F5: organização pessoal (histórico e favoritos no backend, biblioteca compartilhada, presets) + tokens W3C DTCG/Style Dictionary + exportação e importação validadas — **implementada em 2026-11-14** (ADR-127 a ADR-133).
-F6: social (curtir anônimo, seguir) + exportação de paleta como imagem.
-F7: comentários + moderação IA + denúncias + notificações.
+F6: social (curtir anônimo, seguir, perfil público) + exportação de paleta como imagem — **implementada em 2026-11-14** (ADR-134 a ADR-138).
+F7: comentários + moderação IA + denúncias + notificações (sino, preferências e e-mail).
 F8: auditoria final e relatório de aceite.
 
 ## 17. Critérios de aceite
@@ -145,7 +172,12 @@ F8: auditoria final e relatório de aceite.
 - SEO da paleta pública.
 - OG estática das tools versionada em `public/og`; OG dinâmica de paleta em `storage/app/data/og_paleta_image`, nunca versionada.
 - Protótipo exportável em PNG e SVG.
-- Paleta exportável como imagem tipográfica (PNG/SVG).
-- Curtir, comentar (threads de 2 níveis), seguir funcionando.
-- Moderação DeepSeek com cache em `ai_cache`.
-- Notificações e-mail + app imediatas.
+- Paleta exportável como imagem tipográfica (PNG/SVG) nos três formatos, com
+  marca fixa, fonte embutida e nenhuma referência externa.
+- Curtir (inclusive anônimo), seguir e perfil público funcionando; curtidas
+  idempotentes, contagem só de linhas ativas e nenhum identificador na API.
+- Curtidas anônimas reivindicadas no login, sem duplicar e sem segundo aviso.
+- Notificações de curtida e follow gravadas no canal `database`, uma por relação,
+  sem e-mail e sem UI (Fase 7 abre sino, preferências e e-mail).
+- Comentários (threads de 2 níveis), denúncias e moderação DeepSeek com cache em
+  `ai_cache` ficam para a Fase 7.

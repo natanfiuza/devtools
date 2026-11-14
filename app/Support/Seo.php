@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\ColorPalette;
+use App\Models\User;
 use App\Support\Colors\PaletteOgStorage;
 use Illuminate\Http\Request;
 
@@ -121,6 +122,7 @@ final class Seo
             ],
             'tools.show', 'tools.show.grouped' => self::toolMeta($request),
             'colors.palettes.show' => self::paletteMeta($request),
+            'colors.profiles.show' => self::profileMeta($request),
             default => [
                 'title' => (string) config('app.name'),
                 'description' => (string) trans('app.tagline'),
@@ -246,6 +248,59 @@ final class Seo
             'title' => $palette->name,
             'description' => $description,
         ];
+    }
+
+    /**
+     * Metas do perfil publico (F6, ADR-134).
+     *
+     * O perfil entra no indice, mas fica fora do sitemap. A conta e lida pela
+     * mesma regra da rota: suspensa, anonimizada ou inexistente nao ganha meta
+     * propria (o controller responde 404 antes de qualquer renderizacao).
+     *
+     * @return array{title: string, description: string}
+     */
+    private static function profileMeta(Request $request): array
+    {
+        $profile = self::profile($request);
+
+        if ($profile === null) {
+            return [
+                'title' => (string) config('app.name'),
+                'description' => (string) trans('app.tagline'),
+            ];
+        }
+
+        return [
+            'title' => (string) trans('colors.profile.meta.title', ['name' => $profile->name]),
+            'description' => (string) trans('colors.profile.meta.description', [
+                'name' => $profile->name,
+                'app' => (string) trans('app.brand'),
+            ]),
+        ];
+    }
+
+    /**
+     * O perfil da pagina publica, pela mesma visibilidade da rota.
+     */
+    private static function profile(Request $request): ?User
+    {
+        $route = $request->route();
+
+        if ($route?->getName() !== 'colors.profiles.show') {
+            return null;
+        }
+
+        $username = $route->parameter('username');
+
+        if (! is_string($username)) {
+            return null;
+        }
+
+        return User::query()
+            ->where('username', $username)
+            ->whereNull('anonymized_at')
+            ->whereNull('suspended_at')
+            ->first();
     }
 
     /**

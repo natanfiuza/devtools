@@ -7,6 +7,57 @@ return [
         'image_alt' => ':name — color palette',
     ],
 
+    'profile' => [
+        'meta' => [
+            'title' => 'Palettes by :name',
+            'description' => 'Public palettes created by :name on :app.',
+        ],
+        'own_badge' => 'Your profile',
+        'following_zero' => 'Not following anyone',
+        'following_one' => 'Following 1 account',
+        'following_many' => 'Following :count accounts',
+        'member_since' => 'Member since :date',
+        'palettes_title' => 'Public palettes',
+        'empty_title' => 'No public palettes yet',
+        'empty_description' => 'When this account publishes a palette, it shows up here.',
+    ],
+
+    'social' => [
+        'like' => 'Like',
+        'liked' => 'Liked',
+        'like_error' => 'Could not like. Try again.',
+        'likes_zero' => 'No likes',
+        'likes_one' => '1 like',
+        'likes_many' => ':count likes',
+        'follow' => 'Follow',
+        'following' => 'Following',
+        'follow_error' => 'Could not follow. Try again.',
+        'followers_zero' => 'No followers',
+        'followers_one' => '1 follower',
+        'followers_many' => ':count followers',
+    ],
+
+    'image' => [
+        'tab' => 'Image',
+        'title' => 'Palette image',
+        'description' => 'Export the colors as an image for slides, posts and documentation. The preview and the download are generated in your browser.',
+        'layout_label' => 'Format',
+        'layout_horizontal' => 'Horizontal',
+        'layout_vertical' => 'Vertical',
+        'layout_card' => 'Card',
+        'size_horizontal' => '1600 × 500 px',
+        'size_vertical' => '1080 × 1920 px',
+        'size_card' => '1080 × 1080 px',
+        'note' => 'Name, HEX codes and the devtools watermark.',
+        'open' => 'Generate image',
+        'close' => 'Close',
+        'preview_alt' => '{layout} preview of the palette {name}',
+        'download_svg' => 'Download SVG',
+        'download_png' => 'Download PNG',
+        'download_png_2x' => 'Download PNG (2x)',
+        'png_error' => 'Could not generate the PNG in this browser.',
+    ],
+
     'palette' => [
         'copy_suffix' => ' (copy)',
     ],
@@ -210,6 +261,7 @@ return [
 
     'public' => [
         'copy_hex' => 'Copy HEX',
+        'by' => 'By :name',
         'copied' => 'Colors copied.',
         'copied_hex' => '{hex} copied.',
         'extracted_title' => 'Colors from the image',
