@@ -9,6 +9,7 @@ import { useColorState } from '@/composables/useColorState';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import {
     buildPaletteScale,
+    canonicalKey,
     formatHex,
     formatHex8,
     parseColor,
@@ -16,10 +17,16 @@ import {
     type Rgba,
 } from '@/lib/color';
 import { useColorLibrary } from '@/lib/colors/library';
-import type { WorkspaceSnapshot } from '@/lib/paletteSave';
+import { buildFrozenScale } from '@/lib/frozenScale';
+import {
+    paletteSignature,
+    type WorkspaceSnapshot,
+} from '@/lib/paletteSave';
 import type {
     DraftExtractedPalette,
+    DraftScale,
     PaletteDraft,
+    PaletteDraftInput,
     PaletteDraftTab,
 } from '@/lib/saveDraft';
 import type {
@@ -36,6 +43,7 @@ import ToneScale from './components/ToneScale.vue';
 import type { ExtractedColor, ExtractionCount } from './lib/extractContract';
 import type { ExtractedPalette } from './lib/extractedPalette';
 import type { ImageLimits } from './lib/imageLimits';
+import type { ImportedPalette } from './lib/tokenImport';
 
 /**
  * O corpo do Color Palette Generator (F2/F3), reutilizado pelo editor (F4).
@@ -82,6 +90,16 @@ const feedback = copyFeedback.message;
 const activeTab = ref<string>(props.initialTab ?? 'scale');
 const extracted = ref<ExtractedPalette | null>(props.initialExtracted ?? null);
 const frozen = ref<PaletteScale | null>(props.initialScale ?? null);
+
+/**
+ * Papeis de uma importacao de tokens (F5, Etapa 6).
+ *
+ * `importedSignature` e a identidade do snapshot importado: enquanto a tela
+ * tiver as mesmas cores, os papeis continuam valendo. O editor manda os
+ * papeis salvos por prop; a importacao vence enquanto for atual.
+ */
+const importedRoles = ref<PaletteRoles | null>(null);
+const importedSignature = ref<string | null>(null);
 
 function rgbaOf(input: string): Rgba | null {
     const parsed = parseColor(input);
@@ -132,16 +150,52 @@ onMounted(() => {
 const scale = computed(
     () => frozen.value ?? buildPaletteScale(state.rgba.value),
 );
+const activeRoles = computed<PaletteRoles | undefined>(
+    () => importedRoles.value ?? props.roles,
+);
 const isEmpty = computed(() => state.text.value.trim() === '');
 const showStale = computed(() => !isEmpty.value && state.error.value !== null);
 const hasExtraTabs = computed(() => slots['tabs-extra'] !== undefined);
 const hasExtraPanels = computed(() => slots['panels-extra'] !== undefined);
 
-// A escala salva deixa de valer na primeira mudanca da base: a partir dali o
-// algoritmo atual e a fonte da verdade.
-watch(state.rgba, () => {
-    frozen.value = null;
+/**
+ * A escala salva/importada deixa de valer quando a base muda de fato.
+ *
+ * Comparar a chave canonica (e nao qualquer emissao do estado) evita apagar
+ * uma escala congelada no mesmo tick em que ela foi aplicada - a corrida que
+ * existia com `await nextTick()`.
+ */
+watch(state.rgba, (rgba) => {
+    if (
+        frozen.value !== null &&
+        canonicalKey(rgba) !== canonicalKey(frozen.value.base)
+    ) {
+        frozen.value = null;
+    }
+
+    invalidateImportedRoles();
 });
+
+// Editar a extracao ou trocar de aba tambem muda o snapshot do qual os
+// papeis importados fazem parte.
+watch(extracted, invalidateImportedRoles);
+watch(activeTab, invalidateImportedRoles);
+
+/**
+ * Descarta os papeis importados quando o snapshot atual nao e mais o que foi
+ * importado. Roda depois das mutacoes, entao nao atrapalha o proprio
+ * `applyImported`.
+ */
+function invalidateImportedRoles(): void {
+    if (importedSignature.value === null) {
+        return;
+    }
+
+    if (paletteSignature(snapshot()) !== importedSignature.value) {
+        importedRoles.value = null;
+        importedSignature.value = null;
+    }
+}
 
 function restoreExample(): void {
     state.setColor(exampleColor());
@@ -181,6 +235,56 @@ function applyBaseHex(hex: string): boolean {
     return true;
 }
 
+/**
+ * Aplica uma paleta importada de arquivo de tokens (F5, Etapa 6).
+ *
+ * A escala entra congelada (os HEX do arquivo sao os efetivos) antes de a base
+ * mudar, entao o watcher ve a mesma chave e nao recalcula. A extraida entra na
+ * aba de extracao com a base entre as cores. Os papeis so acompanham se o
+ * arquivo os trouxe completos, e ficam amarrados a assinatura deste snapshot.
+ */
+function applyImported(palette: ImportedPalette): void {
+    if (palette.kind === 'extracted') {
+        const table = palette.extracted;
+
+        if (table === null) {
+            return;
+        }
+
+        frozen.value = null;
+        extracted.value = table;
+        activeTab.value = 'extraction';
+
+        const rgba = rgbaOf(palette.base) ?? table.colors[0]?.rgba ?? null;
+
+        if (rgba !== null) {
+            useBase(rgba);
+        }
+    } else {
+        const next = palette.scale;
+
+        if (next === null) {
+            return;
+        }
+
+        frozen.value = next;
+        extracted.value = null;
+        activeTab.value = 'scale';
+        useBase(next.base);
+    }
+
+    importedRoles.value = palette.roles;
+    importedSignature.value =
+        palette.roles === null
+            ? null
+            : paletteSignature({
+                  kind: palette.kind,
+                  base: palette.base,
+                  scale: palette.scale,
+                  extracted: palette.extracted,
+              });
+}
+
 function draftTab(): SaveTab {
     return activeTab.value === 'harmonies' || activeTab.value === 'extraction'
         ? activeTab.value
@@ -216,7 +320,7 @@ function snapshot(): WorkspaceSnapshot {
     };
 }
 
-function draft(): Omit<PaletteDraft, 'version' | 'savedAt'> {
+function draft(): PaletteDraftInput {
     const current = snapshot();
 
     return {
@@ -227,7 +331,42 @@ function draft(): Omit<PaletteDraft, 'version' | 'savedAt'> {
             current.kind === 'extracted' && current.extracted !== null
                 ? serializeExtracted(current.extracted)
                 : null,
+        // So uma escala congelada/importada precisa viajar; a gerada pelo
+        // algoritmo volta igual com a base.
+        scale:
+            current.kind === 'scale' && frozen.value !== null
+                ? serializeScale(frozen.value)
+                : null,
+        roles: importedRoles.value,
     };
+}
+
+function serializeScale(scale: PaletteScale): DraftScale {
+    return {
+        items: scale.tones.map((tone) => ({
+            hex: tone.hex,
+            tone: tone.tone,
+        })),
+        algorithmVersion: scale.algorithmVersion,
+        clippedTones: [...scale.clippedTones],
+    };
+}
+
+function frozenFromDraft(
+    draft: DraftScale,
+    base: string,
+): PaletteScale | null {
+    try {
+        return buildFrozenScale({
+            base,
+            items: draft.items,
+            algorithmVersion: draft.algorithmVersion,
+            clippedTones: draft.clippedTones,
+        });
+    } catch {
+        // Escala corrompida no storage: volta a derivar da base.
+        return null;
+    }
 }
 
 /** So o que redesenha a extracao; a imagem e a URL completa ficam de fora. */
@@ -275,14 +414,32 @@ function restoreDraft(draft: PaletteDraft): void {
     const rgba = rgbaOf(draft.base);
 
     if (rgba !== null) {
-        state.setColor(rgba);
-        state.finalize();
+        useBase(rgba);
     }
 
     activeTab.value = draft.tab;
-    extracted.value =
+
+    const table =
         draft.extracted === null ? null : toExtractedPalette(draft.extracted);
-    frozen.value = null;
+
+    extracted.value = table;
+    frozen.value =
+        draft.kind === 'scale' && draft.scale !== null
+            ? frozenFromDraft(draft.scale, draft.base)
+            : null;
+
+    // Papeis importados atravessam o login com a escala; a assinatura garante
+    // que so continuam valendo para o snapshot restaurado.
+    importedRoles.value = draft.roles;
+    importedSignature.value =
+        draft.roles === null
+            ? null
+            : paletteSignature({
+                  kind: draft.kind,
+                  base: draft.base,
+                  scale: frozen.value,
+                  extracted: table,
+              });
 }
 
 /** Recado da pagina no mesmo lugar do "copiado". */
@@ -318,11 +475,13 @@ defineExpose({
     snapshot,
     draft,
     restoreDraft,
+    applyImported,
     notify,
     isEmpty,
     activeTab,
     scale,
     extracted,
+    roles: activeRoles,
     baseHex,
     applyBaseHex,
     rgba: state.rgba,
@@ -416,7 +575,7 @@ defineExpose({
               <ExportPanel
                 :scale="scale"
                 :copy="copyFeedback.copy"
-                :roles="roles"
+                :roles="activeRoles"
               />
             </template>
           </TabsContent>

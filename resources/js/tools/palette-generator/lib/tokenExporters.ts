@@ -27,7 +27,7 @@ export const COLOR_TOKEN_FORMAT_VERSION = 1;
 const DTCG_EXTENSION_KEY = 'devtools.colors';
 
 /** Base em HEX6 ou HEX8, conforme o alpha. */
-function baseHex(scale: PaletteScale): string {
+export function baseHex(scale: PaletteScale): string {
     return scale.base.a < 1 ? formatHex8(scale.base) : formatHex(scale.base);
 }
 

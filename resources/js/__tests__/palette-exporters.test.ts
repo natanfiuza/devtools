@@ -3,6 +3,7 @@ import {
     PALETTE_ALGORITHM_VERSION,
     PALETTE_TONES,
     buildPaletteScale,
+    formatHex,
     parseColor,
     type Rgba,
 } from '@/lib/color';
@@ -169,6 +170,7 @@ describe('buildPaletteExport — valores opacos', () => {
             name: string;
             formatVersion: number;
             algorithmVersion: number;
+            base: string;
             clippedTones: number[];
             colors: Record<string, string>;
             semantic?: unknown;
@@ -177,6 +179,8 @@ describe('buildPaletteExport — valores opacos', () => {
         expect(parsed.name).toBe('primary');
         expect(parsed.formatVersion).toBe(COLOR_TOKEN_FORMAT_VERSION);
         expect(parsed.algorithmVersion).toBe(PALETTE_ALGORITHM_VERSION);
+        // Aditivo da Etapa 6: a base viaja junto para a importacao fiel.
+        expect(parsed.base).toBe(formatHex(SCALE.base));
         expect(parsed.clippedTones).toEqual(SCALE.clippedTones);
         expect(parsed.semantic).toBeUndefined();
         expect(Object.keys(parsed.colors)).toEqual(
@@ -271,10 +275,15 @@ describe('buildPaletteExport — valores com alpha', () => {
 
     it('JSON e Tailwind v4 usam HEX8', () => {
         const json = buildPaletteExport(ALPHA_SCALE, 'json', 'primary').contents;
-        const parsed = JSON.parse(json) as { colors: Record<string, string> };
+        const parsed = JSON.parse(json) as {
+            base: string;
+            colors: Record<string, string>;
+        };
 
         expect(parsed.colors['50']).toMatch(/^#[0-9a-f]{8}$/);
         expect(parsed.colors['50']).toBe(ALPHA_SCALE.tones[0]?.hex);
+        // A base tambem preserva o alpha em HEX8.
+        expect(parsed.base).toMatch(/^#[0-9a-f]{8}$/);
 
         const v4 = buildPaletteExport(
             ALPHA_SCALE,

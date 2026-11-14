@@ -4,6 +4,7 @@ import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import PresetDialog from '@/components/colors/PresetDialog.vue';
 import SavePaletteDialog from '@/components/colors/SavePaletteDialog.vue';
+import TokenImportDialog from '@/components/colors/TokenImportDialog.vue';
 import { Button } from '@/components/ui/button';
 import type { PaletteSaveSource, WorkspaceSnapshot } from '@/lib/paletteSave';
 import {
@@ -12,9 +13,14 @@ import {
     savePaletteDraft,
 } from '@/lib/saveDraft';
 import palettes from '@/routes/dashboard/colors/palettes';
-import type { ColorLibraryToolProps, PaletteToolProps } from '@/types/colors';
+import type {
+    ColorLibraryToolProps,
+    PaletteToolProps,
+    TokenImportLimits,
+} from '@/types/colors';
 import GeneratorWorkspace from './GeneratorWorkspace.vue';
 import type { ImageLimits } from './lib/imageLimits';
+import type { ImportedPalette } from './lib/tokenImport';
 
 /**
  * Color Palette Generator (`/{locale}/tools/colors/palette-generator`).
@@ -37,6 +43,8 @@ const props = defineProps<{
     palette: PaletteToolProps;
     /** Biblioteca de cores da conta ou local do anonimo (F5). */
     library?: ColorLibraryToolProps;
+    /** Tetos da importacao validada de tokens (F5, Etapa 6). */
+    tokens: TokenImportLimits;
 }>();
 
 const { t } = useI18n();
@@ -47,25 +55,33 @@ const dialogOpen = ref(false);
 const saveSource = ref<PaletteSaveSource | null>(null);
 const presetsOpen = ref(false);
 const presetBase = ref('');
+const importOpen = ref(false);
 
 const authenticated = computed(() => page.props.auth?.user != null);
 const canSave = computed(() => workspace.value?.isEmpty !== true);
 
-/** A escala e a extraida viram o mesmo par de entrada do modal. */
+/**
+ * A escala e a extraida viram o mesmo par de entrada do modal. Os papeis so
+ * viajam quando vieram de uma importacao de tokens e continuam valendo para o
+ * snapshot atual; o workspace ja cuidou dessa validade na assinatura.
+ */
 function sourceOf(snapshot: WorkspaceSnapshot): PaletteSaveSource | null {
     if (snapshot.isEmpty) {
         return null;
     }
+
+    const roles = workspace.value?.roles ?? null;
 
     if (snapshot.kind === 'extracted' && snapshot.extracted !== null) {
         return {
             kind: 'extracted',
             palette: snapshot.extracted,
             base: snapshot.base,
+            roles,
         };
     }
 
-    return { kind: 'scale', scale: snapshot.scale };
+    return { kind: 'scale', scale: snapshot.scale, roles };
 }
 
 function requestSave(): void {
@@ -90,6 +106,22 @@ function requestSave(): void {
 
     savePaletteDraft(current.draft());
     router.visit(palettes.create.url());
+}
+
+/**
+ * Importacao ja validou e o usuario confirmou: so agora o estado da tela muda.
+ * A base importada passa pelo `useBase` do workspace e entra no historico como
+ * qualquer troca.
+ */
+function applyTokens(palette: ImportedPalette): void {
+    const current = workspace.value;
+
+    if (current === null) {
+        return;
+    }
+
+    current.applyImported(palette);
+    current.notify(t('tools.shared.token_import.applied'));
 }
 
 /** O dialogo de presets sempre parte da base que esta no gerador. */
@@ -169,6 +201,15 @@ onMounted(() => {
       <Button
         type="button"
         size="sm"
+        variant="outline"
+        data-test="palette-import"
+        @click="importOpen = true"
+      >
+        {{ t('tools.shared.token_import.button') }}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
         data-test="palette-save"
         :disabled="!canSave"
         @click="requestSave"
@@ -197,6 +238,14 @@ onMounted(() => {
       :has-base="canSave"
       @close="presetsOpen = false"
       @apply="applyPreset"
+    />
+
+    <TokenImportDialog
+      :open="importOpen"
+      :tokens="props.tokens"
+      :source-label-max-length="props.palette.sourceLabelMaxLength"
+      @apply="applyTokens"
+      @close="importOpen = false"
     />
   </div>
 </template>

@@ -1,0 +1,40 @@
+{
+    "color": {
+        "aliased": {
+            "$type": "color",
+            "50": { "$value": "#fafafa" },
+            "100": { "$value": "#f5f5f5" },
+            "200": { "$value": "#e5e5e5" },
+            "300": { "$value": "#d4d4d4" },
+            "400": { "$value": "#a3a3a3" },
+            "500": { "$value": "#737373" },
+            "600": { "$value": "#525252" },
+            "700": { "$value": "#404040" },
+            "800": { "$value": "#262626" },
+            "900": { "$value": "#171717" },
+            "950": { "$value": "#0a0a0a" },
+            "semantic": {
+                "light": {
+                    "primary": { "$value": "{color.aliased.600}" },
+                    "secondary": { "$value": "{color.aliased.700.value}" },
+                    "accent": { "$value": "{ color.aliased.400 }" },
+                    "background": { "$value": "{color.aliased.50}" },
+                    "surface": { "$value": "{color.aliased.100}" },
+                    "text": { "$value": "{color.aliased.950}" },
+                    "text_muted": { "$value": "{color.aliased.500}" },
+                    "border": { "$value": "{color.aliased.200}" }
+                },
+                "dark": {
+                    "primary": { "$value": "{color.aliased.300}" },
+                    "secondary": { "$value": "{color.aliased.200}" },
+                    "accent": { "$value": "{color.aliased.400}" },
+                    "background": { "$value": "{color.aliased.950}" },
+                    "surface": { "$value": "{color.aliased.900}" },
+                    "text": { "$value": "{color.aliased.50}" },
+                    "text_muted": { "$value": "{color.aliased.400}" },
+                    "border": { "$value": "{color.aliased.800}" }
+                }
+            }
+        }
+    }
+}

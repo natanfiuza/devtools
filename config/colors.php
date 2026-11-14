@@ -25,6 +25,12 @@ return [
 
         'description_max_length' => (int) env('COLORS_PALETTE_DESCRIPTION_MAX_LENGTH', 500),
 
+        /*
+        | Rotulo da origem extraida (nome do arquivo). Tambem e o rotulo dado
+        | a uma paleta importada de tokens (F5, Etapa 6).
+        */
+        'source_label_max_length' => (int) env('COLORS_SOURCE_LABEL_MAX_LENGTH', 80),
+
         'per_page' => (int) env('COLORS_PALETTES_PER_PAGE', 20),
 
         /*
@@ -78,6 +84,26 @@ return [
         'anonymous_history_limit' => (int) env('COLORS_ANONYMOUS_HISTORY_LIMIT', 20),
 
         'anonymous_favorites_limit' => (int) env('COLORS_ANONYMOUS_FAVORITES_LIMIT', 50),
+    ],
+
+    /*
+    | Importacao validada de design tokens (F5, Etapa 6). Os tetos valem para
+    | a leitura no navegador: tamanho do arquivo, quantidade de tokens/nos,
+    | profundidade da arvore, encadeamento de aliases e diagnostico exibidos.
+    | Nenhum numero e fixado no cliente.
+    */
+    'tokens' => [
+        'import' => [
+            'max_bytes' => (int) env('COLORS_TOKEN_IMPORT_MAX_BYTES', 512 * 1024),
+
+            'max_tokens' => (int) env('COLORS_TOKEN_IMPORT_MAX_TOKENS', 5000),
+
+            'max_depth' => (int) env('COLORS_TOKEN_IMPORT_MAX_DEPTH', 40),
+
+            'max_reference_depth' => (int) env('COLORS_TOKEN_IMPORT_MAX_REFERENCE_DEPTH', 10),
+
+            'max_diagnostics' => (int) env('COLORS_TOKEN_IMPORT_MAX_DIAGNOSTICS', 20),
+        ],
     ],
 
     'slug' => [

@@ -133,13 +133,20 @@ const payload = computed<PalettePayload | null>(() => {
     };
 
     try {
-        return props.source.kind === 'scale'
-            ? payloadFromScale(props.source.scale, details)
-            : payloadFromExtracted(
-                  props.source.palette,
-                  props.source.base,
-                  details,
-              );
+        const body =
+            props.source.kind === 'scale'
+                ? payloadFromScale(props.source.scale, details)
+                : payloadFromExtracted(
+                      props.source.palette,
+                      props.source.base,
+                      details,
+                  );
+
+        // Papéis importados do arquivo de tokens vencem os defaults; os dois
+        // shapes ja sao completos (8 papeis x 2 temas).
+        return props.source.roles
+            ? { ...body, roles: props.source.roles }
+            : body;
     } catch {
         // Base fora das cores extraidas ou escala incompleta: o envio fica
         // bloqueado em vez de mandar um corpo invalido.

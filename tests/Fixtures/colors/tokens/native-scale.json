@@ -1,0 +1,42 @@
+{
+    "name": "aurora",
+    "formatVersion": 1,
+    "algorithmVersion": 1,
+    "base": "#1212aa",
+    "clippedTones": [950, 50],
+    "colors": {
+        "50": "#fafafa",
+        "100": "#f5f5f5",
+        "200": "#e5e5e5",
+        "300": "#d4d4d4",
+        "400": "#a3a3a3",
+        "500": "#737373",
+        "600": "#525252",
+        "700": "#404040",
+        "800": "#262626",
+        "900": "#171717",
+        "950": "#0a0a0a"
+    },
+    "semantic": {
+        "light": {
+            "primary": "#1d4ed8",
+            "secondary": "#4338ca",
+            "accent": "#0ea5e9",
+            "background": "#ffffff",
+            "surface": "#f8fafc",
+            "text": "#0f172a",
+            "text_muted": "#64748b",
+            "border": "#e2e8f0"
+        },
+        "dark": {
+            "primary": "#60a5fa",
+            "secondary": "#818cf8",
+            "accent": "#38bdf8",
+            "background": "#020617",
+            "surface": "#0f172a",
+            "text": "#f8fafc",
+            "text_muted": "#94a3b8",
+            "border": "#1e293b"
+        }
+    }
+}

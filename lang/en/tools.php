@@ -159,6 +159,86 @@ return [
 
             'load_more' => 'Load more',
         ],
+
+        'token_import' => [
+            'button' => 'Import tokens',
+            'applied' => 'Tokens applied.',
+            'title' => 'Import design tokens',
+            'description' => 'Read the tool’s native JSON, W3C DTCG (Tokens Studio or Figma Variables) or Style Dictionary. The file is read in your browser and never uploaded.',
+            'choose' => 'Choose a JSON file',
+            'hint' => 'Up to {size}. You can also drop the file here.',
+            'reading' => 'Reading the file…',
+
+            'file_errors' => [
+                'file_too_large' => 'The file is over the {limit} limit.',
+                'file_type' => 'Choose a .json file.',
+                'file_unreadable' => 'Could not read the file. Try another one.',
+            ],
+
+            'diagnostics' => [
+                'title' => 'Diagnostics',
+                'errors' => 'Errors',
+                'warnings' => 'Warnings',
+                'hidden' => '{count} more diagnostic(s) not shown.',
+                'path' => 'at {path}',
+            ],
+
+            'preview' => [
+                'title' => 'Preview',
+                'format' => 'Format',
+                'kind' => 'Kind',
+                'base' => 'Base color',
+                'colors_label' => 'Colors',
+                'colors' => '{count} colors',
+                'roles' => 'Semantic roles included',
+                'no_roles' => 'No complete semantic roles',
+                'name' => 'Name in the file: {name}',
+                'filename' => 'File: {name}',
+                'apply' => 'Apply',
+                'cancel' => 'Cancel',
+                'replace' => 'Choose another file',
+                'apply_hint' => 'The current palette only changes when you apply.',
+            ],
+
+            'formats' => [
+                'native' => 'Tool JSON',
+                'dtcg' => 'W3C DTCG',
+                'style-dictionary' => 'Style Dictionary',
+            ],
+
+            'kinds' => [
+                'scale' => '11-tone scale',
+                'extracted' => 'Extracted palette',
+            ],
+
+            'codes' => [
+                'empty_file' => 'The file is empty.',
+                'too_large' => 'The file is over the {max} limit.',
+                'invalid_json' => 'The JSON is not valid (line {line}, column {column}).',
+                'root_not_object' => 'The file root must be a JSON object.',
+                'unsupported_format' => 'No recognizable color tokens were found.',
+                'ambiguous_format' => 'The file mixes more than one token style.',
+                'unsupported_format_version' => 'The format version ({found}) is not supported; this tool reads version {expected}.',
+                'too_deep' => 'The structure exceeds the maximum depth of {max}.',
+                'too_many_tokens' => 'The file has more than {max} tokens.',
+                'forbidden_key' => 'The key “{key}” is not allowed.',
+                'mixed_token_styles' => 'Tokens in different styles appear in the same group.',
+                'invalid_structure' => 'The palette structure is not recognizable.',
+                'no_colors' => 'The file has no colors to import.',
+                'ambiguous_palette' => 'More than one palette is possible; leave just one to import.',
+                'unsupported_color_count' => 'The group has {count} colors; use 5, 7, 9 or 11.',
+                'missing_tones' => 'Tones are missing from the scale: {missing}.',
+                'invalid_color' => 'A color value is not a valid HEX.',
+                'unknown_reference' => 'The reference “{reference}” does not exist in the file.',
+                'reference_not_color' => 'The reference “{reference}” does not point to a color.',
+                'reference_cycle' => 'The references form a cycle.',
+                'reference_depth' => 'The references exceed the maximum depth of {max}.',
+                'algorithm_version_mismatch' => 'The file was generated with algorithm v{found}; colors will be kept as they are.',
+                'non_color_ignored' => 'Tokens that are not colors were ignored.',
+                'semantic_incomplete' => 'The semantic roles block is incomplete; the current roles will be kept.',
+                'extra_colors_ignored' => 'Colors beyond the palette were ignored.',
+            ],
+        ],
     ],
 
     'categories' => [

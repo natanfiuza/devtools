@@ -65,6 +65,61 @@ vi.mock('@/tools/palette-generator/lib/extractionClient', () => ({
     }),
 }));
 
+/**
+ * O dialogo de importacao tem teste proprio; aqui ele e um botao que emite
+ * uma importacao pronta, para testar apenas a ligacao com o gerador.
+ */
+vi.mock('@/components/colors/TokenImportDialog.vue', async () => {
+    const { defineComponent, h } = await import('vue');
+    const { PALETTE_TONES } = await import('@/lib/color');
+    const { buildFrozenScale } = await import('@/lib/frozenScale');
+    const { rolesFromScaleItems } = await import('@/lib/palettePayload');
+
+    const items = PALETTE_TONES.map((tone) => ({ tone, hex: '#aa1122' }));
+    const palette = {
+        format: 'native' as const,
+        kind: 'scale' as const,
+        base: '#aa1122',
+        scale: buildFrozenScale({
+            base: '#aa1122',
+            items,
+            algorithmVersion: 1,
+        }),
+        extracted: null,
+        roles: rolesFromScaleItems(items),
+        tokenCount: 11,
+        name: 'aurora',
+    };
+
+    return {
+        default: defineComponent({
+            name: 'TokenImportDialogStub',
+            props: {
+                open: { type: Boolean, default: false },
+                tokens: { type: Object, default: null },
+                sourceLabelMaxLength: { type: Number, default: 0 },
+            },
+            emits: ['close', 'apply'],
+            setup(props, { emit }) {
+                return () =>
+                    props.open
+                        ? h(
+                              'button',
+                              {
+                                  'data-test': 'import-stub-apply',
+                                  onClick: () => {
+                                      emit('apply', palette);
+                                      emit('close');
+                                  },
+                              },
+                              'importar',
+                          )
+                        : null;
+            },
+        }),
+    };
+});
+
 function colorOf(input: string): Rgba {
     const parsed = parseColor(input);
 
@@ -94,6 +149,15 @@ const PALETTE_PROPS = {
     tagsPerPalette: 10,
     tagNameMaxLength: 30,
     tags: [{ id: 'tag-web', name: 'web' }],
+};
+
+/** Tetos da importacao de tokens (F5, Etapa 6), tambem vindos do servidor. */
+const TOKEN_LIMITS = {
+    maxBytes: 512 * 1024,
+    maxTokens: 5000,
+    maxDepth: 40,
+    maxReferenceDepth: 10,
+    maxDiagnostics: 20,
 };
 
 const TOOL_URL = '/pt-br/tools/colors/palette-generator';
@@ -231,6 +295,10 @@ function i18n() {
                             error: 'A importação falhou.',
                         },
                         load_more: 'Carregar mais',
+                    },
+                    token_import: {
+                        button: 'Importar tokens',
+                        applied: 'Tokens aplicados.',
                     },
                 },
                 'palette-generator': {
@@ -447,7 +515,14 @@ function i18n() {
 
 function mountTool() {
     return mount(Tool, {
-        props: { image: IMAGE_LIMITS, palette: PALETTE_PROPS },
+        props: {
+            image: IMAGE_LIMITS,
+            palette: {
+                ...PALETTE_PROPS,
+                sourceLabelMaxLength: 80,
+            },
+            tokens: TOKEN_LIMITS,
+        },
         global: { plugins: [i18n()] },
     });
 }
@@ -1103,6 +1178,82 @@ describe('Tool · salvar', () => {
 
         expect(dialog()).toBeNull();
         expect(postMock).not.toHaveBeenCalled();
+    });
+});
+
+describe('Tool · importação de tokens', () => {
+    it('aplica a importação, avisa e leva escala e papéis ao rascunho', async () => {
+        const wrapper = mountTool();
+
+        await wrapper.get('[data-test="palette-import"]').trigger('click');
+        await wrapper.get('[data-test="import-stub-apply"]').trigger('click');
+        await flushPromises();
+
+        expect(wrapper.get('[data-test="base-value"]').text()).toBe('#aa1122');
+        expect(
+            wrapper.find('[data-test="export-semantic-note"]').exists(),
+        ).toBe(true);
+        expect(wrapper.get('[data-test="palette-feedback"]').text()).toContain(
+            'Tokens aplicados.',
+        );
+
+        await wrapper.get('[data-test="palette-save"]').trigger('click');
+
+        expect(visitMock).toHaveBeenCalledWith(
+            '/dashboard/colors/palettes/create',
+        );
+
+        const draft = readPaletteDraft();
+
+        expect(draft?.scale?.items).toHaveLength(11);
+        expect(draft?.scale?.items[0]?.hex).toBe('#aa1122');
+        expect(draft?.roles).not.toBeNull();
+    });
+
+    it('autenticado envia os papéis importados no salvamento', async () => {
+        pageState.props.auth.user = { id: 7 };
+
+        const wrapper = mountTool();
+
+        await wrapper.get('[data-test="palette-import"]').trigger('click');
+        await wrapper.get('[data-test="import-stub-apply"]').trigger('click');
+        await flushPromises();
+
+        await wrapper.get('[data-test="palette-save"]').trigger('click');
+        await flushPromises();
+
+        const input = document.querySelector(
+            '[data-test="save-name"]',
+        ) as HTMLInputElement | null;
+
+        if (input === null) {
+            throw new Error('campo de nome ausente');
+        }
+
+        input.value = 'Aurora';
+        input.dispatchEvent(new Event('input'));
+        await nextTick();
+
+        document
+            .querySelector('[data-test="palette-save-dialog"] form')
+            ?.dispatchEvent(
+                new Event('submit', { bubbles: true, cancelable: true }),
+            );
+        await flushPromises();
+
+        const [, body] = postMock.mock.calls[0] as [
+            string,
+            Record<string, unknown>,
+        ];
+
+        expect(body.colors).toMatchObject({ base: '#aa1122' });
+        expect((body.colors as { items: { hex: string }[] }).items[0]?.hex).toBe(
+            '#aa1122',
+        );
+        expect(body.roles).toMatchObject({
+            light: expect.any(Object),
+            dark: expect.any(Object),
+        });
     });
 });
 

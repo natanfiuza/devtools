@@ -105,6 +105,24 @@ describe('buildFrozenScale', () => {
         expect(frozen.tones[0]?.rgba.a).toBeCloseTo(128 / 255, 5);
     });
 
+    it('preserva os tons com croma cortado vindos de arquivo importado', () => {
+        const frozen = buildFrozenScale({
+            base: '#00ff00',
+            items: savedItems(),
+            algorithmVersion: 1,
+            clippedTones: [950, 50, 123],
+        });
+
+        // Ordem canonica e so tons que existem na escala.
+        expect(frozen.clippedTones).toEqual([50, 950]);
+        expect(frozen.tones.find((tone) => tone.tone === 50)?.clipped).toBe(
+            true,
+        );
+        expect(frozen.tones.find((tone) => tone.tone === 100)?.clipped).toBe(
+            false,
+        );
+    });
+
     it('falha quando falta um tom ou ele se repete', () => {
         const missing = savedItems().slice(0, 10);
         const duplicated = [

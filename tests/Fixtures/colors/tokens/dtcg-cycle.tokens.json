@@ -1,0 +1,12 @@
+{
+    "color": {
+        "cycled": {
+            "$type": "color",
+            "a": { "$value": "{color.cycled.b}" },
+            "b": { "$value": "{color.cycled.a}" },
+            "c": { "$value": "#111111" },
+            "d": { "$value": "#222222" },
+            "e": { "$value": "#333333" }
+        }
+    }
+}

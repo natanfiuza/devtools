@@ -1,0 +1,11 @@
+{
+    "color": {
+        "photo": {
+            "sunrise": { "value": "#ff7a45", "type": "color" },
+            "lagoon": { "value": "#13a8a8", "type": "color" },
+            "forest": { "value": "#237804", "type": "color" },
+            "plum": { "value": "#722ed1", "type": "color" },
+            "sand": { "value": "#d4b106", "type": "color" }
+        }
+    }
+}

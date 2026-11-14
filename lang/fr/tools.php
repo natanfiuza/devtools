@@ -159,6 +159,86 @@ return [
 
             'load_more' => 'Charger plus',
         ],
+
+        'token_import' => [
+            'button' => 'Importer des tokens',
+            'applied' => 'Tokens appliqués.',
+            'title' => 'Importer des tokens de design',
+            'description' => 'Lisez le JSON natif de l’outil, W3C DTCG (Tokens Studio ou Figma Variables) ou Style Dictionary. Le fichier est lu dans votre navigateur et n’est jamais envoyé.',
+            'choose' => 'Choisir un fichier JSON',
+            'hint' => 'Jusqu’à {size}. Vous pouvez aussi déposer le fichier ici.',
+            'reading' => 'Lecture du fichier…',
+
+            'file_errors' => [
+                'file_too_large' => 'Le fichier dépasse la limite de {limit}.',
+                'file_type' => 'Choisissez un fichier .json.',
+                'file_unreadable' => 'Impossible de lire le fichier. Essayez-en un autre.',
+            ],
+
+            'diagnostics' => [
+                'title' => 'Diagnostic',
+                'errors' => 'Erreurs',
+                'warnings' => 'Avertissements',
+                'hidden' => '{count} autre(s) diagnostic(s) non affiché(s).',
+                'path' => 'dans {path}',
+            ],
+
+            'preview' => [
+                'title' => 'Aperçu',
+                'format' => 'Format',
+                'kind' => 'Type',
+                'base' => 'Couleur de base',
+                'colors_label' => 'Couleurs',
+                'colors' => '{count} couleurs',
+                'roles' => 'Rôles sémantiques inclus',
+                'no_roles' => 'Sans rôles sémantiques complets',
+                'name' => 'Nom dans le fichier : {name}',
+                'filename' => 'Fichier : {name}',
+                'apply' => 'Appliquer',
+                'cancel' => 'Annuler',
+                'replace' => 'Choisir un autre fichier',
+                'apply_hint' => 'La palette actuelle ne change qu’à l’application.',
+            ],
+
+            'formats' => [
+                'native' => 'JSON de l’outil',
+                'dtcg' => 'W3C DTCG',
+                'style-dictionary' => 'Style Dictionary',
+            ],
+
+            'kinds' => [
+                'scale' => 'Échelle de 11 tons',
+                'extracted' => 'Palette extraite',
+            ],
+
+            'codes' => [
+                'empty_file' => 'Le fichier est vide.',
+                'too_large' => 'Le fichier dépasse la limite de {max}.',
+                'invalid_json' => 'Le JSON n’est pas valide (ligne {line}, colonne {column}).',
+                'root_not_object' => 'La racine du fichier doit être un objet JSON.',
+                'unsupported_format' => 'Aucun token de couleur reconnaissable n’a été trouvé.',
+                'ambiguous_format' => 'Le fichier mélange plusieurs styles de tokens.',
+                'unsupported_format_version' => 'La version du format ({found}) n’est pas compatible ; cet outil lit la version {expected}.',
+                'too_deep' => 'La structure dépasse la profondeur maximale de {max}.',
+                'too_many_tokens' => 'Le fichier contient plus de {max} tokens.',
+                'forbidden_key' => 'La clé « {key} » n’est pas autorisée.',
+                'mixed_token_styles' => 'Des tokens de styles différents apparaissent dans le même groupe.',
+                'invalid_structure' => 'La structure de la palette n’est pas reconnaissable.',
+                'no_colors' => 'Le fichier ne contient aucune couleur à importer.',
+                'ambiguous_palette' => 'Plusieurs palettes sont possibles ; n’en laissez qu’une à importer.',
+                'unsupported_color_count' => 'Le groupe contient {count} couleurs ; utilisez 5, 7, 9 ou 11.',
+                'missing_tones' => 'Des tons manquent dans l’échelle : {missing}.',
+                'invalid_color' => 'Une valeur de couleur n’est pas un HEX valide.',
+                'unknown_reference' => 'La référence « {reference} » n’existe pas dans le fichier.',
+                'reference_not_color' => 'La référence « {reference} » ne pointe pas vers une couleur.',
+                'reference_cycle' => 'Les références forment un cycle.',
+                'reference_depth' => 'Les références dépassent la profondeur maximale de {max}.',
+                'algorithm_version_mismatch' => 'Le fichier a été généré avec l’algorithme v{found} ; les couleurs seront conservées telles quelles.',
+                'non_color_ignored' => 'Les tokens qui ne sont pas des couleurs ont été ignorés.',
+                'semantic_incomplete' => 'Le bloc de rôles sémantiques est incomplet ; les rôles actuels seront conservés.',
+                'extra_colors_ignored' => 'Les couleurs hors palette ont été ignorées.',
+            ],
+        ],
     ],
 
     'categories' => [

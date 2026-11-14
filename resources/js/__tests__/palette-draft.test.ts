@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { PALETTE_TONES } from '@/lib/color';
+import { PALETTE_ROLES } from '@/lib/palettePayload';
 import {
     DRAFT_KEY,
     DRAFT_TTL_MS,
@@ -7,8 +9,9 @@ import {
     savePaletteDraft,
     type DraftExtractedPalette,
     type DraftStorageLike,
-    type PaletteDraft,
+    type PaletteDraftInput,
 } from '@/lib/saveDraft';
+import type { PaletteRoleColors } from '@/types/colors';
 
 /**
  * Rascunho do gerador (ADR-096).
@@ -19,6 +22,14 @@ import {
  */
 
 const NOW = 1_800_000_000_000;
+
+const TONE_VALUES = [...PALETTE_TONES];
+
+function roleColors(hex: string): PaletteRoleColors {
+    return Object.fromEntries(
+        PALETTE_ROLES.map((role) => [role, hex]),
+    ) as PaletteRoleColors;
+}
 
 class MemoryStorage implements DraftStorageLike {
     readonly entries = new Map<string, string>();
@@ -54,7 +65,7 @@ function write(storage: DraftStorageLike, record: unknown): void {
     storage.setItem(DRAFT_KEY, JSON.stringify(record));
 }
 
-const SCALE_DRAFT: Omit<PaletteDraft, 'version' | 'savedAt'> = {
+const SCALE_DRAFT: PaletteDraftInput = {
     kind: 'scale',
     base: '#6366f1',
     extracted: null,
@@ -126,7 +137,7 @@ describe('savePaletteDraft / readPaletteDraft', () => {
         expect(readPaletteDraft(storage, NOW)?.extracted).toBeNull();
     });
 
-    it('guarda apenas base, tipo, extraidas, aba e data', () => {
+    it('guarda apenas os campos do contrato', () => {
         const storage = new MemoryStorage();
 
         savePaletteDraft(
@@ -137,7 +148,6 @@ describe('savePaletteDraft / readPaletteDraft', () => {
                 tab: 'extraction',
                 // Campos de paleta salva nao pertencem ao rascunho.
                 name: 'Oceano',
-                roles: { light: {} },
                 image: 'data:image/png;base64,AAAA',
             } as never,
             storage,
@@ -146,7 +156,96 @@ describe('savePaletteDraft / readPaletteDraft', () => {
 
         expect(
             Object.keys(readPaletteDraft(storage, NOW) ?? {}).sort(),
-        ).toEqual(['base', 'extracted', 'kind', 'savedAt', 'tab', 'version']);
+        ).toEqual([
+            'base',
+            'extracted',
+            'kind',
+            'roles',
+            'savedAt',
+            'scale',
+            'tab',
+            'version',
+        ]);
+    });
+
+    it('preserva a escala importada e os papeis semanticos', () => {
+        const storage = new MemoryStorage();
+        const scale = {
+            items: TONE_VALUES.map((tone, index) => ({
+                tone,
+                hex: `#00000${index}`.slice(0, 7),
+            })),
+            algorithmVersion: 1,
+            clippedTones: [50, 950],
+        };
+        const roles = {
+            light: roleColors('#111111'),
+            dark: roleColors('#eeeeee'),
+        };
+
+        savePaletteDraft(
+            {
+                kind: 'scale',
+                base: '#6366f1',
+                extracted: null,
+                scale,
+                roles,
+                tab: 'scale',
+            },
+            storage,
+            NOW,
+        );
+
+        const restored = readPaletteDraft(storage, NOW + 1000);
+
+        expect(restored?.scale).toEqual(scale);
+        expect(restored?.roles).toEqual(roles);
+    });
+
+    it('rascunho antigo sem escala/papeis continua valido', () => {
+        const storage = new MemoryStorage();
+
+        write(storage, {
+            version: 1,
+            savedAt: NOW,
+            kind: 'scale',
+            base: '#6366f1',
+            extracted: null,
+            tab: 'scale',
+        });
+
+        const restored = readPaletteDraft(storage, NOW);
+
+        expect(restored).not.toBeNull();
+        expect(restored?.scale).toBeNull();
+        expect(restored?.roles).toBeNull();
+    });
+
+    it('descarta escala/papeis invalidos sem perder a base', () => {
+        const storage = new MemoryStorage();
+        const scale = {
+            items: [{ tone: 50, hex: '#000000' }],
+            algorithmVersion: 1,
+            clippedTones: [],
+        };
+        const roles = { light: { primary: 'azul' }, dark: {} };
+
+        write(storage, {
+            version: 1,
+            savedAt: NOW,
+            kind: 'scale',
+            base: '#6366f1',
+            extracted: null,
+            scale,
+            roles,
+            tab: 'scale',
+        });
+
+        const restored = readPaletteDraft(storage, NOW);
+
+        expect(restored?.base).toBe('#6366f1');
+        expect(restored?.scale).toBeNull();
+        expect(restored?.roles).toBeNull();
     });
 
     it('expira depois de 24 horas', () => {

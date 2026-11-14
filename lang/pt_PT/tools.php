@@ -159,6 +159,86 @@ return [
 
             'load_more' => 'Carregar mais',
         ],
+
+        'token_import' => [
+            'button' => 'Importar tokens',
+            'applied' => 'Tokens aplicados.',
+            'title' => 'Importar tokens de design',
+            'description' => 'Leia um JSON nativo da ferramenta, W3C DTCG (Tokens Studio ou Figma Variables) ou Style Dictionary. O ficheiro é lido no navegador e nunca é enviado.',
+            'choose' => 'Escolher um ficheiro JSON',
+            'hint' => 'Até {size}. Também pode largar o ficheiro nesta área.',
+            'reading' => 'A ler o ficheiro…',
+
+            'file_errors' => [
+                'file_too_large' => 'O ficheiro passa do limite de {limit}.',
+                'file_type' => 'Escolha um ficheiro .json.',
+                'file_unreadable' => 'Não foi possível ler o ficheiro. Tente outro.',
+            ],
+
+            'diagnostics' => [
+                'title' => 'Diagnóstico',
+                'errors' => 'Erros',
+                'warnings' => 'Avisos',
+                'hidden' => 'Mais {count} diagnóstico(s) não apresentados.',
+                'path' => 'em {path}',
+            ],
+
+            'preview' => [
+                'title' => 'Prévia',
+                'format' => 'Formato',
+                'kind' => 'Tipo',
+                'base' => 'Cor base',
+                'colors_label' => 'Cores',
+                'colors' => '{count} cores',
+                'roles' => 'Papéis semânticos incluídos',
+                'no_roles' => 'Sem papéis semânticos completos',
+                'name' => 'Nome no ficheiro: {name}',
+                'filename' => 'Ficheiro: {name}',
+                'apply' => 'Aplicar',
+                'cancel' => 'Cancelar',
+                'replace' => 'Escolher outro ficheiro',
+                'apply_hint' => 'A paleta atual só muda ao aplicar.',
+            ],
+
+            'formats' => [
+                'native' => 'JSON da ferramenta',
+                'dtcg' => 'W3C DTCG',
+                'style-dictionary' => 'Style Dictionary',
+            ],
+
+            'kinds' => [
+                'scale' => 'Escala de 11 tons',
+                'extracted' => 'Paleta extraída',
+            ],
+
+            'codes' => [
+                'empty_file' => 'O ficheiro está vazio.',
+                'too_large' => 'O ficheiro passa do limite de {max}.',
+                'invalid_json' => 'O JSON não é válido (linha {line}, coluna {column}).',
+                'root_not_object' => 'A raiz do ficheiro tem de ser um objeto JSON.',
+                'unsupported_format' => 'Não foi encontrado nenhum token de cor reconhecível.',
+                'ambiguous_format' => 'O ficheiro mistura mais de um estilo de token.',
+                'unsupported_format_version' => 'A versão do formato ({found}) não é compatível; esta ferramenta lê a versão {expected}.',
+                'too_deep' => 'A estrutura passa da profundidade máxima de {max}.',
+                'too_many_tokens' => 'O ficheiro tem mais de {max} tokens.',
+                'forbidden_key' => 'A chave “{key}” não é permitida.',
+                'mixed_token_styles' => 'Tokens de estilos diferentes aparecem no mesmo grupo.',
+                'invalid_structure' => 'A estrutura da paleta não é reconhecível.',
+                'no_colors' => 'O ficheiro não tem cores para importar.',
+                'ambiguous_palette' => 'Há mais de uma paleta possível; deixe apenas uma para importar.',
+                'unsupported_color_count' => 'O grupo tem {count} cores; use 5, 7, 9 ou 11.',
+                'missing_tones' => 'Faltam tons na escala: {missing}.',
+                'invalid_color' => 'Um valor de cor não é um HEX válido.',
+                'unknown_reference' => 'A referência “{reference}” não existe no ficheiro.',
+                'reference_not_color' => 'A referência “{reference}” não aponta para uma cor.',
+                'reference_cycle' => 'As referências formam um ciclo.',
+                'reference_depth' => 'As referências passam da profundidade máxima de {max}.',
+                'algorithm_version_mismatch' => 'O ficheiro foi gerado com o algoritmo v{found}; as cores serão mantidas como estão.',
+                'non_color_ignored' => 'Tokens que não são cor foram ignorados.',
+                'semantic_incomplete' => 'O bloco de papéis semânticos está incompleto; os papéis atuais serão mantidos.',
+                'extra_colors_ignored' => 'Cores além da paleta foram ignoradas.',
+            ],
+        ],
     ],
 
     'categories' => [
