@@ -1,5 +1,6 @@
 import {
     BadgeCheck,
+    Bell,
     CreditCard,
     History,
     KeyRound,
@@ -14,6 +15,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dashboard } from '@/routes';
 import { index as palettesIndex } from '@/routes/dashboard/colors/palettes';
+import { index as notificationsIndex } from '@/routes/dashboard/notifications';
 import { index as apiTokens } from '@/routes/api-tokens';
 import { edit as editAppearance } from '@/routes/appearance';
 import { badgeforge, billing, history } from '@/routes/dashboard';
@@ -53,6 +55,11 @@ export function useAccountNav(): ComputedRef<AccountNavGroup[]> {
                     title: t('account.nav.history'),
                     href: history.url(),
                     icon: History,
+                },
+                {
+                    title: t('account.nav.notifications'),
+                    href: notificationsIndex.url(),
+                    icon: Bell,
                 },
                 {
                     title: t('account.nav.billing'),

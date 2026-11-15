@@ -347,6 +347,56 @@ export type AdminBadgeAnalytics = {
     days: AdminBadgeAnalyticsDay[];
 };
 
+/**
+ * Denuncia de comentario na visao do admin (F7, ADR-141).
+ *
+ * O corpo do comentario aparece aqui porque e isso que o admin modera; no
+ * resto do sistema ele so sai pelo presenter publico.
+ */
+export type AdminCommentModerationRow = {
+    id: string;
+    body: string;
+    approvedBody: string | null;
+    status: string;
+    deleted: boolean;
+    paletteName: string | null;
+    paletteSlug: string | null;
+    authorName: string | null;
+    authorUsername: string | null;
+    createdAt: string | null;
+    pendingReports: number;
+};
+
+export type AdminCommentModerationFilters = {
+    status: string;
+    q: string;
+};
+
+export type AdminCommentModerationProps = {
+    comments: Paginator<AdminCommentModerationRow>;
+    filters: AdminCommentModerationFilters;
+};
+
+export type AdminCommentReportRow = {
+    id: string;
+    reason: string;
+    status: string;
+    reportedAt: string | null;
+    resolvedAt: string | null;
+    resolverName: string | null;
+    reporterName: string | null;
+    reporterEmail: string | null;
+    comment: {
+        id: string;
+        body: string;
+        status: string;
+        deleted: boolean;
+        paletteName: string | null;
+        paletteSlug: string | null;
+        authorName: string | null;
+    };
+};
+
 /** Metadados do cache de IA; prompt, schema e resposta nunca saem do servidor. */
 export type AdminAiCacheRow = {
     id: number;

@@ -15,6 +15,8 @@ interface LlmProvider
 {
     /**
      * @param  list<array{role: string, content: string}>  $messages
+     * @param  string|null  $model  Modelo especifico do uso; null usa o modelo
+     *                              configurado em `ai.model` (F7, ADR-140).
      */
-    public function complete(array $messages): LlmCompletion;
+    public function complete(array $messages, ?string $model = null): LlmCompletion;
 }

@@ -51,3 +51,14 @@ A decisão é por relação (paleta + ator, seguidor + seguido), não por clique
 - **Não marcar `notified_at` quando não notifica**: deixaria a relação pendente e poderia avisar depois de suspensão/reativação.
 - **Incluir o identificador anônimo no payload**: contraria a ADR-135 e a privacidade da fase.
 - **Notificar comentário/resposta**: não existem comentários na F6.
+
+## Emenda 2026-11-15
+
+O canal deixa de ser exclusivamente `database` (ADR-142). `database` continua
+sempre ligado; `mail` entra por preferência da conta (`email_on_like`,
+`email_on_follow`, `email_on_comment`, `email_on_reply`), lida no `via()` no
+momento do envio. Somam-se `PaletteCommentApproved` e `CommentReplyApproved`,
+também `ShouldQueueAfterCommit` e com `notified_at` atômico no comentário.
+Silenciar a paleta zera os dois canais para curtida, comentário e resposta
+daquela paleta. O sino e a página `/dashboard/notifications` leem o canal
+`database` já gravado, sem mudar o formato da linha.

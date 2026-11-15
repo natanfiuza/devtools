@@ -312,7 +312,13 @@ php artisan ai:reconcile --dry-run
 ```
 
 - `ai:prune-cache` remove as linhas de `ai_cache` com `expires_at` no passado.
-  A leitura ja as ignora; o comando so libera espaco.
+  A leitura ja as ignora; o comando so libera espaco. Linhas com `expires_at`
+  nulo sao **permanentes** e nunca sao removidas por essa poda.
+- `ai:prune-cache` aceita `--purpose=` para limitar a um uso e `--all` para
+  expurgar o uso inteiro, valido ou nao (`--all` exige `--purpose`). A moderacao
+  de comentarios do Colors grava permanente por padrao; para limpar tudo:
+  `php artisan ai:prune-cache --purpose=colors.comment_moderation --all --dry-run`
+  e depois sem `--dry-run`. Nunca apague a mao com o worker rodando.
 - `ai:reconcile` fecha `queued|processing` mais antigas que `AI_JOB_TIMEOUT` +
   `AI_RECONCILE_GRACE_SECONDS` (90 s + 30 s por padrao), marca `timeout` e
   **estorna a reserva**. Sem ele, um worker morto deixaria a cota debitada para
@@ -756,7 +762,9 @@ Problemas que ja sabemos diagnosticar:
 | Solicitacao presa em `queued\|processing` por mais de ~3 min | Worker morreu no meio: `ai:reconcile --dry-run` primeiro, depois sem `--dry-run`; a reserva e estornada e a solicitacao vira `timeout`. Antes, veja se o job esta em `failed_jobs` |
 | `provider_unavailable` em massa | Chave revogada/expirada, `AI_BASE_URL` errado ou provedor fora. Teste o provedor a parte; a resposta HTTP nao vai para o log - use a mensagem da excecao (sem corpo) e o status |
 | `unsafe_sql` com SQL que parece leitura | O gate lexical (ADR-041) barrou: `;` interno, DDL/DML misturado ou funcao perigosa. Confira o SQL gerado na resposta; nao afrouxe o gate sem ADR |
-| Cache cresce sem parar | `ai:prune-cache` nao esta no cron (secao 5); confira `SELECT COUNT(*) FROM ai_cache WHERE expires_at < NOW()` (nunca apague na mao com o worker rodando) |
+| Cache cresce sem parar | `ai:prune-cache` nao esta no cron (secao 5); confira `SELECT COUNT(*) FROM ai_cache WHERE expires_at < NOW()` (nunca apague na mao com o worker rodando). Linhas de moderacao com `expires_at` nulo sao permanentes: expurgue por `ai:prune-cache --purpose=colors.comment_moderation --all` |
+| Thread de comentarios sumiu da paleta publica | `COLORS_COMMENTS_ENABLED` desligada (default `false`) ou config em cache: `php artisan about`, `optimize:clear && optimize`. Desligada, os endpoints de comentario/denuncia/mute respondem 404 uniforme de proposito |
+| Comentario fica "em analise" e nao sai | Worker parado (`queue:failed`, `supervisorctl status devtools-worker`) ou provedor de IA indisponivel; apos esgotar os retries o job marca `flagged` e o admin decide em `/admin/comments`. Falta de `AI_*` no `.env` nao quebra a escrita: o comentario fica `flagged`, nunca aprovado |
 | Resposta veio do cache para outro schema | Nao deve acontecer: o hit compara o payload inteiro (ADR-016), nao so o MD5. Se acontecer, e bug - guarde o `prompt_hash` e abra incidente; a linha expira em 30 dias |
 | Checkout online nao aparece em `/subscribe` | Falta `MERCADO_PAGO_ACCESS_TOKEN` (ou a config esta em cache): `php artisan about` e `optimize:clear && optimize`. Sem token, o manual continua |
 | Webhook responde **503** | `MERCADO_PAGO_WEBHOOK_SECRET` vazio ou config em cache. O endpoint fica desligado de proposito |

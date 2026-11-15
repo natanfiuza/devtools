@@ -67,6 +67,7 @@ return [
         'api_docs',
         'docs',
         'colors',
+        'notifications',
         'errors',
     ],
 

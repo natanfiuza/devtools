@@ -4,8 +4,10 @@ import { Copy, Download, FlaskConical, RotateCcw, Star } from '@lucide/vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PageHead from '@/components/PageHead.vue';
+import CommentThread from '@/components/colors/CommentThread.vue';
 import FollowButton from '@/components/colors/FollowButton.vue';
 import LikeButton from '@/components/colors/LikeButton.vue';
+import MutePaletteButton from '@/components/colors/MutePaletteButton.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +41,9 @@ import type {
  * Vitrine: nome, descricao, tags, uso, data e as cores persistidas, com copia e
  * download. A byline do autor (F6, ADR-134) leva ao perfil publico e oferece
  * seguir; a curtida (ADR-135) vale para conta e para o visitante anonimo, que
- * recebe o cookie na propria resposta da API. Nao ha comentarios nesta fase.
+ * recebe o cookie na propria resposta da API. A thread de comentarios (F7,
+ * ADR-139) so aparece quando o servidor manda `comments`; com a flag desligada
+ * a secao nem existe na pagina.
  * A escala reusa o painel de exportacao do gerador, montada a partir dos HEX
  * gravados (`buildFrozenScale`), para o visitante ver exatamente o que o dono
  * viu.
@@ -422,6 +426,13 @@ onMounted(() => {
         data-test="public-like"
       />
 
+      <MutePaletteButton
+        :palette-id="palette.id"
+        :muted="muted"
+        :can-mute="canMute"
+        data-test="public-mute"
+      />
+
       <Button
         v-if="canFavorite"
         type="button"
@@ -642,5 +653,13 @@ onMounted(() => {
         :colors="hexes"
       />
     </section>
+
+    <CommentThread
+      v-if="comments !== null && commentForm !== null"
+      :palette-id="palette.id"
+      :comments="comments"
+      :can-comment="canComment"
+      :max-length="commentForm.body_max_length"
+    />
   </article>
 </template>

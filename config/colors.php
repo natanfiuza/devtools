@@ -66,6 +66,58 @@ return [
     ],
 
     /*
+    | Comentarios de paletas publicas (F7, ADR-139 a ADR-143). A superficie
+    | nasce desligada: producao so liga por decisao explicita. O limite de 255
+    | caracteres e o da ADR-111; modelo e versoes vem daqui, nunca do codigo.
+    | `cache_ttl_days` vazio significa linha permanente em `ai_cache`.
+    */
+    'comments' => [
+        'enabled' => (bool) env('COLORS_COMMENTS_ENABLED', false),
+
+        'body_max_length' => (int) env('COLORS_COMMENT_MAX_LENGTH', 255),
+
+        'per_page' => (int) env('COLORS_COMMENTS_PER_PAGE', 20),
+
+        'replies_limit' => (int) env('COLORS_COMMENT_REPLIES_LIMIT', 100),
+
+        'moderation' => [
+            'model' => env('COLORS_COMMENT_MODEL') ?: env('AI_MODEL'),
+
+            'prompt_slug' => env('COLORS_COMMENT_PROMPT_SLUG', 'colors_comment_moderation'),
+
+            'prompt_version' => (int) env('COLORS_COMMENT_PROMPT_VERSION', 1),
+
+            'policy_version' => (int) env('COLORS_COMMENT_POLICY_VERSION', 1),
+
+            'word_lists_path' => env('COLORS_COMMENT_WORD_LISTS_PATH')
+                ?: resource_path('colors/moderation'),
+
+            'cache_ttl_days' => env('COLORS_COMMENT_CACHE_TTL_DAYS') === null
+                || env('COLORS_COMMENT_CACHE_TTL_DAYS') === ''
+                    ? null
+                    : (int) env('COLORS_COMMENT_CACHE_TTL_DAYS'),
+
+            'job_tries' => (int) env('COLORS_COMMENT_JOB_TRIES', 3),
+
+            'job_backoff_seconds' => (int) env('COLORS_COMMENT_JOB_BACKOFF', 30),
+
+            'job_timeout' => (int) env('COLORS_COMMENT_JOB_TIMEOUT', 60),
+        ],
+    ],
+
+    /*
+    | Denuncias e notificacoes (F7, ADR-141/ADR-142). A paginacao vale para as
+    | telas do admin e da conta; nada de numero fixo na interface.
+    */
+    'reports' => [
+        'per_page' => (int) env('COLORS_REPORTS_PER_PAGE', 30),
+    ],
+
+    'notifications' => [
+        'per_page' => (int) env('COLORS_NOTIFICATIONS_PER_PAGE', 20),
+    ],
+
+    /*
     | Presets do gerador (F5, ADR-093). Guardam apenas a entrada da geracao
     | (nome + cor base), nunca as cores derivadas. `limit = null` significa
     | sem limite funcional; um teto operacional, se necessario, vem daqui.
@@ -163,6 +215,8 @@ return [
         'og_per_minute' => (int) env('COLORS_OG_RATE_LIMIT', 10),
         'library_per_minute' => (int) env('COLORS_LIBRARY_RATE_LIMIT', 120),
         'social_per_minute' => (int) env('COLORS_SOCIAL_RATE_LIMIT', 60),
+        'comment_per_minute' => (int) env('COLORS_COMMENT_RATE_LIMIT', 10),
+        'report_per_minute' => (int) env('COLORS_REPORT_RATE_LIMIT', 10),
     ],
 
     /*

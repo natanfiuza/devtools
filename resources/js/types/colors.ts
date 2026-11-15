@@ -156,6 +156,53 @@ export type PalettePublic = {
     updated_at: string | null;
 };
 
+/** Autor de comentario exposto na thread; `null` vira "conta removida". */
+export type ColorCommentAuthor = {
+    id: number;
+    name: string;
+    username: string | null;
+    avatar: string | null;
+};
+
+/**
+ * Comentario ou resposta de uma paleta publica (F7, ADR-139).
+ *
+ * `body` ja vem decidido pelo servidor: edicao rejeitada devolve a ultima
+ * versao aprovada e revisao oculta vem vazia. `pending` cobre pendente e
+ * flagged - o selo "em analise" e o unico rotulo antes da aprovacao.
+ */
+export type ColorComment = {
+    id: string;
+    body: string;
+    pending: boolean;
+    deleted: boolean;
+    created_at: string | null;
+    edited_at: string | null;
+    author: ColorCommentAuthor | null;
+    author_removed: boolean;
+    can_edit: boolean;
+    can_delete: boolean;
+    can_report: boolean;
+    replies: ColorComment[];
+    replies_truncated: boolean;
+};
+
+/** Pagina de raizes da thread (`comments_page`). */
+export type ColorCommentPaginator = {
+    data: ColorComment[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+};
+
+/** Limites do formulario de comentario, lidos da config do servidor. */
+export type CommentFormLimits = {
+    body_max_length: number;
+};
+
 /** Props da pagina publica (`PublicPaletteController@show`). */
 export type PublicPaletteProps = {
     palette: PalettePublic;
@@ -171,8 +218,21 @@ export type PublicPaletteProps = {
     following: boolean;
     /** So conta logada e paleta de outra pessoa podem seguir o autor. */
     canFollow: boolean;
+    /**
+     * Thread de comentarios (F7, ADR-143); `null` com a flag desligada - a
+     * secao nem e renderizada.
+     */
+    comments: ColorCommentPaginator | null;
+    /** Conta logada com a flag ligada pode comentar. */
+    canComment: boolean;
+    /** Limites do formulario; `null` junto com `comments`. */
+    commentForm: CommentFormLimits | null;
     /** URL da OG propria; `null` quando o dono ainda nao gerou. */
     ogUrl: string | null;
+    /** O dono silenciou as notificacoes desta paleta (F7, ADR-142). */
+    muted: boolean;
+    /** So o dono, com comentarios ligados, ve os botoes de silenciar. */
+    canMute: boolean;
 };
 
 /** Resposta de `POST/DELETE /api/tools/colors/palettes/{id}/like`. */

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Account\BillingController;
 use App\Http\Controllers\Account\HistoryController;
+use App\Http\Controllers\Account\NotificationController;
 use App\Http\Controllers\Account\OverviewController;
 use App\Http\Controllers\Api\AiQueryController;
 use App\Http\Controllers\Api\Base64ImageController;
@@ -224,6 +225,17 @@ Route::get('subscribe/checkout/{checkoutSession}/return', [CheckoutController::c
 Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
     Route::get('dashboard', OverviewController::class)->name('dashboard');
     Route::get('dashboard/history', [HistoryController::class, 'index'])->name('dashboard.history');
+
+    // Sino e preferencias (F7, ADR-142). A leitura marca estado explicito: a
+    // pagina lista, e marcar como lida e uma acao da pessoa.
+    Route::get('dashboard/notifications', [NotificationController::class, 'index'])
+        ->name('dashboard.notifications.index');
+    Route::patch('dashboard/notifications/preferences', [NotificationController::class, 'updatePreferences'])
+        ->name('dashboard.notifications.preferences');
+    Route::post('dashboard/notifications/read-all', [NotificationController::class, 'readAll'])
+        ->name('dashboard.notifications.read-all');
+    Route::post('dashboard/notifications/{notification}/read', [NotificationController::class, 'markRead'])
+        ->name('dashboard.notifications.read');
 
     // Escritas do historico: so plano pago (ADR-051). O GET acima fica aberto
     // para o Free ver o CTA de upgrade.

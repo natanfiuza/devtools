@@ -29,6 +29,8 @@ return [
         'badgeforge_providers' => 'BadgeForge providers',
         'badgeforge_custom_providers' => 'Custom providers',
         'badgeforge_analytics' => 'BadgeForge volume',
+        'comments' => 'Comment moderation',
+        'comment_reports' => 'Comment reports',
         'back_to_site' => 'Back to site',
     ],
 
@@ -520,6 +522,66 @@ return [
         'note' => 'Numbers come from the daily aggregate, which cannot deduplicate visitors across dimensions.',
     ],
 
+    'comments' => [
+        'title' => 'Comment moderation',
+        'description' => 'Comments waiting for review, flagged by a provider failure, or rejected. The text is shown here only to support the decision; it is never written to the audit log.',
+        'empty' => 'No comments with this status.',
+        'filter' => 'Status',
+        'all' => 'All',
+        'search' => 'Search',
+        'search_placeholder' => 'Search the text',
+        'comment' => 'Comment',
+        'author' => 'Author',
+        'palette' => 'Palette',
+        'reports' => 'Reports',
+        'created_at' => 'Created',
+        'deleted' => 'Deleted',
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'delete' => 'Delete',
+        'delete_confirm_title' => 'Delete this comment?',
+        'delete_confirm_description' => 'The text is kept for moderation and audit; the public thread shows "removed comment" when there are replies. Pending reports are closed.',
+        'statuses' => [
+            'pending' => 'In review',
+            'flagged' => 'Flagged',
+            'rejected' => 'Rejected',
+            'approved' => 'Approved',
+            'all' => 'All',
+        ],
+    ],
+
+    'comment_reports' => [
+        'title' => 'Comment reports',
+        'description' => 'Reports sent by people who saw a comment on a public palette. Closing a report does not change the comment: rejecting or deleting it happens on the moderation screen.',
+        'empty' => 'No reports with this status.',
+        'filter' => 'Status',
+        'all' => 'All',
+        'comment' => 'Comment',
+        'deleted' => 'Deleted',
+        'palette' => 'Palette',
+        'author' => 'Author',
+        'reporter' => 'Reported by',
+        'reason' => 'Reason',
+        'status' => 'Status',
+        'reported_at' => 'Reported',
+        'closed_at' => 'Closed',
+        'closed_by' => 'Closed by',
+        'resolve' => 'Resolve',
+        'dismiss' => 'Dismiss',
+        'statuses' => [
+            'pending' => 'Pending',
+            'resolved' => 'Resolved',
+            'dismissed' => 'Dismissed',
+            'all' => 'All',
+        ],
+        'comment_statuses' => [
+            'pending' => 'In review',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            'flagged' => 'Flagged',
+        ],
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'Email verified',
@@ -566,6 +628,15 @@ return [
             'payment_confirmed' => 'Subscription intent payment confirmed',
             'canceled' => 'Subscription intent canceled',
         ],
+        'comment_report' => [
+            'resolved' => 'Comment report resolved',
+            'dismissed' => 'Comment report dismissed',
+        ],
+        'comment' => [
+            'approved' => 'Comment approved',
+            'rejected' => 'Comment rejected',
+            'deleted' => 'Comment deleted',
+        ],
     ],
 
     'toasts' => [
@@ -610,6 +681,11 @@ return [
         'intent_already_canceled' => 'The intent was already canceled.',
         'impersonation_started' => 'You are now signed in as :name.',
         'impersonation_stopped' => 'Back to your account.',
+        'comment_report_resolved' => 'Report resolved.',
+        'comment_report_dismissed' => 'Report dismissed.',
+        'comment_approved' => 'Comment approved.',
+        'comment_rejected' => 'Comment rejected.',
+        'comment_deleted' => 'Comment deleted.',
     ],
 
     'impersonation' => [

@@ -2,16 +2,22 @@
 
 namespace App\Notifications\Colors;
 
+use App\Models\ColorNotificationPreference;
+use App\Models\ColorPaletteMute;
+use App\Models\User;
+use App\Support\Locales;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueueAfterCommit;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Aviso de curtida recebida (F6, ADR-137).
+ * Aviso de curtida recebida (F6, ADR-137; canais e e-mail na F7, ADR-142).
  *
- * A F6 grava so no canal `database`; o sino, a preferencia e o e-mail sao da
- * F7. O ator anonimo nao carrega identificador, IP nem e-mail: o payload so
- * marca `anonymous`.
+ * O canal `database` e sempre ligado; o `mail` so entra quando a conta ligou o
+ * toggle de curtidas. O silencio da paleta e consultado no envio (`via()` roda
+ * no worker): silenciar depois nao apaga o aviso que ja existe no sino, apenas
+ * impede os proximos. O ator anonimo nao carrega identificador, IP nem e-mail.
  */
 final class PaletteLiked extends Notification implements ShouldQueueAfterCommit
 {
@@ -32,7 +38,23 @@ final class PaletteLiked extends Notification implements ShouldQueueAfterCommit
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        if (! $notifiable instanceof User
+            || $notifiable->isSuspended()
+            || $notifiable->isAnonymized()) {
+            return [];
+        }
+
+        if (ColorPaletteMute::isMuted($notifiable, $this->paletteId)) {
+            return [];
+        }
+
+        $channels = ['database'];
+
+        if (ColorNotificationPreference::for($notifiable)->allowsEmail('like')) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**
@@ -50,5 +72,31 @@ final class PaletteLiked extends Notification implements ShouldQueueAfterCommit
             'actor_username' => $this->actorUsername,
             'anonymous' => $this->anonymous,
         ];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        /** @var User $notifiable */
+        $actor = $this->actorName ?? __('mail.colors.someone');
+
+        $message = (new MailMessage)
+            ->subject(__('mail.colors.like.subject'))
+            ->greeting(__('mail.colors.greeting', ['name' => $notifiable->name]))
+            ->line($this->anonymous
+                ? __('mail.colors.like.intro_anonymous', ['palette' => $this->paletteName])
+                : __('mail.colors.like.intro', [
+                    'actor' => $actor,
+                    'palette' => $this->paletteName,
+                ]))
+            ->line(__('mail.colors.manage_hint'));
+
+        if ($this->paletteSlug !== null) {
+            $message->action(__('mail.colors.like.action'), route('colors.palettes.show', [
+                'locale' => Locales::slug((string) $notifiable->preferredLocale()),
+                'slug' => $this->paletteSlug,
+            ]));
+        }
+
+        return $message;
     }
 }

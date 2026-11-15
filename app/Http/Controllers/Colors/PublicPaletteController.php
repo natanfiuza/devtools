@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\ColorPalette;
 use App\Models\ColorPaletteFavorite;
 use App\Models\ColorPaletteLike;
+use App\Models\ColorPaletteMute;
 use App\Models\User;
 use App\Models\UserFollow;
 use App\Support\Colors\AnonymousIdentity;
+use App\Support\Colors\CommentPresenter;
 use App\Support\Colors\PaletteOgStorage;
 use App\Support\Colors\PalettePresenter;
 use Illuminate\Http\Request;
@@ -32,6 +34,7 @@ class PublicPaletteController extends Controller
         string $slug,
         PalettePresenter $presenter,
         PaletteOgStorage $og,
+        CommentPresenter $comments,
     ): Response {
         $palette = ColorPalette::query()
             ->publiclyVisible()
@@ -65,6 +68,17 @@ class PublicPaletteController extends Controller
             ->active()
             ->exists();
 
+        // Thread desligada nao consulta nem entrega prop alguma (F7, ADR-143).
+        $commentsEnabled = (bool) config('colors.comments.enabled', false);
+
+        // Silenciar a paleta e so do dono e vale enquanto a thread existe
+        // (F7, ADR-142).
+        $canMute = $commentsEnabled && $isOwner;
+        $muted = $canMute && ColorPaletteMute::query()
+            ->where('color_palette_id', $palette->id)
+            ->where('user_id', $viewerId)
+            ->exists();
+
         return Inertia::render('colors/PublicPalette', [
             'palette' => $presenter->public($palette),
             'favorited' => $favorited,
@@ -74,6 +88,15 @@ class PublicPaletteController extends Controller
             'canLike' => ! $isOwner,
             'following' => $following,
             'canFollow' => $canFollow,
+            'comments' => $commentsEnabled
+                ? $comments->thread($palette, $user instanceof User ? $user : null, $this->commentsPage($request))
+                : null,
+            'canComment' => $commentsEnabled && $user instanceof User,
+            'commentForm' => $commentsEnabled
+                ? ['body_max_length' => (int) config('colors.comments.body_max_length', 255)]
+                : null,
+            'muted' => $muted,
+            'canMute' => $canMute,
             'ogUrl' => $hasOg
                 ? URL::route('colors.palettes.og', [
                     'locale' => $locale,
@@ -82,6 +105,13 @@ class PublicPaletteController extends Controller
                 ])
                 : null,
         ]);
+    }
+
+    private function commentsPage(Request $request): int
+    {
+        $page = $request->query('comments_page');
+
+        return is_numeric($page) ? max(1, (int) $page) : 1;
     }
 
     /**

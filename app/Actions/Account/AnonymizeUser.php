@@ -5,6 +5,8 @@ namespace App\Actions\Account;
 use App\Actions\BadgeForge\DeleteBadgeEndpoint;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
+use App\Models\ColorNotificationPreference;
+use App\Models\ColorPaletteMute;
 use App\Models\User;
 use App\Support\BadgeForge\Personal\BadgeAssetStorage;
 use Illuminate\Support\Facades\DB;
@@ -90,6 +92,14 @@ final class AnonymizeUser
             // `usage_ledger` fica - e consumo, nao identificacao.
             $user->aiRequests()->delete();
             $user->tokens()->delete();
+
+            // Notificacoes Colors (F7, ADR-142): o sino e as preferencias sao
+            // da pessoa e saem juntos. Comentarios e denuncias ficam - o texto
+            // preservado aparece como "conta removida" e nao identifica mais
+            // ninguem.
+            $user->notifications()->delete();
+            ColorNotificationPreference::query()->where('user_id', $id)->delete();
+            ColorPaletteMute::query()->where('user_id', $id)->delete();
 
             // Logos e presets do BadgeForge sao dado da pessoa (F3, ADR-078 e
             // ADR-079). Badges estaticas ja publicadas sao stateless: a URL

@@ -29,6 +29,8 @@ return [
         'badgeforge_providers' => 'Providers de BadgeForge',
         'badgeforge_custom_providers' => 'Providers personalizados',
         'badgeforge_analytics' => 'Volumen de BadgeForge',
+        'comments' => 'Moderación de comentarios',
+        'comment_reports' => 'Denuncias de comentarios',
         'back_to_site' => 'Volver al sitio',
     ],
 
@@ -520,6 +522,66 @@ return [
         'note' => 'Los números vienen del agregado diario, que no permite deduplicar visitantes entre dimensiones.',
     ],
 
+    'comments' => [
+        'title' => 'Moderación de comentarios',
+        'description' => 'Comentarios en espera de revisión, marcados por un fallo del proveedor o rechazados. El texto aparece aquí solo para respaldar la decisión; nunca se escribe en la auditoría.',
+        'empty' => 'No hay comentarios con este estado.',
+        'filter' => 'Estado',
+        'all' => 'Todos',
+        'search' => 'Buscar',
+        'search_placeholder' => 'Buscar en el texto',
+        'comment' => 'Comentario',
+        'author' => 'Autor',
+        'palette' => 'Paleta',
+        'reports' => 'Denuncias',
+        'created_at' => 'Creado el',
+        'deleted' => 'Eliminado',
+        'approve' => 'Aprobar',
+        'reject' => 'Rechazar',
+        'delete' => 'Eliminar',
+        'delete_confirm_title' => '¿Eliminar este comentario?',
+        'delete_confirm_description' => 'El texto se conserva para la moderación y la auditoría; en el hilo público aparece «comentario eliminado» cuando hay respuestas. Las denuncias pendientes se cierran.',
+        'statuses' => [
+            'pending' => 'En revisión',
+            'flagged' => 'Marcado',
+            'rejected' => 'Rechazado',
+            'approved' => 'Aprobado',
+            'all' => 'Todos',
+        ],
+    ],
+
+    'comment_reports' => [
+        'title' => 'Denuncias de comentarios',
+        'description' => 'Denuncias enviadas por quienes vieron un comentario en una paleta pública. Cerrar la denuncia no cambia el comentario: rechazarlo o eliminarlo se hace en la pantalla de moderación.',
+        'empty' => 'No hay denuncias con este estado.',
+        'filter' => 'Estado',
+        'all' => 'Todas',
+        'comment' => 'Comentario',
+        'deleted' => 'Eliminado',
+        'palette' => 'Paleta',
+        'author' => 'Autor',
+        'reporter' => 'Denunciado por',
+        'reason' => 'Motivo',
+        'status' => 'Estado',
+        'reported_at' => 'Denunciado el',
+        'closed_at' => 'Cerrado el',
+        'closed_by' => 'Cerrado por',
+        'resolve' => 'Resolver',
+        'dismiss' => 'Descartar',
+        'statuses' => [
+            'pending' => 'Pendiente',
+            'resolved' => 'Resuelta',
+            'dismissed' => 'Descartada',
+            'all' => 'Todas',
+        ],
+        'comment_statuses' => [
+            'pending' => 'En revisión',
+            'approved' => 'Aprobado',
+            'rejected' => 'Rechazado',
+            'flagged' => 'Marcado',
+        ],
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'Correo verificado',
@@ -566,6 +628,15 @@ return [
             'payment_confirmed' => 'Pago de la intención confirmado',
             'canceled' => 'Intención de suscripción cancelada',
         ],
+        'comment_report' => [
+            'resolved' => 'Denuncia resuelta',
+            'dismissed' => 'Denuncia descartada',
+        ],
+        'comment' => [
+            'approved' => 'Comentario aprobado',
+            'rejected' => 'Comentario rechazado',
+            'deleted' => 'Comentario eliminado',
+        ],
     ],
 
     'toasts' => [
@@ -610,6 +681,11 @@ return [
         'intent_already_canceled' => 'La intención ya estaba cancelada.',
         'impersonation_started' => 'Ahora estás como :name.',
         'impersonation_stopped' => 'De vuelta a tu cuenta.',
+        'comment_report_resolved' => 'Denuncia resuelta.',
+        'comment_report_dismissed' => 'Denuncia descartada.',
+        'comment_approved' => 'Comentario aprobado.',
+        'comment_rejected' => 'Comentario rechazado.',
+        'comment_deleted' => 'Comentario eliminado.',
     ],
 
     'impersonation' => [

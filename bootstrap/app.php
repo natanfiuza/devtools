@@ -3,6 +3,7 @@
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureBadgeForgeHasPaidPlan;
+use App\Http\Middleware\EnsureColorCommentsEnabled;
 use App\Http\Middleware\EnsureHistoryHasPaidPlan;
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAppearance;
@@ -74,6 +75,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // conta, e derrubar ali surpreenderia quem so esta lendo o site.
         $middleware->alias([
             'active' => EnsureAccountIsActive::class,
+            // Comentarios das paletas (F7, ADR-143): desligado, 404 uniforme.
+            'colors.comments' => EnsureColorCommentsEnabled::class,
             'history.paid' => EnsureHistoryHasPaidPlan::class,
             'badgeforge.paid' => EnsureBadgeForgeHasPaidPlan::class,
             // O Sanctum v4 nao registra estes aliases sozinho; a API publica

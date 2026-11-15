@@ -6,6 +6,7 @@ use App\Enums\SqlDialect;
 use App\Exceptions\Ai\InvalidContractException;
 use App\Exceptions\Ai\PayloadCodecException;
 use App\Models\AiCache;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
 /**
@@ -21,6 +22,12 @@ use Illuminate\Support\Carbon;
  */
 final class AiCacheRepository
 {
+    /**
+     * Uso da tabela `ai_cache` pelo AI SQL Builder. A moderacao Colors grava
+     * na mesma tabela com outro `purpose` (F7, ADR-140).
+     */
+    public const PURPOSE = 'ai';
+
     public function __construct(
         private readonly PayloadCodec $codec,
         private readonly ContractValidator $contracts,
@@ -29,8 +36,12 @@ final class AiCacheRepository
     public function find(CanonicalPayload $payload, SqlDialect $dialect, string $target): ?AiCacheHit
     {
         $cache = AiCache::query()
+            ->where('purpose', self::PURPOSE)
             ->where('prompt_hash', $payload->hash())
-            ->where('expires_at', '>', now())
+            ->where(function (Builder $query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
             ->first();
 
         if ($cache === null) {
@@ -76,6 +87,7 @@ final class AiCacheRepository
         AiCache::query()->upsert(
             [[
                 'prompt_hash' => $hash,
+                'purpose' => self::PURPOSE,
                 'canonical_payload' => $this->codec->encode($payload),
                 'response_json' => $result->json(),
                 'model' => $payload->model,
@@ -109,10 +121,13 @@ final class AiCacheRepository
 
     /**
      * Quantas linhas expiradas foram apagadas - usado pelo `ai:prune-cache`.
+     *
+     * Linhas com `expires_at` NULL sao permanentes e nunca entram na poda.
      */
     public function deleteExpired(?Carbon $before = null): int
     {
         return AiCache::query()
+            ->whereNotNull('expires_at')
             ->where('expires_at', '<=', $before ?? now())
             ->delete();
     }

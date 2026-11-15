@@ -32,6 +32,8 @@ declare module '@inertiajs/core' {
             impersonation: { email: string } | null;
             /** Chave publica do Turnstile; nula desliga o widget (ADR-052). */
             turnstileSiteKey: string | null;
+            /** Contador do sino; `null` para visitante (F7, ADR-142). */
+            notifications: { unread: number } | null;
             seo: {
                 /** Tela de acesso: pede `noindex` e nada de `hreflang`. */
                 noindex: boolean;

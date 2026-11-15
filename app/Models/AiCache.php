@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property string $prompt_hash
+ * @property string $purpose
  * @property string $canonical_payload
  * @property string $response_json
  * @property string $model
@@ -26,10 +27,11 @@ use Illuminate\Support\Carbon;
  * @property int $hits
  * @property Carbon|null $last_hit_at
  * @property Carbon|null $created_at
- * @property Carbon $expires_at
+ * @property Carbon|null $expires_at
  */
 #[Fillable([
     'prompt_hash',
+    'purpose',
     'canonical_payload',
     'response_json',
     'model',
@@ -74,9 +76,12 @@ class AiCache extends Model
         ];
     }
 
+    /**
+     * `expires_at` NULL significa permanente (F7, ADR-140).
+     */
     public function isExpired(): bool
     {
-        return $this->expires_at->isPast();
+        return $this->expires_at !== null && $this->expires_at->isPast();
     }
 
     /**

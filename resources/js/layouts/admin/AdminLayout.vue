@@ -9,9 +9,11 @@ import {
     ClipboardList,
     CreditCard,
     Database,
+    Flag,
     Hexagon,
     LayoutGrid,
     Mail,
+    MessageSquareText,
     ScrollText,
     Tag,
     Users,
@@ -103,6 +105,16 @@ const navItems = computed<NavItem[]>(() => [
         title: t('admin.nav.badgeforge_analytics'),
         href: admin.badgeforge.analytics.index.url(),
         icon: ChartColumn,
+    },
+    {
+        title: t('admin.nav.comments'),
+        href: admin.comments.index.url(),
+        icon: MessageSquareText,
+    },
+    {
+        title: t('admin.nav.comment_reports'),
+        href: admin.commentReports.index.url(),
+        icon: Flag,
     },
     {
         title: t('admin.nav.audit'),

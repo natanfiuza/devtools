@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\Colors\ColorCommentController;
+use App\Http\Controllers\Api\Colors\ColorCommentReportController;
 use App\Http\Controllers\Api\Colors\ColorFavoriteController;
 use App\Http\Controllers\Api\Colors\ColorHistoryController;
 use App\Http\Controllers\Api\Colors\ColorPresetController;
 use App\Http\Controllers\Api\Colors\PaletteFavoriteController;
 use App\Http\Controllers\Api\Colors\PaletteLikeController;
+use App\Http\Controllers\Api\Colors\PaletteMuteController;
 use App\Http\Controllers\Api\Colors\UserFollowController;
 use App\Http\Controllers\Colors\PaletteController;
 use App\Http\Controllers\Colors\PaletteDuplicationController;
@@ -68,6 +71,51 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
                     ->whereUlid('colorPalette')
                     ->name('palettes.favorite.destroy');
             });
+        });
+
+    // Comentarios de paletas publicas (F7, ADR-139/ADR-143). O interruptor
+    // `colors.comments` responde 404 uniforme quando desligado; escrita exige
+    // conta e limiter proprio.
+    Route::prefix('api/tools/colors')
+        ->name('api.tools.colors.')
+        ->middleware(['colors.comments', 'throttle:colors-comments'])
+        ->group(function (): void {
+            Route::post('palettes/{colorPalette}/comments', [ColorCommentController::class, 'store'])
+                ->whereUlid('colorPalette')
+                ->name('palettes.comments.store');
+
+            Route::patch('comments/{colorPaletteComment}', [ColorCommentController::class, 'update'])
+                ->whereUlid('colorPaletteComment')
+                ->name('comments.update');
+
+            Route::delete('comments/{colorPaletteComment}', [ColorCommentController::class, 'destroy'])
+                ->whereUlid('colorPaletteComment')
+                ->name('comments.destroy');
+        });
+
+    // Denuncias de comentario (F7, ADR-141). Limiter proprio: denunciar em
+    // serie e abuso distinto de comentar em serie.
+    Route::prefix('api/tools/colors')
+        ->name('api.tools.colors.')
+        ->middleware(['colors.comments', 'throttle:colors-reports'])
+        ->group(function (): void {
+            Route::post('comments/{colorPaletteComment}/report', [ColorCommentReportController::class, 'store'])
+                ->whereUlid('colorPaletteComment')
+                ->name('comments.report.store');
+        });
+
+    // Silenciar a propria paleta (F7, ADR-142). Mesma flag da thread: com os
+    // comentarios desligados o recurso responde 404 uniforme.
+    Route::prefix('api/tools/colors')
+        ->name('api.tools.colors.')
+        ->middleware(['colors.comments', 'throttle:colors-social'])
+        ->group(function (): void {
+            Route::post('palettes/{colorPalette}/mute', [PaletteMuteController::class, 'store'])
+                ->whereUlid('colorPalette')
+                ->name('palettes.mute.store');
+            Route::delete('palettes/{colorPalette}/mute', [PaletteMuteController::class, 'destroy'])
+                ->whereUlid('colorPalette')
+                ->name('palettes.mute.destroy');
         });
 
     // Seguir contas (F6, ADR-136): exige login e usa o limiter social.

@@ -33,6 +33,7 @@ class AiCacheFactory extends Factory
 
         return [
             'prompt_hash' => md5(fake()->uuid()),
+            'purpose' => 'ai',
             'canonical_payload' => base64_encode($payload === false ? '' : $payload),
             'response_json' => json_encode($result, JSON_THROW_ON_ERROR),
             'model' => (string) config('ai.model', 'test-model'),
@@ -50,6 +51,16 @@ class AiCacheFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'expires_at' => now()->subDay(),
+        ]);
+    }
+
+    /**
+     * Linha sem expiracao, como as da moderacao de comentarios.
+     */
+    public function permanent(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'expires_at' => null,
         ]);
     }
 }
