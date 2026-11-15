@@ -95,109 +95,103 @@ function onDownload(): void {
 </script>
 
 <template>
-  <section
-    class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
-    data-test="export-panel"
-  >
-    <div>
-      <h2 class="text-sm font-semibold">
-        {{ t('tools.palette-generator.export.title') }}
-      </h2>
-      <p class="mt-1 text-xs text-muted-foreground">
-        {{ t('tools.palette-generator.export.description') }}
-      </p>
-      <p
-        v-if="roles"
-        class="mt-1 text-xs text-muted-foreground"
-        data-test="export-semantic-note"
-      >
-        {{ t('tools.palette-generator.export.semantic_included') }}
-      </p>
-    </div>
-
-    <div>
-      <label
-        class="text-sm font-medium"
-        for="palette-export-name"
-      >
-        {{ t('tools.palette-generator.export.name_label') }}
-      </label>
-      <Input
-        id="palette-export-name"
-        v-model="name"
-        class="mt-1"
-        data-test="export-name"
-      />
-      <p
-        class="mt-1 text-xs text-muted-foreground"
-        data-test="export-slug"
-      >
-        {{
-          t('tools.palette-generator.export.name_hint', {
-            slug,
-          })
-        }}
-      </p>
-      <p
-        v-if="renamed"
-        class="mt-1 text-xs text-muted-foreground"
-        data-test="export-name-warning"
-      >
-        {{
-          t('tools.palette-generator.export.name_invalid', {
-            slug,
-          })
-        }}
-      </p>
-    </div>
-
-    <Tabs
-      :model-value="active"
-      @update:model-value="onTabChange"
+    <section
+        class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+        data-test="export-panel"
     >
-      <TabsList class="flex w-full flex-wrap">
-        <TabsTrigger
-          v-for="format in PALETTE_EXPORT_FORMATS"
-          :key="format"
-          :value="format"
-          :data-test="`export-tab-${format}`"
-        >
-          {{ t(`tools.palette-generator.export.tabs.${tabKey(format)}`) }}
-        </TabsTrigger>
-      </TabsList>
+        <div>
+            <h2 class="text-sm font-semibold">
+                {{ t('tools.palette-generator.export.title') }}
+            </h2>
+            <p class="mt-1 text-xs text-muted-foreground">
+                {{ t('tools.palette-generator.export.description') }}
+            </p>
+            <p
+                v-if="roles"
+                class="mt-1 text-xs text-muted-foreground"
+                data-test="export-semantic-note"
+            >
+                {{ t('tools.palette-generator.export.semantic_included') }}
+            </p>
+        </div>
 
-      <TabsContent
-        v-for="format in PALETTE_EXPORT_FORMATS"
-        :key="format"
-        :value="format"
-        class="mt-3"
-      >
-        <pre
-          tabindex="0"
-          class="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs leading-relaxed"
-          data-test="export-code"
-        >{{ fileFor(format)?.contents }}</pre>
-      </TabsContent>
-    </Tabs>
+        <div>
+            <label class="text-sm font-medium" for="palette-export-name">
+                {{ t('tools.palette-generator.export.name_label') }}
+            </label>
+            <Input
+                id="palette-export-name"
+                v-model="name"
+                class="mt-1"
+                data-test="export-name"
+            />
+            <p
+                class="mt-1 text-xs text-muted-foreground"
+                data-test="export-slug"
+            >
+                {{
+                    t('tools.palette-generator.export.name_hint', {
+                        slug,
+                    })
+                }}
+            </p>
+            <p
+                v-if="renamed"
+                class="mt-1 text-xs text-muted-foreground"
+                data-test="export-name-warning"
+            >
+                {{
+                    t('tools.palette-generator.export.name_invalid', {
+                        slug,
+                    })
+                }}
+            </p>
+        </div>
 
-    <div class="flex flex-wrap gap-2">
-      <Button
-        type="button"
-        data-test="export-copy"
-        @click="onCopy"
-      >
-        <CopyStatusIcon :copied="copied" />
-        {{ t('tools.palette-generator.export.copy') }}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        data-test="export-download"
-        @click="onDownload"
-      >
-        <Download aria-hidden="true" />
-        {{ t('tools.palette-generator.export.download') }}
-      </Button>
-    </div>
-  </section>
+        <Tabs :model-value="active" @update:model-value="onTabChange">
+            <TabsList class="flex w-full flex-wrap">
+                <TabsTrigger
+                    v-for="format in PALETTE_EXPORT_FORMATS"
+                    :key="format"
+                    :value="format"
+                    :data-test="`export-tab-${format}`"
+                >
+                    {{
+                        t(
+                            `tools.palette-generator.export.tabs.${tabKey(format)}`,
+                        )
+                    }}
+                </TabsTrigger>
+            </TabsList>
+
+            <TabsContent
+                v-for="format in PALETTE_EXPORT_FORMATS"
+                :key="format"
+                :value="format"
+                class="mt-3"
+            >
+                <pre
+                    tabindex="0"
+                    class="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs leading-relaxed"
+                    data-test="export-code"
+                    >{{ fileFor(format)?.contents }}</pre>
+            </TabsContent>
+        </Tabs>
+
+        <div class="flex flex-wrap gap-2">
+            <Button type="button" data-test="export-copy" @click="onCopy">
+                <CopyStatusIcon :copied="copied" />
+                {{ t('tools.palette-generator.export.copy') }}
+            </Button>
+            <Button
+                type="button"
+                variant="outline"
+                data-test="export-download"
+                @click="onDownload"
+            >
+                <Download aria-hidden="true" />
+                {{ t('tools.palette-generator.export.download') }}
+            </Button>
+        </div>
+    </section>
 </template>

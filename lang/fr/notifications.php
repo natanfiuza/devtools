@@ -21,12 +21,13 @@ return [
     'unread_badge' => 'Nouvelle',
     'someone' => 'Quelqu\'un',
 
+    // Interpolation de vue-i18n (`{nom}`), jamais celle de Laravel (`:nom`).
     'kinds' => [
-        'palette_liked' => ':actor a aimé votre palette « :palette ».',
-        'palette_liked_anonymous' => 'Quelqu\'un a aimé votre palette « :palette ».',
-        'user_followed' => ':actor a commencé à vous suivre.',
-        'palette_comment_approved' => ':actor a commenté votre palette « :palette ».',
-        'comment_reply_approved' => ':actor a répondu à votre commentaire sur « :palette ».',
+        'palette_liked' => '{actor} a aimé votre palette « {palette} ».',
+        'palette_liked_anonymous' => 'Quelqu\'un a aimé votre palette « {palette} ».',
+        'user_followed' => '{actor} a commencé à vous suivre.',
+        'palette_comment_approved' => '{actor} a commenté votre palette « {palette} ».',
+        'comment_reply_approved' => '{actor} a répondu à votre commentaire sur « {palette} ».',
         'unknown' => 'Vous avez une nouvelle notification.',
     ],
 

@@ -70,31 +70,27 @@ vi.mock('@inertiajs/vue3', () => ({
 vi.mock('@/lib/clipboard', () => ({ writeClipboard }));
 vi.mock('@/lib/download', () => ({ downloadText, downloadBlob: vi.fn() }));
 
-vi.mock(
-    '@/tools/palette-generator/components/ExportPanel.vue',
-    async () => {
-        const { defineComponent, h } = await import('vue');
+vi.mock('@/tools/palette-generator/components/ExportPanel.vue', async () => {
+    const { defineComponent, h } = await import('vue');
 
-        return {
-            default: defineComponent({
-                name: 'ExportPanelStub',
-                props: {
-                    scale: { type: Object, required: true },
-                    copy: { type: Function, required: true },
-                },
-                setup(props) {
-                    exportProps.current = props as unknown as Record<
-                        string,
-                        unknown
-                    >;
+    return {
+        default: defineComponent({
+            name: 'ExportPanelStub',
+            props: {
+                scale: { type: Object, required: true },
+                copy: { type: Function, required: true },
+            },
+            setup(props) {
+                exportProps.current = props as unknown as Record<
+                    string,
+                    unknown
+                >;
 
-                    return () =>
-                        h('div', { 'data-test': 'export-panel-stub' });
-                },
-            }),
-        };
-    },
-);
+                return () => h('div', { 'data-test': 'export-panel-stub' });
+            },
+        }),
+    };
+});
 
 const TRADUCOES = {
     colors: {
@@ -397,9 +393,7 @@ describe('Pagina publica de paleta', () => {
             '[data-test="public-duplicate-login"]',
         );
 
-        expect(link.getAttribute('href')).toBe(
-            '/en/colors/p/oceano/duplicate',
-        );
+        expect(link.getAttribute('href')).toBe('/en/colors/p/oceano/duplicate');
     });
 
     it('duplica a propria paleta sem corpo quando nada foi experimentado', async () => {
@@ -462,8 +456,14 @@ describe('Pagina publica de paleta', () => {
         const call = routerMock.post.mock.calls[0] as [
             string,
             {
-                colors: { base: string; items: { hex: string; tone: number }[] };
-                roles: { light: Record<string, string>; dark: Record<string, string> };
+                colors: {
+                    base: string;
+                    items: { hex: string; tone: number }[];
+                };
+                roles: {
+                    light: Record<string, string>;
+                    dark: Record<string, string>;
+                };
                 tags: string[];
             },
         ];
@@ -522,20 +522,18 @@ describe('Pagina publica de paleta', () => {
     it('favorita e desfavorita de forma otimista pela API', async () => {
         mountPage({}, { canFavorite: true });
 
-        expect(
-            query('[data-test="public-favorite"]').textContent,
-        ).toContain('FAVORITAR');
+        expect(query('[data-test="public-favorite"]').textContent).toContain(
+            'FAVORITAR',
+        );
 
         await click('[data-test="public-favorite"]');
         await flushPromises();
 
+        expect(query('[data-test="public-favorite"]').textContent).toContain(
+            'FAVORITADA',
+        );
         expect(
-            query('[data-test="public-favorite"]').textContent,
-        ).toContain('FAVORITADA');
-        expect(
-            query('[data-test="public-favorite"]').getAttribute(
-                'aria-pressed',
-            ),
+            query('[data-test="public-favorite"]').getAttribute('aria-pressed'),
         ).toBe('true');
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(fetchMock.mock.calls[0]?.[0]).toBe(
@@ -549,9 +547,9 @@ describe('Pagina publica de paleta', () => {
         await click('[data-test="public-favorite"]');
         await flushPromises();
 
-        expect(
-            query('[data-test="public-favorite"]').textContent,
-        ).toContain('FAVORITAR');
+        expect(query('[data-test="public-favorite"]').textContent).toContain(
+            'FAVORITAR',
+        );
         expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({
             method: 'DELETE',
         });
@@ -568,13 +566,11 @@ describe('Pagina publica de paleta', () => {
         await click('[data-test="public-favorite"]');
         await flushPromises();
 
+        expect(query('[data-test="public-favorite"]').textContent).toContain(
+            'FAVORITAR',
+        );
         expect(
-            query('[data-test="public-favorite"]').textContent,
-        ).toContain('FAVORITAR');
-        expect(
-            query('[data-test="public-favorite"]').getAttribute(
-                'aria-pressed',
-            ),
+            query('[data-test="public-favorite"]').getAttribute('aria-pressed'),
         ).toBe('false');
         expect(
             query('[data-test="public-favorite-error"]').textContent,
@@ -597,9 +593,7 @@ describe('Pagina publica de paleta', () => {
             query('[data-test="public-image-toggle"]').textContent,
         ).toContain('FECHAR');
         expect(
-            query('[data-test="palette-image-preview"]').getAttribute(
-                'width',
-            ),
+            query('[data-test="palette-image-preview"]').getAttribute('width'),
         ).toBe('1600');
 
         await click('[data-test="public-image-toggle"]');
@@ -644,9 +638,9 @@ describe('Pagina publica de paleta', () => {
             '/api/tools/colors/palettes/01KPALETTE00000000000000001/like',
         );
         expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: 'POST' });
-        expect(
-            query('[data-test="palette-like"]').textContent,
-        ).toContain('CURTIDA');
+        expect(query('[data-test="palette-like"]').textContent).toContain(
+            'CURTIDA',
+        );
         expect(
             query('[data-test="palette-likes-count"]').textContent,
         ).toContain('4_CURTIDAS');
@@ -673,15 +667,15 @@ describe('Pagina publica de paleta', () => {
         await click('[data-test="palette-like"]');
         await flushPromises();
 
-        expect(
-            query('[data-test="palette-like"]').textContent,
-        ).toContain('CURTIR');
+        expect(query('[data-test="palette-like"]').textContent).toContain(
+            'CURTIR',
+        );
         expect(
             query('[data-test="palette-likes-count"]').textContent,
         ).toContain('3_CURTIDAS');
-        expect(
-            query('[data-test="palette-like-error"]').textContent,
-        ).toContain('ERRO_CURTIDA');
+        expect(query('[data-test="palette-like-error"]').textContent).toContain(
+            'ERRO_CURTIDA',
+        );
     });
 
     it('o dono ve a contagem sem o botao de curtir', () => {
@@ -705,9 +699,9 @@ describe('Pagina publica de paleta', () => {
 
         mountPage({}, { canFollow: true });
 
-        expect(
-            query('[data-test="follow-button"]').textContent,
-        ).toContain('SEGUIR');
+        expect(query('[data-test="follow-button"]').textContent).toContain(
+            'SEGUIR',
+        );
 
         await click('[data-test="follow-button"]');
         await flushPromises();
@@ -715,8 +709,8 @@ describe('Pagina publica de paleta', () => {
         expect(fetchMock.mock.calls[0]?.[0]).toBe(
             '/api/tools/colors/users/42/follow',
         );
-        expect(
-            query('[data-test="follow-button"]').textContent,
-        ).toContain('SEGUINDO');
+        expect(query('[data-test="follow-button"]').textContent).toContain(
+            'SEGUINDO',
+        );
     });
 });

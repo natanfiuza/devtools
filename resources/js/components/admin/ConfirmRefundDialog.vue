@@ -52,79 +52,76 @@ function executeRefund(): void {
 </script>
 
 <template>
-  <Dialog
-    :open="payment !== null"
-    @update:open="setOpen"
-  >
-    <DialogContent class="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>
-          {{ t('admin.payments.refund') }}
-        </DialogTitle>
-        <DialogDescription>
-          {{ t('admin.payments.refund_confirm') }}
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog :open="payment !== null" @update:open="setOpen">
+        <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ t('admin.payments.refund') }}
+                </DialogTitle>
+                <DialogDescription>
+                    {{ t('admin.payments.refund_confirm') }}
+                </DialogDescription>
+            </DialogHeader>
 
-      <dl
-        v-if="payment"
-        class="grid gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <dt class="text-subtle">
-            {{ t('admin.payments.account') }}
-          </dt>
-          <dd class="font-medium">
-            {{ payment.account }}
-          </dd>
-        </div>
-        <div class="flex items-center justify-between gap-2">
-          <dt class="text-subtle">
-            {{ t('admin.payments.plan') }}
-          </dt>
-          <dd class="font-medium">
-            {{ payment.plan ?? t('admin.payments.plan_none') }}
-          </dd>
-        </div>
-        <div class="flex items-center justify-between gap-2">
-          <dt class="text-subtle">
-            {{ t('admin.payments.amount') }}
-          </dt>
-          <dd class="font-mono font-medium">
-            {{ payment.amount }}
-          </dd>
-        </div>
-        <div class="flex items-center justify-between gap-2">
-          <dt class="text-subtle">
-            {{ t('admin.payments.method') }}
-          </dt>
-          <dd class="font-medium">
-            {{ t(`admin.payments.methods.${payment.method}`) }}
-          </dd>
-        </div>
-      </dl>
+            <dl
+                v-if="payment"
+                class="grid gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs"
+            >
+                <div class="flex items-center justify-between gap-2">
+                    <dt class="text-subtle">
+                        {{ t('admin.payments.account') }}
+                    </dt>
+                    <dd class="font-medium">
+                        {{ payment.account }}
+                    </dd>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <dt class="text-subtle">
+                        {{ t('admin.payments.plan') }}
+                    </dt>
+                    <dd class="font-medium">
+                        {{ payment.plan ?? t('admin.payments.plan_none') }}
+                    </dd>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <dt class="text-subtle">
+                        {{ t('admin.payments.amount') }}
+                    </dt>
+                    <dd class="font-mono font-medium">
+                        {{ payment.amount }}
+                    </dd>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                    <dt class="text-subtle">
+                        {{ t('admin.payments.method') }}
+                    </dt>
+                    <dd class="font-medium">
+                        {{ t(`admin.payments.methods.${payment.method}`) }}
+                    </dd>
+                </div>
+            </dl>
 
-      <DialogFooter class="gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          :disabled="isRefunding"
-          @click="emit('close')"
-        >
-          {{ t('admin.common.cancel') }}
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          data-test="confirm-refund-submit"
-          :disabled="isRefunding"
-          @click="executeRefund"
-        >
-          {{ t('admin.payments.refund') }}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+            <DialogFooter class="gap-2">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    :disabled="isRefunding"
+                    @click="emit('close')"
+                >
+                    {{ t('admin.common.cancel') }}
+                </Button>
+                <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    data-test="confirm-refund-submit"
+                    :disabled="isRefunding"
+                    @click="executeRefund"
+                >
+                    {{ t('admin.payments.refund') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>

@@ -23,17 +23,15 @@ const sizes: Record<NonNullable<Props['size']>, string> = {
 </script>
 
 <template>
-  <span
-    v-bind="$attrs"
-    :class="[
-      'font-mono font-semibold tracking-tight',
-      sizes[size],
-      $props.class,
-    ]"
-  >
-    <span>devtools</span><span
-      class="text-brand"
-      aria-hidden="true"
-    >_</span>
-  </span>
+    <span
+        v-bind="$attrs"
+        :class="[
+            'font-mono font-semibold tracking-tight',
+            sizes[size],
+            $props.class,
+        ]"
+    >
+        <span>devtools</span
+        ><span class="text-brand" aria-hidden="true">_</span>
+    </span>
 </template>

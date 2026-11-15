@@ -63,7 +63,8 @@ function stubFetch(
 function postOf(calls: Call[], path: string): Call | undefined {
     return calls.find(
         (call) =>
-            call.init?.method === 'POST' && call.url === `/api/tools/colors${path}`,
+            call.init?.method === 'POST' &&
+            call.url === `/api/tools/colors${path}`,
     );
 }
 
@@ -110,19 +111,10 @@ describe('useColorLibrary anonimo', () => {
     it('le o historico local existente ao iniciar', () => {
         const storage = new FakeStorage();
 
-        storage.data.set(
-            STORAGE_KEYS.history,
-            JSON.stringify(['#ff0000ff']),
-        );
-        storage.data.set(
-            STORAGE_KEYS.favorites,
-            JSON.stringify(['#0000ffff']),
-        );
+        storage.data.set(STORAGE_KEYS.history, JSON.stringify(['#ff0000ff']));
+        storage.data.set(STORAGE_KEYS.favorites, JSON.stringify(['#0000ffff']));
 
-        const library = useColorLibrary(
-            { authenticated: false },
-            { storage },
-        );
+        const library = useColorLibrary({ authenticated: false }, { storage });
 
         expect(library.history.value).toEqual(['#ff0000ff']);
         expect(library.favoriteColors.value).toHaveLength(1);
@@ -182,9 +174,9 @@ describe('useColorLibrary autenticada', () => {
         expect(JSON.parse(String(post?.init?.body))).toEqual({
             color: '#ff0000ff',
         });
-        expect(
-            (post?.init?.headers as Headers).get('X-Requested-With'),
-        ).toBe('XMLHttpRequest');
+        expect((post?.init?.headers as Headers).get('X-Requested-With')).toBe(
+            'XMLHttpRequest',
+        );
 
         stubFetch(() => ({ status: 500 }));
 
@@ -312,23 +304,15 @@ describe('useColorLibrary autenticada', () => {
     it('mantem o historico local quando a importacao falha', async () => {
         const storage = new FakeStorage();
 
-        storage.data.set(
-            STORAGE_KEYS.history,
-            JSON.stringify(['#ff0000ff']),
-        );
+        storage.data.set(STORAGE_KEYS.history, JSON.stringify(['#ff0000ff']));
 
         stubFetch(() => ({ status: 500 }));
 
-        const library = useColorLibrary(
-            { authenticated: true },
-            { storage },
-        );
+        const library = useColorLibrary({ authenticated: true }, { storage });
 
         await expect(library.importLocalHistory()).rejects.toThrow();
 
         expect(library.importable.value).toBe(1);
-        expect(storage.data.get(STORAGE_KEYS.history)).toBe(
-            '["#ff0000ff"]',
-        );
+        expect(storage.data.get(STORAGE_KEYS.history)).toBe('["#ff0000ff"]');
     });
 });

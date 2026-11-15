@@ -1,0 +1,29 @@
+Notificação por e-mail (checklist F8, item 9)
+MAIL_MAILER=log -> storage/logs/laravel.log (ambiente de auditoria, 2026-11-15 12:41:54)
+
+[2026-11-15 12:41:54] local.DEBUG: From: devtools <hello@example.com>
+To: ana@f8.test
+Subject: New comment on "Oceano"
+MIME-Version: 1.0
+Date: Sun, 15 Nov 2026 12:41:54 -0300
+Message-ID: <f72f1a2f2fad0af46677ee629184fba7@example.com>
+Content-Type: multipart/alternative; boundary=p8mLgeY0
+
+--p8mLgeY0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+devtools_: http://127.0.0.1:8000
+
+# Hello, Ana Souza!
+
+Bruno Lima commented on your palette "Oceano".
+
+You can change which emails you receive on your notifications page.
+
+View comment: http://127.0.0.1:8000/en/colors/p/oceano#comment-01m7ft2r1s1aew7ctdyqn4s8fm
+
+Regards,
+devtools_
+
+If you're having trouble clicking the "View comment" button, copy and paste the URL below into your web browser: [http://127.0.0.1:8000/en/colors/p/oceano#comment-01m7ft2r1s1aew7ctdyqn4s8fm](http://127.0.0.1:8000/en/colors/p/oceano#comment-01m7ft2r1s1aew7ctdyqn4s8fm)

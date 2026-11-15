@@ -291,12 +291,16 @@ describe('EndpointBadgeDialog', () => {
         url.dispatchEvent(new Event('input'));
 
         document
-            .querySelector<HTMLButtonElement>('[data-test="badge-endpoint-submit"]')
+            .querySelector<HTMLButtonElement>(
+                '[data-test="badge-endpoint-submit"]',
+            )
             ?.click();
         await flushPromises();
 
         expect(postMock).toHaveBeenCalledTimes(1);
-        expect(String(postMock.mock.calls[0]?.[0])).toBe('/badgeforge/endpoints');
+        expect(String(postMock.mock.calls[0]?.[0])).toBe(
+            '/badgeforge/endpoints',
+        );
         expect(forms[0]?.name).toBe('Deploys');
         expect(forms[0]?.url).toBe('https://example.com/badge.json');
     });

@@ -73,7 +73,10 @@ class FakeWorker {
         this.listeners.set(type, handlers);
     }
 
-    postMessage(request: WorkerRequest<ExtractionRequest>, transfer?: Transferable[]): void {
+    postMessage(
+        request: WorkerRequest<ExtractionRequest>,
+        transfer?: Transferable[],
+    ): void {
         this.posted.push(request);
         this.transfers.push(transfer ?? []);
     }

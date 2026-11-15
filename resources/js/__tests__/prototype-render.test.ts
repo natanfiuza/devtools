@@ -121,9 +121,7 @@ describe('Prototipos: SVG', () => {
             );
         }
 
-        const background = parsed.querySelector(
-            'rect[data-role="background"]',
-        );
+        const background = parsed.querySelector('rect[data-role="background"]');
 
         expect(background?.getAttribute('fill')).toBe(
             ROLES.light.background.toLowerCase(),
@@ -157,11 +155,11 @@ describe('Prototipos: SVG', () => {
         const svg = svgOf('site', 'light', hostile);
 
         expect(svg).not.toContain('<script>');
-        expect(svg).toContain('&lt;script&gt;alert(&quot;x&quot;) &amp; &apos;y&apos;&lt;/script&gt;');
-        // O proprio texto do cabecalho tambem passa pelo escape.
-        expect(escapeXml('Tom & Jerry <3')).toBe(
-            'Tom &amp; Jerry &lt;3',
+        expect(svg).toContain(
+            '&lt;script&gt;alert(&quot;x&quot;) &amp; &apos;y&apos;&lt;/script&gt;',
         );
+        // O proprio texto do cabecalho tambem passa pelo escape.
+        expect(escapeXml('Tom & Jerry <3')).toBe('Tom &amp; Jerry &lt;3');
     });
 
     it('embute a Libre Franklin Regular e Bold na exportacao', () => {
@@ -178,8 +176,8 @@ describe('Prototipos: SVG', () => {
         );
 
         expect(fonts.match(/@font-face/g)).toHaveLength(2);
-        expect(fonts).toContain("font-weight:400");
-        expect(fonts).toContain("font-weight:700");
+        expect(fonts).toContain('font-weight:400');
+        expect(fonts).toContain('font-weight:700');
         expect(fonts).toContain('data:font/ttf;base64');
 
         expect(svg).toContain('<style>');

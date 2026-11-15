@@ -49,9 +49,7 @@ interface FixtureCase {
     };
 }
 
-function logoFrom(
-    logo: FixtureCase['spec']['logo'],
-): BadgeSpec['logo'] {
+function logoFrom(logo: FixtureCase['spec']['logo']): BadgeSpec['logo'] {
     if (logo === null) {
         return null;
     }

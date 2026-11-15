@@ -6,6 +6,11 @@ ele manda schema e descricao ao provedor de IA e devolve a consulta gerada -
 sem nunca executar o SQL. O servidor entrega as paginas, o SEO e o backend
 dessa tool.
 
+O grupo **Colors** ocupa duas dessas oito tools — o HTML Color Picker e o Color
+Palette Generator, ambos em `/{locale}/tools/colors`. A geracao continua no
+navegador; so as acoes de conta (salvar paleta, biblioteca pessoal, curtir,
+seguir, comentar) falam com o servidor, com a visibilidade publica opcional.
+
 - Especificacao: [docs/SPEC.md](docs/SPEC.md)
 - Decisoes: [docs/adr/](docs/adr/)
 - Design system: [docs/design/DESIGN.md](docs/design/DESIGN.md)
@@ -13,6 +18,7 @@ dessa tool.
 - Operacao no servidor: [docs/RUNBOOK.md](docs/RUNBOOK.md)
 - Guias operacionais (GA4, OAuth Google/GitHub, Mercado Pago e Cron): [docs/guides/](docs/guides/)
 - Arquitetura do AI SQL Builder e Pagamentos: [docs/ARQUITETURA.md](docs/ARQUITETURA.md)
+- Grupo Colors (picker, gerador, paletas, social e comentarios): [docs/colors/](docs/colors/) — aceite em [docs/acceptance/COLORS-FASE-8.md](docs/acceptance/COLORS-FASE-8.md)
 - API da IA: [docs/API.md](docs/API.md)
 
 ## Stack

@@ -1,7 +1,7 @@
 # Colors — índice da documentação
 
 Track do grupo Colors do devtools: HTML Color Picker e Color Palette Generator.
-Estado atual: **Fases 1, 2, 3, 4, 5, 6 e 7 implementadas**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). A **Fase 5** acrescentou a biblioteca pessoal de cores — histórico e favoritos da conta, sem limite funcional e compartilhados pelo Picker e pelo Generator, com o anônimo reduzido a 20 de histórico e 50 de favoritos e importação explícita para a conta (ADR-127, ADR-131, ADR-132) —, favoritos de paletas públicas sem duplicata (ADR-128), presets do gerador como entrada da geração (ADR-129) e exportação e importação validadas de tokens W3C DTCG, Style Dictionary e JSON nativo (ADR-130, ADR-133). A **Fase 6** abriu o social — curtir paleta pública inclusive anônimo por identidade first-party reivindicada no login (ADR-135), seguir contas e perfil público por username (ADR-134, ADR-136), notificações só no canal `database` (ADR-137) — e a exportação da paleta como imagem tipográfica horizontal, vertical e card (ADR-138). A **Fase 7** abriu a última frente de produto antes da auditoria final: comentários em thread de dois níveis nas paletas públicas, com selo "em análise", edição e exclusão com tombstone (ADR-139), moderação em dois estágios — filtro local por idioma e DeepSeek com cache por `purpose` e sentinela permanente (ADR-140) —, denúncias com deduplicação e fila administrativa (ADR-141), notificações com e-mail, sino, preferências e silenciar por paleta (ADR-142) e a flag `COLORS_COMMENTS_ENABLED` desligada por padrão (ADR-143). Bloqueio entre contas segue não implementado. O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
+Estado atual: **Fases 1 a 8 implementadas — track concluído**. A Fase 1 entregou o HTML Color Picker completo (área 2D, matiz, alpha e sliders RGB/RGBA e HSL/HSLA — a lacuna de canais foi fechada antes da F2). A **Fase 2** entregou o Color Palette Generator em `/{locale}/tools/colors/palette-generator`: escala determinística de 11 tons em OKLCH (ADR-120), contraste por tom, base intacta, cópia e exportações CSS/SCSS/JSON/Tailwind v3/v4. A **Fase 3** acrescentou as abas de harmonias — cinco tipos em OKLCH e HSL (ADR-121) — e de extração de 5/7/9/11 cores dominantes de imagem local ou URL HTTPS, em worker e com limites configuráveis (ADR-122). A **Fase 4** transformou o gerador em produto: paletas salvas com cota sob lock em `/dashboard/colors/palettes` (ADR-123), página pública com canonical/sitemap/OG dinâmica e duplicação (ADR-124, ADR-125), e protótipos vetoriais de site e mobile com papéis claro/escuro exportáveis em SVG e PNG 1x/2x (ADR-126). A **Fase 5** acrescentou a biblioteca pessoal de cores — histórico e favoritos da conta, sem limite funcional e compartilhados pelo Picker e pelo Generator, com o anônimo reduzido a 20 de histórico e 50 de favoritos e importação explícita para a conta (ADR-127, ADR-131, ADR-132) —, favoritos de paletas públicas sem duplicata (ADR-128), presets do gerador como entrada da geração (ADR-129) e exportação e importação validadas de tokens W3C DTCG, Style Dictionary e JSON nativo (ADR-130, ADR-133). A **Fase 6** abriu o social — curtir paleta pública inclusive anônimo por identidade first-party reivindicada no login (ADR-135), seguir contas e perfil público por username (ADR-134, ADR-136), notificações só no canal `database` (ADR-137) — e a exportação da paleta como imagem tipográfica horizontal, vertical e card (ADR-138). A **Fase 7** abriu a última frente de produto antes da auditoria final: comentários em thread de dois níveis nas paletas públicas, com selo "em análise", edição e exclusão com tombstone (ADR-139), moderação em dois estágios — filtro local por idioma e DeepSeek com cache por `purpose` e sentinela permanente (ADR-140) —, denúncias com deduplicação e fila administrativa (ADR-141), notificações com e-mail, sino, preferências e silenciar por paleta (ADR-142) e a flag `COLORS_COMMENTS_ENABLED` desligada por padrão (ADR-143). A **Fase 8** é a auditoria final do grupo: matriz requisito → implementação → teste sobre F1–F7, correção dos dois achados altos — bloco `colors` na exportação da conta (ADR-028) e limpeza dos dados pessoais da biblioteca e das relações de saída na anonimização —, pendências classificadas por gravidade e aceite em `docs/acceptance/COLORS-FASE-8.md` (ADR-144). Bloqueio entre contas segue não implementado. O processamento das ferramentas continua 100% no navegador; só as ações de conta falam com o servidor.
 
 ## Documentos
 
@@ -25,7 +25,7 @@ Estado atual: **Fases 1, 2, 3, 4, 5, 6 e 7 implementadas**. A Fase 1 entregou o 
 
 ## ADRs de Colors
 
-Numeração vigente: **ADR-091 a ADR-143**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
+Numeração vigente: **ADR-091 a ADR-144**, em `docs/adr/` com o prefixo `colors` no nome do arquivo (ex.: `ADR-091-colors-espacos-de-cor.md`), como o BadgeForge.
 Os números 057–086 que a especificação original citava já estavam ocupados no repositório (`docs/adr/`), por isso os 25 ADRs de Colors foram renumerados em 2026-11-07, sem mudar o conteúdo além das emendas da Fase 1.
 
 | antigo | novo | | antigo | novo | | antigo | novo |
@@ -41,7 +41,7 @@ Os números 057–086 que a especificação original citava já estavam ocupados
 |  |  | | 076 | 105 | | 085 | 114 |
 |  |  | |  |  | | 086 | 115 |
 
-ADRs criados nas Fases 1–5:
+ADRs do grupo:
 
 | ADR | Tema |
 |---|---|
@@ -73,6 +73,7 @@ ADRs criados nas Fases 1–5:
 | 141 | denúncias (uma por par, motivo fixo, dedupe, resolução automática, sem notificação) |
 | 142 | notificações e-mail/sino/silêncio (preferências por tipo, mute no `via()`, `notified_at`) |
 | 143 | kill switch de comentários (`COLORS_COMMENTS_ENABLED`, 404 uniforme) |
+| 144 | auditoria final (matriz de requisitos, exportação e anonimização de Colors, pendências deferidas) |
 
 ## Emendas de 2026-11-07
 
@@ -146,6 +147,26 @@ As decisões anteriores foram preservadas; cada ADR afetado ganhou uma seção
   (ADR-114);
 - o formato gravado em `notifications` não muda; a F7 só acrescenta remetentes
   e leitores (ADR-137).
+
+## Emendas de 2026-11-15 (Fase 8)
+
+A auditoria final corrigiu o que a F7 deixou em aberto; as decisões anteriores
+foram preservadas e a ADR-144 registra o resultado:
+
+- a exportação da conta (ADR-028) passa a ter o bloco `colors`: paletas, tags,
+  histórico, favoritos, presets, favoritos de paleta, curtidas ativas,
+  follows de saída, comentários (inclusive excluídos), denúncias feitas,
+  preferências e paletas silenciadas — sem `moderation_reason`, sem
+  `notified_at` e sem seguidores (ação de outra conta);
+- a anonimização apaga histórico, favoritos de cor, presets, favoritos de
+  paleta, curtidas da conta, follows de saída e tags; paletas, comentários e
+  denúncias ficam com autoria `NULL`, porque apagar paleta destruiria dados de
+  outras contas pelas FKs em cascata;
+- `COLORS_COMMENTS_ENABLED` continua `false` em produção; ligar é decisão
+  operacional documentada na §11 do RUNBOOK, não uma mudança de código;
+- pendências médias/baixas (TTL do cache de moderação, exportação sem teto
+  para conta paga, `lockForUpdate` no MySQL, worker obrigatório) ficam
+  classificadas no aceite e na ADR-144, sem correção nesta fase.
 
 ## Regras de manutenção
 

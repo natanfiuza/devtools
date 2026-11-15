@@ -95,58 +95,58 @@ function submit(): void {
 </script>
 
 <template>
-  <form
-    class="flex flex-col gap-2"
-    data-test="comment-form"
-    @submit.prevent="submit"
-  >
-    <textarea
-      v-model="body"
-      :maxlength="maxLength"
-      :placeholder="placeholder"
-      :rows="compact ? 2 : 3"
-      class="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:outline-2 focus:outline-offset-2 focus:outline-ring"
-      :aria-label="placeholder"
-      data-test="comment-form-input"
-    />
-
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <span
-        class="text-xs text-muted-foreground"
-        data-test="comment-form-counter"
-      >
-        {{ body.length }} / {{ maxLength }}
-      </span>
-
-      <div class="flex items-center gap-2">
-        <Button
-          v-if="kind !== 'root'"
-          type="button"
-          variant="ghost"
-          size="sm"
-          data-test="comment-form-cancel"
-          @click="emit('cancel')"
-        >
-          {{ t('colors.comments.cancel') }}
-        </Button>
-        <Button
-          type="submit"
-          size="sm"
-          :disabled="busy"
-          data-test="comment-form-submit"
-        >
-          {{ submitLabel }}
-        </Button>
-      </div>
-    </div>
-
-    <p
-      v-if="errorMessage !== null"
-      class="text-xs text-destructive"
-      role="alert"
-      data-test="comment-form-error"
+    <form
+        class="flex flex-col gap-2"
+        data-test="comment-form"
+        @submit.prevent="submit"
     >
-      {{ errorMessage }}
-    </p>
-  </form>
+        <textarea
+            v-model="body"
+            :maxlength="maxLength"
+            :placeholder="placeholder"
+            :rows="compact ? 2 : 3"
+            class="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+            :aria-label="placeholder"
+            data-test="comment-form-input"
+        />
+
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <span
+                class="text-xs text-muted-foreground"
+                data-test="comment-form-counter"
+            >
+                {{ body.length }} / {{ maxLength }}
+            </span>
+
+            <div class="flex items-center gap-2">
+                <Button
+                    v-if="kind !== 'root'"
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-test="comment-form-cancel"
+                    @click="emit('cancel')"
+                >
+                    {{ t('colors.comments.cancel') }}
+                </Button>
+                <Button
+                    type="submit"
+                    size="sm"
+                    :disabled="busy"
+                    data-test="comment-form-submit"
+                >
+                    {{ submitLabel }}
+                </Button>
+            </div>
+        </div>
+
+        <p
+            v-if="errorMessage !== null"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="comment-form-error"
+        >
+            {{ errorMessage }}
+        </p>
+    </form>
 </template>

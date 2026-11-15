@@ -166,10 +166,7 @@ function mountTool(props: BadgeForgeToolProps = PROPS) {
 }
 
 /** Select cujo valor atual e o slug informado (o de logo, nao o de estilo). */
-function selectWithValue(
-    wrapper: ReturnType<typeof mountTool>,
-    value: string,
-) {
+function selectWithValue(wrapper: ReturnType<typeof mountTool>, value: string) {
     return wrapper
         .findAllComponents({ name: 'Select' })
         .find((select) => select.props('modelValue') === value);
@@ -396,13 +393,17 @@ describe('BadgeForge Tool - modo provider', () => {
     it('troca o construtor local pela imagem do endpoint de provider', async () => {
         const wrapper = mountTool();
 
-        await wrapper.find('[data-test="badge-mode-provider"]').trigger('click');
+        await wrapper
+            .find('[data-test="badge-mode-provider"]')
+            .trigger('click');
         await flushPromises();
 
-        expect(wrapper.find('[data-test="badge-preview"]').exists()).toBe(false);
-        expect(
-            wrapper.find('[data-test="badge-provider-mode"]').exists(),
-        ).toBe(true);
+        expect(wrapper.find('[data-test="badge-preview"]').exists()).toBe(
+            false,
+        );
+        expect(wrapper.find('[data-test="badge-provider-mode"]').exists()).toBe(
+            true,
+        );
         expect(
             wrapper
                 .find('[data-test="badge-provider-preview"]')
@@ -443,9 +444,9 @@ describe('BadgeForge Tool - gestao da conta', () => {
     it('leva ao painel de endpoints JSON so para quem gerencia a conta', () => {
         const managed = mountTool(managedProps());
 
-        expect(
-            managed.find('[data-test="badge-endpoint-cta"]').exists(),
-        ).toBe(true);
+        expect(managed.find('[data-test="badge-endpoint-cta"]').exists()).toBe(
+            true,
+        );
         expect(
             managed
                 .find('[data-test="badge-endpoint-cta-link"]')

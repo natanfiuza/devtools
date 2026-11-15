@@ -69,18 +69,16 @@ describe('Prototipos: rasterizacao', () => {
             () => context,
         ) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 
-        HTMLCanvasElement.prototype.toBlob = vi.fn(
-            function (
-                this: HTMLCanvasElement,
-                callback: BlobCallback,
-            ): void {
-                canvasSizes.push({
-                    width: this.width,
-                    height: this.height,
-                });
-                callback(toBlobResult);
-            },
-        ) as unknown as typeof HTMLCanvasElement.prototype.toBlob;
+        HTMLCanvasElement.prototype.toBlob = vi.fn(function (
+            this: HTMLCanvasElement,
+            callback: BlobCallback,
+        ): void {
+            canvasSizes.push({
+                width: this.width,
+                height: this.height,
+            });
+            callback(toBlobResult);
+        }) as unknown as typeof HTMLCanvasElement.prototype.toBlob;
     });
 
     afterEach(() => {
@@ -92,11 +90,7 @@ describe('Prototipos: rasterizacao', () => {
     });
 
     it('gera o PNG em 1x no tamanho do template', async () => {
-        const blob = await rasterizeSvg(
-            SVG,
-            { width: 1200, height: 900 },
-            1,
-        );
+        const blob = await rasterizeSvg(SVG, { width: 1200, height: 900 }, 1);
 
         expect(blob.type).toBe('image/png');
         expect(canvasSizes).toEqual([{ width: 1200, height: 900 }]);

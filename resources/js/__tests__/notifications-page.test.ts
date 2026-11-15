@@ -3,10 +3,7 @@ import { defineComponent, h } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import Notifications from '@/pages/dashboard/Notifications.vue';
-import type {
-    AccountNotification,
-    NotificationPreferences,
-} from '@/types';
+import type { AccountNotification, NotificationPreferences } from '@/types';
 
 /**
  * Pagina do sino e das preferencias (F7, ADR-142).
@@ -148,9 +145,9 @@ describe('Pagina de notificacoes', () => {
         const wrapper = mountPage();
 
         expect(wrapper.text()).toContain('CURTIU Ana Oceano');
-        expect(
-            wrapper.find('[data-test="notification-unread"]').exists(),
-        ).toBe(true);
+        expect(wrapper.find('[data-test="notification-unread"]').exists()).toBe(
+            true,
+        );
 
         await wrapper
             .get('[data-test="notification-mark-read"]')
@@ -198,9 +195,9 @@ describe('Pagina de notificacoes', () => {
     it('nao mostra acoes quando a lista esta vazia', () => {
         const wrapper = mountPage([]);
 
-        expect(
-            wrapper.find('[data-test="notifications-empty"]').exists(),
-        ).toBe(true);
+        expect(wrapper.find('[data-test="notifications-empty"]').exists()).toBe(
+            true,
+        );
         expect(
             wrapper.find('[data-test="notifications-mark-all"]').exists(),
         ).toBe(false);
@@ -246,7 +243,9 @@ describe('Pagina de notificacoes', () => {
         await wrapper.vm.$nextTick();
 
         expect(
-            wrapper.find('[data-test="notification-preferences-saved"]').exists(),
+            wrapper
+                .find('[data-test="notification-preferences-saved"]')
+                .exists(),
         ).toBe(true);
     });
 

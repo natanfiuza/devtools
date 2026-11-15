@@ -40,7 +40,8 @@ describe('Base64 Image Decoder & Storage', () => {
 
         it('infere MIME type jpeg a partir de magic bytes /9j/', () => {
             // Pequeno base64 comecando com /9j/
-            const rawJpeg = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=';
+            const rawJpeg =
+                '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=';
             const res = parseBase64Image(rawJpeg);
 
             expect(res.valid).toBe(true);
@@ -68,8 +69,10 @@ describe('Base64 Image Decoder & Storage', () => {
                 file_size_bytes: 1024,
                 base64_size_bytes: 1400,
                 created_at: new Date().toISOString(),
-                download_url: '/tools/base64-image/download/01ARZ3NDEKTSV4RRFFQ69G5FAV',
-                preview_url: '/tools/base64-image/preview/01ARZ3NDEKTSV4RRFFQ69G5FAV',
+                download_url:
+                    '/tools/base64-image/download/01ARZ3NDEKTSV4RRFFQ69G5FAV',
+                preview_url:
+                    '/tools/base64-image/preview/01ARZ3NDEKTSV4RRFFQ69G5FAV',
             };
 
             saveAnonymousConversion(record1);
@@ -83,7 +86,9 @@ describe('Base64 Image Decoder & Storage', () => {
         });
 
         it('descarta itens mais antigos que 24 horas', () => {
-            const oldDate = new Date(Date.now() - 25 * 3600 * 1000).toISOString();
+            const oldDate = new Date(
+                Date.now() - 25 * 3600 * 1000,
+            ).toISOString();
             const expiredRecord = {
                 id: '01ARZ3NDEKTSV4RRFFQ69G5OLD',
                 filename: 'old.png',
@@ -113,7 +118,8 @@ describe('Base64 Image Decoder & Storage', () => {
             base64_size_bytes: 1400,
             created_at: new Date().toISOString(),
             download_url: '/dl',
-            data_uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            data_uri:
+                'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
         };
 
         it('escapa caracteres especiais de XML', () => {
@@ -124,7 +130,9 @@ describe('Base64 Image Decoder & Storage', () => {
 
         it('extrai base64 puro removendo o prefixo Data URI', () => {
             const raw = extractRawBase64(sampleItem.data_uri!);
-            expect(raw).toBe('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+            expect(raw).toBe(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            );
             expect(extractRawBase64('simpleBase64==')).toBe('simpleBase64==');
         });
 
@@ -145,20 +153,36 @@ describe('Base64 Image Decoder & Storage', () => {
 
             expect(xmlStr).toContain('<?xml version="1.0" encoding="UTF-8"?>');
             expect(xmlStr).toContain('<image>');
-            expect(xmlStr).toContain('<filename>test &amp; demo &lt;1&gt;.png</filename>');
+            expect(xmlStr).toContain(
+                '<filename>test &amp; demo &lt;1&gt;.png</filename>',
+            );
             expect(xmlStr).toContain('<mime_type>image/png</mime_type>');
             expect(xmlStr).toContain('<file_size_bytes>1024</file_size_bytes>');
-            expect(xmlStr).toContain('<base64_size_bytes>1400</base64_size_bytes>');
-            expect(xmlStr).toContain(`<data_uri>${escapeXml(sampleItem.data_uri!)}</data_uri>`);
+            expect(xmlStr).toContain(
+                '<base64_size_bytes>1400</base64_size_bytes>',
+            );
+            expect(xmlStr).toContain(
+                `<data_uri>${escapeXml(sampleItem.data_uri!)}</data_uri>`,
+            );
             expect(xmlStr).toContain('</image>');
         });
 
         it('formatSnippet resolve todos os modos suportados', () => {
-            expect(formatSnippet('json', sampleItem)).toBe(formatJsonOutput(sampleItem));
-            expect(formatSnippet('xml', sampleItem)).toBe(formatXmlOutput(sampleItem));
-            expect(formatSnippet('data-uri', sampleItem)).toBe(sampleItem.data_uri);
-            expect(formatSnippet('img', sampleItem)).toBe(`<img src="${sampleItem.data_uri}" alt="${sampleItem.filename}" />`);
-            expect(formatSnippet('css', sampleItem)).toBe(`background-image: url("${sampleItem.data_uri}");`);
+            expect(formatSnippet('json', sampleItem)).toBe(
+                formatJsonOutput(sampleItem),
+            );
+            expect(formatSnippet('xml', sampleItem)).toBe(
+                formatXmlOutput(sampleItem),
+            );
+            expect(formatSnippet('data-uri', sampleItem)).toBe(
+                sampleItem.data_uri,
+            );
+            expect(formatSnippet('img', sampleItem)).toBe(
+                `<img src="${sampleItem.data_uri}" alt="${sampleItem.filename}" />`,
+            );
+            expect(formatSnippet('css', sampleItem)).toBe(
+                `background-image: url("${sampleItem.data_uri}");`,
+            );
         });
 
         it('formatRetentionTime exibe em horas para valores ate 24h', () => {
@@ -169,9 +193,15 @@ describe('Base64 Image Decoder & Storage', () => {
                 return key;
             };
 
-            expect(formatRetentionTime(1, mockT)).toBe('Histórico disponível por 1h');
-            expect(formatRetentionTime(12, mockT)).toBe('Histórico disponível por 12h');
-            expect(formatRetentionTime(24, mockT)).toBe('Histórico disponível por 24h');
+            expect(formatRetentionTime(1, mockT)).toBe(
+                'Histórico disponível por 1h',
+            );
+            expect(formatRetentionTime(12, mockT)).toBe(
+                'Histórico disponível por 12h',
+            );
+            expect(formatRetentionTime(24, mockT)).toBe(
+                'Histórico disponível por 24h',
+            );
         });
 
         it('formatRetentionTime exibe em dias quando for maior que 24h', () => {
@@ -186,11 +216,17 @@ describe('Base64 Image Decoder & Storage', () => {
             };
 
             // 25h e 30h arredondam para 1 dia
-            expect(formatRetentionTime(25, mockT)).toBe('Histórico disponível por 1 dia');
+            expect(formatRetentionTime(25, mockT)).toBe(
+                'Histórico disponível por 1 dia',
+            );
             // 48h sao 2 dias
-            expect(formatRetentionTime(48, mockT)).toBe('Histórico disponível por 2 dias');
+            expect(formatRetentionTime(48, mockT)).toBe(
+                'Histórico disponível por 2 dias',
+            );
             // 720h sao exatamente 30 dias (cenario Plano Pago)
-            expect(formatRetentionTime(720, mockT)).toBe('Histórico disponível por 30 dias');
+            expect(formatRetentionTime(720, mockT)).toBe(
+                'Histórico disponível por 30 dias',
+            );
         });
     });
 });

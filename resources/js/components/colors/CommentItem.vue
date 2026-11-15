@@ -106,219 +106,209 @@ async function confirmDelete(): Promise<void> {
 </script>
 
 <template>
-  <li
-    :id="comment.deleted ? undefined : `comment-${comment.id}`"
-    class="flex flex-col gap-2 rounded-xl border border-border bg-card p-3"
-    :data-depth="depth"
-    data-test="comment-item"
-  >
-    <div class="flex flex-wrap items-center gap-2">
-      <img
-        v-if="comment.author?.avatar"
-        :src="comment.author.avatar"
-        :alt="authorName"
-        class="size-7 rounded-full border border-border object-cover"
-      >
-      <span
-        v-else-if="comment.author"
-        class="flex size-7 items-center justify-center rounded-full border border-border bg-muted text-[10px] font-semibold text-muted-foreground"
-        :aria-label="authorName"
-      >
-        {{ getInitials(comment.author.name) }}
-      </span>
-
-      <Link
-        v-if="profileUrl !== null"
-        :href="profileUrl"
-        class="text-sm font-medium hover:underline"
-        data-test="comment-author-link"
-      >
-        {{ authorName }}
-      </Link>
-      <span
-        v-else
-        class="text-sm font-medium"
-        data-test="comment-author-name"
-      >
-        {{ authorName }}
-      </span>
-
-      <Badge
-        v-if="comment.pending && !comment.deleted"
-        variant="outline"
-        data-test="comment-pending-badge"
-      >
-        {{ t('colors.comments.pending_badge') }}
-      </Badge>
-
-      <span
-        v-if="when !== null"
-        class="text-xs text-muted-foreground"
-      >
-        {{ when }}
-      </span>
-      <span
-        v-if="comment.edited_at !== null && !comment.deleted"
-        class="text-xs text-muted-foreground"
-        data-test="comment-edited"
-      >
-        {{ t('colors.comments.edited') }}
-      </span>
-    </div>
-
-    <p
-      v-if="comment.deleted"
-      class="text-sm text-muted-foreground italic"
-      data-test="comment-tombstone"
+    <li
+        :id="comment.deleted ? undefined : `comment-${comment.id}`"
+        class="flex flex-col gap-2 rounded-xl border border-border bg-card p-3"
+        :data-depth="depth"
+        data-test="comment-item"
     >
-      {{ t('colors.comments.deleted_tombstone') }}
-    </p>
-    <p
-      v-else
-      class="text-sm whitespace-pre-line"
-      data-test="comment-body"
-    >
-      {{ comment.body }}
-    </p>
+        <div class="flex flex-wrap items-center gap-2">
+            <img
+                v-if="comment.author?.avatar"
+                :src="comment.author.avatar"
+                :alt="authorName"
+                class="size-7 rounded-full border border-border object-cover"
+            />
+            <span
+                v-else-if="comment.author"
+                class="flex size-7 items-center justify-center rounded-full border border-border bg-muted text-[10px] font-semibold text-muted-foreground"
+                :aria-label="authorName"
+            >
+                {{ getInitials(comment.author.name) }}
+            </span>
 
-    <div
-      v-if="!comment.deleted"
-      class="flex flex-wrap items-center gap-2"
-    >
-      <Button
-        v-if="canComment && depth === 0"
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-test="comment-reply-toggle"
-        @click="startReply"
-      >
-        <Reply class="size-3.5" />
-        {{ t('colors.comments.reply') }}
-      </Button>
+            <Link
+                v-if="profileUrl !== null"
+                :href="profileUrl"
+                class="text-sm font-medium hover:underline"
+                data-test="comment-author-link"
+            >
+                {{ authorName }}
+            </Link>
+            <span
+                v-else
+                class="text-sm font-medium"
+                data-test="comment-author-name"
+            >
+                {{ authorName }}
+            </span>
 
-      <Button
-        v-if="comment.can_edit"
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-test="comment-edit-toggle"
-        @click="startEdit"
-      >
-        <Pencil class="size-3.5" />
-        {{ t('colors.comments.edit') }}
-      </Button>
+            <Badge
+                v-if="comment.pending && !comment.deleted"
+                variant="outline"
+                data-test="comment-pending-badge"
+            >
+                {{ t('colors.comments.pending_badge') }}
+            </Badge>
 
-      <Button
-        v-if="comment.can_delete && !confirmingDelete"
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-test="comment-delete-toggle"
-        @click="confirmingDelete = true"
-      >
-        <Trash2 class="size-3.5" />
-        {{ t('colors.comments.delete') }}
-      </Button>
+            <span v-if="when !== null" class="text-xs text-muted-foreground">
+                {{ when }}
+            </span>
+            <span
+                v-if="comment.edited_at !== null && !comment.deleted"
+                class="text-xs text-muted-foreground"
+                data-test="comment-edited"
+            >
+                {{ t('colors.comments.edited') }}
+            </span>
+        </div>
 
-      <Button
-        v-if="comment.can_report && !reporting"
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-test="comment-report-toggle"
-        @click="reporting = true"
-      >
-        <Flag class="size-3.5" />
-        {{ t('colors.reports.open') }}
-      </Button>
-    </div>
+        <p
+            v-if="comment.deleted"
+            class="text-sm text-muted-foreground italic"
+            data-test="comment-tombstone"
+        >
+            {{ t('colors.comments.deleted_tombstone') }}
+        </p>
+        <p v-else class="text-sm whitespace-pre-line" data-test="comment-body">
+            {{ comment.body }}
+        </p>
 
-    <CommentReportDialog
-      v-if="reporting"
-      :comment-id="comment.id"
-      @close="reporting = false"
-    />
+        <div v-if="!comment.deleted" class="flex flex-wrap items-center gap-2">
+            <Button
+                v-if="canComment && depth === 0"
+                type="button"
+                variant="ghost"
+                size="sm"
+                data-test="comment-reply-toggle"
+                @click="startReply"
+            >
+                <Reply class="size-3.5" />
+                {{ t('colors.comments.reply') }}
+            </Button>
 
-    <div
-      v-if="confirmingDelete"
-      class="flex flex-wrap items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2"
-      data-test="comment-delete-confirm"
-    >
-      <span class="text-xs">{{
-        t('colors.comments.delete_confirm')
-      }}</span>
-      <Button
-        type="button"
-        variant="destructive"
-        size="sm"
-        :disabled="busy"
-        data-test="comment-delete-confirm-yes"
-        @click="confirmDelete"
-      >
-        {{ t('colors.comments.delete') }}
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        data-test="comment-delete-confirm-no"
-        @click="confirmingDelete = false"
-      >
-        {{ t('colors.comments.cancel') }}
-      </Button>
-    </div>
+            <Button
+                v-if="comment.can_edit"
+                type="button"
+                variant="ghost"
+                size="sm"
+                data-test="comment-edit-toggle"
+                @click="startEdit"
+            >
+                <Pencil class="size-3.5" />
+                {{ t('colors.comments.edit') }}
+            </Button>
 
-    <CommentForm
-      v-if="editing"
-      :max-length="maxLength"
-      :busy="busy"
-      :error="error"
-      :initial-body="comment.body"
-      kind="edit"
-      compact
-      @submit="submitEdit"
-      @cancel="editing = false"
-    />
+            <Button
+                v-if="comment.can_delete && !confirmingDelete"
+                type="button"
+                variant="ghost"
+                size="sm"
+                data-test="comment-delete-toggle"
+                @click="confirmingDelete = true"
+            >
+                <Trash2 class="size-3.5" />
+                {{ t('colors.comments.delete') }}
+            </Button>
 
-    <CommentForm
-      v-if="replying"
-      :max-length="maxLength"
-      :busy="busy"
-      :error="error"
-      kind="reply"
-      compact
-      @submit="submitReply"
-      @cancel="replying = false"
-    />
+            <Button
+                v-if="comment.can_report && !reporting"
+                type="button"
+                variant="ghost"
+                size="sm"
+                data-test="comment-report-toggle"
+                @click="reporting = true"
+            >
+                <Flag class="size-3.5" />
+                {{ t('colors.reports.open') }}
+            </Button>
+        </div>
 
-    <ul
-      v-if="depth === 0 && comment.replies.length > 0"
-      class="mt-1 flex flex-col gap-2 border-l border-border pl-3"
-      data-test="comment-replies"
-    >
-      <CommentItem
-        v-for="reply in comment.replies"
-        :key="reply.id"
-        :comment="reply"
-        :can-comment="canComment"
-        :max-length="maxLength"
-        :depth="1"
-        :busy="busy"
-        :error="error"
-        :create="create"
-        :update="update"
-        :destroy="destroy"
-        :clear-error="clearError"
-      />
-    </ul>
+        <CommentReportDialog
+            v-if="reporting"
+            :comment-id="comment.id"
+            @close="reporting = false"
+        />
 
-    <p
-      v-if="depth === 0 && comment.replies_truncated"
-      class="text-xs text-muted-foreground"
-      data-test="comment-replies-truncated"
-    >
-      {{ t('colors.comments.replies_truncated') }}
-    </p>
-  </li>
+        <div
+            v-if="confirmingDelete"
+            class="flex flex-wrap items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 p-2"
+            data-test="comment-delete-confirm"
+        >
+            <span class="text-xs">{{
+                t('colors.comments.delete_confirm')
+            }}</span>
+            <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                :disabled="busy"
+                data-test="comment-delete-confirm-yes"
+                @click="confirmDelete"
+            >
+                {{ t('colors.comments.delete') }}
+            </Button>
+            <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                data-test="comment-delete-confirm-no"
+                @click="confirmingDelete = false"
+            >
+                {{ t('colors.comments.cancel') }}
+            </Button>
+        </div>
+
+        <CommentForm
+            v-if="editing"
+            :max-length="maxLength"
+            :busy="busy"
+            :error="error"
+            :initial-body="comment.body"
+            kind="edit"
+            compact
+            @submit="submitEdit"
+            @cancel="editing = false"
+        />
+
+        <CommentForm
+            v-if="replying"
+            :max-length="maxLength"
+            :busy="busy"
+            :error="error"
+            kind="reply"
+            compact
+            @submit="submitReply"
+            @cancel="replying = false"
+        />
+
+        <ul
+            v-if="depth === 0 && comment.replies.length > 0"
+            class="mt-1 flex flex-col gap-2 border-l border-border pl-3"
+            data-test="comment-replies"
+        >
+            <CommentItem
+                v-for="reply in comment.replies"
+                :key="reply.id"
+                :comment="reply"
+                :can-comment="canComment"
+                :max-length="maxLength"
+                :depth="1"
+                :busy="busy"
+                :error="error"
+                :create="create"
+                :update="update"
+                :destroy="destroy"
+                :clear-error="clearError"
+            />
+        </ul>
+
+        <p
+            v-if="depth === 0 && comment.replies_truncated"
+            class="text-xs text-muted-foreground"
+            data-test="comment-replies-truncated"
+        >
+            {{ t('colors.comments.replies_truncated') }}
+        </p>
+    </li>
 </template>

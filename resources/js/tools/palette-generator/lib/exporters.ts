@@ -202,7 +202,14 @@ function buildTailwindV4(scale: PaletteScale, name: string): string {
         '@theme {',
         // Tailwind v4 aceita HEX8 direto na variavel; mantem o valor sem
         // funcao `rgba()` para o `@theme` ficar declarativo.
-        ...variableLines(scale, name, '--color-', ';', '    ', (tone) => tone.hex),
+        ...variableLines(
+            scale,
+            name,
+            '--color-',
+            ';',
+            '    ',
+            (tone) => tone.hex,
+        ),
         '}',
     ];
 

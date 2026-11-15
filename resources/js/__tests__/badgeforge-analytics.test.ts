@@ -34,7 +34,8 @@ const TRADUCOES = {
                 no_data: 'SEM_DADOS',
                 chart_heading: 'Visualizacoes por dia',
                 chart_title: 'Visualizacoes de {start} a {end}',
-                chart_bar_title: '{date}: {views} visualizacoes, {uniques} visitantes unicos',
+                chart_bar_title:
+                    '{date}: {views} visualizacoes, {uniques} visitantes unicos',
                 referers: 'Referrers',
                 countries: 'Paises',
                 formats: 'Formatos',
@@ -114,7 +115,9 @@ describe('AnalyticsPanel', () => {
     it('mostra totais, taxa de cache, serie, quebras e CSV no plano pago', () => {
         const wrapper = montar(paidAnalytics());
 
-        const totais = wrapper.find('[data-test="badgeforge-analytics-totals"]').text();
+        const totais = wrapper
+            .find('[data-test="badgeforge-analytics-totals"]')
+            .text();
 
         expect(totais).toContain('12');
         expect(totais).toContain('7');
@@ -127,14 +130,19 @@ describe('AnalyticsPanel', () => {
         expect(chart.attributes('role')).toBe('img');
         expect(chart.attributes('aria-label')).toContain('2026-11-03');
 
-        expect(wrapper.find('[data-test="badgeforge-analytics-referers"]').text())
-            .toContain('github.com');
-        expect(wrapper.find('[data-test="badgeforge-analytics-countries"]').text())
-            .toContain('BR');
-        expect(wrapper.find('[data-test="badgeforge-analytics-formats"]').text())
-            .toContain('svg');
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-referers"]').text(),
+        ).toContain('github.com');
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-countries"]').text(),
+        ).toContain('BR');
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-formats"]').text(),
+        ).toContain('svg');
 
-        const linhas = wrapper.find('[data-test="badgeforge-analytics-subjects"]').text();
+        const linhas = wrapper
+            .find('[data-test="badgeforge-analytics-subjects"]')
+            .text();
 
         expect(linhas).toContain('Minha API');
         expect(linhas).toContain('IMAGEM_EXCLUIDA');
@@ -142,17 +150,24 @@ describe('AnalyticsPanel', () => {
         expect(linhas).toContain('Provider customizado');
 
         expect(
-            wrapper.find('[data-test="badgeforge-analytics-export"]').attributes('href'),
+            wrapper
+                .find('[data-test="badgeforge-analytics-export"]')
+                .attributes('href'),
         ).toBe('/badgeforge/analytics/export?window=30');
 
-        expect(wrapper.find('[data-test="badgeforge-analytics-free-note"]').exists())
-            .toBe(false);
+        expect(
+            wrapper
+                .find('[data-test="badgeforge-analytics-free-note"]')
+                .exists(),
+        ).toBe(false);
     });
 
     it('recarrega apenas a prop analytics ao trocar a janela', async () => {
         const wrapper = montar(paidAnalytics());
 
-        await wrapper.find('[data-test="badgeforge-analytics-window-7"]').trigger('click');
+        await wrapper
+            .find('[data-test="badgeforge-analytics-window-7"]')
+            .trigger('click');
 
         expect(routerGet).toHaveBeenCalledTimes(1);
 
@@ -182,20 +197,35 @@ describe('AnalyticsPanel', () => {
             }),
         );
 
-        expect(wrapper.find('[data-test="badgeforge-analytics"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="badgeforge-analytics-chart"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test="badgeforge-analytics-export"]').exists()).toBe(false);
-        expect(wrapper.find('[data-test="badgeforge-analytics-free-note"]').text())
-            .toContain('NOTA_FREE_30');
-        expect(wrapper.find('[data-test="badgeforge-analytics-upgrade"]').attributes('href'))
-            .toBe('/pricing');
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics"]').exists(),
+        ).toBe(true);
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-chart"]').exists(),
+        ).toBe(false);
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-export"]').exists(),
+        ).toBe(false);
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics-free-note"]').text(),
+        ).toContain('NOTA_FREE_30');
+        expect(
+            wrapper
+                .find('[data-test="badgeforge-analytics-upgrade"]')
+                .attributes('href'),
+        ).toBe('/pricing');
     });
 
     it('avisa quando a secao esta indisponivel', () => {
         const wrapper = montar(null);
 
-        expect(wrapper.find('[data-test="badgeforge-analytics-unavailable"]').text())
-            .toContain('ANALYTICS_INDISPONIVEL');
-        expect(wrapper.find('[data-test="badgeforge-analytics"]').exists()).toBe(false);
+        expect(
+            wrapper
+                .find('[data-test="badgeforge-analytics-unavailable"]')
+                .text(),
+        ).toContain('ANALYTICS_INDISPONIVEL');
+        expect(
+            wrapper.find('[data-test="badgeforge-analytics"]').exists(),
+        ).toBe(false);
     });
 });

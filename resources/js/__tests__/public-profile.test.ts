@@ -3,10 +3,7 @@ import { defineComponent, h } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import PublicProfile from '@/pages/colors/PublicProfile.vue';
-import type {
-    ProfilePaletteRow,
-    PublicProfileProps,
-} from '@/types/colors';
+import type { ProfilePaletteRow, PublicProfileProps } from '@/types/colors';
 
 /**
  * Perfil publico por username (F6, ADR-134).
@@ -197,9 +194,9 @@ describe('Perfil publico', () => {
         expect(query('[data-test="profile-name"]').textContent).toContain(
             'Ana',
         );
-        expect(
-            query('[data-test="profile-username"]').textContent,
-        ).toContain('@ana');
+        expect(query('[data-test="profile-username"]').textContent).toContain(
+            '@ana',
+        );
         expect(
             query('[data-test="profile-following-count"]').textContent,
         ).toContain('SEGUINDO 3');
@@ -216,8 +213,9 @@ describe('Perfil publico', () => {
             query('[data-test="profile-palette-name"]').textContent,
         ).toContain('Oceano');
         expect(
-            query<HTMLAnchorElement>('[data-test="profile-palette-name"]')
-                .getAttribute('href'),
+            query<HTMLAnchorElement>(
+                '[data-test="profile-palette-name"]',
+            ).getAttribute('href'),
         ).toBe('/en/colors/p/oceano');
         expect(
             query('[data-test="profile-palette-likes"]').textContent,
@@ -267,12 +265,12 @@ describe('Perfil publico', () => {
 
         mountPage({ canFollow: true });
 
-        expect(
-            query('[data-test="followers-count"]').textContent,
-        ).toContain('2_SEGUIDORES');
-        expect(
-            query('[data-test="follow-button"]').textContent,
-        ).toContain('SEGUIR');
+        expect(query('[data-test="followers-count"]').textContent).toContain(
+            '2_SEGUIDORES',
+        );
+        expect(query('[data-test="follow-button"]').textContent).toContain(
+            'SEGUIR',
+        );
 
         query<HTMLButtonElement>('[data-test="follow-button"]').click();
         await flushPromises();
@@ -280,12 +278,12 @@ describe('Perfil publico', () => {
         expect(fetchMock.mock.calls[0]?.[0]).toBe(
             '/api/tools/colors/users/42/follow',
         );
-        expect(
-            query('[data-test="follow-button"]').textContent,
-        ).toContain('SEGUINDO');
-        expect(
-            query('[data-test="followers-count"]').textContent,
-        ).toContain('3_SEGUIDORES');
+        expect(query('[data-test="follow-button"]').textContent).toContain(
+            'SEGUINDO',
+        );
+        expect(query('[data-test="followers-count"]').textContent).toContain(
+            '3_SEGUIDORES',
+        );
     });
 
     it('pede a proxima pagina ao servidor preservando a rota', () => {

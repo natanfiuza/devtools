@@ -44,7 +44,9 @@ const providers = computed(() => props.toolProps.customProviders);
 const atLimit = computed(() => {
     const limit = props.toolProps.limits.customProviders.limit;
 
-    return limit !== null && props.toolProps.limits.customProviders.used >= limit;
+    return (
+        limit !== null && props.toolProps.limits.customProviders.used >= limit
+    );
 });
 
 const origin = typeof window === 'undefined' ? '' : window.location.origin;
@@ -74,208 +76,220 @@ function startDelete(provider: BadgeForgeCustomProvider): void {
 }
 
 function destroy(provider: BadgeForgeCustomProvider): void {
-    router.delete(destroyCustomProvider.url({ badgeCustomProvider: provider.id }), {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: () => {
-            confirmingId.value = null;
+    router.delete(
+        destroyCustomProvider.url({ badgeCustomProvider: provider.id }),
+        {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                confirmingId.value = null;
+            },
         },
-    });
+    );
 }
 </script>
 
 <template>
-  <section
-    class="space-y-3"
-    data-test="badgeforge-custom-providers"
-  >
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <div>
-        <h3 class="text-sm font-medium">
-          {{ t('tools.badgeforge.custom_providers.title') }}
-        </h3>
-        <p class="mt-1 text-xs text-subtle">
-          {{ t('tools.badgeforge.custom_providers.description') }}
-        </p>
-      </div>
+    <section class="space-y-3" data-test="badgeforge-custom-providers">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <h3 class="text-sm font-medium">
+                    {{ t('tools.badgeforge.custom_providers.title') }}
+                </h3>
+                <p class="mt-1 text-xs text-subtle">
+                    {{ t('tools.badgeforge.custom_providers.description') }}
+                </p>
+            </div>
 
-      <div class="flex items-center gap-2">
-        <span
-          v-if="copyMessage"
-          class="text-xs text-muted-foreground"
-          data-test="badgeforge-custom-copy-feedback"
-        >
-          {{ copyMessage }}
-        </span>
-        <Button
-          v-if="canCreate"
-          variant="outline"
-          size="sm"
-          :disabled="atLimit"
-          data-test="badgeforge-custom-create"
-          @click="openCreate"
-        >
-          {{ t('tools.badgeforge.custom_providers.create_button') }}
-        </Button>
-      </div>
-    </div>
-
-    <p
-      v-if="!canCreate"
-      class="rounded-md border border-dashed px-4 py-3 text-sm text-subtle"
-      data-test="badgeforge-custom-readonly"
-    >
-      {{ t('tools.badgeforge.custom_providers.readonly_note') }}
-      <a
-        :href="upgradeUrl"
-        class="font-medium underline underline-offset-2"
-        data-test="badgeforge-custom-upgrade"
-      >
-        {{ t('tools.badgeforge.custom_providers.upgrade') }}
-      </a>
-    </p>
-
-    <p
-      v-else-if="atLimit"
-      class="text-xs text-subtle"
-      data-test="badgeforge-custom-limit"
-    >
-      {{
-        t('tools.badgeforge.custom_providers.limit_reached', {
-          limit: toolProps.limits.customProviders.limit,
-        })
-      }}
-    </p>
-
-    <div
-      v-if="providers.length === 0"
-      class="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-subtle"
-      data-test="badgeforge-custom-empty"
-    >
-      {{ t('tools.badgeforge.custom_providers.empty') }}
-    </div>
-
-    <ul
-      v-else
-      class="divide-y rounded-lg border border-border"
-      data-test="badgeforge-custom-list"
-    >
-      <li
-        v-for="provider in providers"
-        :key="provider.id"
-        class="space-y-2 px-4 py-3"
-        data-test="badgeforge-custom-row"
-      >
-        <div class="flex flex-wrap items-center gap-2">
-          <p class="min-w-0 flex-1 truncate text-sm font-medium">
-            {{ provider.name }}
-          </p>
-
-          <Badge
-            v-if="!provider.enabled"
-            variant="outline"
-            class="border-amber-500/40 text-amber-600"
-            data-test="badgeforge-custom-disabled"
-          >
-            {{ t('tools.badgeforge.custom_providers.disabled') }}
-          </Badge>
-
-          <template v-if="canCreate">
-            <Button
-              variant="ghost"
-              size="sm"
-              data-test="badgeforge-custom-edit"
-              @click="openEdit(provider)"
-            >
-              <Pencil class="size-4" />
-              {{ t('tools.badgeforge.management.rename') }}
-            </Button>
-          </template>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            data-test="badgeforge-custom-delete"
-            @click="startDelete(provider)"
-          >
-            <Trash2 class="size-4" />
-            {{ t('tools.badgeforge.management.delete') }}
-          </Button>
+            <div class="flex items-center gap-2">
+                <span
+                    v-if="copyMessage"
+                    class="text-xs text-muted-foreground"
+                    data-test="badgeforge-custom-copy-feedback"
+                >
+                    {{ copyMessage }}
+                </span>
+                <Button
+                    v-if="canCreate"
+                    variant="outline"
+                    size="sm"
+                    :disabled="atLimit"
+                    data-test="badgeforge-custom-create"
+                    @click="openCreate"
+                >
+                    {{ t('tools.badgeforge.custom_providers.create_button') }}
+                </Button>
+            </div>
         </div>
 
-        <ul class="space-y-2">
-          <li
-            v-for="definition in provider.definitions"
-            :key="definition.slug"
-            class="flex flex-wrap items-center gap-2 text-sm"
-            data-test="badgeforge-custom-metric"
-          >
-            <span class="min-w-24 text-subtle">
-              {{ definition.label }}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              data-test="badgeforge-custom-copy-svg"
-              @click="copy(metricUrl(provider, definition, 'svg'))"
+        <p
+            v-if="!canCreate"
+            class="rounded-md border border-dashed px-4 py-3 text-sm text-subtle"
+            data-test="badgeforge-custom-readonly"
+        >
+            {{ t('tools.badgeforge.custom_providers.readonly_note') }}
+            <a
+                :href="upgradeUrl"
+                class="font-medium underline underline-offset-2"
+                data-test="badgeforge-custom-upgrade"
             >
-              <Copy class="size-4" />
-              {{ t('tools.badgeforge.custom_providers.copy_svg') }}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              data-test="badgeforge-custom-copy-png"
-              @click="copy(metricUrl(provider, definition, 'png'))"
-            >
-              <Copy class="size-4" />
-              {{ t('tools.badgeforge.custom_providers.copy_png') }}
-            </Button>
-          </li>
-        </ul>
+                {{ t('tools.badgeforge.custom_providers.upgrade') }}
+            </a>
+        </p>
+
+        <p
+            v-else-if="atLimit"
+            class="text-xs text-subtle"
+            data-test="badgeforge-custom-limit"
+        >
+            {{
+                t('tools.badgeforge.custom_providers.limit_reached', {
+                    limit: toolProps.limits.customProviders.limit,
+                })
+            }}
+        </p>
 
         <div
-          v-if="confirmingId === provider.id"
-          class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
-          data-test="badgeforge-custom-delete-confirm"
+            v-if="providers.length === 0"
+            class="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-subtle"
+            data-test="badgeforge-custom-empty"
         >
-          <p class="text-sm font-medium">
-            {{
-              t('tools.badgeforge.management.delete_title', {
-                name: provider.name,
-              })
-            }}
-          </p>
-          <p class="text-xs text-subtle">
-            {{ t('tools.badgeforge.custom_providers.delete_description') }}
-          </p>
-          <div class="mt-2 flex gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              data-test="badgeforge-custom-delete-confirmed"
-              @click="destroy(provider)"
-            >
-              {{ t('tools.badgeforge.management.delete') }}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              data-test="badgeforge-custom-delete-cancel"
-              @click="confirmingId = null"
-            >
-              {{ t('tools.badgeforge.management.cancel') }}
-            </Button>
-          </div>
+            {{ t('tools.badgeforge.custom_providers.empty') }}
         </div>
-      </li>
-    </ul>
 
-    <CustomProviderDialog
-      v-if="canCreate"
-      v-model:open="dialogOpen"
-      :tool-props="toolProps"
-      :provider="editingProvider"
-    />
-  </section>
+        <ul
+            v-else
+            class="divide-y rounded-lg border border-border"
+            data-test="badgeforge-custom-list"
+        >
+            <li
+                v-for="provider in providers"
+                :key="provider.id"
+                class="space-y-2 px-4 py-3"
+                data-test="badgeforge-custom-row"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="min-w-0 flex-1 truncate text-sm font-medium">
+                        {{ provider.name }}
+                    </p>
+
+                    <Badge
+                        v-if="!provider.enabled"
+                        variant="outline"
+                        class="border-amber-500/40 text-amber-600"
+                        data-test="badgeforge-custom-disabled"
+                    >
+                        {{ t('tools.badgeforge.custom_providers.disabled') }}
+                    </Badge>
+
+                    <template v-if="canCreate">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            data-test="badgeforge-custom-edit"
+                            @click="openEdit(provider)"
+                        >
+                            <Pencil class="size-4" />
+                            {{ t('tools.badgeforge.management.rename') }}
+                        </Button>
+                    </template>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        data-test="badgeforge-custom-delete"
+                        @click="startDelete(provider)"
+                    >
+                        <Trash2 class="size-4" />
+                        {{ t('tools.badgeforge.management.delete') }}
+                    </Button>
+                </div>
+
+                <ul class="space-y-2">
+                    <li
+                        v-for="definition in provider.definitions"
+                        :key="definition.slug"
+                        class="flex flex-wrap items-center gap-2 text-sm"
+                        data-test="badgeforge-custom-metric"
+                    >
+                        <span class="min-w-24 text-subtle">
+                            {{ definition.label }}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            data-test="badgeforge-custom-copy-svg"
+                            @click="
+                                copy(metricUrl(provider, definition, 'svg'))
+                            "
+                        >
+                            <Copy class="size-4" />
+                            {{
+                                t('tools.badgeforge.custom_providers.copy_svg')
+                            }}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            data-test="badgeforge-custom-copy-png"
+                            @click="
+                                copy(metricUrl(provider, definition, 'png'))
+                            "
+                        >
+                            <Copy class="size-4" />
+                            {{
+                                t('tools.badgeforge.custom_providers.copy_png')
+                            }}
+                        </Button>
+                    </li>
+                </ul>
+
+                <div
+                    v-if="confirmingId === provider.id"
+                    class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
+                    data-test="badgeforge-custom-delete-confirm"
+                >
+                    <p class="text-sm font-medium">
+                        {{
+                            t('tools.badgeforge.management.delete_title', {
+                                name: provider.name,
+                            })
+                        }}
+                    </p>
+                    <p class="text-xs text-subtle">
+                        {{
+                            t(
+                                'tools.badgeforge.custom_providers.delete_description',
+                            )
+                        }}
+                    </p>
+                    <div class="mt-2 flex gap-2">
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            data-test="badgeforge-custom-delete-confirmed"
+                            @click="destroy(provider)"
+                        >
+                            {{ t('tools.badgeforge.management.delete') }}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            data-test="badgeforge-custom-delete-cancel"
+                            @click="confirmingId = null"
+                        >
+                            {{ t('tools.badgeforge.management.cancel') }}
+                        </Button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <CustomProviderDialog
+            v-if="canCreate"
+            v-model:open="dialogOpen"
+            :tool-props="toolProps"
+            :provider="editingProvider"
+        />
+    </section>
 </template>

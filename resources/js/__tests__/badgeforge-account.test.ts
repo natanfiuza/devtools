@@ -245,9 +245,7 @@ describe('BadgeForge na conta', () => {
         expect(wrapper.text()).toContain('2 CAMINHOS');
         expect(wrapper.text()).toContain('Release');
         expect(
-            wrapper
-                .find('[data-test="badgeforge-preset-orphaned"]')
-                .exists(),
+            wrapper.find('[data-test="badgeforge-preset-orphaned"]').exists(),
         ).toBe(true);
         expect(
             wrapper.find('[data-test="badgeforge-empty-logos"]').exists() ===
@@ -259,9 +257,9 @@ describe('BadgeForge na conta', () => {
         const wrapper = mountPage(accountProps());
 
         expect(
-            wrapper.find('[data-test="badgeforge-preset-open"]').attributes(
-                'href',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-preset-open"]')
+                .attributes('href'),
         ).toBe(`/tools/badgeforge?preset=${PRESET.id}`);
     });
 
@@ -288,9 +286,9 @@ describe('BadgeForge na conta', () => {
 
         const wrapper = mountPage(props);
 
-        expect(
-            wrapper.find('[data-test="badgeforge-upgrade"]').exists(),
-        ).toBe(false);
+        expect(wrapper.find('[data-test="badgeforge-upgrade"]').exists()).toBe(
+            false,
+        );
         expect(wrapper.find('[data-test="badgeforge-limits"]').text()).toBe(
             'LIMITESLIMITE_LOGOSILIMITADOLIMITE_PRESETSILIMITADOLIMITE_PESSOAIS0 PESSOAISLIMITE_CUSTOM_PROVIDERSILIMITADO',
         );
@@ -379,9 +377,11 @@ describe('Dialogos de gestao', () => {
         expect(body).toContain('USADOS 2 DE 2');
         expect(body).toContain('PLANO PERMITE 2');
         expect(
-            document.querySelector<HTMLAnchorElement>(
-                '[data-test="badge-logo-upgrade"] a',
-            )?.getAttribute('href'),
+            document
+                .querySelector<HTMLAnchorElement>(
+                    '[data-test="badge-logo-upgrade"] a',
+                )
+                ?.getAttribute('href'),
         ).toBe('/planos');
         expect(
             document.querySelector<HTMLButtonElement>(
@@ -457,7 +457,9 @@ describe('Dialogos de gestao', () => {
         expect(document.body.innerHTML).toContain('PRESETS 1 SEM_LIMITE');
 
         document
-            .querySelector<HTMLButtonElement>('[data-test="badge-preset-apply"]')
+            .querySelector<HTMLButtonElement>(
+                '[data-test="badge-preset-apply"]',
+            )
             ?.click();
         await flushPromises();
 

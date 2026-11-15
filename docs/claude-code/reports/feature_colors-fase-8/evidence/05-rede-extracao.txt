@@ -1,0 +1,14 @@
+Extração de cores no gerador (checklist F8, item 4 e 12)
+Ambiente: http://127.0.0.1:8000/pt-br/tools/colors/palette-generator
+Imagem: public/og/palette-generator.png (upload local pelo seletor de arquivo)
+Resultado: 11 cores dominantes, algoritmo v1, fonte "Arquivo: palette-generator.png".
+
+Requisições para o servidor da aplicação (filtro 127.0.0.1:8000, estáticos incluídos):
+
+1124. [GET] http://127.0.0.1:8000/pt-br/tools/colors/palette-generator => [200] OK
+1434. [GET] blob:http://127.0.0.1:8000/90f6944e-1c38-40c2-8239-36c6a9e4b89c => [200] OK
+
+A 1124 é a carga da própria página (navegação); a 1434 é o blob local criado
+pelo `URL.createObjectURL` para a prévia — não sai do navegador. Nenhum POST,
+upload ou XHR foi emitido durante a extração: a decodificação e a análise
+rodam no worker do navegador (ADR-122).

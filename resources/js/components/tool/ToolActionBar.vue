@@ -10,17 +10,17 @@
 </script>
 
 <template>
-  <div
-    class="flex w-full flex-wrap items-center gap-x-2 gap-y-2"
-    data-test="tool-action-bar"
-  >
-    <slot />
-
     <div
-      v-if="$slots.end"
-      class="ml-auto flex flex-wrap items-center gap-2"
+        class="flex w-full flex-wrap items-center gap-x-2 gap-y-2"
+        data-test="tool-action-bar"
     >
-      <slot name="end" />
+        <slot />
+
+        <div
+            v-if="$slots.end"
+            class="ml-auto flex flex-wrap items-center gap-2"
+        >
+            <slot name="end" />
+        </div>
     </div>
-  </div>
 </template>

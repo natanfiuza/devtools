@@ -35,7 +35,9 @@ const HEIGHT = 64;
 
 type Pixel = [r: number, g: number, b: number, a?: number];
 
-function image(pixel: (x: number, y: number) => Pixel): Uint8ClampedArray<ArrayBuffer> {
+function image(
+    pixel: (x: number, y: number) => Pixel,
+): Uint8ClampedArray<ArrayBuffer> {
     const data = new Uint8ClampedArray(WIDTH * HEIGHT * 4);
 
     for (let y = 0; y < HEIGHT; y += 1) {
@@ -60,7 +62,9 @@ function request(
     return { data, width: WIDTH, height: HEIGHT, count };
 }
 
-function expectOk(outcome: ReturnType<typeof extractPalette>): ExtractionResult {
+function expectOk(
+    outcome: ReturnType<typeof extractPalette>,
+): ExtractionResult {
     if (!outcome.ok) {
         throw new Error(`extracao falhou: ${outcome.error}`);
     }
@@ -97,9 +101,7 @@ describe('quadrantes e pesos', () => {
         const result = expectOk(extractPalette(request(data, 5)));
         const hexes = result.colors.map((color) => color.hex).sort();
 
-        expect(hexes).toEqual(
-            ['#0000ff', '#00ff00', '#ff0000', '#ffffff'],
-        );
+        expect(hexes).toEqual(['#0000ff', '#00ff00', '#ff0000', '#ffffff']);
         for (const color of result.colors) {
             expect(color.percentage).toBeCloseTo(25, 4);
             expect(color.weight).toBe((WIDTH / 2) * (HEIGHT / 2));
@@ -166,16 +168,23 @@ describe('transparencia', () => {
 });
 
 describe('quantidade pedida', () => {
-    it.each(EXTRACTION_COUNTS)('devolve %i cores de uma imagem variada', (count) => {
-        const result = expectOk(extractPalette(request(gradient(), count)));
+    it.each(EXTRACTION_COUNTS)(
+        'devolve %i cores de uma imagem variada',
+        (count) => {
+            const result = expectOk(extractPalette(request(gradient(), count)));
 
-        expect(result.colors).toHaveLength(count);
-        expect(result.sufficient).toBe(true);
-        expect(new Set(result.colors.map((color) => color.hex)).size).toBe(count);
-    });
+            expect(result.colors).toHaveLength(count);
+            expect(result.sufficient).toBe(true);
+            expect(new Set(result.colors.map((color) => color.hex)).size).toBe(
+                count,
+            );
+        },
+    );
 
     it('imagem uniforme devolve uma cor e nao inventa as demais', () => {
-        const result = expectOk(extractPalette(request(image(() => [18, 52, 86]))));
+        const result = expectOk(
+            extractPalette(request(image(() => [18, 52, 86]))),
+        );
 
         expect(result.colors).toHaveLength(1);
         expect(result.colors[0]?.hex).toBe('#123456');
@@ -184,7 +193,9 @@ describe('quantidade pedida', () => {
     });
 
     it('mantem o branco quando ignoreWhite esta desligado', () => {
-        const data = image((x) => (x < WIDTH / 2 ? [255, 255, 255] : [0, 0, 0]));
+        const data = image((x) =>
+            x < WIDTH / 2 ? [255, 255, 255] : [0, 0, 0],
+        );
         const result = expectOk(extractPalette(request(data, 5)));
 
         expect(result.colors.map((color) => color.hex).sort()).toEqual([

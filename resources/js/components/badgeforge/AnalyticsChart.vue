@@ -76,60 +76,60 @@ function barTitle(day: AccountBadgeForgeAnalyticsDay): string {
 </script>
 
 <template>
-  <svg
-    :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
-    role="img"
-    :aria-label="chartLabel"
-    class="h-48 w-full"
-    data-test="badgeforge-analytics-chart"
-    preserveAspectRatio="none"
-  >
-    <title>{{ chartLabel }}</title>
-
-    <line
-      v-for="step in 4"
-      :key="step"
-      :x1="PAD_X"
-      :x2="WIDTH - PAD_X"
-      :y1="PAD_TOP + ((HEIGHT - PAD_TOP - PAD_BOTTOM) / 4) * (step - 1)"
-      :y2="PAD_TOP + ((HEIGHT - PAD_TOP - PAD_BOTTOM) / 4) * (step - 1)"
-      class="stroke-border"
-      stroke-width="1"
-      stroke-dasharray="4 4"
-    />
-
-    <rect
-      v-for="(day, index) in days"
-      :key="day.date"
-      :x="barX(index)"
-      :y="barY(day.views)"
-      :width="barWidth()"
-      :height="barHeight(day.views)"
-      class="fill-primary opacity-70"
-      rx="1"
+    <svg
+        :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
+        role="img"
+        :aria-label="chartLabel"
+        class="h-48 w-full"
+        data-test="badgeforge-analytics-chart"
+        preserveAspectRatio="none"
     >
-      <title>{{ barTitle(day) }}</title>
-    </rect>
+        <title>{{ chartLabel }}</title>
 
-    <polyline
-      v-if="days.length > 1"
-      :points="linePoints"
-      fill="none"
-      class="stroke-primary"
-      stroke-width="2"
-      stroke-linejoin="round"
-      stroke-linecap="round"
-    />
-  </svg>
+        <line
+            v-for="step in 4"
+            :key="step"
+            :x1="PAD_X"
+            :x2="WIDTH - PAD_X"
+            :y1="PAD_TOP + ((HEIGHT - PAD_TOP - PAD_BOTTOM) / 4) * (step - 1)"
+            :y2="PAD_TOP + ((HEIGHT - PAD_TOP - PAD_BOTTOM) / 4) * (step - 1)"
+            class="stroke-border"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+        />
 
-  <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-subtle">
-    <span class="flex items-center gap-1">
-      <span class="inline-block size-2 rounded-sm bg-primary/70" />
-      {{ t('account.badgeforge.analytics.views') }}
-    </span>
-    <span class="flex items-center gap-1">
-      <span class="inline-block h-0.5 w-3 bg-primary" />
-      {{ t('account.badgeforge.analytics.uniques') }}
-    </span>
-  </div>
+        <rect
+            v-for="(day, index) in days"
+            :key="day.date"
+            :x="barX(index)"
+            :y="barY(day.views)"
+            :width="barWidth()"
+            :height="barHeight(day.views)"
+            class="fill-primary opacity-70"
+            rx="1"
+        >
+            <title>{{ barTitle(day) }}</title>
+        </rect>
+
+        <polyline
+            v-if="days.length > 1"
+            :points="linePoints"
+            fill="none"
+            class="stroke-primary"
+            stroke-width="2"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+        />
+    </svg>
+
+    <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-subtle">
+        <span class="flex items-center gap-1">
+            <span class="inline-block size-2 rounded-sm bg-primary/70" />
+            {{ t('account.badgeforge.analytics.views') }}
+        </span>
+        <span class="flex items-center gap-1">
+            <span class="inline-block h-0.5 w-3 bg-primary" />
+            {{ t('account.badgeforge.analytics.uniques') }}
+        </span>
+    </div>
 </template>

@@ -218,7 +218,10 @@ function mountOg(source: PaletteOgSource | null = SOURCE): OgState {
     const holder = { state: null as unknown as OgState };
     const Host = defineComponent({
         setup() {
-            holder.state = usePaletteOg(() => 'PALETTE1', () => source);
+            holder.state = usePaletteOg(
+                () => 'PALETTE1',
+                () => source,
+            );
 
             return () => h('div');
         },

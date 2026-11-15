@@ -49,7 +49,7 @@
 - A estrela de favorito da F5 é um vínculo da conta, independente da curtida
   anônima/conta: as duas relações coexistem sem se influenciar.
 
-## Fora desta fase
+## Fora do escopo (F7)
 
 - Lista de seguidores/seguindo, bloqueio entre contas e edição de perfil público:
   não implementados.

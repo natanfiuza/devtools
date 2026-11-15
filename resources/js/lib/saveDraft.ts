@@ -1,10 +1,6 @@
 import { PALETTE_TONES, parseColor } from '@/lib/color';
 import { PALETTE_ROLES, PALETTE_THEMES } from '@/lib/palettePayload';
-import type {
-    PaletteKind,
-    PaletteRoles,
-    PaletteSource,
-} from '@/types/colors';
+import type { PaletteKind, PaletteRoles, PaletteSource } from '@/types/colors';
 
 /**
  * Rascunho do gerador para quem ainda nao esta logado (F4, ADR-096).
@@ -116,8 +112,7 @@ function validScale(value: unknown): value is DraftScale {
 
     if (
         !value.clippedTones.every(
-            (tone) =>
-                typeof tone === 'number' && TONE_VALUES.includes(tone),
+            (tone) => typeof tone === 'number' && TONE_VALUES.includes(tone),
         )
     ) {
         return false;

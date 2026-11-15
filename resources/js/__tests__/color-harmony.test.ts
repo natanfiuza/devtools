@@ -138,7 +138,9 @@ describe('harmonias em OKLCH', () => {
         const tetradic = buildHarmony(RED, 'tetradic', 'oklch');
 
         expect(triadic.colors.map((color) => color.oklch.h)).toEqual(
-            [0, 120, 240].map((offset) => expect.closeTo((baseHue + offset) % 360, 3)),
+            [0, 120, 240].map((offset) =>
+                expect.closeTo((baseHue + offset) % 360, 3),
+            ),
         );
         expect(tetradic.colors.map((color) => color.oklch.h)).toEqual(
             [0, 60, 180, 240].map((offset) =>
@@ -185,12 +187,12 @@ describe('base, alpha e determinismo', () => {
             for (const method of ['oklch', 'hsl'] as const) {
                 const set = buildHarmony(RED, kind, method);
 
-                expect(
-                    set.colors.filter((color) => color.isBase),
-                ).toHaveLength(1);
-                expect(canonicalKey(set.colors.find((c) => c.isBase)?.rgba ?? RED)).toBe(
-                    canonicalKey(RED),
+                expect(set.colors.filter((color) => color.isBase)).toHaveLength(
+                    1,
                 );
+                expect(
+                    canonicalKey(set.colors.find((c) => c.isBase)?.rgba ?? RED),
+                ).toBe(canonicalKey(RED));
             }
         }
     });

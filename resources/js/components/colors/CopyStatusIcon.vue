@@ -12,15 +12,11 @@ defineProps<{ copied: boolean }>();
 </script>
 
 <template>
-  <Check
-    v-if="copied"
-    class="text-emerald-600 dark:text-emerald-400"
-    aria-hidden="true"
-    data-test="copied-icon"
-  />
-  <Copy
-    v-else
-    aria-hidden="true"
-    data-test="copy-icon"
-  />
+    <Check
+        v-if="copied"
+        class="text-emerald-600 dark:text-emerald-400"
+        aria-hidden="true"
+        data-test="copied-icon"
+    />
+    <Copy v-else aria-hidden="true" data-test="copy-icon" />
 </template>

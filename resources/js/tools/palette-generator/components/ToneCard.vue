@@ -70,93 +70,97 @@ async function onCopy(): Promise<void> {
 </script>
 
 <template>
-  <article
-    class="flex flex-col gap-2 rounded-lg border border-border bg-card p-2"
-    :data-test="`tone-card-${tone.tone}`"
-  >
-    <div class="flex items-center justify-between gap-1">
-      <span class="font-mono text-xs font-medium tabular-nums">
-        {{ tone.tone }}
-      </span>
-      <span
-        v-if="nearest"
-        class="rounded-full border px-1.5 py-0.5 text-[10px] leading-none text-muted-foreground"
-        :data-test="`tone-nearest-${tone.tone}`"
-      >
-        {{ t('tools.palette-generator.scale.base_tone_badge') }}
-      </span>
-    </div>
-
-    <div
-      class="relative h-14 overflow-hidden rounded-md border shadow-xs"
-      :style="checkerboardStyle"
-      aria-hidden="true"
+    <article
+        class="flex flex-col gap-2 rounded-lg border border-border bg-card p-2"
+        :data-test="`tone-card-${tone.tone}`"
     >
-      <div
-        class="absolute inset-0"
-        :style="{ backgroundColor: cssColor(tone.rgba) }"
-      />
-    </div>
+        <div class="flex items-center justify-between gap-1">
+            <span class="font-mono text-xs font-medium tabular-nums">
+                {{ tone.tone }}
+            </span>
+            <span
+                v-if="nearest"
+                class="rounded-full border px-1.5 py-0.5 text-[10px] leading-none text-muted-foreground"
+                :data-test="`tone-nearest-${tone.tone}`"
+            >
+                {{ t('tools.palette-generator.scale.base_tone_badge') }}
+            </span>
+        </div>
 
-    <div class="flex items-center gap-1">
-      <code class="min-w-0 flex-1 truncate font-mono text-[11px] tabular-nums">
-        {{ tone.hex }}
-      </code>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        :aria-label="copyLabel"
-        :title="copyLabel"
-        :data-test="`tone-copy-${tone.tone}`"
-        @click="onCopy"
-      >
-        <CopyStatusIcon :copied="copied" />
-      </Button>
-    </div>
-
-    <p
-      v-if="tone.clipped"
-      class="rounded border border-dashed px-1.5 py-0.5 text-[10px] leading-tight text-muted-foreground"
-      :data-test="`tone-clipped-${tone.tone}`"
-    >
-      {{ t('tools.palette-generator.scale.clipped_badge') }}
-    </p>
-
-    <ul class="flex flex-col gap-0.5">
-      <li
-        v-for="line in lines"
-        :key="line.key"
-        class="flex flex-wrap items-center gap-1 text-[10px] leading-tight text-muted-foreground"
-        :data-test="`tone-contrast-${line.key}-${tone.tone}`"
-      >
-        <span>{{ line.label }}</span>
-        <span aria-hidden="true">{{ line.verdict.aaNormal ? '👍' : '👎' }}</span>
-        <span
-          v-if="line.verdict.aaNormal"
-          aria-hidden="true"
-          class="rounded border px-1 leading-none"
+        <div
+            class="relative h-14 overflow-hidden rounded-md border shadow-xs"
+            :style="checkerboardStyle"
+            aria-hidden="true"
         >
-          AA
-        </span>
-        <span
-          v-if="line.verdict.aaaNormal"
-          aria-hidden="true"
-          class="rounded border px-1 leading-none"
+            <div
+                class="absolute inset-0"
+                :style="{ backgroundColor: cssColor(tone.rgba) }"
+            />
+        </div>
+
+        <div class="flex items-center gap-1">
+            <code
+                class="min-w-0 flex-1 truncate font-mono text-[11px] tabular-nums"
+            >
+                {{ tone.hex }}
+            </code>
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                :aria-label="copyLabel"
+                :title="copyLabel"
+                :data-test="`tone-copy-${tone.tone}`"
+                @click="onCopy"
+            >
+                <CopyStatusIcon :copied="copied" />
+            </Button>
+        </div>
+
+        <p
+            v-if="tone.clipped"
+            class="rounded border border-dashed px-1.5 py-0.5 text-[10px] leading-tight text-muted-foreground"
+            :data-test="`tone-clipped-${tone.tone}`"
         >
-          AAA
-        </span>
-        <span class="sr-only">
-          {{
-            t(
-              line.verdict.aaNormal
-                ? 'tools.palette-generator.scale.pass'
-                : 'tools.palette-generator.scale.fail',
-              { level: 'AA' },
-            )
-          }}
-        </span>
-      </li>
-    </ul>
-  </article>
+            {{ t('tools.palette-generator.scale.clipped_badge') }}
+        </p>
+
+        <ul class="flex flex-col gap-0.5">
+            <li
+                v-for="line in lines"
+                :key="line.key"
+                class="flex flex-wrap items-center gap-1 text-[10px] leading-tight text-muted-foreground"
+                :data-test="`tone-contrast-${line.key}-${tone.tone}`"
+            >
+                <span>{{ line.label }}</span>
+                <span aria-hidden="true">{{
+                    line.verdict.aaNormal ? '👍' : '👎'
+                }}</span>
+                <span
+                    v-if="line.verdict.aaNormal"
+                    aria-hidden="true"
+                    class="rounded border px-1 leading-none"
+                >
+                    AA
+                </span>
+                <span
+                    v-if="line.verdict.aaaNormal"
+                    aria-hidden="true"
+                    class="rounded border px-1 leading-none"
+                >
+                    AAA
+                </span>
+                <span class="sr-only">
+                    {{
+                        t(
+                            line.verdict.aaNormal
+                                ? 'tools.palette-generator.scale.pass'
+                                : 'tools.palette-generator.scale.fail',
+                            { level: 'AA' },
+                        )
+                    }}
+                </span>
+            </li>
+        </ul>
+    </article>
 </template>

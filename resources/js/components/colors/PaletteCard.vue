@@ -42,116 +42,123 @@ function formatDate(value: string | null): string | null {
 </script>
 
 <template>
-  <article
-    class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
-    data-test="palette-card"
-  >
-    <div
-      class="flex h-14 overflow-hidden rounded-lg border border-border"
-      role="img"
-      :aria-label="t('colors.list.preview_alt', { name: palette.name })"
-      data-test="palette-preview"
+    <article
+        class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+        data-test="palette-card"
     >
-      <span
-        v-for="(hex, index) in palette.preview"
-        :key="`${hex}-${index}`"
-        class="h-full flex-1"
-        :style="{ backgroundColor: hex }"
-        :title="hex"
-      />
-    </div>
-
-    <div class="flex flex-wrap items-start justify-between gap-2">
-      <div class="min-w-0">
-        <h3 class="truncate text-base font-semibold">
-          <Link
-            :href="palettes.edit.url({ colorPalette: palette.id })"
-            class="hover:underline"
-            data-test="palette-card-name"
-          >
-            {{ palette.name }}
-          </Link>
-        </h3>
-        <p
-          v-if="palette.description !== null"
-          class="mt-1 line-clamp-2 text-sm text-muted-foreground"
-          data-test="palette-card-description"
+        <div
+            class="flex h-14 overflow-hidden rounded-lg border border-border"
+            role="img"
+            :aria-label="t('colors.list.preview_alt', { name: palette.name })"
+            data-test="palette-preview"
         >
-          {{ palette.description }}
-        </p>
-      </div>
+            <span
+                v-for="(hex, index) in palette.preview"
+                :key="`${hex}-${index}`"
+                class="h-full flex-1"
+                :style="{ backgroundColor: hex }"
+                :title="hex"
+            />
+        </div>
 
-      <div class="flex flex-wrap gap-1">
-        <Badge variant="outline">
-          {{ t(`colors.list.kind_${palette.kind}`) }}
-        </Badge>
-        <Badge variant="secondary">
-          {{
-            palette.visibility === 'public'
-              ? t('colors.list.badge_public')
-              : t('colors.list.badge_private')
-          }}
-        </Badge>
-        <Badge
-          v-if="palette.archived"
-          variant="destructive"
-          data-test="palette-card-archived"
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div class="min-w-0">
+                <h3 class="truncate text-base font-semibold">
+                    <Link
+                        :href="palettes.edit.url({ colorPalette: palette.id })"
+                        class="hover:underline"
+                        data-test="palette-card-name"
+                    >
+                        {{ palette.name }}
+                    </Link>
+                </h3>
+                <p
+                    v-if="palette.description !== null"
+                    class="mt-1 line-clamp-2 text-sm text-muted-foreground"
+                    data-test="palette-card-description"
+                >
+                    {{ palette.description }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1">
+                <Badge variant="outline">
+                    {{ t(`colors.list.kind_${palette.kind}`) }}
+                </Badge>
+                <Badge variant="secondary">
+                    {{
+                        palette.visibility === 'public'
+                            ? t('colors.list.badge_public')
+                            : t('colors.list.badge_private')
+                    }}
+                </Badge>
+                <Badge
+                    v-if="palette.archived"
+                    variant="destructive"
+                    data-test="palette-card-archived"
+                >
+                    {{ t('colors.list.badge_archived') }}
+                </Badge>
+            </div>
+        </div>
+
+        <dl
+            class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
         >
-          {{ t('colors.list.badge_archived') }}
-        </Badge>
-      </div>
-    </div>
+            <div>
+                <dt class="sr-only">
+                    {{ t('colors.list.sort_colors_count') }}
+                </dt>
+                <dd>
+                    {{
+                        t('colors.list.colors_count', {
+                            count: palette.colors_count,
+                        })
+                    }}
+                </dd>
+            </div>
+            <div>
+                <dt class="sr-only">
+                    {{ t('colors.list.sort_duplications_count') }}
+                </dt>
+                <dd data-test="palette-card-usage">
+                    {{
+                        palette.duplications_count === 0
+                            ? t('colors.list.usage_zero')
+                            : t('colors.list.usage', {
+                                  count: palette.duplications_count,
+                              })
+                    }}
+                </dd>
+            </div>
+            <div v-if="formatDate(palette.updated_at) !== null">
+                <dt class="sr-only">
+                    {{ t('colors.list.sort_updated_at') }}
+                </dt>
+                <dd>
+                    {{
+                        t('colors.list.updated_at', {
+                            date: formatDate(palette.updated_at),
+                        })
+                    }}
+                </dd>
+            </div>
+        </dl>
 
-    <dl class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-      <div>
-        <dt class="sr-only">
-          {{ t('colors.list.sort_colors_count') }}
-        </dt>
-        <dd>{{ t('colors.list.colors_count', { count: palette.colors_count }) }}</dd>
-      </div>
-      <div>
-        <dt class="sr-only">
-          {{ t('colors.list.sort_duplications_count') }}
-        </dt>
-        <dd data-test="palette-card-usage">
-          {{
-            palette.duplications_count === 0
-              ? t('colors.list.usage_zero')
-              : t('colors.list.usage', { count: palette.duplications_count })
-          }}
-        </dd>
-      </div>
-      <div v-if="formatDate(palette.updated_at) !== null">
-        <dt class="sr-only">
-          {{ t('colors.list.sort_updated_at') }}
-        </dt>
-        <dd>
-          {{
-            t('colors.list.updated_at', {
-              date: formatDate(palette.updated_at),
-            })
-          }}
-        </dd>
-      </div>
-    </dl>
+        <ul
+            v-if="palette.tags.length > 0"
+            class="flex flex-wrap gap-1"
+            data-test="palette-card-tags"
+        >
+            <li
+                v-for="tag in palette.tags"
+                :key="tag.id"
+                class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+            >
+                {{ tag.name }}
+            </li>
+        </ul>
 
-    <ul
-      v-if="palette.tags.length > 0"
-      class="flex flex-wrap gap-1"
-      data-test="palette-card-tags"
-    >
-      <li
-        v-for="tag in palette.tags"
-        :key="tag.id"
-        class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-      >
-        {{ tag.name }}
-      </li>
-    </ul>
-
-    <PaletteActions
-      :palette="palette"
-      @delete="emit('delete', palette)"
-    />
-  </article>
+        <PaletteActions :palette="palette" @delete="emit('delete', palette)" />
+    </article>
 </template>

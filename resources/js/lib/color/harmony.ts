@@ -1,10 +1,4 @@
-import {
-    clamp,
-    hslToRgb,
-    normalizeHue,
-    rgbToHsl,
-    rgbToOklch,
-} from './convert';
+import { clamp, hslToRgb, normalizeHue, rgbToHsl, rgbToOklch } from './convert';
 import { canonicalKey, formatHex, formatHex8 } from './format';
 import { mapOklchToSrgb } from './gamut';
 import type { Hsl, Oklch, Rgba } from './types';
@@ -18,11 +12,7 @@ import type { Hsl, Oklch, Rgba } from './types';
  */
 
 export type HarmonyKind =
-    | 'complementary'
-    | 'analogous'
-    | 'triadic'
-    | 'tetradic'
-    | 'monochromatic';
+    'complementary' | 'analogous' | 'triadic' | 'tetradic' | 'monochromatic';
 
 export type HarmonyMethod = 'oklch' | 'hsl';
 
@@ -134,7 +124,12 @@ function hslColor(
         l: lightness,
     });
 
-    return toHarmonyColor({ ...rgb, a: base.a }, rgbToOklch(rgb), false, baseKey);
+    return toHarmonyColor(
+        { ...rgb, a: base.a },
+        rgbToOklch(rgb),
+        false,
+        baseKey,
+    );
 }
 
 /** Remove repetidas pela chave canonica, preservando a primeira ocorrencia. */
@@ -209,11 +204,7 @@ function buildMonochromaticOklch(base: Rgba, baseKey: string): HarmonyColor[] {
         oklchColor(
             base,
             baseOklch,
-            clamp(
-                baseOklch.l + step,
-                OKLCH_LIGHTNESS.min,
-                OKLCH_LIGHTNESS.max,
-            ),
+            clamp(baseOklch.l + step, OKLCH_LIGHTNESS.min, OKLCH_LIGHTNESS.max),
             0,
             baseKey,
         ),
@@ -224,12 +215,6 @@ function buildMonochromaticHsl(base: Rgba, baseKey: string): HarmonyColor[] {
     const baseHsl = rgbToHsl(base);
 
     return MONOCHROMATIC_HSL_STEPS.map((step) =>
-        hslColor(
-            base,
-            baseHsl,
-            clamp(baseHsl.l + step, 0, 100),
-            0,
-            baseKey,
-        ),
+        hslColor(base, baseHsl, clamp(baseHsl.l + step, 0, 100), 0, baseKey),
     );
 }

@@ -40,13 +40,21 @@ const EXTRACTED: ExtractedPalette = {
 
 describe('paletteSignature', () => {
     it('e estavel para o mesmo snapshot', () => {
-        const source = { kind: 'scale' as const, base: '#6366f1', scale: SCALE };
+        const source = {
+            kind: 'scale' as const,
+            base: '#6366f1',
+            scale: SCALE,
+        };
 
         expect(paletteSignature(source)).toBe(paletteSignature({ ...source }));
     });
 
     it('muda quando a base muda', () => {
-        const source = { kind: 'scale' as const, base: '#6366f1', scale: SCALE };
+        const source = {
+            kind: 'scale' as const,
+            base: '#6366f1',
+            scale: SCALE,
+        };
 
         expect(paletteSignature(source)).not.toBe(
             paletteSignature({ ...source, base: '#4f46e5' }),
@@ -54,7 +62,11 @@ describe('paletteSignature', () => {
     });
 
     it('muda quando um tom da escala muda', () => {
-        const source = { kind: 'scale' as const, base: '#6366f1', scale: SCALE };
+        const source = {
+            kind: 'scale' as const,
+            base: '#6366f1',
+            scale: SCALE,
+        };
         const changed = {
             ...SCALE,
             tones: SCALE.tones.map((tone, index) =>
@@ -96,7 +108,11 @@ describe('paletteSignature', () => {
     });
 
     it('ignora caixa no HEX', () => {
-        const source = { kind: 'scale' as const, base: '#6366f1', scale: SCALE };
+        const source = {
+            kind: 'scale' as const,
+            base: '#6366f1',
+            scale: SCALE,
+        };
 
         expect(paletteSignature({ ...source, base: '#6366F1' })).toBe(
             paletteSignature(source),

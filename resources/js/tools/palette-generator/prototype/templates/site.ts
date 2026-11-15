@@ -20,7 +20,11 @@ export function siteNodes(
     roles: PaletteRoleColors,
     copy: PrototypeCopy,
 ): SvgNode[] {
-    const cardX = [MARGIN, MARGIN + CARD_WIDTH + CARD_GAP, MARGIN + (CARD_WIDTH + CARD_GAP) * 2];
+    const cardX = [
+        MARGIN,
+        MARGIN + CARD_WIDTH + CARD_GAP,
+        MARGIN + (CARD_WIDTH + CARD_GAP) * 2,
+    ];
     const navX = [640, 776, 904];
     const nodes: SvgNode[] = [
         {
@@ -191,19 +195,17 @@ export function siteNodes(
         },
 
         // Links
-        ...copy.links.map(
-            (label, index): SvgNode => ({
-                kind: 'text',
-                x: MARGIN + index * 220,
-                y: 372,
-                text: label,
-                size: 15,
-                weight: 600,
-                fill: roles.accent,
-                role: 'accent',
-                section: 'links',
-            }),
-        ),
+        ...copy.links.map((label, index): SvgNode => ({
+            kind: 'text',
+            x: MARGIN + index * 220,
+            y: 372,
+            text: label,
+            size: 15,
+            weight: 600,
+            fill: roles.accent,
+            role: 'accent',
+            section: 'links',
+        })),
 
         // Cards
         {

@@ -87,7 +87,10 @@ const TRADUCOES = {
     },
 };
 
-function montar(component: Parameters<typeof mount>[0], props: Record<string, unknown>) {
+function montar(
+    component: Parameters<typeof mount>[0],
+    props: Record<string, unknown>,
+) {
     const i18n = createI18nInstance();
     applyTranslations(i18n, { locale: 'pt_BR', translations: TRADUCOES });
 
@@ -97,7 +100,9 @@ function montar(component: Parameters<typeof mount>[0], props: Record<string, un
     });
 }
 
-function provider(overrides: Partial<AdminBadgeProviderRow> = {}): AdminBadgeProviderRow {
+function provider(
+    overrides: Partial<AdminBadgeProviderRow> = {},
+): AdminBadgeProviderRow {
     return {
         id: 1,
         slug: 'github',
@@ -105,7 +110,13 @@ function provider(overrides: Partial<AdminBadgeProviderRow> = {}): AdminBadgePro
         category: 'social',
         enabled: true,
         definitions: [
-            { id: 10, slug: 'stars', name: 'Estrelas', label: 'Estrelas', enabled: true },
+            {
+                id: 10,
+                slug: 'stars',
+                name: 'Estrelas',
+                label: 'Estrelas',
+                enabled: true,
+            },
         ],
         ...overrides,
     };
@@ -150,7 +161,9 @@ function paginator<T extends { id: number | string }>(
     };
 }
 
-function analytics(overrides: Partial<AdminBadgeAnalytics> = {}): AdminBadgeAnalytics {
+function analytics(
+    overrides: Partial<AdminBadgeAnalytics> = {},
+): AdminBadgeAnalytics {
     return {
         window: 7,
         windows: [7, 30, 90, 400],
@@ -178,8 +191,9 @@ describe('BadgeProviders', () => {
 
         expect(bloco.exists()).toBe(true);
         expect(bloco.text()).toContain('CATEGORIA');
-        expect(wrapper.find('[data-test="badge-definition-stars"]').text())
-            .toContain('Estrelas');
+        expect(
+            wrapper.find('[data-test="badge-definition-stars"]').text(),
+        ).toContain('Estrelas');
 
         await bloco.find('button[role="checkbox"]').trigger('click');
 
@@ -189,13 +203,19 @@ describe('BadgeProviders', () => {
 
         expect(url).toBe('/admin/badgeforge/providers/1');
         expect(data).toEqual({ enabled: false });
-        expect(options).toMatchObject({ preserveScroll: true, preserveState: true });
+        expect(options).toMatchObject({
+            preserveScroll: true,
+            preserveState: true,
+        });
     });
 
     it('desliga a definicao pela rota aninhada', async () => {
         const wrapper = montar(BadgeProviders, { providers: [provider()] });
 
-        await wrapper.find('[data-test="badge-definition-stars"] button[role="checkbox"]')
+        await wrapper
+            .find(
+                '[data-test="badge-definition-stars"] button[role="checkbox"]',
+            )
             .trigger('click');
 
         const [url, data] = routerPatch.mock.calls[0] ?? [];
@@ -216,7 +236,9 @@ describe('BadgeCustomProviders', () => {
         expect(texto).toContain('api-interna');
         expect(texto).toContain('Dona API');
         expect(texto).toContain('owner@example.com');
-        expect(texto).toContain('https://api.example.com/repos/{owner}/{repo}.json');
+        expect(texto).toContain(
+            'https://api.example.com/repos/{owner}/{repo}.json',
+        );
         expect(texto).toContain('owner, repo');
         expect(texto).toContain('stars = /stargazers_count');
         expect(texto).toContain('(number)');
@@ -225,19 +247,29 @@ describe('BadgeCustomProviders', () => {
 
         const [url, data] = routerPatch.mock.calls[0] ?? [];
 
-        expect(url).toBe('/admin/badgeforge/custom-providers/01AAAAAAAAAAAAAAAAAAAAAAAA');
+        expect(url).toBe(
+            '/admin/badgeforge/custom-providers/01AAAAAAAAAAAAAAAAAAAAAAAA',
+        );
         expect(data).toEqual({ enabled: false });
 
-        expect(wrapper.findAll('button').some((button) => button.text() === 'EXCLUIR'))
-            .toBe(false);
+        expect(
+            wrapper
+                .findAll('button')
+                .some((button) => button.text() === 'EXCLUIR'),
+        ).toBe(false);
     });
 
     it('pede a proxima pagina no indice', async () => {
         const wrapper = montar(BadgeCustomProviders, {
-            providers: paginator([customProvider()], { current_page: 1, last_page: 2 }),
+            providers: paginator([customProvider()], {
+                current_page: 1,
+                last_page: 2,
+            }),
         });
 
-        const proxima = wrapper.findAll('button').find((button) => button.text() === 'PROXIMA');
+        const proxima = wrapper
+            .findAll('button')
+            .find((button) => button.text() === 'PROXIMA');
 
         expect(proxima).toBeDefined();
 
@@ -254,27 +286,36 @@ describe('BadgeAnalytics', () => {
     it('mostra totais, taxa de cache e a serie do agregado', () => {
         const wrapper = montar(BadgeAnalytics, { analytics: analytics() });
 
-        const totais = wrapper.find('[data-test="admin-badgeforge-analytics-totals"]').text();
+        const totais = wrapper
+            .find('[data-test="admin-badgeforge-analytics-totals"]')
+            .text();
 
         expect(totais).toContain('10');
         expect(totais).toContain('4');
         expect(totais).toContain('40%');
         expect(totais).toContain('4 DO CACHE');
 
-        const grafico = wrapper.find('[data-test="admin-badgeforge-analytics-chart"]');
+        const grafico = wrapper.find(
+            '[data-test="admin-badgeforge-analytics-chart"]',
+        );
 
         expect(grafico.attributes('role')).toBe('img');
         expect(grafico.findAll('rect')).toHaveLength(2);
         expect(grafico.text()).toContain('BARRA_2026-11-04');
 
-        expect(wrapper.find('[data-test="admin-badgeforge-analytics-empty"]').exists())
-            .toBe(false);
+        expect(
+            wrapper
+                .find('[data-test="admin-badgeforge-analytics-empty"]')
+                .exists(),
+        ).toBe(false);
     });
 
     it('troca a janela recarregando so a prop analytics', async () => {
         const wrapper = montar(BadgeAnalytics, { analytics: analytics() });
 
-        await wrapper.find('[data-test="admin-badgeforge-window-30"]').trigger('click');
+        await wrapper
+            .find('[data-test="admin-badgeforge-window-30"]')
+            .trigger('click');
 
         const [url, params, options] = routerGet.mock.calls[0] ?? [];
 
@@ -298,12 +339,20 @@ describe('BadgeAnalytics', () => {
             }),
         });
 
-        await wrapper.find('[data-test="admin-badgeforge-window-7"]').trigger('click');
+        await wrapper
+            .find('[data-test="admin-badgeforge-window-7"]')
+            .trigger('click');
 
         expect(routerGet).not.toHaveBeenCalled();
-        expect(wrapper.find('[data-test="admin-badgeforge-analytics-empty"]').text())
-            .toContain('SEM_DADOS');
-        expect(wrapper.find('[data-test="admin-badgeforge-analytics-chart"]').exists())
-            .toBe(false);
+        expect(
+            wrapper
+                .find('[data-test="admin-badgeforge-analytics-empty"]')
+                .text(),
+        ).toContain('SEM_DADOS');
+        expect(
+            wrapper
+                .find('[data-test="admin-badgeforge-analytics-chart"]')
+                .exists(),
+        ).toBe(false);
     });
 });

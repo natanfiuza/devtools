@@ -156,17 +156,17 @@ describe('Tool', () => {
 
         expect(wrapper.find('[data-test="color-area"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="color-input"]').exists()).toBe(true);
-        expect(
-            wrapper.find('[data-test="native-color-input"]').exists(),
-        ).toBe(false);
+        expect(wrapper.find('[data-test="native-color-input"]').exists()).toBe(
+            false,
+        );
         expect(wrapper.find('[data-test="color-eyedropper"]').exists()).toBe(
             true,
         );
         expect(wrapper.find('[data-test="alpha-slider"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="channels-tabs"]').exists()).toBe(true);
-        expect(
-            wrapper.find('[data-test="channel-slider-r"]').exists(),
-        ).toBe(true);
+        expect(wrapper.find('[data-test="channel-slider-r"]').exists()).toBe(
+            true,
+        );
     });
 });
 

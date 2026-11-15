@@ -765,9 +765,11 @@ describe('JSON Viewer', () => {
             await esperarAnalise();
 
             expect(textoDoEditor(wrapper)).toBe(invalido);
-            expect(wrapper.get('[data-test="json-editor"]').attributes('data-error')).toBe(
-                'INVALIDO:3:3',
-            );
+            expect(
+                wrapper
+                    .get('[data-test="json-editor"]')
+                    .attributes('data-error'),
+            ).toBe('INVALIDO:3:3');
         });
 
         it('recusa arquivo maior que o limite', async () => {

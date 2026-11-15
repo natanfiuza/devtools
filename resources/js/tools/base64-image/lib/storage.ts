@@ -36,10 +36,10 @@ export function saveAnonymousConversion(
 ): void {
     try {
         const current = getAnonymousHistory();
-        const updated = [record, ...current.filter((item) => item.id !== record.id)].slice(
-            0,
-            50,
-        );
+        const updated = [
+            record,
+            ...current.filter((item) => item.id !== record.id),
+        ].slice(0, 50);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch {
         // localStorage indisponivel ou cheio

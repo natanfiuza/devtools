@@ -96,8 +96,7 @@ export interface DecodedImage {
 }
 
 export type DecodeOutcome =
-    | { ok: true; image: DecodedImage }
-    | { ok: false; error: ImageErrorCode };
+    { ok: true; image: DecodedImage } | { ok: false; error: ImageErrorCode };
 
 export async function decodeImage(
     source: Blob,

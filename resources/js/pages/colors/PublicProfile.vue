@@ -76,114 +76,109 @@ function goToPage(target: number): void {
 </script>
 
 <template>
-  <PageHead />
+    <PageHead />
 
-  <article
-    class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
-    data-test="public-profile"
-  >
-    <header class="flex flex-col gap-4">
-      <div class="flex flex-wrap items-center gap-4">
-        <img
-          v-if="profile.avatar !== null"
-          :src="profile.avatar"
-          :alt="profile.name"
-          class="size-16 rounded-full border border-border object-cover"
-          data-test="profile-avatar"
-        >
-        <span
-          v-else
-          class="flex size-16 items-center justify-center rounded-full border border-border bg-muted text-lg font-semibold text-muted-foreground"
-          :aria-label="profile.name"
-          data-test="profile-avatar-initials"
-        >
-          {{ getInitials(profile.name) }}
-        </span>
-
-        <div class="min-w-0">
-          <h1
-            class="text-3xl font-semibold tracking-tight"
-            data-test="profile-name"
-          >
-            {{ profile.name }}
-          </h1>
-          <p
-            class="text-sm text-muted-foreground"
-            data-test="profile-username"
-          >
-            @{{ profile.username }}
-          </p>
-        </div>
-
-        <Badge
-          v-if="isOwnProfile"
-          variant="secondary"
-          data-test="profile-own-badge"
-        >
-          {{ t('colors.profile.own_badge') }}
-        </Badge>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-        <span data-test="profile-following-count">
-          {{ followingLabel }}
-        </span>
-        <span
-          v-if="memberSince !== null"
-          data-test="profile-member-since"
-        >
-          {{ t('colors.profile.member_since', { date: memberSince }) }}
-        </span>
-      </div>
-
-      <FollowButton
-        :user-id="profile.id"
-        :following="following"
-        :followers-count="profile.followers_count"
-        :can-follow="canFollow"
-        show-count
-        data-test="profile-follow"
-      />
-    </header>
-
-    <section
-      class="flex flex-col gap-4"
-      data-test="profile-palettes"
+    <article
+        class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
+        data-test="public-profile"
     >
-      <h2 class="text-lg font-semibold">
-        {{ t('colors.profile.palettes_title') }}
-      </h2>
+        <header class="flex flex-col gap-4">
+            <div class="flex flex-wrap items-center gap-4">
+                <img
+                    v-if="profile.avatar !== null"
+                    :src="profile.avatar"
+                    :alt="profile.name"
+                    class="size-16 rounded-full border border-border object-cover"
+                    data-test="profile-avatar"
+                />
+                <span
+                    v-else
+                    class="flex size-16 items-center justify-center rounded-full border border-border bg-muted text-lg font-semibold text-muted-foreground"
+                    :aria-label="profile.name"
+                    data-test="profile-avatar-initials"
+                >
+                    {{ getInitials(profile.name) }}
+                </span>
 
-      <div
-        v-if="palettes.data.length === 0"
-        class="rounded-xl border border-dashed border-border p-8 text-center"
-        data-test="profile-empty"
-      >
-        <p class="text-base font-medium">
-          {{ t('colors.profile.empty_title') }}
-        </p>
-        <p class="mt-1 text-sm text-muted-foreground">
-          {{ t('colors.profile.empty_description') }}
-        </p>
-      </div>
+                <div class="min-w-0">
+                    <h1
+                        class="text-3xl font-semibold tracking-tight"
+                        data-test="profile-name"
+                    >
+                        {{ profile.name }}
+                    </h1>
+                    <p
+                        class="text-sm text-muted-foreground"
+                        data-test="profile-username"
+                    >
+                        @{{ profile.username }}
+                    </p>
+                </div>
 
-      <ul
-        v-else
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        data-test="profile-palette-list"
-      >
-        <li
-          v-for="palette in palettes.data"
-          :key="palette.id"
-        >
-          <ProfilePaletteCard :palette="palette" />
-        </li>
-      </ul>
+                <Badge
+                    v-if="isOwnProfile"
+                    variant="secondary"
+                    data-test="profile-own-badge"
+                >
+                    {{ t('colors.profile.own_badge') }}
+                </Badge>
+            </div>
 
-      <PalettePagination
-        :paginator="palettes"
-        @select="goToPage"
-      />
-    </section>
-  </article>
+            <div
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground"
+            >
+                <span data-test="profile-following-count">
+                    {{ followingLabel }}
+                </span>
+                <span
+                    v-if="memberSince !== null"
+                    data-test="profile-member-since"
+                >
+                    {{
+                        t('colors.profile.member_since', { date: memberSince })
+                    }}
+                </span>
+            </div>
+
+            <FollowButton
+                :user-id="profile.id"
+                :following="following"
+                :followers-count="profile.followers_count"
+                :can-follow="canFollow"
+                show-count
+                data-test="profile-follow"
+            />
+        </header>
+
+        <section class="flex flex-col gap-4" data-test="profile-palettes">
+            <h2 class="text-lg font-semibold">
+                {{ t('colors.profile.palettes_title') }}
+            </h2>
+
+            <div
+                v-if="palettes.data.length === 0"
+                class="rounded-xl border border-dashed border-border p-8 text-center"
+                data-test="profile-empty"
+            >
+                <p class="text-base font-medium">
+                    {{ t('colors.profile.empty_title') }}
+                </p>
+                <p class="mt-1 text-sm text-muted-foreground">
+                    {{ t('colors.profile.empty_description') }}
+                </p>
+            </div>
+
+            <ul
+                v-else
+                class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                data-test="profile-palette-list"
+            >
+                <li v-for="palette in palettes.data" :key="palette.id">
+                    <ProfilePaletteCard :palette="palette" />
+                </li>
+            </ul>
+
+            <PalettePagination :paginator="palettes" @select="goToPage" />
+        </section>
+    </article>
 </template>

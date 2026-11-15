@@ -172,12 +172,9 @@ export function buildCustomBadgeUrl(
 
     const base = endpoint.replace(/\/+$/, '');
     const format = options.format ?? 'svg';
-    const path = [
-        base,
-        provider.id,
-        definition.slug,
-        segments.join('/'),
-    ].join('/');
+    const path = [base, provider.id, definition.slug, segments.join('/')].join(
+        '/',
+    );
 
     const suffix = query.length > 0 ? `?${query.join('&')}` : '';
 

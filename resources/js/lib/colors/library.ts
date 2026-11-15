@@ -86,12 +86,8 @@ export function useColorLibrary(
 
     const authenticated = settings.authenticated;
 
-    const history = ref<string[]>(
-        authenticated ? [] : local.readHistory(),
-    );
-    const favorites = ref<string[]>(
-        authenticated ? [] : local.readFavorites(),
-    );
+    const history = ref<string[]>(authenticated ? [] : local.readHistory());
+    const favorites = ref<string[]>(authenticated ? [] : local.readFavorites());
 
     const ready = ref(!authenticated);
     const loading = ref(false);
@@ -101,9 +97,7 @@ export function useColorLibrary(
     const nextHistory = ref<string | null>(null);
     const nextFavorites = ref<string | null>(null);
 
-    const importable = ref(
-        authenticated ? local.readHistory().length : 0,
-    );
+    const importable = ref(authenticated ? local.readHistory().length : 0);
 
     let loaded = false;
 
@@ -143,9 +137,7 @@ export function useColorLibrary(
         }
     }
 
-    async function loadMore(
-        page: 'history' | 'favorites',
-    ): Promise<void> {
+    async function loadMore(page: 'history' | 'favorites'): Promise<void> {
         if (!authenticated || loadingMore.value) {
             return;
         }
@@ -226,13 +218,13 @@ export function useColorLibrary(
 
         const request = wasFavorite
             ? colorsApi('/favorites', {
-                method: 'DELETE',
-                body: { color: key },
-            })
+                  method: 'DELETE',
+                  body: { color: key },
+              })
             : colorsApi('/favorites', {
-                method: 'POST',
-                body: { color: key },
-            });
+                  method: 'POST',
+                  body: { color: key },
+              });
 
         void request.catch(() => {
             favorites.value = previous;

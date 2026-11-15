@@ -257,9 +257,9 @@ describe('PersonalBadgesPanel', () => {
         const wrapper = mountPanel(toolPropsFor());
 
         expect(
-            wrapper.find('[data-test="badgeforge-personal-preview"]').attributes(
-                'src',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-personal-preview"]')
+                .attributes('src'),
         ).toBe(BADGE.url);
         expect(wrapper.text()).toContain('ESTRELAS');
 
@@ -354,16 +354,18 @@ describe('PersonalBadgesPanel', () => {
             Record<string, string>,
         ];
 
-        expect(url).toBe(`/badgeforge/badges/01K0PERSONALBADGE0000000001/refresh`);
+        expect(url).toBe(
+            `/badgeforge/badges/01K0PERSONALBADGE0000000001/refresh`,
+        );
         expect(init.method).toBe('POST');
         expect(init.headers).toMatchObject({
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
         });
         expect(
-            wrapper.find('[data-test="badgeforge-personal-preview"]').attributes(
-                'src',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-personal-preview"]')
+                .attributes('src'),
         ).toContain('?v=');
         expect(
             wrapper
@@ -535,7 +537,9 @@ describe('PersonalBadgeDialog', () => {
         name.dispatchEvent(new Event('input'));
 
         document
-            .querySelector<HTMLButtonElement>('[data-test="badge-personal-submit"]')
+            .querySelector<HTMLButtonElement>(
+                '[data-test="badge-personal-submit"]',
+            )
             ?.click();
         await flushPromises();
 
@@ -590,7 +594,9 @@ describe('PersonalBadgeDialog', () => {
         name.dispatchEvent(new Event('input'));
 
         document
-            .querySelector<HTMLButtonElement>('[data-test="badge-personal-submit"]')
+            .querySelector<HTMLButtonElement>(
+                '[data-test="badge-personal-submit"]',
+            )
             ?.click();
         await flushPromises();
 

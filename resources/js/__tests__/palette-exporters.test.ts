@@ -91,7 +91,9 @@ describe('sanitizePaletteName', () => {
     });
 
     it('colapsa e apara separadores', () => {
-        expect(sanitizePaletteName('--muitos---hifens--')).toBe('muitos-hifens');
+        expect(sanitizePaletteName('--muitos---hifens--')).toBe(
+            'muitos-hifens',
+        );
     });
 
     it('cai no fallback quando nao sobra nada', () => {
@@ -183,9 +185,7 @@ describe('buildPaletteExport — valores opacos', () => {
         expect(parsed.base).toBe(formatHex(SCALE.base));
         expect(parsed.clippedTones).toEqual(SCALE.clippedTones);
         expect(parsed.semantic).toBeUndefined();
-        expect(Object.keys(parsed.colors)).toEqual(
-            PALETTE_TONES.map(String),
-        );
+        expect(Object.keys(parsed.colors)).toEqual(PALETTE_TONES.map(String));
 
         for (const tone of SCALE.tones) {
             expect(parsed.colors[String(tone.tone)]).toBe(tone.hex);
@@ -213,7 +213,9 @@ describe('buildPaletteExport — valores opacos', () => {
         expect(contents.endsWith('\n')).toBe(true);
 
         expect(variablesOf(contents, '                    ')).toEqual(
-            SCALE.tones.map((tone) => `                    ${tone.tone}: '${tone.hex}',`),
+            SCALE.tones.map(
+                (tone) => `                    ${tone.tone}: '${tone.hex}',`,
+            ),
         );
     });
 
@@ -274,7 +276,11 @@ describe('buildPaletteExport — valores com alpha', () => {
     });
 
     it('JSON e Tailwind v4 usam HEX8', () => {
-        const json = buildPaletteExport(ALPHA_SCALE, 'json', 'primary').contents;
+        const json = buildPaletteExport(
+            ALPHA_SCALE,
+            'json',
+            'primary',
+        ).contents;
         const parsed = JSON.parse(json) as {
             base: string;
             colors: Record<string, string>;
@@ -381,7 +387,9 @@ describe('buildPaletteExport — papeis semanticos', () => {
             SEMANTIC_LINES.map((key) => {
                 const separator = key.indexOf('-');
                 const theme = key.slice(0, separator) as 'light' | 'dark';
-                const role = key.slice(separator + 1) as keyof PaletteRoleColors;
+                const role = key.slice(
+                    separator + 1,
+                ) as keyof PaletteRoleColors;
 
                 return `    --color-${key}: ${ROLES[theme][role]};`;
             }),
@@ -389,7 +397,12 @@ describe('buildPaletteExport — papeis semanticos', () => {
     });
 
     it('SCSS usa !default nos papeis', () => {
-        const scss = buildPaletteExport(SCALE, 'scss', 'primary', ROLES).contents;
+        const scss = buildPaletteExport(
+            SCALE,
+            'scss',
+            'primary',
+            ROLES,
+        ).contents;
 
         expect(scss).toContain(
             `$color-light-primary: ${LIGHT_ROLES.primary} !default;`,

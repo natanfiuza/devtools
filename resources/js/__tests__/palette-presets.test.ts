@@ -131,7 +131,9 @@ async function typeName(value: string): Promise<void> {
 function submitCreate(): void {
     document
         .querySelector('[data-test="presets-dialog"] form')
-        ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        ?.dispatchEvent(
+            new Event('submit', { bubbles: true, cancelable: true }),
+        );
 }
 
 beforeEach(() => {
@@ -145,9 +147,8 @@ afterEach(() => {
 
 describe('PresetDialog', () => {
     it('carrega a lista da conta ao abrir', async () => {
-        const fetchMock = vi.fn(
-            async (_url: string, _init?: RequestInit) =>
-                jsonResponse(listBody()),
+        const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+            jsonResponse(listBody()),
         );
         vi.stubGlobal('fetch', fetchMock);
 
@@ -169,7 +170,11 @@ describe('PresetDialog', () => {
     });
 
     it('cria um preset com a base atual do gerador', async () => {
-        const created = { ...PRESET, id: '01JYYYYYYYYYYYYYYYYYYYYYYY', name: 'Marca' };
+        const created = {
+            ...PRESET,
+            id: '01JYYYYYYYYYYYYYYYYYYYYYYY',
+            name: 'Marca',
+        };
         const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
             if (init?.method === 'POST') {
                 return jsonResponse({ preset: created }, 201);
@@ -257,7 +262,9 @@ describe('PresetDialog', () => {
         await openDialog(wrapper);
 
         (
-            document.querySelector('[data-test="preset-apply"]') as HTMLButtonElement
+            document.querySelector(
+                '[data-test="preset-apply"]',
+            ) as HTMLButtonElement
         ).click();
         await flushPromises();
 
@@ -279,7 +286,9 @@ describe('PresetDialog', () => {
         await openDialog(wrapper);
 
         (
-            document.querySelector('[data-test="preset-delete"]') as HTMLButtonElement
+            document.querySelector(
+                '[data-test="preset-delete"]',
+            ) as HTMLButtonElement
         ).click();
         await nextTick();
 
@@ -314,7 +323,12 @@ describe('PresetDialog', () => {
                 return jsonResponse({ preset: renamed });
             }
 
-            return jsonResponse(listBody({ data: [PRESET, second], limits: { limit: null, used: 2 } }));
+            return jsonResponse(
+                listBody({
+                    data: [PRESET, second],
+                    limits: { limit: null, used: 2 },
+                }),
+            );
         });
         vi.stubGlobal('fetch', fetchMock);
 
@@ -322,7 +336,9 @@ describe('PresetDialog', () => {
         await openDialog(wrapper);
 
         (
-            document.querySelectorAll('[data-test="preset-rename"]')[1] as HTMLButtonElement
+            document.querySelectorAll(
+                '[data-test="preset-rename"]',
+            )[1] as HTMLButtonElement
         ).click();
         await nextTick();
 

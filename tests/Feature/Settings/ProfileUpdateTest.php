@@ -1,14 +1,25 @@
 <?php
 
+use App\Enums\ColorCommentReportReason;
 use App\Enums\PaymentStatus;
 use App\Enums\SubscriptionStatus;
 use App\Models\AiRequest;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgePreset;
+use App\Models\ColorCommentReport;
+use App\Models\ColorFavorite;
+use App\Models\ColorHistoryEntry;
+use App\Models\ColorPalette;
+use App\Models\ColorPaletteComment;
+use App\Models\ColorPaletteFavorite;
+use App\Models\ColorPaletteLike;
+use App\Models\ColorPreset;
+use App\Models\ColorTag;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Models\UserFollow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -191,6 +202,49 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
     BadgeCustomLogo::factory()->for($user)->create();
     BadgePreset::factory()->for($user)->create();
 
+    // Colors (F8, ADR-144): a biblioteca e as relacoes que a conta iniciou sao
+    // dado da pessoa; paletas, comentarios e denuncias sao conteudo publicado.
+    $seguidor = User::factory()->create();
+    $seguido = User::factory()->create();
+    $paleta = ColorPalette::factory()->for($user)->public()->create();
+    $outra = ColorPalette::factory()->for($seguido)->public()->create();
+    $tag = ColorTag::factory()->for($user)->create();
+    $paleta->tags()->attach($tag);
+    ColorHistoryEntry::create(['user_id' => $user->id, 'color' => '#112233']);
+    ColorFavorite::create(['user_id' => $user->id, 'color' => '#445566']);
+    ColorPreset::factory()->for($user)->create();
+    ColorPaletteFavorite::create(['user_id' => $user->id, 'color_palette_id' => $outra->id]);
+    ColorPaletteLike::create([
+        'color_palette_id' => $outra->id,
+        'user_id' => $user->id,
+        'liked_at' => now(),
+    ]);
+    ColorPaletteLike::create([
+        'color_palette_id' => $outra->id,
+        'anonymous_id' => str_repeat('a', 64),
+        'liked_at' => now(),
+    ]);
+    UserFollow::create([
+        'follower_id' => $user->id,
+        'followed_id' => $seguido->id,
+        'followed_at' => now(),
+    ]);
+    UserFollow::create([
+        'follower_id' => $seguidor->id,
+        'followed_id' => $user->id,
+        'followed_at' => now(),
+    ]);
+    $comentario = ColorPaletteComment::factory()->approved()->create([
+        'color_palette_id' => $paleta->id,
+        'user_id' => $user->id,
+        'body' => 'Bela paleta',
+    ]);
+    $denuncia = ColorCommentReport::factory()->resolved($user)->create([
+        'comment_id' => $comentario->id,
+        'user_id' => $user->id,
+        'reason' => ColorCommentReportReason::Spam,
+    ]);
+
     // Simula exclusao ha mais de 30 dias
     $user->delete();
     DB::table('users')->where('id', $user->id)->update(['deleted_at' => now()->subDays(31)]);
@@ -217,6 +271,26 @@ it('rotina de expurgo anonimiza conta soft-deleted apos 30 dias', function () {
         ->and($anonima->tokens()->count())->toBe(0)
         ->and($anonima->badgeCustomLogos()->count())->toBe(0)
         ->and($anonima->badgePresets()->count())->toBe(0);
+
+    // Colors: biblioteca, tags e relacoes de saida saem; conteudo publicado
+    // fica, sem autoria. Curtida anonima e follow de terceiro nao pertencem a
+    // conta e nao podem ser apagados por ela.
+    expect($anonima->colorHistoryEntries()->count())->toBe(0)
+        ->and($anonima->colorFavorites()->count())->toBe(0)
+        ->and($anonima->colorPresets()->count())->toBe(0)
+        ->and($anonima->favoritePalettes()->count())->toBe(0)
+        ->and($anonima->paletteLikes()->count())->toBe(0)
+        ->and($anonima->following()->count())->toBe(0)
+        ->and($anonima->followers()->count())->toBe(1)
+        ->and($anonima->colorTags()->count())->toBe(0)
+        ->and(ColorPaletteLike::query()->whereNull('user_id')->count())->toBe(1)
+        ->and(ColorPalette::query()->count())->toBe(2)
+        ->and($paleta->refresh()->user_id)->toBe($user->id)
+        ->and($comentario->refresh()->user_id)->toBeNull()
+        ->and($comentario->body)->toBe('Bela paleta')
+        ->and($denuncia->refresh()->user_id)->toBeNull()
+        ->and($denuncia->resolved_by)->toBeNull()
+        ->and($denuncia->reason)->toBe(ColorCommentReportReason::Spam);
 });
 
 it('requires the correct password to delete the account', function () {

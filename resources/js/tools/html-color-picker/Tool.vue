@@ -125,132 +125,124 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6">
-    <div
-      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start"
-    >
-      <div class="flex min-w-0 flex-col gap-6">
-        <section
-          class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
+    <div class="flex flex-col gap-6">
+        <div
+            class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start"
         >
-          <ColorPreview
-            :rgba="rgba"
-            :out-of-gamut="outOfGamut"
-            :gamut-source="gamutSource"
-            @picked="applyPicked"
-          />
+            <div class="flex min-w-0 flex-col gap-6">
+                <section
+                    class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
+                >
+                    <ColorPreview
+                        :rgba="rgba"
+                        :out-of-gamut="outOfGamut"
+                        :gamut-source="gamutSource"
+                        @picked="applyPicked"
+                    />
 
-          <ColorInputField
-            :model-value="text"
-            :error="error"
-            @update="state.setFromText"
-            @finalize="state.finalizeText"
-          />
+                    <ColorInputField
+                        :model-value="text"
+                        :error="error"
+                        @update="state.setFromText"
+                        @finalize="state.finalizeText"
+                    />
 
-          <ColorArea
-            :hsv="hsv"
-            @change="state.setSaturationValue"
-            @finalize="state.finalize"
-          />
+                    <ColorArea
+                        :hsv="hsv"
+                        @change="state.setSaturationValue"
+                        @finalize="state.finalize"
+                    />
 
-          <HueSlider
-            :model-value="hsv.h"
-            @change="state.setHue"
-            @finalize="state.finalize"
-          />
+                    <HueSlider
+                        :model-value="hsv.h"
+                        @change="state.setHue"
+                        @finalize="state.finalize"
+                    />
 
-          <AlphaSlider
-            :model-value="rgba.a"
-            :color="rgba"
-            @change="state.setAlpha"
-            @finalize="state.finalize"
-          />
+                    <AlphaSlider
+                        :model-value="rgba.a"
+                        :color="rgba"
+                        @change="state.setAlpha"
+                        @finalize="state.finalize"
+                    />
 
-          <ChannelSliders
-            :rgba="rgba"
-            :hsl="hsl"
-            @set-rgb="state.setRgbChannel"
-            @set-hsl="state.setHslChannel"
-            @finalize="state.finalize"
-          />
-        </section>
+                    <ChannelSliders
+                        :rgba="rgba"
+                        :hsl="hsl"
+                        @set-rgb="state.setRgbChannel"
+                        @set-hsl="state.setHslChannel"
+                        @finalize="state.finalize"
+                    />
+                </section>
 
-        <FormatsList
-          :rgba="rgba"
-          :copy="copyFeedback.copy"
-        />
-      </div>
+                <FormatsList :rgba="rgba" :copy="copyFeedback.copy" />
+            </div>
 
-      <div class="min-w-0">
-        <Tabs default-value="contrast">
-          <TabsList class="grid w-full grid-cols-3">
-            <TabsTrigger value="contrast">
-              {{ t('tools.html-color-picker.tabs.contrast') }}
-            </TabsTrigger>
-            <TabsTrigger value="shades">
-              {{ t('tools.html-color-picker.tabs.shades') }}
-            </TabsTrigger>
-            <TabsTrigger value="library">
-              {{ t('tools.html-color-picker.tabs.library') }}
-            </TabsTrigger>
-          </TabsList>
+            <div class="min-w-0">
+                <Tabs default-value="contrast">
+                    <TabsList class="grid w-full grid-cols-3">
+                        <TabsTrigger value="contrast">
+                            {{ t('tools.html-color-picker.tabs.contrast') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="shades">
+                            {{ t('tools.html-color-picker.tabs.shades') }}
+                        </TabsTrigger>
+                        <TabsTrigger value="library">
+                            {{ t('tools.html-color-picker.tabs.library') }}
+                        </TabsTrigger>
+                    </TabsList>
 
-          <TabsContent
-            value="contrast"
-            class="mt-3"
-          >
-            <ContrastPanel :rgba="rgba" />
-          </TabsContent>
+                    <TabsContent value="contrast" class="mt-3">
+                        <ContrastPanel :rgba="rgba" />
+                    </TabsContent>
 
-          <TabsContent
-            value="shades"
-            class="mt-3"
-          >
-            <ShadesTintsPanel
-              :rgba="rgba"
-              @apply="applyColor"
-            />
-          </TabsContent>
+                    <TabsContent value="shades" class="mt-3">
+                        <ShadesTintsPanel :rgba="rgba" @apply="applyColor" />
+                    </TabsContent>
 
-          <TabsContent
-            value="library"
-            class="mt-3 flex flex-col gap-4"
-          >
-            <FavoritesPanel
-              :colors="favoriteColors"
-              :is-favorite="isFavorite"
-              :authenticated="props.library?.authenticated === true"
-              :more="hasMoreFavorites"
-              :loading-more="loadingMore"
-              @apply="applyColor"
-              @toggle="toggleCurrentFavorite"
-              @clear="clearFavorites"
-              @more="loadMoreFavorites"
-            />
-            <HistoryPanel
-              :colors="historyColors"
-              :authenticated="props.library?.authenticated === true"
-              :importable="importable"
-              :importing="importing"
-              :more="hasMoreHistory"
-              :loading-more="loadingMore"
-              @apply="applyColor"
-              @clear="clearHistory"
-              @import="importHistory"
-              @more="loadMoreHistory"
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+                    <TabsContent
+                        value="library"
+                        class="mt-3 flex flex-col gap-4"
+                    >
+                        <FavoritesPanel
+                            :colors="favoriteColors"
+                            :is-favorite="isFavorite"
+                            :authenticated="
+                                props.library?.authenticated === true
+                            "
+                            :more="hasMoreFavorites"
+                            :loading-more="loadingMore"
+                            @apply="applyColor"
+                            @toggle="toggleCurrentFavorite"
+                            @clear="clearFavorites"
+                            @more="loadMoreFavorites"
+                        />
+                        <HistoryPanel
+                            :colors="historyColors"
+                            :authenticated="
+                                props.library?.authenticated === true
+                            "
+                            :importable="importable"
+                            :importing="importing"
+                            :more="hasMoreHistory"
+                            :loading-more="loadingMore"
+                            @apply="applyColor"
+                            @clear="clearHistory"
+                            @import="importHistory"
+                            @more="loadMoreHistory"
+                        />
+                    </TabsContent>
+                </Tabs>
+            </div>
+        </div>
+
+        <p
+            class="min-h-5 text-sm text-muted-foreground"
+            role="status"
+            aria-live="polite"
+            data-test="picker-feedback"
+        >
+            {{ feedback }}
+        </p>
     </div>
-
-    <p
-      class="min-h-5 text-sm text-muted-foreground"
-      role="status"
-      aria-live="polite"
-      data-test="picker-feedback"
-    >
-      {{ feedback }}
-    </p>
-  </div>
 </template>

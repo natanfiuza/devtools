@@ -247,314 +247,314 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-  <Dialog
-    :open="open"
-    @update:open="setOpen"
-  >
-    <DialogContent
-      class="sm:max-w-lg"
-      data-test="presets-dialog"
-    >
-      <DialogHeader>
-        <DialogTitle>{{ t('colors.presets.title') }}</DialogTitle>
-        <DialogDescription>
-          {{ t('colors.presets.description') }}
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog :open="open" @update:open="setOpen">
+        <DialogContent class="sm:max-w-lg" data-test="presets-dialog">
+            <DialogHeader>
+                <DialogTitle>{{ t('colors.presets.title') }}</DialogTitle>
+                <DialogDescription>
+                    {{ t('colors.presets.description') }}
+                </DialogDescription>
+            </DialogHeader>
 
-      <form
-        class="flex flex-col gap-3 rounded-xl border border-border p-3"
-        @submit.prevent="create"
-      >
-        <div class="flex items-center gap-2 text-sm">
-          <span
-            v-if="hasBase"
-            class="size-5 rounded-md border border-border"
-            :style="{ backgroundColor: base }"
-            aria-hidden="true"
-          />
-          <span
-            v-if="hasBase"
-            class="font-mono text-xs text-muted-foreground"
-            data-test="presets-current-base"
-          >
-            {{ t('colors.presets.current_base', { hex: base }) }}
-          </span>
-          <span
-            v-else
-            class="text-xs text-muted-foreground"
-            data-test="presets-no-base"
-          >
-            {{ t('colors.presets.empty_base') }}
-          </span>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <div class="flex items-baseline justify-between gap-2">
-            <Label for="preset-name">
-              {{ t('colors.presets.name_label') }}
-            </Label>
-            <span
-              v-if="nameMaxLength !== null"
-              class="text-xs text-muted-foreground"
+            <form
+                class="flex flex-col gap-3 rounded-xl border border-border p-3"
+                @submit.prevent="create"
             >
-              {{ name.trim().length }}/{{ nameMaxLength }}
-            </span>
-          </div>
-          <Input
-            id="preset-name"
-            v-model="name"
-            type="text"
-            autocomplete="off"
-            :maxlength="nameMaxLength ?? undefined"
-            :aria-invalid="duplicate || formError !== null"
-            :placeholder="t('colors.presets.name_placeholder')"
-            data-test="preset-name"
-          />
-        </div>
+                <div class="flex items-center gap-2 text-sm">
+                    <span
+                        v-if="hasBase"
+                        class="size-5 rounded-md border border-border"
+                        :style="{ backgroundColor: base }"
+                        aria-hidden="true"
+                    />
+                    <span
+                        v-if="hasBase"
+                        class="font-mono text-xs text-muted-foreground"
+                        data-test="presets-current-base"
+                    >
+                        {{ t('colors.presets.current_base', { hex: base }) }}
+                    </span>
+                    <span
+                        v-else
+                        class="text-xs text-muted-foreground"
+                        data-test="presets-no-base"
+                    >
+                        {{ t('colors.presets.empty_base') }}
+                    </span>
+                </div>
 
-        <p
-          v-if="limitReached"
-          class="text-xs text-muted-foreground"
-          data-test="presets-limit"
-        >
-          {{ t('colors.presets.limit_reached', { max: limit }) }}
-        </p>
-        <p
-          v-else-if="duplicate"
-          class="text-xs text-destructive"
-          data-test="presets-duplicate"
-        >
-          {{ t('colors.presets.duplicate') }}
-        </p>
-        <p
-          v-if="formError !== null"
-          class="text-xs text-destructive"
-          role="alert"
-          data-test="presets-form-error"
-        >
-          {{ formError }}
-        </p>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <Label for="preset-name">
+                            {{ t('colors.presets.name_label') }}
+                        </Label>
+                        <span
+                            v-if="nameMaxLength !== null"
+                            class="text-xs text-muted-foreground"
+                        >
+                            {{ name.trim().length }}/{{ nameMaxLength }}
+                        </span>
+                    </div>
+                    <Input
+                        id="preset-name"
+                        v-model="name"
+                        type="text"
+                        autocomplete="off"
+                        :maxlength="nameMaxLength ?? undefined"
+                        :aria-invalid="duplicate || formError !== null"
+                        :placeholder="t('colors.presets.name_placeholder')"
+                        data-test="preset-name"
+                    />
+                </div>
 
-        <div class="flex justify-end">
-          <Button
-            type="submit"
-            size="sm"
-            :disabled="!canCreate"
-            data-test="presets-create"
-          >
-            {{
-              saving
-                ? t('colors.presets.saving')
-                : t('colors.presets.create')
-            }}
-          </Button>
-        </div>
-      </form>
-
-      <p
-        v-if="loading"
-        class="text-sm text-muted-foreground"
-        data-test="presets-loading"
-      >
-        {{ t('colors.presets.loading') }}
-      </p>
-
-      <div
-        v-else-if="loadError"
-        class="flex items-center justify-between gap-2 rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
-        role="alert"
-        data-test="presets-load-error"
-      >
-        <span>{{ t('colors.presets.load_error') }}</span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          @click="load"
-        >
-          {{ t('colors.presets.retry') }}
-        </Button>
-      </div>
-
-      <p
-        v-else-if="presets.length === 0"
-        class="text-sm text-muted-foreground"
-        data-test="presets-empty"
-      >
-        {{ t('colors.presets.empty') }}
-      </p>
-
-      <ul
-        v-else
-        class="flex max-h-80 flex-col gap-2 overflow-y-auto"
-      >
-        <li
-          v-for="preset in presets"
-          :key="preset.id"
-          class="flex flex-col gap-2 rounded-lg border border-border px-3 py-2"
-          data-test="preset-row"
-        >
-          <div class="flex items-center gap-2">
-            <span
-              class="size-6 shrink-0 rounded-md border border-border"
-              :style="{ backgroundColor: preset.base }"
-              aria-hidden="true"
-            />
-            <div class="min-w-0 flex-1">
-              <template v-if="renamingId === preset.id">
-                <Input
-                  v-model="renameName"
-                  type="text"
-                  autocomplete="off"
-                  :maxlength="nameMaxLength ?? undefined"
-                  :aria-invalid="rowError !== null"
-                  :aria-label="t('colors.presets.name_label')"
-                  data-test="preset-rename-input"
-                  @keydown.enter.prevent="saveRename(preset)"
-                  @keydown.esc.prevent="cancelRename"
-                />
-              </template>
-              <template v-else>
                 <p
-                  class="truncate text-sm font-medium"
-                  data-test="preset-name-label"
+                    v-if="limitReached"
+                    class="text-xs text-muted-foreground"
+                    data-test="presets-limit"
                 >
-                  {{ preset.name }}
+                    {{ t('colors.presets.limit_reached', { max: limit }) }}
                 </p>
-                <p class="font-mono text-xs text-muted-foreground">
-                  {{ preset.base }}
-                  <template v-if="formatDate(preset.updated_at) !== null">
-                    · {{
-                      t('colors.presets.updated_at', {
-                        date: formatDate(preset.updated_at),
-                      })
-                    }}
-                  </template>
+                <p
+                    v-else-if="duplicate"
+                    class="text-xs text-destructive"
+                    data-test="presets-duplicate"
+                >
+                    {{ t('colors.presets.duplicate') }}
                 </p>
-              </template>
-            </div>
-          </div>
+                <p
+                    v-if="formError !== null"
+                    class="text-xs text-destructive"
+                    role="alert"
+                    data-test="presets-form-error"
+                >
+                    {{ formError }}
+                </p>
 
-          <p
-            v-if="rowErrorId === preset.id && rowError !== null"
-            class="text-xs text-destructive"
-            role="alert"
-            data-test="preset-row-error"
-          >
-            {{ rowError }}
-          </p>
+                <div class="flex justify-end">
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="!canCreate"
+                        data-test="presets-create"
+                    >
+                        {{
+                            saving
+                                ? t('colors.presets.saving')
+                                : t('colors.presets.create')
+                        }}
+                    </Button>
+                </div>
+            </form>
 
-          <div class="flex flex-wrap justify-end gap-1">
-            <template v-if="renamingId === preset.id">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="renaming"
-                data-test="preset-rename-cancel"
-                @click="cancelRename"
-              >
-                {{ t('colors.presets.cancel') }}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                :disabled="!canRename"
-                data-test="preset-rename-save"
-                @click="saveRename(preset)"
-              >
-                {{
-                  renaming
-                    ? t('colors.presets.renaming')
-                    : t('colors.presets.rename_save')
-                }}
-              </Button>
-            </template>
-            <template v-else>
-              <Button
-                type="button"
-                size="sm"
-                data-test="preset-apply"
-                @click="applyPreset(preset)"
-              >
-                {{ t('colors.presets.apply') }}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="deletingId !== null"
-                data-test="preset-rename"
-                @click="startRename(preset)"
-              >
-                {{ t('colors.presets.rename') }}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="deletingId !== null"
-                data-test="preset-delete"
-                @click="confirmingId = preset.id"
-              >
-                {{ t('colors.presets.delete') }}
-              </Button>
-            </template>
-          </div>
-
-          <div
-            v-if="confirmingId === preset.id"
-            class="flex flex-col gap-2 rounded-lg border border-dashed border-destructive/40 px-3 py-2"
-            data-test="preset-delete-confirm"
-          >
-            <p class="text-xs">
-              {{ t('colors.presets.confirm_delete', { name: preset.name }) }}
+            <p
+                v-if="loading"
+                class="text-sm text-muted-foreground"
+                data-test="presets-loading"
+            >
+                {{ t('colors.presets.loading') }}
             </p>
-            <p class="text-xs text-muted-foreground">
-              {{ t('colors.presets.confirm_delete_hint') }}
-            </p>
-            <div class="flex justify-end gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                :disabled="deletingId !== null"
-                data-test="preset-delete-cancel"
-                @click="confirmingId = null"
-              >
-                {{ t('colors.presets.cancel') }}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                :disabled="deletingId !== null"
-                data-test="preset-delete-confirm-button"
-                @click="remove(preset)"
-              >
-                {{
-                  deletingId === preset.id
-                    ? t('colors.presets.deleting')
-                    : t('colors.presets.delete')
-                }}
-              </Button>
-            </div>
-          </div>
-        </li>
-      </ul>
 
-      <DialogFooter>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          data-test="presets-close"
-          @click="emit('close')"
-        >
-          {{ t('colors.presets.close') }}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+            <div
+                v-else-if="loadError"
+                class="flex items-center justify-between gap-2 rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
+                role="alert"
+                data-test="presets-load-error"
+            >
+                <span>{{ t('colors.presets.load_error') }}</span>
+                <Button type="button" variant="ghost" size="sm" @click="load">
+                    {{ t('colors.presets.retry') }}
+                </Button>
+            </div>
+
+            <p
+                v-else-if="presets.length === 0"
+                class="text-sm text-muted-foreground"
+                data-test="presets-empty"
+            >
+                {{ t('colors.presets.empty') }}
+            </p>
+
+            <ul v-else class="flex max-h-80 flex-col gap-2 overflow-y-auto">
+                <li
+                    v-for="preset in presets"
+                    :key="preset.id"
+                    class="flex flex-col gap-2 rounded-lg border border-border px-3 py-2"
+                    data-test="preset-row"
+                >
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="size-6 shrink-0 rounded-md border border-border"
+                            :style="{ backgroundColor: preset.base }"
+                            aria-hidden="true"
+                        />
+                        <div class="min-w-0 flex-1">
+                            <template v-if="renamingId === preset.id">
+                                <Input
+                                    v-model="renameName"
+                                    type="text"
+                                    autocomplete="off"
+                                    :maxlength="nameMaxLength ?? undefined"
+                                    :aria-invalid="rowError !== null"
+                                    :aria-label="t('colors.presets.name_label')"
+                                    data-test="preset-rename-input"
+                                    @keydown.enter.prevent="saveRename(preset)"
+                                    @keydown.esc.prevent="cancelRename"
+                                />
+                            </template>
+                            <template v-else>
+                                <p
+                                    class="truncate text-sm font-medium"
+                                    data-test="preset-name-label"
+                                >
+                                    {{ preset.name }}
+                                </p>
+                                <p
+                                    class="font-mono text-xs text-muted-foreground"
+                                >
+                                    {{ preset.base }}
+                                    <template
+                                        v-if="
+                                            formatDate(preset.updated_at) !==
+                                            null
+                                        "
+                                    >
+                                        ·
+                                        {{
+                                            t('colors.presets.updated_at', {
+                                                date: formatDate(
+                                                    preset.updated_at,
+                                                ),
+                                            })
+                                        }}
+                                    </template>
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <p
+                        v-if="rowErrorId === preset.id && rowError !== null"
+                        class="text-xs text-destructive"
+                        role="alert"
+                        data-test="preset-row-error"
+                    >
+                        {{ rowError }}
+                    </p>
+
+                    <div class="flex flex-wrap justify-end gap-1">
+                        <template v-if="renamingId === preset.id">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                :disabled="renaming"
+                                data-test="preset-rename-cancel"
+                                @click="cancelRename"
+                            >
+                                {{ t('colors.presets.cancel') }}
+                            </Button>
+                            <Button
+                                type="button"
+                                size="sm"
+                                :disabled="!canRename"
+                                data-test="preset-rename-save"
+                                @click="saveRename(preset)"
+                            >
+                                {{
+                                    renaming
+                                        ? t('colors.presets.renaming')
+                                        : t('colors.presets.rename_save')
+                                }}
+                            </Button>
+                        </template>
+                        <template v-else>
+                            <Button
+                                type="button"
+                                size="sm"
+                                data-test="preset-apply"
+                                @click="applyPreset(preset)"
+                            >
+                                {{ t('colors.presets.apply') }}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                :disabled="deletingId !== null"
+                                data-test="preset-rename"
+                                @click="startRename(preset)"
+                            >
+                                {{ t('colors.presets.rename') }}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                :disabled="deletingId !== null"
+                                data-test="preset-delete"
+                                @click="confirmingId = preset.id"
+                            >
+                                {{ t('colors.presets.delete') }}
+                            </Button>
+                        </template>
+                    </div>
+
+                    <div
+                        v-if="confirmingId === preset.id"
+                        class="flex flex-col gap-2 rounded-lg border border-dashed border-destructive/40 px-3 py-2"
+                        data-test="preset-delete-confirm"
+                    >
+                        <p class="text-xs">
+                            {{
+                                t('colors.presets.confirm_delete', {
+                                    name: preset.name,
+                                })
+                            }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ t('colors.presets.confirm_delete_hint') }}
+                        </p>
+                        <div class="flex justify-end gap-1">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                :disabled="deletingId !== null"
+                                data-test="preset-delete-cancel"
+                                @click="confirmingId = null"
+                            >
+                                {{ t('colors.presets.cancel') }}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                :disabled="deletingId !== null"
+                                data-test="preset-delete-confirm-button"
+                                @click="remove(preset)"
+                            >
+                                {{
+                                    deletingId === preset.id
+                                        ? t('colors.presets.deleting')
+                                        : t('colors.presets.delete')
+                                }}
+                            </Button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+            <DialogFooter>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-test="presets-close"
+                    @click="emit('close')"
+                >
+                    {{ t('colors.presets.close') }}
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
 </template>

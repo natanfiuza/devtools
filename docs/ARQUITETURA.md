@@ -23,6 +23,7 @@ vocabulário, em [glossario.md](glossario.md). As decisões ficam em `ADR-0xx`.
 | Pagamentos | `/subscribe`, `/subscribe/checkout`, `/dashboard/billing`, `/admin/payments`, `/admin/intents` | Venda manual, Checkout Pro, Preapproval e confirmação de intenção. | `## Pagamentos e webhooks`; ADR-045, ADR-046, ADR-049, ADR-054 |
 | Webhooks | `POST /webhooks/mercadopago` | Assinatura HMAC, armazenamento cru, fila e busca do recurso. | `### Webhooks`; ADR-047 |
 | Base64 Image | `/api/tools/base64-image/*`, `/tools/base64-image/{download,preview}` | Conversão no servidor, armazenamento, retenção e download. | `### Base64 Image`; ADR-055 |
+| Colors | `/{locale}/tools/colors*`, `/dashboard/colors/*`, `/{locale}/colors/p/{slug}`, `/{locale}/u/{username}`, `/admin/comments`, `/admin/comment-reports` | Paletas salvas e públicas, biblioteca pessoal, curtidas/seguir/perfil, comentários com moderação por IA, denúncias e notificações; geração, extração e protótipos continuam no navegador. | `### Colors`; ADR-091 a ADR-144; [colors/](colors/) |
 | Contato | `GET/POST /{locale}/contact` | Formulário público, gravação e e-mail para a administração. | `### Contato` |
 | Admin | `/admin/*` | Contas, assinaturas, planos, intenções, pagamentos, webhooks, alvos e cache. | ADR-025; [DESIGN.md](design/DESIGN.md) |
 | i18n e prompts | `/{locale}`, `lang/`, `resources/prompts/` | Cinco idiomas; o locale entra no payload e no hash da IA; traducao compilada em runtime com compilador tolerante. | ADR-010, ADR-026, ADR-056, ADR-060; [SPEC.md](SPEC.md) |
@@ -63,6 +64,25 @@ houver sessão, `user_id`; depois enfileira `ContactMessageReceived` para
 `CONTACT_EMAIL`. O `StoreContactMessageRequest` limita a 5 envios por minuto
 por IP e o honeypot `hp_website` descarta o bot em silêncio, devolvendo a
 mesma mensagem de sucesso. Não há tela de admin para ler as mensagens.
+
+### Colors (ADR-091 a ADR-144)
+
+O grupo é misto por desenho: **gerar, converter, extrair e exportar é do
+navegador** (ADR-002 continua valendo; a imagem do usuário nunca sobe, nem na
+extração de cores, nem no protótipo, nem na imagem tipográfica), e só a
+**conta** fala com o servidor — paletas salvas e públicas, biblioteca de cores,
+curtidas, follows, perfil, comentários, denúncias e notificações. A geração da
+OG dinâmica da paleta também é do cliente; o PNG só chega ao servidor por
+upload validado em `storage/app/data/og_paleta_image` (nunca versionada).
+
+Invariantes que a auditoria final fixou (ADR-144): paleta **nunca** é excluída
+na anonimização, porque as FKs de comentários, curtidas e favoritos são
+`cascadeOnDelete` e levariam dados de outras contas; a moderação roda em fila
+(`ModerateColorComment` após o commit, chave única por comentário/revisão) com
+cache `ai_cache` de `purpose = colors.comment_moderation`; e a flag
+`COLORS_COMMENTS_ENABLED` desligada responde 404 uniforme em toda a superfície
+de comentário. A documentação do grupo, termo a termo, está em
+[colors/](colors/).
 
 ## Visão em uma tela
 

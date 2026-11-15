@@ -27,12 +27,8 @@ const svg = computed(() => {
     const body = props.paths
         .map((path) => {
             const rules = [
-                path.fillRule === null
-                    ? ''
-                    : ` fill-rule="${path.fillRule}"`,
-                path.clipRule === null
-                    ? ''
-                    : ` clip-rule="${path.clipRule}"`,
+                path.fillRule === null ? '' : ` fill-rule="${path.fillRule}"`,
+                path.clipRule === null ? '' : ` clip-rule="${path.clipRule}"`,
             ].join('');
 
             return `<path d="${escapeXml(path.d)}"${rules} fill="${escapeXml(props.color)}"/>`;
@@ -50,11 +46,11 @@ const svg = computed(() => {
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado aqui -->
-  <span
-    class="inline-flex shrink-0"
-    data-test="badge-logo-preview"
-    v-html="svg"
-  />
-  <!-- eslint-enable vue/no-v-html -->
+    <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado aqui -->
+    <span
+        class="inline-flex shrink-0"
+        data-test="badge-logo-preview"
+        v-html="svg"
+    />
+    <!-- eslint-enable vue/no-v-html -->
 </template>

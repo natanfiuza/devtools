@@ -45,7 +45,8 @@ function i18n() {
                         hint: 'Até {size}.',
                         reading: 'Lendo o arquivo…',
                         file_errors: {
-                            file_too_large: 'O arquivo passa do limite de {limit}.',
+                            file_too_large:
+                                'O arquivo passa do limite de {limit}.',
                             file_type: 'Escolha um arquivo .json.',
                             file_unreadable:
                                 'Não foi possível ler o arquivo. Tente outro.',
@@ -213,12 +214,12 @@ describe('TokenImportDialog', () => {
         expect(query('[data-test="token-import-base"]')?.textContent).toBe(
             '#1212aa',
         );
-        expect(query('[data-test="token-import-count"]')?.textContent).toContain(
-            '11',
-        );
-        expect(query('[data-test="token-import-roles"]')?.textContent).toContain(
-            'Papéis semânticos incluídos',
-        );
+        expect(
+            query('[data-test="token-import-count"]')?.textContent,
+        ).toContain('11');
+        expect(
+            query('[data-test="token-import-roles"]')?.textContent,
+        ).toContain('Papéis semânticos incluídos');
         expect(query('[data-test="token-import-name"]')?.textContent).toContain(
             'aurora',
         );
@@ -257,9 +258,7 @@ describe('TokenImportDialog', () => {
         const error = await waitFor('[data-test="token-import-error"]');
 
         expect(error.textContent).toContain('linha');
-        expect(
-            query('[data-test="token-import-preview"]'),
-        ).toBeNull();
+        expect(query('[data-test="token-import-preview"]')).toBeNull();
 
         const apply = query<HTMLButtonElement>(
             '[data-test="token-import-apply"]',
@@ -305,12 +304,8 @@ describe('TokenImportDialog', () => {
         const error = await waitFor('[data-test="token-import-file-error"]');
 
         expect(error.textContent).toContain('limite');
-        expect(
-            query('[data-test="token-import-error"]'),
-        ).toBeNull();
-        expect(
-            query('[data-test="token-import-preview"]'),
-        ).toBeNull();
+        expect(query('[data-test="token-import-error"]')).toBeNull();
+        expect(query('[data-test="token-import-preview"]')).toBeNull();
     });
 
     it('recusa um arquivo que não é JSON', async () => {

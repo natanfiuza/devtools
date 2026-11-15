@@ -11,8 +11,7 @@ import type { ExtractedColor, ExtractionCount } from './extractContract';
  */
 
 export type ExtractedPaletteSource =
-    | { kind: 'file'; label: string }
-    | { kind: 'url'; host: string };
+    { kind: 'file'; label: string } | { kind: 'url'; host: string };
 
 export interface ExtractedPalette {
     colors: ExtractedColor[];

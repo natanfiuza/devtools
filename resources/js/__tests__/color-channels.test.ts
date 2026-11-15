@@ -143,24 +143,20 @@ describe('ChannelSliders', () => {
     it('mostra tres canais por aba', async () => {
         const wrapper = mountSliders();
 
-        expect(
-            wrapper.find('[data-test="channel-slider-r"]').exists(),
-        ).toBe(true);
-        expect(
-            wrapper.findAll('input[type="range"]'),
-        ).toHaveLength(3);
-        expect(
-            wrapper.find('[data-test="channel-tab-hsl"]').text(),
-        ).toBe('HSL');
+        expect(wrapper.find('[data-test="channel-slider-r"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.findAll('input[type="range"]')).toHaveLength(3);
+        expect(wrapper.find('[data-test="channel-tab-hsl"]').text()).toBe(
+            'HSL',
+        );
 
         await wrapper.get('[data-test="channel-tab-hsl"]').trigger('mousedown');
 
-        expect(
-            wrapper.find('[data-test="channel-slider-h"]').exists(),
-        ).toBe(true);
-        expect(
-            wrapper.findAll('input[type="range"]'),
-        ).toHaveLength(3);
+        expect(wrapper.find('[data-test="channel-slider-h"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.findAll('input[type="range"]')).toHaveLength(3);
     });
 
     it('emite set-rgb no arraste e finalize no fim do gesto', async () => {

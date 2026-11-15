@@ -1,0 +1,29 @@
+Item 14 — Tema escuro (F8, checklist manual)
+Data: 2026-11-15
+Ambiente: SQLite descartavel em %TEMP%, COLORS_COMMENTS_ENABLED=true, INERTIA_SSR_ENABLED=true,
+          build de producao servida por `php artisan serve` em http://127.0.0.1:8000.
+
+Metodo: `browser_emulate_media({colorScheme: "dark"})` (prefers-color-scheme: dark) sem
+        opt-in de tema no cookie/perfil, para exercitar o caminho "seguir o sistema".
+
+/Pt-br/tools/colors/html-color-picker
+  html.className          = "dark"
+  body background         = rgb(11, 12, 15)
+  colorScheme computado   = "normal" (o dark vem da classe, nao de forced-colors)
+  Captura: 14-tema-escuro-picker.png
+  Observado: cabecalho, campos e painel de gradiente com superficies escuras; texto
+  legivel; nenhuma area branca vazando (sem flash de tema claro na captura).
+
+/pt-br/colors/p/oceano
+  html.className          = "dark"
+  body background         = rgb(11, 12, 15)
+  colorScheme computado   = "normal"
+  Captura: 14-tema-escuro-paleta-publica.png
+
+Restauracao: `browser_emulate_media({colorScheme: "light"})` ao fim; o tema nao fica
+             preso no navegador nem no cookie do usuario.
+
+Conclusao: os dois tons (claro/escuro) renderizam corretamente pela classe `dark` do
+documento, sem mudanca de markup entre temas. O checklist de contraste WCAG usa o
+painel do picker (color-contrast.test.ts cobre os calculos); a verificacao visual do
+tema escuro nao encontrou regressao.

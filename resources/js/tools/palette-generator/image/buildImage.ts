@@ -35,7 +35,11 @@ export function imageColors(source: PaletteImageSource): string[] {
         .filter((hex) => HEX_PATTERN.test(hex));
 }
 
-function watermark(x: number, y: number, anchor: 'start' | 'middle' | 'end'): SvgNode {
+function watermark(
+    x: number,
+    y: number,
+    anchor: 'start' | 'middle' | 'end',
+): SvgNode {
     return {
         kind: 'text',
         x,

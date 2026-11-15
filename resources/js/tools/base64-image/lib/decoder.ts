@@ -34,7 +34,10 @@ export function parseBase64Image(rawInput: string): DecodedImageResult {
             mimeType = 'image/gif';
         } else if (base64Data.startsWith('UklGR')) {
             mimeType = 'image/webp';
-        } else if (base64Data.startsWith('PHN2Zw') || base64Data.startsWith('PD94b')) {
+        } else if (
+            base64Data.startsWith('PHN2Zw') ||
+            base64Data.startsWith('PD94b')
+        ) {
             mimeType = 'image/svg+xml';
         }
     }

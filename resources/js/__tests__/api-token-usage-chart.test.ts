@@ -9,7 +9,8 @@ const mockTranslations = {
         api_tokens: {
             usage_chart: {
                 title: 'Estatísticas de consumo de IA',
-                description: 'Acompanhe a quantidade diária de tokens de IA consumidos e requisições via tokens de API.',
+                description:
+                    'Acompanhe a quantidade diária de tokens de IA consumidos e requisições via tokens de API.',
                 views: {
                     total: 'Total diário',
                     by_token: 'Por token de API',
@@ -40,7 +41,8 @@ const mockTranslations = {
                 },
                 empty: {
                     title: 'Nenhum consumo no período',
-                    description: 'Nenhuma consulta foi realizada pelos tokens de API nas datas selecionadas.',
+                    description:
+                        'Nenhuma consulta foi realizada pelos tokens de API nas datas selecionadas.',
                 },
             },
         },
@@ -49,7 +51,10 @@ const mockTranslations = {
 
 function i18nMock() {
     const i18n = createI18nInstance();
-    applyTranslations(i18n, { locale: 'pt_BR', translations: mockTranslations });
+    applyTranslations(i18n, {
+        locale: 'pt_BR',
+        translations: mockTranslations,
+    });
     return i18n;
 }
 
@@ -113,35 +118,51 @@ describe('ApiTokenUsageChart', () => {
     it('renderiza o card do gráfico com os totais de tokens e requisições', () => {
         const wrapper = mountChart();
 
-        expect(wrapper.find('[data-test="api-tokens-usage-chart-card"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="chart-summary-tokens"]').text()).toContain('1.500');
-        expect(wrapper.find('[data-test="chart-summary-requests"]').text()).toContain('2');
-        expect(wrapper.find('[data-test="api-tokens-usage-svg"]').exists()).toBe(true);
+        expect(
+            wrapper.find('[data-test="api-tokens-usage-chart-card"]').exists(),
+        ).toBe(true);
+        expect(
+            wrapper.find('[data-test="chart-summary-tokens"]').text(),
+        ).toContain('1.500');
+        expect(
+            wrapper.find('[data-test="chart-summary-requests"]').text(),
+        ).toContain('2');
+        expect(
+            wrapper.find('[data-test="api-tokens-usage-svg"]').exists(),
+        ).toBe(true);
     });
 
     it('permite alternar entre as visões Total diário e Por token de API', async () => {
         const wrapper = mountChart();
 
         const totalBtn = wrapper.find('[data-test="chart-view-total-btn"]');
-        const byTokenBtn = wrapper.find('[data-test="chart-view-by-token-btn"]');
+        const byTokenBtn = wrapper.find(
+            '[data-test="chart-view-by-token-btn"]',
+        );
 
         expect(totalBtn.exists()).toBe(true);
         expect(byTokenBtn.exists()).toBe(true);
 
         // Por padrão inicia em 'total', sem exibir a legenda
-        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(
+            false,
+        );
 
         // Clica em 'Por token'
         await byTokenBtn.trigger('click');
 
         // Agora a legenda deve aparecer
-        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(
+            true,
+        );
         expect(wrapper.text()).toContain('Token Prod');
         expect(wrapper.text()).toContain('Tokens revogados');
 
         // Clica de volta em 'Total'
         await totalBtn.trigger('click');
-        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="chart-tokens-legend"]').exists()).toBe(
+            false,
+        );
     });
 
     it('exibe controles de data customizada e emite evento ao aplicar', async () => {
@@ -156,10 +177,16 @@ describe('ApiTokenUsageChart', () => {
 
         const wrapper = mountChart(customStats);
 
-        expect(wrapper.find('[data-test="chart-custom-range-controls"]').exists()).toBe(true);
+        expect(
+            wrapper.find('[data-test="chart-custom-range-controls"]').exists(),
+        ).toBe(true);
 
-        const startInput = wrapper.find<HTMLInputElement>('[data-test="chart-custom-start-input"]');
-        const endInput = wrapper.find<HTMLInputElement>('[data-test="chart-custom-end-input"]');
+        const startInput = wrapper.find<HTMLInputElement>(
+            '[data-test="chart-custom-start-input"]',
+        );
+        const endInput = wrapper.find<HTMLInputElement>(
+            '[data-test="chart-custom-end-input"]',
+        );
         const applyBtn = wrapper.find('[data-test="chart-custom-apply-btn"]');
 
         expect(startInput.element.value).toBe('2026-10-05');
@@ -205,7 +232,9 @@ describe('ApiTokenUsageChart', () => {
 
         const wrapper = mountChart(emptyStats);
 
-        expect(wrapper.find('[data-test="chart-empty-state"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="chart-empty-state"]').exists()).toBe(
+            true,
+        );
         expect(wrapper.text()).toContain('Nenhum consumo no período');
     });
 });

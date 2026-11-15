@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\ColorPalette;
+use App\Models\ColorPaletteComment;
 use App\Models\User;
 use App\Notifications\AccountPurgedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +18,13 @@ test('expurga contas em soft delete ha mais de 30 dias enviando email com export
         'email' => 'teste@exemplo.com',
         'locale' => 'pt_BR',
         'deleted_at' => now()->subDays(31),
+    ]);
+
+    $paleta = ColorPalette::factory()->for($user)->public()->create(['name' => 'Oceano']);
+    ColorPaletteComment::factory()->approved()->create([
+        'color_palette_id' => $paleta->id,
+        'user_id' => $user->id,
+        'body' => 'Bela paleta',
     ]);
 
     $this->artisan('accounts:purge-deleted', ['--days' => 30])
@@ -37,7 +46,10 @@ test('expurga contas em soft delete ha mais de 30 dias enviando email com export
             ->and($attachment['options']['mime'])->toBe('application/json')
             ->and($json)->toBeArray()
             ->and($json['account']['email'])->toBe('teste@exemplo.com')
-            ->and($json['account']['username'])->toBe('usuarioteste');
+            ->and($json['account']['username'])->toBe('usuarioteste')
+            // Colors entram na exportacao antes da anonimizacao (ADR-144).
+            ->and($json['colors']['palettes'][0]['name'])->toBe('Oceano')
+            ->and($json['colors']['comments'][0]['body'])->toBe('Bela paleta');
 
         return true;
     });

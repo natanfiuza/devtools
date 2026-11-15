@@ -1,0 +1,37 @@
+Notificações: sino, lista, marcar lida, toggles (checklist F8, item 9)
+Sessão como ana@f8.test no ambiente de auditoria (SQLite descartável), 2026-11-15.
+
+Worker processou 4 jobs após a aprovação: PaletteLiked, UserFollowed e dois
+PaletteCommentApproved (o comentário semeado e o recém-aprovado).
+
+1) /dashboard/notifications: 3 não lidas —
+   'Bruno Lima comentou na sua paleta "Oceano".'
+   'Alguém curtiu sua paleta "Oceano".'
+   'Bruno Lima começou a seguir você.'
+   Nenhum corpo de comentário em nenhuma linha.
+
+2) 'Marcar como lida' no primeiro item -> não lidas 3 -> 2 (POST .../read).
+   'Marcar todas como lidas' -> não lidas 0; o botão some (POST .../read-all).
+
+3) Toggle 'Curtidas nas minhas paletas': false -> true com 'Preferências salvas.'
+   (PATCH .../preferences) e volta para false (PATCH novamente). Os quatro
+   toggles estão na tela; defaults semeados: curtida/seguidor false,
+   comentário/resposta true.
+
+4) Rede real (só as rotas próprias da página):
+   POST  /dashboard/notifications/{uuid}/read        -> 302
+   POST  /dashboard/notifications/read-all            -> 302
+   PATCH /dashboard/notifications/preferences (x2)    -> 303
+
+5) E-mail: ver 09-email-notificacao-sem-corpo.txt (locale do destinatário,
+   sem o texto do comentário).
+
+ACHADO CORRIGIDO NA F8 (alto): as traduções notifications.kinds.* dos 5
+locales usavam a interpolação do Laravel (:actor/:palette) e o vue-i18n não
+substituía — a página mostrava ":actor" e ":palette" literais. Corrigido em
+lang/{pt_BR,pt_PT,en,es,fr}/notifications.php para {actor}/{palette}, com
+guarda nova em resources/js/__tests__/i18n-messages.test.ts. Abaixo, o texto
+renderizado depois da correção (o mesmo snapshot que gerou o PNG):
+   74:              - paragraph [ref=f20e132]: Bruno Lima comentou na sua paleta "Oceano".
+   85:              - paragraph [ref=f20e141]: Alguém curtiu sua paleta "Oceano".
+   94:              - paragraph [ref=f20e149]: Bruno Lima começou a seguir você.

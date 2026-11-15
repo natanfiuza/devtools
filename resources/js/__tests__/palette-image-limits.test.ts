@@ -37,9 +37,10 @@ interface FakeContext {
     getImageData: ReturnType<typeof vi.fn>;
 }
 
-function fakeCanvas(
-    getImageData?: FakeContext['getImageData'],
-): { canvas: FakeCanvas; context: FakeContext } {
+function fakeCanvas(getImageData?: FakeContext['getImageData']): {
+    canvas: FakeCanvas;
+    context: FakeContext;
+} {
     const context: FakeContext = {
         imageSmoothingEnabled: false,
         imageSmoothingQuality: 'low',
@@ -190,7 +191,10 @@ describe('decodeImage', () => {
 
         vi.stubGlobal('createImageBitmap', spy);
 
-        const outcome = await decodeImage(file(64), { ...LIMITS, maxBytes: 10 });
+        const outcome = await decodeImage(file(64), {
+            ...LIMITS,
+            maxBytes: 10,
+        });
 
         expect(outcome).toEqual({ ok: false, error: 'too_large' });
         expect(spy).not.toHaveBeenCalled();
@@ -229,7 +233,13 @@ describe('decodeImage', () => {
 
         expect(fake.context.imageSmoothingEnabled).toBe(true);
         expect(fake.context.imageSmoothingQuality).toBe('high');
-        expect(fake.context.drawImage).toHaveBeenCalledWith(image, 0, 0, 512, 256);
+        expect(fake.context.drawImage).toHaveBeenCalledWith(
+            image,
+            0,
+            0,
+            512,
+            256,
+        );
         expect(fake.context.getImageData).toHaveBeenCalledWith(0, 0, 512, 256);
         expect(image.close).toHaveBeenCalled();
     });

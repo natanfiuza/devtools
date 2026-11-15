@@ -161,324 +161,302 @@ function handlePeriodChange(payload: {
 </script>
 
 <template>
-  <Head :title="t('settings.api_tokens.title')" />
+    <Head :title="t('settings.api_tokens.title')" />
 
-  <div class="space-y-6">
-    <Heading
-      variant="small"
-      :title="t('settings.api_tokens.title')"
-      :description="t('settings.api_tokens.description')"
-    />
-
-    <!-- Banner de documentacao da API -->
-    <div
-      data-test="api-tokens-docs-banner"
-      class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4"
-    >
-      <div class="flex items-start gap-3">
-        <BookOpen
-          class="mt-0.5 size-4 shrink-0 text-accent"
-          aria-hidden="true"
+    <div class="space-y-6">
+        <Heading
+            variant="small"
+            :title="t('settings.api_tokens.title')"
+            :description="t('settings.api_tokens.description')"
         />
-        <div class="space-y-1">
-          <p class="text-sm font-medium">
-            {{ t('settings.api_tokens.docs_banner.title') }}
-          </p>
-          <p class="text-xs leading-relaxed text-subtle">
-            {{ t('settings.api_tokens.docs_banner.description') }}
-          </p>
-        </div>
-      </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        as-child
-      >
-        <Link
-          :href="routes.apiDocs.value"
-          data-test="api-tokens-docs-link"
+        <!-- Banner de documentacao da API -->
+        <div
+            data-test="api-tokens-docs-banner"
+            class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4"
         >
-          {{ t('settings.api_tokens.docs_banner.cta') }}
-        </Link>
-      </Button>
-    </div>
+            <div class="flex items-start gap-3">
+                <BookOpen
+                    class="mt-0.5 size-4 shrink-0 text-accent"
+                    aria-hidden="true"
+                />
+                <div class="space-y-1">
+                    <p class="text-sm font-medium">
+                        {{ t('settings.api_tokens.docs_banner.title') }}
+                    </p>
+                    <p class="text-xs leading-relaxed text-subtle">
+                        {{ t('settings.api_tokens.docs_banner.description') }}
+                    </p>
+                </div>
+            </div>
 
-    <!-- Contadores acumulados da API -->
-    <div
-      data-test="api-tokens-stats"
-      class="grid gap-3 sm:grid-cols-3"
-    >
-      <div class="rounded-lg border border-border p-4">
-        <p class="text-xs text-subtle">
-          {{ t('settings.api_tokens.stats.total_requests') }}
-        </p>
-        <p
-          data-test="api-tokens-stat-requests"
-          class="mt-1 font-mono text-xl font-semibold"
-        >
-          {{ summaryStats.totalRequests }}
-        </p>
-      </div>
-
-      <div class="rounded-lg border border-border p-4">
-        <p class="text-xs text-subtle">
-          {{ t('settings.api_tokens.stats.total_queries') }}
-        </p>
-        <p
-          data-test="api-tokens-stat-queries"
-          class="mt-1 font-mono text-xl font-semibold"
-        >
-          {{ summaryStats.totalSqlQueries }}
-        </p>
-      </div>
-
-      <div class="rounded-lg border border-border p-4">
-        <p class="text-xs text-subtle">
-          {{ t('settings.api_tokens.stats.active_tokens') }}
-        </p>
-        <p
-          data-test="api-tokens-stat-active"
-          class="mt-1 font-mono text-xl font-semibold"
-        >
-          {{ summaryStats.activeTokens }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Grafico de consumo diario e por token de API -->
-    <ApiTokenUsageChart
-      :stats="props.usageStats"
-      @period-change="handlePeriodChange"
-    />
-
-    <!-- Valor recem-criado: aparece uma vez e some no proximo carregamento -->
-    <div
-      v-if="plainTextToken"
-      data-test="api-token-novo"
-      class="rounded-lg border border-border bg-muted/20 p-4"
-    >
-      <p class="text-sm font-medium">
-        {{ t('settings.api_tokens.once.title') }}
-      </p>
-      <p class="mt-1 text-sm text-subtle">
-        {{ t('settings.api_tokens.once.description') }}
-      </p>
-
-      <div class="mt-3 flex flex-wrap items-center gap-2">
-        <code
-          class="min-w-0 flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 font-mono text-xs"
-        >{{ plainTextToken }}</code>
-        <Button
-          variant="outline"
-          size="sm"
-          data-test="api-token-copiar"
-          @click="copyToken"
-        >
-          <Check
-            v-if="copied"
-            class="size-3.5"
-          />
-          <Copy
-            v-else
-            class="size-3.5"
-          />
-          {{
-            copied
-              ? t('settings.api_tokens.once.copied')
-              : t('settings.api_tokens.once.copy')
-          }}
-        </Button>
-      </div>
-    </div>
-
-    <!-- Criacao -->
-    <form
-      data-test="api-token-form"
-      class="space-y-4 rounded-lg border border-border p-4"
-      @submit.prevent="createToken"
-    >
-      <div class="flex flex-wrap items-end gap-3">
-        <div class="grid min-w-64 flex-1 gap-2">
-          <Label for="api-token-name">
-            {{ t('settings.api_tokens.create.name') }}
-          </Label>
-          <Input
-            id="api-token-name"
-            v-model="form.name"
-            data-test="api-token-name"
-            :placeholder="
-              t('settings.api_tokens.create.name_placeholder')
-            "
-            maxlength="80"
-            autocomplete="off"
-          />
-          <InputError :message="form.errors.name" />
+            <Button variant="outline" size="sm" as-child>
+                <Link
+                    :href="routes.apiDocs.value"
+                    data-test="api-tokens-docs-link"
+                >
+                    {{ t('settings.api_tokens.docs_banner.cta') }}
+                </Link>
+            </Button>
         </div>
 
-        <Button
-          type="submit"
-          data-test="api-token-criar"
-          :disabled="form.processing"
-        >
-          {{ t('settings.api_tokens.create.submit') }}
-        </Button>
-      </div>
+        <!-- Contadores acumulados da API -->
+        <div data-test="api-tokens-stats" class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-lg border border-border p-4">
+                <p class="text-xs text-subtle">
+                    {{ t('settings.api_tokens.stats.total_requests') }}
+                </p>
+                <p
+                    data-test="api-tokens-stat-requests"
+                    class="mt-1 font-mono text-xl font-semibold"
+                >
+                    {{ summaryStats.totalRequests }}
+                </p>
+            </div>
 
-      <fieldset
-        data-test="api-token-abilities"
-        class="grid gap-2"
-      >
-        <legend class="text-sm font-medium">
-          {{ t('settings.api_tokens.create.abilities_title') }}
-        </legend>
-        <p class="text-xs text-subtle">
-          {{ t('settings.api_tokens.create.abilities_help') }}
-        </p>
+            <div class="rounded-lg border border-border p-4">
+                <p class="text-xs text-subtle">
+                    {{ t('settings.api_tokens.stats.total_queries') }}
+                </p>
+                <p
+                    data-test="api-tokens-stat-queries"
+                    class="mt-1 font-mono text-xl font-semibold"
+                >
+                    {{ summaryStats.totalSqlQueries }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-border p-4">
+                <p class="text-xs text-subtle">
+                    {{ t('settings.api_tokens.stats.active_tokens') }}
+                </p>
+                <p
+                    data-test="api-tokens-stat-active"
+                    class="mt-1 font-mono text-xl font-semibold"
+                >
+                    {{ summaryStats.activeTokens }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Grafico de consumo diario e por token de API -->
+        <ApiTokenUsageChart
+            :stats="props.usageStats"
+            @period-change="handlePeriodChange"
+        />
+
+        <!-- Valor recem-criado: aparece uma vez e some no proximo carregamento -->
+        <div
+            v-if="plainTextToken"
+            data-test="api-token-novo"
+            class="rounded-lg border border-border bg-muted/20 p-4"
+        >
+            <p class="text-sm font-medium">
+                {{ t('settings.api_tokens.once.title') }}
+            </p>
+            <p class="mt-1 text-sm text-subtle">
+                {{ t('settings.api_tokens.once.description') }}
+            </p>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                <code
+                    class="min-w-0 flex-1 overflow-x-auto rounded-md border border-border bg-background px-3 py-2 font-mono text-xs"
+                    >{{ plainTextToken }}</code
+                >
+                <Button
+                    variant="outline"
+                    size="sm"
+                    data-test="api-token-copiar"
+                    @click="copyToken"
+                >
+                    <Check v-if="copied" class="size-3.5" />
+                    <Copy v-else class="size-3.5" />
+                    {{
+                        copied
+                            ? t('settings.api_tokens.once.copied')
+                            : t('settings.api_tokens.once.copy')
+                    }}
+                </Button>
+            </div>
+        </div>
+
+        <!-- Criacao -->
+        <form
+            data-test="api-token-form"
+            class="space-y-4 rounded-lg border border-border p-4"
+            @submit.prevent="createToken"
+        >
+            <div class="flex flex-wrap items-end gap-3">
+                <div class="grid min-w-64 flex-1 gap-2">
+                    <Label for="api-token-name">
+                        {{ t('settings.api_tokens.create.name') }}
+                    </Label>
+                    <Input
+                        id="api-token-name"
+                        v-model="form.name"
+                        data-test="api-token-name"
+                        :placeholder="
+                            t('settings.api_tokens.create.name_placeholder')
+                        "
+                        maxlength="80"
+                        autocomplete="off"
+                    />
+                    <InputError :message="form.errors.name" />
+                </div>
+
+                <Button
+                    type="submit"
+                    data-test="api-token-criar"
+                    :disabled="form.processing"
+                >
+                    {{ t('settings.api_tokens.create.submit') }}
+                </Button>
+            </div>
+
+            <fieldset data-test="api-token-abilities" class="grid gap-2">
+                <legend class="text-sm font-medium">
+                    {{ t('settings.api_tokens.create.abilities_title') }}
+                </legend>
+                <p class="text-xs text-subtle">
+                    {{ t('settings.api_tokens.create.abilities_help') }}
+                </p>
+
+                <div
+                    v-for="ability in props.abilities"
+                    :key="ability"
+                    class="flex items-start gap-2"
+                >
+                    <Checkbox
+                        :id="`api-ability-${ability}`"
+                        :model-value="form.abilities.includes(ability)"
+                        :data-test="`api-token-ability-${ability}`"
+                        class="mt-0.5"
+                        @update:model-value="
+                            (checked) => toggleAbility(ability, checked)
+                        "
+                    />
+                    <Label
+                        :for="`api-ability-${ability}`"
+                        class="text-sm leading-snug font-normal"
+                    >
+                        <span class="font-mono text-xs">{{ ability }}</span>
+                        — {{ abilityLabel(ability) }}
+                    </Label>
+                </div>
+
+                <InputError :message="form.errors.abilities" />
+            </fieldset>
+        </form>
+
+        <!-- Lista -->
+        <div
+            v-if="hasTokens"
+            data-test="api-tokens-lista"
+            class="overflow-hidden rounded-lg border border-border"
+        >
+            <ul class="divide-y divide-border">
+                <li
+                    v-for="token in tokens"
+                    :key="token.id"
+                    class="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+                >
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium">
+                            {{ token.name }}
+                        </p>
+                        <p class="mt-0.5 text-xs text-subtle">
+                            {{ t('settings.api_tokens.created') }}
+                            {{ formatDate(token.createdAt) }} ·
+                            {{ t('settings.api_tokens.last_used') }}
+                            {{ lastUsed(token) }} ·
+                            {{
+                                t('settings.api_tokens.requests_count', {
+                                    count: token.requestsCount ?? 0,
+                                })
+                            }}
+                            ·
+                            {{
+                                t('settings.api_tokens.queries_count', {
+                                    count: token.sqlQueriesCount ?? 0,
+                                })
+                            }}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <Badge
+                            v-for="ability in token.abilities"
+                            :key="ability"
+                            variant="outline"
+                            class="font-mono text-xs"
+                        >
+                            {{ ability }}
+                        </Badge>
+
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            :data-test="`api-token-revogar-${token.id}`"
+                            @click="tokenToRevoke = token"
+                        >
+                            <Trash2 class="size-3.5" />
+                            {{ t('settings.api_tokens.revoke') }}
+                        </Button>
+                    </div>
+                </li>
+            </ul>
+        </div>
 
         <div
-          v-for="ability in props.abilities"
-          :key="ability"
-          class="flex items-start gap-2"
+            v-else
+            data-test="api-tokens-vazio"
+            class="rounded-lg border border-border px-4 py-12 text-center"
         >
-          <Checkbox
-            :id="`api-ability-${ability}`"
-            :model-value="form.abilities.includes(ability)"
-            :data-test="`api-token-ability-${ability}`"
-            class="mt-0.5"
-            @update:model-value="
-              (checked) => toggleAbility(ability, checked)
-            "
-          />
-          <Label
-            :for="`api-ability-${ability}`"
-            class="text-sm leading-snug font-normal"
-          >
-            <span class="font-mono text-xs">{{ ability }}</span>
-            — {{ abilityLabel(ability) }}
-          </Label>
+            <KeyRound class="mx-auto size-5 text-subtle" aria-hidden="true" />
+            <p class="mt-3 text-sm font-medium">
+                {{ t('settings.api_tokens.empty_title') }}
+            </p>
+            <p class="mx-auto mt-1 max-w-md text-sm text-subtle">
+                {{ t('settings.api_tokens.empty') }}
+            </p>
         </div>
 
-        <InputError :message="form.errors.abilities" />
-      </fieldset>
-    </form>
-
-    <!-- Lista -->
-    <div
-      v-if="hasTokens"
-      data-test="api-tokens-lista"
-      class="overflow-hidden rounded-lg border border-border"
-    >
-      <ul class="divide-y divide-border">
-        <li
-          v-for="token in tokens"
-          :key="token.id"
-          class="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+        <!-- Confirmacao de revogacao -->
+        <Dialog
+            :open="tokenToRevoke !== null"
+            @update:open="
+                (open) => {
+                    if (!open) tokenToRevoke = null;
+                }
+            "
         >
-          <div class="min-w-0">
-            <p class="truncate text-sm font-medium">
-              {{ token.name }}
-            </p>
-            <p class="mt-0.5 text-xs text-subtle">
-              {{ t('settings.api_tokens.created') }}
-              {{ formatDate(token.createdAt) }} ·
-              {{ t('settings.api_tokens.last_used') }}
-              {{ lastUsed(token) }} ·
-              {{
-                t('settings.api_tokens.requests_count', {
-                  count: token.requestsCount ?? 0,
-                })
-              }} ·
-              {{
-                t('settings.api_tokens.queries_count', {
-                  count: token.sqlQueriesCount ?? 0,
-                })
-              }}
-            </p>
-          </div>
+            <DialogContent data-test="api-token-modal-revogar">
+                <DialogHeader>
+                    <DialogTitle>
+                        {{ t('settings.api_tokens.revoke_title') }}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {{ t('settings.api_tokens.revoke_description') }}
+                    </DialogDescription>
+                </DialogHeader>
 
-          <div class="flex items-center gap-2">
-            <Badge
-              v-for="ability in token.abilities"
-              :key="ability"
-              variant="outline"
-              class="font-mono text-xs"
-            >
-              {{ ability }}
-            </Badge>
-
-            <Button
-              variant="destructive"
-              size="sm"
-              :data-test="`api-token-revogar-${token.id}`"
-              @click="tokenToRevoke = token"
-            >
-              <Trash2 class="size-3.5" />
-              {{ t('settings.api_tokens.revoke') }}
-            </Button>
-          </div>
-        </li>
-      </ul>
+                <DialogFooter>
+                    <DialogClose as-child>
+                        <Button variant="secondary" size="sm">
+                            {{ t('settings.api_tokens.cancel') }}
+                        </Button>
+                    </DialogClose>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        data-test="api-token-revogar-confirmar"
+                        :disabled="isRevoking"
+                        @click="revokeToken"
+                    >
+                        {{ t('settings.api_tokens.confirm') }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
-
-    <div
-      v-else
-      data-test="api-tokens-vazio"
-      class="rounded-lg border border-border px-4 py-12 text-center"
-    >
-      <KeyRound
-        class="mx-auto size-5 text-subtle"
-        aria-hidden="true"
-      />
-      <p class="mt-3 text-sm font-medium">
-        {{ t('settings.api_tokens.empty_title') }}
-      </p>
-      <p class="mx-auto mt-1 max-w-md text-sm text-subtle">
-        {{ t('settings.api_tokens.empty') }}
-      </p>
-    </div>
-
-    <!-- Confirmacao de revogacao -->
-    <Dialog
-      :open="tokenToRevoke !== null"
-      @update:open="
-        (open) => {
-          if (!open) tokenToRevoke = null;
-        }
-      "
-    >
-      <DialogContent data-test="api-token-modal-revogar">
-        <DialogHeader>
-          <DialogTitle>
-            {{
-              t('settings.api_tokens.revoke_title')
-            }}
-          </DialogTitle>
-          <DialogDescription>
-            {{ t('settings.api_tokens.revoke_description') }}
-          </DialogDescription>
-        </DialogHeader>
-
-        <DialogFooter>
-          <DialogClose as-child>
-            <Button
-              variant="secondary"
-              size="sm"
-            >
-              {{ t('settings.api_tokens.cancel') }}
-            </Button>
-          </DialogClose>
-          <Button
-            variant="destructive"
-            size="sm"
-            data-test="api-token-revogar-confirmar"
-            :disabled="isRevoking"
-            @click="revokeToken"
-          >
-            {{ t('settings.api_tokens.confirm') }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </div>
 </template>

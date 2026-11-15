@@ -3,7 +3,12 @@ import { parseColorOr } from './lib/color';
 import { DEFAULT_FONT, fontAsset } from './lib/fonts';
 import { styleById } from './lib/styles';
 import { logoAsset } from './logos';
-import type { BadgeForgeToolProps, BadgeLogo, BadgeSpec, BadgeStyle } from './types';
+import type {
+    BadgeForgeToolProps,
+    BadgeLogo,
+    BadgeSpec,
+    BadgeStyle,
+} from './types';
 
 /**
  * Estado do formulario e normalizacao (espelho de `BadgeRequest`).

@@ -186,66 +186,66 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="flex flex-wrap justify-end gap-2">
-      <Button
-        v-if="authenticated"
-        type="button"
-        size="sm"
-        variant="outline"
-        data-test="palette-presets"
-        @click="openPresets"
-      >
-        {{ t('colors.presets.open') }}
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        data-test="palette-import"
-        @click="importOpen = true"
-      >
-        {{ t('tools.shared.token_import.button') }}
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        data-test="palette-save"
-        :disabled="!canSave"
-        @click="requestSave"
-      >
-        {{ t('tools.palette-generator.save.action') }}
-      </Button>
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-wrap justify-end gap-2">
+            <Button
+                v-if="authenticated"
+                type="button"
+                size="sm"
+                variant="outline"
+                data-test="palette-presets"
+                @click="openPresets"
+            >
+                {{ t('colors.presets.open') }}
+            </Button>
+            <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                data-test="palette-import"
+                @click="importOpen = true"
+            >
+                {{ t('tools.shared.token_import.button') }}
+            </Button>
+            <Button
+                type="button"
+                size="sm"
+                data-test="palette-save"
+                :disabled="!canSave"
+                @click="requestSave"
+            >
+                {{ t('tools.palette-generator.save.action') }}
+            </Button>
+        </div>
+
+        <GeneratorWorkspace
+            ref="workspace"
+            :image="props.image"
+            :library="props.library"
+        />
+
+        <SavePaletteDialog
+            :open="dialogOpen"
+            :source="saveSource"
+            :palette="props.palette"
+            @close="dialogOpen = false"
+        />
+
+        <PresetDialog
+            v-if="authenticated && presetsOpen"
+            :open="presetsOpen"
+            :base="presetBase"
+            :has-base="canSave"
+            @close="presetsOpen = false"
+            @apply="applyPreset"
+        />
+
+        <TokenImportDialog
+            :open="importOpen"
+            :tokens="props.tokens"
+            :source-label-max-length="props.palette.sourceLabelMaxLength"
+            @apply="applyTokens"
+            @close="importOpen = false"
+        />
     </div>
-
-    <GeneratorWorkspace
-      ref="workspace"
-      :image="props.image"
-      :library="props.library"
-    />
-
-    <SavePaletteDialog
-      :open="dialogOpen"
-      :source="saveSource"
-      :palette="props.palette"
-      @close="dialogOpen = false"
-    />
-
-    <PresetDialog
-      v-if="authenticated && presetsOpen"
-      :open="presetsOpen"
-      :base="presetBase"
-      :has-base="canSave"
-      @close="presetsOpen = false"
-      @apply="applyPreset"
-    />
-
-    <TokenImportDialog
-      :open="importOpen"
-      :tokens="props.tokens"
-      :source-label-max-length="props.palette.sourceLabelMaxLength"
-      @apply="applyTokens"
-      @close="importOpen = false"
-    />
-  </div>
 </template>

@@ -1,10 +1,7 @@
 import type { PaletteScale } from '@/lib/color';
 import type { PaletteDraftTab } from '@/lib/saveDraft';
 import type { ExtractedPalette } from '@/tools/palette-generator/lib/extractedPalette';
-import type {
-    PaletteKind,
-    PaletteRoles,
-} from '@/types/colors';
+import type { PaletteKind, PaletteRoles } from '@/types/colors';
 
 /**
  * O que o modal de salvar recebe do gerador (F4, ADR-123).
