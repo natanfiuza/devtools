@@ -114,7 +114,7 @@ uniforme, paletas públicas do autor, contadores e SEO indexável fora do sitema
   comentário, denúncia e mute respondem 404 uniforme via middleware
   `colors.comments`.
 
-## Fora desta fase
+## Fora do escopo (F7)
 
 - Bloqueio entre contas.
 - Listas de seguidores/seguindo e edição de perfil.

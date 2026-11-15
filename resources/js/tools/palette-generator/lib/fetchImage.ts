@@ -20,8 +20,7 @@ export interface ParsedImageUrl {
 }
 
 export type ParseImageUrlResult =
-    | ParsedImageUrl
-    | { ok: false; error: ImageErrorCode };
+    ParsedImageUrl | { ok: false; error: ImageErrorCode };
 
 export type FetchImageOutcome =
     | { ok: true; blob: Blob; mime: string }

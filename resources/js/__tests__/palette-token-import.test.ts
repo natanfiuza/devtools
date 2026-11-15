@@ -2,10 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PALETTE_ALGORITHM_VERSION } from '@/lib/color';
-import {
-    payloadFromExtracted,
-    payloadFromScale,
-} from '@/lib/palettePayload';
+import { payloadFromExtracted, payloadFromScale } from '@/lib/palettePayload';
 import {
     importTokens,
     type ImportedPalette,
@@ -112,9 +109,7 @@ const DETAILS = {
     tags: [],
 };
 
-const TONES = [
-    50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950,
-] as const;
+const TONES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
 function tonesObject(value = '#123456'): Record<string, string> {
     return Object.fromEntries(TONES.map((tone) => [String(tone), value]));
@@ -126,9 +121,7 @@ describe('fixtures — JSON nativo', () => {
         const palette = expectOk(result);
 
         expect(palette.name).toBe('aurora');
-        expect(palette.scale?.algorithmVersion).toBe(
-            PALETTE_ALGORITHM_VERSION,
-        );
+        expect(palette.scale?.algorithmVersion).toBe(PALETTE_ALGORITHM_VERSION);
         expect(projection(palette)).toEqual(
             expected('native-scale.payload.json'),
         );
@@ -227,9 +220,9 @@ describe('fixtures — Style Dictionary', () => {
         });
         expect(palette.extracted?.sufficient).toBe(true);
         expect(palette.extracted?.visiblePixels).toBe(0);
-        expect(
-            palette.extracted?.colors.map((color) => color.weight),
-        ).toEqual([0, 0, 0, 0, 0]);
+        expect(palette.extracted?.colors.map((color) => color.weight)).toEqual([
+            0, 0, 0, 0, 0,
+        ]);
         expect(
             palette.extracted?.colors.map((color) => color.percentage),
         ).toEqual([0, 0, 0, 0, 0]);
@@ -318,9 +311,7 @@ describe('formato e estrutura', () => {
         const result = run(text);
         const palette = expectOk(result);
 
-        expect(palette.scale?.algorithmVersion).toBe(
-            PALETTE_ALGORITHM_VERSION,
-        );
+        expect(palette.scale?.algorithmVersion).toBe(PALETTE_ALGORITHM_VERSION);
         expect(onlyDiagnostic(result.diagnostics)).toMatchObject({
             code: 'algorithm_version_mismatch',
             severity: 'warning',
@@ -384,9 +375,9 @@ describe('formato e estrutura', () => {
 
         const many = JSON.stringify({ colors: tonesObject() });
 
-        expect(
-            codesOf(run(many, { maxTokens: 3 }).diagnostics),
-        ).toContain('too_many_tokens');
+        expect(codesOf(run(many, { maxTokens: 3 }).diagnostics)).toContain(
+            'too_many_tokens',
+        );
     });
 
     it('rejeita semanticas incompletas com aviso e mantem a paleta', () => {
@@ -457,9 +448,7 @@ describe('referencias', () => {
             }),
         );
 
-        expect(codesOf(result.diagnostics)).toContain(
-            'reference_not_color',
-        );
+        expect(codesOf(result.diagnostics)).toContain('reference_not_color');
     });
 
     it('respeita o teto de encadeamento de aliases', () => {

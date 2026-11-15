@@ -69,7 +69,10 @@ function serializeRect(node: SvgRectNode): string {
         ['height', num(node.height)],
         ['rx', optionalNum(node.radius)],
         ['fill', escapeXml(node.fill)],
-        ['stroke', node.stroke === undefined ? undefined : escapeXml(node.stroke)],
+        [
+            'stroke',
+            node.stroke === undefined ? undefined : escapeXml(node.stroke),
+        ],
         ['stroke-width', optionalNum(node.strokeWidth)],
     ])}${marking(node)}/>`;
 }
@@ -136,10 +139,7 @@ export function renderSvg(
         ['xmlns', 'http://www.w3.org/2000/svg'],
         ['width', num(document.width)],
         ['height', num(document.height)],
-        [
-            'viewBox',
-            `0 0 ${num(document.width)} ${num(document.height)}`,
-        ],
+        ['viewBox', `0 0 ${num(document.width)} ${num(document.height)}`],
         ['role', 'img'],
         ['aria-label', label],
         ['font-family', 'Libre Franklin, system-ui, sans-serif'],

@@ -311,11 +311,7 @@ onMounted(() => {
     const preset = props.presets.find((item) => item.id === presetId);
 
     current.searchParams.delete('preset');
-    window.history.replaceState(
-        window.history.state,
-        '',
-        current.toString(),
-    );
+    window.history.replaceState(window.history.state, '', current.toString());
 
     if (preset !== undefined) {
         applyPreset(preset);
@@ -324,639 +320,645 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-6xl space-y-6 py-4">
-    <!-- Gestao da conta: os dialogos so tocam o servidor em acao explicita. -->
-    <div
-      v-if="props.management.canManage"
-      class="flex flex-wrap items-center gap-2"
-      data-test="badge-management"
-    >
-      <Button
-        variant="outline"
-        size="sm"
-        data-test="badge-manage-logos"
-        @click="logoDialogOpen = true"
-      >
-        <Image class="size-4" />
-        {{ t('tools.badgeforge.management.logos_button') }}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        data-test="badge-manage-presets"
-        @click="presetDialogOpen = true"
-      >
-        <Bookmark class="size-4" />
-        {{ t('tools.badgeforge.management.presets_button') }}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        data-test="badge-personal-open"
-        @click="personalDialogOpen = true"
-      >
-        <UserRound class="size-4" />
-        {{ t('tools.badgeforge.personal.create_button') }}
-      </Button>
-    </div>
-    <p
-      v-else-if="!isAuthenticated"
-      class="text-xs text-muted-foreground"
-      data-test="badge-login-cta"
-    >
-      {{ t('tools.badgeforge.management.login_cta') }}
-      <a
-        :href="loginUrl"
-        class="font-medium underline underline-offset-2"
-      >
-        {{ t('tools.badgeforge.management.login_action') }}
-      </a>
-    </p>
-
-    <!-- Endpoint JSON: cadastro e lista vivem na dashboard (ADR-083). -->
-    <div
-      v-if="props.management.canManage"
-      class="rounded-lg border border-border px-4 py-3"
-      data-test="badge-endpoint-cta"
-    >
-      <p class="text-sm font-medium">
-        {{ t('tools.badgeforge.endpoint.cta_title') }}
-      </p>
-      <p class="text-xs text-subtle">
-        {{ t('tools.badgeforge.endpoint.cta_description') }}
-      </p>
-      <Button
-        as-child
-        variant="outline"
-        size="sm"
-        class="mt-2"
-        data-test="badge-endpoint-cta-link"
-      >
-        <a :href="endpointDashboardUrl">
-          {{ t('tools.badgeforge.endpoint.cta_action') }}
-        </a>
-      </Button>
-    </div>
-
-    <ModeTabs
-      v-model="mode"
-      :show-custom="props.customProviders.length > 0"
-    />
-
-    <div
-      v-if="mode === 'static'"
-      class="grid gap-6 lg:grid-cols-2"
-    >
-      <!-- Formulario -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.sections.content') }}
-          </h2>
-          <div class="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              data-test="badge-sample"
-              @click="loadSample"
-            >
-              <Sparkles class="size-4" />
-              {{ t('tools.badgeforge.actions.sample') }}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              data-test="badge-reset"
-              @click="reset"
-            >
-              <Eraser class="size-4" />
-              {{ t('tools.badgeforge.actions.reset') }}
-            </Button>
-          </div>
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-2">
-            <Label for="badge-label">
-              {{ t('tools.badgeforge.fields.label') }}
-            </Label>
-            <Input
-              id="badge-label"
-              v-model="form.label"
-              :placeholder="
-                t('tools.badgeforge.placeholders.label')
-              "
-              :maxlength="props.limits.maxTextLength"
-              data-test="badge-label"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="badge-message">
-              {{ t('tools.badgeforge.fields.message') }}
-            </Label>
-            <Input
-              id="badge-message"
-              v-model="form.message"
-              :placeholder="
-                t('tools.badgeforge.placeholders.message')
-              "
-              :maxlength="props.limits.maxTextLength"
-              data-test="badge-message"
-            />
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <Label for="badge-style">
-            {{ t('tools.badgeforge.fields.style') }}
-          </Label>
-          <Select v-model="form.style">
-            <SelectTrigger
-              id="badge-style"
-              class="w-full"
-              data-test="badge-style"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                v-for="style in props.styles"
-                :key="style"
-                :value="style"
-              >
-                {{ style }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <!-- Cores -->
-        <div class="space-y-3">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.sections.colors') }}
-          </h2>
-
-          <p
-            v-if="forcesColors"
-            class="text-xs text-muted-foreground"
-            data-test="badge-social-note"
-          >
-            {{ t('tools.badgeforge.social_note') }}
-          </p>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="space-y-2">
-              <Label for="badge-label-color">
-                {{ t('tools.badgeforge.fields.label_color') }}
-              </Label>
-              <Input
-                id="badge-label-color"
-                v-model="form.labelColor"
-                :placeholder="
-                  t(
-                    'tools.badgeforge.placeholders.label_color',
-                  )
-                "
-                :disabled="forcesColors"
-                data-test="badge-label-color"
-              />
-            </div>
-            <div class="space-y-2">
-              <Label for="badge-color">
-                {{ t('tools.badgeforge.fields.color') }}
-              </Label>
-              <Input
-                id="badge-color"
-                v-model="form.color"
-                :placeholder="
-                  t('tools.badgeforge.placeholders.color')
-                "
-                :disabled="forcesColors"
-                data-test="badge-color"
-              />
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-1.5">
-            <button
-              v-for="swatch in SWATCHES"
-              :key="`label-${swatch}`"
-              type="button"
-              class="size-5 rounded-sm border"
-              :style="{ backgroundColor: swatch }"
-              :title="swatch"
-              :aria-label="swatch"
-              :disabled="forcesColors"
-              data-test="swatch-label"
-              @click="form.labelColor = swatch"
-            />
-            <span class="mx-2 text-xs text-muted-foreground">·</span>
-            <button
-              v-for="swatch in SWATCHES"
-              :key="`message-${swatch}`"
-              type="button"
-              class="size-5 rounded-sm border"
-              :style="{ backgroundColor: swatch }"
-              :title="swatch"
-              :aria-label="swatch"
-              :disabled="forcesColors"
-              data-test="swatch-message"
-              @click="form.color = swatch"
-            />
-          </div>
-        </div>
-
-        <!-- Logo -->
-        <div class="space-y-3">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.sections.logo') }}
-          </h2>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="space-y-2">
-              <Label for="badge-logo">
-                {{ t('tools.badgeforge.fields.logo') }}
-              </Label>
-              <Select v-model="form.logo">
-                <SelectTrigger
-                  id="badge-logo"
-                  class="w-full"
-                  data-test="badge-logo"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem :value="NO_LOGO">
-                    {{ t('tools.badgeforge.logo_none') }}
-                  </SelectItem>
-                  <SelectItem
-                    v-for="logo in props.logos"
-                    :key="logo.slug"
-                    :value="logo.slug"
-                  >
-                    {{ logo.name }}
-                  </SelectItem>
-                  <SelectItem
-                    v-for="logo in props.customLogos"
-                    :key="logo.slug"
-                    :value="logo.slug"
-                    data-test="badge-logo-custom-option"
-                  >
-                    {{ logo.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div class="space-y-2">
-              <Label for="badge-logo-position">
-                {{ t('tools.badgeforge.fields.logo_position') }}
-              </Label>
-              <Select v-model="form.logoPosition">
-                <SelectTrigger
-                  id="badge-logo-position"
-                  class="w-full"
-                  data-test="badge-logo-position"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="position in [
-                      'left',
-                      'right',
-                    ] as const"
-                    :key="position"
-                    :value="position"
-                  >
-                    {{
-                      t(
-                        `tools.badgeforge.positions.${position}`,
-                      )
-                    }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div class="space-y-2">
-              <Label for="badge-logo-color">
-                {{ t('tools.badgeforge.fields.logo_color') }}
-              </Label>
-              <Input
-                id="badge-logo-color"
-                v-model="form.logoColor"
-                :placeholder="
-                  t(
-                    'tools.badgeforge.placeholders.logo_color',
-                  )
-                "
-                data-test="badge-logo-color"
-              />
-            </div>
-
-            <div class="space-y-2">
-              <Label for="badge-logo-size">
-                {{ t('tools.badgeforge.fields.logo_size') }}
-              </Label>
-              <Input
-                id="badge-logo-size"
-                v-model="form.logoSize"
-                type="number"
-                :min="props.limits.logoSize.min"
-                :max="props.limits.logoSize.max"
-                :placeholder="String(spec.style.logoSize)"
-                data-test="badge-logo-size"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Avancado -->
-        <div class="space-y-3">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.sections.advanced') }}
-          </h2>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="space-y-2">
-              <Label for="badge-link">
-                {{ t('tools.badgeforge.fields.link') }}
-              </Label>
-              <Input
-                id="badge-link"
-                v-model="form.link"
-                type="url"
-                :placeholder="
-                  t('tools.badgeforge.placeholders.link')
-                "
-                data-test="badge-link"
-              />
-            </div>
-
-            <div class="space-y-2">
-              <Label for="badge-cache">
-                {{ t('tools.badgeforge.fields.cache_seconds') }}
-              </Label>
-              <Input
-                id="badge-cache"
-                v-model="form.cacheSeconds"
-                type="number"
-                :min="props.limits.cacheSeconds.min"
-                :max="props.limits.cacheSeconds.max"
-                :placeholder="
-                  String(props.limits.cacheSeconds.default)
-                "
-                data-test="badge-cache"
-              />
-            </div>
-
-            <div class="space-y-2">
-              <Label for="badge-font">
-                {{ t('tools.badgeforge.fields.font') }}
-              </Label>
-              <Select v-model="form.font">
-                <SelectTrigger
-                  id="badge-font"
-                  class="w-full"
-                  data-test="badge-font"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem :value="DEFAULT_FONT">
-                    {{ t('tools.badgeforge.fonts.default') }}
-                  </SelectItem>
-                  <SelectItem
-                    v-for="font in props.fonts"
-                    :key="font.slug"
-                    :value="font.slug"
-                  >
-                    {{ font.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Preview e snippets -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="text-sm font-semibold">
-            {{ t('tools.badgeforge.preview.title') }}
-          </h2>
-          <Label
-            for="badge-dark"
-            class="flex items-center gap-2 text-xs text-muted-foreground"
-          >
-            <Checkbox
-              id="badge-dark"
-              v-model="darkBackground"
-              data-test="badge-dark"
-            />
-            {{ t('tools.badgeforge.preview.dark') }}
-          </Label>
-        </div>
-
+    <div class="mx-auto max-w-6xl space-y-6 py-4">
+        <!-- Gestao da conta: os dialogos so tocam o servidor em acao explicita. -->
         <div
-          class="flex min-h-[140px] items-center justify-center rounded-md border p-6"
-          :class="
-            darkBackground ? 'bg-neutral-900' : 'bg-neutral-100'
-          "
-          data-test="badge-stage"
+            v-if="props.management.canManage"
+            class="flex flex-wrap items-center gap-2"
+            data-test="badge-management"
         >
-          <!--
+            <Button
+                variant="outline"
+                size="sm"
+                data-test="badge-manage-logos"
+                @click="logoDialogOpen = true"
+            >
+                <Image class="size-4" />
+                {{ t('tools.badgeforge.management.logos_button') }}
+            </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                data-test="badge-manage-presets"
+                @click="presetDialogOpen = true"
+            >
+                <Bookmark class="size-4" />
+                {{ t('tools.badgeforge.management.presets_button') }}
+            </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                data-test="badge-personal-open"
+                @click="personalDialogOpen = true"
+            >
+                <UserRound class="size-4" />
+                {{ t('tools.badgeforge.personal.create_button') }}
+            </Button>
+        </div>
+        <p
+            v-else-if="!isAuthenticated"
+            class="text-xs text-muted-foreground"
+            data-test="badge-login-cta"
+        >
+            {{ t('tools.badgeforge.management.login_cta') }}
+            <a
+                :href="loginUrl"
+                class="font-medium underline underline-offset-2"
+            >
+                {{ t('tools.badgeforge.management.login_action') }}
+            </a>
+        </p>
+
+        <!-- Endpoint JSON: cadastro e lista vivem na dashboard (ADR-083). -->
+        <div
+            v-if="props.management.canManage"
+            class="rounded-lg border border-border px-4 py-3"
+            data-test="badge-endpoint-cta"
+        >
+            <p class="text-sm font-medium">
+                {{ t('tools.badgeforge.endpoint.cta_title') }}
+            </p>
+            <p class="text-xs text-subtle">
+                {{ t('tools.badgeforge.endpoint.cta_description') }}
+            </p>
+            <Button
+                as-child
+                variant="outline"
+                size="sm"
+                class="mt-2"
+                data-test="badge-endpoint-cta-link"
+            >
+                <a :href="endpointDashboardUrl">
+                    {{ t('tools.badgeforge.endpoint.cta_action') }}
+                </a>
+            </Button>
+        </div>
+
+        <ModeTabs
+            v-model="mode"
+            :show-custom="props.customProviders.length > 0"
+        />
+
+        <div v-if="mode === 'static'" class="grid gap-6 lg:grid-cols-2">
+            <!-- Formulario -->
+            <section class="space-y-6">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-semibold">
+                        {{ t('tools.badgeforge.sections.content') }}
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            data-test="badge-sample"
+                            @click="loadSample"
+                        >
+                            <Sparkles class="size-4" />
+                            {{ t('tools.badgeforge.actions.sample') }}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            data-test="badge-reset"
+                            @click="reset"
+                        >
+                            <Eraser class="size-4" />
+                            {{ t('tools.badgeforge.actions.reset') }}
+                        </Button>
+                    </div>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-2">
+                        <Label for="badge-label">
+                            {{ t('tools.badgeforge.fields.label') }}
+                        </Label>
+                        <Input
+                            id="badge-label"
+                            v-model="form.label"
+                            :placeholder="
+                                t('tools.badgeforge.placeholders.label')
+                            "
+                            :maxlength="props.limits.maxTextLength"
+                            data-test="badge-label"
+                        />
+                    </div>
+                    <div class="space-y-2">
+                        <Label for="badge-message">
+                            {{ t('tools.badgeforge.fields.message') }}
+                        </Label>
+                        <Input
+                            id="badge-message"
+                            v-model="form.message"
+                            :placeholder="
+                                t('tools.badgeforge.placeholders.message')
+                            "
+                            :maxlength="props.limits.maxTextLength"
+                            data-test="badge-message"
+                        />
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <Label for="badge-style">
+                        {{ t('tools.badgeforge.fields.style') }}
+                    </Label>
+                    <Select v-model="form.style">
+                        <SelectTrigger
+                            id="badge-style"
+                            class="w-full"
+                            data-test="badge-style"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="style in props.styles"
+                                :key="style"
+                                :value="style"
+                            >
+                                {{ style }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <!-- Cores -->
+                <div class="space-y-3">
+                    <h2 class="text-sm font-semibold">
+                        {{ t('tools.badgeforge.sections.colors') }}
+                    </h2>
+
+                    <p
+                        v-if="forcesColors"
+                        class="text-xs text-muted-foreground"
+                        data-test="badge-social-note"
+                    >
+                        {{ t('tools.badgeforge.social_note') }}
+                    </p>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <Label for="badge-label-color">
+                                {{ t('tools.badgeforge.fields.label_color') }}
+                            </Label>
+                            <Input
+                                id="badge-label-color"
+                                v-model="form.labelColor"
+                                :placeholder="
+                                    t(
+                                        'tools.badgeforge.placeholders.label_color',
+                                    )
+                                "
+                                :disabled="forcesColors"
+                                data-test="badge-label-color"
+                            />
+                        </div>
+                        <div class="space-y-2">
+                            <Label for="badge-color">
+                                {{ t('tools.badgeforge.fields.color') }}
+                            </Label>
+                            <Input
+                                id="badge-color"
+                                v-model="form.color"
+                                :placeholder="
+                                    t('tools.badgeforge.placeholders.color')
+                                "
+                                :disabled="forcesColors"
+                                data-test="badge-color"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button
+                            v-for="swatch in SWATCHES"
+                            :key="`label-${swatch}`"
+                            type="button"
+                            class="size-5 rounded-sm border"
+                            :style="{ backgroundColor: swatch }"
+                            :title="swatch"
+                            :aria-label="swatch"
+                            :disabled="forcesColors"
+                            data-test="swatch-label"
+                            @click="form.labelColor = swatch"
+                        />
+                        <span class="mx-2 text-xs text-muted-foreground"
+                            >·</span
+                        >
+                        <button
+                            v-for="swatch in SWATCHES"
+                            :key="`message-${swatch}`"
+                            type="button"
+                            class="size-5 rounded-sm border"
+                            :style="{ backgroundColor: swatch }"
+                            :title="swatch"
+                            :aria-label="swatch"
+                            :disabled="forcesColors"
+                            data-test="swatch-message"
+                            @click="form.color = swatch"
+                        />
+                    </div>
+                </div>
+
+                <!-- Logo -->
+                <div class="space-y-3">
+                    <h2 class="text-sm font-semibold">
+                        {{ t('tools.badgeforge.sections.logo') }}
+                    </h2>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <Label for="badge-logo">
+                                {{ t('tools.badgeforge.fields.logo') }}
+                            </Label>
+                            <Select v-model="form.logo">
+                                <SelectTrigger
+                                    id="badge-logo"
+                                    class="w-full"
+                                    data-test="badge-logo"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="NO_LOGO">
+                                        {{ t('tools.badgeforge.logo_none') }}
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="logo in props.logos"
+                                        :key="logo.slug"
+                                        :value="logo.slug"
+                                    >
+                                        {{ logo.name }}
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="logo in props.customLogos"
+                                        :key="logo.slug"
+                                        :value="logo.slug"
+                                        data-test="badge-logo-custom-option"
+                                    >
+                                        {{ logo.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="badge-logo-position">
+                                {{ t('tools.badgeforge.fields.logo_position') }}
+                            </Label>
+                            <Select v-model="form.logoPosition">
+                                <SelectTrigger
+                                    id="badge-logo-position"
+                                    class="w-full"
+                                    data-test="badge-logo-position"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="position in [
+                                            'left',
+                                            'right',
+                                        ] as const"
+                                        :key="position"
+                                        :value="position"
+                                    >
+                                        {{
+                                            t(
+                                                `tools.badgeforge.positions.${position}`,
+                                            )
+                                        }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="badge-logo-color">
+                                {{ t('tools.badgeforge.fields.logo_color') }}
+                            </Label>
+                            <Input
+                                id="badge-logo-color"
+                                v-model="form.logoColor"
+                                :placeholder="
+                                    t(
+                                        'tools.badgeforge.placeholders.logo_color',
+                                    )
+                                "
+                                data-test="badge-logo-color"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="badge-logo-size">
+                                {{ t('tools.badgeforge.fields.logo_size') }}
+                            </Label>
+                            <Input
+                                id="badge-logo-size"
+                                v-model="form.logoSize"
+                                type="number"
+                                :min="props.limits.logoSize.min"
+                                :max="props.limits.logoSize.max"
+                                :placeholder="String(spec.style.logoSize)"
+                                data-test="badge-logo-size"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avancado -->
+                <div class="space-y-3">
+                    <h2 class="text-sm font-semibold">
+                        {{ t('tools.badgeforge.sections.advanced') }}
+                    </h2>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <Label for="badge-link">
+                                {{ t('tools.badgeforge.fields.link') }}
+                            </Label>
+                            <Input
+                                id="badge-link"
+                                v-model="form.link"
+                                type="url"
+                                :placeholder="
+                                    t('tools.badgeforge.placeholders.link')
+                                "
+                                data-test="badge-link"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="badge-cache">
+                                {{ t('tools.badgeforge.fields.cache_seconds') }}
+                            </Label>
+                            <Input
+                                id="badge-cache"
+                                v-model="form.cacheSeconds"
+                                type="number"
+                                :min="props.limits.cacheSeconds.min"
+                                :max="props.limits.cacheSeconds.max"
+                                :placeholder="
+                                    String(props.limits.cacheSeconds.default)
+                                "
+                                data-test="badge-cache"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="badge-font">
+                                {{ t('tools.badgeforge.fields.font') }}
+                            </Label>
+                            <Select v-model="form.font">
+                                <SelectTrigger
+                                    id="badge-font"
+                                    class="w-full"
+                                    data-test="badge-font"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem :value="DEFAULT_FONT">
+                                        {{
+                                            t('tools.badgeforge.fonts.default')
+                                        }}
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="font in props.fonts"
+                                        :key="font.slug"
+                                        :value="font.slug"
+                                    >
+                                        {{ font.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preview e snippets -->
+            <section class="space-y-6">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-sm font-semibold">
+                        {{ t('tools.badgeforge.preview.title') }}
+                    </h2>
+                    <Label
+                        for="badge-dark"
+                        class="flex items-center gap-2 text-xs text-muted-foreground"
+                    >
+                        <Checkbox
+                            id="badge-dark"
+                            v-model="darkBackground"
+                            data-test="badge-dark"
+                        />
+                        {{ t('tools.badgeforge.preview.dark') }}
+                    </Label>
+                </div>
+
+                <div
+                    class="flex min-h-[140px] items-center justify-center rounded-md border p-6"
+                    :class="
+                        darkBackground ? 'bg-neutral-900' : 'bg-neutral-100'
+                    "
+                    data-test="badge-stage"
+                >
+                    <!--
             SVG inline (nao `<img>`): fonte carregada pela pagina nao vale
             dentro de uma imagem. O conteudo e gerado e escapado pelo proprio
             renderer, por isso o `v-html` e seguro (ADR-077).
           -->
-          <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado pelo renderer -->
-          <div
-            v-if="hasContent"
-            :aria-label="altText"
-            class="inline-flex max-w-full"
-            data-test="badge-preview"
-            v-html="svg"
-          />
-          <!-- eslint-enable vue/no-v-html -->
-          <p
-            v-else
-            class="text-sm text-muted-foreground"
-            data-test="badge-empty"
-          >
-            {{ t('tools.badgeforge.preview.empty') }}
-          </p>
-        </div>
-
-        <p
-          v-if="hasContent"
-          class="text-xs text-muted-foreground"
-          data-test="badge-dimensions"
-        >
-          {{
-            t('tools.badgeforge.preview.dimensions', {
-              width: dimensions.width,
-              height: dimensions.height,
-            })
-          }}
-        </p>
-
-        <div class="space-y-2">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <h2 class="text-sm font-semibold">
-              {{ t('tools.badgeforge.snippets.title') }}
-            </h2>
-
-            <div class="flex items-center gap-2">
-              <div class="w-24">
-                <Select v-model="format">
-                  <SelectTrigger
-                    id="badge-format"
-                    class="w-full"
-                    :aria-label="t('tools.badgeforge.fields.format')"
-                    data-test="badge-format"
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="value in ['svg', 'png'] as const"
-                      :key="value"
-                      :value="value"
+                    <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado pelo renderer -->
+                    <div
+                        v-if="hasContent"
+                        :aria-label="altText"
+                        class="inline-flex max-w-full"
+                        data-test="badge-preview"
+                        v-html="svg"
+                    />
+                    <!-- eslint-enable vue/no-v-html -->
+                    <p
+                        v-else
+                        class="text-sm text-muted-foreground"
+                        data-test="badge-empty"
                     >
-                      {{ t(`tools.badgeforge.formats.${value}`) }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                        {{ t('tools.badgeforge.preview.empty') }}
+                    </p>
+                </div>
 
-              <Button
-                as-child
-                variant="outline"
-                size="sm"
-                data-test="badge-download"
-              >
-                <a :href="downloadUrl">
-                  <Download class="size-4" />
-                  {{ t('tools.ui.actions.download') }}
-                </a>
-              </Button>
-            </div>
-          </div>
-
-          <Tabs v-model="snippetTab" data-test="badge-snippet-tabs">
-            <TabsList class="grid w-full grid-cols-4">
-              <TabsTrigger value="url">
-                {{ t('tools.badgeforge.snippets.url') }}
-              </TabsTrigger>
-              <TabsTrigger value="markdown">
-                {{ t('tools.badgeforge.snippets.markdown') }}
-              </TabsTrigger>
-              <TabsTrigger value="html">
-                {{ t('tools.badgeforge.snippets.html') }}
-              </TabsTrigger>
-              <TabsTrigger value="rst">
-                {{ t('tools.badgeforge.snippets.rst') }}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent
-              v-for="tab in [
-                'url',
-                'markdown',
-                'html',
-                'rst',
-              ] as const"
-              :key="tab"
-              :value="tab"
-              class="space-y-2"
-            >
-              <pre
-                class="overflow-x-auto rounded-md bg-muted p-3 text-xs break-all whitespace-pre-wrap"
-                data-test="badge-snippet"
-              >{{ snippets[tab] }}</pre>
-              <div class="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  data-test="badge-copy"
-                  @click="copySnippet(snippets[tab])"
+                <p
+                    v-if="hasContent"
+                    class="text-xs text-muted-foreground"
+                    data-test="badge-dimensions"
                 >
-                  <Copy class="size-4" />
-                  {{ t('tools.ui.actions.copy') }}
-                </Button>
-                <span
-                  v-if="copyMessage"
-                  class="text-xs text-muted-foreground"
-                  data-test="badge-copy-feedback"
-                >
-                  {{ copyMessage }}
-                </span>
-              </div>
-            </TabsContent>
-          </Tabs>
+                    {{
+                        t('tools.badgeforge.preview.dimensions', {
+                            width: dimensions.width,
+                            height: dimensions.height,
+                        })
+                    }}
+                </p>
+
+                <div class="space-y-2">
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-2"
+                    >
+                        <h2 class="text-sm font-semibold">
+                            {{ t('tools.badgeforge.snippets.title') }}
+                        </h2>
+
+                        <div class="flex items-center gap-2">
+                            <div class="w-24">
+                                <Select v-model="format">
+                                    <SelectTrigger
+                                        id="badge-format"
+                                        class="w-full"
+                                        :aria-label="
+                                            t('tools.badgeforge.fields.format')
+                                        "
+                                        data-test="badge-format"
+                                    >
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="value in [
+                                                'svg',
+                                                'png',
+                                            ] as const"
+                                            :key="value"
+                                            :value="value"
+                                        >
+                                            {{
+                                                t(
+                                                    `tools.badgeforge.formats.${value}`,
+                                                )
+                                            }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <Button
+                                as-child
+                                variant="outline"
+                                size="sm"
+                                data-test="badge-download"
+                            >
+                                <a :href="downloadUrl">
+                                    <Download class="size-4" />
+                                    {{ t('tools.ui.actions.download') }}
+                                </a>
+                            </Button>
+                        </div>
+                    </div>
+
+                    <Tabs v-model="snippetTab" data-test="badge-snippet-tabs">
+                        <TabsList class="grid w-full grid-cols-4">
+                            <TabsTrigger value="url">
+                                {{ t('tools.badgeforge.snippets.url') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="markdown">
+                                {{ t('tools.badgeforge.snippets.markdown') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="html">
+                                {{ t('tools.badgeforge.snippets.html') }}
+                            </TabsTrigger>
+                            <TabsTrigger value="rst">
+                                {{ t('tools.badgeforge.snippets.rst') }}
+                            </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent
+                            v-for="tab in [
+                                'url',
+                                'markdown',
+                                'html',
+                                'rst',
+                            ] as const"
+                            :key="tab"
+                            :value="tab"
+                            class="space-y-2"
+                        >
+                            <pre
+                                class="overflow-x-auto rounded-md bg-muted p-3 text-xs break-all whitespace-pre-wrap"
+                                data-test="badge-snippet"
+                                >{{ snippets[tab] }}</pre>
+                            <div class="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    data-test="badge-copy"
+                                    @click="copySnippet(snippets[tab])"
+                                >
+                                    <Copy class="size-4" />
+                                    {{ t('tools.ui.actions.copy') }}
+                                </Button>
+                                <span
+                                    v-if="copyMessage"
+                                    class="text-xs text-muted-foreground"
+                                    data-test="badge-copy-feedback"
+                                >
+                                    {{ copyMessage }}
+                                </span>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            </section>
         </div>
-      </section>
+
+        <!-- Provider customizado do dono (F7, ADR-087): so com provider criado. -->
+        <div
+            v-else-if="mode === 'custom' && props.customProviders.length > 0"
+            class="grid gap-6 lg:grid-cols-2"
+            data-test="badge-custom-mode"
+        >
+            <CustomProviderForm
+                v-model="customProviderForm"
+                :tool-props="props"
+            />
+            <CustomProviderPreview
+                :form="customProviderForm"
+                :tool-props="props"
+            />
+        </div>
+
+        <div
+            v-else
+            class="grid gap-6 lg:grid-cols-2"
+            data-test="badge-provider-mode"
+        >
+            <ProviderForm v-model="providerForm" :tool-props="props" />
+            <ProviderPreview :form="providerForm" :tool-props="props" />
+        </div>
+
+        <LogoLibraryDialog
+            v-if="props.management.canManage"
+            v-model:open="logoDialogOpen"
+            :logos="props.customLogos"
+            :limits="props.limits.customLogos"
+            :upgrade-url="pricingUrl"
+        />
+
+        <PresetDialog
+            v-if="props.management.canManage"
+            v-model:open="presetDialogOpen"
+            :presets="props.presets"
+            :limits="props.limits.presets"
+            :builder-form="form"
+            @apply="applyPreset"
+        />
+
+        <PersonalBadgeDialog
+            v-if="props.management.canManage"
+            v-model:open="personalDialogOpen"
+            :tool-props="props"
+            :mode="mode"
+            :builder-form="form"
+            :provider-form="providerForm"
+            :upgrade-url="pricingUrl"
+        />
     </div>
-
-    <!-- Provider customizado do dono (F7, ADR-087): so com provider criado. -->
-    <div
-      v-else-if="mode === 'custom' && props.customProviders.length > 0"
-      class="grid gap-6 lg:grid-cols-2"
-      data-test="badge-custom-mode"
-    >
-      <CustomProviderForm
-        v-model="customProviderForm"
-        :tool-props="props"
-      />
-      <CustomProviderPreview
-        :form="customProviderForm"
-        :tool-props="props"
-      />
-    </div>
-
-    <div
-      v-else
-      class="grid gap-6 lg:grid-cols-2"
-      data-test="badge-provider-mode"
-    >
-      <ProviderForm
-        v-model="providerForm"
-        :tool-props="props"
-      />
-      <ProviderPreview
-        :form="providerForm"
-        :tool-props="props"
-      />
-    </div>
-
-    <LogoLibraryDialog
-      v-if="props.management.canManage"
-      v-model:open="logoDialogOpen"
-      :logos="props.customLogos"
-      :limits="props.limits.customLogos"
-      :upgrade-url="pricingUrl"
-    />
-
-    <PresetDialog
-      v-if="props.management.canManage"
-      v-model:open="presetDialogOpen"
-      :presets="props.presets"
-      :limits="props.limits.presets"
-      :builder-form="form"
-      @apply="applyPreset"
-    />
-
-    <PersonalBadgeDialog
-      v-if="props.management.canManage"
-      v-model:open="personalDialogOpen"
-      :tool-props="props"
-      :mode="mode"
-      :builder-form="form"
-      :provider-form="providerForm"
-      :upgrade-url="pricingUrl"
-    />
-  </div>
 </template>

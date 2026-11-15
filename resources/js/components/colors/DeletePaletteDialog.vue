@@ -56,9 +56,7 @@ watch(
     },
 );
 
-const matches = computed(
-    () => confirmName.value === props.paletteName,
-);
+const matches = computed(() => confirmName.value === props.paletteName);
 
 function destroy(): void {
     if (!matches.value || deleting.value) {
@@ -88,65 +86,58 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-  <Dialog
-    :open="open"
-    @update:open="setOpen"
-  >
-    <DialogContent
-      class="sm:max-w-md"
-      data-test="palette-delete-dialog"
-    >
-      <DialogHeader>
-        <DialogTitle>{{ t('colors.delete.title') }}</DialogTitle>
-        <DialogDescription>
-          {{ t('colors.delete.description') }}
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog :open="open" @update:open="setOpen">
+        <DialogContent class="sm:max-w-md" data-test="palette-delete-dialog">
+            <DialogHeader>
+                <DialogTitle>{{ t('colors.delete.title') }}</DialogTitle>
+                <DialogDescription>
+                    {{ t('colors.delete.description') }}
+                </DialogDescription>
+            </DialogHeader>
 
-      <form
-        class="flex flex-col gap-3"
-        @submit.prevent="destroy"
-      >
-        <div class="flex flex-col gap-2">
-          <Label for="palette-delete-name">
-            {{ t('colors.delete.label') }}
-          </Label>
-          <Input
-            id="palette-delete-name"
-            v-model="confirmName"
-            type="text"
-            autocomplete="off"
-            :placeholder="paletteName"
-            :aria-invalid="serverError !== null"
-            data-test="palette-delete-name"
-          />
-          <InputError :message="serverError ?? undefined" />
-        </div>
+            <form class="flex flex-col gap-3" @submit.prevent="destroy">
+                <div class="flex flex-col gap-2">
+                    <Label for="palette-delete-name">
+                        {{ t('colors.delete.label') }}
+                    </Label>
+                    <Input
+                        id="palette-delete-name"
+                        v-model="confirmName"
+                        type="text"
+                        autocomplete="off"
+                        :placeholder="paletteName"
+                        :aria-invalid="serverError !== null"
+                        data-test="palette-delete-name"
+                    />
+                    <InputError :message="serverError ?? undefined" />
+                </div>
 
-        <DialogFooter class="gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            :disabled="deleting"
-            data-test="palette-delete-cancel"
-            @click="emit('close')"
-          >
-            {{ t('colors.delete.cancel') }}
-          </Button>
-          <Button
-            type="submit"
-            variant="destructive"
-            size="sm"
-            :disabled="!matches || deleting"
-            data-test="palette-delete-confirm"
-          >
-            {{
-              deleting ? t('colors.delete.deleting') : t('colors.delete.confirm')
-            }}
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
-  </Dialog>
+                <DialogFooter class="gap-2">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        :disabled="deleting"
+                        data-test="palette-delete-cancel"
+                        @click="emit('close')"
+                    >
+                        {{ t('colors.delete.cancel') }}
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="destructive"
+                        size="sm"
+                        :disabled="!matches || deleting"
+                        data-test="palette-delete-confirm"
+                    >
+                        {{
+                            deleting
+                                ? t('colors.delete.deleting')
+                                : t('colors.delete.confirm')
+                        }}
+                    </Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
 </template>

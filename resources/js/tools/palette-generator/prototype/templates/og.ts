@@ -97,19 +97,17 @@ export function ogNodes(
         });
     }
 
-    nodes.push(
-        {
-            kind: 'text',
-            x: MARGIN,
-            y: 584,
-            text: copy.footer,
-            size: 16,
-            weight: 400,
-            fill: roles.text_muted,
-            role: 'text_muted',
-            section: 'footer',
-        },
-    );
+    nodes.push({
+        kind: 'text',
+        x: MARGIN,
+        y: 584,
+        text: copy.footer,
+        size: 16,
+        weight: 400,
+        fill: roles.text_muted,
+        role: 'text_muted',
+        section: 'footer',
+    });
 
     return nodes;
 }

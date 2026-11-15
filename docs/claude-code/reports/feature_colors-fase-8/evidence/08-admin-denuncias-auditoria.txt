@@ -1,0 +1,19 @@
+Admin: moderação e denúncias (checklist F8, item 8)
+Ambiente de auditoria (SQLite descartável), 2026-11-15.
+
+1) /admin/comments: o único pendente (Bruno) foi aprovado -> botão
+   [data-test=comment-moderation-approve], aviso 'Comentário aprovado.', lista vazia.
+
+2) /admin/comment-reports: duas denúncias 'Spam' pendentes.
+   - 'Resolver' em [data-test=comment-report-resolve] -> total passa de 2 para 1;
+   - 'Dispensar' em [data-test=comment-report-dismiss] -> lista 'Nada por aqui'.
+
+3) /admin/audit mostra as três ações (sem corpo, sem coluna de texto).
+
+4) Linhas reais em admin_actions (dump do banco descartável):
+{"id":4,"actor_id":1,"action":"comment_report.dismissed","target_type":null,"target_id":null,"meta":"{\"id\":\"01m7ft2r2c7ac98ejd9ypzy2xy\",\"comment_id\":\"01m7ft2r20ne1xa810rnmxbsnf\",\"from\":\"pending\",\"to\":\"dismissed\"}","ip":"127.0.0.1","created_at":"2026-11-15 12:43:13"}
+{"id":3,"actor_id":1,"action":"comment_report.resolved","target_type":null,"target_id":null,"meta":"{\"id\":\"01m7fxebfnnssphe4jt1t15588\",\"comment_id\":\"01m7ft2r1s1aew7ctdyqn4s8fm\",\"from\":\"pending\",\"to\":\"resolved\"}","ip":"127.0.0.1","created_at":"2026-11-15 12:42:59"}
+{"id":2,"actor_id":1,"action":"comment.approved","target_type":null,"target_id":null,"meta":"{\"id\":\"01m7ft2r1s1aew7ctdyqn4s8fm\",\"palette_id\":\"01M7FT2QV43YZYNGA463XZKQ88\",\"from\":\"pending\",\"to\":\"approved\"}","ip":"127.0.0.1","created_at":"2026-11-15 12:41:45"}
+{"id":1,"actor_id":null,"action":"user.role_granted","target_type":"App\\Models\\User","target_id":1,"meta":"{\"via\":\"cli\",\"para\":\"admin\"}","ip":null,"created_at":"2026-11-15 11:34:18"}
+
+meta contém só id/comment_id/from/to — nunca o corpo do comentário.

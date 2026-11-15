@@ -4,11 +4,15 @@ import { useI18n } from 'vue-i18n';
 import FileDropzone from '@/components/tool/FileDropzone.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { formatBytes } from '@/lib/bytes';
 import type { Rgba } from '@/lib/color';
 import { acceptAttribute } from '@/lib/file';
 import { ACCEPTED_IMAGE_TYPES, decodeImage } from '../lib/decodeImage';
 import type { ExtractedPalette } from '../lib/extractedPalette';
-import { EXTRACTION_COUNTS, type ExtractionCount } from '../lib/extractContract';
+import {
+    EXTRACTION_COUNTS,
+    type ExtractionCount,
+} from '../lib/extractContract';
 import {
     createExtractionClient,
     type ExtractionClient,
@@ -65,7 +69,7 @@ let abort: AbortController | null = null;
 const busy = computed(() => status.value !== 'idle');
 const fileHint = computed(() =>
     t('tools.palette-generator.extraction.file_hint', {
-        size: formatBytes(props.image.maxBytes),
+        size: formatLimit(props.image.maxBytes),
     }),
 );
 const statusLabel = computed(() => {
@@ -81,14 +85,9 @@ const statusLabel = computed(() => {
     }
 });
 
-/** Teto em MB pelo locale atual; o numero vem do servidor, nunca daqui. */
-function formatBytes(bytes: number): string {
-    return new Intl.NumberFormat(locale.value, {
-        style: 'unit',
-        unit: 'megabyte',
-        unitDisplay: 'short',
-        maximumFractionDigits: 1,
-    }).format(bytes / 1024 / 1024);
+/** Teto no idioma da pagina; o numero vem do servidor, nunca daqui. */
+function formatLimit(bytes: number): string {
+    return formatBytes(bytes, locale.value);
 }
 
 function paletteClient(): ExtractionClient {
@@ -200,9 +199,7 @@ async function analyze(input: AnalyzeInput): Promise<void> {
 
         if (!outcome.ok) {
             fail(
-                outcome.error === 'empty_image'
-                    ? 'empty_image'
-                    : 'unavailable',
+                outcome.error === 'empty_image' ? 'empty_image' : 'unavailable',
             );
 
             return;
@@ -264,218 +261,230 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section
-    class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
-    data-test="extraction-panel"
-  >
-    <div>
-      <h2 class="text-sm font-semibold">
-        {{ t('tools.palette-generator.extraction.title') }}
-      </h2>
-      <p class="mt-1 text-xs text-muted-foreground">
-        {{ t('tools.palette-generator.extraction.description') }}
-      </p>
-    </div>
-
-    <div class="grid gap-4 md:grid-cols-2">
-      <div class="flex flex-col gap-2">
-        <span class="text-sm font-medium">
-          {{ t('tools.palette-generator.extraction.file_label') }}
-        </span>
-        <FileDropzone
-          ref="dropzone"
-          :accept="ACCEPT"
-          testid="extraction"
-          @file="analyzeFile"
-        >
-          <div
-            class="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border p-4 text-center"
-          >
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              data-test="extraction-pick"
-              @click.stop="dropzone?.pick()"
-            >
-              {{ t('tools.palette-generator.extraction.file_label') }}
-            </Button>
-            <p class="text-xs text-muted-foreground">
-              {{ fileHint }}
-            </p>
-          </div>
-        </FileDropzone>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label
-          class="text-sm font-medium"
-          for="palette-extraction-url"
-        >
-          {{ t('tools.palette-generator.extraction.url_label') }}
-        </label>
-        <div class="flex gap-2">
-          <Input
-            id="palette-extraction-url"
-            v-model="url"
-            type="url"
-            inputmode="url"
-            :placeholder="t('tools.palette-generator.extraction.url_placeholder')"
-            data-test="extraction-url"
-          />
-          <Button
-            type="button"
-            :disabled="url.trim() === '' || busy"
-            data-test="extraction-import"
-            @click="importUrl"
-          >
-            {{
-              busy
-                ? t('tools.palette-generator.extraction.importing')
-                : t('tools.palette-generator.extraction.import_url')
-            }}
-          </Button>
-        </div>
-        <p class="text-xs text-muted-foreground">
-          {{ t('tools.palette-generator.extraction.url_hint') }}
-        </p>
-      </div>
-    </div>
-
-    <div class="flex flex-col gap-2">
-      <span class="text-sm font-medium">
-        {{ t('tools.palette-generator.extraction.count_label') }}
-      </span>
-      <div class="flex flex-wrap gap-1">
-        <Button
-          v-for="value in EXTRACTION_COUNTS"
-          :key="value"
-          type="button"
-          size="sm"
-          :variant="count === value ? 'default' : 'outline'"
-          :aria-pressed="count === value"
-          :data-test="`extraction-count-${value}`"
-          @click="count = value"
-        >
-          {{
-            t('tools.palette-generator.extraction.count_option', {
-              count: value,
-            })
-          }}
-        </Button>
-      </div>
-    </div>
-
-    <div
-      v-if="busy"
-      class="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs"
-      role="status"
-      aria-live="polite"
-      data-test="extraction-status"
-    >
-      <span>{{ statusLabel }}</span>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        data-test="extraction-cancel"
-        @click="cancel"
-      >
-        {{ t('tools.palette-generator.extraction.cancel') }}
-      </Button>
-    </div>
-
-    <p
-      v-if="error !== null"
-      class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
-      role="alert"
-      data-test="extraction-error"
-    >
-      {{ t(`tools.palette-generator.extraction.errors.${error}`) }}
-      <Button
-        v-if="error === 'cors'"
-        type="button"
-        variant="outline"
-        size="sm"
-        class="mt-2"
-        data-test="extraction-use-file"
-        @click="dropzone?.pick()"
-      >
-        {{ t('tools.palette-generator.extraction.use_file') }}
-      </Button>
-    </p>
-
-    <img
-      v-if="previewUrl !== null"
-      :src="previewUrl"
-      :alt="t('tools.palette-generator.extraction.preview_alt')"
-      class="max-h-48 w-auto max-w-full self-start rounded-lg border border-border object-contain"
-      data-test="extraction-preview"
-    >
-
     <section
-      v-if="modelValue !== null"
-      class="flex flex-col gap-3"
-      data-test="extraction-results"
+        class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+        data-test="extraction-panel"
     >
-      <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 class="text-sm font-semibold">
-          {{
-            t('tools.palette-generator.extraction.results_title', {
-              count: modelValue.colors.length,
-            })
-          }}
-        </h3>
-        <span
-          class="text-[10px] text-muted-foreground"
-          data-test="extraction-version"
+        <div>
+            <h2 class="text-sm font-semibold">
+                {{ t('tools.palette-generator.extraction.title') }}
+            </h2>
+            <p class="mt-1 text-xs text-muted-foreground">
+                {{ t('tools.palette-generator.extraction.description') }}
+            </p>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div class="flex flex-col gap-2">
+                <span class="text-sm font-medium">
+                    {{ t('tools.palette-generator.extraction.file_label') }}
+                </span>
+                <FileDropzone
+                    ref="dropzone"
+                    :accept="ACCEPT"
+                    testid="extraction"
+                    @file="analyzeFile"
+                >
+                    <div
+                        class="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border p-4 text-center"
+                    >
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            data-test="extraction-pick"
+                            @click.stop="dropzone?.pick()"
+                        >
+                            {{
+                                t(
+                                    'tools.palette-generator.extraction.file_label',
+                                )
+                            }}
+                        </Button>
+                        <p class="text-xs text-muted-foreground">
+                            {{ fileHint }}
+                        </p>
+                    </div>
+                </FileDropzone>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-medium" for="palette-extraction-url">
+                    {{ t('tools.palette-generator.extraction.url_label') }}
+                </label>
+                <div class="flex gap-2">
+                    <Input
+                        id="palette-extraction-url"
+                        v-model="url"
+                        type="url"
+                        inputmode="url"
+                        :placeholder="
+                            t(
+                                'tools.palette-generator.extraction.url_placeholder',
+                            )
+                        "
+                        data-test="extraction-url"
+                    />
+                    <Button
+                        type="button"
+                        :disabled="url.trim() === '' || busy"
+                        data-test="extraction-import"
+                        @click="importUrl"
+                    >
+                        {{
+                            busy
+                                ? t(
+                                      'tools.palette-generator.extraction.importing',
+                                  )
+                                : t(
+                                      'tools.palette-generator.extraction.import_url',
+                                  )
+                        }}
+                    </Button>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                    {{ t('tools.palette-generator.extraction.url_hint') }}
+                </p>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <span class="text-sm font-medium">
+                {{ t('tools.palette-generator.extraction.count_label') }}
+            </span>
+            <div class="flex flex-wrap gap-1">
+                <Button
+                    v-for="value in EXTRACTION_COUNTS"
+                    :key="value"
+                    type="button"
+                    size="sm"
+                    :variant="count === value ? 'default' : 'outline'"
+                    :aria-pressed="count === value"
+                    :data-test="`extraction-count-${value}`"
+                    @click="count = value"
+                >
+                    {{
+                        t('tools.palette-generator.extraction.count_option', {
+                            count: value,
+                        })
+                    }}
+                </Button>
+            </div>
+        </div>
+
+        <div
+            v-if="busy"
+            class="flex flex-wrap items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs"
+            role="status"
+            aria-live="polite"
+            data-test="extraction-status"
         >
-          {{
-            t('tools.palette-generator.extraction.algorithm_version', {
-              version: modelValue.algorithmVersion,
-            })
-          }}
-        </span>
-      </div>
+            <span>{{ statusLabel }}</span>
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-test="extraction-cancel"
+                @click="cancel"
+            >
+                {{ t('tools.palette-generator.extraction.cancel') }}
+            </Button>
+        </div>
 
-      <p
-        class="text-xs text-muted-foreground"
-        data-test="extraction-source"
-      >
-        {{
-          modelValue.source.kind === 'file'
-            ? t('tools.palette-generator.extraction.source_file', {
-              name: modelValue.source.label,
-            })
-            : t('tools.palette-generator.extraction.source_url', {
-              host: modelValue.source.host,
-            })
-        }}
-      </p>
+        <p
+            v-if="error !== null"
+            class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
+            role="alert"
+            data-test="extraction-error"
+        >
+            {{ t(`tools.palette-generator.extraction.errors.${error}`) }}
+            <Button
+                v-if="error === 'cors'"
+                type="button"
+                variant="outline"
+                size="sm"
+                class="mt-2"
+                data-test="extraction-use-file"
+                @click="dropzone?.pick()"
+            >
+                {{ t('tools.palette-generator.extraction.use_file') }}
+            </Button>
+        </p>
 
-      <p
-        v-if="!modelValue.sufficient"
-        class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
-        data-test="extraction-insufficient"
-      >
-        {{
-          t('tools.palette-generator.extraction.insufficient', {
-            requested: modelValue.requested,
-            found: modelValue.colors.length,
-          })
-        }}
-      </p>
-
-      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <ExtractedSwatch
-          v-for="(color, index) in modelValue.colors"
-          :key="color.hex"
-          :color="color"
-          :index="index"
-          :copy="copy"
-          @use="emit('use-base', color.rgba)"
+        <img
+            v-if="previewUrl !== null"
+            :src="previewUrl"
+            :alt="t('tools.palette-generator.extraction.preview_alt')"
+            class="max-h-48 w-auto max-w-full self-start rounded-lg border border-border object-contain"
+            data-test="extraction-preview"
         />
-      </div>
+
+        <section
+            v-if="modelValue !== null"
+            class="flex flex-col gap-3"
+            data-test="extraction-results"
+        >
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 class="text-sm font-semibold">
+                    {{
+                        t('tools.palette-generator.extraction.results_title', {
+                            count: modelValue.colors.length,
+                        })
+                    }}
+                </h3>
+                <span
+                    class="text-[10px] text-muted-foreground"
+                    data-test="extraction-version"
+                >
+                    {{
+                        t(
+                            'tools.palette-generator.extraction.algorithm_version',
+                            {
+                                version: modelValue.algorithmVersion,
+                            },
+                        )
+                    }}
+                </span>
+            </div>
+
+            <p
+                class="text-xs text-muted-foreground"
+                data-test="extraction-source"
+            >
+                {{
+                    modelValue.source.kind === 'file'
+                        ? t('tools.palette-generator.extraction.source_file', {
+                              name: modelValue.source.label,
+                          })
+                        : t('tools.palette-generator.extraction.source_url', {
+                              host: modelValue.source.host,
+                          })
+                }}
+            </p>
+
+            <p
+                v-if="!modelValue.sufficient"
+                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+                data-test="extraction-insufficient"
+            >
+                {{
+                    t('tools.palette-generator.extraction.insufficient', {
+                        requested: modelValue.requested,
+                        found: modelValue.colors.length,
+                    })
+                }}
+            </p>
+
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <ExtractedSwatch
+                    v-for="(color, index) in modelValue.colors"
+                    :key="color.hex"
+                    :color="color"
+                    :index="index"
+                    :copy="copy"
+                    @use="emit('use-base', color.rgba)"
+                />
+            </div>
+        </section>
     </section>
-  </section>
 </template>

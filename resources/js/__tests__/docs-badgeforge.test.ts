@@ -199,8 +199,9 @@ function mountDocs(
     return mount(BadgeForgeDocs, {
         props: {
             ...PADRAO,
-            providers: (toolProps as { providers: BadgeForgeDocsProps['providers'] })
-                .providers,
+            providers: (
+                toolProps as { providers: BadgeForgeDocsProps['providers'] }
+            ).providers,
             ...overrides,
         },
         global: { plugins: [i18n] },
@@ -229,7 +230,9 @@ describe('BadgeForge Docs', () => {
     it('traduz o nome da metrica e mostra o caminho do exemplo', () => {
         const wrapper = mountDocs();
 
-        const github = wrapper.find('[data-test="badgeforge-docs-provider-github"]');
+        const github = wrapper.find(
+            '[data-test="badgeforge-docs-provider-github"]',
+        );
 
         expect(github.text()).toContain('ESTRELAS_GH');
         expect(github.text()).toContain(
@@ -241,7 +244,9 @@ describe('BadgeForge Docs', () => {
     it('marca item privado e publico pela definicao', () => {
         const wrapper = mountDocs();
 
-        const npmDm = wrapper.find('[data-test="badgeforge-docs-metric-npm-dm"]');
+        const npmDm = wrapper.find(
+            '[data-test="badgeforge-docs-metric-npm-dm"]',
+        );
         const npmV = wrapper.find('[data-test="badgeforge-docs-metric-npm-v"]');
 
         expect(npmDm.text()).toContain('PUBLICO');
@@ -255,7 +260,9 @@ describe('BadgeForge Docs', () => {
             wrapper.find('[data-test="badgeforge-docs-static-example"]').text(),
         ).toBe('https://devtools.example/api/badges/static/build/passing.svg');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-static-markdown"]').text(),
+            wrapper
+                .find('[data-test="badgeforge-docs-static-markdown"]')
+                .text(),
         ).toBe(
             '![build: passing](https://devtools.example/api/badges/static/build/passing.svg)',
         );
@@ -278,7 +285,9 @@ describe('BadgeForge Docs', () => {
             endpointRateLimits: { anonymous: 5, free: 7, paid: 9 },
         });
 
-        const section = wrapper.find('[data-test="badgeforge-docs-json-endpoint"]');
+        const section = wrapper.find(
+            '[data-test="badgeforge-docs-json-endpoint"]',
+        );
 
         expect(section.text()).toContain('INTRO_ENDPOINT_JSON');
         expect(
@@ -300,9 +309,9 @@ describe('BadgeForge Docs', () => {
             wrapper.find('[data-test="badgeforge-docs-json-limits"]').text(),
         ).toContain('PAGO_9');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-json-manage"]').attributes(
-                'href',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-docs-json-manage"]')
+                .attributes('href'),
         ).toBe('/pt-br/dashboard/badgeforge');
     });
 
@@ -314,14 +323,16 @@ describe('BadgeForge Docs', () => {
         expect(section.text()).toContain('INTRO_CUSTOM');
         expect(
             wrapper.find('[data-test="badgeforge-docs-custom-url"]').text(),
-        ).toBe('https://devtools.example/api/badges/custom/{id}/{metric}/{path}.svg');
+        ).toBe(
+            'https://devtools.example/api/badges/custom/{id}/{metric}/{path}.svg',
+        );
         expect(section.text()).toContain('CORPO_PAGO_CUSTOM');
         expect(section.text()).toContain('CORPO_POINTER_CUSTOM');
         expect(section.text()).toContain('CORPO_SEGURANCA_CUSTOM');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-custom-manage"]').attributes(
-                'href',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-docs-custom-manage"]')
+                .attributes('href'),
         ).toBe('/pt-br/dashboard/badgeforge');
     });
 
@@ -338,10 +349,14 @@ describe('BadgeForge Docs', () => {
             wrapper.find('[data-test="badgeforge-docs-api-base-url"]').text(),
         ).toBe('https://devtools.example/api/v1/badgeforge');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-api-tokens"]').attributes('href'),
+            wrapper
+                .find('[data-test="badgeforge-docs-api-tokens"]')
+                .attributes('href'),
         ).toBe('/pt-br/settings/api-tokens');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-api-spec"]').attributes('href'),
+            wrapper
+                .find('[data-test="badgeforge-docs-api-spec"]')
+                .attributes('href'),
         ).toBe('https://devtools.example/openapi/badges.yaml');
     });
 
@@ -357,14 +372,14 @@ describe('BadgeForge Docs', () => {
         const wrapper = mountDocs();
 
         expect(
-            wrapper.find('[data-test="badgeforge-docs-open-tool"]').attributes(
-                'href',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-docs-open-tool"]')
+                .attributes('href'),
         ).toBe('/pt-br/tools/badgeforge');
         expect(
-            wrapper.find('[data-test="badgeforge-docs-manage"]').attributes(
-                'href',
-            ),
+            wrapper
+                .find('[data-test="badgeforge-docs-manage"]')
+                .attributes('href'),
         ).toBe('/pt-br/dashboard/badgeforge');
     });
 

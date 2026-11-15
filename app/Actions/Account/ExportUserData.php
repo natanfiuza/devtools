@@ -8,6 +8,17 @@ use App\Models\BadgeAsset;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgeEndpoint;
 use App\Models\BadgePreset;
+use App\Models\ColorCommentReport;
+use App\Models\ColorFavorite;
+use App\Models\ColorHistoryEntry;
+use App\Models\ColorNotificationPreference;
+use App\Models\ColorPalette;
+use App\Models\ColorPaletteComment;
+use App\Models\ColorPaletteFavorite;
+use App\Models\ColorPaletteLike;
+use App\Models\ColorPaletteMute;
+use App\Models\ColorPreset;
+use App\Models\ColorTag;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\SocialAccount;
@@ -15,6 +26,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionIntent;
 use App\Models\UsageLedger;
 use App\Models\User;
+use App\Models\UserFollow;
 use App\Support\Ai\PayloadCodec;
 
 /**
@@ -182,6 +194,10 @@ final class ExportUserData
                     ])
                     ->all(),
             ],
+            // Colors (F1 a F7): paletas, biblioteca pessoal, relações sociais
+            // e o que a conta escreveu. O bloco existe para que o direito de
+            // levar os proprios dados (ADR-028) cubra o grupo inteiro.
+            'colors' => $this->colors($user),
             // O livro-razao do consumo: e da conta, e nao estado do sistema.
             'usage' => $user->usageLedger()
                 ->orderBy('id')
@@ -191,6 +207,173 @@ final class ExportUserData
                     'tokens' => $entry->tokens,
                     'uses' => $entry->uses,
                     'at' => $entry->created_at?->toIso8601String(),
+                ])
+                ->all(),
+        ];
+    }
+
+    /**
+     * Dados do grupo Colors que pertencem a conta (F8, ADR-144).
+     *
+     * Ficam de fora o `moderation_reason` (nota interna da moderacao) e os
+     * seguidores (a linha e a acao de outra conta). Curtidas e follows so
+     * aparecem quando estao ativos; comentario excluido entra, porque o texto
+     * continua sendo do autor.
+     *
+     * @return array<string, mixed>
+     */
+    private function colors(User $user): array
+    {
+        $preferences = ColorNotificationPreference::for($user);
+
+        return [
+            'palettes' => $user->colorPalettes()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPalette $palette): array => [
+                    'id' => $palette->id,
+                    'name' => $palette->name,
+                    'description' => $palette->description,
+                    'slug' => $palette->slug,
+                    'kind' => $palette->kind->value,
+                    'visibility' => $palette->visibility->value,
+                    'archived_at' => $palette->archived_at?->toIso8601String(),
+                    'colors' => $palette->colors,
+                    'roles' => $palette->roles,
+                    'source' => $palette->source,
+                    'colors_count' => $palette->colors_count,
+                    'duplications_count' => $palette->duplications_count,
+                    'algorithm_version' => $palette->algorithm_version,
+                    'created_at' => $palette->created_at?->toIso8601String(),
+                    'updated_at' => $palette->updated_at?->toIso8601String(),
+                ])
+                ->all(),
+            'tags' => $user->colorTags()
+                ->orderBy('position')
+                ->orderBy('name')
+                ->get()
+                ->map(fn (ColorTag $tag): array => [
+                    'name' => $tag->name,
+                    'key' => $tag->key,
+                    'position' => $tag->position,
+                ])
+                ->all(),
+            'history' => $user->colorHistoryEntries()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorHistoryEntry $entry): array => [
+                    'color' => $entry->color,
+                    'created_at' => $entry->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            'favorites' => $user->colorFavorites()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorFavorite $favorite): array => [
+                    'color' => $favorite->color,
+                    'created_at' => $favorite->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            'presets' => $user->colorPresets()
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPreset $preset): array => [
+                    'name' => $preset->name,
+                    'base' => $preset->base,
+                    'created_at' => $preset->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            'palette_favorites' => $user->favoritePalettes()
+                ->with('palette')
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPaletteFavorite $favorite): array => [
+                    'palette_id' => $favorite->color_palette_id,
+                    'palette_slug' => $favorite->palette->slug,
+                    'palette_name' => $favorite->palette->name,
+                    'created_at' => $favorite->created_at?->toIso8601String(),
+                ])
+                ->all(),
+            'likes' => $user->paletteLikes()
+                ->whereNotNull('liked_at')
+                ->with('palette')
+                ->orderBy('liked_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPaletteLike $like): array => [
+                    'palette_id' => $like->color_palette_id,
+                    'palette_slug' => $like->palette->slug,
+                    'palette_name' => $like->palette->name,
+                    'liked_at' => $like->liked_at?->toIso8601String(),
+                ])
+                ->all(),
+            // O username vem do join: a conta seguida pode estar em soft
+            // delete e o vinculo continua existindo, entao a relacao
+            // `followed` resolveria nula mesmo com a linha presente.
+            'following' => $user->following()
+                ->whereNotNull('user_follows.followed_at')
+                ->join('users', 'users.id', '=', 'user_follows.followed_id')
+                ->orderBy('user_follows.followed_at')
+                ->orderBy('user_follows.id')
+                ->select(['user_follows.followed_at', 'users.username'])
+                ->get()
+                ->map(fn (UserFollow $follow): array => [
+                    'username' => $follow->getAttribute('username'),
+                    'followed_at' => $follow->followed_at?->toIso8601String(),
+                ])
+                ->all(),
+            'comments' => $user->colorPaletteComments()
+                ->withTrashed()
+                ->with('palette')
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPaletteComment $comment): array => [
+                    'id' => $comment->id,
+                    'palette_id' => $comment->color_palette_id,
+                    'palette_slug' => $comment->palette->slug,
+                    'body' => $comment->body,
+                    'approved_body' => $comment->approved_body,
+                    'status' => $comment->status->value,
+                    'locale' => $comment->locale,
+                    'revision' => $comment->revision,
+                    'created_at' => $comment->created_at?->toIso8601String(),
+                    'edited_at' => $comment->edited_at?->toIso8601String(),
+                    'deleted_at' => $comment->deleted_at?->toIso8601String(),
+                ])
+                ->all(),
+            'reports_filed' => $user->colorCommentReports()
+                ->with('comment.palette')
+                ->orderBy('reported_at')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorCommentReport $report): array => [
+                    'comment_id' => $report->comment_id,
+                    'palette_slug' => $report->comment->palette->slug,
+                    'reason' => $report->reason->value,
+                    'status' => $report->status->value,
+                    'reported_at' => $report->reported_at->toIso8601String(),
+                    'resolved_at' => $report->resolved_at?->toIso8601String(),
+                ])
+                ->all(),
+            'notification_preferences' => [
+                'email_on_like' => (bool) $preferences->email_on_like,
+                'email_on_follow' => (bool) $preferences->email_on_follow,
+                'email_on_comment' => (bool) $preferences->email_on_comment,
+                'email_on_reply' => (bool) $preferences->email_on_reply,
+            ],
+            'muted_palettes' => $user->colorPaletteMutes()
+                ->with('palette')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ColorPaletteMute $mute): array => [
+                    'palette_slug' => $mute->palette->slug,
+                    'palette_name' => $mute->palette->name,
                 ])
                 ->all(),
         ];

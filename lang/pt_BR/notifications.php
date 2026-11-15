@@ -21,12 +21,15 @@ return [
     'unread_badge' => 'Nova',
     'someone' => 'Alguém',
 
+    // Interpolacao do vue-i18n (`{nome}`), nunca a do Laravel (`:nome`): estas
+    // chaves sao consumidas por `t()` no navegador, que deixaria `:actor` e
+    // `:palette` literais na tela.
     'kinds' => [
-        'palette_liked' => ':actor curtiu sua paleta ":palette".',
-        'palette_liked_anonymous' => 'Alguém curtiu sua paleta ":palette".',
-        'user_followed' => ':actor começou a seguir você.',
-        'palette_comment_approved' => ':actor comentou na sua paleta ":palette".',
-        'comment_reply_approved' => ':actor respondeu ao seu comentário em ":palette".',
+        'palette_liked' => '{actor} curtiu sua paleta "{palette}".',
+        'palette_liked_anonymous' => 'Alguém curtiu sua paleta "{palette}".',
+        'user_followed' => '{actor} começou a seguir você.',
+        'palette_comment_approved' => '{actor} comentou na sua paleta "{palette}".',
+        'comment_reply_approved' => '{actor} respondeu ao seu comentário em "{palette}".',
         'unknown' => 'Você tem uma nova notificação.',
     ],
 

@@ -66,80 +66,77 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-2"
-    data-test="comment-report-dialog"
-  >
-    <template v-if="sent">
-      <p
-        class="text-xs"
-        data-test="comment-report-sent"
-      >
-        {{ t('colors.reports.sent') }}
-      </p>
-      <div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          data-test="comment-report-close"
-          @click="emit('close')"
-        >
-          {{ t('colors.reports.close') }}
-        </Button>
-      </div>
-    </template>
+    <div
+        class="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-2"
+        data-test="comment-report-dialog"
+    >
+        <template v-if="sent">
+            <p class="text-xs" data-test="comment-report-sent">
+                {{ t('colors.reports.sent') }}
+            </p>
+            <div>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-test="comment-report-close"
+                    @click="emit('close')"
+                >
+                    {{ t('colors.reports.close') }}
+                </Button>
+            </div>
+        </template>
 
-    <template v-else>
-      <p class="text-xs font-medium">
-        {{ t('colors.reports.title') }}
-      </p>
+        <template v-else>
+            <p class="text-xs font-medium">
+                {{ t('colors.reports.title') }}
+            </p>
 
-      <label class="flex flex-wrap items-center gap-2 text-xs">
-        {{ t('colors.reports.reason_label') }}
-        <select
-          v-model="form.reason"
-          class="rounded-md border border-border bg-background px-2 py-1 text-sm"
-          data-test="comment-report-reason"
-        >
-          <option
-            v-for="reason in reasons"
-            :key="reason"
-            :value="reason"
-          >
-            {{ t(`colors.reports.reasons.${reason}`) }}
-          </option>
-        </select>
-      </label>
+            <label class="flex flex-wrap items-center gap-2 text-xs">
+                {{ t('colors.reports.reason_label') }}
+                <select
+                    v-model="form.reason"
+                    class="rounded-md border border-border bg-background px-2 py-1 text-sm"
+                    data-test="comment-report-reason"
+                >
+                    <option
+                        v-for="reason in reasons"
+                        :key="reason"
+                        :value="reason"
+                    >
+                        {{ t(`colors.reports.reasons.${reason}`) }}
+                    </option>
+                </select>
+            </label>
 
-      <p
-        v-if="error !== null"
-        class="text-xs text-destructive"
-        data-test="comment-report-error"
-      >
-        {{ error }}
-      </p>
+            <p
+                v-if="error !== null"
+                class="text-xs text-destructive"
+                data-test="comment-report-error"
+            >
+                {{ error }}
+            </p>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          size="sm"
-          :disabled="busy"
-          data-test="comment-report-submit"
-          @click="submit"
-        >
-          {{ t('colors.reports.submit') }}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          data-test="comment-report-cancel"
-          @click="emit('close')"
-        >
-          {{ t('colors.reports.cancel') }}
-        </Button>
-      </div>
-    </template>
-  </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <Button
+                    type="button"
+                    size="sm"
+                    :disabled="busy"
+                    data-test="comment-report-submit"
+                    @click="submit"
+                >
+                    {{ t('colors.reports.submit') }}
+                </Button>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    data-test="comment-report-cancel"
+                    @click="emit('close')"
+                >
+                    {{ t('colors.reports.cancel') }}
+                </Button>
+            </div>
+        </template>
+    </div>
 </template>

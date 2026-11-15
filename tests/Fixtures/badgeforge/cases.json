@@ -421,7 +421,11 @@
                     "viewBox": "0 0 24 24",
                     "paths": [
                         { "d": "M12 2L2 22h20z", "fillRule": "evenodd" },
-                        { "d": "M12 6l6 12H6z", "fillRule": "nonzero", "clipRule": "evenodd" }
+                        {
+                            "d": "M12 6l6 12H6z",
+                            "fillRule": "nonzero",
+                            "clipRule": "evenodd"
+                        }
                     ]
                 },
                 "logoColor": { "hex": "#ffffff", "alpha": 1 },

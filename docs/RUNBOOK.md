@@ -807,3 +807,93 @@ O que segue e a parte de operacao.
   **nao** e - la nao ha banner nem tag, nem com aceite.
 - Desligar e o mesmo caminho ao contrario: esvaziar a variavel e rodar os dois
   comandos.
+
+## 11. Colors (picker, gerador, paletas, social e comentários)
+
+As duas tools (`/{locale}/tools/colors` e `.../palette-generator`) rodam no
+navegador: não há fila, worker nem `.env` para elas. O que precisa de operação
+é a superfície de conta: paletas salvas e públicas, biblioteca pessoal,
+curtidas/follows/perfil, comentários, denúncias, notificações e a OG dinâmica.
+Fonte de verdade: [colors/](colors/); aceite:
+[acceptance/COLORS-FASE-8.md](acceptance/COLORS-FASE-8.md).
+
+### Comentários: ligar (decisão explícita)
+
+`COLORS_COMMENTS_ENABLED=false` é o padrão e o que está em produção. Desligada,
+a thread não é consultada nem renderizada e comentário, denúncia e mute
+respondem **404 uniforme** pelo middleware `colors.comments` (ADR-143). Para
+ligar:
+
+1. **Worker no ar.** `supervisorctl status devtools-worker`; sem ele a
+   moderação (`ModerateColorComment`) nunca roda, o comentário fica "em
+   análise" e o sino não toca.
+2. **IA configurada** (opcional para subir): `AI_BASE_URL`, `AI_MODEL` e
+   `AI_API_KEY`. Sem elas a escrita continua funcionando, mas o job esgota os
+   retries e marca o comentário como `flagged` para o admin decidir em
+   `/admin/comments` — é o estado seguro, nunca aprovado por falha.
+   `COLORS_COMMENT_MODEL` (se vazio, cai em `AI_MODEL`) é o modelo da moderação;
+   nome de modelo não mora no código.
+3. **Config nova no `.env` de produção.** O `deploy.sh` não toca no `.env`
+   (ADR-014): editar à mão `COLORS_COMMENTS_ENABLED=true` e, se for o caso, os
+   limites da seção abaixo.
+4. **Limpar/gerar cache de config.** `php artisan optimize:clear && php artisan optimize`.
+5. **Permissões de storage** (paletas, OG e avatares):
+   `chown -R www-data:www-data storage bootstrap/cache`. A OG dinâmica é servida
+   direto de `storage/app/data/og_paleta_image/{ulid}.png` (config
+   `colors.og.path`), então o diretório precisa ser gravável; `storage:link` só
+   importa se a foto de perfil aparecer 404.
+6. **Smoke.** Paleta pública com thread renderizada, um comentário novo nascendo
+   "em análise", `php artisan queue:work --stop-when-empty` e o status virando
+   `approved`/`flagged`; `/admin/comments` e `/admin/comment-reports` abrindo.
+
+### Desligar (rollback funcional)
+
+Voltar `COLORS_COMMENTS_ENABLED=false`, `optimize:clear && optimize` e **parar**
+(não apagar) o worker da fila de moderação se ela for a única que usa a fila.
+Os comentários ficam no banco e voltam a aparecer quando a flag ligar de novo;
+nada é migrado, nada é perdido. Deploy e rollback de código continuam na
+seção 2.
+
+### Limites e retenção (só `.env`, nunca no código)
+
+| Chave | Padrão | Efeito |
+| --- | --- | --- |
+| `COLORS_FREE_LIMIT` / `COLORS_PAID_LIMIT` | 25 / ilimitado | cota de paletas (arquivadas contam) |
+| `COLORS_PALETTES_PER_PAGE` / `COLORS_PALETTES_SITEMAP_LIMIT` | 20 / 500 | paginação e teto de públicas no sitemap |
+| `COLORS_COMMENT_MAX_LENGTH` / `..._PER_PAGE` / `..._REPLIES_LIMIT` | 255 / 20 / 100 | comentário e thread |
+| `COLORS_COMMENT_MODEL` / `..._PROMPT_VERSION` / `..._POLICY_VERSION` | `AI_MODEL` / 1 / 1 | moderação e invalidação da sentinela |
+| `COLORS_COMMENT_CACHE_TTL_DAYS` | vazio = permanente | TTL do `ai_cache` de moderação |
+| `COLORS_COMMENT_JOB_TRIES` / `..._BACKOFF` / `..._TIMEOUT` | 3 / 30 s / 60 s | job de moderação |
+| `COLORS_ANON_COOKIE_DAYS` | 365 | validade do cookie anônimo de curtida |
+| `COLORS_OG_PATH` / `COLORS_OG_MAX_BYTES` / `..._CACHE_SECONDS` | `app/data/og_paleta_image` / 2 MB / 86400 | OG dinâmica |
+| `COLORS_MANAGEMENT_RATE_LIMIT` / `..._OG_RATE_LIMIT` / `..._LIBRARY_RATE_LIMIT` / `..._SOCIAL_RATE_LIMIT` / `..._COMMENT_RATE_LIMIT` / `..._REPORT_RATE_LIMIT` | 60 / 10 / 120 / 60 / 10 / 10 por minuto | throttles por conta |
+
+Lista completa com defaults: `config/colors.php` e `.env.example`. Depois de
+mexer, `optimize:clear && optimize`.
+
+### Expurgo e manutenção
+
+- O cache de moderação nasce **permanente** (`ai_cache.expires_at = NULL`) e
+  guarda o texto do comentário. Expurgue por `purpose`:
+  `php artisan ai:prune-cache --purpose=colors.comment_moderation --all`.
+  A recomendação da auditoria (ADR-144) é definir
+  `COLORS_COMMENT_CACHE_TTL_DAYS` em produção quando o volume justificar.
+- Comentário excluído é tombstone (`deleted_at`); o texto só sai de verdade
+  quando o admin exclui. Paleta **nunca** é apagada na anonimização de conta
+  (as FKs em cascata levariam comentários, curtidas e favoritos de outras
+  contas).
+- Rotação de `APP_KEY` (seção 7) invalida o cookie `colors_anon`: curtidas
+  anônimas antigas perdem a identidade first-party (as linhas e a contagem
+  ficam). Curtidas de conta não são afetadas.
+
+### Diagnóstico rápido
+
+| Sintoma | Causa provável |
+| --- | --- |
+| Thread ausente na paleta pública | flag desligada ou config em cache — `php artisan about`, `optimize:clear && optimize` |
+| Comentário preso em "em análise" | worker parado, `failed_jobs` ou IA fora; depois dos retries vira `flagged` e o admin decide |
+| 422 genérico ao comentar | filtro local de palavras em `resources/colors/moderation/{locale}.txt` bloqueou antes da IA; a mensagem não revela o termo |
+| OG da paleta 404 | paleta privada/arquivada/slug inexistente (404 é o esperado) ou PNG não enviado; o público só serve pública ativa |
+| OG 500/403 | diretório de `colors.og.path` sem escrita para o `www-data` |
+| Sitemap sem paletas novas | acervo passou de `COLORS_PALETTES_SITEMAP_LIMIT` (500): o teto protege o tempo de resposta, não é defeito |
+| Thread vazia mas comentários no banco | flag desligada: os comentários voltam quando a flag ligar, sem migração |

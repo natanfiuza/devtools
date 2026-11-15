@@ -77,8 +77,7 @@ export type TokenImportWarningCode =
     (typeof TOKEN_IMPORT_WARNING_CODES)[number];
 
 export type TokenImportDiagnosticCode =
-    | TokenImportErrorCode
-    | TokenImportWarningCode;
+    TokenImportErrorCode | TokenImportWarningCode;
 
 export type TokenImportFormat = 'native' | 'dtcg' | 'style-dictionary';
 
@@ -253,10 +252,7 @@ function emptyMetadata(): Metadata {
  * Metadados sao sempre opcionais: arquivo de terceiro nao tem nenhum deles e
  * continua importavel. `formatVersion` so e validado quando esta presente.
  */
-function metadataFrom(
-    record: JsonRecord,
-    context: Context,
-): Metadata | null {
+function metadataFrom(record: JsonRecord, context: Context): Metadata | null {
     if (
         own(record, 'formatVersion') &&
         record.formatVersion !== COLOR_TOKEN_FORMAT_VERSION
@@ -298,7 +294,9 @@ function metadataOf(
 
     const namespace = extensions['devtools.colors'];
 
-    return isRecord(namespace) ? metadataFrom(namespace, context) : emptyMetadata();
+    return isRecord(namespace)
+        ? metadataFrom(namespace, context)
+        : emptyMetadata();
 }
 
 /** Aliases aceitam `{a.b.c}` com espacos internos nas bordas. */
@@ -586,8 +584,7 @@ function candidateGroups(traversal: Traversal): GroupRecord[] {
 }
 
 type Selection =
-    | { ok: true; group: GroupRecord; kind: TokenImportKind }
-    | { ok: false };
+    { ok: true; group: GroupRecord; kind: TokenImportKind } | { ok: false };
 
 function selectGroup(traversal: Traversal, context: Context): Selection {
     const groups = candidateGroups(traversal);
@@ -739,10 +736,7 @@ function extractionBase(
         .filter((hex): hex is string => hex !== undefined);
     const normalized = new Set(colors.map((hex) => hex.toLowerCase()));
 
-    if (
-        metadata.base !== null &&
-        normalized.has(metadata.base.toLowerCase())
-    ) {
+    if (metadata.base !== null && normalized.has(metadata.base.toLowerCase())) {
         return metadata.base;
     }
 
@@ -1077,7 +1071,13 @@ function importNative(
         return failure(context);
     }
 
-    const extracted = buildExtracted(group, resolved, base, sourceLabel, context);
+    const extracted = buildExtracted(
+        group,
+        resolved,
+        base,
+        sourceLabel,
+        context,
+    );
 
     if (extracted === null) {
         return failure(context);
@@ -1306,11 +1306,5 @@ export function importTokens(
     const format: TokenImportFormat =
         traversal.sdLeaves > 0 ? 'style-dictionary' : 'dtcg';
 
-    return importGeneric(
-        root,
-        format,
-        traversal,
-        context,
-        options.sourceLabel,
-    );
+    return importGeneric(root, format, traversal, context, options.sourceLabel);
 }

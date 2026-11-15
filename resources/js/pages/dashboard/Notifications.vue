@@ -55,7 +55,8 @@ watch(
 /** Texto do fato; o anonimo nunca vira nome de conta. */
 function text(item: AccountNotification): string {
     const data = item.data;
-    const actor = data.follower_name ?? data.actor_name ?? t('notifications.someone');
+    const actor =
+        data.follower_name ?? data.actor_name ?? t('notifications.someone');
     const palette = data.palette_name ?? '';
 
     const key =
@@ -97,17 +98,25 @@ function markRead(item: AccountNotification): void {
         return;
     }
 
-    router.post(markReadRoute.url({ notification: item.id }), {}, {
-        preserveScroll: true,
-        preserveState: true,
-    });
+    router.post(
+        markReadRoute.url({ notification: item.id }),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
 }
 
 function markAllRead(): void {
-    router.post(markAllReadRoute.url(), {}, {
-        preserveScroll: true,
-        preserveState: true,
-    });
+    router.post(
+        markAllReadRoute.url(),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
 }
 
 function goToPage(target: number): void {
@@ -149,191 +158,191 @@ function updatePreference(
 </script>
 
 <template>
-  <Head :title="t('notifications.title')" />
+    <Head :title="t('notifications.title')" />
 
-  <div class="flex flex-col gap-8">
-    <header class="flex flex-col gap-1">
-      <h2 class="text-xl font-semibold">
-        {{ t('notifications.title') }}
-      </h2>
-      <p class="text-sm text-muted-foreground">
-        {{ t('notifications.description') }}
-      </p>
-    </header>
-
-    <section class="flex flex-col gap-3">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <h3 class="text-base font-medium">
-          {{ t('notifications.title') }}
-        </h3>
-        <Button
-          v-if="unreadCount > 0"
-          type="button"
-          variant="outline"
-          size="sm"
-          data-test="notifications-mark-all"
-          @click="markAllRead"
-        >
-          {{ t('notifications.mark_all_read') }}
-        </Button>
-      </div>
-
-      <p
-        v-if="items.length === 0"
-        class="text-sm text-muted-foreground"
-        data-test="notifications-empty"
-      >
-        {{ t('notifications.empty') }}
-      </p>
-
-      <ul
-        v-else
-        class="flex flex-col divide-y divide-border rounded-xl border border-border"
-        data-test="notifications-list"
-      >
-        <li
-          v-for="item in items"
-          :key="item.id"
-          class="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
-          :class="item.read ? '' : 'bg-accent/40'"
-          data-test="notification-row"
-        >
-          <div class="flex flex-col gap-1">
-            <p class="text-sm">
-              {{ text(item) }}
+    <div class="flex flex-col gap-8">
+        <header class="flex flex-col gap-1">
+            <h2 class="text-xl font-semibold">
+                {{ t('notifications.title') }}
+            </h2>
+            <p class="text-sm text-muted-foreground">
+                {{ t('notifications.description') }}
             </p>
-            <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span data-test="notification-created-at">
-                {{ item.created_at }}
-              </span>
-              <Badge
-                v-if="!item.read"
-                variant="secondary"
-                data-test="notification-unread"
-              >
-                {{ t('notifications.unread_badge') }}
-              </Badge>
-              <a
-                v-if="paletteUrl(item) !== null"
-                :href="paletteUrl(item) ?? '#'"
-                class="hover:underline"
-                data-test="notification-palette-link"
-              >
-                {{ item.data.palette_name }}
-              </a>
-              <a
-                v-if="actorUrl(item) !== null"
-                :href="actorUrl(item) ?? '#'"
-                class="hover:underline"
-                data-test="notification-actor-link"
-              >
-                @{{
-                  item.data.follower_username ?? item.data.actor_username
-                }}
-              </a>
+        </header>
+
+        <section class="flex flex-col gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="text-base font-medium">
+                    {{ t('notifications.title') }}
+                </h3>
+                <Button
+                    v-if="unreadCount > 0"
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    data-test="notifications-mark-all"
+                    @click="markAllRead"
+                >
+                    {{ t('notifications.mark_all_read') }}
+                </Button>
             </div>
-          </div>
 
-          <Button
-            v-if="!item.read"
-            type="button"
-            variant="ghost"
-            size="sm"
-            data-test="notification-mark-read"
-            @click="markRead(item)"
-          >
-            {{ t('notifications.mark_read') }}
-          </Button>
-        </li>
-      </ul>
+            <p
+                v-if="items.length === 0"
+                class="text-sm text-muted-foreground"
+                data-test="notifications-empty"
+            >
+                {{ t('notifications.empty') }}
+            </p>
 
-      <div
-        v-if="hasPages"
-        class="flex flex-wrap items-center justify-center gap-2"
-        data-test="notifications-pagination"
-      >
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          :disabled="notifications.current_page <= 1"
-          data-test="notifications-page-prev"
-          @click="goToPage(notifications.current_page - 1)"
+            <ul
+                v-else
+                class="flex flex-col divide-y divide-border rounded-xl border border-border"
+                data-test="notifications-list"
+            >
+                <li
+                    v-for="item in items"
+                    :key="item.id"
+                    class="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
+                    :class="item.read ? '' : 'bg-accent/40'"
+                    data-test="notification-row"
+                >
+                    <div class="flex flex-col gap-1">
+                        <p class="text-sm">
+                            {{ text(item) }}
+                        </p>
+                        <div
+                            class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+                        >
+                            <span data-test="notification-created-at">
+                                {{ item.created_at }}
+                            </span>
+                            <Badge
+                                v-if="!item.read"
+                                variant="secondary"
+                                data-test="notification-unread"
+                            >
+                                {{ t('notifications.unread_badge') }}
+                            </Badge>
+                            <a
+                                v-if="paletteUrl(item) !== null"
+                                :href="paletteUrl(item) ?? '#'"
+                                class="hover:underline"
+                                data-test="notification-palette-link"
+                            >
+                                {{ item.data.palette_name }}
+                            </a>
+                            <a
+                                v-if="actorUrl(item) !== null"
+                                :href="actorUrl(item) ?? '#'"
+                                class="hover:underline"
+                                data-test="notification-actor-link"
+                            >
+                                @{{
+                                    item.data.follower_username ??
+                                    item.data.actor_username
+                                }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <Button
+                        v-if="!item.read"
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        data-test="notification-mark-read"
+                        @click="markRead(item)"
+                    >
+                        {{ t('notifications.mark_read') }}
+                    </Button>
+                </li>
+            </ul>
+
+            <div
+                v-if="hasPages"
+                class="flex flex-wrap items-center justify-center gap-2"
+                data-test="notifications-pagination"
+            >
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    :disabled="notifications.current_page <= 1"
+                    data-test="notifications-page-prev"
+                    @click="goToPage(notifications.current_page - 1)"
+                >
+                    {{ t('notifications.pagination.previous') }}
+                </Button>
+
+                <span class="text-xs text-muted-foreground">
+                    {{
+                        t('notifications.pagination.status', {
+                            page: notifications.current_page,
+                            pages: notifications.last_page,
+                        })
+                    }}
+                </span>
+
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    :disabled="
+                        notifications.current_page >= notifications.last_page
+                    "
+                    data-test="notifications-page-next"
+                    @click="goToPage(notifications.current_page + 1)"
+                >
+                    {{ t('notifications.pagination.next') }}
+                </Button>
+            </div>
+        </section>
+
+        <section
+            class="flex flex-col gap-3"
+            data-test="notification-preferences"
         >
-          {{ t('notifications.pagination.previous') }}
-        </Button>
+            <div class="flex flex-col gap-1">
+                <h3 class="text-base font-medium">
+                    {{ t('notifications.preferences.title') }}
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                    {{ t('notifications.preferences.description') }}
+                </p>
+            </div>
 
-        <span class="text-xs text-muted-foreground">
-          {{
-            t('notifications.pagination.status', {
-              page: notifications.current_page,
-              pages: notifications.last_page,
-            })
-          }}
-        </span>
+            <div
+                v-for="key in [
+                    'email_on_like',
+                    'email_on_follow',
+                    'email_on_comment',
+                    'email_on_reply',
+                ] as const"
+                :key="key"
+                class="flex items-center gap-2"
+            >
+                <Checkbox
+                    :id="`notification-preference-${key}`"
+                    :data-test="`notification-preference-${key}`"
+                    :model-value="preferences[key]"
+                    @update:model-value="
+                        (value) => updatePreference(key, value === true)
+                    "
+                />
+                <Label :for="`notification-preference-${key}`" class="text-sm">
+                    {{ t(`notifications.preferences.${key}`) }}
+                </Label>
+            </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          :disabled="notifications.current_page >= notifications.last_page"
-          data-test="notifications-page-next"
-          @click="goToPage(notifications.current_page + 1)"
-        >
-          {{ t('notifications.pagination.next') }}
-        </Button>
-      </div>
-    </section>
-
-    <section
-      class="flex flex-col gap-3"
-      data-test="notification-preferences"
-    >
-      <div class="flex flex-col gap-1">
-        <h3 class="text-base font-medium">
-          {{ t('notifications.preferences.title') }}
-        </h3>
-        <p class="text-sm text-muted-foreground">
-          {{ t('notifications.preferences.description') }}
-        </p>
-      </div>
-
-      <div
-        v-for="key in (
-          [
-            'email_on_like',
-            'email_on_follow',
-            'email_on_comment',
-            'email_on_reply',
-          ] as const
-        )"
-        :key="key"
-        class="flex items-center gap-2"
-      >
-        <Checkbox
-          :id="`notification-preference-${key}`"
-          :data-test="`notification-preference-${key}`"
-          :model-value="preferences[key]"
-          @update:model-value="
-            (value) => updatePreference(key, value === true)
-          "
-        />
-        <Label
-          :for="`notification-preference-${key}`"
-          class="text-sm"
-        >
-          {{ t(`notifications.preferences.${key}`) }}
-        </Label>
-      </div>
-
-      <p
-        v-if="saved"
-        class="text-xs text-muted-foreground"
-        role="status"
-        data-test="notification-preferences-saved"
-      >
-        {{ t('notifications.preferences.saved') }}
-      </p>
-    </section>
-  </div>
+            <p
+                v-if="saved"
+                class="text-xs text-muted-foreground"
+                role="status"
+                data-test="notification-preferences-saved"
+            >
+                {{ t('notifications.preferences.saved') }}
+            </p>
+        </section>
+    </div>
 </template>

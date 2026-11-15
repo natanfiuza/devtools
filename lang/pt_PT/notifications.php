@@ -21,12 +21,13 @@ return [
     'unread_badge' => 'Nova',
     'someone' => 'Alguém',
 
+    // Interpolacao do vue-i18n (`{nome}`), nunca a do Laravel (`:nome`).
     'kinds' => [
-        'palette_liked' => ':actor gostou da sua paleta ":palette".',
-        'palette_liked_anonymous' => 'Alguém gostou da sua paleta ":palette".',
-        'user_followed' => ':actor começou a seguir-te.',
-        'palette_comment_approved' => ':actor comentou na sua paleta ":palette".',
-        'comment_reply_approved' => ':actor respondeu ao seu comentário em ":palette".',
+        'palette_liked' => '{actor} gostou da sua paleta "{palette}".',
+        'palette_liked_anonymous' => 'Alguém gostou da sua paleta "{palette}".',
+        'user_followed' => '{actor} começou a seguir-te.',
+        'palette_comment_approved' => '{actor} comentou na sua paleta "{palette}".',
+        'comment_reply_approved' => '{actor} respondeu ao seu comentário em "{palette}".',
         'unknown' => 'Tem uma nova notificação.',
     ],
 

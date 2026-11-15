@@ -108,16 +108,11 @@ describe('buildPaletteScale', () => {
         expect(scale.baseIsTone500).toBe(false);
 
         // O tom mais proximo carrega exatamente o croma da base...
-        expect(toneAt(scale, 6).oklch.c).toBeCloseTo(
-            scale.baseOklch.c,
-            6,
-        );
+        expect(toneAt(scale, 6).oklch.c).toBeCloseTo(scale.baseOklch.c, 6);
 
         // ...e o 500, ampliado por 1/0.92, passa do gamut e e cortado.
         expect(toneAt(scale, 5).clipped).toBe(true);
-        expect(toneAt(scale, 5).oklch.c).toBeLessThan(
-            scale.baseOklch.c,
-        );
+        expect(toneAt(scale, 5).oklch.c).toBeLessThan(scale.baseOklch.c);
     });
 
     it('fecha o ponto fixo no tom 500', () => {

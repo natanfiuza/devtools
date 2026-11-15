@@ -213,25 +213,17 @@ describe('Imagem da paleta: exportacao', () => {
 
         expect(downloadMock).toHaveBeenCalledTimes(1);
 
-        const [filename, blob] = downloadMock.mock.calls[0] as [
-            string,
-            Blob,
-        ];
+        const [filename, blob] = downloadMock.mock.calls[0] as [string, Blob];
 
         expect(filename).toBe('palette-horizontal.svg');
         expect(blob.type).toBe('image/svg+xml;charset=utf-8');
-        await expect(blob.text()).resolves.toContain(
-            PALETTE_IMAGE_WATERMARK,
-        );
+        await expect(blob.text()).resolves.toContain(PALETTE_IMAGE_WATERMARK);
     });
 
     it('baixa o PNG na escala pedida', async () => {
         await downloadPaletteImagePng(SOURCE, 'card', 1);
 
-        const [filename, blob] = downloadMock.mock.calls[0] as [
-            string,
-            Blob,
-        ];
+        const [filename, blob] = downloadMock.mock.calls[0] as [string, Blob];
 
         expect(filename).toBe('palette-card.png');
         expect(blob.type).toBe('image/png');

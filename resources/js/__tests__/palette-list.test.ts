@@ -310,9 +310,9 @@ describe('Minhas Paletas', () => {
             limits: { limit: null, used: 7, remaining: null },
         });
 
-        expect(
-            query('[data-test="palettes-index"]').textContent,
-        ).toContain('USO 7 SEM_LIMITE');
+        expect(query('[data-test="palettes-index"]').textContent).toContain(
+            'USO 7 SEM_LIMITE',
+        );
     });
 
     it('espera 300 ms antes de buscar', async () => {
@@ -369,10 +369,9 @@ describe('Minhas Paletas', () => {
     it('filtra pela tag da conta', async () => {
         const wrapper = mountPage();
 
-        wrapper.findAllComponents(Select)[1]?.vm.$emit(
-            'update:modelValue',
-            'tag-2',
-        );
+        wrapper
+            .findAllComponents(Select)[1]
+            ?.vm.$emit('update:modelValue', 'tag-2');
         await nextTick();
 
         expect(routerMock.get).toHaveBeenCalledWith(
@@ -390,7 +389,12 @@ describe('Minhas Paletas', () => {
 
     it('limpa os filtros e volta ao padrão', async () => {
         mountPage({
-            filters: { ...FILTERS, q: 'azul', status: 'archived', tag: 'tag-1' },
+            filters: {
+                ...FILTERS,
+                q: 'azul',
+                status: 'archived',
+                tag: 'tag-1',
+            },
         });
 
         query<HTMLButtonElement>('[data-test="palettes-clear"]').click();
@@ -399,7 +403,12 @@ describe('Minhas Paletas', () => {
         expect(routerMock.get).toHaveBeenCalledTimes(1);
         expect(routerMock.get).toHaveBeenCalledWith(
             '/dashboard/colors/palettes',
-            { status: 'active', sort: 'updated_at', direction: 'desc', page: 1 },
+            {
+                status: 'active',
+                sort: 'updated_at',
+                direction: 'desc',
+                page: 1,
+            },
             { preserveState: true, preserveScroll: true, replace: true },
         );
     });
@@ -447,9 +456,7 @@ describe('Minhas Paletas', () => {
     it('exclui só com o nome exato e manda a confirmação', async () => {
         mountPage();
 
-        query<HTMLButtonElement>(
-            '[data-test="palette-action-delete"]',
-        ).click();
+        query<HTMLButtonElement>('[data-test="palette-action-delete"]').click();
         await nextTick();
 
         const input = query<HTMLInputElement>(
@@ -483,9 +490,7 @@ describe('Minhas Paletas', () => {
     it('abre o gerenciador com as tags da conta', async () => {
         mountPage();
 
-        query<HTMLButtonElement>(
-            '[data-test="palettes-manage-tags"]',
-        ).click();
+        query<HTMLButtonElement>('[data-test="palettes-manage-tags"]').click();
         await nextTick();
 
         const rows = document.querySelectorAll('[data-test="tag-manager-row"]');
@@ -497,9 +502,9 @@ describe('Minhas Paletas', () => {
     it('mostra as abas e alterna para Favoritas pelo servidor', async () => {
         mountPage();
 
-        expect(
-            query('[data-test="palettes-tabs"]').textContent,
-        ).toContain('ABA_MINHAS');
+        expect(query('[data-test="palettes-tabs"]').textContent).toContain(
+            'ABA_MINHAS',
+        );
 
         query<HTMLButtonElement>(
             '[data-test="palettes-tab-favorites"]',
@@ -556,9 +561,9 @@ describe('Minhas Paletas', () => {
             },
         });
 
-        expect(
-            query('[data-test="favorites-empty"]').textContent,
-        ).toContain('SEM_FAVORITAS');
+        expect(query('[data-test="favorites-empty"]').textContent).toContain(
+            'SEM_FAVORITAS',
+        );
         expect(exists('[data-test="palettes-empty"]')).toBe(false);
     });
 });

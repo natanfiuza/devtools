@@ -5,7 +5,9 @@ namespace App\Actions\Account;
 use App\Actions\BadgeForge\DeleteBadgeEndpoint;
 use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
+use App\Models\ColorCommentReport;
 use App\Models\ColorNotificationPreference;
+use App\Models\ColorPaletteComment;
 use App\Models\ColorPaletteMute;
 use App\Models\User;
 use App\Support\BadgeForge\Personal\BadgeAssetStorage;
@@ -100,6 +102,34 @@ final class AnonymizeUser
             $user->notifications()->delete();
             ColorNotificationPreference::query()->where('user_id', $id)->delete();
             ColorPaletteMute::query()->where('user_id', $id)->delete();
+
+            // Biblioteca pessoal, favoritos de paleta e relacoes que a conta
+            // iniciou (F8, ADR-144). O que e acao da pessoa sai; paletas,
+            // comentarios e denuncias ficam, porque sao conteudo publicado e o
+            // texto preservado nao identifica mais ninguem. Paleta nenhuma e
+            // apagada: as FKs de comentarios, curtidas e favoritos sao
+            // `cascadeOnDelete` e destruiriam dados de outras contas.
+            $user->colorHistoryEntries()->delete();
+            $user->colorFavorites()->delete();
+            $user->colorPresets()->delete();
+            $user->favoritePalettes()->delete();
+            $user->paletteLikes()->delete();
+            $user->following()->delete();
+            $user->colorTags()->delete();
+
+            // Seguidor de uma conta anonimizada e acao de outra pessoa: a
+            // linha fica e o perfil responde 404. A autoria, porem, nao pode
+            // continuar amarrada a conta.
+            ColorPaletteComment::query()
+                ->withTrashed()
+                ->where('user_id', $id)
+                ->update(['user_id' => null]);
+            ColorCommentReport::query()
+                ->where('user_id', $id)
+                ->update(['user_id' => null]);
+            ColorCommentReport::query()
+                ->where('resolved_by', $id)
+                ->update(['resolved_by' => null]);
 
             // Logos e presets do BadgeForge sao dado da pessoa (F3, ADR-078 e
             // ADR-079). Badges estaticas ja publicadas sao stateless: a URL

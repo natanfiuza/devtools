@@ -18,13 +18,13 @@ const markup = computed(() => props.svg);
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado pelo renderer -->
-  <div
-    class="overflow-hidden rounded-xl border border-border bg-muted [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
-    role="img"
-    :aria-label="label"
-    data-test="prototype-preview"
-    v-html="markup"
-  />
-  <!-- eslint-enable vue/no-v-html -->
+    <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado pelo renderer -->
+    <div
+        class="overflow-hidden rounded-xl border border-border bg-muted [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+        role="img"
+        :aria-label="label"
+        data-test="prototype-preview"
+        v-html="markup"
+    />
+    <!-- eslint-enable vue/no-v-html -->
 </template>

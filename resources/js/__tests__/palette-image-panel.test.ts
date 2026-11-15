@@ -118,9 +118,9 @@ describe('PaletteImagePanel', () => {
     it('abre no formato horizontal com as medidas certas', () => {
         mountPanel();
 
-        expect(
-            query('[data-test="palette-image-size"]').textContent,
-        ).toContain('1600 × 500 px');
+        expect(query('[data-test="palette-image-size"]').textContent).toContain(
+            '1600 × 500 px',
+        );
         expect(preview().getAttribute('width')).toBe('1600');
         expect(preview().getAttribute('height')).toBe('500');
         expect(preview().getAttribute('src')).toMatch(
@@ -139,9 +139,9 @@ describe('PaletteImagePanel', () => {
 
         await click('[data-test="image-layout-vertical"]');
 
-        expect(
-            query('[data-test="palette-image-size"]').textContent,
-        ).toContain('1080 × 1920 px');
+        expect(query('[data-test="palette-image-size"]').textContent).toContain(
+            '1080 × 1920 px',
+        );
         expect(preview().getAttribute('width')).toBe('1080');
         expect(preview().getAttribute('height')).toBe('1920');
         expect(
@@ -157,9 +157,9 @@ describe('PaletteImagePanel', () => {
 
         await click('[data-test="image-layout-card"]');
 
-        expect(
-            query('[data-test="palette-image-size"]').textContent,
-        ).toContain('1080 × 1080 px');
+        expect(query('[data-test="palette-image-size"]').textContent).toContain(
+            '1080 × 1080 px',
+        );
     });
 
     it('baixa o SVG do formato atual', async () => {

@@ -10,7 +10,10 @@ import { resolve } from 'node:path';
  */
 
 export type NamespaceMessages = Record<string, unknown>;
-export type ExportedMessages = Record<string, Record<string, NamespaceMessages>>;
+export type ExportedMessages = Record<
+    string,
+    Record<string, NamespaceMessages>
+>;
 
 const root = resolve(process.cwd());
 

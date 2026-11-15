@@ -206,11 +206,11 @@ const EXTRACTED: ExtractionResult = {
     visiblePixels: 4,
 };
 
-function i18n() {
+function i18n(locale = 'pt-BR') {
     const instance = createI18nInstance();
 
     applyTranslations(instance, {
-        locale: 'pt-BR',
+        locale,
         translations: {
             tools: {
                 ui: {
@@ -513,7 +513,7 @@ function i18n() {
     return instance;
 }
 
-function mountTool() {
+function mountTool(locale = 'pt-BR') {
     return mount(Tool, {
         props: {
             image: IMAGE_LIMITS,
@@ -523,7 +523,7 @@ function mountTool() {
             },
             tokens: TOKEN_LIMITS,
         },
-        global: { plugins: [i18n()] },
+        global: { plugins: [i18n(locale)] },
     });
 }
 
@@ -817,7 +817,9 @@ describe('Tool', () => {
     it('mostra a biblioteca compartilhada e favorita a cor base', async () => {
         const wrapper = mountTool();
 
-        await wrapper.get('[data-test="page-tab-library"]').trigger('mousedown');
+        await wrapper
+            .get('[data-test="page-tab-library"]')
+            .trigger('mousedown');
 
         expect(wrapper.find('[data-test="history-empty"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="favorites-empty"]').exists()).toBe(
@@ -957,6 +959,21 @@ describe('Tool', () => {
 
         expect(wrapper.find('[data-test="extraction-results"]').exists()).toBe(
             true,
+        );
+    });
+
+    it('abre a extração no locale com underscore do Laravel', async () => {
+        // O i18n usa o codigo de pasta (`pt_BR`); o `Intl` exige tag BCP 47
+        // (`pt-BR`) e lanca `RangeError` com underscore. Sem a normalizacao o
+        // painel inteiro deixava de renderizar nos dois locales de portugues.
+        const wrapper = mountTool('pt_BR');
+
+        await wrapper
+            .get('[data-test="page-tab-extraction"]')
+            .trigger('mousedown');
+
+        expect(wrapper.get('[data-test="extraction-panel"]').text()).toContain(
+            'Até 10 MB.',
         );
     });
 
@@ -1247,9 +1264,9 @@ describe('Tool · importação de tokens', () => {
         ];
 
         expect(body.colors).toMatchObject({ base: '#aa1122' });
-        expect((body.colors as { items: { hex: string }[] }).items[0]?.hex).toBe(
-            '#aa1122',
-        );
+        expect(
+            (body.colors as { items: { hex: string }[] }).items[0]?.hex,
+        ).toBe('#aa1122');
         expect(body.roles).toMatchObject({
             light: expect.any(Object),
             dark: expect.any(Object),

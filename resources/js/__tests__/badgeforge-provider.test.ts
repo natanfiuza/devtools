@@ -59,7 +59,9 @@ function pair(
     const definition = findDefinition(provider, definitionSlug);
 
     if (provider === undefined || definition === undefined) {
-        throw new Error(`Metrica ausente no fixture: ${providerSlug}/${definitionSlug}`);
+        throw new Error(
+            `Metrica ausente no fixture: ${providerSlug}/${definitionSlug}`,
+        );
     }
 
     return { provider, definition };
@@ -93,21 +95,69 @@ describe('buildProviderBadgeUrl', () => {
             definition: string;
             path: string;
         }> = [
-            { provider: 'github', definition: 'stars', path: 'github/stars/natanfiuza/devtools.svg' },
-            { provider: 'github', definition: 'forks', path: 'github/forks/natanfiuza/devtools.svg' },
-            { provider: 'github', definition: 'issues', path: 'github/issues/natanfiuza/devtools.svg' },
-            { provider: 'github', definition: 'license', path: 'github/license/natanfiuza/devtools.svg' },
+            {
+                provider: 'github',
+                definition: 'stars',
+                path: 'github/stars/natanfiuza/devtools.svg',
+            },
+            {
+                provider: 'github',
+                definition: 'forks',
+                path: 'github/forks/natanfiuza/devtools.svg',
+            },
+            {
+                provider: 'github',
+                definition: 'issues',
+                path: 'github/issues/natanfiuza/devtools.svg',
+            },
+            {
+                provider: 'github',
+                definition: 'license',
+                path: 'github/license/natanfiuza/devtools.svg',
+            },
             { provider: 'npm', definition: 'v', path: 'npm/v/vue.svg' },
             { provider: 'npm', definition: 'dm', path: 'npm/dm/vue.svg' },
-            { provider: 'packagist', definition: 'dt', path: 'packagist/dt/laravel/framework.svg' },
-            { provider: 'packagist', definition: 'v', path: 'packagist/v/laravel/framework.svg' },
-            { provider: 'docker', definition: 'pulls', path: 'docker/pulls/library/postgres.svg' },
-            { provider: 'codecov', definition: 'coverage', path: 'codecov/coverage/psf/requests.svg' },
-            { provider: 'coveralls', definition: 'coverage', path: 'coveralls/coverage/twbs/bootstrap.svg' },
-            { provider: 'laravel', definition: 'v', path: 'laravel/v/latest.svg' },
-            { provider: 'laravel', definition: 'dt', path: 'laravel/dt/latest.svg' },
+            {
+                provider: 'packagist',
+                definition: 'dt',
+                path: 'packagist/dt/laravel/framework.svg',
+            },
+            {
+                provider: 'packagist',
+                definition: 'v',
+                path: 'packagist/v/laravel/framework.svg',
+            },
+            {
+                provider: 'docker',
+                definition: 'pulls',
+                path: 'docker/pulls/library/postgres.svg',
+            },
+            {
+                provider: 'codecov',
+                definition: 'coverage',
+                path: 'codecov/coverage/psf/requests.svg',
+            },
+            {
+                provider: 'coveralls',
+                definition: 'coverage',
+                path: 'coveralls/coverage/twbs/bootstrap.svg',
+            },
+            {
+                provider: 'laravel',
+                definition: 'v',
+                path: 'laravel/v/latest.svg',
+            },
+            {
+                provider: 'laravel',
+                definition: 'dt',
+                path: 'laravel/dt/latest.svg',
+            },
             { provider: 'php', definition: 'v', path: 'php/v/latest.svg' },
-            { provider: 'python', definition: 'v', path: 'python/v/latest.svg' },
+            {
+                provider: 'python',
+                definition: 'v',
+                path: 'python/v/latest.svg',
+            },
         ];
 
         for (const item of cases) {
@@ -152,7 +202,13 @@ describe('buildProviderBadgeUrl', () => {
     it('recusa literal invalido no catalogo', () => {
         const { provider, definition } = pair('php', 'v');
 
-        for (const pathPattern of ['', '..', 'latest/x', '{owner}', 'lat est']) {
+        for (const pathPattern of [
+            '',
+            '..',
+            'latest/x',
+            '{owner}',
+            'lat est',
+        ]) {
             expect(
                 buildProviderBadgeUrl(
                     ORIGIN,
@@ -247,9 +303,12 @@ describe('buildProviderBadgeUrl', () => {
             urlFor('github', 'stars', { owner: 'natanfiuza', repo: '../etc' }),
         ).toBe('');
         expect(urlFor('npm', 'v', { package: '@vue/../shared' })).toBe('');
-        expect(urlFor('docker', 'pulls', { namespace: 'Library', repository: 'x' })).toBe(
-            '',
-        );
+        expect(
+            urlFor('docker', 'pulls', {
+                namespace: 'Library',
+                repository: 'x',
+            }),
+        ).toBe('');
     });
 
     it('recusa param acima do limite de comprimento', () => {

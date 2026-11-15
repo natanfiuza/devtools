@@ -45,16 +45,15 @@ const page = usePage();
 const share = useCopyFeedback();
 const shareFeedback = share.message;
 
-const editUrl = computed(
-    () => palettes.edit.url({ colorPalette: props.palette.id }),
+const editUrl = computed(() =>
+    palettes.edit.url({ colorPalette: props.palette.id }),
 );
 
-const prototypeUrl = computed(
-    () =>
-        palettes.edit.url(
-            { colorPalette: props.palette.id },
-            { query: { tab: 'prototype' } },
-        ),
+const prototypeUrl = computed(() =>
+    palettes.edit.url(
+        { colorPalette: props.palette.id },
+        { query: { tab: 'prototype' } },
+    ),
 );
 
 const publicUrl = computed<string | null>(() => {
@@ -102,106 +101,95 @@ async function copyLink(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
-    <div class="flex flex-wrap items-center gap-1">
-      <Button
-        v-if="showEdit"
-        as-child
-        variant="ghost"
-        size="sm"
-      >
-        <Link
-          :href="editUrl"
-          data-test="palette-action-edit"
+    <div class="flex flex-col gap-2">
+        <div class="flex flex-wrap items-center gap-1">
+            <Button v-if="showEdit" as-child variant="ghost" size="sm">
+                <Link :href="editUrl" data-test="palette-action-edit">
+                    <Pencil class="size-4" />
+                    {{ t('colors.actions.edit') }}
+                </Link>
+            </Button>
+
+            <Button
+                v-if="showPrototype && !palette.archived"
+                as-child
+                variant="ghost"
+                size="sm"
+            >
+                <Link :href="prototypeUrl" data-test="palette-action-prototype">
+                    <Layers class="size-4" />
+                    {{ t('colors.actions.prototype') }}
+                </Link>
+            </Button>
+
+            <Button
+                variant="ghost"
+                size="sm"
+                data-test="palette-action-duplicate"
+                @click="duplicate"
+            >
+                <Copy class="size-4" />
+                {{ t('colors.actions.duplicate') }}
+            </Button>
+
+            <Button
+                variant="ghost"
+                size="sm"
+                :disabled="publicUrl === null"
+                :title="
+                    publicUrl === null
+                        ? t('colors.actions.share_unavailable')
+                        : undefined
+                "
+                data-test="palette-action-share"
+                @click="copyLink"
+            >
+                <Link2 class="size-4" />
+                {{ t('colors.actions.share') }}
+            </Button>
+
+            <Button
+                v-if="!palette.archived"
+                variant="ghost"
+                size="sm"
+                data-test="palette-action-archive"
+                @click="archive"
+            >
+                <Archive class="size-4" />
+                {{ t('colors.actions.archive') }}
+            </Button>
+
+            <Button
+                v-else
+                variant="ghost"
+                size="sm"
+                data-test="palette-action-restore"
+                @click="restore"
+            >
+                <RotateCcw class="size-4" />
+                {{ t('colors.actions.restore') }}
+            </Button>
+
+            <Button
+                variant="ghost"
+                size="sm"
+                class="text-destructive"
+                data-test="palette-action-delete"
+                @click="emit('delete', palette)"
+            >
+                <Trash2 class="size-4" />
+                {{ t('colors.actions.delete') }}
+            </Button>
+        </div>
+
+        <p
+            v-if="shareFeedback !== null"
+            class="text-xs text-muted-foreground"
+            role="status"
+            aria-live="polite"
+            data-test="palette-share-feedback"
         >
-          <Pencil class="size-4" />
-          {{ t('colors.actions.edit') }}
-        </Link>
-      </Button>
-
-      <Button
-        v-if="showPrototype && !palette.archived"
-        as-child
-        variant="ghost"
-        size="sm"
-      >
-        <Link
-          :href="prototypeUrl"
-          data-test="palette-action-prototype"
-        >
-          <Layers class="size-4" />
-          {{ t('colors.actions.prototype') }}
-        </Link>
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        data-test="palette-action-duplicate"
-        @click="duplicate"
-      >
-        <Copy class="size-4" />
-        {{ t('colors.actions.duplicate') }}
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        :disabled="publicUrl === null"
-        :title="
-          publicUrl === null
-            ? t('colors.actions.share_unavailable')
-            : undefined
-        "
-        data-test="palette-action-share"
-        @click="copyLink"
-      >
-        <Link2 class="size-4" />
-        {{ t('colors.actions.share') }}
-      </Button>
-
-      <Button
-        v-if="!palette.archived"
-        variant="ghost"
-        size="sm"
-        data-test="palette-action-archive"
-        @click="archive"
-      >
-        <Archive class="size-4" />
-        {{ t('colors.actions.archive') }}
-      </Button>
-
-      <Button
-        v-else
-        variant="ghost"
-        size="sm"
-        data-test="palette-action-restore"
-        @click="restore"
-      >
-        <RotateCcw class="size-4" />
-        {{ t('colors.actions.restore') }}
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        class="text-destructive"
-        data-test="palette-action-delete"
-        @click="emit('delete', palette)"
-      >
-        <Trash2 class="size-4" />
-        {{ t('colors.actions.delete') }}
-      </Button>
+            {{ shareFeedback }}
+        </p>
     </div>
-
-    <p
-      v-if="shareFeedback !== null"
-      class="text-xs text-muted-foreground"
-      role="status"
-      aria-live="polite"
-      data-test="palette-share-feedback"
-    >
-      {{ shareFeedback }}
-    </p>
-  </div>
 </template>

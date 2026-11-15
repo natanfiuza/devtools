@@ -3,13 +3,7 @@
     "providerEndpoint": "/api/badges",
     "personalEndpoint": "/b",
     "customEndpoint": "/api/badges/custom",
-    "styles": [
-        "flat",
-        "flat-square",
-        "plastic",
-        "for-the-badge",
-        "social"
-    ],
+    "styles": ["flat", "flat-square", "plastic", "for-the-badge", "social"],
     "logos": [
         {
             "slug": "composer",

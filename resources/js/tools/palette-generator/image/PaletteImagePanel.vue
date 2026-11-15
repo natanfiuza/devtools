@@ -83,95 +83,97 @@ async function downloadPng(scale: 1 | 2): Promise<void> {
 </script>
 
 <template>
-  <section
-    class="flex flex-col gap-4"
-    data-test="palette-image-panel"
-  >
-    <div>
-      <h2 class="text-sm font-semibold">
-        {{ t('colors.image.title') }}
-      </h2>
-      <p class="mt-1 text-xs text-muted-foreground">
-        {{ t('colors.image.description') }}
-      </p>
-    </div>
+    <section class="flex flex-col gap-4" data-test="palette-image-panel">
+        <div>
+            <h2 class="text-sm font-semibold">
+                {{ t('colors.image.title') }}
+            </h2>
+            <p class="mt-1 text-xs text-muted-foreground">
+                {{ t('colors.image.description') }}
+            </p>
+        </div>
 
-    <div class="flex flex-col gap-2">
-      <span class="text-xs font-medium">
-        {{ t('colors.image.layout_label') }}
-      </span>
-      <div
-        class="flex flex-wrap gap-2"
-        role="group"
-        :aria-label="t('colors.image.layout_label')"
-      >
-        <Button
-          v-for="option in PALETTE_IMAGE_LAYOUTS"
-          :key="option"
-          type="button"
-          size="sm"
-          :variant="layout === option ? 'secondary' : 'outline'"
-          :aria-pressed="layout === option"
-          :data-test="`image-layout-${option}`"
-          @click="selectLayout(option)"
+        <div class="flex flex-col gap-2">
+            <span class="text-xs font-medium">
+                {{ t('colors.image.layout_label') }}
+            </span>
+            <div
+                class="flex flex-wrap gap-2"
+                role="group"
+                :aria-label="t('colors.image.layout_label')"
+            >
+                <Button
+                    v-for="option in PALETTE_IMAGE_LAYOUTS"
+                    :key="option"
+                    type="button"
+                    size="sm"
+                    :variant="layout === option ? 'secondary' : 'outline'"
+                    :aria-pressed="layout === option"
+                    :data-test="`image-layout-${option}`"
+                    @click="selectLayout(option)"
+                >
+                    {{ t(`colors.image.layout_${option}`) }}
+                </Button>
+            </div>
+            <p
+                class="text-xs text-muted-foreground"
+                data-test="palette-image-size"
+            >
+                {{ t(`colors.image.size_${layout}`) }} ·
+                {{ t('colors.image.note') }}
+            </p>
+        </div>
+
+        <img
+            :src="preview"
+            :alt="
+                t('colors.image.preview_alt', {
+                    name,
+                    layout: t(`colors.image.layout_${layout}`),
+                })
+            "
+            :width="size.width"
+            :height="size.height"
+            class="w-full rounded-lg border border-border bg-white"
+            data-test="palette-image-preview"
+        />
+
+        <div class="flex flex-wrap items-center gap-2">
+            <Button
+                type="button"
+                :disabled="busy"
+                data-test="palette-image-download-svg"
+                @click="downloadSvg"
+            >
+                {{ t('colors.image.download_svg') }}
+            </Button>
+            <Button
+                type="button"
+                variant="outline"
+                :disabled="busy"
+                data-test="palette-image-download-png"
+                @click="downloadPng(1)"
+            >
+                {{ t('colors.image.download_png') }}
+            </Button>
+            <Button
+                type="button"
+                variant="outline"
+                :disabled="busy"
+                data-test="palette-image-download-png-2x"
+                @click="downloadPng(2)"
+            >
+                {{ t('colors.image.download_png_2x') }}
+            </Button>
+        </div>
+
+        <p
+            v-if="pngFailed"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="palette-image-error"
         >
-          {{ t(`colors.image.layout_${option}`) }}
-        </Button>
-      </div>
-      <p
-        class="text-xs text-muted-foreground"
-        data-test="palette-image-size"
-      >
-        {{ t(`colors.image.size_${layout}`) }} ·
-        {{ t('colors.image.note') }}
-      </p>
-    </div>
-
-    <img
-      :src="preview"
-      :alt="t('colors.image.preview_alt', { name, layout: t(`colors.image.layout_${layout}`) })"
-      :width="size.width"
-      :height="size.height"
-      class="w-full rounded-lg border border-border bg-white"
-      data-test="palette-image-preview"
-    >
-
-    <div class="flex flex-wrap items-center gap-2">
-      <Button
-        type="button"
-        :disabled="busy"
-        data-test="palette-image-download-svg"
-        @click="downloadSvg"
-      >
-        {{ t('colors.image.download_svg') }}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        :disabled="busy"
-        data-test="palette-image-download-png"
-        @click="downloadPng(1)"
-      >
-        {{ t('colors.image.download_png') }}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        :disabled="busy"
-        data-test="palette-image-download-png-2x"
-        @click="downloadPng(2)"
-      >
-        {{ t('colors.image.download_png_2x') }}
-      </Button>
-    </div>
-
-    <p
-      v-if="pngFailed"
-      class="text-xs text-destructive"
-      role="alert"
-      data-test="palette-image-error"
-    >
-      {{ t('colors.image.png_error') }}
-    </p>
-  </section>
+            {{ t('colors.image.png_error') }}
+        </p>
+    </section>
 </template>

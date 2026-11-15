@@ -77,10 +77,12 @@ function response(
         ok: status >= 200 && status < 300,
         status,
         headers: headers(headerValues),
-        body:
-            options.body === false ? null : { getReader: () => reader },
+        body: options.body === false ? null : { getReader: () => reader },
         arrayBuffer: async () => {
-            const total = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+            const total = chunks.reduce(
+                (sum, chunk) => sum + chunk.byteLength,
+                0,
+            );
             const buffer = new ArrayBuffer(total);
             const view = new Uint8Array(buffer);
             let offset = 0;
@@ -210,10 +212,7 @@ describe('fetchImage', () => {
     });
 
     it('conta os bytes lidos e para ao passar do teto', async () => {
-        const fake = response([
-            new Uint8Array(600),
-            new Uint8Array(600),
-        ]);
+        const fake = response([new Uint8Array(600), new Uint8Array(600)]);
 
         useFetch(fake);
 

@@ -176,9 +176,7 @@ type WorkspaceVm = {
     baseHex: () => string;
 };
 
-function vmOf(
-    wrapper: ReturnType<typeof mountWorkspace>,
-): WorkspaceVm {
+function vmOf(wrapper: ReturnType<typeof mountWorkspace>): WorkspaceVm {
     return wrapper.vm as unknown as WorkspaceVm;
 }
 

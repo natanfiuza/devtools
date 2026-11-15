@@ -323,15 +323,16 @@ describe('criacao', () => {
         await write.trigger('click');
 
         expect(write.attributes('data-state')).toBe('checked');
-        expect(
-            (formRef.current as { abilities: string[] }).abilities,
-        ).toEqual(['ai:query', 'badgeforge:write']);
+        expect((formRef.current as { abilities: string[] }).abilities).toEqual([
+            'ai:query',
+            'badgeforge:write',
+        ]);
 
         await ai.trigger('click');
 
-        expect(
-            (formRef.current as { abilities: string[] }).abilities,
-        ).toEqual(['badgeforge:write']);
+        expect((formRef.current as { abilities: string[] }).abilities).toEqual([
+            'badgeforge:write',
+        ]);
     });
 
     it('mostra o valor uma vez e copia para a area de transferencia', async () => {

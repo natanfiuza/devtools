@@ -27,45 +27,36 @@ const { muted, pending, failed, toggle } = usePaletteMute({
 </script>
 
 <template>
-  <div
-    v-if="canMute"
-    class="flex flex-wrap items-center gap-2"
-  >
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      :disabled="pending"
-      :aria-pressed="muted"
-      data-test="mute-palette-button"
-      @click="toggle"
-    >
-      <BellOff
-        v-if="muted"
-        class="size-4"
-      />
-      <BellRing
-        v-else
-        class="size-4"
-      />
-      {{ muted ? t('colors.mute.unmute') : t('colors.mute.mute') }}
-    </Button>
+    <div v-if="canMute" class="flex flex-wrap items-center gap-2">
+        <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            :disabled="pending"
+            :aria-pressed="muted"
+            data-test="mute-palette-button"
+            @click="toggle"
+        >
+            <BellOff v-if="muted" class="size-4" />
+            <BellRing v-else class="size-4" />
+            {{ muted ? t('colors.mute.unmute') : t('colors.mute.mute') }}
+        </Button>
 
-    <span
-      v-if="muted"
-      class="text-xs text-muted-foreground"
-      data-test="mute-palette-state"
-    >
-      {{ t('colors.mute.muted') }}
-    </span>
+        <span
+            v-if="muted"
+            class="text-xs text-muted-foreground"
+            data-test="mute-palette-state"
+        >
+            {{ t('colors.mute.muted') }}
+        </span>
 
-    <p
-      v-if="failed"
-      class="text-xs text-destructive"
-      role="alert"
-      data-test="mute-palette-error"
-    >
-      {{ t('colors.mute.error') }}
-    </p>
-  </div>
+        <p
+            v-if="failed"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="mute-palette-error"
+        >
+            {{ t('colors.mute.error') }}
+        </p>
+    </div>
 </template>

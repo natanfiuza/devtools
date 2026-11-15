@@ -76,7 +76,10 @@ function sectionsOf(nodes: SvgNode[]): string[] {
         ...new Set(
             nodes
                 .map((node) => node.section)
-                .filter((section): section is NonNullable<typeof section> => section !== undefined),
+                .filter(
+                    (section): section is NonNullable<typeof section> =>
+                        section !== undefined,
+                ),
         ),
     ];
 }

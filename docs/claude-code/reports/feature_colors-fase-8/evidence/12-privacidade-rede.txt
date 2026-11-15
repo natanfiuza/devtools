@@ -1,0 +1,29 @@
+Privacidade da rede: protótipos, imagem tipográfica e OG (checklist F8, item 12)
+Sessão de ana, ambiente de auditoria (SQLite descartável), 2026-11-15.
+Captura com page.on('request') ao redor de cada clique, sem recarregar a página.
+
+1) Protótipos — /dashboard/colors/palettes/01m7fwgewg7kbrwds7kgt2n48p/edit, aba Protótipo.
+   Cliques: prototype-export-svg, prototype-export-png-1x, prototype-export-png-2x.
+   Downloads: palette-prototype-site-light.svg, palette-prototype-site-light.png (1x e 2x).
+   Requisições observadas:
+     script  GET  http://[::1]:5173/resources/js/tools/palette-generator/prototype/fonts.ts
+     script  GET  http://[::1]:5173/resources/badgeforge/fonts/... (2 .ttf empacotados)
+     image   GET  blob:http://127.0.0.1:8000/... (preview/rastreio local)
+   Nenhum XHR/fetch ao servidor da aplicação: as fontes são módulos do bundle.
+
+2) Imagem tipográfica — mesma página, aba Imagem.
+   Cliques: palette-image-download-svg, palette-image-download-png, palette-image-download-png-2x.
+   Downloads: palette-horizontal.svg, palette-horizontal.png (1x e 2x).
+   Requisições observadas: duas image GET blob:http://127.0.0.1:8000/...
+   Nenhuma requisição ao servidor: SVG montado e PNG rastreado no navegador.
+
+3) OG — /dashboard/colors/palettes/01M7FT2QV43YZYNGA463XZKQ88/edit (Oceano, pública).
+   Clique: og-image-generate ('Atualizar imagem').
+   Requisições observadas após a carga:
+     image GET  blob:http://127.0.0.1:8000/...            (cartão desenhado no canvas)
+     xhr   POST http://127.0.0.1:8000/dashboard/colors/palettes/01M7FT2QV43YZYNGA463XZKQ88/og
+     xhr   GET  .../edit                                 (reload do Inertia após o upload)
+   O POST leva somente o PNG final (multipart 'image'), como em usePaletteOg.ts:
+   a paleta é desenhada no navegador; nada do conteúdo é calculado no servidor.
+
+4) Extração de imagem: ver 05-rede-extracao.txt (só a carga da página e um blob:).

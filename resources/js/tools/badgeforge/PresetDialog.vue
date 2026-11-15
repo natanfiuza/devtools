@@ -138,192 +138,208 @@ function destroy(preset: BadgeForgePreset): void {
 </script>
 
 <template>
-  <Dialog
-    :open="open"
-    @update:open="(value: boolean) => emit('update:open', value)"
-  >
-    <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-      <DialogHeader>
-        <DialogTitle>
-          {{ t('tools.badgeforge.management.presets_title') }}
-        </DialogTitle>
-        <DialogDescription>
-          {{ t('tools.badgeforge.management.presets_description') }}
-        </DialogDescription>
-      </DialogHeader>
+    <Dialog
+        :open="open"
+        @update:open="(value: boolean) => emit('update:open', value)"
+    >
+        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+            <DialogHeader>
+                <DialogTitle>
+                    {{ t('tools.badgeforge.management.presets_title') }}
+                </DialogTitle>
+                <DialogDescription>
+                    {{ t('tools.badgeforge.management.presets_description') }}
+                </DialogDescription>
+            </DialogHeader>
 
-      <form
-        class="flex flex-wrap items-end gap-2"
-        data-test="badge-preset-save"
-        @submit.prevent="save"
-      >
-        <div class="min-w-0 flex-1 space-y-2">
-          <Input
-            v-model="saveForm.name"
-            :maxlength="limits.nameMaxLength"
-            :placeholder="
-              t('tools.badgeforge.management.preset_name_placeholder')
-            "
-            :aria-label="t('tools.badgeforge.management.name')"
-            data-test="badge-preset-name"
-          />
-          <InputError :message="saveForm.errors.name" />
-        </div>
-        <Button
-          type="submit"
-          size="sm"
-          :disabled="saveForm.processing"
-          data-test="badge-preset-save-submit"
-        >
-          {{ t('tools.badgeforge.management.save_preset') }}
-        </Button>
-      </form>
+            <form
+                class="flex flex-wrap items-end gap-2"
+                data-test="badge-preset-save"
+                @submit.prevent="save"
+            >
+                <div class="min-w-0 flex-1 space-y-2">
+                    <Input
+                        v-model="saveForm.name"
+                        :maxlength="limits.nameMaxLength"
+                        :placeholder="
+                            t(
+                                'tools.badgeforge.management.preset_name_placeholder',
+                            )
+                        "
+                        :aria-label="t('tools.badgeforge.management.name')"
+                        data-test="badge-preset-name"
+                    />
+                    <InputError :message="saveForm.errors.name" />
+                </div>
+                <Button
+                    type="submit"
+                    size="sm"
+                    :disabled="saveForm.processing"
+                    data-test="badge-preset-save-submit"
+                >
+                    {{ t('tools.badgeforge.management.save_preset') }}
+                </Button>
+            </form>
 
-      <p class="text-xs text-muted-foreground">
-        {{
-          limits.limit === null
-            ? t('tools.badgeforge.management.preset_unlimited_note', {
-              used: limits.used,
-            })
-            : t('tools.badgeforge.management.preset_limit_note', {
-              used: limits.used,
-              limit: limits.limit,
-            })
-        }}
-      </p>
-
-      <div
-        v-if="presets.length === 0"
-        class="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground"
-        data-test="badge-preset-empty"
-      >
-        {{ t('tools.badgeforge.management.empty_presets') }}
-      </div>
-
-      <ul
-        v-else
-        class="divide-y rounded-md border"
-        data-test="badge-preset-list"
-      >
-        <li
-          v-for="preset in presets"
-          :key="preset.id"
-          class="space-y-2 px-3 py-2"
-          data-test="badge-preset-row"
-        >
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="min-w-0 flex-1">
-              <template v-if="editingId === preset.id">
-                <Input
-                  v-model="renameForm.name"
-                  :maxlength="limits.nameMaxLength"
-                  :aria-label="t('tools.badgeforge.management.name')"
-                  data-test="badge-preset-rename-input"
-                  @keyup.enter="saveRename(preset)"
-                />
-                <InputError :message="renameForm.errors.name" />
-              </template>
-              <p
-                v-else
-                class="truncate text-sm font-medium"
-              >
-                {{ preset.name }}
-              </p>
-              <Badge
-                v-if="preset.logoOrphaned"
-                variant="outline"
-                class="border-amber-500/40 text-amber-600"
-                data-test="badge-preset-orphaned"
-              >
-                {{ t('tools.badgeforge.management.preset_orphaned') }}
-              </Badge>
-            </div>
-
-            <template v-if="editingId === preset.id">
-              <Button
-                size="sm"
-                :disabled="renameForm.processing"
-                data-test="badge-preset-rename-save"
-                @click="saveRename(preset)"
-              >
-                {{ t('tools.badgeforge.management.save') }}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                data-test="badge-preset-rename-cancel"
-                @click="cancelRename"
-              >
-                {{ t('tools.badgeforge.management.cancel') }}
-              </Button>
-            </template>
-            <template v-else>
-              <Button
-                variant="outline"
-                size="sm"
-                data-test="badge-preset-apply"
-                @click="apply(preset)"
-              >
-                <Check class="size-4" />
-                {{ t('tools.badgeforge.management.apply_preset') }}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                data-test="badge-preset-rename"
-                @click="startRename(preset)"
-              >
-                <Pencil class="size-4" />
-                {{ t('tools.badgeforge.management.rename') }}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                data-test="badge-preset-delete"
-                @click="startDelete(preset)"
-              >
-                <Trash2 class="size-4" />
-                {{ t('tools.badgeforge.management.delete') }}
-              </Button>
-            </template>
-          </div>
-
-          <div
-            v-if="confirmingId === preset.id"
-            class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
-            data-test="badge-preset-delete-confirm"
-          >
-            <p class="text-sm font-medium">
-              {{
-                t('tools.badgeforge.management.delete_title', {
-                  name: preset.name,
-                })
-              }}
-            </p>
             <p class="text-xs text-muted-foreground">
-              {{ t('tools.badgeforge.management.delete_description') }}
+                {{
+                    limits.limit === null
+                        ? t(
+                              'tools.badgeforge.management.preset_unlimited_note',
+                              {
+                                  used: limits.used,
+                              },
+                          )
+                        : t('tools.badgeforge.management.preset_limit_note', {
+                              used: limits.used,
+                              limit: limits.limit,
+                          })
+                }}
             </p>
-            <div class="mt-2 flex gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
-                data-test="badge-preset-delete-confirmed"
-                @click="destroy(preset)"
-              >
-                {{ t('tools.badgeforge.management.delete') }}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                data-test="badge-preset-delete-cancel"
-                @click="confirmingId = null"
-              >
-                {{ t('tools.badgeforge.management.cancel') }}
-              </Button>
+
+            <div
+                v-if="presets.length === 0"
+                class="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground"
+                data-test="badge-preset-empty"
+            >
+                {{ t('tools.badgeforge.management.empty_presets') }}
             </div>
-          </div>
-        </li>
-      </ul>
-    </DialogContent>
-  </Dialog>
+
+            <ul
+                v-else
+                class="divide-y rounded-md border"
+                data-test="badge-preset-list"
+            >
+                <li
+                    v-for="preset in presets"
+                    :key="preset.id"
+                    class="space-y-2 px-3 py-2"
+                    data-test="badge-preset-row"
+                >
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="min-w-0 flex-1">
+                            <template v-if="editingId === preset.id">
+                                <Input
+                                    v-model="renameForm.name"
+                                    :maxlength="limits.nameMaxLength"
+                                    :aria-label="
+                                        t('tools.badgeforge.management.name')
+                                    "
+                                    data-test="badge-preset-rename-input"
+                                    @keyup.enter="saveRename(preset)"
+                                />
+                                <InputError :message="renameForm.errors.name" />
+                            </template>
+                            <p v-else class="truncate text-sm font-medium">
+                                {{ preset.name }}
+                            </p>
+                            <Badge
+                                v-if="preset.logoOrphaned"
+                                variant="outline"
+                                class="border-amber-500/40 text-amber-600"
+                                data-test="badge-preset-orphaned"
+                            >
+                                {{
+                                    t(
+                                        'tools.badgeforge.management.preset_orphaned',
+                                    )
+                                }}
+                            </Badge>
+                        </div>
+
+                        <template v-if="editingId === preset.id">
+                            <Button
+                                size="sm"
+                                :disabled="renameForm.processing"
+                                data-test="badge-preset-rename-save"
+                                @click="saveRename(preset)"
+                            >
+                                {{ t('tools.badgeforge.management.save') }}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                data-test="badge-preset-rename-cancel"
+                                @click="cancelRename"
+                            >
+                                {{ t('tools.badgeforge.management.cancel') }}
+                            </Button>
+                        </template>
+                        <template v-else>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                data-test="badge-preset-apply"
+                                @click="apply(preset)"
+                            >
+                                <Check class="size-4" />
+                                {{
+                                    t(
+                                        'tools.badgeforge.management.apply_preset',
+                                    )
+                                }}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                data-test="badge-preset-rename"
+                                @click="startRename(preset)"
+                            >
+                                <Pencil class="size-4" />
+                                {{ t('tools.badgeforge.management.rename') }}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                data-test="badge-preset-delete"
+                                @click="startDelete(preset)"
+                            >
+                                <Trash2 class="size-4" />
+                                {{ t('tools.badgeforge.management.delete') }}
+                            </Button>
+                        </template>
+                    </div>
+
+                    <div
+                        v-if="confirmingId === preset.id"
+                        class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
+                        data-test="badge-preset-delete-confirm"
+                    >
+                        <p class="text-sm font-medium">
+                            {{
+                                t('tools.badgeforge.management.delete_title', {
+                                    name: preset.name,
+                                })
+                            }}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                            {{
+                                t(
+                                    'tools.badgeforge.management.delete_description',
+                                )
+                            }}
+                        </p>
+                        <div class="mt-2 flex gap-2">
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                data-test="badge-preset-delete-confirmed"
+                                @click="destroy(preset)"
+                            >
+                                {{ t('tools.badgeforge.management.delete') }}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                data-test="badge-preset-delete-cancel"
+                                @click="confirmingId = null"
+                            >
+                                {{ t('tools.badgeforge.management.cancel') }}
+                            </Button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </DialogContent>
+    </Dialog>
 </template>

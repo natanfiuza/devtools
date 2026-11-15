@@ -131,80 +131,77 @@ function onBlur(): void {
 </script>
 
 <template>
-  <div
-    class="flex flex-col gap-2"
-    data-test="tag-input"
-  >
-    <div class="flex items-baseline justify-between gap-2">
-      <Label :for="id">
-        {{ t('colors.form.tags_label') }}
-      </Label>
-      <span class="text-xs text-muted-foreground">{{ hint }}</span>
-    </div>
+    <div class="flex flex-col gap-2" data-test="tag-input">
+        <div class="flex items-baseline justify-between gap-2">
+            <Label :for="id">
+                {{ t('colors.form.tags_label') }}
+            </Label>
+            <span class="text-xs text-muted-foreground">{{ hint }}</span>
+        </div>
 
-    <ul
-      v-if="modelValue.length > 0"
-      class="flex flex-wrap gap-1"
-      data-test="tag-chips"
-    >
-      <li
-        v-for="(tag, index) in modelValue"
-        :key="`${tag}-${index}`"
-        class="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs"
-        data-test="tag-chip"
-      >
-        <span>{{ tag }}</span>
-        <button
-          type="button"
-          class="rounded-full px-1 leading-none text-muted-foreground hover:text-foreground"
-          :aria-label="t('colors.form.tags_remove', { name: tag })"
-          data-test="tag-chip-remove"
-          @click="removeAt(index)"
+        <ul
+            v-if="modelValue.length > 0"
+            class="flex flex-wrap gap-1"
+            data-test="tag-chips"
         >
-          ×
-        </button>
-      </li>
-    </ul>
+            <li
+                v-for="(tag, index) in modelValue"
+                :key="`${tag}-${index}`"
+                class="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs"
+                data-test="tag-chip"
+            >
+                <span>{{ tag }}</span>
+                <button
+                    type="button"
+                    class="rounded-full px-1 leading-none text-muted-foreground hover:text-foreground"
+                    :aria-label="t('colors.form.tags_remove', { name: tag })"
+                    data-test="tag-chip-remove"
+                    @click="removeAt(index)"
+                >
+                    ×
+                </button>
+            </li>
+        </ul>
 
-    <Input
-      :id="id"
-      v-model="draft"
-      type="text"
-      autocomplete="off"
-      :maxlength="nameMaxLength"
-      :placeholder="t('colors.form.tags_placeholder')"
-      data-test="tag-input-field"
-      @keydown="onKeydown"
-      @blur="onBlur"
-    />
+        <Input
+            :id="id"
+            v-model="draft"
+            type="text"
+            autocomplete="off"
+            :maxlength="nameMaxLength"
+            :placeholder="t('colors.form.tags_placeholder')"
+            data-test="tag-input-field"
+            @keydown="onKeydown"
+            @blur="onBlur"
+        />
 
-    <div
-      v-if="unusedSuggestions.length > 0"
-      class="flex flex-wrap items-center gap-1"
-    >
-      <span class="text-xs text-muted-foreground">
-        {{ t('colors.form.tags_suggestions') }}
-      </span>
-      <button
-        v-for="tag in unusedSuggestions"
-        :key="tag.id"
-        type="button"
-        class="rounded-full border border-dashed border-border px-2 py-0.5 text-xs hover:bg-muted"
-        data-test="tag-suggestion"
-        @mousedown.prevent
-        @click="add(tag.name)"
-      >
-        {{ tag.name }}
-      </button>
+        <div
+            v-if="unusedSuggestions.length > 0"
+            class="flex flex-wrap items-center gap-1"
+        >
+            <span class="text-xs text-muted-foreground">
+                {{ t('colors.form.tags_suggestions') }}
+            </span>
+            <button
+                v-for="tag in unusedSuggestions"
+                :key="tag.id"
+                type="button"
+                class="rounded-full border border-dashed border-border px-2 py-0.5 text-xs hover:bg-muted"
+                data-test="tag-suggestion"
+                @mousedown.prevent
+                @click="add(tag.name)"
+            >
+                {{ tag.name }}
+            </button>
+        </div>
+
+        <p
+            v-if="message !== null"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="tag-input-message"
+        >
+            {{ message }}
+        </p>
     </div>
-
-    <p
-      v-if="message !== null"
-      class="text-xs text-destructive"
-      role="alert"
-      data-test="tag-input-message"
-    >
-      {{ message }}
-    </p>
-  </div>
 </template>

@@ -35,9 +35,7 @@ const { formPost, formPatch, routerDelete } = vi.hoisted(() => ({
 vi.mock('@inertiajs/vue3', async () => {
     const { reactive } = await import('vue');
 
-    let transform:
-        | ((data: Record<string, unknown>) => unknown)
-        | null = null;
+    let transform: ((data: Record<string, unknown>) => unknown) | null = null;
 
     const form = reactive({
         name: '',
@@ -240,7 +238,9 @@ function submitDialog(): void {
         throw new Error('Formulario ausente');
     }
 
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    form.dispatchEvent(
+        new Event('submit', { bubbles: true, cancelable: true }),
+    );
 }
 
 beforeEach(() => {
@@ -265,7 +265,8 @@ describe('URL do provider customizado', () => {
 
     it('monta a URL opaca com os segmentos codificados', () => {
         const form = defaultCustomProviderForm(customProps());
-        const definition = PROVIDER.definitions[0] as BadgeForgeCustomProvider['definitions'][number];
+        const definition = PROVIDER
+            .definitions[0] as BadgeForgeCustomProvider['definitions'][number];
 
         const url = buildCustomBadgeUrl(
             ORIGIN,
@@ -431,9 +432,9 @@ describe('modo custom do construtor', () => {
         expect(
             wrapper.find('[data-test="badge-custom-invalid-preview"]').exists(),
         ).toBe(true);
-        expect(wrapper.find('[data-test="badge-custom-preview"]').exists()).toBe(
-            false,
-        );
+        expect(
+            wrapper.find('[data-test="badge-custom-preview"]').exists(),
+        ).toBe(false);
     });
 
     it('monta a URL mesmo com o provider desabilitado (o servidor responde 404)', async () => {
@@ -469,14 +470,19 @@ describe('painel de providers customizados', () => {
             customProps({
                 providers: [
                     PROVIDER,
-                    { ...PROVIDER, id: '01K0CUSTOMPROVIDER00000002', name: 'Off', enabled: false },
+                    {
+                        ...PROVIDER,
+                        id: '01K0CUSTOMPROVIDER00000002',
+                        name: 'Off',
+                        enabled: false,
+                    },
                 ],
             }),
         );
 
-        expect(wrapper.findAll('[data-test="badgeforge-custom-row"]')).toHaveLength(
-            2,
-        );
+        expect(
+            wrapper.findAll('[data-test="badgeforge-custom-row"]'),
+        ).toHaveLength(2);
         expect(wrapper.text()).toContain('Catálogo');
         expect(
             wrapper.find('[data-test="badgeforge-custom-disabled"]').exists(),
@@ -509,7 +515,9 @@ describe('painel de providers customizados', () => {
             .trigger('click');
 
         expect(
-            wrapper.find('[data-test="badgeforge-custom-delete-confirm"]').exists(),
+            wrapper
+                .find('[data-test="badgeforge-custom-delete-confirm"]')
+                .exists(),
         ).toBe(true);
         expect(routerDelete).not.toHaveBeenCalled();
 
@@ -551,13 +559,13 @@ describe('painel de providers customizados', () => {
 
         const wrapper = mountPanel(props);
 
-        expect(wrapper.find('[data-test="badgeforge-custom-limit"]').exists()).toBe(
-            true,
-        );
         expect(
-            wrapper.find('[data-test="badgeforge-custom-create"]').attributes(
-                'disabled',
-            ),
+            wrapper.find('[data-test="badgeforge-custom-limit"]').exists(),
+        ).toBe(true);
+        expect(
+            wrapper
+                .find('[data-test="badgeforge-custom-create"]')
+                .attributes('disabled'),
         ).toBeDefined();
     });
 });
@@ -575,10 +583,14 @@ describe('dialogo de provider customizado', () => {
             document.querySelector('[data-test="badge-custom-provider-form"]'),
         ).not.toBeNull();
         expect(
-            document.querySelector('[data-test="badge-custom-provider-template"]'),
+            document.querySelector(
+                '[data-test="badge-custom-provider-template"]',
+            ),
         ).toBeNull();
         expect(
-            document.querySelector('[data-test="badge-custom-provider-immutable"]'),
+            document.querySelector(
+                '[data-test="badge-custom-provider-immutable"]',
+            ),
         ).not.toBeNull();
 
         const slugs = document.querySelectorAll<HTMLInputElement>(
@@ -645,7 +657,9 @@ describe('dialogo de provider customizado', () => {
         await flushPromises();
 
         expect(
-            document.querySelector('[data-test="badge-custom-provider-template"]'),
+            document.querySelector(
+                '[data-test="badge-custom-provider-template"]',
+            ),
         ).not.toBeNull();
 
         fill('badge-custom-provider-name', 'Meu catálogo');

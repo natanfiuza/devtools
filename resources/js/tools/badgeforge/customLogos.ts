@@ -117,7 +117,11 @@ function toLogo(slug: string, payload: unknown): BadgeLogo | null {
             return null;
         }
 
-        const path = item as { d?: unknown; fillRule?: unknown; clipRule?: unknown };
+        const path = item as {
+            d?: unknown;
+            fillRule?: unknown;
+            clipRule?: unknown;
+        };
 
         if (typeof path.d !== 'string' || path.d === '') {
             return null;

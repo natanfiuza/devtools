@@ -73,10 +73,7 @@ function channelLabel(key: string): string {
     return t(`tools.shared.color_picker.channels.${key}`);
 }
 
-function rgbRow(
-    channel: RgbChannel,
-    key: string,
-): ChannelRow<RgbChannel> {
+function rgbRow(channel: RgbChannel, key: string): ChannelRow<RgbChannel> {
     const from = withChannel(props.rgba, channel, 0);
     const to = withChannel(props.rgba, channel, 255);
 
@@ -134,10 +131,7 @@ function onHslInput(channel: HslChannel, event: Event): void {
     }
 }
 
-function onNumberChange(
-    apply: () => void,
-    event: Event,
-): void {
+function onNumberChange(apply: () => void, event: Event): void {
     if (valueOf(event) === null) {
         return;
     }
@@ -156,117 +150,108 @@ function onHslNumber(channel: HslChannel, event: Event): void {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
-    <span class="text-sm font-medium">
-      {{ t('tools.shared.color_picker.channels.title') }}
-    </span>
+    <div class="flex flex-col gap-3">
+        <span class="text-sm font-medium">
+            {{ t('tools.shared.color_picker.channels.title') }}
+        </span>
 
-    <Tabs default-value="rgb">
-      <TabsList
-        class="grid w-full grid-cols-2"
-        data-test="channels-tabs"
-      >
-        <TabsTrigger
-          value="rgb"
-          data-test="channel-tab-rgb"
-        >
-          {{ t('tools.shared.color_picker.channels.rgb') }}
-        </TabsTrigger>
-        <TabsTrigger
-          value="hsl"
-          data-test="channel-tab-hsl"
-        >
-          {{ t('tools.shared.color_picker.channels.hsl') }}
-        </TabsTrigger>
-      </TabsList>
+        <Tabs default-value="rgb">
+            <TabsList class="grid w-full grid-cols-2" data-test="channels-tabs">
+                <TabsTrigger value="rgb" data-test="channel-tab-rgb">
+                    {{ t('tools.shared.color_picker.channels.rgb') }}
+                </TabsTrigger>
+                <TabsTrigger value="hsl" data-test="channel-tab-hsl">
+                    {{ t('tools.shared.color_picker.channels.hsl') }}
+                </TabsTrigger>
+            </TabsList>
 
-      <TabsContent
-        value="rgb"
-        class="mt-3 flex flex-col gap-2"
-      >
-        <div
-          v-for="row in rgbRows"
-          :key="row.channel"
-          class="grid grid-cols-[minmax(0,5rem)_minmax(0,1fr)_4.5rem] items-center gap-2"
-        >
-          <span
-            class="truncate text-xs font-medium"
-            :title="row.label"
-          >
-            {{ row.label }}
-          </span>
-          <input
-            type="range"
-            min="0"
-            :max="row.max"
-            step="1"
-            :value="row.value"
-            :aria-label="row.label"
-            class="h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
-            :style="{ backgroundImage: row.gradient, '--thumb-color': thumb }"
-            :data-test="`channel-slider-${row.channel}`"
-            @input="onRgbInput(row.channel, $event)"
-            @change="emit('finalize')"
-            @blur="emit('finalize')"
-          >
-          <input
-            type="number"
-            min="0"
-            :max="row.max"
-            step="1"
-            :value="row.value"
-            :aria-label="row.label"
-            class="h-8 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-right text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            :data-test="`channel-value-${row.channel}`"
-            @change="onRgbNumber(row.channel, $event)"
-            @keydown.enter.prevent="emit('finalize')"
-          >
-        </div>
-      </TabsContent>
+            <TabsContent value="rgb" class="mt-3 flex flex-col gap-2">
+                <div
+                    v-for="row in rgbRows"
+                    :key="row.channel"
+                    class="grid grid-cols-[minmax(0,5rem)_minmax(0,1fr)_4.5rem] items-center gap-2"
+                >
+                    <span
+                        class="truncate text-xs font-medium"
+                        :title="row.label"
+                    >
+                        {{ row.label }}
+                    </span>
+                    <input
+                        type="range"
+                        min="0"
+                        :max="row.max"
+                        step="1"
+                        :value="row.value"
+                        :aria-label="row.label"
+                        class="h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
+                        :style="{
+                            backgroundImage: row.gradient,
+                            '--thumb-color': thumb,
+                        }"
+                        :data-test="`channel-slider-${row.channel}`"
+                        @input="onRgbInput(row.channel, $event)"
+                        @change="emit('finalize')"
+                        @blur="emit('finalize')"
+                    />
+                    <input
+                        type="number"
+                        min="0"
+                        :max="row.max"
+                        step="1"
+                        :value="row.value"
+                        :aria-label="row.label"
+                        class="h-8 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-right text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        :data-test="`channel-value-${row.channel}`"
+                        @change="onRgbNumber(row.channel, $event)"
+                        @keydown.enter.prevent="emit('finalize')"
+                    />
+                </div>
+            </TabsContent>
 
-      <TabsContent
-        value="hsl"
-        class="mt-3 flex flex-col gap-2"
-      >
-        <div
-          v-for="row in hslRows"
-          :key="row.channel"
-          class="grid grid-cols-[minmax(0,5rem)_minmax(0,1fr)_4.5rem] items-center gap-2"
-        >
-          <span
-            class="truncate text-xs font-medium"
-            :title="row.label"
-          >
-            {{ row.label }}
-          </span>
-          <input
-            type="range"
-            min="0"
-            :max="row.max"
-            step="1"
-            :value="row.value"
-            :aria-label="row.label"
-            class="h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
-            :style="{ backgroundImage: row.gradient, '--thumb-color': thumb }"
-            :data-test="`channel-slider-${row.channel}`"
-            @input="onHslInput(row.channel, $event)"
-            @change="emit('finalize')"
-            @blur="emit('finalize')"
-          >
-          <input
-            type="number"
-            min="0"
-            :max="row.max"
-            step="1"
-            :value="row.value"
-            :aria-label="row.label"
-            class="h-8 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-right text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            :data-test="`channel-value-${row.channel}`"
-            @change="onHslNumber(row.channel, $event)"
-            @keydown.enter.prevent="emit('finalize')"
-          >
-        </div>
-      </TabsContent>
-    </Tabs>
-  </div>
+            <TabsContent value="hsl" class="mt-3 flex flex-col gap-2">
+                <div
+                    v-for="row in hslRows"
+                    :key="row.channel"
+                    class="grid grid-cols-[minmax(0,5rem)_minmax(0,1fr)_4.5rem] items-center gap-2"
+                >
+                    <span
+                        class="truncate text-xs font-medium"
+                        :title="row.label"
+                    >
+                        {{ row.label }}
+                    </span>
+                    <input
+                        type="range"
+                        min="0"
+                        :max="row.max"
+                        step="1"
+                        :value="row.value"
+                        :aria-label="row.label"
+                        class="h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
+                        :style="{
+                            backgroundImage: row.gradient,
+                            '--thumb-color': thumb,
+                        }"
+                        :data-test="`channel-slider-${row.channel}`"
+                        @input="onHslInput(row.channel, $event)"
+                        @change="emit('finalize')"
+                        @blur="emit('finalize')"
+                    />
+                    <input
+                        type="number"
+                        min="0"
+                        :max="row.max"
+                        step="1"
+                        :value="row.value"
+                        :aria-label="row.label"
+                        class="h-8 w-full min-w-0 rounded-md border border-input bg-transparent px-2 text-right text-sm tabular-nums outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        :data-test="`channel-value-${row.channel}`"
+                        @change="onHslNumber(row.channel, $event)"
+                        @keydown.enter.prevent="emit('finalize')"
+                    />
+                </div>
+            </TabsContent>
+        </Tabs>
+    </div>
 </template>

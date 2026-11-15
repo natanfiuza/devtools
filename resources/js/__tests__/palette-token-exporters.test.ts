@@ -166,9 +166,7 @@ describe('buildDtcgTokens', () => {
         expect(tone.$value).toMatch(/^#[0-9a-f]{8}$/);
         expect(tone.$value).toBe(ALPHA_SCALE.tones[0]?.hex);
 
-        const withRoles = documentOf(
-            buildDtcgTokens(SCALE, 'marca', ROLES),
-        );
+        const withRoles = documentOf(buildDtcgTokens(SCALE, 'marca', ROLES));
         const semantic = withRoles.color.marca?.semantic as DtcgGroup;
         const accent = (semantic.light as DtcgGroup).accent as DtcgToken;
 
@@ -209,8 +207,7 @@ describe('buildStyleDictionaryTokens', () => {
         const contents = buildStyleDictionaryTokens(SCALE, 'marca');
         const document = JSON.parse(contents) as Record<string, unknown>;
         const group = (document.color as Record<string, unknown>).marca as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
 
         expect(document).not.toHaveProperty('$extensions');
         expect(contents).not.toContain('$type');
@@ -232,8 +229,12 @@ describe('buildTypeScriptTokens', () => {
         expect(contents).toContain('export const minhaMarcaTokens = {');
         expect(contents).toContain('    color: {');
         expect(contents).toContain(`        50: '${SCALE.tones[0]?.hex}',`);
-        expect(contents).toContain(`                primary: '${LIGHT_ROLES.primary}',`);
-        expect(contents).toContain(`                accent: '${LIGHT_ROLES.accent}',`);
+        expect(contents).toContain(
+            `                primary: '${LIGHT_ROLES.primary}',`,
+        );
+        expect(contents).toContain(
+            `                accent: '${LIGHT_ROLES.accent}',`,
+        );
         expect(contents).toContain('} as const;');
         expect(contents).toContain(
             `Tokens format v${COLOR_TOKEN_FORMAT_VERSION}`,

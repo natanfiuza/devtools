@@ -101,4 +101,86 @@ describe('mensagens do vue-i18n', () => {
         expect(total).toBeGreaterThan(0);
         expect(failures).toEqual([]);
     });
+
+    it('interpolam ator e paleta nas notificacoes reais dos cinco idiomas', () => {
+        // O vue-i18n interpola com `{nome}`; o Laravel, com `:nome`. Chave com a
+        // sintaxe do Laravel nao quebra o render: o `t()` devolve o texto com
+        // `:actor`/`:palette` literais na tela. O teste da pagina finge as
+        // traducoes nessa sintaxe, por isso o texto real e guardado aqui
+        // (achado da F8; sem esta guarda o defeito volta silencioso).
+        const exported = exportMessages();
+
+        const failures: string[] = [];
+        const withActorAndPalette = [
+            'palette_liked',
+            'palette_comment_approved',
+            'comment_reply_approved',
+        ];
+
+        for (const [locale, namespaces] of Object.entries(exported)) {
+            const i18n = createI18n({
+                legacy: false,
+                locale,
+                fallbackLocale: false,
+                messages: {
+                    [locale]: namespaces,
+                } as unknown as Record<
+                    string,
+                    Record<string, LocaleMessageValue<VueMessageType>>
+                >,
+                missingWarn: false,
+                fallbackWarn: false,
+                warnHtmlMessage: false,
+            });
+
+            for (const key of withActorAndPalette) {
+                const text = i18n.global.t(`notifications.kinds.${key}`, {
+                    actor: 'ATOR',
+                    palette: 'PALETA',
+                });
+
+                if (
+                    !text.includes('ATOR') ||
+                    !text.includes('PALETA') ||
+                    text.includes(':actor') ||
+                    text.includes(':palette')
+                ) {
+                    failures.push(`${locale}/notifications.${key}: ${text}`);
+                }
+            }
+
+            // `user_followed` fala do ator e nunca da paleta.
+            const followed = i18n.global.t(
+                'notifications.kinds.user_followed',
+                { actor: 'ATOR', palette: 'PALETA' },
+            );
+
+            if (
+                !followed.includes('ATOR') ||
+                followed.includes('PALETA') ||
+                followed.includes(':actor')
+            ) {
+                failures.push(
+                    `${locale}/notifications.user_followed: ${followed}`,
+                );
+            }
+
+            const anonymous = i18n.global.t(
+                'notifications.kinds.palette_liked_anonymous',
+                { actor: 'ATOR', palette: 'PALETA' },
+            );
+
+            if (
+                !anonymous.includes('PALETA') ||
+                anonymous.includes('ATOR') ||
+                anonymous.includes(':palette')
+            ) {
+                failures.push(
+                    `${locale}/notifications.palette_liked_anonymous: ${anonymous}`,
+                );
+            }
+        }
+
+        expect(failures).toEqual([]);
+    });
 });

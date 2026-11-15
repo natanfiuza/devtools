@@ -1,0 +1,23 @@
+i18n: cinco idiomas na página pública e em Minhas Paletas (checklist F8, item 11)
+Ambiente de auditoria, 2026-11-15. Nenhuma chave crua encontrada em nenhuma tela.
+
+Página pública /{locale}/colors/p/oceano (sessão de ana):
+  slug    lang    curtida        duplicar                 silenciar                          títulos
+  pt-br   pt-BR   1 curtida      Duplicar paleta          Silenciar paleta                   Exportar / Imagem da paleta / Comentários
+  pt-pt   pt-PT   1 gosto        Duplicar paleta          Silenciar paleta                   Exportar / Imagem da paleta / Comentários
+  en      en      1 like         Duplicate palette        Mute palette                       Export / Palette image / Comments
+  es      es      1 me gusta     Duplicar paleta          Silenciar paleta                   Exportar / Imagen de la paleta / Comentarios
+  fr      fr      1 J’aime       Dupliquer la palette     Mettre la palette en sourdine      Exporter / Image de la palette / Commentaires
+
+  <html lang> correto nos cinco; regex de chave crua (colors./notifications./
+  admin./tools.) não encontrou nada nos cinco textos renderizados.
+
+Minhas Paletas (/dashboard/colors/palettes, cookie httpOnly 'locale'):
+  pt-br  <html lang=pt-BR>  h1 'Minhas Paletas'      title 'Minhas Paletas - devtools'
+  pt-pt  <html lang=pt-PT>  h1 'As Minhas Paletas'   title 'As Minhas Paletas - devtools'
+  en     <html lang=en>     h1 'My palettes'         title 'My palettes - devtools'
+  es     <html lang=es>     h1 'Mis Paletas'         title 'Mis Paletas - devtools'
+  fr     <html lang=fr>     h1 'Mes palettes'        title 'Mes palettes - devtools'
+
+  Linhas da lista traduzem colunas/cabeçalhos (Escala/Scale/Échelle,
+  Pública/Public/Publique) e nenhuma chave crua apareceu.

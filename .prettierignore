@@ -21,4 +21,7 @@ resources/views/mail
 .gitpr
 # Prompts sao texto de entrada do modelo: as quebras de linha sao autorais.
 resources/prompts
+# Gerado por `badgeforge:font-metrics` e conferido byte a byte por `--check`:
+# reformatar a mao quebra o teste (TrueTypeFontTest).
+resources/badgeforge/font-metrics.json
 

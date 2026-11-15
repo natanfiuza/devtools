@@ -57,7 +57,7 @@
 - Reivindicação de curtidas: no login, passar as curtidas do cookie anônimo para a conta, mesclando conflitos e descartando o identificador, sem duplicar linhas nem avisos (ADR-135).
 - Perfil público: página `/{locale}/u/{username}` com nome, avatar, contadores e paletas públicas do autor; 404 uniforme para conta inexistente, suspensa ou anonimizada, indexável e fora do sitemap (ADR-134).
 - Seguir: relação permanente entre duas contas, uma linha por par, com `followed_at` nulo como “não segue”; exige login e não tem lista pública de seguidores (ADR-136).
-- Notificação de relação: aviso de curtida ou follow gravado apenas no canal `database`, depois do commit e no máximo uma vez por relação, garantido por `notified_at` atômico; sem e-mail, sino ou preferências na F6 (ADR-137).
+- Notificação de relação: aviso de curtida ou follow gravado no canal `database`, depois do commit e no máximo uma vez por relação, garantido por `notified_at` atômico; e-mail, sino e preferências por tipo chegaram na F7 (ADR-137, ADR-142).
 - Imagem tipográfica da paleta: imagem gerada no navegador com o nome, os HEX e a marca fixa, nos formatos horizontal 1600×500, vertical 1080×1920 e card 1080×1080; SVG sanitizado e PNG rasterizado do mesmo SVG (ADR-138).
 - Marca fixa: assinatura `devtools.natanfiuza.dev.br` presente em toda imagem tipográfica da paleta (ADR-138).
 - Comentário: texto público em paleta, escrito por conta logada, verificada e ativa, com até 255 caracteres; nasce aguardando moderação e pode ser editado ou excluído pelo autor (ADR-111, ADR-139).

@@ -31,9 +31,10 @@ responde 404 e não redireciona.
 - Curtidas e follows são contados por linhas ativas, não por contador
   denormalizado.
 
-## Fora desta fase
+## Fora do escopo (F7)
 
 - Editar perfil, username ou bio.
 - Listas de seguidores e seguindo.
-- Bloqueio.
-- Notificações visíveis (o banco grava, mas não há sino na F6).
+- Bloqueio entre contas.
+- Menções e notificações disparadas pelo perfil: o sino da F7 cobre curtida,
+  follow, comentário e resposta (ADR-142), não menções.

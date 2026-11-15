@@ -76,7 +76,11 @@ const traducoes = {
 };
 
 function montarPagina(
-    props: { name: string | null; email: string | null; status: string | null } = {
+    props: {
+        name: string | null;
+        email: string | null;
+        status: string | null;
+    } = {
         name: null,
         email: null,
         status: null,
@@ -114,9 +118,15 @@ describe('Contact.vue', () => {
         expect(wrapper.find('[data-test="contact-form"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="contact-name"]').exists()).toBe(true);
         expect(wrapper.find('[data-test="contact-email"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="contact-subject-trigger"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="contact-message"]').exists()).toBe(true);
-        expect(wrapper.find('[data-test="contact-submit"]').exists()).toBe(true);
+        expect(
+            wrapper.find('[data-test="contact-subject-trigger"]').exists(),
+        ).toBe(true);
+        expect(wrapper.find('[data-test="contact-message"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="contact-submit"]').exists()).toBe(
+            true,
+        );
     });
 
     it('pre-preenche os campos quando dados do usuario sao fornecidos', () => {
@@ -126,8 +136,14 @@ describe('Contact.vue', () => {
             status: null,
         });
 
-        expect(wrapper.find('[data-test="contact-name"]').attributes('value') || mockFormState.name).toBe('Natan Fiuza');
-        expect(wrapper.find('[data-test="contact-email"]').attributes('value') || mockFormState.email).toBe('natan@exemplo.com');
+        expect(
+            wrapper.find('[data-test="contact-name"]').attributes('value') ||
+                mockFormState.name,
+        ).toBe('Natan Fiuza');
+        expect(
+            wrapper.find('[data-test="contact-email"]').attributes('value') ||
+                mockFormState.email,
+        ).toBe('natan@exemplo.com');
     });
 
     it('dispara o envio do formulario no submit', async () => {
@@ -145,7 +161,9 @@ describe('Contact.vue', () => {
             status: 'sent',
         });
 
-        expect(wrapper.find('[data-test="contact-success-banner"]').exists()).toBe(true);
+        expect(
+            wrapper.find('[data-test="contact-success-banner"]').exists(),
+        ).toBe(true);
         expect(wrapper.find('[data-test="contact-form"]').exists()).toBe(false);
     });
 });

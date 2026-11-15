@@ -1,0 +1,24 @@
+SSR: HTML do servidor com título e meta (checklist F8, item 13)
+Ambiente de auditoria, 2026-11-15. Bundle: npm run build:ssr (Etapa 6);
+processo: npm run ssr (node bootstrap/ssr/ssr.js, porta 13714);
+servidor: php artisan serve com INERTIA_SSR_ENABLED=true.
+
+Tentativa 1 (falha conhecida): com public/hot remanescente do 'npm run dev'
+o Inertia tentava o SSR do Vite em http://[::1]:5173 (morto) e caía para o
+cliente (div#app vazio). Removido o public/hot (arquivo gerado), o SSR
+passou a usar o bundle de produção em 13714.
+
+1) GET /pt-br/colors/p/oceano -> 200 (data-server-rendered="true" presente: 1)
+   <title data-inertia="">Oceano - devtools</title>
+   name="description" content="Paleta azul de demonstracao da auditoria."
+   rel="canonical" href="http://127.0.0.1:8000/pt-br/colors/p/oceano"
+   og:title" content="Oceano"
+   og:type" content="website"
+   og:url" content="http://127.0.0.1:8000/pt-br/colors/p/oceano"
+   div#app: <div class="flex min-h-screen flex-col"><a href="#conteudo" ... (markup renderizado)
+
+2) GET /pt-br/tools/colors/html-color-picker -> 200
+   data-server-rendered="true"
+   <title data-inertia="">HTML Color Picker - devtools</title>
+   name="description" content="Escolha uma cor, converta entre HEX, RGB, HSL e OKLCH e confira o contraste WCAG antes de usar."
+   div#app: <div class="flex min-h-screen flex-col"><a href="#conteudo" ... (markup renderizado)

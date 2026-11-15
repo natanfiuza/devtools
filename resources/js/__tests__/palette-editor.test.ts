@@ -97,9 +97,8 @@ vi.mock('@/tools/palette-generator/GeneratorWorkspace.vue', async () => {
                 >;
 
                 function snapshot() {
-                    const extracted = props.initialExtracted as
-                        | StubExtracted
-                        | null;
+                    const extracted =
+                        props.initialExtracted as StubExtracted | null;
 
                     if (extracted !== null) {
                         return {
@@ -150,8 +149,7 @@ vi.mock('@/tools/palette-generator/GeneratorWorkspace.vue', async () => {
                                     TabsList,
                                     {},
                                     {
-                                        default: () =>
-                                            slots['tabs-extra']?.(),
+                                        default: () => slots['tabs-extra']?.(),
                                     },
                                 ),
                                 slots['panels-extra']?.(),
@@ -447,19 +445,11 @@ const IMAGE_LIMITS = {
     fetchTimeoutMs: 8000,
 };
 
-const EXTRACTED_HEXES = [
-    '#ff0000',
-    '#ff7f00',
-    '#ffff00',
-    '#00ff00',
-    '#0000ff',
-];
+const EXTRACTED_HEXES = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff'];
 
 const EXTRACTED_ITEMS = EXTRACTED_HEXES.map((hex) => ({ hex }));
 
-function editor(
-    overrides: Partial<PaletteEditorData> = {},
-): PaletteEditorData {
+function editor(overrides: Partial<PaletteEditorData> = {}): PaletteEditorData {
     return {
         id: '01KPALETTE00000000000000001',
         name: 'Oceano',
@@ -598,16 +588,14 @@ describe('PaletteEditor', () => {
             initialTab: string;
         };
 
-        expect(query('[data-test="palette-editor-name"]').textContent).toContain(
-            'Oceano',
-        );
+        expect(
+            query('[data-test="palette-editor-name"]').textContent,
+        ).toContain('Oceano');
         expect(received.initialBase).toBe('#6366f1');
         expect(received.initialExtracted).toBeNull();
         expect(received.initialTab).toBe('scale');
         expect(received.initialScale?.tones).toHaveLength(11);
-        expect(received.initialScale?.tones[0]?.hex).toBe(
-            SCALE_ITEMS[0]?.hex,
-        );
+        expect(received.initialScale?.tones[0]?.hex).toBe(SCALE_ITEMS[0]?.hex);
         expect(received.initialScale?.tones[10]?.hex).toBe(
             SCALE_ITEMS[10]?.hex,
         );
@@ -676,9 +664,9 @@ describe('PaletteEditor', () => {
 
         expect(received.initialScale).toBeNull();
         expect(received.initialTab).toBe('extraction');
-        expect(received.initialExtracted?.colors.map((color) => color.hex)).toEqual(
-            EXTRACTED_HEXES,
-        );
+        expect(
+            received.initialExtracted?.colors.map((color) => color.hex),
+        ).toEqual(EXTRACTED_HEXES);
         expect(received.initialExtracted?.colors[0]?.percentage).toBe(0);
         expect(received.initialExtracted?.requested).toBe(5);
         expect(received.initialExtracted?.source).toEqual({
@@ -912,9 +900,7 @@ describe('PaletteEditor', () => {
         field.dispatchEvent(new Event('change'));
         await nextTick();
 
-        query<HTMLButtonElement>(
-            '[data-test="role-editor-restore"]',
-        ).click();
+        query<HTMLButtonElement>('[data-test="role-editor-restore"]').click();
         await nextTick();
 
         await save();
@@ -944,9 +930,7 @@ describe('PaletteEditor', () => {
         );
         expect(data.image).toBeInstanceOf(File);
         expect(data.image.type).toBe('image/png');
-        expect(
-            document.querySelector('[data-test="og-image"]'),
-        ).not.toBeNull();
+        expect(document.querySelector('[data-test="og-image"]')).not.toBeNull();
     });
 
     it('refaz a imagem ao salvar uma paleta publica, com o payload salvo', async () => {

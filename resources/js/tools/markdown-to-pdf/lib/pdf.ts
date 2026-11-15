@@ -1,10 +1,6 @@
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
-import {
-    getPaperDimensions,
-    getPrintCss,
-    MARGIN_VALUES_MM,
-} from './themes';
+import { getPaperDimensions, getPrintCss, MARGIN_VALUES_MM } from './themes';
 import type { DocumentConfig } from './types';
 
 /**
@@ -45,7 +41,10 @@ export function findSafeSliceHeight(
     }
 
     const searchRange = Math.max(16, Math.floor(maxSliceHeight * 0.2));
-    const searchStartY = Math.max(sourceY + 1, sourceY + maxSliceHeight - searchRange);
+    const searchStartY = Math.max(
+        sourceY + 1,
+        sourceY + maxSliceHeight - searchRange,
+    );
     const bandHeight = sourceY + maxSliceHeight - searchStartY;
 
     if (bandHeight <= 4 || canvas.width <= 0) {

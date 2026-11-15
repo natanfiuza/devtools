@@ -1,17 +1,29 @@
 <?php
 
 use App\Enums\AiRequestStatus;
+use App\Enums\ColorCommentReportReason;
 use App\Enums\NewsletterSource;
 use App\Enums\SqlDialect;
 use App\Models\AiRequest;
 use App\Models\BadgeCustomLogo;
 use App\Models\BadgePreset;
+use App\Models\ColorCommentReport;
+use App\Models\ColorFavorite;
+use App\Models\ColorHistoryEntry;
+use App\Models\ColorPalette;
+use App\Models\ColorPaletteComment;
+use App\Models\ColorPaletteFavorite;
+use App\Models\ColorPaletteLike;
+use App\Models\ColorPaletteMute;
+use App\Models\ColorPreset;
+use App\Models\ColorTag;
 use App\Models\NewsletterSubscriber;
 use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\UsageLedger;
 use App\Models\User;
+use App\Models\UserFollow;
 use App\Support\Format;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -473,6 +485,47 @@ it('exporta os dados da conta em JSON para download', function () {
     BadgePreset::factory()->for($user)->create(['name' => 'Release']);
     inscricaoDaConta('ana@exemplo.com', ['confirmed_at' => now()]);
 
+    // Colors: o que a conta salvou, escreveu e as relacoes que iniciou.
+    $seguido = User::factory()->create(['username' => 'seguido']);
+    $paleta = ColorPalette::factory()->for($user)->public()->create([
+        'name' => 'Oceano',
+        'slug' => 'oceano',
+    ]);
+    $outra = ColorPalette::factory()->for($seguido)->public()->create([
+        'name' => 'Outra',
+        'slug' => 'outra',
+    ]);
+    $tag = ColorTag::factory()->for($user)->create(['name' => 'Marca', 'key' => 'marca']);
+    $paleta->tags()->attach($tag);
+    ColorHistoryEntry::create(['user_id' => $user->id, 'color' => '#112233']);
+    ColorFavorite::create(['user_id' => $user->id, 'color' => '#445566']);
+    ColorPreset::factory()->for($user)->create(['name' => 'Marca base']);
+    ColorPaletteFavorite::create(['user_id' => $user->id, 'color_palette_id' => $outra->id]);
+    ColorPaletteLike::create([
+        'color_palette_id' => $outra->id,
+        'user_id' => $user->id,
+        'liked_at' => now(),
+    ]);
+    UserFollow::create([
+        'follower_id' => $user->id,
+        'followed_id' => $seguido->id,
+        'followed_at' => now(),
+    ]);
+    $comentario = ColorPaletteComment::factory()->approved()->create([
+        'color_palette_id' => $paleta->id,
+        'user_id' => $user->id,
+        'body' => 'Bela paleta',
+    ]);
+    ColorCommentReport::factory()->create([
+        'comment_id' => $comentario->id,
+        'user_id' => $user->id,
+        'reason' => ColorCommentReportReason::Spam,
+    ]);
+    ColorPaletteMute::factory()->create([
+        'user_id' => $user->id,
+        'color_palette_id' => $paleta->id,
+    ]);
+
     $response = $this->actingAs($user)->get(route('profile.export'));
 
     $response->assertOk()
@@ -508,7 +561,35 @@ it('exporta os dados da conta em JSON para download', function () {
         ->and($data['badgeforge']['custom_logos'][0]['paths'])->toHaveCount(1)
         ->and($data['badgeforge']['presets'])->toHaveCount(1)
         ->and($data['badgeforge']['presets'][0]['name'])->toBe('Release')
-        ->and($data['badgeforge']['presets'][0]['form']['label'])->toBe('build');
+        ->and($data['badgeforge']['presets'][0]['form']['label'])->toBe('build')
+        // Colors: paleta, tags, biblioteca, relacoes e autoria.
+        ->and($data['colors']['palettes'])->toHaveCount(1)
+        ->and($data['colors']['palettes'][0]['name'])->toBe('Oceano')
+        ->and($data['colors']['palettes'][0]['slug'])->toBe('oceano')
+        ->and($data['colors']['palettes'][0]['kind'])->toBe('scale')
+        ->and($data['colors']['palettes'][0]['visibility'])->toBe('public')
+        ->and($data['colors']['palettes'][0]['colors']['base'])->toBe('#6366f1')
+        ->and($data['colors']['tags'][0]['name'])->toBe('Marca')
+        ->and($data['colors']['history'][0]['color'])->toBe('#112233')
+        ->and($data['colors']['favorites'][0]['color'])->toBe('#445566')
+        ->and($data['colors']['presets'][0]['name'])->toBe('Marca base')
+        ->and($data['colors']['palette_favorites'][0]['palette_slug'])->toBe('outra')
+        ->and($data['colors']['likes'][0]['palette_slug'])->toBe('outra')
+        ->and($data['colors']['following'][0]['username'])->toBe('seguido')
+        ->and($data['colors']['comments'])->toHaveCount(1)
+        ->and($data['colors']['comments'][0]['body'])->toBe('Bela paleta')
+        ->and($data['colors']['comments'][0]['palette_slug'])->toBe('oceano')
+        ->and($data['colors']['comments'][0]['status'])->toBe('approved')
+        // Nota interna da moderacao nao e dado do autor.
+        ->and($data['colors']['comments'][0])->not->toHaveKey('moderation_reason')
+        ->and($data['colors']['reports_filed'][0]['reason'])->toBe('spam')
+        ->and($data['colors']['notification_preferences'])->toBe([
+            'email_on_like' => false,
+            'email_on_follow' => false,
+            'email_on_comment' => true,
+            'email_on_reply' => true,
+        ])
+        ->and($data['colors']['muted_palettes'][0]['palette_slug'])->toBe('oceano');
 });
 
 it('exporta os dados de quem nao tem inscricao nem vinculo social', function () {
@@ -525,5 +606,22 @@ it('exporta os dados de quem nao tem inscricao nem vinculo social', function () 
         ->and($data['ai_requests'])->toBe([])
         ->and($data['usage'])->toBe([])
         ->and($data['badgeforge']['custom_logos'])->toBe([])
-        ->and($data['badgeforge']['presets'])->toBe([]);
+        ->and($data['badgeforge']['presets'])->toBe([])
+        ->and($data['colors']['palettes'])->toBe([])
+        ->and($data['colors']['tags'])->toBe([])
+        ->and($data['colors']['history'])->toBe([])
+        ->and($data['colors']['favorites'])->toBe([])
+        ->and($data['colors']['presets'])->toBe([])
+        ->and($data['colors']['palette_favorites'])->toBe([])
+        ->and($data['colors']['likes'])->toBe([])
+        ->and($data['colors']['following'])->toBe([])
+        ->and($data['colors']['comments'])->toBe([])
+        ->and($data['colors']['reports_filed'])->toBe([])
+        ->and($data['colors']['notification_preferences'])->toBe([
+            'email_on_like' => false,
+            'email_on_follow' => false,
+            'email_on_comment' => true,
+            'email_on_reply' => true,
+        ])
+        ->and($data['colors']['muted_palettes'])->toBe([]);
 });

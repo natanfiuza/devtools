@@ -76,72 +76,72 @@ async function eyedropper(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="flex items-center gap-3">
-      <div
-        class="relative size-14 shrink-0 overflow-hidden rounded-lg border shadow-xs"
-        :style="checkerboardStyle"
-        aria-hidden="true"
-      >
-        <div
-          class="absolute inset-0"
-          :style="{ backgroundColor: cssColor(rgba) }"
+    <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+            <div
+                class="relative size-14 shrink-0 overflow-hidden rounded-lg border shadow-xs"
+                :style="checkerboardStyle"
+                aria-hidden="true"
+            >
+                <div
+                    class="absolute inset-0"
+                    :style="{ backgroundColor: cssColor(rgba) }"
+                />
+            </div>
+            <code
+                class="min-w-0 flex-1 truncate font-mono text-lg font-medium tabular-nums"
+                data-test="picker-value"
+            >
+                {{ value }}
+            </code>
+        </div>
+
+        <Button
+            v-if="eyedropperSupported"
+            type="button"
+            variant="outline"
+            size="sm"
+            class="self-start"
+            :disabled="picking"
+            data-test="picker-eyedropper"
+            @click="eyedropper"
+        >
+            <Pipette aria-hidden="true" />
+            {{ t('tools.shared.color_picker.preview.eyedropper') }}
+        </Button>
+
+        <ColorInputField
+            :model-value="text"
+            :error="displayedError"
+            @update="state.setFromText"
+            @finalize="state.finalizeText"
         />
-      </div>
-      <code
-        class="min-w-0 flex-1 truncate font-mono text-lg font-medium tabular-nums"
-        data-test="picker-value"
-      >
-        {{ value }}
-      </code>
+
+        <ColorArea
+            :hsv="hsv"
+            @change="state.setSaturationValue"
+            @finalize="state.finalize"
+        />
+
+        <HueSlider
+            :model-value="hsv.h"
+            @change="state.setHue"
+            @finalize="state.finalize"
+        />
+
+        <AlphaSlider
+            :model-value="rgba.a"
+            :color="rgba"
+            @change="state.setAlpha"
+            @finalize="state.finalize"
+        />
+
+        <ChannelSliders
+            :rgba="rgba"
+            :hsl="hsl"
+            @set-rgb="state.setRgbChannel"
+            @set-hsl="state.setHslChannel"
+            @finalize="state.finalize"
+        />
     </div>
-
-    <Button
-      v-if="eyedropperSupported"
-      type="button"
-      variant="outline"
-      size="sm"
-      class="self-start"
-      :disabled="picking"
-      data-test="picker-eyedropper"
-      @click="eyedropper"
-    >
-      <Pipette aria-hidden="true" />
-      {{ t('tools.shared.color_picker.preview.eyedropper') }}
-    </Button>
-
-    <ColorInputField
-      :model-value="text"
-      :error="displayedError"
-      @update="state.setFromText"
-      @finalize="state.finalizeText"
-    />
-
-    <ColorArea
-      :hsv="hsv"
-      @change="state.setSaturationValue"
-      @finalize="state.finalize"
-    />
-
-    <HueSlider
-      :model-value="hsv.h"
-      @change="state.setHue"
-      @finalize="state.finalize"
-    />
-
-    <AlphaSlider
-      :model-value="rgba.a"
-      :color="rgba"
-      @change="state.setAlpha"
-      @finalize="state.finalize"
-    />
-
-    <ChannelSliders
-      :rgba="rgba"
-      :hsl="hsl"
-      @set-rgb="state.setRgbChannel"
-      @set-hsl="state.setHslChannel"
-      @finalize="state.finalize"
-    />
-  </div>
 </template>

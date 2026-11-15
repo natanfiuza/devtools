@@ -75,116 +75,116 @@ function selectWindow(days: number): void {
 </script>
 
 <template>
-  <Head :title="t('admin.badgeforge_analytics.title')" />
+    <Head :title="t('admin.badgeforge_analytics.title')" />
 
-  <div class="space-y-4">
-    <header class="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h2 class="text-lg font-medium">
-          {{ t('admin.badgeforge_analytics.title') }}
-        </h2>
-        <p class="mt-1 text-sm text-subtle">
-          {{ t('admin.badgeforge_analytics.description') }}
+    <div class="space-y-4">
+        <header class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h2 class="text-lg font-medium">
+                    {{ t('admin.badgeforge_analytics.title') }}
+                </h2>
+                <p class="mt-1 text-sm text-subtle">
+                    {{ t('admin.badgeforge_analytics.description') }}
+                </p>
+            </div>
+
+            <div
+                class="flex flex-wrap items-center gap-2"
+                :aria-label="t('admin.badgeforge_analytics.window')"
+            >
+                <button
+                    v-for="days in analytics.windows"
+                    :key="days"
+                    type="button"
+                    class="rounded-md border px-3 py-1.5 text-sm"
+                    :class="
+                        days === analytics.window
+                            ? 'border-border bg-accent/10 text-foreground'
+                            : 'border-border text-subtle hover:bg-muted'
+                    "
+                    :aria-pressed="days === analytics.window"
+                    :data-test="`admin-badgeforge-window-${days}`"
+                    @click="selectWindow(days)"
+                >
+                    {{ t('admin.badgeforge_analytics.window_days', { days }) }}
+                </button>
+            </div>
+        </header>
+
+        <p
+            v-if="analytics.totals.views === 0"
+            class="text-sm text-subtle"
+            data-test="admin-badgeforge-analytics-empty"
+        >
+            {{ t('admin.badgeforge_analytics.no_data') }}
         </p>
-      </div>
 
-      <div
-        class="flex flex-wrap items-center gap-2"
-        :aria-label="t('admin.badgeforge_analytics.window')"
-      >
-        <button
-          v-for="days in analytics.windows"
-          :key="days"
-          type="button"
-          class="rounded-md border px-3 py-1.5 text-sm"
-          :class="
-            days === analytics.window
-              ? 'border-border bg-accent/10 text-foreground'
-              : 'border-border text-subtle hover:bg-muted'
-          "
-          :aria-pressed="days === analytics.window"
-          :data-test="`admin-badgeforge-window-${days}`"
-          @click="selectWindow(days)"
-        >
-          {{ t('admin.badgeforge_analytics.window_days', { days }) }}
-        </button>
-      </div>
-    </header>
+        <template v-else>
+            <dl
+                class="grid gap-3 sm:grid-cols-3"
+                data-test="admin-badgeforge-analytics-totals"
+            >
+                <div class="rounded-lg border border-border px-4 py-3">
+                    <dt class="text-[12px] tracking-wide text-subtle uppercase">
+                        {{ t('admin.badgeforge_analytics.views') }}
+                    </dt>
+                    <dd class="mt-1 font-mono text-2xl">
+                        {{ analytics.totals.views }}
+                    </dd>
+                </div>
+                <div class="rounded-lg border border-border px-4 py-3">
+                    <dt class="text-[12px] tracking-wide text-subtle uppercase">
+                        {{ t('admin.badgeforge_analytics.cache_hits') }}
+                    </dt>
+                    <dd class="mt-1 font-mono text-2xl">
+                        {{ analytics.totals.cacheHits }}
+                    </dd>
+                </div>
+                <div class="rounded-lg border border-border px-4 py-3">
+                    <dt class="text-[12px] tracking-wide text-subtle uppercase">
+                        {{ t('admin.badgeforge_analytics.cache_rate') }}
+                    </dt>
+                    <dd class="mt-1 font-mono text-2xl">
+                        {{
+                            cachePercent === null
+                                ? t('admin.badgeforge_analytics.cache_none')
+                                : `${cachePercent}%`
+                        }}
+                    </dd>
+                    <p class="mt-1 text-[12px] text-subtle">
+                        {{
+                            t('admin.badgeforge_analytics.cache_detail', {
+                                hits: analytics.totals.cacheHits,
+                            })
+                        }}
+                    </p>
+                </div>
+            </dl>
 
-    <p
-      v-if="analytics.totals.views === 0"
-      class="text-sm text-subtle"
-      data-test="admin-badgeforge-analytics-empty"
-    >
-      {{ t('admin.badgeforge_analytics.no_data') }}
-    </p>
+            <svg
+                :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
+                class="w-full max-w-3xl"
+                role="img"
+                :aria-label="t('admin.badgeforge_analytics.title')"
+                data-test="admin-badgeforge-analytics-chart"
+            >
+                <title>{{ t('admin.badgeforge_analytics.title') }}</title>
+                <rect
+                    v-for="(day, index) in analytics.days"
+                    :key="day.date"
+                    :x="barX(index)"
+                    :y="barY(day.views)"
+                    :width="barWidth()"
+                    :height="barHeight(day.views)"
+                    class="fill-current text-accent"
+                >
+                    <title>{{ barTitle(day) }}</title>
+                </rect>
+            </svg>
+        </template>
 
-    <template v-else>
-      <dl
-        class="grid gap-3 sm:grid-cols-3"
-        data-test="admin-badgeforge-analytics-totals"
-      >
-        <div class="rounded-lg border border-border px-4 py-3">
-          <dt class="text-[12px] tracking-wide text-subtle uppercase">
-            {{ t('admin.badgeforge_analytics.views') }}
-          </dt>
-          <dd class="mt-1 font-mono text-2xl">
-            {{ analytics.totals.views }}
-          </dd>
-        </div>
-        <div class="rounded-lg border border-border px-4 py-3">
-          <dt class="text-[12px] tracking-wide text-subtle uppercase">
-            {{ t('admin.badgeforge_analytics.cache_hits') }}
-          </dt>
-          <dd class="mt-1 font-mono text-2xl">
-            {{ analytics.totals.cacheHits }}
-          </dd>
-        </div>
-        <div class="rounded-lg border border-border px-4 py-3">
-          <dt class="text-[12px] tracking-wide text-subtle uppercase">
-            {{ t('admin.badgeforge_analytics.cache_rate') }}
-          </dt>
-          <dd class="mt-1 font-mono text-2xl">
-            {{
-              cachePercent === null
-                ? t('admin.badgeforge_analytics.cache_none')
-                : `${cachePercent}%`
-            }}
-          </dd>
-          <p class="mt-1 text-[12px] text-subtle">
-            {{
-              t('admin.badgeforge_analytics.cache_detail', {
-                hits: analytics.totals.cacheHits,
-              })
-            }}
-          </p>
-        </div>
-      </dl>
-
-      <svg
-        :viewBox="`0 0 ${WIDTH} ${HEIGHT}`"
-        class="w-full max-w-3xl"
-        role="img"
-        :aria-label="t('admin.badgeforge_analytics.title')"
-        data-test="admin-badgeforge-analytics-chart"
-      >
-        <title>{{ t('admin.badgeforge_analytics.title') }}</title>
-        <rect
-          v-for="(day, index) in analytics.days"
-          :key="day.date"
-          :x="barX(index)"
-          :y="barY(day.views)"
-          :width="barWidth()"
-          :height="barHeight(day.views)"
-          class="fill-current text-accent"
-        >
-          <title>{{ barTitle(day) }}</title>
-        </rect>
-      </svg>
-    </template>
-
-    <p class="text-xs text-subtle">
-      {{ t('admin.badgeforge_analytics.note') }}
-    </p>
-  </div>
+        <p class="text-xs text-subtle">
+            {{ t('admin.badgeforge_analytics.note') }}
+        </p>
+    </div>
 </template>

@@ -3,6 +3,50 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Track Colors: picker, gerador, paletas, social e comentários - 2026-11-15
+
+O grupo Colors fecha as oito fases (ADR-091 a ADR-144) em
+`/{locale}/tools/colors`, com a geração 100% no navegador e só as ações de
+conta no servidor. A fonte de verdade é [docs/colors/](docs/colors/); o aceite
+está em [docs/acceptance/COLORS-FASE-8.md](docs/acceptance/COLORS-FASE-8.md).
+
+### Adicionado
+
+- **HTML Color Picker**: área 2D, matiz, alpha, sliders RGB/RGBA e HSL/HSLA,
+  editor de tons, contraste AA/AAA, conta-gotas com fallback e persistência
+  local da seleção (F1, ADR-116 a ADR-119).
+- **Color Palette Generator**: escala determinística de 11 tons em OKLCH com
+  base intacta, cinco tipos de harmonia, extração de 5/7/9/11 cores de imagem
+  local ou URL HTTPS em worker, e exportação CSS/SCSS/JSON/Tailwind v3/v4
+  (F2/F3, ADR-120 a ADR-122).
+- **Paletas salvas e públicas**: cota de 25 no Free, arquivamento, slug global,
+  página pública com canonical/sitemap/OG dinâmica e duplicação; protótipos de
+  site e mobile exportáveis em SVG e PNG 1×/2× (F4, ADR-123 a ADR-126).
+- **Biblioteca pessoal**: histórico e favoritos de cores da conta,
+  compartilhados entre as duas tools, favoritos de paletas públicas, presets do
+  gerador e exportação/importação validada de tokens W3C DTCG, Style Dictionary
+  e JSON nativo (F5, ADR-127 a ADR-133).
+- **Social**: curtir paleta pública inclusive anônimo por identidade first-party
+  reivindicada no login, seguir contas, perfil público por username e imagem
+  tipográfica da paleta em três formatos (F6, ADR-134 a ADR-138).
+- **Comentários e moderação**: thread de dois níveis, moderação em dois estágios
+  (filtro local + DeepSeek com cache), denúncias com fila administrativa e
+  notificações com sino, preferências e e-mail por tipo (F7, ADR-139 a
+  ADR-143). A flag `COLORS_COMMENTS_ENABLED` entra desligada por padrão.
+- **Auditoria final (F8, ADR-144)**: matriz requisito → implementação → teste,
+  aceite com pendências classificadas, seção de operação no RUNBOOK, testes
+  novos do admin de denúncias e de exportação/anonimização da conta.
+
+### Corrigido
+
+- **Exportação da conta**: bloco `colors` com paletas, biblioteca, favoritos,
+  curtidas e follows ativos, comentários (inclusive excluídos), denúncias,
+  preferências e paletas silenciadas — sem `moderation_reason`, sem
+  `notified_at` e sem seguidores.
+- **Anonimização**: apaga histórico, favoritos de cor, presets, favoritos de
+  paleta, curtidas da conta, follows de saída e tags; paletas, comentários e
+  denúncias ficam com autoria `NULL`, sem excluir paleta alguma.
+
 ## Contador de requisições e documentação pública da API v1 - 2026-10-25
 
 ### Adicionado

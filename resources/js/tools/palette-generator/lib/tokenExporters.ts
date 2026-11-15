@@ -1,10 +1,6 @@
 import { formatHex, formatHex8, type PaletteScale } from '@/lib/color';
 import { PALETTE_ROLES, PALETTE_THEMES } from '@/lib/palettePayload';
-import type {
-    PaletteRole,
-    PaletteRoles,
-    PaletteTheme,
-} from '@/types/colors';
+import type { PaletteRole, PaletteRoles, PaletteTheme } from '@/types/colors';
 
 /**
  * Exportacao de design tokens (F5, ADR-095).
@@ -183,9 +179,7 @@ export function buildTypeScriptTokens(
             lines.push(`            ${theme}: {`);
 
             for (const role of PALETTE_ROLES) {
-                lines.push(
-                    `                ${role}: '${roles[theme][role]}',`,
-                );
+                lines.push(`                ${role}: '${roles[theme][role]}',`);
             }
 
             lines.push('            },');

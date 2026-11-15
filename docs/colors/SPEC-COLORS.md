@@ -1,4 +1,4 @@
-# SPEC - Grupo Colors (v1.4)
+# SPEC - Grupo Colors (v1.5)
 
 ## 1. Visão
 Grupo Colors do devtools com HTML Color Picker e Color Palette Generator.
@@ -177,8 +177,12 @@ NotificationBell. As abas de admin de comentários e denúncias usam `AdminTable
   concorrência, anônimo e privacidade), follows, reivindicação no login, perfil
   público, SEO, comentários (autorização, thread, revisão concorrente,
   tombstone, flag), filtro de palavras nos cinco idiomas, cache de moderação,
-  denúncias (dedupe, resolução automática), preferências e silenciar, e admin
-  de moderação e denúncias.
+  denúncias (dedupe, resolução automática), preferências e silenciar, admin
+  de moderação e denúncias, e exportação/anonimização da conta com o bloco
+  `colors` (F8, ADR-144).
+- Vitest da F8: `admin-comment-reports.test.ts` cobre as linhas da fila de
+  denúncias (corpo, motivo, denunciante, status, data, selo de excluído),
+  as URLs de resolver/dispensar e os botões só em denúncia pendente.
 
 ## 16. Fases
 F1: grupo + HTML Color Picker completo (histórico e favoritos locais).
@@ -188,7 +192,7 @@ F4: paletas salvas + protótipos + compartilhamento + OG dinâmica — **impleme
 F5: organização pessoal (histórico e favoritos no backend, biblioteca compartilhada, presets) + tokens W3C DTCG/Style Dictionary + exportação e importação validadas — **implementada em 2026-11-14** (ADR-127 a ADR-133).
 F6: social (curtir anônimo, seguir, perfil público) + exportação de paleta como imagem — **implementada em 2026-11-14** (ADR-134 a ADR-138).
 F7: comentários + moderação IA + denúncias + notificações (sino, preferências e e-mail) — **implementada em 2026-11-15** (ADR-139 a ADR-143), com `COLORS_COMMENTS_ENABLED` desligada por padrão.
-F8: auditoria final e relatório de aceite.
+F8: auditoria final e relatório de aceite — **implementada em 2026-11-15** (ADR-144), com o aceite em `docs/acceptance/COLORS-FASE-8.md` e `COLORS_COMMENTS_ENABLED` ainda desligada por padrão.
 
 ## 17. Critérios de aceite
 - EyeDropper com fallback.
@@ -225,3 +229,13 @@ F8: auditoria final e relatório de aceite.
   canais.
 - Flag desligada: thread ausente e endpoints de comentário/denúncia/mute em 404
   uniforme.
+- Exportação da conta inclui o bloco `colors` completo (paletas, biblioteca,
+  favoritos de paleta, curtidas e follows ativos, comentários inclusive
+  excluídos, denúncias feitas, preferências e paletas silenciadas) sem
+  `moderation_reason`, sem `notified_at` e sem seguidores.
+- Anonimização apaga biblioteca, presets, favoritos, curtidas da conta, follows
+  de saída e tags; paletas, comentários e denúncias ficam com autoria `NULL` e
+  nenhuma paleta é excluída (FKs em cascata).
+- Auditoria final registra a matriz requisito → implementação → teste e as
+  pendências por gravidade no aceite e na ADR-144; não há quebra de regressão
+  em BadgeForge, AI ou demais ferramentas.

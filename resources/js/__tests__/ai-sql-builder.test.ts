@@ -518,14 +518,17 @@ describe('ResultPanel', () => {
         const wrapper = montarResultado({
             result: {
                 ...RESULTADO,
-                explanation: 'A query faz um join simples entre usuarios e pedidos.',
+                explanation:
+                    'A query faz um join simples entre usuarios e pedidos.',
             },
             status: 'done',
         });
 
         const meta = wrapper.get('[data-test="ai-meta"]');
         expect(meta.text()).toContain('COMO_FOI_CONSTRUIDA');
-        expect(meta.text()).toContain('A query faz um join simples entre usuarios e pedidos.');
+        expect(meta.text()).toContain(
+            'A query faz um join simples entre usuarios e pedidos.',
+        );
         expect(meta.text()).toContain('DICA_BOAS_PRATICAS');
         expect(meta.text()).toContain('DICA_ELOQUENT_EAGER');
     });

@@ -12,4 +12,6 @@ import {
  * principal: o chunk da pagina nunca carrega a quantizacao. O payload chega
  * com o `ArrayBuffer` transferido, sem copia.
  */
-serve<ExtractionRequest, ExtractionOutcome>((request) => extractPalette(request));
+serve<ExtractionRequest, ExtractionOutcome>((request) =>
+    extractPalette(request),
+);

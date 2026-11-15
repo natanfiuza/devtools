@@ -131,9 +131,9 @@ watch(
 </script>
 
 <template>
-  <div
-    ref="host"
-    class="h-full min-h-0 font-mono text-sm"
-    :data-test="testid"
-  />
+    <div
+        ref="host"
+        class="h-full min-h-0 font-mono text-sm"
+        :data-test="testid"
+    />
 </template>
