@@ -7,6 +7,7 @@ return [
         'settings' => 'Settings',
         'overview' => 'Overview',
         'history' => 'History',
+        'notifications' => 'Notifications',
         'billing' => 'Invoices',
         'badgeforge' => 'BadgeForge',
         'palettes' => 'My palettes',

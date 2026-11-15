@@ -128,6 +128,16 @@ class ColorPalette extends Model
     }
 
     /**
+     * Comentarios da paleta, inclusive respostas e excluidos (F7, ADR-139).
+     *
+     * @return HasMany<ColorPaletteComment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ColorPaletteComment::class, 'color_palette_id');
+    }
+
+    /**
      * @return HasMany<ColorPalette, $this>
      */
     public function duplicates(): HasMany

@@ -104,6 +104,37 @@ return [
         'attached' => 'Vous trouverez en pièce jointe une copie au format JSON contenant toutes les données exportées de votre compte avant son anonymisation.',
     ],
 
+    /*
+    | Notificacoes sociais das paletas (F7, ADR-142). O e-mail nunca leva o
+    | corpo do comentario nem o e-mail/IP de quem agiu.
+    */
+    'colors' => [
+        'greeting' => 'Bonjour :name !',
+        'someone' => 'Quelqu\'un',
+        'manage_hint' => 'Vous pouvez choisir les e-mails reçus sur la page de notifications.',
+        'like' => [
+            'subject' => 'Quelqu\'un a aimé votre palette',
+            'intro' => ':actor a aimé votre palette « :palette ».',
+            'intro_anonymous' => 'Quelqu\'un a aimé votre palette « :palette ».',
+            'action' => 'Voir la palette',
+        ],
+        'follow' => [
+            'subject' => 'Vous avez un nouveau follower',
+            'intro' => ':actor a commencé à vous suivre.',
+            'action' => 'Voir le profil',
+        ],
+        'comment' => [
+            'subject' => 'Nouveau commentaire sur « :palette »',
+            'intro' => ':actor a commenté votre palette « :palette ».',
+            'action' => 'Voir le commentaire',
+        ],
+        'reply' => [
+            'subject' => 'Nouvelle réponse à votre commentaire',
+            'intro' => ':actor a répondu à votre commentaire sur « :palette ».',
+            'action' => 'Voir la réponse',
+        ],
+    ],
+
     'contact' => [
         'subject_prefix' => 'Message de contact',
         'greeting' => 'Nouveau message de contact reçu',

@@ -10,6 +10,21 @@ const BASE = '/api/tools/colors';
 
 export type ColorsApiMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
+/**
+ * Erro HTTP do cliente. `message` segue o formato `colors_api_<status>` que os
+ * composables ja leem; `payload` traz o envelope do servidor para quem precisa
+ * da mensagem traduzida (ex.: denuncia duplicada).
+ */
+export class ColorsApiError extends Error {
+    constructor(
+        readonly status: number,
+        readonly payload: unknown,
+    ) {
+        super(`colors_api_${status}`);
+        this.name = 'ColorsApiError';
+    }
+}
+
 function csrfToken(): string {
     if (typeof document === 'undefined') {
         return '';
@@ -49,7 +64,15 @@ export async function colorsApi<T>(
     });
 
     if (!response.ok) {
-        throw new Error(`colors_api_${response.status}`);
+        let payload: unknown = null;
+
+        try {
+            payload = await response.json();
+        } catch {
+            payload = null;
+        }
+
+        throw new ColorsApiError(response.status, payload);
     }
 
     return (await response.json()) as T;

@@ -120,6 +120,8 @@ const traducoes = {
             badgeforge_providers: 'PROVIDERS_BF',
             badgeforge_custom_providers: 'PROVIDERS_CUSTOM_BF',
             badgeforge_analytics: 'VOLUME_BF',
+            comments: 'MODERACAO',
+            comment_reports: 'DENUNCIAS',
             audit: 'AUDITORIA',
             panel: 'PAINEL',
             back_to_site: 'VOLTAR_AO_SITE',
@@ -210,7 +212,7 @@ beforeEach(() => {
 });
 
 describe('navegacao do painel', () => {
-    it('lista as quatorze secoes com o caminho de cada uma', () => {
+    it('lista as dezesseis secoes com o caminho de cada uma', () => {
         const wrapper = montarPainel();
 
         const itens = wrapper.findAll('nav a');
@@ -229,6 +231,8 @@ describe('navegacao do painel', () => {
             'PROVIDERS_BF',
             'PROVIDERS_CUSTOM_BF',
             'VOLUME_BF',
+            'MODERACAO',
+            'DENUNCIAS',
             'AUDITORIA',
         ]);
         expect(itens.map((item) => item.attributes('href'))).toEqual([
@@ -245,6 +249,8 @@ describe('navegacao do painel', () => {
             '/admin/badgeforge/providers',
             '/admin/badgeforge/custom-providers',
             '/admin/badgeforge/analytics',
+            '/admin/comments',
+            '/admin/comment-reports',
             '/admin/audit',
         ]);
     });

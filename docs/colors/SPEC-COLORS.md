@@ -1,4 +1,4 @@
-# SPEC - Grupo Colors (v1.3)
+# SPEC - Grupo Colors (v1.4)
 
 ## 1. Visão
 Grupo Colors do devtools com HTML Color Picker e Color Palette Generator.
@@ -13,6 +13,7 @@ As rotas públicas do site são prefixadas por `{locale}`. Os códigos de idioma
 - `/{locale}/colors/p/{slug}` (paleta pública)
 - `/{locale}/u/{username}` (perfil público, Fase 6 — ADR-134)
 - `/dashboard/colors/palettes` (Minhas Paletas) — o dashboard **não** tem prefixo de locale (ADR-022)
+- `/dashboard/notifications` (notificações e preferências da conta — compartilhada por todas as tools; Fase 7, ADR-142)
 
 ## 3. Formatos
 HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
@@ -54,7 +55,8 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Favoritar paleta pública de outro usuário, sem copiar nem contar “Uso”; a aba **Favoritas** mostra o que ainda é público e ativo (Fase 5, ADR-128).
 - Seguir conta (login obrigatório, perfil público em `/{locale}/u/{username}`; Fase 6, ADR-136).
 - Curtir paleta pública, inclusive anônimo, por identificador anônimo assinado de primeira parte; IP só como sinal antiabuso e chave do limitador (Fase 6, ADR-135).
-- Comentar paleta pública (threads de no máximo 2 níveis, apenas logados; ADR-111) — Fase 7.
+- Comentar paleta pública (threads de no máximo 2 níveis, login + conta verificada e ativa, máximo de 255 caracteres; Fase 7, ADR-111 e ADR-139) com edição e exclusão pelo autor.
+- Denunciar comentário de outra conta, com motivo em lista fixa e uma denúncia por par comentário/denunciante (Fase 7, ADR-141).
 
 ## 7. Compartilhamento
 - Paleta pública: `/{locale}/colors/p/{slug}`
@@ -104,34 +106,61 @@ HEX, RGB/RGBA, HSL/HSLA, OKLCH, OKLab, nomes CSS. Conversões bidirecionais.
 - Seguir conta com login obrigatório e perfil público (Fase 6, ADR-134 e
   ADR-136).
 - Favoritar paleta (Fase 5, ADR-128), independente da curtida.
-- Notificações de curtida e follow apenas no canal `database`, gravadas depois do
-  commit e com no máximo um aviso por relação (Fase 6, ADR-137); sem e-mail,
-  sino, preferências ou contador de não lidas.
-- Comentar, responder, denunciar, editar/excluir comentário, moderar, bloquear e
-  silenciar por paleta ficam para a Fase 7; a Fase 6 não cria essas superfícies.
+- Notificações gravadas depois do commit e com no máximo um aviso por relação
+  (Fase 6, ADR-137; Fase 7, ADR-142). O canal `database` é sempre ligado e o
+  `mail` entra por preferência da conta, por tipo: curtida e novo seguidor
+  desligados por padrão, comentário aprovado e resposta aprovada ligados.
+- Comentário aprovado avisa o dono da paleta; resposta aprovada avisa o autor do
+  comentário pai e o dono, deduplicados e nunca o autor da ação.
+  `pending`/`flagged` não notificam; a rejeição não gera aviso social.
+- Sino com contador de não lidas por prop Inertia (sem polling) e página única
+  `/dashboard/notifications` com a lista e os toggles de e-mail.
+- Silenciar paleta pelo dono: corta curtida, comentário e resposta daquela paleta
+  nos dois canais, avaliado no envio; follows não são afetados (ADR-142).
+- Bloqueio entre contas continua não implementado.
+- Comentário `pending` ou `flagged` é visível com o selo "em análise" — nunca
+  rotulado como aprovado —, e `rejected` sem versão aprovada anterior não
+  aparece. Editar volta a `pending`; se a revisão for rejeitada, volta ao texto
+  de `approved_body`. Excluir o pai com respostas deixa tombstone ("comentário
+  removido"); sem respostas, some (ADR-139).
 
 ## 12. Moderação
-- Filtro de palavras local.
-- IA moderadora: DeepSeek.
-- Cache em `ai_cache` (singular; a tabela real do projeto). A decisão de cache "permanente" exige definir na Fase 7 um sentinela de `expires_at`, pois a coluna é obrigatória.
-- Fila assíncrona.
-- Status: pending, approved, rejected, flagged.
-- Admin revisa flagged.
+
+- Filtro de palavras local e síncrono, por idioma em
+  `resources/colors/moderation/{locale}.txt` com fallback para inglês; compara
+  n-gramas de palavras após normalização, nunca substring, e responde 422
+  genérico sem gravar nem ecoar o termo (Fase 7, ADR-140).
+- IA moderadora DeepSeek em job na fila, com prompt versionado e o comentário
+  tratado como dado não confiável; contrato JSON estrito
+  (`decision` + `category`), sem chamar a cota da conta.
+- Cache em `ai_cache` (singular; a tabela real do projeto), separado por
+  `purpose = colors.comment_moderation`. "Permanente" é `expires_at = NULL`;
+  `COLORS_COMMENT_CACHE_TTL_DAYS` define validade e o expurgo é
+  `ai:prune-cache --purpose=colors.comment_moderation --all`.
+- Fila assíncrona com resultado aplicado por UPDATE condicional
+  (`revision` + `status`): resultado antigo não aprova revisão nova.
+- Status: `pending`, `approved`, `rejected`, `flagged`. Falha do provedor,
+  contrato inválido ou retries esgotados viram `flagged`, nunca aprovação.
+- Admin revisa `pending`/`flagged`, aprova, rejeita e exclui, com auditoria sem
+  o texto.
 - Limite: 255 caracteres por comentário.
+- Flag `COLORS_COMMENTS_ENABLED` desligada por padrão: sem thread na página e
+  404 uniforme nos endpoints de comentário, denúncia e mute (ADR-143).
 
 ## 13. Analytics
 
 - GA na interface.
-- A Fase 6 não criou eventos de analytics: curtidas, seguidores e seguindo são
-  lidos como linhas ativas, não como histórico de eventos. Eventos de criação,
-  salvamento, exportação, visualização pública, curtida, comentário, follow e
-  denúncia permanecem para a fase que abrir analytics.
+- As Fases 6 e 7 não criaram eventos de analytics: curtidas, seguidores e
+  seguindo são lidos como linhas ativas, não como histórico de eventos. Eventos
+  de criação, salvamento, exportação, visualização pública, curtida, comentário,
+  follow e denúncia permanecem para a fase que abrir analytics.
 
 ## 14. Frontend
 Componentes implementados: ColorSwatch, ContrastBadge, ColorInput, ShadeScale,
 PaletteCard, PrototypeSite, PrototypeMobile, ExportPanel, TagInput,
-FollowButton, LikeButton, ProfilePaletteCard e PaletteImagePanel.
-CommentThread, ReportButton e NotificationBell pertencem à Fase 7.
+FollowButton, LikeButton, ProfilePaletteCard, PaletteImagePanel, CommentThread,
+CommentForm, CommentItem, CommentReportDialog, MutePaletteButton e
+NotificationBell. As abas de admin de comentários e denúncias usam `AdminTable`.
 
 ## 15. Testes
 
@@ -139,13 +168,17 @@ CommentThread, ReportButton e NotificationBell pertencem à Fase 7.
   imagem e de tokens (parser, diálogo, workspace, rascunho), biblioteca pessoal,
   favoritos de paletas, presets, extração, OG image, export da paleta como
   imagem (dimensões, marca, HEX/HEX8, escaping, sanitização, determinismo,
-  fonte só na exportação, 1×/2×), curtir/seguir otimistas, perfil público e
-  integração nas duas telas.
+  fonte só na exportação, 1×/2×), curtir/seguir otimistas, perfil público,
+  thread de comentários (estados, selo, tombstone, denúncia), sino e página de
+  notificações, e integração nas duas telas.
 - Pest: auth, CRUD, limites, visibilidade, slug, archive, biblioteca
   (histórico/favoritos/importação explícita), favoritos de paletas, presets,
   fixtures de tokens validadas contra `PaletteRules`, curtidas (idempotência,
   concorrência, anônimo e privacidade), follows, reivindicação no login, perfil
-  público e SEO. Comentários, denúncias e moderação pertencem à Fase 7.
+  público, SEO, comentários (autorização, thread, revisão concorrente,
+  tombstone, flag), filtro de palavras nos cinco idiomas, cache de moderação,
+  denúncias (dedupe, resolução automática), preferências e silenciar, e admin
+  de moderação e denúncias.
 
 ## 16. Fases
 F1: grupo + HTML Color Picker completo (histórico e favoritos locais).
@@ -154,7 +187,7 @@ F3: harmonias + importação de imagem e de URL com extração de 5/7/9/11 cores
 F4: paletas salvas + protótipos + compartilhamento + OG dinâmica — **implementada em 2026-11-11** (ADR-123 a ADR-126).
 F5: organização pessoal (histórico e favoritos no backend, biblioteca compartilhada, presets) + tokens W3C DTCG/Style Dictionary + exportação e importação validadas — **implementada em 2026-11-14** (ADR-127 a ADR-133).
 F6: social (curtir anônimo, seguir, perfil público) + exportação de paleta como imagem — **implementada em 2026-11-14** (ADR-134 a ADR-138).
-F7: comentários + moderação IA + denúncias + notificações (sino, preferências e e-mail).
+F7: comentários + moderação IA + denúncias + notificações (sino, preferências e e-mail) — **implementada em 2026-11-15** (ADR-139 a ADR-143), com `COLORS_COMMENTS_ENABLED` desligada por padrão.
 F8: auditoria final e relatório de aceite.
 
 ## 17. Critérios de aceite
@@ -177,7 +210,18 @@ F8: auditoria final e relatório de aceite.
 - Curtir (inclusive anônimo), seguir e perfil público funcionando; curtidas
   idempotentes, contagem só de linhas ativas e nenhum identificador na API.
 - Curtidas anônimas reivindicadas no login, sem duplicar e sem segundo aviso.
-- Notificações de curtida e follow gravadas no canal `database`, uma por relação,
-  sem e-mail e sem UI (Fase 7 abre sino, preferências e e-mail).
-- Comentários (threads de 2 níveis), denúncias e moderação DeepSeek com cache em
-  `ai_cache` ficam para a Fase 7.
+- Notificações de curtida e follow gravadas no canal `database`, uma por relação;
+  e-mail por preferência, sino com contador e página única de notificações.
+- Comentários em thread de dois níveis, apenas para conta logada, verificada e
+  ativa; `pending`/`flagged` visíveis com selo e nunca como aprovados; edição
+  rejeitada volta ao texto aprovado anterior; exclusão de pai com respostas deixa
+  tombstone e o admin mantém o texto.
+- Filtro local bloqueia antes da IA com 422 genérico; falha da IA nunca aprova;
+  cache permanente é `expires_at = NULL` e pode ser expurgado por `purpose`.
+- Denúncia única por par, motivo em lista fixa, sem esconder o comentário;
+  rejeitar/excluir resolve as pendentes.
+- Comentário aprovado e resposta aprovada notificam uma vez, sem o corpo do
+  comentário; silenciar a paleta corta curtida, comentário e resposta nos dois
+  canais.
+- Flag desligada: thread ausente e endpoints de comentário/denúncia/mute em 404
+  uniforme.

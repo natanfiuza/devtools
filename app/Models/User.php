@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -424,6 +425,46 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function colorPresets(): HasMany
     {
         return $this->hasMany(ColorPreset::class);
+    }
+
+    /**
+     * Comentarios escritos pela conta (F7, ADR-139).
+     *
+     * @return HasMany<ColorPaletteComment, $this>
+     */
+    public function colorPaletteComments(): HasMany
+    {
+        return $this->hasMany(ColorPaletteComment::class, 'user_id');
+    }
+
+    /**
+     * Denuncias feitas pela conta (F7, ADR-141).
+     *
+     * @return HasMany<ColorCommentReport, $this>
+     */
+    public function colorCommentReports(): HasMany
+    {
+        return $this->hasMany(ColorCommentReport::class, 'user_id');
+    }
+
+    /**
+     * Preferencias de e-mail das notificacoes Colors (F7, ADR-142).
+     *
+     * @return HasOne<ColorNotificationPreference, $this>
+     */
+    public function colorNotificationPreference(): HasOne
+    {
+        return $this->hasOne(ColorNotificationPreference::class, 'user_id');
+    }
+
+    /**
+     * Paletas que a conta silenciou (F7, ADR-142).
+     *
+     * @return HasMany<ColorPaletteMute, $this>
+     */
+    public function colorPaletteMutes(): HasMany
+    {
+        return $this->hasMany(ColorPaletteMute::class, 'user_id');
     }
 
     /**

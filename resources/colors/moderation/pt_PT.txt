@@ -1,0 +1,19 @@
+# Lista de bloqueio do pt-PT (F7, ADR-140).
+# Um termo ou expressao por linha, ja no formato normalizado. A comparacao e
+# por token/ngrama, nunca por substring. A lista inglesa e sempre mesclada.
+merda
+foda se
+caralho
+cona
+puta
+puto
+cabrao
+corno
+paneleiro
+bicha
+retardado
+retardada
+nazista
+vai a merda
+filho da puta
+filha da puta

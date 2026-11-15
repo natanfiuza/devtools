@@ -79,6 +79,11 @@ class HandleInertiaRequests extends Middleware
                 // modelo): o que as telas decidem e "pode ver o painel?".
                 'isAdmin' => $user instanceof User && $user->isAdmin(),
             ],
+            // Contador do sino (F7, ADR-142). So existe para conta logada e
+            // vem por props a cada navegacao - sem polling nem endpoint extra.
+            'notifications' => $user instanceof User
+                ? ['unread' => $user->unreadNotifications()->count()]
+                : null,
             'impersonation' => $impersonator === null
                 ? null
                 : ['email' => $impersonator->email],

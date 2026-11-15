@@ -60,10 +60,20 @@
 - Notificação de relação: aviso de curtida ou follow gravado apenas no canal `database`, depois do commit e no máximo uma vez por relação, garantido por `notified_at` atômico; sem e-mail, sino ou preferências na F6 (ADR-137).
 - Imagem tipográfica da paleta: imagem gerada no navegador com o nome, os HEX e a marca fixa, nos formatos horizontal 1600×500, vertical 1080×1920 e card 1080×1080; SVG sanitizado e PNG rasterizado do mesmo SVG (ADR-138).
 - Marca fixa: assinatura `devtools.natanfiuza.dev.br` presente em toda imagem tipográfica da paleta (ADR-138).
-- Comentário: texto público em paleta.
-- Thread: cadeia de respostas, com no máximo 2 níveis (ADR-111).
-- Denúncia: report de conteúdo.
-- Moderação: filtro automático de conteúdo.
+- Comentário: texto público em paleta, escrito por conta logada, verificada e ativa, com até 255 caracteres; nasce aguardando moderação e pode ser editado ou excluído pelo autor (ADR-111, ADR-139).
+- Thread: cadeia de raízes e respostas, com no máximo 2 níveis — só se responde a comentário raiz (ADR-111, ADR-139).
+- Selo "em análise": marca visual de comentário `pending` ou `flagged`; ele nunca é apresentado como aprovado antes da aprovação (ADR-139).
+- Versão aprovada: último texto de um comentário que passou pela moderação, guardado para voltar a valer quando uma edição posterior é rejeitada (ADR-139).
+- Comentário removido: marca deixada no lugar de uma raiz excluída que ainda tem respostas; preserva o fio sem exibir o texto (ADR-139).
+- Conta removida: autoria exibida para comentário de conta anonimizada; o texto permanece (ADR-139).
+- Denúncia: sinalização de comentário por outra conta logada, com motivo em lista fixa e uma por par comentário/denunciante; não esconde o comentário e é resolvida ou descartada pelo admin (ADR-114, ADR-141).
+- Moderação: decisão sobre o comentário em dois estágios — filtro local de palavras e IA —, com status `pending`, `approved`, `rejected` e `flagged`; falha da IA nunca aprova (ADR-110, ADR-140).
+- Palavra bloqueada: termo do filtro local que impede o envio do comentário, por idioma, comparado por n-gramas de palavras e não revelado na resposta (ADR-140).
+- Cache permanente: linha de cache sem validade (`expires_at` nulo), usada na moderação e expurgável por uso (`purpose`) (ADR-140).
+- Silenciar paleta: preferência do dono que corta, no app e no e-mail, avisos de curtida, comentário e resposta daquela paleta; não afeta novo seguidor (ADR-142).
+- Preferência de notificação: toggles de e-mail por tipo na conta; o canal no app fica sempre ligado (ADR-142).
+- Sino: contador de notificações não lidas no cabeçalho da conta, atualizado pelas props da página, sem polling (ADR-142).
+- Flag de comentários: `COLORS_COMMENTS_ENABLED`, desligada por padrão; quando desligada, some a thread e os endpoints de comentário, denúncia e mute respondem 404 uniforme (ADR-143).
 - Biblioteca pessoal: histórico e favoritos de cores de uma conta, com histórico sem limite funcional e favoritos sincronizados entre Picker e Generator; o anônimo tem a versão local reduzida (ADR-127, ADR-131, ADR-132).
 - Histórico da conta: cores usadas por um usuário logado, uma linha por cor canônica, ordenadas pela mais recente e paginadas por cursor (ADR-127).
 - Favorito de paleta: vínculo entre a conta e uma paleta pública de outra conta, sem copiar a paleta, consumir cota ou contar “Uso” (ADR-128).

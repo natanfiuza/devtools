@@ -28,9 +28,11 @@ final class DeepSeekProvider implements LlmProvider
         private readonly TokenEstimator $estimator,
     ) {}
 
-    public function complete(array $messages): LlmCompletion
+    public function complete(array $messages, ?string $model = null): LlmCompletion
     {
-        AiConfiguration::ensureAvailable();
+        $model = is_string($model) && trim($model) !== ''
+            ? trim($model)
+            : AiConfiguration::model();
 
         $url = rtrim(AiConfiguration::baseUrl(), '/').'/chat/completions';
 
@@ -41,7 +43,7 @@ final class DeepSeekProvider implements LlmProvider
                 ->connectTimeout(max(1, (int) config('ai.connect_timeout', 10)))
                 ->timeout(max(1, (int) config('ai.timeout', 60)))
                 ->post($url, [
-                    'model' => AiConfiguration::model(),
+                    'model' => $model,
                     'messages' => $messages,
                     'temperature' => (float) config('ai.temperature', 0.2),
                     'max_tokens' => max(1, (int) config('ai.max_tokens', 2000)),
@@ -88,7 +90,7 @@ final class DeepSeekProvider implements LlmProvider
         $providerModel = $data['model'] ?? null;
         $model = is_string($providerModel) && trim($providerModel) !== ''
             ? trim($providerModel)
-            : AiConfiguration::model();
+            : $model;
 
         return new LlmCompletion(
             trim($content),

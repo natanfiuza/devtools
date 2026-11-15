@@ -1,0 +1,18 @@
+# Liste de blocage du fr (F7, ADR-140).
+# Un terme ou une expression par ligne, deja normalise. La comparaison se fait
+# par jetons/ngrammes, jamais par sous-chaine. La liste anglaise est toujours
+# fusionnee.
+merde
+putain
+connard
+connasse
+salope
+encule
+enculé
+bâtard
+batard
+nazi
+nique ta mere
+nique ta mère
+fils de pute
+va te faire foutre

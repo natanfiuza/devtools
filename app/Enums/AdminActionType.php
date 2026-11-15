@@ -35,4 +35,9 @@ enum AdminActionType: string
     case SubscriptionIntentPaymentConfirmed = 'intent.payment_confirmed';
     case SubscriptionIntentCanceled = 'intent.canceled';
     case UserRestored = 'user.restored';
+    case CommentReportResolved = 'comment_report.resolved';
+    case CommentReportDismissed = 'comment_report.dismissed';
+    case CommentApproved = 'comment.approved';
+    case CommentRejected = 'comment.rejected';
+    case CommentDeleted = 'comment.deleted';
 }

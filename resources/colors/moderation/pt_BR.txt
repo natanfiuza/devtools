@@ -1,0 +1,28 @@
+# Lista de bloqueio do pt-BR (F7, ADR-140).
+# Um termo ou expressao por linha, ja no formato normalizado. A comparacao e
+# por token/ngrama, nunca por substring. Esta lista e apenas a primeira
+# barreira; a moderacao por IA continua rodando em todo comentario aceito.
+merda
+porra
+caralho
+buceta
+foder
+foda se
+foder se
+puta
+puto
+piranha
+corno
+viado
+viadinho
+bicha
+traveco
+retardado
+retardada
+nazista
+vai se foder
+vai tomar no cu
+filho da puta
+filha da puta
+vai morrer
+morre sua

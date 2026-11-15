@@ -23,6 +23,16 @@
   botão aparece junto à byline.
 - Gerar imagem (Fase 6, ADR-138): seção recolhível com os três formatos
   tipográficos, disponível também a visitante; nada é enviado ao servidor.
+- Comentários (Fase 7, ADR-139): thread de dois níveis, leitura pública, escrita
+  só para conta logada, verificada e ativa; `pending`/`flagged` aparecem com o
+  selo "em análise"; edição e exclusão pelo autor, com tombstone no pai que tem
+  respostas.
+- Denúncia (Fase 7, ADR-141): botão para conta logada em comentário de outra
+  conta, com motivo em lista fixa.
+- Silenciar a paleta (Fase 7, ADR-142): botão visível só para o dono; corta
+  notificação de curtida, comentário e resposta desta paleta nos dois canais.
+- A thread e o silenciar só existem com `COLORS_COMMENTS_ENABLED` ligada; com a
+  flag desligada a página não recebe `comments` (ADR-143).
 
 ## Regras
 
@@ -31,14 +41,16 @@
 - Canonical sem `?duplicate=1` e sem qualquer query.
 - OG image enviada como imagem pela paleta e validada no servidor; a URL leva `?v={og_version}`.
 - Favoritar exige conta: a rota é autenticada, a própria paleta responde **403** e paleta que não é pública/ativa responde **404** (o mesmo 404 da página) — favoritar nunca revela o que não está no ar.
-- A página mostra autor visível, curtir, seguir e a seção de imagem desde a F6
-  (ADR-134 a ADR-138). Comentários, respostas, denúncia e moderação continuam
-  fora (F7); protótipo não é exibido nesta página.
+- A página mostra autor visível, curtir, seguir, a seção de imagem (F6) e a
+  thread de comentários (F7, com a flag ligada). Protótipo não é exibido nesta
+  página.
+- O apresentador público de comentário nunca devolve `user_id`, e-mail,
+  `moderation_reason`, `revision` nem `approved_body` como campo separado.
 - A estrela de favorito da F5 é um vínculo da conta, independente da curtida
   anônima/conta: as duas relações coexistem sem se influenciar.
 
 ## Fora desta fase
 
-- Comentários em threads de 2 níveis (ADR-111), denúncia e moderação: F7.
-- E-mail, sino e preferências de notificação: F7.
-- Lista de seguidores/seguindo e bloqueio: não implementados.
+- Lista de seguidores/seguindo, bloqueio entre contas e edição de perfil público:
+  não implementados.
+- Notificação ao denunciante e recurso contra decisão administrativa.

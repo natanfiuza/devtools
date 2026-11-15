@@ -227,7 +227,12 @@ function props(
         canLike: true,
         following: false,
         canFollow: false,
+        comments: null,
+        canComment: false,
+        commentForm: null,
         ogUrl: null,
+        muted: false,
+        canMute: false,
         ...extra,
     };
 }

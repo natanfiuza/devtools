@@ -7,6 +7,7 @@ return [
         'settings' => 'Paramètres',
         'overview' => 'Vue d’ensemble',
         'history' => 'Historique',
+        'notifications' => 'Notifications',
         'billing' => 'Factures',
         'badgeforge' => 'BadgeForge',
         'palettes' => 'Mes palettes',

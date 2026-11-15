@@ -1,0 +1,28 @@
+# English block list for the local pre-filter (F7, ADR-140).
+# One normalized term or phrase per line. Matching is by whole tokens/ngrams,
+# never by substring, so short words do not hit unrelated text. This list is a
+# first gate only; the AI moderation still runs on every accepted comment.
+fuck
+fucking
+fucker
+motherfucker
+shit
+bullshit
+bitch
+bastard
+asshole
+cunt
+dick
+pussy
+whore
+slut
+nigger
+nigga
+faggot
+retard
+kike
+spic
+chink
+tranny
+kill yourself
+go die

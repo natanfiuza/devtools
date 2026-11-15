@@ -59,6 +59,25 @@ it('envia o pedido em JSON mode e devolve conteudo e usage', function () {
     });
 });
 
+it('usa o modelo da chamada quando informado, sem mexer no modelo global', function () {
+    Http::fake([
+        '*' => Http::response([
+            'choices' => [
+                ['message' => ['content' => '{"decision":"approved","category":null}']],
+            ],
+        ], 200),
+    ]);
+
+    $completion = aiProvider()->complete([
+        ['role' => 'user', 'content' => 'classifique'],
+    ], 'moderation-model');
+
+    expect($completion->model)->toBe('moderation-model')
+        ->and(config('ai.model'))->toBe('deepseek-chat-test');
+
+    Http::assertSent(fn (Request $request): bool => $request['model'] === 'moderation-model');
+});
+
 it('estima os tokens quando o usage nao vem', function () {
     Http::fake([
         '*' => Http::response([

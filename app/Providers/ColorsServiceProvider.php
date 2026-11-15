@@ -50,6 +50,36 @@ final class ColorsServiceProvider extends ServiceProvider
                 ->by('colors social:'.$account)
                 ->response($this->rejection());
         });
+
+        // Comentarios e respostas (F7, ADR-139): escrita exige conta, mas o
+        // limiter aceita IP como fallback para nao virar chave unica em erro.
+        RateLimiter::for('colors-comments', function (Request $request): Limit {
+            $user = $request->user();
+            $account = $user instanceof User
+                ? 'user:'.$user->getKey()
+                : 'ip:'.AnonymousIdentity::ipKey($request);
+
+            $perMinute = max(1, (int) config('colors.rates.comment_per_minute', 10));
+
+            return Limit::perMinute($perMinute)
+                ->by('colors comments:'.$account)
+                ->response($this->rejection());
+        });
+
+        // Denuncias (F7, ADR-141): mesma chave da conta, bucket separado, para
+        // denunciar nao consumir o teto de comentar.
+        RateLimiter::for('colors-reports', function (Request $request): Limit {
+            $user = $request->user();
+            $account = $user instanceof User
+                ? 'user:'.$user->getKey()
+                : 'ip:'.AnonymousIdentity::ipKey($request);
+
+            $perMinute = max(1, (int) config('colors.rates.report_per_minute', 10));
+
+            return Limit::perMinute($perMinute)
+                ->by('colors reports:'.$account)
+                ->response($this->rejection());
+        });
     }
 
     private function limit(Request $request, string $key, string $bucket): Limit

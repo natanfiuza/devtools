@@ -7,5 +7,6 @@ export * from './donations';
 export * from './home';
 export * from './i18n';
 export * from './navigation';
+export * from './notifications';
 export * from './settings';
 export * from './ui';

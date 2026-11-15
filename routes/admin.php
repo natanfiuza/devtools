@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\BadgeAnalyticsAdminController;
 use App\Http\Controllers\Admin\BadgeCustomProviderAdminController;
 use App\Http\Controllers\Admin\BadgeProviderAdminController;
+use App\Http\Controllers\Admin\CommentModerationController;
+use App\Http\Controllers\Admin\CommentReportController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\OutputTargetController;
@@ -136,6 +138,29 @@ Route::middleware(['auth', 'verified', 'active', 'can:access-admin'])
 
         Route::get('badgeforge/analytics', [BadgeAnalyticsAdminController::class, 'index'])
             ->name('badgeforge.analytics.index');
+
+        // Moderacao de comentarios (F7, ADR-139/ADR-140): aprovar, rejeitar e
+        // excluir, tudo auditado. O texto aparece na tela, nunca na auditoria.
+        Route::get('comments', [CommentModerationController::class, 'index'])
+            ->name('comments.index');
+        Route::post('comments/{comment}/approve', [CommentModerationController::class, 'approve'])
+            ->whereUlid('comment')
+            ->name('comments.approve');
+        Route::post('comments/{comment}/reject', [CommentModerationController::class, 'reject'])
+            ->whereUlid('comment')
+            ->name('comments.reject');
+        Route::delete('comments/{comment}', [CommentModerationController::class, 'destroy'])
+            ->whereUlid('comment')
+            ->name('comments.destroy');
+
+        // Denuncias de comentario (F7, ADR-141). A decisao aqui so encerra a
+        // denuncia; rejeitar ou excluir o comentario e a tela de moderacao.
+        Route::get('comment-reports', [CommentReportController::class, 'index'])
+            ->name('comment-reports.index');
+        Route::post('comment-reports/{commentReport}/resolve', [CommentReportController::class, 'resolve'])
+            ->name('comment-reports.resolve');
+        Route::post('comment-reports/{commentReport}/dismiss', [CommentReportController::class, 'dismiss'])
+            ->name('comment-reports.dismiss');
 
         Route::get('audit', AuditController::class)->name('audit.index');
     });

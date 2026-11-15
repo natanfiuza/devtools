@@ -103,6 +103,7 @@ const traducoes = {
             settings: 'CONFIGURACOES',
             overview: 'VISAO_GERAL',
             history: 'HISTORICO',
+            notifications: 'NOTIFICACOES',
             billing: 'FATURAS',
             badgeforge: 'BADGEFORGE',
             palettes: 'MINHAS_PALETAS',
@@ -287,7 +288,14 @@ describe('navegacao da conta', () => {
         expect(
             secoes.map((grupo) => grupo.findAll('a').map((a) => a.text())),
         ).toEqual([
-            ['VISAO_GERAL', 'HISTORICO', 'FATURAS', 'BADGEFORGE', 'MINHAS_PALETAS'],
+            [
+                'VISAO_GERAL',
+                'HISTORICO',
+                'NOTIFICACOES',
+                'FATURAS',
+                'BADGEFORGE',
+                'MINHAS_PALETAS',
+            ],
             ['PERFIL', 'SEGURANCA', 'APARENCIA', 'TOKENS_DE_API'],
         ]);
 
@@ -299,6 +307,7 @@ describe('navegacao da conta', () => {
         ).toEqual([
             '/dashboard',
             '/dashboard/history',
+            '/dashboard/notifications',
             '/dashboard/billing',
             '/dashboard/badgeforge',
             '/dashboard/colors/palettes',
@@ -326,6 +335,7 @@ describe('navegacao da conta', () => {
     const TELAS: [string, string][] = [
         ['/dashboard', 'VISAO_GERAL'],
         ['/dashboard/history', 'HISTORICO'],
+        ['/dashboard/notifications', 'NOTIFICACOES'],
         ['/dashboard/billing', 'FATURAS'],
         ['/dashboard/badgeforge', 'BADGEFORGE'],
         ['/dashboard/colors/palettes', 'MINHAS_PALETAS'],
@@ -363,6 +373,7 @@ describe('navegacao da conta', () => {
         ).toEqual([
             'VISAO_GERAL',
             'HISTORICO',
+            'NOTIFICACOES',
             'FATURAS',
             'BADGEFORGE',
             'MINHAS_PALETAS',

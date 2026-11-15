@@ -1,0 +1,21 @@
+# Lista de bloqueo del es (F7, ADR-140).
+# Un termino o expresion por linea, ya normalizado. La comparacion es por
+# tokens/ngramas, nunca por subcadena. La lista inglesa siempre se mezcla.
+mierda
+puta
+puto
+joder
+cabron
+cabrón
+pendejo
+maricon
+maricón
+marica
+zorra
+perra
+gilipollas
+nazi
+hijo de puta
+vete a la mierda
+matate
+mátate

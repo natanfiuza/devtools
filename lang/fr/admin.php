@@ -29,6 +29,8 @@ return [
         'badgeforge_providers' => 'Providers BadgeForge',
         'badgeforge_custom_providers' => 'Providers personnalisés',
         'badgeforge_analytics' => 'Volume BadgeForge',
+        'comments' => 'Modération des commentaires',
+        'comment_reports' => 'Signalements',
         'back_to_site' => 'Retour au site',
     ],
 
@@ -520,6 +522,66 @@ return [
         'note' => 'Les chiffres viennent de l\'agrégat quotidien, qui ne permet pas de dédupliquer les visiteurs entre dimensions.',
     ],
 
+    'comments' => [
+        'title' => 'Modération des commentaires',
+        'description' => 'Commentaires en attente d’examen, signalés par une panne du fournisseur ou rejetés. Le texte n’apparaît ici que pour étayer la décision ; il n’est jamais écrit dans le journal d’audit.',
+        'empty' => 'Aucun commentaire avec ce statut.',
+        'filter' => 'Statut',
+        'all' => 'Tous',
+        'search' => 'Rechercher',
+        'search_placeholder' => 'Rechercher dans le texte',
+        'comment' => 'Commentaire',
+        'author' => 'Auteur',
+        'palette' => 'Palette',
+        'reports' => 'Signalements',
+        'created_at' => 'Créé le',
+        'deleted' => 'Supprimé',
+        'approve' => 'Approuver',
+        'reject' => 'Rejeter',
+        'delete' => 'Supprimer',
+        'delete_confirm_title' => 'Supprimer ce commentaire ?',
+        'delete_confirm_description' => 'Le texte est conservé pour la modération et l’audit ; le fil public affiche « commentaire supprimé » lorsqu’il y a des réponses. Les signalements en attente sont clos.',
+        'statuses' => [
+            'pending' => 'En cours d’examen',
+            'flagged' => 'Signalé',
+            'rejected' => 'Rejeté',
+            'approved' => 'Approuvé',
+            'all' => 'Tous',
+        ],
+    ],
+
+    'comment_reports' => [
+        'title' => 'Signalements de commentaires',
+        'description' => 'Signalements envoyés par des personnes ayant vu un commentaire sur une palette publique. Fermer un signalement ne modifie pas le commentaire : le rejet ou la suppression se fait dans l’écran de modération.',
+        'empty' => 'Aucun signalement avec ce statut.',
+        'filter' => 'Statut',
+        'all' => 'Tous',
+        'comment' => 'Commentaire',
+        'deleted' => 'Supprimé',
+        'palette' => 'Palette',
+        'author' => 'Auteur',
+        'reporter' => 'Signalé par',
+        'reason' => 'Motif',
+        'status' => 'Statut',
+        'reported_at' => 'Signalé le',
+        'closed_at' => 'Fermé le',
+        'closed_by' => 'Fermé par',
+        'resolve' => 'Résoudre',
+        'dismiss' => 'Ignorer',
+        'statuses' => [
+            'pending' => 'En attente',
+            'resolved' => 'Résolu',
+            'dismissed' => 'Ignoré',
+            'all' => 'Tous',
+        ],
+        'comment_statuses' => [
+            'pending' => 'En cours d’examen',
+            'approved' => 'Approuvé',
+            'rejected' => 'Rejeté',
+            'flagged' => 'Signalé',
+        ],
+    ],
+
     'actions' => [
         'user' => [
             'verified' => 'E-mail vérifié',
@@ -566,6 +628,15 @@ return [
             'payment_confirmed' => 'Paiement de l\'intention confirmé',
             'canceled' => 'Intention d\'abonnement annulée',
         ],
+        'comment_report' => [
+            'resolved' => 'Signalement résolu',
+            'dismissed' => 'Signalement ignoré',
+        ],
+        'comment' => [
+            'approved' => 'Commentaire approuvé',
+            'rejected' => 'Commentaire rejeté',
+            'deleted' => 'Commentaire supprimé',
+        ],
     ],
 
     'toasts' => [
@@ -610,6 +681,11 @@ return [
         'intent_already_canceled' => 'L\'intention était déjà annulée.',
         'impersonation_started' => 'Vous êtes maintenant :name.',
         'impersonation_stopped' => 'De retour sur votre compte.',
+        'comment_report_resolved' => 'Signalement résolu.',
+        'comment_report_dismissed' => 'Signalement ignoré.',
+        'comment_approved' => 'Commentaire approuvé.',
+        'comment_rejected' => 'Commentaire rejeté.',
+        'comment_deleted' => 'Commentaire supprimé.',
     ],
 
     'impersonation' => [
