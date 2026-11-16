@@ -109,10 +109,22 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->where('toolProps.palette.tags', [])
         );
 
+    $this->get('/pt-br/tools/colors/layout-harmonizer')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tools/Show')
+            ->where('slug', 'layout-harmonizer')
+            ->where('seo.noindex', false)
+            // A F2 gera o quadro inteiro no navegador: sem props de backend.
+            ->where('toolProps', []),
+        );
+
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();
     $this->get('/pt-br/tools/palette-generator')->assertNotFound();
+    $this->get('/pt-br/tools/layout-harmonizer')->assertNotFound();
     $this->get('/pt-br/tools/outro/html-color-picker')->assertNotFound();
     $this->get('/pt-br/tools/outro/palette-generator')->assertNotFound();
+    $this->get('/pt-br/tools/outro/layout-harmonizer')->assertNotFound();
     $this->get('/pt-br/tools/colors/json-viewer')->assertNotFound();
     $this->get('/pt-br/tools/colors')->assertNotFound();
 });

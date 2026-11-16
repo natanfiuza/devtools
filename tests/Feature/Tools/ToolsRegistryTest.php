@@ -28,6 +28,7 @@ function mvpToolSlugs(): array
         'badgeforge',
         'html-color-picker',
         'palette-generator',
+        'layout-harmonizer',
     ];
 }
 
@@ -104,6 +105,7 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'badgeforge',
         'html-color-picker',
         'palette-generator',
+        'layout-harmonizer',
     ]);
 });
 
@@ -117,11 +119,14 @@ it('declara o grupo de URL e o resolve pelo par slug+grupo', function () {
     expect(Tools::findForUrl('html-color-picker', null))->toBeNull();
     expect(Tools::findForUrl('palette-generator', 'colors'))->not->toBeNull();
     expect(Tools::findForUrl('palette-generator', null))->toBeNull();
+    expect(Tools::findForUrl('layout-harmonizer', 'colors'))->not->toBeNull();
+    expect(Tools::findForUrl('layout-harmonizer', null))->toBeNull();
     expect(Tools::findForUrl('json-viewer', null))->not->toBeNull();
     expect(Tools::findForUrl('json-viewer', 'colors'))->toBeNull();
     expect(Tools::findForUrl('nao-existe', 'colors'))->toBeNull();
     expect(Tools::find('html-color-picker')['group'])->toBe('colors');
     expect(Tools::find('palette-generator')['group'])->toBe('colors');
+    expect(Tools::find('layout-harmonizer')['group'])->toBe('colors');
     expect(Tools::find('json-viewer')['group'])->toBeNull();
 });
 

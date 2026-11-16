@@ -1,0 +1,203 @@
+import { flushPromises, mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { applyTranslations, createI18nInstance } from '@/lib/i18n';
+import LayoutWorkspace from '@/tools/layout-harmonizer/LayoutWorkspace.vue';
+import { exportMessages } from './support/langMessages';
+
+const { writeClipboard } = vi.hoisted(() => ({ writeClipboard: vi.fn() }));
+
+vi.mock('@/lib/clipboard', () => ({ writeClipboard }));
+
+/**
+ * Workspace da F2: estado vazio, os tres modos de visualizacao, o ultimo
+ * quadro valido e o tema do site intocado. Cada quadro tem 33 tokens; o modo
+ * Comparar mostra os dois (66 celulas).
+ */
+
+function i18n() {
+    const instance = createI18nInstance();
+
+    applyTranslations(instance, {
+        locale: 'pt_BR',
+        translations: exportMessages().pt_BR,
+    });
+
+    return instance;
+}
+
+function mountWorkspace() {
+    return mount(LayoutWorkspace, { global: { plugins: [i18n()] } });
+}
+
+async function typeSeed(
+    wrapper: ReturnType<typeof mountWorkspace>,
+    value: string,
+) {
+    await wrapper.get('[data-test="color-input"]').setValue(value);
+    await nextTick();
+}
+
+afterEach(() => {
+    vi.mocked(writeClipboard).mockReset();
+    document.documentElement.className = '';
+});
+
+describe('estado vazio', () => {
+    it('abre sem quadro e com o picker sem valor', () => {
+        const wrapper = mountWorkspace();
+
+        expect(wrapper.find('[data-test="layout-empty"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test="theme-board"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="picker-empty"]').exists()).toBe(true);
+        expect(wrapper.get('[data-test="layout-notice"]').text()).toBe('');
+    });
+
+    it('deixa de mostrar o vazio quando ha seed valida', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        expect(wrapper.find('[data-test="layout-empty"]').exists()).toBe(false);
+        expect(wrapper.find('[data-test="picker-empty"]').exists()).toBe(false);
+    });
+});
+
+describe('modos de visualizacao', () => {
+    it('abre em Comparar, com os dois quadros e 66 celulas', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        expect(wrapper.findAll('[data-test="theme-board"]')).toHaveLength(2);
+        expect(wrapper.findAll('[data-test="token-cell"]')).toHaveLength(66);
+        expect(
+            wrapper
+                .get('[data-test="view-mode-compare"]')
+                .attributes('aria-pressed'),
+        ).toBe('true');
+    });
+
+    it('mostra um quadro por vez nos modos Claro e Escuro', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        await wrapper.get('[data-test="view-mode-light"]').trigger('click');
+        await nextTick();
+
+        expect(wrapper.findAll('[data-test="theme-board"]')).toHaveLength(1);
+        expect(wrapper.findAll('[data-test="token-cell"]')).toHaveLength(33);
+        expect(wrapper.find('[data-test="theme-comparison"]').exists()).toBe(
+            false,
+        );
+        expect(
+            wrapper
+                .get('[data-test="view-mode-light"]')
+                .attributes('aria-pressed'),
+        ).toBe('true');
+
+        await wrapper.get('[data-test="view-mode-dark"]').trigger('click');
+        await nextTick();
+
+        expect(wrapper.get('[data-test="theme-board"]').text()).toContain(
+            'Tema escuro',
+        );
+    });
+
+    it('nao altera o tema do site ao alternar o quadro', async () => {
+        document.documentElement.className = 'dark';
+
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+        await wrapper.get('[data-test="view-mode-light"]').trigger('click');
+        await nextTick();
+        await wrapper.get('[data-test="view-mode-dark"]').trigger('click');
+        await nextTick();
+
+        expect(document.documentElement.className).toBe('dark');
+    });
+});
+
+describe('ultimo quadro valido', () => {
+    it('mantem as 66 celulas e avisa quando o texto fica invalido', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        const first = wrapper.get('[data-test="copy-hex"]').element;
+        const hex = wrapper.get('[data-test="token-hex"]').text();
+
+        await typeSeed(wrapper, 'nao-e-uma-cor');
+
+        expect(wrapper.findAll('[data-test="token-cell"]')).toHaveLength(66);
+        expect(wrapper.get('[data-test="token-hex"]').text()).toBe(hex);
+        expect(wrapper.get('[data-test="layout-notice"]').text()).toContain(
+            'não é válida',
+        );
+        expect(wrapper.get('[data-test="layout-notice"]').text()).toContain(
+            'última entrada válida',
+        );
+        // O botao nao e remontado: o foco de quem copia continua onde estava.
+        expect(wrapper.get('[data-test="copy-hex"]').element).toBe(first);
+    });
+});
+
+describe('alpha e fundo explicito', () => {
+    it('so mostra o campo de fundo quando a seed tem transparencia', async () => {
+        const wrapper = mountWorkspace();
+
+        expect(
+            wrapper.find('[data-test="seed-background-field"]').exists(),
+        ).toBe(false);
+
+        await typeSeed(wrapper, 'rgba(59, 130, 246, 0.6)');
+
+        expect(
+            wrapper.find('[data-test="seed-background-field"]').exists(),
+        ).toBe(true);
+        expect(wrapper.find('[data-test="layout-empty"]').exists()).toBe(true);
+        expect(wrapper.get('[data-test="layout-notice"]').text()).toContain(
+            'transparência',
+        );
+    });
+
+    it('gera o quadro depois de um fundo valido e resume a composicao', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, 'rgba(59, 130, 246, 0.6)');
+
+        await wrapper
+            .get('[data-test="seed-background-input"]')
+            .setValue('white');
+        await nextTick();
+
+        expect(wrapper.findAll('[data-test="token-cell"]')).toHaveLength(66);
+        expect(wrapper.get('[data-test="layout-notice"]').text()).toBe('');
+        expect(wrapper.get('[data-test="seed-summary"]').text()).toContain(
+            '#ffffff',
+        );
+    });
+});
+
+describe('copiar', () => {
+    it('anuncia a copia na linha de status persistente', async () => {
+        vi.mocked(writeClipboard).mockResolvedValue(undefined);
+
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        await wrapper.get('[data-test="copy-hex"]').trigger('click');
+        await flushPromises();
+
+        expect(writeClipboard).toHaveBeenCalledTimes(1);
+        expect(wrapper.get('[data-test="layout-feedback"]').text()).toContain(
+            'Copiado',
+        );
+        expect(wrapper.get('[data-test="layout-feedback"]').text()).toContain(
+            'HEX',
+        );
+    });
+});

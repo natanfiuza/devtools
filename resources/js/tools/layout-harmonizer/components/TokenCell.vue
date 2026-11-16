@@ -1,0 +1,165 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import CopyStatusIcon from '@/components/colors/CopyStatusIcon.vue';
+import { cssColor } from '@/components/colors/lib/style';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useCopyConfirmation } from '@/composables/useCopyFeedback';
+import { formatColor } from '@/lib/color';
+import type { LayoutPairCheck, LayoutToken } from '../engine';
+import { formatRatio } from '../lib/boardView';
+
+/**
+ * Uma linha do quadro semantico.
+ *
+ * O swatch mostra a cor real do token e fica oculto de leitores; todo texto
+ * (chave, finalidade, valores, selos) fica na superficie da interface, nunca
+ * por cima da cor gerada - assim um par com contraste ruim nao some.
+ */
+
+const props = defineProps<{
+    token: LayoutToken;
+    purpose: string;
+    checks: LayoutPairCheck[];
+    copy: (value: string, success?: string) => Promise<boolean>;
+}>();
+
+const { t, locale } = useI18n();
+const { copied: hexCopied, confirm: confirmHex } = useCopyConfirmation();
+const { copied: oklchCopied, confirm: confirmOklch } = useCopyConfirmation();
+
+const oklch = computed(() => formatColor(props.token.rgba, 'oklch'));
+
+function ratio(value: number): string {
+    return formatRatio(value, locale.value);
+}
+
+function against(background: LayoutPairCheck['background']): string {
+    return t('tools.layout-harmonizer.contrast.against', { background });
+}
+
+async function copyHex(): Promise<void> {
+    if (
+        await props.copy(
+            props.token.hex,
+            t('tools.layout-harmonizer.copy.hex_copied', {
+                token: props.token.id,
+            }),
+        )
+    ) {
+        confirmHex();
+    }
+}
+
+async function copyOklch(): Promise<void> {
+    if (
+        await props.copy(
+            oklch.value,
+            t('tools.layout-harmonizer.copy.oklch_copied', {
+                token: props.token.id,
+            }),
+        )
+    ) {
+        confirmOklch();
+    }
+}
+</script>
+
+<template>
+    <li
+        class="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-start"
+        data-test="token-cell"
+    >
+        <span
+            class="size-10 shrink-0 rounded-md border"
+            :style="{ backgroundColor: cssColor(token.rgba) }"
+            aria-hidden="true"
+            data-test="token-swatch"
+        />
+
+        <div class="min-w-0 flex-1 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+                <code class="font-mono text-sm font-medium">{{
+                    token.id
+                }}</code>
+                <Badge variant="secondary">
+                    {{
+                        t(`tools.layout-harmonizer.provenance.${token.source}`)
+                    }}
+                </Badge>
+                <span
+                    v-if="token.clipped"
+                    :title="t('tools.layout-harmonizer.clipped.note')"
+                >
+                    <Badge variant="outline">
+                        {{ t('tools.layout-harmonizer.clipped.badge') }}
+                    </Badge>
+                </span>
+            </div>
+
+            <p class="text-xs text-muted-foreground">{{ purpose }}</p>
+
+            <div
+                class="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs"
+            >
+                <span data-test="token-hex">{{ token.hex }}</span>
+                <span class="text-muted-foreground" data-test="token-oklch">
+                    {{ oklch }}
+                </span>
+            </div>
+
+            <ul v-if="checks.length" class="flex flex-wrap gap-1.5 pt-1">
+                <li
+                    v-for="check in checks"
+                    :key="check.background"
+                    :title="against(check.background)"
+                >
+                    <Badge
+                        :variant="
+                            check.verdict.aaNormal ? 'default' : 'destructive'
+                        "
+                    >
+                        {{
+                            check.verdict.aaNormal
+                                ? t('tools.layout-harmonizer.contrast.aa')
+                                : t('tools.layout-harmonizer.contrast.aa_fail')
+                        }}
+                        {{ ratio(check.verdict.ratio) }}
+                    </Badge>
+                </li>
+            </ul>
+        </div>
+
+        <div class="flex shrink-0 gap-1">
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                :aria-label="
+                    t('tools.layout-harmonizer.copy.hex_aria', {
+                        token: token.id,
+                    })
+                "
+                data-test="copy-hex"
+                @click="copyHex"
+            >
+                <CopyStatusIcon :copied="hexCopied" />
+            </Button>
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                :aria-label="
+                    t('tools.layout-harmonizer.copy.oklch_aria', {
+                        token: token.id,
+                    })
+                "
+                data-test="copy-oklch"
+                @click="copyOklch"
+            >
+                <CopyStatusIcon :copied="oklchCopied" />
+            </Button>
+        </div>
+    </li>
+</template>

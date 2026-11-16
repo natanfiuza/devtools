@@ -1,0 +1,59 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { LayoutThemeBoard, LayoutTokenId } from '../engine';
+import { checksByToken, groupTokens } from '../lib/boardView';
+import ContrastSummary from './ContrastSummary.vue';
+import FeedbackPreview from './FeedbackPreview.vue';
+import TokenGroup from './TokenGroup.vue';
+
+/**
+ * Um tema completo: os 33 tokens em cinco familias, a previa de feedback e o
+ * resumo de contraste. Nao conhece o outro tema nem o tema do site.
+ */
+
+const props = defineProps<{
+    board: LayoutThemeBoard;
+    title: string;
+    copy: (value: string, success?: string) => Promise<boolean>;
+}>();
+
+const { t } = useI18n();
+
+const groups = computed(() => groupTokens(props.board.tokens));
+const checks = computed(() => checksByToken(props.board));
+
+function purposeOf(id: LayoutTokenId): string {
+    return t(`tools.layout-harmonizer.tokens.${id}`);
+}
+
+function familyTitle(family: (typeof groups.value)[number]['family']): string {
+    return t(`tools.layout-harmonizer.families.${family}`);
+}
+</script>
+
+<template>
+    <section
+        role="region"
+        :aria-label="
+            t('tools.layout-harmonizer.a11y.board_section', { theme: title })
+        "
+        class="space-y-4 rounded-xl border p-4"
+        data-test="theme-board"
+    >
+        <h2 class="text-base font-semibold">{{ title }}</h2>
+
+        <TokenGroup
+            v-for="group in groups"
+            :key="group.family"
+            :title="familyTitle(group.family)"
+            :tokens="group.tokens"
+            :checks-by-token="checks"
+            :purpose-of="purposeOf"
+            :copy="copy"
+        />
+
+        <FeedbackPreview :tokens="board.tokens" />
+        <ContrastSummary :checks="board.checks" />
+    </section>
+</template>

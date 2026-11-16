@@ -458,6 +458,151 @@ return [
         ],
     ],
 
+    'layout-harmonizer' => [
+        'name' => 'Layout Harmonizer',
+        'description' => 'Gere os tokens semânticos de cor de uma interface clara e escura a partir de uma seed: 33 tokens, diagnóstico de contraste e valores copiáveis.',
+        'keywords' => 'layout, tokens semânticos, design tokens, sistema de cores, tema claro, tema escuro, contraste, WCAG, OKLCH',
+        'intro' => 'Escolha uma cor seed para obter o quadro semântico completo nos temas claro e escuro: marca, superfícies, feedback, conteúdo e interação, cada um com a finalidade e o contraste medido. Nada é gerado antes de uma cor válida, e nada sai do seu navegador.',
+
+        'seed' => [
+            'title' => 'Cor seed',
+            'description' => 'O quadro deriva desta cor. Escreva um valor ou use o seletor.',
+            'empty_value' => 'Nenhuma cor ainda',
+            'background_label' => 'Fundo da composição',
+            'background_hint' => 'Obrigatório porque a seed tem transparência. Qualquer formato serve: HEX, RGB ou OKLCH.',
+            'background_invalid' => 'Este fundo não é uma cor válida.',
+            'summary' => [
+                'original' => 'Original',
+                'effective' => 'Efetiva',
+                'background' => 'Fundo',
+                'strategy' => 'Estratégia',
+                'alpha_note' => 'Com transparência, a seed efetiva é a cor composta sobre o fundo.',
+                'achromatic' => 'A seed é acromática: as rotações de matiz são reduzidas ao tom neutro e o quadro mantém-se acromático.',
+            ],
+        ],
+
+        'strategy' => [
+            'label' => 'Estratégia de harmonia',
+            'hint' => 'Os 33 tokens não mudam; a estratégia muda a derivação da secundária e do accent.',
+            'analogous' => [
+                'name' => 'Análoga',
+                'description' => 'Secundária a 30° da seed: vizinhas próximas, pouca tensão.',
+            ],
+            'complementary' => [
+                'name' => 'Complementar',
+                'description' => 'Secundária a 180° da seed: contraste máximo.',
+            ],
+            'triadic' => [
+                'name' => 'Triádica',
+                'description' => 'Secundária a 240° da seed: três matizes equidistantes.',
+            ],
+            'monochromatic' => [
+                'name' => 'Monocromática',
+                'description' => 'Secundária na mesma matiz: variação só em luminosidade e croma.',
+            ],
+        ],
+
+        'view' => [
+            'light' => 'Claro',
+            'dark' => 'Escuro',
+            'compare' => 'Comparar',
+            'board_light' => 'Tema claro',
+            'board_dark' => 'Tema escuro',
+        ],
+
+        'families' => [
+            'brand' => 'Marca',
+            'surface' => 'Superfícies',
+            'feedback' => 'Feedback',
+            'content' => 'Conteúdo',
+            'interaction' => 'Interação',
+        ],
+
+        'tokens' => [
+            'primary' => 'Cor principal da marca; base de botões sólidos e ênfase.',
+            'primary-variant' => 'Tom mais profundo da marca para blocos grandes, separado do hover.',
+            'secondary' => 'Cor de apoio para ações menos proeminentes.',
+            'secondary-variant' => 'Tom mais profundo da secundária para superfícies maiores.',
+            'surface' => 'Fundo padrão de painéis.',
+            'surface-variant' => 'Fundo subtil para conteúdo agrupado.',
+            'background' => 'Fundo da página, a camada mais externa.',
+            'hairline' => 'Bordas e divisores.',
+            'error' => 'Fundo e cor de texto do estado de erro.',
+            'success' => 'Fundo e cor de texto do estado de sucesso.',
+            'warning' => 'Fundo e cor de texto do estado de alerta.',
+            'info' => 'Fundo e cor de texto do estado informativo.',
+            'on-primary' => 'Texto e ícones sobre a primária, hover e active.',
+            'on-secondary' => 'Texto e ícones sobre a secundária e os seus estados.',
+            'on-background' => 'Texto principal sobre o fundo da página.',
+            'on-surface' => 'Texto sobre superfícies e cartões.',
+            'on-surface-variant' => 'Texto secundário: legendas, dicas e metadados.',
+            'on-error' => 'Texto e ícones sobre o erro.',
+            'on-success' => 'Texto e ícones sobre o sucesso.',
+            'on-warning' => 'Texto e ícones sobre o alerta.',
+            'on-info' => 'Texto e ícones sobre o informativo.',
+            'primary-hover' => 'Primária ao pairar e em estados de ponteiro.',
+            'primary-active' => 'Primária durante o clique.',
+            'secondary-hover' => 'Secundária ao pairar.',
+            'secondary-active' => 'Secundária durante o clique.',
+            'link' => 'Links dentro do conteúdo.',
+            'link-hover' => 'Link ao pairar.',
+            'link-active' => 'Link durante o clique.',
+            'focus-ring' => 'Anel de foco do teclado.',
+            'accent' => 'Terceira cor da harmonia, presente em todas as estratégias.',
+            'on-accent' => 'Texto e ícones sobre o accent e os seus estados.',
+            'accent-hover' => 'Accent ao pairar.',
+            'accent-active' => 'Accent durante o clique.',
+        ],
+
+        'provenance' => [
+            'seed' => 'Da seed',
+            'manual' => 'Manual',
+            'rule' => 'Por regra',
+            'feedback' => 'Feedback',
+        ],
+
+        'contrast' => [
+            'aa' => 'AA',
+            'aa_fail' => 'Falha AA',
+            'against' => 'Contra {background}',
+            'on' => 'sobre',
+            'summary_title' => 'Contraste AA',
+            'all_pass' => 'Todos os pares medidos atingem AA para texto normal.',
+        ],
+
+        'copy' => [
+            'hex_copied' => 'Copiado {token}: HEX',
+            'oklch_copied' => 'Copiado {token}: OKLCH',
+            'hex_aria' => 'Copiar HEX de {token}',
+            'oklch_aria' => 'Copiar OKLCH de {token}',
+        ],
+
+        'clipped' => [
+            'badge' => 'Croma reduzido',
+            'note' => 'O croma pedido está fora do sRGB e foi reduzido para a cor apresentável mais próxima.',
+        ],
+
+        'states' => [
+            'empty_title' => 'Ainda sem quadro',
+            'empty_description' => 'Escolha uma cor seed para gerar os quadros claro e escuro.',
+            'invalid_seed' => 'A cor escrita não é válida; o quadro anterior continua no ecrã.',
+            'seed_alpha_without_background' => 'A seed tem transparência: indique um fundo de composição para gerar o quadro.',
+            'invalid_strategy' => 'A estratégia escolhida não é reconhecida; o quadro anterior continua no ecrã.',
+            'stale_board' => 'O quadro apresentado reflete a última entrada válida.',
+        ],
+
+        'feedback_preview' => [
+            'title' => 'Pares de feedback',
+            'description' => 'Cada cor de feedback com a cor de conteúdo medida sobre ela.',
+        ],
+
+        'a11y' => [
+            'view_mode' => 'Visualização do tema',
+            'board_section' => 'Quadro: {theme}',
+            'contrast_summary' => 'Diagnóstico de contraste',
+        ],
+    ],
+
     'json-viewer' => [
         'name' => 'JSON Viewer',
         'description' => 'Explore, formate e valide JSON em árvore, com pesquisa e cópia de qualquer caminho.',

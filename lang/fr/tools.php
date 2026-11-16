@@ -458,6 +458,151 @@ return [
         ],
     ],
 
+    'layout-harmonizer' => [
+        'name' => 'Layout Harmonizer',
+        'description' => 'Générez les tokens sémantiques de couleur d’une interface claire et sombre à partir d’une couleur source : 33 tokens, diagnostic de contraste et valeurs copiables.',
+        'keywords' => 'layout, tokens sémantiques, design tokens, système de couleurs, thème clair, thème sombre, contraste, WCAG, OKLCH',
+        'intro' => 'Choisissez une couleur source pour obtenir le tableau sémantique complet en thèmes clair et sombre : marque, surfaces, retours, contenu et interaction, chacun avec sa finalité et son contraste mesuré. Rien n’est généré avant une couleur valide, et rien ne quitte votre navigateur.',
+
+        'seed' => [
+            'title' => 'Couleur source',
+            'description' => 'Le tableau est dérivé de cette couleur. Saisissez une valeur ou utilisez le sélecteur.',
+            'empty_value' => 'Aucune couleur',
+            'background_label' => 'Fond de composition',
+            'background_hint' => 'Obligatoire car la source est transparente. Tout format convient : HEX, RGB ou OKLCH.',
+            'background_invalid' => 'Ce fond n’est pas une couleur valide.',
+            'summary' => [
+                'original' => 'Originale',
+                'effective' => 'Effective',
+                'background' => 'Fond',
+                'strategy' => 'Stratégie',
+                'alpha_note' => 'Avec transparence, la source effective est la couleur composée sur le fond.',
+                'achromatic' => 'La source est achromatique : les rotations de teinte sont ramenées au ton neutre et le tableau reste achromatique.',
+            ],
+        ],
+
+        'strategy' => [
+            'label' => 'Stratégie d’harmonie',
+            'hint' => 'Les 33 tokens ne changent pas ; la stratégie change la dérivation de la secondaire et de l’accent.',
+            'analogous' => [
+                'name' => 'Analogue',
+                'description' => 'Secondaire à 30° de la source : voisines proches, peu de tension.',
+            ],
+            'complementary' => [
+                'name' => 'Complémentaire',
+                'description' => 'Secondaire à 180° de la source : contraste maximal.',
+            ],
+            'triadic' => [
+                'name' => 'Triadique',
+                'description' => 'Secondaire à 240° de la source : trois teintes équidistantes.',
+            ],
+            'monochromatic' => [
+                'name' => 'Monochromatique',
+                'description' => 'Secondaire sur la même teinte : variation uniquement en clarté et en chroma.',
+            ],
+        ],
+
+        'view' => [
+            'light' => 'Clair',
+            'dark' => 'Sombre',
+            'compare' => 'Comparer',
+            'board_light' => 'Thème clair',
+            'board_dark' => 'Thème sombre',
+        ],
+
+        'families' => [
+            'brand' => 'Marque',
+            'surface' => 'Surfaces',
+            'feedback' => 'Retours',
+            'content' => 'Contenu',
+            'interaction' => 'Interaction',
+        ],
+
+        'tokens' => [
+            'primary' => 'Couleur principale de la marque ; base des boutons pleins et de l’emphase.',
+            'primary-variant' => 'Ton plus profond de la marque pour les grands blocs, distinct du survol.',
+            'secondary' => 'Couleur d’appui pour les actions moins visibles.',
+            'secondary-variant' => 'Ton plus profond de la secondaire pour les grandes surfaces.',
+            'surface' => 'Fond par défaut des panneaux.',
+            'surface-variant' => 'Fond discret pour un contenu regroupé.',
+            'background' => 'Fond de page, la couche la plus externe.',
+            'hairline' => 'Bordures et séparateurs.',
+            'error' => 'Fond et texte de l’état d’erreur.',
+            'success' => 'Fond et texte de l’état de réussite.',
+            'warning' => 'Fond et texte de l’état d’avertissement.',
+            'info' => 'Fond et texte de l’état d’information.',
+            'on-primary' => 'Texte et icônes sur la primaire, le survol et l’actif.',
+            'on-secondary' => 'Texte et icônes sur la secondaire et ses états.',
+            'on-background' => 'Texte principal sur le fond de page.',
+            'on-surface' => 'Texte sur les surfaces et les cartes.',
+            'on-surface-variant' => 'Texte secondaire : légendes, aides et métadonnées.',
+            'on-error' => 'Texte et icônes sur l’erreur.',
+            'on-success' => 'Texte et icônes sur la réussite.',
+            'on-warning' => 'Texte et icônes sur l’avertissement.',
+            'on-info' => 'Texte et icônes sur l’information.',
+            'primary-hover' => 'Primaire au survol.',
+            'primary-active' => 'Primaire pendant l’appui.',
+            'secondary-hover' => 'Secondaire au survol.',
+            'secondary-active' => 'Secondaire pendant l’appui.',
+            'link' => 'Liens dans le contenu.',
+            'link-hover' => 'Lien au survol.',
+            'link-active' => 'Lien pendant l’appui.',
+            'focus-ring' => 'Anneau de focus clavier.',
+            'accent' => 'Troisième couleur de l’harmonie, présente dans toutes les stratégies.',
+            'on-accent' => 'Texte et icônes sur l’accent et ses états.',
+            'accent-hover' => 'Accent au survol.',
+            'accent-active' => 'Accent pendant l’appui.',
+        ],
+
+        'provenance' => [
+            'seed' => 'De la source',
+            'manual' => 'Manuel',
+            'rule' => 'Par règle',
+            'feedback' => 'Retour',
+        ],
+
+        'contrast' => [
+            'aa' => 'AA',
+            'aa_fail' => 'Échec AA',
+            'against' => 'Sur {background}',
+            'on' => 'sur',
+            'summary_title' => 'Contraste AA',
+            'all_pass' => 'Toutes les paires mesurées atteignent AA pour le texte normal.',
+        ],
+
+        'copy' => [
+            'hex_copied' => 'Copié {token} : HEX',
+            'oklch_copied' => 'Copié {token} : OKLCH',
+            'hex_aria' => 'Copier le HEX de {token}',
+            'oklch_aria' => 'Copier l’OKLCH de {token}',
+        ],
+
+        'clipped' => [
+            'badge' => 'Chroma réduit',
+            'note' => 'Le chroma demandé sort du sRGB et a été réduit à la couleur affichable la plus proche.',
+        ],
+
+        'states' => [
+            'empty_title' => 'Pas encore de tableau',
+            'empty_description' => 'Choisissez une couleur source pour générer les tableaux clair et sombre.',
+            'invalid_seed' => 'La couleur saisie n’est pas valide ; le tableau précédent reste affiché.',
+            'seed_alpha_without_background' => 'La source est transparente : indiquez un fond de composition pour générer le tableau.',
+            'invalid_strategy' => 'La stratégie choisie n’est pas reconnue ; le tableau précédent reste affiché.',
+            'stale_board' => 'Le tableau affiché reflète la dernière saisie valide.',
+        ],
+
+        'feedback_preview' => [
+            'title' => 'Paires de retour',
+            'description' => 'Chaque couleur de retour avec la couleur de contenu mesurée par-dessus.',
+        ],
+
+        'a11y' => [
+            'view_mode' => 'Vue du thème',
+            'board_section' => 'Tableau : {theme}',
+            'contrast_summary' => 'Diagnostic de contraste',
+        ],
+    ],
+
     'json-viewer' => [
         'name' => 'JSON Viewer',
         'description' => 'Explorez, formatez et validez du JSON en arbre, avec recherche et copie de n\'importe quel chemin.',
