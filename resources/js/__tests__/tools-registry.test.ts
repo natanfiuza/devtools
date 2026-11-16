@@ -35,6 +35,7 @@ const MVP = [
     'badgeforge',
     'html-color-picker',
     'palette-generator',
+    'layout-harmonizer',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */

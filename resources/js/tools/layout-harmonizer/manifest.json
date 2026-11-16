@@ -1,0 +1,19 @@
+{
+    "slug": "layout-harmonizer",
+    "status": "available",
+    "category": "colors",
+    "group": "colors",
+    "icon": "layout-panel-left",
+    "order": 120,
+    "keywords": [
+        "layout",
+        "semantic tokens",
+        "design tokens",
+        "color system",
+        "light theme",
+        "dark theme",
+        "contrast",
+        "WCAG",
+        "OKLCH"
+    ]
+}

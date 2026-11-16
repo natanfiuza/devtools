@@ -30,6 +30,9 @@ import { checkerboardStyle, cssColor } from './lib/style';
 
 const props = defineProps<{
     state: ColorState;
+    /** Campo ainda sem escolha: mostra o rotulo no lugar do valor. */
+    empty?: boolean;
+    emptyLabel?: string;
 }>();
 
 const { t } = useI18n();
@@ -77,7 +80,20 @@ async function eyedropper(): Promise<void> {
 
 <template>
     <div class="flex flex-col gap-4">
-        <div class="flex items-center gap-3">
+        <div
+            v-if="empty"
+            class="flex items-center gap-3"
+            data-test="picker-empty"
+        >
+            <div
+                class="size-14 shrink-0 rounded-lg border border-dashed"
+                aria-hidden="true"
+            />
+            <span class="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                {{ emptyLabel }}
+            </span>
+        </div>
+        <div v-else class="flex items-center gap-3">
             <div
                 class="relative size-14 shrink-0 overflow-hidden rounded-lg border shadow-xs"
                 :style="checkerboardStyle"

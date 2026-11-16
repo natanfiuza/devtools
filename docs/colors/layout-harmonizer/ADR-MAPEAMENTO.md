@@ -42,7 +42,7 @@ implementa — nunca todos de uma vez.
 | `ADR-LH-014.md` | Contraste | `ADR-158-colors-lh-contraste.md` | F1 (retomada na F3 para AA/AAA) |
 | `ADR-LH-015.md` | Cadastro | `ADR-159-colors-lh-cadastro.md` | F4 |
 | `ADR-LH-016.md` | Downgrade | `ADR-160-colors-lh-downgrade.md` | F4 |
-| `ADR-LH-017.md` | Rascunho | `ADR-161-colors-lh-rascunho.md` | F2 |
+| `ADR-LH-017.md` | Rascunho | `ADR-161-colors-lh-rascunho.md` | F4 |
 | `ADR-LH-018.md` | Copiar cor | `ADR-162-colors-lh-copiar-cor.md` | F2 |
 | `ADR-LH-019.md` | Accent | `ADR-163-colors-lh-accent.md` | F1 |
 | `ADR-LH-020.md` | Ciclo de vida | `ADR-164-colors-lh-ciclo-de-vida.md` | F4 |
@@ -61,14 +61,18 @@ implementada e nenhum arquivo local seja removido sem revisão.
   158 (contraste), 163 (Accent) e 166 (temas), com o mesmo conteúdo e apenas
   título/numeração ajustados. Os originais locais foram mantidos até a revisão
   da fase; a remoção acontece depois do aceite da F1.
+- **2026-11-16 (F2)**: copiados 153 (entradas) e 162 (copiar cor), com o mesmo
+  conteúdo e apenas título/numeração ajustados. O 161 (rascunho) foi adiado
+  para a F4, porque a F2 não persiste nada no navegador. Os originais locais
+  seguem em `adr/` até o aceite da fase.
 
 ## Contagem por fase
 
 | Fase | ADRs |
 |---|---|
 | F1 (inclui os dois da F0) | 145, 146, 147, 149, 150, 156, 157, 158, 163, 166 |
-| F2 | 153, 161, 162 |
+| F2 | 153, 162 |
 | F3 | 151 (retomada de 158) |
-| F4 | 152, 154, 159, 160, 164, 165 |
+| F4 | 152, 154, 159, 160, 161, 164, 165 |
 | F5 | 148, 155 |
 | F0 | — (somente este mapeamento) |

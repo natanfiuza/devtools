@@ -458,6 +458,151 @@ return [
         ],
     ],
 
+    'layout-harmonizer' => [
+        'name' => 'Layout Harmonizer',
+        'description' => 'Build the semantic colour tokens for a light and dark interface from one seed: 33 tokens, contrast diagnostics and copyable values.',
+        'keywords' => 'layout, semantic tokens, design tokens, color system, light theme, dark theme, contrast, WCAG, OKLCH',
+        'intro' => 'Choose a seed colour to get the complete semantic board for the light and dark themes: brand, surfaces, feedback, content and interaction, each with its purpose and measured contrast. Nothing is generated before there is a valid colour, and nothing leaves your browser.',
+
+        'seed' => [
+            'title' => 'Seed colour',
+            'description' => 'The board is derived from this colour. Type a value or use the picker.',
+            'empty_value' => 'No colour yet',
+            'background_label' => 'Composition background',
+            'background_hint' => 'Required because the seed has transparency. Any format works: HEX, RGB or OKLCH.',
+            'background_invalid' => 'This background is not a valid colour.',
+            'summary' => [
+                'original' => 'Original',
+                'effective' => 'Effective',
+                'background' => 'Background',
+                'strategy' => 'Strategy',
+                'alpha_note' => 'With transparency, the effective seed is the colour composed over the background.',
+                'achromatic' => 'The seed is achromatic: hue rotations are reduced to the neutral tone and the board stays achromatic.',
+            ],
+        ],
+
+        'strategy' => [
+            'label' => 'Harmony strategy',
+            'hint' => 'The 33 tokens stay the same; the strategy changes how the secondary and accent tones are derived.',
+            'analogous' => [
+                'name' => 'Analogous',
+                'description' => 'Secondary 30° from the seed: close neighbours, little tension.',
+            ],
+            'complementary' => [
+                'name' => 'Complementary',
+                'description' => 'Secondary 180° from the seed: maximum contrast.',
+            ],
+            'triadic' => [
+                'name' => 'Triadic',
+                'description' => 'Secondary 240° from the seed: three evenly spaced hues.',
+            ],
+            'monochromatic' => [
+                'name' => 'Monochromatic',
+                'description' => 'Secondary on the same hue: variation only in lightness and chroma.',
+            ],
+        ],
+
+        'view' => [
+            'light' => 'Light',
+            'dark' => 'Dark',
+            'compare' => 'Compare',
+            'board_light' => 'Light theme',
+            'board_dark' => 'Dark theme',
+        ],
+
+        'families' => [
+            'brand' => 'Brand',
+            'surface' => 'Surfaces',
+            'feedback' => 'Feedback',
+            'content' => 'Content',
+            'interaction' => 'Interaction',
+        ],
+
+        'tokens' => [
+            'primary' => 'Main brand colour; base for solid buttons and emphasis.',
+            'primary-variant' => 'Deeper brand tone for large blocks, separate from hover.',
+            'secondary' => 'Supporting colour for less prominent actions.',
+            'secondary-variant' => 'Deeper secondary tone for larger surfaces.',
+            'surface' => 'Default panel background.',
+            'surface-variant' => 'Subtle background for grouped content.',
+            'background' => 'Page background, the outermost layer.',
+            'hairline' => 'Borders and dividers.',
+            'error' => 'Background and text colour for the error state.',
+            'success' => 'Background and text colour for the success state.',
+            'warning' => 'Background and text colour for the warning state.',
+            'info' => 'Background and text colour for the informational state.',
+            'on-primary' => 'Text and icons over primary, hover and active.',
+            'on-secondary' => 'Text and icons over secondary and its states.',
+            'on-background' => 'Main text over the page background.',
+            'on-surface' => 'Text over surfaces and cards.',
+            'on-surface-variant' => 'Secondary text: captions, hints and metadata.',
+            'on-error' => 'Text and icons over error.',
+            'on-success' => 'Text and icons over success.',
+            'on-warning' => 'Text and icons over warning.',
+            'on-info' => 'Text and icons over info.',
+            'primary-hover' => 'Primary on hover and pointer states.',
+            'primary-active' => 'Primary while pressed.',
+            'secondary-hover' => 'Secondary on hover.',
+            'secondary-active' => 'Secondary while pressed.',
+            'link' => 'Links inside content.',
+            'link-hover' => 'Link on hover.',
+            'link-active' => 'Link while pressed.',
+            'focus-ring' => 'Keyboard focus ring.',
+            'accent' => 'Third colour of the harmony, present in every strategy.',
+            'on-accent' => 'Text and icons over accent and its states.',
+            'accent-hover' => 'Accent on hover.',
+            'accent-active' => 'Accent while pressed.',
+        ],
+
+        'provenance' => [
+            'seed' => 'From seed',
+            'manual' => 'Manual',
+            'rule' => 'By rule',
+            'feedback' => 'Feedback',
+        ],
+
+        'contrast' => [
+            'aa' => 'AA',
+            'aa_fail' => 'AA fails',
+            'against' => 'Against {background}',
+            'on' => 'on',
+            'summary_title' => 'AA contrast',
+            'all_pass' => 'Every measured pair reaches AA for normal text.',
+        ],
+
+        'copy' => [
+            'hex_copied' => 'Copied {token}: HEX',
+            'oklch_copied' => 'Copied {token}: OKLCH',
+            'hex_aria' => 'Copy HEX of {token}',
+            'oklch_aria' => 'Copy OKLCH of {token}',
+        ],
+
+        'clipped' => [
+            'badge' => 'Reduced chroma',
+            'note' => 'The requested chroma is outside sRGB and was reduced to the closest displayable colour.',
+        ],
+
+        'states' => [
+            'empty_title' => 'No board yet',
+            'empty_description' => 'Choose a seed colour to generate the light and dark boards.',
+            'invalid_seed' => 'The typed colour is not valid; the previous board stays on screen.',
+            'seed_alpha_without_background' => 'The seed has transparency: enter a composition background to generate the board.',
+            'invalid_strategy' => 'The chosen strategy is not recognised; the previous board stays on screen.',
+            'stale_board' => 'The board shown reflects the last valid input.',
+        ],
+
+        'feedback_preview' => [
+            'title' => 'Feedback pairs',
+            'description' => 'Each feedback colour with the content colour measured on top of it.',
+        ],
+
+        'a11y' => [
+            'view_mode' => 'Theme view',
+            'board_section' => 'Board: {theme}',
+            'contrast_summary' => 'Contrast diagnostics',
+        ],
+    ],
+
     'json-viewer' => [
         'name' => 'JSON Viewer',
         'description' => 'Explore, format and validate JSON as a tree, with search and copy of any path.',

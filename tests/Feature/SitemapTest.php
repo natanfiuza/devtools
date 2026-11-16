@@ -179,7 +179,7 @@ it('lista a pagina de cada tool que funciona', function () {
         }
 
         // As tools agrupadas entram pela rota aninhada, nao pela plana (ADR-116).
-        foreach (['html-color-picker', 'palette-generator'] as $slug) {
+        foreach (['html-color-picker', 'palette-generator', 'layout-harmonizer'] as $slug) {
             expect($xml)
                 ->toContain(route('tools.show.grouped', [
                     'locale' => $locale['slug'],

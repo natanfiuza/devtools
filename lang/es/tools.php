@@ -458,6 +458,151 @@ return [
         ],
     ],
 
+    'layout-harmonizer' => [
+        'name' => 'Layout Harmonizer',
+        'description' => 'Genera los tokens semánticos de color de una interfaz clara y oscura a partir de una semilla: 33 tokens, diagnóstico de contraste y valores copiables.',
+        'keywords' => 'layout, tokens semánticos, design tokens, sistema de colores, tema claro, tema oscuro, contraste, WCAG, OKLCH',
+        'intro' => 'Elige un color semilla para obtener el tablero semántico completo en los temas claro y oscuro: marca, superficies, feedback, contenido e interacción, cada uno con su finalidad y el contraste medido. Nada se genera antes de un color válido, y nada sale de tu navegador.',
+
+        'seed' => [
+            'title' => 'Color semilla',
+            'description' => 'El tablero se deriva de este color. Escribe un valor o usa el selector.',
+            'empty_value' => 'Aún no hay color',
+            'background_label' => 'Fondo de la composición',
+            'background_hint' => 'Obligatorio porque la semilla tiene transparencia. Sirve cualquier formato: HEX, RGB u OKLCH.',
+            'background_invalid' => 'Este fondo no es un color válido.',
+            'summary' => [
+                'original' => 'Original',
+                'effective' => 'Efectiva',
+                'background' => 'Fondo',
+                'strategy' => 'Estrategia',
+                'alpha_note' => 'Con transparencia, la semilla efectiva es el color compuesto sobre el fondo.',
+                'achromatic' => 'La semilla es acromática: las rotaciones de matiz se reducen al tono neutro y el tablero sigue acromático.',
+            ],
+        ],
+
+        'strategy' => [
+            'label' => 'Estrategia de armonía',
+            'hint' => 'Los 33 tokens no cambian; la estrategia cambia la derivación de la secundaria y del accent.',
+            'analogous' => [
+                'name' => 'Análoga',
+                'description' => 'Secundaria a 30° de la semilla: vecinas cercanas, poca tensión.',
+            ],
+            'complementary' => [
+                'name' => 'Complementaria',
+                'description' => 'Secundaria a 180° de la semilla: contraste máximo.',
+            ],
+            'triadic' => [
+                'name' => 'Triádica',
+                'description' => 'Secundaria a 240° de la semilla: tres matices equidistantes.',
+            ],
+            'monochromatic' => [
+                'name' => 'Monocromática',
+                'description' => 'Secundaria en el mismo matiz: variación solo en luminosidad y croma.',
+            ],
+        ],
+
+        'view' => [
+            'light' => 'Claro',
+            'dark' => 'Oscuro',
+            'compare' => 'Comparar',
+            'board_light' => 'Tema claro',
+            'board_dark' => 'Tema oscuro',
+        ],
+
+        'families' => [
+            'brand' => 'Marca',
+            'surface' => 'Superficies',
+            'feedback' => 'Feedback',
+            'content' => 'Contenido',
+            'interaction' => 'Interacción',
+        ],
+
+        'tokens' => [
+            'primary' => 'Color principal de la marca; base de botones sólidos y énfasis.',
+            'primary-variant' => 'Tono más profundo de la marca para bloques grandes, distinto del hover.',
+            'secondary' => 'Color de apoyo para acciones menos prominentes.',
+            'secondary-variant' => 'Tono más profundo de la secundaria para superficies grandes.',
+            'surface' => 'Fondo predeterminado de los paneles.',
+            'surface-variant' => 'Fondo sutil para contenido agrupado.',
+            'background' => 'Fondo de la página, la capa más externa.',
+            'hairline' => 'Bordes y separadores.',
+            'error' => 'Fondo y texto del estado de error.',
+            'success' => 'Fondo y texto del estado de éxito.',
+            'warning' => 'Fondo y texto del estado de advertencia.',
+            'info' => 'Fondo y texto del estado informativo.',
+            'on-primary' => 'Texto e iconos sobre la primaria, el hover y el active.',
+            'on-secondary' => 'Texto e iconos sobre la secundaria y sus estados.',
+            'on-background' => 'Texto principal sobre el fondo de página.',
+            'on-surface' => 'Texto sobre superficies y tarjetas.',
+            'on-surface-variant' => 'Texto secundario: leyendas, ayudas y metadatos.',
+            'on-error' => 'Texto e iconos sobre el error.',
+            'on-success' => 'Texto e iconos sobre el éxito.',
+            'on-warning' => 'Texto e iconos sobre la advertencia.',
+            'on-info' => 'Texto e iconos sobre el informativo.',
+            'primary-hover' => 'Primaria en hover y estados de puntero.',
+            'primary-active' => 'Primaria durante la pulsación.',
+            'secondary-hover' => 'Secundaria en hover.',
+            'secondary-active' => 'Secundaria durante la pulsación.',
+            'link' => 'Enlaces dentro del contenido.',
+            'link-hover' => 'Enlace en hover.',
+            'link-active' => 'Enlace durante la pulsación.',
+            'focus-ring' => 'Anillo de foco del teclado.',
+            'accent' => 'Tercer color de la armonía, presente en todas las estrategias.',
+            'on-accent' => 'Texto e iconos sobre el accent y sus estados.',
+            'accent-hover' => 'Accent en hover.',
+            'accent-active' => 'Accent durante la pulsación.',
+        ],
+
+        'provenance' => [
+            'seed' => 'De la semilla',
+            'manual' => 'Manual',
+            'rule' => 'Por regla',
+            'feedback' => 'Feedback',
+        ],
+
+        'contrast' => [
+            'aa' => 'AA',
+            'aa_fail' => 'Falla AA',
+            'against' => 'Sobre {background}',
+            'on' => 'sobre',
+            'summary_title' => 'Contraste AA',
+            'all_pass' => 'Todos los pares medidos alcanzan AA para texto normal.',
+        ],
+
+        'copy' => [
+            'hex_copied' => 'Copiado {token}: HEX',
+            'oklch_copied' => 'Copiado {token}: OKLCH',
+            'hex_aria' => 'Copiar HEX de {token}',
+            'oklch_aria' => 'Copiar OKLCH de {token}',
+        ],
+
+        'clipped' => [
+            'badge' => 'Croma reducido',
+            'note' => 'El croma pedido está fuera de sRGB y se redujo al color visible más cercano.',
+        ],
+
+        'states' => [
+            'empty_title' => 'Aún no hay tablero',
+            'empty_description' => 'Elige un color semilla para generar los tableros claro y oscuro.',
+            'invalid_seed' => 'El color escrito no es válido; el tablero anterior sigue en pantalla.',
+            'seed_alpha_without_background' => 'La semilla tiene transparencia: indica un fondo de composición para generar el tablero.',
+            'invalid_strategy' => 'La estrategia elegida no se reconoce; el tablero anterior sigue en pantalla.',
+            'stale_board' => 'El tablero mostrado refleja la última entrada válida.',
+        ],
+
+        'feedback_preview' => [
+            'title' => 'Pares de feedback',
+            'description' => 'Cada color de feedback con el color de contenido medido encima.',
+        ],
+
+        'a11y' => [
+            'view_mode' => 'Vista del tema',
+            'board_section' => 'Tablero: {theme}',
+            'contrast_summary' => 'Diagnóstico de contraste',
+        ],
+    ],
+
     'json-viewer' => [
         'name' => 'JSON Viewer',
         'description' => 'Explora, formatea y valida JSON en árbol, con búsqueda y copia de cualquier ruta.',
