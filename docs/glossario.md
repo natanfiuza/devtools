@@ -176,5 +176,13 @@
 - CSP de imagem: politica fechada (`default-src 'none'; style-src 'unsafe-inline'`) aplicada a toda resposta `image/svg+xml`, independentemente do `CSP_MODE` do site, para um SVG aberto direto no navegador nao executar script (F8, ADR-089).
 - `badge_unavailable`: codigo do envelope `ApiError` para falha de infraestrutura na superficie de imagem (banco fora): 503 com `Retry-After: 60` e `Cache-Control: no-store`, distinto de `not_found` (recurso inexistente) e de `image_unavailable` (PNG sem Imagick) (F8, ADR-089).
 - Health check com dependencias: `/up` que checa banco, cache e disco do PNG e responde 200 `up` ou 503 `down` com o mapa das sondas, sem carregar a excecao original (F8, ADR-089).
+- Sistema de layout (Layout Harmonizer): conjunto de tokens semanticos por papel nos temas claro e escuro, gerado a partir de uma seed e exportavel em Markdown, CSS e ZIP; e o que a tool Layout Harmonizer produz e o que a tabela `layout_systems` guarda, com o estado versionado (seed, estrategia, overrides, bloqueios e snapshot).
+- Token semantico: nome de papel (`background`, `surface`, `primary`, `on-primary`, `error`...) ligado a uma cor propria em cada tema, e nao um tom de escala; o Layout Harmonizer tem 33 (29 aprovados mais os 4 do accent triadico), e o mesmo token tem valor diferente no claro e no escuro.
+- Seed efetiva: a cor-base depois da composicao de alpha sobre o fundo escolhido; e ela que todas as contas usam, que o Primary reproduz exatamente nos dois temas ate aceite explicito e que as estrategias usam para derivar as demais cores. A seed original e preservada ao lado, e a efetiva nunca a substitui em silencio.
+- On-color (`on-*`): token de conteudo que fica por cima de um token de superficie ou de marca (`on-primary`, `on-error`...) e e escolhido pela maior razao de contraste entre branco e escuro, e nao por uma regra fixa de tema.
+- Accent: cor de destaque da estrategia triadica, com matiz da seed + 120° e estados proprios (`accent`, `on-accent`, `accent-hover`, `accent-active`); nas demais estrategias ela nao existe.
+- Bloqueio (lock): token que o usuario fixou; a regeneracao e a troca de estrategia nao o alteram, e nem o aceite de uma sugestao o sobrescreve - restaurar e acao explicita.
+- Snapshot: estado congelado de um sistema salvo ou exportado; reabrir e exportar usam os valores gravados, sem recalcular, mesmo que o algoritmo mude depois (mesmo principio da escala congelada das paletas).
+- Cota conjunta: o limite Free de 25 itens do grupo Colors conta paletas e sistemas de layout juntos, sob o lock da conta; itens arquivados contam e so a exclusao definitiva libera uma vaga.
 
 
