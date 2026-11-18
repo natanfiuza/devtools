@@ -116,8 +116,43 @@ por número inventado:
   `rgba(59,130,246,0.6)` sobre branco, cada uma nas quatro estratégias e nos
   dois temas (80 snapshots).
 
+## Parâmetros das sugestões (F3)
+
+As sugestões de correção de contraste têm constantes próprias, em
+`resources/js/tools/layout-harmonizer/lib/suggestions.ts`, versionadas por
+`LAYOUT_SUGGESTIONS_VERSION`. Elas não alteram nenhum token sozinhas: só
+descrevem a menor mudança que faria um token de frente passar na meta contra os
+fundos dele.
+
+| Constante | Valor | Uso |
+|---|---|---|
+| `SUGGESTION_TARGETS.aa` | `4.5` | meta AA |
+| `SUGGESTION_TARGETS.aaa` | `7` | meta AAA |
+| `SUGGESTION_STEP` | `0.005` | passo de L OKLCH entre candidatos |
+| `SUGGESTION_MAX_STEPS` | `200` | teto de passos em cada direção (L de 0 a 1) |
+| `SUGGESTION_EPSILON` | `0.001` | folga acima da meta (razão ≥ meta + épsilon) |
+
+Regras fixas da busca (não são números novos, mas definem o resultado):
+
+1. Uma sugestão por **token de frente × tema**, agrupando todos os checks
+   daquele token (ex.: `on-primary` contra `primary`, `primary-hover` e
+   `primary-active`); um token que já passa na meta não gera sugestão.
+2. Move só a luminosidade (`L0 ± k·0,005`), preservando matiz e croma, com o
+   sRGB mapeado; o candidato preso no clamp de 0/1 não é repetido.
+3. A razão projetada é medida no sRGB mapeado e precisa atingir a meta em
+   **todos** os fundos; sem candidato até 200 passos, `proposal: null`
+   (inviável, sem ação de aceite).
+4. Desempate no mesmo passo: maior razão mínima; persistindo, a direção mais
+   clara. A primeira cor viável no menor passo vence.
+5. **AA não é universalmente alcançável** para tokens multi-fundo: se base,
+   hover e active cruzam a faixa de luminância média, nenhum foreground único
+   atende 4,5 nos três (caso real `#3b82f6`, `on-*` no tema claro). É o efeito
+   esperado da regra 3, coberto por testes; a meta não muda nenhuma cor.
+6. Trocar entre AA e AAA não regenera o quadro: a meta só filtra as sugestões.
+
 ## Versionamento
 
 | Versão | Data | Mudança |
 |---|---|---|
 | 1 | 2026-11-16 | primeira tabela aprovada e implementada na F1 |
+| Sugestões 1 | 2026-11-18 | parâmetros aprovados da F3 (meta, passo, teto e épsilon) |

@@ -113,6 +113,14 @@ export interface LayoutSeedInfo {
     achromatic: boolean;
 }
 
+/**
+ * Valores manuais por tema e token (F3). O override vale exatamente para o
+ * token informado: nao recalcula derivados, e o contraste e medido depois dele.
+ */
+export type LayoutOverrides = Partial<
+    Record<LayoutTheme, Partial<Record<LayoutTokenId, Rgb>>>
+>;
+
 export interface GenerateLayoutInput {
     seed: Rgba;
     strategy: LayoutStrategy;
@@ -123,6 +131,11 @@ export interface GenerateLayoutInput {
     background?: Rgb | null;
     /** Secundaria manual opaca; ausente = derivada da estrategia. */
     secondary?: Rgb | null;
+    /**
+     * Overrides manuais por tema; ausente ou vazio devolve o quadro automatico.
+     * Precedencia: override por token > secundaria manual > derivacao.
+     */
+    overrides?: LayoutOverrides;
 }
 
 export interface LayoutSystemResult {

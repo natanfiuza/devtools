@@ -182,6 +182,8 @@
 - On-color (`on-*`): token de conteudo que fica por cima de um token de superficie ou de marca (`on-primary`, `on-error`...) e e escolhido pela maior razao de contraste entre branco e escuro, e nao por uma regra fixa de tema.
 - Accent: cor de destaque da estrategia triadica, com matiz da seed + 120° e estados proprios (`accent`, `on-accent`, `accent-hover`, `accent-active`); nas demais estrategias ela nao existe.
 - Bloqueio (lock): token que o usuario fixou; a regeneracao e a troca de estrategia nao o alteram, e nem o aceite de uma sugestao o sobrescreve - restaurar e acao explicita.
+- Ajuste sugerido: proposta de correcao de contraste para um token de frente em um tema, feita pela menor mudanca de luminosidade que atinge a meta escolhida (AA ou AAA) contra todos os fundos daquele token; nunca se aplica sozinha - o aceite e explicito e vale no tema aceito (ou nos dois, por acao propria) - e, quando nenhuma luminosidade atende, sai como inviavel, sem acao.
+- Estado efetivo: o quadro como esta na tela, depois da seed, da estrategia, da secundaria manual, das edicoes e dos bloqueios; e o que o snapshot congela, e o que a regeneracao descarta em parte quando as entradas mudam - so o que esta bloqueado sobrevive.
 - Snapshot: estado congelado de um sistema salvo ou exportado; reabrir e exportar usam os valores gravados, sem recalcular, mesmo que o algoritmo mude depois (mesmo principio da escala congelada das paletas).
 - Cota conjunta: o limite Free de 25 itens do grupo Colors conta paletas e sistemas de layout juntos, sob o lock da conta; itens arquivados contam e so a exclusao definitiva libera uma vaga.
 

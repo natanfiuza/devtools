@@ -65,6 +65,12 @@ implementada e nenhum arquivo local seja removido sem revisão.
   conteúdo e apenas título/numeração ajustados. O 161 (rascunho) foi adiado
   para a F4, porque a F2 não persiste nada no navegador. Os originais locais
   seguem em `adr/` até o aceite da fase.
+- **2026-11-18 (F3)**: copiado 151 (bloqueios), com o mesmo conteúdo e apenas
+  título/numeração ajustados, mais uma nota de implementação no fim. O ADR-158
+  recebeu emenda datada (AA/AAA para sugestões, inviabilidade em AA) e o
+  ADR-167, novo, registra o estado efetivo, os overrides por tema/origem, a
+  assinatura de regeneração, a secundária manual, os parâmetros das sugestões e
+  o snapshot. O original local do 151 segue em `adr/` até o aceite da fase.
 
 ## Contagem por fase
 
@@ -72,7 +78,7 @@ implementada e nenhum arquivo local seja removido sem revisão.
 |---|---|
 | F1 (inclui os dois da F0) | 145, 146, 147, 149, 150, 156, 157, 158, 163, 166 |
 | F2 | 153, 162 |
-| F3 | 151 (retomada de 158) |
+| F3 | 151 (retomada de 158; novo 167) |
 | F4 | 152, 154, 159, 160, 161, 164, 165 |
 | F5 | 148, 155 |
 | F0 | — (somente este mapeamento) |

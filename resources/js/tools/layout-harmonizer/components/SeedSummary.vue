@@ -10,10 +10,14 @@ import type { LayoutSeedInfo, LayoutStrategy } from '../engine';
  * quadro exibe enquanto a entrada atual estiver invalida.
  */
 
-const props = defineProps<{
-    seed: LayoutSeedInfo;
-    strategy: LayoutStrategy;
-}>();
+const props = withDefaults(
+    defineProps<{
+        seed: LayoutSeedInfo;
+        strategy: LayoutStrategy;
+        secondarySource?: 'auto' | 'manual';
+    }>(),
+    { secondarySource: 'auto' },
+);
 
 const { t } = useI18n();
 
@@ -64,6 +68,17 @@ const strategyName = computed(() =>
             {{ t('tools.layout-harmonizer.seed.summary.strategy') }}
         </dt>
         <dd>{{ strategyName }}</dd>
+
+        <dt class="text-muted-foreground">
+            {{ t('tools.layout-harmonizer.seed.summary.secondary') }}
+        </dt>
+        <dd data-test="seed-summary-secondary">
+            {{
+                secondarySource === 'manual'
+                    ? t('tools.layout-harmonizer.secondary.manual')
+                    : t('tools.layout-harmonizer.secondary.auto')
+            }}
+        </dd>
     </dl>
 
     <p

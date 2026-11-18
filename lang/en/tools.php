@@ -476,6 +476,7 @@ return [
                 'effective' => 'Effective',
                 'background' => 'Background',
                 'strategy' => 'Strategy',
+                'secondary' => 'Secondary',
                 'alpha_note' => 'With transparency, the effective seed is the colour composed over the background.',
                 'achromatic' => 'The seed is achromatic: hue rotations are reduced to the neutral tone and the board stays achromatic.',
             ],
@@ -591,6 +592,61 @@ return [
             'stale_board' => 'The board shown reflects the last valid input.',
         ],
 
+        'edit' => [
+            'title' => 'Edit {token}',
+            'open_aria' => 'Edit {token}',
+            'apply' => 'Apply',
+            'cancel' => 'Cancel',
+            'alpha_ignored' => 'Tokens are opaque: the alpha you choose is ignored.',
+        ],
+
+        'lock' => [
+            'lock' => 'Lock',
+            'unlock' => 'Unlock',
+            'lock_aria' => 'Lock {token}',
+            'unlock_aria' => 'Unlock {token}',
+        ],
+
+        'restore' => [
+            'token' => 'Restore token',
+            'token_aria' => 'Restore {token} to automatic',
+            'theme' => 'Restore {theme} ({count})',
+            'all' => 'Restore all ({count})',
+            'confirm_title' => 'Discard manual changes?',
+            'confirm_body' => 'This removes manual values and locks from {count} token(s) in this scope and returns to automatic generation.',
+            'confirm' => 'Restore',
+            'cancel' => 'Cancel',
+        ],
+
+        'secondary' => [
+            'label' => 'Secondary colour (optional)',
+            'hint' => 'Empty keeps the automatic secondary from the strategy. Variants and states are still derived per theme.',
+            'invalid' => 'This secondary is not a valid colour; the last valid value stays.',
+            'manual' => 'Manual secondary',
+            'auto' => 'Automatic secondary',
+            'reset' => 'Back to automatic',
+        ],
+
+        'suggestions' => [
+            'title' => 'Contrast suggestions',
+            'description' => 'Each suggestion moves only the text colour, by the smallest lightness step that reaches the chosen target against every background of that token. Nothing is applied without your acceptance.',
+            'badge' => 'Suggestion',
+            'target' => [
+                'aa' => 'AA target',
+                'aaa' => 'AAA target',
+            ],
+            'none' => 'Every measured pair reaches the chosen target.',
+            'delta_lightness' => 'ΔL {delta}',
+            'accept_theme' => 'Accept in {theme}',
+            'accept_both' => 'Accept in both themes',
+            'inviable' => 'No lightness reaches {target} against every background of this token.',
+            'inviable_badge' => 'Not reachable',
+        ],
+
+        'edit_notice' => [
+            'discarded' => 'Unlocked manual values were discarded because the seed, strategy or secondary changed. Locked values were kept.',
+        ],
+
         'feedback_preview' => [
             'title' => 'Feedback pairs',
             'description' => 'Each feedback colour with the content colour measured on top of it.',
@@ -600,6 +656,9 @@ return [
             'view_mode' => 'Theme view',
             'board_section' => 'Board: {theme}',
             'contrast_summary' => 'Contrast diagnostics',
+            'restore' => 'Restore automatic generation',
+            'suggestions' => 'Contrast suggestions',
+            'suggestion_target' => 'Contrast target for suggestions',
         ],
     ],
 
