@@ -6,6 +6,7 @@ import {
     normalizeHue,
     rgbToOklch,
     type Oklch,
+    type Rgb,
     type Rgba,
 } from '@/lib/color';
 import { resolveSeed } from './alpha';
@@ -157,6 +158,7 @@ interface BoardInput {
     seedOklch: Oklch;
     achromatic: boolean;
     manualSecondary: Rgba | null;
+    overrides?: Partial<Record<LayoutTokenId, Rgb>>;
 }
 
 function buildBoard(input: BoardInput): LayoutThemeBoard {
@@ -360,6 +362,26 @@ function buildBoard(input: BoardInput): LayoutThemeBoard {
         'rule',
     );
 
+    // Valores manuais (F3): entram depois da derivacao e antes do contraste,
+    // sem recalcular dependentes, para que os checks meçam o que a tela mostra.
+    if (input.overrides) {
+        for (const [id, rgb] of Object.entries(input.overrides) as [
+            LayoutTokenId,
+            Rgb | undefined,
+        ][]) {
+            if (!rgb || !(id in tokens)) {
+                continue;
+            }
+
+            tokens[id] = makeToken(
+                id,
+                theme,
+                exactColor({ ...rgb, a: 1 }),
+                'manual',
+            );
+        }
+    }
+
     return { theme, tokens, checks: evaluateContrast(tokens) };
 }
 
@@ -400,8 +422,16 @@ export function generateLayoutSystem(
         strategy: input.strategy,
         secondarySource: manualSecondary ? 'manual' : 'auto',
         themes: {
-            light: buildBoard({ ...boardInput, theme: 'light' }),
-            dark: buildBoard({ ...boardInput, theme: 'dark' }),
+            light: buildBoard({
+                ...boardInput,
+                theme: 'light',
+                overrides: input.overrides?.light,
+            }),
+            dark: buildBoard({
+                ...boardInput,
+                theme: 'dark',
+                overrides: input.overrides?.dark,
+            }),
         },
     };
 }

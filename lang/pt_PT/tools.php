@@ -476,6 +476,7 @@ return [
                 'effective' => 'Efetiva',
                 'background' => 'Fundo',
                 'strategy' => 'Estratégia',
+                'secondary' => 'Secundária',
                 'alpha_note' => 'Com transparência, a seed efetiva é a cor composta sobre o fundo.',
                 'achromatic' => 'A seed é acromática: as rotações de matiz são reduzidas ao tom neutro e o quadro mantém-se acromático.',
             ],
@@ -591,6 +592,61 @@ return [
             'stale_board' => 'O quadro apresentado reflete a última entrada válida.',
         ],
 
+        'edit' => [
+            'title' => 'Editar {token}',
+            'open_aria' => 'Editar {token}',
+            'apply' => 'Aplicar',
+            'cancel' => 'Cancelar',
+            'alpha_ignored' => 'Os tokens são opacos: o alfa escolhido é ignorado.',
+        ],
+
+        'lock' => [
+            'lock' => 'Bloquear',
+            'unlock' => 'Desbloquear',
+            'lock_aria' => 'Bloquear {token}',
+            'unlock_aria' => 'Desbloquear {token}',
+        ],
+
+        'restore' => [
+            'token' => 'Restaurar token',
+            'token_aria' => 'Restaurar {token} para o automático',
+            'theme' => 'Restaurar {theme} ({count})',
+            'all' => 'Restaurar tudo ({count})',
+            'confirm_title' => 'Descartar alterações manuais?',
+            'confirm_body' => 'Isto remove valores manuais e bloqueios de {count} token(s) neste âmbito e volta à geração automática.',
+            'confirm' => 'Restaurar',
+            'cancel' => 'Cancelar',
+        ],
+
+        'secondary' => [
+            'label' => 'Cor secundária (opcional)',
+            'hint' => 'Vazio mantém a secundária automática da estratégia. As variantes e os estados continuam derivados por tema.',
+            'invalid' => 'Esta secundária não é uma cor válida; o último valor válido mantém-se.',
+            'manual' => 'Secundária manual',
+            'auto' => 'Secundária automática',
+            'reset' => 'Voltar ao automático',
+        ],
+
+        'suggestions' => [
+            'title' => 'Sugestões de contraste',
+            'description' => 'Cada sugestão altera apenas a cor do texto, no menor passo de luminosidade que atinge a meta escolhida contra todos os fundos desse token. Nada é aplicado sem a sua aceitação.',
+            'badge' => 'Sugestão',
+            'target' => [
+                'aa' => 'Meta AA',
+                'aaa' => 'Meta AAA',
+            ],
+            'none' => 'Todos os pares medidos atingem a meta escolhida.',
+            'delta_lightness' => 'ΔL {delta}',
+            'accept_theme' => 'Aceitar em {theme}',
+            'accept_both' => 'Aceitar nos dois temas',
+            'inviable' => 'Nenhuma luminosidade atinge {target} contra todos os fundos deste token.',
+            'inviable_badge' => 'Inviável',
+        ],
+
+        'edit_notice' => [
+            'discarded' => 'Os valores manuais sem bloqueio foram descartados porque a seed, a estratégia ou a secundária mudaram. Os valores bloqueados foram mantidos.',
+        ],
+
         'feedback_preview' => [
             'title' => 'Pares de feedback',
             'description' => 'Cada cor de feedback com a cor de conteúdo medida sobre ela.',
@@ -600,6 +656,9 @@ return [
             'view_mode' => 'Visualização do tema',
             'board_section' => 'Quadro: {theme}',
             'contrast_summary' => 'Diagnóstico de contraste',
+            'restore' => 'Restaurar a geração automática',
+            'suggestions' => 'Sugestões de contraste',
+            'suggestion_target' => 'Meta de contraste das sugestões',
         ],
     ],
 

@@ -476,6 +476,7 @@ return [
                 'effective' => 'Effective',
                 'background' => 'Fond',
                 'strategy' => 'Stratégie',
+                'secondary' => 'Secondaire',
                 'alpha_note' => 'Avec transparence, la source effective est la couleur composée sur le fond.',
                 'achromatic' => 'La source est achromatique : les rotations de teinte sont ramenées au ton neutre et le tableau reste achromatique.',
             ],
@@ -591,6 +592,61 @@ return [
             'stale_board' => 'Le tableau affiché reflète la dernière saisie valide.',
         ],
 
+        'edit' => [
+            'title' => 'Modifier {token}',
+            'open_aria' => 'Modifier {token}',
+            'apply' => 'Appliquer',
+            'cancel' => 'Annuler',
+            'alpha_ignored' => "Les jetons sont opaques : l'alpha choisi est ignoré.",
+        ],
+
+        'lock' => [
+            'lock' => 'Verrouiller',
+            'unlock' => 'Déverrouiller',
+            'lock_aria' => 'Verrouiller {token}',
+            'unlock_aria' => 'Déverrouiller {token}',
+        ],
+
+        'restore' => [
+            'token' => 'Restaurer le jeton',
+            'token_aria' => 'Restaurer {token} en automatique',
+            'theme' => 'Restaurer {theme} ({count})',
+            'all' => 'Tout restaurer ({count})',
+            'confirm_title' => 'Supprimer les modifications manuelles ?',
+            'confirm_body' => 'Cela supprime les valeurs manuelles et les verrouillages de {count} jeton(s) dans ce périmètre et revient à la génération automatique.',
+            'confirm' => 'Restaurer',
+            'cancel' => 'Annuler',
+        ],
+
+        'secondary' => [
+            'label' => 'Couleur secondaire (facultative)',
+            'hint' => 'Vide conserve la secondaire automatique de la stratégie. Les variantes et les états restent dérivés par thème.',
+            'invalid' => "Cette secondaire n'est pas une couleur valide ; la dernière valeur valide reste.",
+            'manual' => 'Secondaire manuelle',
+            'auto' => 'Secondaire automatique',
+            'reset' => "Revenir à l'automatique",
+        ],
+
+        'suggestions' => [
+            'title' => 'Suggestions de contraste',
+            'description' => "Chaque suggestion ne déplace que la couleur du texte, du plus petit pas de luminosité qui atteint la cible choisie contre tous les fonds de ce jeton. Rien n'est appliqué sans votre accord.",
+            'badge' => 'Suggestion',
+            'target' => [
+                'aa' => 'Cible AA',
+                'aaa' => 'Cible AAA',
+            ],
+            'none' => 'Chaque paire mesurée atteint la cible choisie.',
+            'delta_lightness' => 'ΔL {delta}',
+            'accept_theme' => 'Accepter en {theme}',
+            'accept_both' => 'Accepter dans les deux thèmes',
+            'inviable' => "Aucune luminosité n'atteint {target} contre tous les fonds de ce jeton.",
+            'inviable_badge' => 'Inatteignable',
+        ],
+
+        'edit_notice' => [
+            'discarded' => 'Les valeurs manuelles non verrouillées ont été supprimées car la graine, la stratégie ou la secondaire ont changé. Les valeurs verrouillées ont été conservées.',
+        ],
+
         'feedback_preview' => [
             'title' => 'Paires de retour',
             'description' => 'Chaque couleur de retour avec la couleur de contenu mesurée par-dessus.',
@@ -600,6 +656,9 @@ return [
             'view_mode' => 'Vue du thème',
             'board_section' => 'Tableau : {theme}',
             'contrast_summary' => 'Diagnostic de contraste',
+            'restore' => 'Restaurer la génération automatique',
+            'suggestions' => 'Suggestions de contraste',
+            'suggestion_target' => 'Cible de contraste des suggestions',
         ],
     ],
 

@@ -1,4 +1,4 @@
-import { flushPromises, mount } from '@vue/test-utils';
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
@@ -178,6 +178,156 @@ describe('alpha e fundo explicito', () => {
         expect(wrapper.get('[data-test="seed-summary"]').text()).toContain(
             '#ffffff',
         );
+    });
+});
+
+describe('edicao no quadro (F3)', () => {
+    it('mostra secundaria, restaurar e sugestoes junto ao quadro', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        expect(wrapper.find('[data-test="secondary-field"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="suggestions-panel"]').exists()).toBe(
+            true,
+        );
+        expect(wrapper.find('[data-test="restore-controls"]').exists()).toBe(
+            true,
+        );
+        expect(
+            wrapper.get('[data-test="restore-all"]').attributes('disabled'),
+        ).toBe('');
+    });
+
+    it('bloqueia pelo cabecalho e restaura tudo apos confirmar', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        const lock = wrapper.get('[data-test="token-lock"]');
+
+        expect(lock.attributes('aria-pressed')).toBe('false');
+
+        await lock.trigger('click');
+        await nextTick();
+
+        expect(
+            wrapper.get('[data-test="token-lock"]').attributes('aria-pressed'),
+        ).toBe('true');
+        expect(
+            wrapper.get('[data-test="restore-all"]').attributes('disabled'),
+        ).toBe(undefined);
+
+        await wrapper.get('[data-test="restore-all"]').trigger('click');
+        await nextTick();
+
+        const confirm = document.body.querySelector(
+            '[data-test="restore-confirm"]',
+        );
+
+        expect(confirm).not.toBeNull();
+
+        new DOMWrapper(confirm!).trigger('click');
+        await nextTick();
+        await nextTick();
+
+        expect(
+            wrapper.get('[data-test="restore-all"]').attributes('disabled'),
+        ).toBe('');
+        expect(
+            wrapper.get('[data-test="token-lock"]').attributes('aria-pressed'),
+        ).toBe('false');
+    });
+});
+
+describe('secundaria manual (F3)', () => {
+    it('aplica a cor e volta ao automatico pelo botao', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        expect(wrapper.get('[data-test="secondary-source"]').text()).toContain(
+            'automática',
+        );
+
+        await wrapper.get('[data-test="secondary-input"]').setValue('#00ff00');
+        await nextTick();
+
+        expect(wrapper.get('[data-test="secondary-source"]').text()).toContain(
+            'manual',
+        );
+        expect(
+            wrapper.get('[data-test="secondary-reset"]').attributes('disabled'),
+        ).toBe(undefined);
+
+        await wrapper.get('[data-test="secondary-reset"]').trigger('click');
+        await nextTick();
+
+        expect(wrapper.get('[data-test="secondary-source"]').text()).toContain(
+            'automática',
+        );
+    });
+});
+
+describe('sugestoes (F3)', () => {
+    it('aceita a proposta em um tema sem tocar o outro', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#777777');
+
+        const row = wrapper
+            .findAll('[data-test="suggestion-row"]')
+            .find(
+                (item) =>
+                    item.attributes('data-theme') === 'dark' &&
+                    item.attributes('data-token') === 'on-primary',
+            );
+
+        expect(row).toBeDefined();
+
+        await row!.get('[data-test="suggestion-accept"]').trigger('click');
+        await nextTick();
+
+        expect(
+            wrapper
+                .findAll('[data-test="suggestion-row"]')
+                .some(
+                    (item) =>
+                        item.attributes('data-theme') === 'dark' &&
+                        item.attributes('data-token') === 'on-primary',
+                ),
+        ).toBe(false);
+        expect(
+            wrapper
+                .findAll('[data-test="suggestion-row"]')
+                .some(
+                    (item) =>
+                        item.attributes('data-theme') === 'light' &&
+                        item.attributes('data-token') === 'on-primary',
+                ),
+        ).toBe(true);
+    });
+
+    it('troca para AAA sem alterar os HEX do quadro', async () => {
+        const wrapper = mountWorkspace();
+
+        await typeSeed(wrapper, '#3b82f6');
+
+        const before = wrapper.get('[data-test="token-hex"]').text();
+
+        await wrapper
+            .get('[data-test="suggestion-target-aaa"]')
+            .trigger('click');
+        await nextTick();
+
+        expect(wrapper.get('[data-test="token-hex"]').text()).toBe(before);
+        expect(
+            wrapper
+                .get('[data-test="suggestion-target-aaa"]')
+                .attributes('aria-pressed'),
+        ).toBe('true');
     });
 });
 
