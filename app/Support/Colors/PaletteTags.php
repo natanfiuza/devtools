@@ -4,7 +4,9 @@ namespace App\Support\Colors;
 
 use App\Models\ColorPalette;
 use App\Models\ColorTag;
+use App\Models\LayoutSystem;
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -30,13 +32,23 @@ final class PaletteTags
      */
     public function sync(User $user, ColorPalette $palette, array $names): void
     {
+        $this->syncTo($user, $palette, $names);
+    }
+
+    /**
+     * Versao generica para paletas e sistemas de layout (F4, ADR-168).
+     *
+     * @param  list<string>  $names
+     */
+    public function syncTo(User $user, ColorPalette|LayoutSystem $item, array $names): void
+    {
         $ids = [];
 
         foreach ($this->dedupe($names) as $name) {
             $ids[] = $this->findOrCreate($user, $name)->getKey();
         }
 
-        $palette->tags()->sync($ids);
+        $item->tags()->sync($ids);
     }
 
     /**
@@ -45,7 +57,7 @@ final class PaletteTags
      *
      * @param  iterable<int, ColorTag>  $sourceTags
      */
-    public function copyTo(User $user, ColorPalette $palette, iterable $sourceTags): void
+    public function copyTo(User $user, ColorPalette|LayoutSystem $palette, iterable $sourceTags): void
     {
         $names = [];
 
@@ -53,7 +65,7 @@ final class PaletteTags
             $names[] = $tag->name;
         }
 
-        $this->sync($user, $palette, $names);
+        $this->syncTo($user, $palette, $names);
     }
 
     public function create(User $user, string $name): ColorTag
@@ -109,6 +121,13 @@ final class PaletteTags
     public function delete(ColorTag $tag): void
     {
         $tag->palettes()->detach();
+
+        // A tabela nova pode ainda nao existir na janela entre o deploy do
+        // codigo e o `migrate`; nesse intervalo nao ha sistema vinculado.
+        if (Schema::hasTable('color_tag_layout_system')) {
+            $tag->layoutSystems()->detach();
+        }
+
         $tag->delete();
     }
 

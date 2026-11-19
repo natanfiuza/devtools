@@ -150,9 +150,52 @@ Regras fixas da busca (não são números novos, mas definem o resultado):
    esperado da regra 3, coberto por testes; a meta não muda nenhuma cor.
 6. Trocar entre AA e AAA não regenera o quadro: a meta só filtra as sugestões.
 
+## Parâmetros do sistema salvo (F4)
+
+A F4 acrescentou limites e versões da persistência, todos em
+`config/colors.php` (`layout_systems`, `tags` e `slug`) e espelhados nas props
+do tool. Nenhum destes números altera a tabela do motor.
+
+| Chave | Valor | Uso |
+|---|---|---|
+| `layout_systems.name_max_length` | `80` | nome do sistema (obrigatório, sugerido e editável) |
+| `layout_systems.description_max_length` | `500` | descrição opcional |
+| `layout_systems.input_max_length` | `120` | cada texto cru de `state.inputs` (`seedText`, `backgroundText`, `secondaryText`, `strategy`) |
+| `layout_systems.state_max_bytes` | `262144` (256 KB) | teto técnico do JSON de `state`; o caso real fica em ~20–25 KB |
+| `layout_systems.per_page` | `20` | paginação da lista de sistemas |
+| `layout_systems.preview_colors` | `6` | HEX exibidos no card do sistema |
+| `layout_systems.sitemap_limit` | `500` | sistemas públicos ativos no sitemap |
+| `tags.per_layout_system` | `10` | tags por sistema (o mesmo limite de nome de tag das paletas) |
+| `palettes.free_limit` / `paid_limit` | `25` / `null` | cota conjunta (ADR-152/ADR-170) |
+
+### Versões do estado
+
+| Campo | Valor | Regra |
+|---|---|---|
+| `LAYOUT_STATE_VERSION` / `snapshotVersion` | `1` | envelope e snapshot suportados; shape diferente é somente leitura |
+| `schemaVersion` | `1` | catálogo de tokens e checks |
+| `algorithmVersion` | `1` (≥ 1) | versões menores que a atual abrem no modo compatível; maiores/desconhecidas ficam somente leitura |
+| `suggestionsVersion` | `1` (≥ 1) | idem; sugestões ficam desabilitadas no modo compatível |
+
+O servidor valida o shape v1, aceita `algorithmVersion`/`suggestionsVersion`
+entre 1 e 999 e **deriva** `schema_version`, `algorithm_version`,
+`suggestions_version`, `snapshot_version` e `tokens_count` do snapshot; o
+cliente nunca envia essas colunas separadas (ADR-168).
+
+### Modo compatível
+
+Abre quando `state`/`snapshot`/`schema` são os atuais e `algorithm`/`suggestions`
+são menores. Edita `rgba`/`hex`/`oklch` e os 16 checks do tema com o
+`evaluateContrast` do motor, preservando as versões; restaurar e sugestões
+ficam desabilitados; mudar seed/estratégia/secundária apenas marca
+`pendingRegeneration` e bloqueia o salvamento até a regeneração explícita
+(ADR-169). `readonly` é shape/versão mais nova ou desconhecida: quadro sem
+edição, com ciclo de vida e duplicação.
+
 ## Versionamento
 
 | Versão | Data | Mudança |
 |---|---|---|
 | 1 | 2026-11-16 | primeira tabela aprovada e implementada na F1 |
 | Sugestões 1 | 2026-11-18 | parâmetros aprovados da F3 (meta, passo, teto e épsilon) |
+| Estado 1 | 2026-11-19 | envelope `state` da F4 (`stateVersion`/`snapshotVersion` = 1) e limites de persistência |

@@ -3,8 +3,8 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import type { Rgba } from '@/lib/color';
-import { useLayoutSystem } from './composables/useLayoutSystem';
 import type { LayoutViewMode } from './lib/boardView';
+import type { LayoutController } from './lib/controller';
 import type { LayoutTheme, LayoutTokenId } from './engine';
 import RestoreControls from './components/RestoreControls.vue';
 import SecondaryField from './components/SecondaryField.vue';
@@ -21,41 +21,51 @@ import ViewModeSwitch from './components/ViewModeSwitch.vue';
  * empilhado. O quadro so existe depois de uma seed; entrada invalida mantem o
  * ultimo resultado e mostra o aviso, sem trocar tema, storage ou rota.
  *
- * Na F3 a coluna da esquerda ganhou a secundaria manual, e abaixo dos quadros
- * ficam as sugestoes de contraste com seus aceites explicitos.
+ * A partir da F4 o corpo consome o `LayoutController` que o pai monta: o
+ * workspace live regenera com o motor atual e o congelado exibe o snapshot
+ * gravado. Restaurar e sugestoes so aparecem quando o modo as sustenta.
  */
+
+const props = defineProps<{
+    controller: LayoutController;
+    /** Regeneracao explicita no modo congelado; ausente quando nao ha como. */
+    regenerate?: (() => void) | null;
+}>();
 
 const { t } = useI18n();
 const feedback = useCopyFeedback();
 
-const {
-    picker,
-    strategy,
-    backgroundText,
-    secondaryText,
-    hasSeed,
-    needsBackground,
-    backgroundInvalid,
-    secondaryInvalid,
-    secondarySource,
-    result,
-    seed,
-    notice,
-    isStale,
-    target,
-    editState,
-    editNotice,
-    suggestions,
-    editable,
-    applyColor,
-    toggleTokenLock,
-    acceptAdjustment,
-    acceptAdjustmentInBothThemes,
-    restoreTokenEdit,
-    restoreThemeEdits,
-    restoreAllEdits,
-    resetSecondary,
-} = useLayoutSystem();
+const picker = props.controller.picker;
+const strategy = props.controller.strategy;
+const backgroundText = props.controller.backgroundText;
+const secondaryText = props.controller.secondaryText;
+const hasSeed = props.controller.hasSeed;
+const needsBackground = props.controller.needsBackground;
+const backgroundInvalid = props.controller.backgroundInvalid;
+const secondaryInvalid = props.controller.secondaryInvalid;
+const secondarySource = props.controller.secondarySource;
+const result = props.controller.result;
+const seed = props.controller.seed;
+const notice = props.controller.notice;
+const isStale = props.controller.isStale;
+const target = props.controller.target;
+const editState = props.controller.editState;
+const editNotice = props.controller.editNotice;
+const suggestions = props.controller.suggestions;
+const editable = props.controller.editable;
+const pendingRegeneration = props.controller.pendingRegeneration;
+const canRestoreEdits = props.controller.canRestoreEdits;
+const canSuggest = props.controller.canSuggest;
+const mode = props.controller.mode;
+const applyColor = props.controller.applyColor;
+const toggleTokenLock = props.controller.toggleTokenLock;
+const acceptAdjustment = props.controller.acceptAdjustment;
+const acceptAdjustmentInBothThemes =
+    props.controller.acceptAdjustmentInBothThemes;
+const restoreTokenEdit = props.controller.restoreTokenEdit;
+const restoreThemeEdits = props.controller.restoreThemeEdits;
+const restoreAllEdits = props.controller.restoreAllEdits;
+const resetSecondary = props.controller.resetSecondary;
 
 const viewMode = ref<LayoutViewMode>('compare');
 
@@ -138,11 +148,16 @@ function toggleIn(theme: LayoutTheme, token: LayoutTokenId): void {
 function restoreIn(theme: LayoutTheme, token: LayoutTokenId): void {
     restoreTokenEdit(theme, token);
 }
+
+function requestRegeneration(): void {
+    props.regenerate?.();
+}
 </script>
 
 <template>
     <div
         class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)]"
+        :data-mode="mode"
         data-test="layout-workspace"
     >
         <section class="space-y-3 rounded-xl border p-4">
@@ -183,12 +198,45 @@ function restoreIn(theme: LayoutTheme, token: LayoutTokenId): void {
                 <ViewModeSwitch v-if="result !== null" v-model="viewMode" />
 
                 <RestoreControls
-                    v-if="result !== null"
+                    v-if="result !== null && canRestoreEdits"
                     :counts="restoreCounts"
                     :total="restoreTotal"
                     :restore-theme="restoreThemeEdits"
                     :restore-all="restoreAllEdits"
                 />
+            </div>
+
+            <p
+                v-if="!canRestoreEdits && result !== null"
+                class="text-xs text-muted-foreground"
+                data-test="layout-restore-disabled"
+            >
+                {{ t('tools.layout-harmonizer.lifecycle.restore_disabled') }}
+            </p>
+
+            <div
+                v-if="pendingRegeneration"
+                class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm"
+                role="status"
+                aria-live="polite"
+                data-test="layout-pending-regeneration"
+            >
+                <span>
+                    {{
+                        t(
+                            'tools.layout-harmonizer.lifecycle.pending_regeneration',
+                        )
+                    }}
+                </span>
+                <button
+                    v-if="regenerate"
+                    type="button"
+                    class="rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+                    data-test="layout-regenerate"
+                    @click="requestRegeneration"
+                >
+                    {{ t('tools.layout-harmonizer.lifecycle.regenerate') }}
+                </button>
             </div>
 
             <p
@@ -241,11 +289,19 @@ function restoreIn(theme: LayoutTheme, token: LayoutTokenId): void {
                 />
 
                 <SuggestionsPanel
+                    v-if="canSuggest"
                     v-model:target="target"
                     :suggestions="suggestions"
                     :accept="acceptAdjustment"
                     :accept-both="acceptAdjustmentInBothThemes"
                 />
+                <p
+                    v-else
+                    class="text-xs text-muted-foreground"
+                    data-test="layout-suggestions-off"
+                >
+                    {{ t('tools.layout-harmonizer.lifecycle.suggestions_off') }}
+                </p>
             </template>
 
             <section

@@ -115,8 +115,15 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->component('tools/Show')
             ->where('slug', 'layout-harmonizer')
             ->where('seo.noindex', false)
-            // A F2 gera o quadro inteiro no navegador: sem props de backend.
-            ->where('toolProps', []),
+            // A F2 gera o quadro inteiro no navegador; a F4 acrescenta so os
+            // limites, as versoes atuais e a origem opcional do CTA da paleta.
+            ->where('toolProps.authenticated', false)
+            ->where('toolProps.origin', null)
+            ->where('toolProps.quota', null)
+            ->where('toolProps.tags', [])
+            ->where('toolProps.limits.nameMaxLength', 80)
+            ->where('toolProps.limits.descriptionMaxLength', 500)
+            ->has('toolProps.currentVersions'),
         );
 
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();

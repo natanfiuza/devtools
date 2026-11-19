@@ -5,6 +5,7 @@ return [
         'description' => 'Palette de :count couleurs avec les étiquettes : :tags.',
         'description_no_tags' => 'Palette de :count couleurs.',
         'image_alt' => ':name — palette de couleurs',
+        'system_description' => 'Système de mise en page avec la stratégie :strategy et :tokens jetons de couleur.',
     ],
 
     'profile' => [
@@ -109,8 +110,8 @@ return [
 
     'list' => [
         'title' => 'Mes palettes',
-        'description' => 'Vous utilisez :used palettes sur :limit. Les palettes archivées comptent dans la limite.',
-        'description_unlimited' => 'Vous avez :used palettes. Les palettes archivées apparaissent aussi ici.',
+        'description' => 'Vous utilisez {used} sur {limit} éléments. Les palettes et systèmes archivés comptent dans la limite.',
+        'description_unlimited' => 'Vous avez {used} éléments. Les éléments archivés apparaissent aussi ici.',
         'remaining' => ':remaining restantes',
         'unlimited' => 'Illimité',
         'search_label' => 'Rechercher',
@@ -202,6 +203,7 @@ return [
         'archive' => 'Archiver',
         'restore' => 'Restaurer',
         'delete' => 'Supprimer',
+        'create_layout_system' => 'Créer un système de mise en page',
     ],
 
     'pagination' => [
@@ -235,6 +237,53 @@ return [
         'deleting' => 'Suppression…',
         'cancel' => 'Annuler',
         'mismatch' => 'Le nom ne correspond pas à celui de la palette.',
+    ],
+
+    'systems' => [
+        'list' => [
+            'title' => 'Mes systèmes de mise en page',
+            'description' => 'Vous utilisez {used} sur {limit} éléments. Les palettes et systèmes archivés comptent dans la limite.',
+            'description_unlimited' => 'Vous avez {used} éléments. Les éléments archivés apparaissent aussi ici.',
+            'new_system' => 'Nouveau système',
+            'tokens_label' => 'Jetons',
+            'tokens_count' => '{count} jetons',
+            'preview_alt' => 'Couleurs de {name}',
+            'empty_title' => 'Aucun système de mise en page pour l’instant',
+            'empty_description' => 'Générez un tableau dans le Layout Harmonizer, nommez-le et enregistrez : il apparaît dans cette liste.',
+            'empty_cta' => 'Créer un système de mise en page',
+        ],
+        'actions' => [
+            'share_unavailable' => 'Rendez le système public pour obtenir un lien.',
+        ],
+        'editor' => [
+            'back' => 'Retour aux systèmes de mise en page',
+            'public_link' => 'Voir la page publique',
+            'archived_title' => 'Ce système est archivé',
+            'archived_description' => 'Les systèmes archivés sont en lecture seule jusqu’à leur restauration.',
+        ],
+        'public' => [
+            'versions' => 'Schéma v{schema} · algorithme v{algorithm} · suggestions v{suggestions} · instantané v{snapshot}',
+            'credit_from' => 'Créé à partir de la palette',
+        ],
+        'delete' => [
+            'title' => 'Supprimer le système de mise en page',
+            'description' => 'Action irréversible : le système et son lien public disparaissent définitivement, et le slug n’est jamais réutilisé.',
+            'label' => 'Saisissez le nom du système pour confirmer',
+            'confirm' => 'Supprimer le système',
+            'deleting' => 'Suppression…',
+            'cancel' => 'Annuler',
+        ],
+        'strategy' => [
+            'unknown' => 'Stratégie inconnue',
+        ],
+        'toasts' => [
+            'created' => 'Système enregistré.',
+            'updated' => 'Système mis à jour.',
+            'archived' => 'Système archivé.',
+            'restored' => 'Système restauré.',
+            'deleted' => 'Système supprimé.',
+            'duplicated' => 'Système dupliqué.',
+        ],
     ],
 
     'tags_manager' => [

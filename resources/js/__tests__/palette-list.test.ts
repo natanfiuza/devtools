@@ -113,6 +113,7 @@ const TRADUCOES = {
         actions: {
             edit: 'EDITAR',
             prototype: 'PROTOTIPO',
+            create_layout_system: 'CRIAR_SISTEMA',
             duplicate: 'DUPLICAR',
             share: 'COMPARTILHAR',
             share_unavailable: 'SEM_LINK',
@@ -497,6 +498,18 @@ describe('Minhas Paletas', () => {
 
         expect(rows).toHaveLength(2);
         expect(rows[0]?.textContent).toContain('web');
+    });
+
+    it('abre o Layout Harmonizer com a paleta como cor base', () => {
+        mountPage();
+
+        expect(
+            query<HTMLAnchorElement>(
+                '[data-test="palette-action-layout-system"]',
+            ).getAttribute('href'),
+        ).toBe(
+            '/dashboard/colors/layout-systems/create?palette=01KPALETTE00000000000000001',
+        );
     });
 
     it('mostra as abas e alterna para Favoritas pelo servidor', async () => {

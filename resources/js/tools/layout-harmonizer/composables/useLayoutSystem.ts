@@ -1,19 +1,10 @@
-import {
-    computed,
-    ref,
-    shallowRef,
-    watch,
-    type ComputedRef,
-    type Ref,
-    type ShallowRef,
-} from 'vue';
+import { computed, ref, shallowRef, watch } from 'vue';
 import { parseColor, type Rgb, type Rgba } from '@/lib/color';
-import { useColorState, type ColorState } from '@/composables/useColorState';
+import { useColorState } from '@/composables/useColorState';
 import {
     generateLayoutSystem,
     LayoutEngineError,
     resolveSeed,
-    type LayoutEngineErrorCode,
     type LayoutSeedInfo,
     type LayoutStrategy,
     type LayoutSystemResult,
@@ -36,7 +27,19 @@ import {
     type LayoutEditState,
     type LayoutEditTarget,
 } from '../lib/editState';
+import type {
+    LayoutEditNotice,
+    LayoutNotice,
+    LayoutSystemInit,
+    LiveLayoutController,
+} from '../lib/controller';
+import {
+    LAYOUT_PLACEHOLDER,
+    parseBackgroundText,
+    parseSecondaryText,
+} from '../lib/inputs';
 import { buildSnapshot, type LayoutSnapshot } from '../lib/snapshot';
+import { hydrateState, materializeResult } from '../lib/state';
 import { suggestionsFor, type LayoutSuggestion } from '../lib/suggestions';
 
 /**
@@ -50,80 +53,28 @@ import { suggestionsFor, type LayoutSuggestion } from '../lib/suggestions';
  *
  * Edicoes ficam FORA do `result`, porque o motor e substituido inteiro a cada
  * geracao e um valor bloqueado precisa sobreviver a troca de seed.
+ *
+ * Na F4 o composable tambem reabre um sistema salvo (`initial`): hidrata o
+ * snapshot sem regenerar e consome a primeira execucao do watch (ADR-168).
  */
 
-/** Aviso ativo; `null` quando a ultima entrada gerou um quadro. */
-export type LayoutNotice = LayoutEngineErrorCode | 'invalid-seed' | null;
+export type {
+    LayoutController,
+    LayoutEditNotice,
+    LayoutNotice,
+} from '../lib/controller';
 
-/** Aviso de edicao, separado do aviso do quadro para nao marcar stale. */
-export type LayoutEditNotice = 'discarded' | null;
-
-/**
- * Cor interna do picker antes da primeira escolha. Nunca vira seed: o campo
- * abre vazio e so uma interacao real (`text` nao vazio) libera a geracao.
- */
-const PLACEHOLDER = { r: 255, g: 255, b: 255, a: 1 };
-
-export interface LayoutSystemState {
-    picker: ColorState;
-    strategy: Ref<LayoutStrategy>;
-    backgroundText: Ref<string>;
-    secondaryText: Ref<string>;
-    /** Ha texto no campo da seed (mesmo invalido). */
-    hasSeed: ComputedRef<boolean>;
-    /** A seed tem alpha e precisa de fundo explicito. */
-    needsBackground: ComputedRef<boolean>;
-    background: ComputedRef<Rgb | null>;
-    backgroundInvalid: ComputedRef<boolean>;
-    /** Texto da secundaria preenchido e invalido; o ultimo valor vale. */
-    secondaryInvalid: ComputedRef<boolean>;
-    /** Origem efetiva da secundaria no ultimo quadro valido. */
-    secondarySource: ComputedRef<'auto' | 'manual'>;
-    result: ShallowRef<LayoutSystemResult | null>;
-    seed: ComputedRef<LayoutSeedInfo | null>;
-    notice: Ref<LayoutNotice>;
-    /** Ha um quadro anterior enquanto a entrada atual e invalida. */
-    isStale: ComputedRef<boolean>;
-    /** Meta de sugestao; trocar nao regenera o quadro. */
-    target: Ref<LayoutEditTarget>;
-    editState: ShallowRef<LayoutEditState>;
-    editNotice: Ref<LayoutEditNotice>;
-    suggestions: ComputedRef<LayoutSuggestion[]>;
-    snapshot: ComputedRef<LayoutSnapshot | null>;
-    /** O quadro pode ser editado (sem entrada invalida pendente). */
-    editable: ComputedRef<boolean>;
-    isTokenLocked(theme: LayoutTheme, token: LayoutTokenId): boolean;
-    applyColor(theme: LayoutTheme, token: LayoutTokenId, color: Rgba): void;
-    toggleTokenLock(theme: LayoutTheme, token: LayoutTokenId): void;
-    acceptAdjustment(theme: LayoutTheme, token: LayoutTokenId): void;
-    acceptAdjustmentInBothThemes(token: LayoutTokenId): void;
-    restoreTokenEdit(theme: LayoutTheme, token: LayoutTokenId): void;
-    restoreThemeEdits(theme: LayoutTheme): void;
-    restoreAllEdits(): void;
-    resetSecondary(): void;
+export interface LayoutSystemOptions {
+    /** Sistema salvo: hidrata o workspace live sem chamar o motor. */
+    initial?: LayoutSystemInit;
+    /** CTA da paleta: preenche a seed e deixa o watch gerar uma vez. */
+    seedText?: string;
 }
 
-function parsedSecondary(text: string): Rgb | null | undefined {
-    const trimmed = text.trim();
-
-    if (trimmed === '') {
-        return null;
-    }
-
-    const parsed = parseColor(trimmed);
-
-    // `undefined` = invalido; `null` = automatico.
-    return parsed.ok
-        ? {
-              r: parsed.color.rgba.r,
-              g: parsed.color.rgba.g,
-              b: parsed.color.rgba.b,
-          }
-        : undefined;
-}
-
-export function useLayoutSystem(): LayoutSystemState {
-    const picker = useColorState({ initial: PLACEHOLDER });
+export function useLayoutSystem(
+    options: LayoutSystemOptions = {},
+): LiveLayoutController {
+    const picker = useColorState({ initial: LAYOUT_PLACEHOLDER });
 
     // Campo vazio e um estado da pagina, nao um erro de formato: o picker
     // esconde `empty`, e a seed nasce "nao escolhida".
@@ -137,39 +88,31 @@ export function useLayoutSystem(): LayoutSystemState {
     const editNotice = ref<LayoutEditNotice>(null);
     const target = ref<LayoutEditTarget>('aa');
     const editState = shallowRef<LayoutEditState>(emptyEditState());
+    /** O live nunca pendura regeneracao: o watch sempre gera. */
+    const pendingRegeneration = ref(false);
     /** Assinatura das entradas que regeneram; `null` antes do primeiro quadro. */
     let lastSignature: string | null = null;
 
     const hasSeed = computed(() => picker.text.value.trim() !== '');
 
-    const background = computed<Rgb | null>(() => {
-        const text = backgroundText.value.trim();
-
-        if (text === '') {
-            return null;
-        }
-
-        const parsed = parseColor(text);
-
-        if (!parsed.ok) {
-            return null;
-        }
-
-        // O fundo da composicao e sempre opaco: so os canais RGB entram.
-        return {
-            r: parsed.color.rgba.r,
-            g: parsed.color.rgba.g,
-            b: parsed.color.rgba.b,
-        };
-    });
+    const background = computed<Rgb | null>(() =>
+        parseBackgroundText(backgroundText.value),
+    );
 
     const backgroundInvalid = computed(
         () => backgroundText.value.trim() !== '' && background.value === null,
     );
 
     const secondaryInvalid = computed(
-        () => parsedSecondary(secondaryText.value) === undefined,
+        () => parseSecondaryText(secondaryText.value) === undefined,
     );
+
+    /** RGB efetivo da secundaria manual, pronto para o envelope persistido. */
+    const secondaryColor = computed<Rgb | null>(() => {
+        const parsed = parseSecondaryText(secondaryText.value);
+
+        return parsed === undefined || parsed === null ? null : parsed;
+    });
 
     const needsBackground = computed(() => picker.rgba.value.a < 1);
 
@@ -202,7 +145,7 @@ export function useLayoutSystem(): LayoutSystemState {
      * geracao, e o aviso correspondente aparece sem marcar o quadro como stale.
      */
     function regenerate(): void {
-        const manualSecondary = parsedSecondary(secondaryText.value);
+        const manualSecondary = parseSecondaryText(secondaryText.value);
 
         // Secundaria digitada e invalida preserva o ultimo quadro, como a seed.
         if (manualSecondary === undefined) {
@@ -286,6 +229,44 @@ export function useLayoutSystem(): LayoutSystemState {
         }
     }
 
+    /**
+     * Reabre o sistema salvo preenchendo tudo antes do watch. A primeira
+     * execucao e consumida pelo latch: sem ele, montar o workspace regeneraria
+     * o quadro e poderia descartar overrides gravados (ADR-168).
+     */
+    let skipNext = false;
+
+    if (options.initial) {
+        const hydrated = hydrateState(options.initial.state);
+
+        picker.setFromText(hydrated.inputs.seedText);
+        strategy.value = hydrated.inputs.strategy;
+        backgroundText.value = hydrated.inputs.backgroundText;
+        secondaryText.value = hydrated.inputs.secondaryText;
+        result.value = materializeResult(hydrated.snapshot);
+        editState.value = hydrated.editState;
+        target.value = hydrated.target;
+        lastSignature = signatureOf(
+            hydrated.snapshot.seed.effective,
+            hydrated.snapshot.strategy,
+            hydrated.secondary,
+        );
+        skipNext = true;
+    } else if (options.seedText !== undefined) {
+        // CTA da paleta: preenche a seed e deixa o watch gerar uma vez.
+        picker.setFromText(options.seedText);
+    }
+
+    function onInputsChanged(): void {
+        if (skipNext) {
+            skipNext = false;
+
+            return;
+        }
+
+        regenerate();
+    }
+
     watch(
         [
             () => picker.text.value,
@@ -294,7 +275,7 @@ export function useLayoutSystem(): LayoutSystemState {
             backgroundText,
             secondaryText,
         ],
-        regenerate,
+        onInputsChanged,
         { immediate: true },
     );
 
@@ -408,6 +389,7 @@ export function useLayoutSystem(): LayoutSystemState {
     );
 
     return {
+        mode: 'live',
         picker,
         strategy,
         backgroundText,
@@ -418,6 +400,7 @@ export function useLayoutSystem(): LayoutSystemState {
         backgroundInvalid,
         secondaryInvalid,
         secondarySource,
+        secondaryColor,
         result,
         seed,
         notice,
@@ -428,6 +411,9 @@ export function useLayoutSystem(): LayoutSystemState {
         suggestions,
         snapshot,
         editable,
+        canRestoreEdits: true,
+        canSuggest: true,
+        pendingRegeneration,
         isTokenLocked: (theme, token) =>
             isLocked(editState.value, theme, token),
         applyColor,

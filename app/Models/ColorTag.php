@@ -63,6 +63,14 @@ class ColorTag extends Model
     }
 
     /**
+     * @return BelongsToMany<LayoutSystem, $this>
+     */
+    public function layoutSystems(): BelongsToMany
+    {
+        return $this->belongsToMany(LayoutSystem::class, 'color_tag_layout_system');
+    }
+
+    /**
      * @param  Builder<static>  $query
      */
     public function scopeForUser(Builder $query, int $userId): void

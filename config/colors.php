@@ -47,8 +47,45 @@ return [
         'sitemap_limit' => (int) env('COLORS_PALETTES_SITEMAP_LIMIT', 500),
     ],
 
+    /*
+    | Sistemas de layout persistidos (F4, ADR-168 a ADR-174). A cota e a mesma
+    | das paletas (conjunta, ADR-170); aqui ficam so os limites de formulario,
+    | da previa, do sitemap e o teto tecnico do `state`. As versoes correntes
+    | do estado/snapshot sao 1; `algorithm` e `suggestions` acompanham o motor e
+    | o servidor so aceita o que o snapshot declarar dentro da faixa.
+    */
+    'layout_systems' => [
+        'name_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_NAME_MAX_LENGTH', 80),
+
+        'description_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_DESCRIPTION_MAX_LENGTH', 500),
+
+        'per_page' => (int) env('COLORS_LAYOUT_SYSTEMS_PER_PAGE', 20),
+
+        'preview_colors' => (int) env('COLORS_LAYOUT_SYSTEM_PREVIEW_COLORS', 6),
+
+        'sitemap_limit' => (int) env('COLORS_LAYOUT_SYSTEMS_SITEMAP_LIMIT', 500),
+
+        /*
+        | Teto tecnico do JSON do estado. O retrato real fica em ~25 KB; o teto
+        | existe para recusar payload abusivo antes de gravar.
+        */
+        'state_max_bytes' => (int) env('COLORS_LAYOUT_SYSTEM_STATE_MAX_BYTES', 256 * 1024),
+
+        'input_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_INPUT_MAX_LENGTH', 120),
+
+        'versions' => [
+            'state' => 1,
+            'schema' => 1,
+            'snapshot' => 1,
+            'algorithm' => 1,
+            'suggestions' => 1,
+        ],
+    ],
+
     'tags' => [
         'per_palette' => (int) env('COLORS_TAGS_PER_PALETTE', 10),
+
+        'per_layout_system' => (int) env('COLORS_TAGS_PER_LAYOUT_SYSTEM', 10),
 
         'name_max_length' => (int) env('COLORS_TAG_NAME_MAX_LENGTH', 30),
     ],

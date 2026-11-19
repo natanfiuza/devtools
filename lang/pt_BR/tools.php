@@ -660,6 +660,75 @@ return [
             'suggestions' => 'Sugestões de contraste',
             'suggestion_target' => 'Meta de contraste das sugestões',
         ],
+
+        'prototype' => [
+            'title' => 'Protótipo',
+            'description' => 'Veja os 33 tokens do sistema aplicados a uma interface, no modelo e no tema escolhidos.',
+            'template_label' => 'Modelo',
+            'template_site' => 'Site',
+            'template_mobile' => 'Celular',
+            'theme_label' => 'Tema',
+            'theme_light' => 'Claro',
+            'theme_dark' => 'Escuro',
+            'preview_label' => 'Prévia do protótipo: {template}, {theme}',
+        ],
+
+        'save' => [
+            'title' => 'Salvar sistema de layout',
+            'description' => 'O quadro gravado abre de novo exatamente como está, sem recalcular.',
+            'name_label' => 'Nome',
+            'name_placeholder' => 'Meu sistema',
+            'name_required' => 'Informe um nome.',
+            'name_too_long' => 'Use no máximo {max} caracteres.',
+            'name_from_palette' => 'Sistema de layout — {name}',
+            'name_from_strategy' => '{strategy} — {hex}',
+            'description_label' => 'Descrição (opcional)',
+            'description_placeholder' => 'Para que serve este sistema?',
+            'description_too_long' => 'Use no máximo {max} caracteres.',
+            'visibility_label' => 'Quem pode ver',
+            'visibility_private' => 'Privado',
+            'visibility_private_hint' => 'Só você vê. Você pode publicar depois.',
+            'visibility_public' => 'Público',
+            'visibility_public_hint' => 'Ganha um link público e aparece na busca.',
+            'save_button' => 'Salvar',
+            'submit' => 'Salvar sistema',
+            'submit_update' => 'Salvar alterações',
+            'save_as_new' => 'Salvar como novo',
+            'saving' => 'Salvando…',
+            'cancel' => 'Cancelar',
+            'login_to_save' => 'Entrar para salvar',
+            'limit_reached' => 'Você atingiu o limite de {limit} itens. Arquive ou exclua algo para salvar.',
+        ],
+
+        'draft' => [
+            'title' => 'Retomar o rascunho?',
+            'description' => 'Encontramos um quadro salvo neste navegador antes de você entrar. Importar mantém o que você fez e não cria um sistema.',
+            'unsupported_title' => 'Rascunho de uma versão mais nova',
+            'unsupported_description' => 'Este rascunho foi criado por uma versão mais nova da ferramenta e não pode ser importado aqui. Você pode descartá-lo.',
+            'import' => 'Importar rascunho',
+            'discard' => 'Descartar',
+        ],
+
+        'origin' => [
+            'from' => 'Criado a partir da paleta {name}.',
+            'open' => 'Ver paleta',
+            'remove' => 'Remover origem',
+        ],
+
+        'lifecycle' => [
+            'restore_disabled' => 'Restaurar fica indisponível neste sistema: o estado gravado não guarda os valores automáticos. Use “Regenerar com a versão atual”.',
+            'suggestions_off' => 'As sugestões de contraste ficam indisponíveis neste sistema porque a versão do algoritmo de sugestões mudou.',
+            'pending_regeneration' => 'A seed, a estratégia ou a secundária mudou. O quadro continua no estado salvo até você regenerar.',
+            'regenerate' => 'Regenerar com a versão atual',
+            'readonly_notice' => 'Este sistema usa uma versão mais nova que este editor. O quadro aparece somente leitura; duplique para continuar editando.',
+        ],
+
+        'guard' => [
+            'title' => 'Sair sem salvar?',
+            'description' => 'Você tem alterações que ainda não foram salvas. Se sair agora, elas serão perdidas.',
+            'stay' => 'Continuar editando',
+            'leave' => 'Sair sem salvar',
+        ],
     ],
 
     'json-viewer' => [

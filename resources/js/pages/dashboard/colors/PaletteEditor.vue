@@ -30,7 +30,7 @@ import type {
 } from '@/tools/palette-generator/lib/extractContract';
 import type { ExtractedPalette } from '@/tools/palette-generator/lib/extractedPalette';
 import type { ImportedPalette } from '@/tools/palette-generator/lib/tokenImport';
-import PrototypePanel from '@/tools/palette-generator/prototype/PrototypePanel.vue';
+import PrototypePanel from '@/lib/prototype/PrototypePanel.vue';
 import type {
     PaletteDetails,
     PaletteEditorProps,

@@ -5,6 +5,7 @@ return [
         'description' => 'Paleta de :count colores con etiquetas: :tags.',
         'description_no_tags' => 'Paleta de :count colores.',
         'image_alt' => ':name — paleta de colores',
+        'system_description' => 'Sistema de layout con estrategia :strategy y :tokens tokens de color.',
     ],
 
     'profile' => [
@@ -109,8 +110,8 @@ return [
 
     'list' => [
         'title' => 'Mis Paletas',
-        'description' => 'Usas :used de :limit paletas. Las paletas archivadas cuentan para el límite.',
-        'description_unlimited' => 'Tienes :used paletas. Las archivadas también aparecen aquí.',
+        'description' => 'Usas {used} de {limit} elementos. Las paletas y sistemas archivados cuentan para el límite.',
+        'description_unlimited' => 'Tienes {used} elementos. Los archivados también aparecen aquí.',
         'remaining' => ':remaining restantes',
         'unlimited' => 'Ilimitado',
         'search_label' => 'Buscar',
@@ -202,6 +203,7 @@ return [
         'archive' => 'Archivar',
         'restore' => 'Restaurar',
         'delete' => 'Eliminar',
+        'create_layout_system' => 'Crear sistema de layout',
     ],
 
     'pagination' => [
@@ -235,6 +237,53 @@ return [
         'deleting' => 'Eliminando…',
         'cancel' => 'Cancelar',
         'mismatch' => 'El nombre no coincide con el de la paleta.',
+    ],
+
+    'systems' => [
+        'list' => [
+            'title' => 'Mis sistemas de layout',
+            'description' => 'Usas {used} de {limit} elementos. Las paletas y sistemas archivados cuentan para el límite.',
+            'description_unlimited' => 'Tienes {used} elementos. Los archivados también aparecen aquí.',
+            'new_system' => 'Nuevo sistema',
+            'tokens_label' => 'Tokens',
+            'tokens_count' => '{count} tokens',
+            'preview_alt' => 'Colores de {name}',
+            'empty_title' => 'Aún no hay sistemas de layout',
+            'empty_description' => 'Genera un tablero en el Layout Harmonizer, ponle un nombre y guárdalo: aparece en esta lista.',
+            'empty_cta' => 'Crear sistema de layout',
+        ],
+        'actions' => [
+            'share_unavailable' => 'Haz público el sistema para tener un enlace.',
+        ],
+        'editor' => [
+            'back' => 'Volver a los sistemas de layout',
+            'public_link' => 'Ver página pública',
+            'archived_title' => 'Este sistema está archivado',
+            'archived_description' => 'Los sistemas archivados son de solo lectura hasta que los restaures.',
+        ],
+        'public' => [
+            'versions' => 'Esquema v{schema} · algoritmo v{algorithm} · sugerencias v{suggestions} · instantánea v{snapshot}',
+            'credit_from' => 'Creado a partir de la paleta',
+        ],
+        'delete' => [
+            'title' => 'Eliminar sistema de layout',
+            'description' => 'No se puede deshacer: el sistema y su enlace público desaparecen para siempre y el slug nunca se reutiliza.',
+            'label' => 'Escribe el nombre del sistema para confirmar',
+            'confirm' => 'Eliminar sistema',
+            'deleting' => 'Eliminando…',
+            'cancel' => 'Cancelar',
+        ],
+        'strategy' => [
+            'unknown' => 'Estrategia desconocida',
+        ],
+        'toasts' => [
+            'created' => 'Sistema guardado.',
+            'updated' => 'Sistema actualizado.',
+            'archived' => 'Sistema archivado.',
+            'restored' => 'Sistema restaurado.',
+            'deleted' => 'Sistema eliminado.',
+            'duplicated' => 'Sistema duplicado.',
+        ],
     ],
 
     'tags_manager' => [

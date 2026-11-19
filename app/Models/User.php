@@ -348,6 +348,16 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     }
 
     /**
+     * Sistemas de layout salvos pela conta (F4, ADR-168).
+     *
+     * @return HasMany<LayoutSystem, $this>
+     */
+    public function layoutSystems(): HasMany
+    {
+        return $this->hasMany(LayoutSystem::class);
+    }
+
+    /**
      * Tags de paleta da conta (F4, ADR-103).
      *
      * @return HasMany<ColorTag, $this>

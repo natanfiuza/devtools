@@ -5,6 +5,7 @@ return [
         'description' => 'A :count-color palette with tags: :tags.',
         'description_no_tags' => 'A :count-color palette.',
         'image_alt' => ':name — color palette',
+        'system_description' => 'Layout system with the :strategy strategy and :tokens color tokens.',
     ],
 
     'profile' => [
@@ -109,8 +110,8 @@ return [
 
     'list' => [
         'title' => 'My palettes',
-        'description' => 'You are using :used of :limit palettes. Archived palettes count toward the limit.',
-        'description_unlimited' => 'You have :used palettes. Archived palettes are listed here too.',
+        'description' => 'You are using {used} of {limit} items. Archived palettes and systems count toward the limit.',
+        'description_unlimited' => 'You have {used} items. Archived ones show up here too.',
         'remaining' => ':remaining left',
         'unlimited' => 'Unlimited',
         'search_label' => 'Search',
@@ -202,6 +203,7 @@ return [
         'archive' => 'Archive',
         'restore' => 'Restore',
         'delete' => 'Delete',
+        'create_layout_system' => 'Create layout system',
     ],
 
     'pagination' => [
@@ -235,6 +237,53 @@ return [
         'deleting' => 'Deleting…',
         'cancel' => 'Cancel',
         'mismatch' => 'The name does not match the palette name.',
+    ],
+
+    'systems' => [
+        'list' => [
+            'title' => 'My layout systems',
+            'description' => 'You are using {used} of {limit} items. Archived palettes and systems count toward the limit.',
+            'description_unlimited' => 'You have {used} items. Archived ones show up here too.',
+            'new_system' => 'New system',
+            'tokens_label' => 'Tokens',
+            'tokens_count' => '{count} tokens',
+            'preview_alt' => 'Colors of {name}',
+            'empty_title' => 'No layout systems yet',
+            'empty_description' => 'Generate a board in the Layout Harmonizer, name it and save: it shows up in this list.',
+            'empty_cta' => 'Create layout system',
+        ],
+        'actions' => [
+            'share_unavailable' => 'Make the system public to get a link.',
+        ],
+        'editor' => [
+            'back' => 'Back to layout systems',
+            'public_link' => 'View public page',
+            'archived_title' => 'This system is archived',
+            'archived_description' => 'Archived systems are read-only until you restore them.',
+        ],
+        'public' => [
+            'versions' => 'Schema v{schema} · algorithm v{algorithm} · suggestions v{suggestions} · snapshot v{snapshot}',
+            'credit_from' => 'Created from the palette',
+        ],
+        'delete' => [
+            'title' => 'Delete layout system',
+            'description' => 'This cannot be undone: the system and its public link are gone for good, and the slug is never reused.',
+            'label' => 'Type the system name to confirm',
+            'confirm' => 'Delete system',
+            'deleting' => 'Deleting…',
+            'cancel' => 'Cancel',
+        ],
+        'strategy' => [
+            'unknown' => 'Unknown strategy',
+        ],
+        'toasts' => [
+            'created' => 'System saved.',
+            'updated' => 'System updated.',
+            'archived' => 'System archived.',
+            'restored' => 'System restored.',
+            'deleted' => 'System deleted.',
+            'duplicated' => 'System duplicated.',
+        ],
     ],
 
     'tags_manager' => [

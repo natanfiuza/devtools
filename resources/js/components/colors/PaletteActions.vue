@@ -3,6 +3,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import {
     Archive,
     Copy,
+    LayoutGrid,
     Layers,
     Link2,
     Pencil,
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import publicPalettes from '@/routes/colors/palettes';
 import palettes from '@/routes/dashboard/colors/palettes';
+import systems from '@/routes/dashboard/colors/systems';
 import type { PaletteEditor, PaletteRow } from '@/types/colors';
 
 /**
@@ -66,6 +68,11 @@ const publicUrl = computed<string | null>(() => {
         slug: props.palette.slug,
     });
 });
+
+/** CTA da paleta: abre o Layout Harmonizer com a cor base como seed. */
+const layoutSystemUrl = computed(() =>
+    systems.create.url({ query: { palette: props.palette.id } }),
+);
 
 function duplicate(): void {
     router.post(
@@ -119,6 +126,16 @@ async function copyLink(): Promise<void> {
                 <Link :href="prototypeUrl" data-test="palette-action-prototype">
                     <Layers class="size-4" />
                     {{ t('colors.actions.prototype') }}
+                </Link>
+            </Button>
+
+            <Button as-child variant="ghost" size="sm">
+                <Link
+                    :href="layoutSystemUrl"
+                    data-test="palette-action-layout-system"
+                >
+                    <LayoutGrid class="size-4" />
+                    {{ t('colors.actions.create_layout_system') }}
                 </Link>
             </Button>
 

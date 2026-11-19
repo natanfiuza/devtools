@@ -11,6 +11,7 @@ return [
         'billing' => 'Invoices',
         'badgeforge' => 'BadgeForge',
         'palettes' => 'My palettes',
+        'layout_systems' => 'Layout systems',
         'back_to_site' => 'Back to site',
     ],
 

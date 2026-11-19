@@ -11,6 +11,7 @@ return [
         'billing' => 'Facturas',
         'badgeforge' => 'BadgeForge',
         'palettes' => 'Mis Paletas',
+        'layout_systems' => 'Sistemas de layout',
         'back_to_site' => 'Volver al sitio',
     ],
 

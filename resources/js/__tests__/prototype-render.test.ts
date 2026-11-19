@@ -1,14 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { buildPaletteScale, parseColor, type Rgba } from '@/lib/color';
 import { PALETTE_ROLES, rolesFromScaleItems } from '@/lib/palettePayload';
-import { buildPrototype } from '@/tools/palette-generator/prototype/defaults';
-import { prototypeFontCss } from '@/tools/palette-generator/prototype/fonts';
-import {
-    escapeXml,
-    readableOn,
-    renderSvg,
-} from '@/tools/palette-generator/prototype/renderSvg';
-import type { PrototypeCopy } from '@/tools/palette-generator/prototype/types';
+import { buildPrototype } from '@/lib/prototype/defaults';
+import { prototypeFontCss } from '@/lib/prototype/fonts';
+import { escapeXml, readableOn, renderSvg } from '@/lib/prototype/renderSvg';
+import type { PrototypeCopy } from '@/lib/prototype/types';
 import type { PaletteRole, PaletteRoles } from '@/types/colors';
 
 /**

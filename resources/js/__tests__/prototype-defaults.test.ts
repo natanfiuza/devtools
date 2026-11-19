@@ -5,9 +5,9 @@ import {
     buildPrototype,
     PROTOTYPE_SIZES,
     PROTOTYPE_TEMPLATES,
-} from '@/tools/palette-generator/prototype/defaults';
-import { readableOn } from '@/tools/palette-generator/prototype/renderSvg';
-import type { PrototypeCopy } from '@/tools/palette-generator/prototype/types';
+} from '@/lib/prototype/defaults';
+import { readableOn } from '@/lib/prototype/renderSvg';
+import type { PrototypeCopy } from '@/lib/prototype/types';
 import type { PaletteRoles } from '@/types/colors';
 
 /**

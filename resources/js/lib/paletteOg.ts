@@ -1,9 +1,6 @@
-import { buildPrototype } from '@/tools/palette-generator/prototype/defaults';
-import { prototypePngFromDocument } from '@/tools/palette-generator/prototype/exportPrototype';
-import type {
-    PrototypeCopy,
-    PrototypeDocument,
-} from '@/tools/palette-generator/prototype/types';
+import { buildPrototype } from '@/lib/prototype/defaults';
+import { prototypePngFromDocument } from '@/lib/prototype/exportPrototype';
+import type { PrototypeCopy, PrototypeDocument } from '@/lib/prototype/types';
 import type {
     PaletteColors,
     PalettePayload,

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { rasterizeSvg } from '@/tools/palette-generator/prototype/rasterize';
+import { rasterizeSvg } from '@/lib/prototype/rasterize';
 
 /**
  * Rasterizacao do SVG em PNG (F4, ADR-126).
