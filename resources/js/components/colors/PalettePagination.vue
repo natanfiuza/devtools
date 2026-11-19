@@ -7,11 +7,17 @@ import type { PalettePaginator } from '@/types/colors';
  * Paginacao de Minhas Paletas (F4).
  *
  * A pagina e decidida pelo servidor; aqui so existe o pedido. O componente nao
- * conhece os filtros - quem navega e a pagina, preservando a busca.
+ * conhece os filtros - quem navega e a pagina, preservando a busca. O recorte
+ * de campos e estrutural para servir tambem a lista de sistemas (F4).
  */
 
+type PaginationFields = Pick<
+    PalettePaginator,
+    'current_page' | 'last_page' | 'per_page' | 'total' | 'from' | 'to'
+>;
+
 defineProps<{
-    paginator: PalettePaginator;
+    paginator: PaginationFields;
 }>();
 
 const emit = defineEmits<{

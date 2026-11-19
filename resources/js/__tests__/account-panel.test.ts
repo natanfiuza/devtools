@@ -107,6 +107,7 @@ const traducoes = {
             billing: 'FATURAS',
             badgeforge: 'BADGEFORGE',
             palettes: 'MINHAS_PALETAS',
+            layout_systems: 'SISTEMAS_DE_LAYOUT',
             back_to_site: 'VOLTAR_AO_SITE',
         },
         history: {
@@ -295,6 +296,7 @@ describe('navegacao da conta', () => {
                 'FATURAS',
                 'BADGEFORGE',
                 'MINHAS_PALETAS',
+                'SISTEMAS_DE_LAYOUT',
             ],
             ['PERFIL', 'SEGURANCA', 'APARENCIA', 'TOKENS_DE_API'],
         ]);
@@ -311,6 +313,7 @@ describe('navegacao da conta', () => {
             '/dashboard/billing',
             '/dashboard/badgeforge',
             '/dashboard/colors/palettes',
+            '/dashboard/colors/layout-systems',
             '/settings/profile',
             '/settings/security',
             '/settings/appearance',
@@ -339,6 +342,7 @@ describe('navegacao da conta', () => {
         ['/dashboard/billing', 'FATURAS'],
         ['/dashboard/badgeforge', 'BADGEFORGE'],
         ['/dashboard/colors/palettes', 'MINHAS_PALETAS'],
+        ['/dashboard/colors/layout-systems', 'SISTEMAS_DE_LAYOUT'],
         ['/settings/profile', 'PERFIL'],
         ['/settings/security', 'SEGURANCA'],
         ['/settings/appearance', 'APARENCIA'],
@@ -377,6 +381,7 @@ describe('navegacao da conta', () => {
             'FATURAS',
             'BADGEFORGE',
             'MINHAS_PALETAS',
+            'SISTEMAS_DE_LAYOUT',
         ]);
     });
 

@@ -186,5 +186,12 @@
 - Estado efetivo: o quadro como esta na tela, depois da seed, da estrategia, da secundaria manual, das edicoes e dos bloqueios; e o que o snapshot congela, e o que a regeneracao descarta em parte quando as entradas mudam - so o que esta bloqueado sobrevive.
 - Snapshot: estado congelado de um sistema salvo ou exportado; reabrir e exportar usam os valores gravados, sem recalcular, mesmo que o algoritmo mude depois (mesmo principio da escala congelada das paletas).
 - Cota conjunta: o limite Free de 25 itens do grupo Colors conta paletas e sistemas de layout juntos, sob o lock da conta; itens arquivados contam e so a exclusao definitiva libera uma vaga.
+- Rascunho anonimo: envelope do Layout Harmonizer gravado no `localStorage` (`devtools.layout-harmonizer.draft.v1`) enquanto o usuario nao tem conta, sem TTL e com status `pending`, `imported` ou `refused`; nao e um sistema salvo, nao consome cota e nunca vai ao servidor (ADR-161).
+- Importacao de rascunho: acao explicita depois do login que hidrata o rascunho no workspace sem salvar nem consumir cota; descartar limpa o rascunho, e o dialogo so aparece quando o status e `pending`.
+- Modo compativel: abertura de um sistema salvo com algoritmo ou sugestoes de versoes anteriores suportadas; o quadro exibido e o gravado, a edicao e o bloqueio continuam, restaurar e sugestoes ficam desabilitados e as entradas marcam regeneracao pendente (ADR-169).
+- Quadro congelado: quadro de um sistema de versao mais nova ou desconhecida, exibido somente leitura com os valores gravados, sem edicao de token mas com metadados, ciclo de vida e duplicacao disponiveis.
+- Regeneracao explicita: decisao do usuario de gerar de novo um sistema compativel com as versoes atuais, levando os tokens bloqueados como overrides e descartando as edicoes manuais nao bloqueadas; nunca acontece sozinha (ADR-169).
+- Slug aposentado: slug publico de um sistema arquivado ou excluido, reservado em `layout_systems.archived_slug` ou em `layout_system_retired_slugs`; nunca e reemitido, e a URL antiga responde 404 permanente (ADR-171).
+- Credito de origem: registro congelado no salvamento com o nome, o slug, a visibilidade e o autor da paleta que deu origem ao sistema; a origem privada nunca aparece no publico, e o texto sobrevive a exclusao da paleta mesmo perdendo o link (ADR-172).
 
 

@@ -1,6 +1,6 @@
 import { downloadBlob } from '@/lib/download';
-import { renderSvg } from '../prototype/renderSvg';
-import { rasterizeSvg, type RasterScale } from '../prototype/rasterize';
+import { renderSvg } from '@/lib/prototype/renderSvg';
+import { rasterizeSvg, type RasterScale } from '@/lib/prototype/rasterize';
 import { buildPaletteImage } from './buildImage';
 import { PALETTE_IMAGE_SIZES } from './types';
 import type { PaletteImageLayout, PaletteImageSource } from './types';
@@ -14,7 +14,7 @@ import type { PaletteImageLayout, PaletteImageSource } from './types';
  */
 
 async function fontCss(): Promise<string> {
-    const { prototypeFontCss } = await import('../prototype/fonts');
+    const { prototypeFontCss } = await import('@/lib/prototype/fonts');
 
     return prototypeFontCss();
 }

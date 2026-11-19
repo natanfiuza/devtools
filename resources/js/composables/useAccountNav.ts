@@ -6,6 +6,7 @@ import {
     KeyRound,
     LayoutGrid,
     Palette,
+    PanelTop,
     ShieldCheck,
     SwatchBook,
     UserRound,
@@ -15,6 +16,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dashboard } from '@/routes';
 import { index as palettesIndex } from '@/routes/dashboard/colors/palettes';
+import { index as layoutSystemsIndex } from '@/routes/dashboard/colors/systems';
 import { index as notificationsIndex } from '@/routes/dashboard/notifications';
 import { index as apiTokens } from '@/routes/api-tokens';
 import { edit as editAppearance } from '@/routes/appearance';
@@ -75,6 +77,11 @@ export function useAccountNav(): ComputedRef<AccountNavGroup[]> {
                     title: t('account.nav.palettes'),
                     href: palettesIndex.url(),
                     icon: SwatchBook,
+                },
+                {
+                    title: t('account.nav.layout_systems'),
+                    href: layoutSystemsIndex.url(),
+                    icon: PanelTop,
                 },
             ],
         },

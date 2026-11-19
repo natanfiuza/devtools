@@ -660,6 +660,75 @@ return [
             'suggestions' => 'Contrast suggestions',
             'suggestion_target' => 'Contrast target for suggestions',
         ],
+
+        'prototype' => [
+            'title' => 'Prototype',
+            'description' => 'See the system\'s 33 tokens applied to an interface, in the template and theme you pick.',
+            'template_label' => 'Template',
+            'template_site' => 'Site',
+            'template_mobile' => 'Mobile',
+            'theme_label' => 'Theme',
+            'theme_light' => 'Light',
+            'theme_dark' => 'Dark',
+            'preview_label' => 'Prototype preview: {template}, {theme}',
+        ],
+
+        'save' => [
+            'title' => 'Save layout system',
+            'description' => 'The saved board reopens exactly as it is, without recalculating.',
+            'name_label' => 'Name',
+            'name_placeholder' => 'My system',
+            'name_required' => 'Enter a name.',
+            'name_too_long' => 'Use at most {max} characters.',
+            'name_from_palette' => 'Layout system — {name}',
+            'name_from_strategy' => '{strategy} — {hex}',
+            'description_label' => 'Description (optional)',
+            'description_placeholder' => 'What is this system for?',
+            'description_too_long' => 'Use at most {max} characters.',
+            'visibility_label' => 'Who can see it',
+            'visibility_private' => 'Private',
+            'visibility_private_hint' => 'Only you see it. You can publish later.',
+            'visibility_public' => 'Public',
+            'visibility_public_hint' => 'It gets a public link and shows up in search.',
+            'save_button' => 'Save',
+            'submit' => 'Save system',
+            'submit_update' => 'Save changes',
+            'save_as_new' => 'Save as new',
+            'saving' => 'Saving…',
+            'cancel' => 'Cancel',
+            'login_to_save' => 'Sign in to save',
+            'limit_reached' => 'You reached the limit of {limit} items. Archive or delete something to save.',
+        ],
+
+        'draft' => [
+            'title' => 'Resume the draft?',
+            'description' => 'We found a board saved in this browser before you signed in. Importing keeps your work and does not create a system.',
+            'unsupported_title' => 'Draft from a newer version',
+            'unsupported_description' => 'This draft was created by a newer version of the tool and cannot be imported here. You can discard it.',
+            'import' => 'Import draft',
+            'discard' => 'Discard',
+        ],
+
+        'origin' => [
+            'from' => 'Created from the palette {name}.',
+            'open' => 'View palette',
+            'remove' => 'Remove origin',
+        ],
+
+        'lifecycle' => [
+            'restore_disabled' => 'Restore is unavailable for this system: the saved state does not keep the automatic values. Use “Regenerate with the current version”.',
+            'suggestions_off' => 'Contrast suggestions are unavailable for this system because the suggestion algorithm version changed.',
+            'pending_regeneration' => 'The seed, the strategy or the secondary changed. The board stays in the saved state until you regenerate.',
+            'regenerate' => 'Regenerate with the current version',
+            'readonly_notice' => 'This system uses a newer version than this editor. The board is read-only; duplicate it to keep editing.',
+        ],
+
+        'guard' => [
+            'title' => 'Leave without saving?',
+            'description' => 'You have changes that have not been saved. If you leave now, they will be lost.',
+            'stay' => 'Keep editing',
+            'leave' => 'Leave without saving',
+        ],
     ],
 
     'json-viewer' => [

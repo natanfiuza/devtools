@@ -2,10 +2,13 @@
 
 namespace App\Support;
 
+use App\Enums\LayoutStrategy;
 use App\Models\ColorPalette;
+use App\Models\LayoutSystem;
 use App\Models\User;
 use App\Support\Colors\PaletteOgStorage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Regras de indexacao e de compartilhamento do site.
@@ -122,6 +125,7 @@ final class Seo
             ],
             'tools.show', 'tools.show.grouped' => self::toolMeta($request),
             'colors.palettes.show' => self::paletteMeta($request),
+            'colors.systems.show' => self::systemMeta($request),
             'colors.profiles.show' => self::profileMeta($request),
             default => [
                 'title' => (string) config('app.name'),
@@ -248,6 +252,74 @@ final class Seo
             'title' => $palette->name,
             'description' => $description,
         ];
+    }
+
+    /**
+     * Metas da pagina publica de um sistema de layout (F4, ADR-174).
+     *
+     * O titulo e o nome do sistema; a descricao e a do dono quando existe e,
+     * senao, uma frase com a estrategia e a contagem de tokens. O sistema e
+     * lido pela mesma regra da rota (publico, ativo e com slug). A tabela pode
+     * ainda nao existir na janela entre o deploy e o `migrate`.
+     *
+     * @return array{title: string, description: string}
+     */
+    private static function systemMeta(Request $request): array
+    {
+        $system = self::layoutSystem($request);
+
+        if ($system === null) {
+            return [
+                'title' => (string) config('app.name'),
+                'description' => (string) trans('app.tagline'),
+            ];
+        }
+
+        $description = trim((string) $system->description);
+
+        if ($description === '') {
+            $strategy = $system->state['inputs']['strategy'] ?? null;
+            $enum = is_string($strategy) ? LayoutStrategy::tryFrom($strategy) : null;
+
+            $description = (string) trans('colors.meta.system_description', [
+                'strategy' => $enum instanceof LayoutStrategy
+                    ? (string) trans($enum->labelKey())
+                    : (string) trans('colors.systems.strategy.unknown'),
+                'tokens' => (int) $system->tokens_count,
+            ]);
+        }
+
+        return [
+            'title' => $system->name,
+            'description' => $description,
+        ];
+    }
+
+    /**
+     * O sistema da pagina publica, pela mesma visibilidade da rota.
+     */
+    private static function layoutSystem(Request $request): ?LayoutSystem
+    {
+        $route = $request->route();
+
+        if ($route?->getName() !== 'colors.systems.show') {
+            return null;
+        }
+
+        if (! Schema::hasTable('layout_systems')) {
+            return null;
+        }
+
+        $slug = $route->parameter('slug');
+
+        if (! is_string($slug)) {
+            return null;
+        }
+
+        return LayoutSystem::query()
+            ->publiclyVisible()
+            ->where('slug', $slug)
+            ->first();
     }
 
     /**
@@ -436,6 +508,14 @@ final class Seo
     {
         $route = $request->route();
         $name = $route?->getName();
+
+        // A pagina publica do sistema de layout usa a imagem estatica do
+        // Layout Harmonizer: nao ha OG dinamica por sistema (F4, ADR-174).
+        if ($name === 'colors.systems.show') {
+            $tool = Tools::findForUrl('layout-harmonizer', 'colors');
+
+            return $tool === null || $tool['status'] !== 'available' ? null : 'layout-harmonizer';
+        }
 
         // So as rotas de tool tem imagem propria: nas outras nem se abre o
         // registro.

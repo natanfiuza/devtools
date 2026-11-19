@@ -1,7 +1,7 @@
 // A mesma familia que o app ja carrega (`resources/css/app.css`); aqui ela
 // entra como data URI para o SVG exportado nao depender de rede.
-import bold from '../../../../badgeforge/fonts/libre-franklin/LibreFranklin-Bold.ttf?inline';
-import regular from '../../../../badgeforge/fonts/libre-franklin/LibreFranklin-Regular.ttf?inline';
+import bold from '../../../badgeforge/fonts/libre-franklin/LibreFranklin-Bold.ttf?inline';
+import regular from '../../../badgeforge/fonts/libre-franklin/LibreFranklin-Regular.ttf?inline';
 
 /**
  * Fonte embutida no SVG de exportacao (F4, ADR-126).

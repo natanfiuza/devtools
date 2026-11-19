@@ -660,6 +660,75 @@ return [
             'suggestions' => 'Sugerencias de contraste',
             'suggestion_target' => 'Objetivo de contraste de las sugerencias',
         ],
+
+        'prototype' => [
+            'title' => 'Prototipo',
+            'description' => 'Mira los 33 tokens del sistema aplicados a una interfaz, en la plantilla y el tema que elijas.',
+            'template_label' => 'Plantilla',
+            'template_site' => 'Sitio',
+            'template_mobile' => 'Móvil',
+            'theme_label' => 'Tema',
+            'theme_light' => 'Claro',
+            'theme_dark' => 'Oscuro',
+            'preview_label' => 'Vista previa del prototipo: {template}, {theme}',
+        ],
+
+        'save' => [
+            'title' => 'Guardar sistema de layout',
+            'description' => 'El tablero guardado se abre de nuevo exactamente como está, sin recalcular.',
+            'name_label' => 'Nombre',
+            'name_placeholder' => 'Mi sistema',
+            'name_required' => 'Indica un nombre.',
+            'name_too_long' => 'Usa como máximo {max} caracteres.',
+            'name_from_palette' => 'Sistema de layout — {name}',
+            'name_from_strategy' => '{strategy} — {hex}',
+            'description_label' => 'Descripción (opcional)',
+            'description_placeholder' => '¿Para qué sirve este sistema?',
+            'description_too_long' => 'Usa como máximo {max} caracteres.',
+            'visibility_label' => 'Quién puede verlo',
+            'visibility_private' => 'Privado',
+            'visibility_private_hint' => 'Solo tú lo ves. Puedes publicarlo después.',
+            'visibility_public' => 'Público',
+            'visibility_public_hint' => 'Obtiene un enlace público y aparece en la búsqueda.',
+            'save_button' => 'Guardar',
+            'submit' => 'Guardar sistema',
+            'submit_update' => 'Guardar cambios',
+            'save_as_new' => 'Guardar como nuevo',
+            'saving' => 'Guardando…',
+            'cancel' => 'Cancelar',
+            'login_to_save' => 'Iniciar sesión para guardar',
+            'limit_reached' => 'Has alcanzado el límite de {limit} elementos. Archiva o elimina algo para guardar.',
+        ],
+
+        'draft' => [
+            'title' => '¿Retomar el borrador?',
+            'description' => 'Encontramos un tablero guardado en este navegador antes de que iniciaras sesión. Importarlo conserva tu trabajo y no crea un sistema.',
+            'unsupported_title' => 'Borrador de una versión más nueva',
+            'unsupported_description' => 'Este borrador fue creado por una versión más nueva de la herramienta y no se puede importar aquí. Puedes descartarlo.',
+            'import' => 'Importar borrador',
+            'discard' => 'Descartar',
+        ],
+
+        'origin' => [
+            'from' => 'Creado a partir de la paleta {name}.',
+            'open' => 'Ver paleta',
+            'remove' => 'Quitar origen',
+        ],
+
+        'lifecycle' => [
+            'restore_disabled' => 'Restaurar no está disponible en este sistema: el estado guardado no conserva los valores automáticos. Usa «Regenerar con la versión actual».',
+            'suggestions_off' => 'Las sugerencias de contraste no están disponibles en este sistema porque cambió la versión del algoritmo de sugerencias.',
+            'pending_regeneration' => 'La semilla, la estrategia o la secundaria cambió. El tablero sigue en el estado guardado hasta que regeneres.',
+            'regenerate' => 'Regenerar con la versión actual',
+            'readonly_notice' => 'Este sistema usa una versión más nueva que este editor. El tablero aparece en solo lectura; duplícalo para seguir editando.',
+        ],
+
+        'guard' => [
+            'title' => '¿Salir sin guardar?',
+            'description' => 'Tienes cambios que aún no se han guardado. Si sales ahora, se perderán.',
+            'stay' => 'Seguir editando',
+            'leave' => 'Salir sin guardar',
+        ],
     ],
 
     'json-viewer' => [

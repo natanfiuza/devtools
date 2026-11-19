@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\ColorPalette;
+use App\Models\LayoutSystem;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
@@ -62,7 +63,7 @@ final class Sitemap
             $urls = [...$urls, ...self::entries($name, $params)];
         }
 
-        return [...$urls, ...self::palettes()];
+        return [...$urls, ...self::palettes(), ...self::layoutSystems()];
     }
 
     /**
@@ -102,6 +103,46 @@ final class Sitemap
             }
 
             $urls = [...$urls, ...self::entries('colors.palettes.show', ['slug' => $palette->slug])];
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Sistemas de layout publicos ativos, em todos os idiomas (F4, ADR-174).
+     *
+     * Mesma regra da pagina publica: publico, ativo e com slug. Arquivado sai
+     * do sitemap e a URL antiga responde 404. A tabela pode ainda nao existir
+     * durante o deploy: nesse caso a lista e vazia, e nunca um 500.
+     *
+     * @return list<array{loc: string, alternates: array<string, string>, xdefault: string}>
+     */
+    private static function layoutSystems(): array
+    {
+        if (! Schema::hasTable('layout_systems')) {
+            return [];
+        }
+
+        $limit = (int) config('colors.layout_systems.sitemap_limit', 500);
+
+        if ($limit <= 0) {
+            return [];
+        }
+
+        $urls = [];
+
+        $systems = LayoutSystem::query()
+            ->publiclyVisible()
+            ->orderByDesc('updated_at')
+            ->limit($limit)
+            ->get(['slug']);
+
+        foreach ($systems as $system) {
+            if (! is_string($system->slug) || $system->slug === '') {
+                continue;
+            }
+
+            $urls = [...$urls, ...self::entries('colors.systems.show', ['slug' => $system->slug])];
         }
 
         return $urls;

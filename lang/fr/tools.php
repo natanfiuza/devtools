@@ -660,6 +660,75 @@ return [
             'suggestions' => 'Suggestions de contraste',
             'suggestion_target' => 'Cible de contraste des suggestions',
         ],
+
+        'prototype' => [
+            'title' => 'Prototype',
+            'description' => 'Voyez les 33 jetons du système appliqués à une interface, dans le modèle et le thème choisis.',
+            'template_label' => 'Modèle',
+            'template_site' => 'Site',
+            'template_mobile' => 'Mobile',
+            'theme_label' => 'Thème',
+            'theme_light' => 'Clair',
+            'theme_dark' => 'Sombre',
+            'preview_label' => 'Aperçu du prototype : {template}, {theme}',
+        ],
+
+        'save' => [
+            'title' => 'Enregistrer le système de mise en page',
+            'description' => 'Le tableau enregistré se rouvre exactement tel quel, sans recalcul.',
+            'name_label' => 'Nom',
+            'name_placeholder' => 'Mon système',
+            'name_required' => 'Saisissez un nom.',
+            'name_too_long' => 'Utilisez au maximum {max} caractères.',
+            'name_from_palette' => 'Système de mise en page — {name}',
+            'name_from_strategy' => '{strategy} — {hex}',
+            'description_label' => 'Description (facultative)',
+            'description_placeholder' => 'À quoi sert ce système ?',
+            'description_too_long' => 'Utilisez au maximum {max} caractères.',
+            'visibility_label' => 'Qui peut le voir',
+            'visibility_private' => 'Privé',
+            'visibility_private_hint' => 'Vous seul le voyez. Vous pourrez le publier plus tard.',
+            'visibility_public' => 'Public',
+            'visibility_public_hint' => 'Il obtient un lien public et apparaît dans la recherche.',
+            'save_button' => 'Enregistrer',
+            'submit' => 'Enregistrer le système',
+            'submit_update' => 'Enregistrer les modifications',
+            'save_as_new' => 'Enregistrer comme nouveau',
+            'saving' => 'Enregistrement…',
+            'cancel' => 'Annuler',
+            'login_to_save' => 'Se connecter pour enregistrer',
+            'limit_reached' => 'Vous avez atteint la limite de {limit} éléments. Archivez ou supprimez quelque chose pour enregistrer.',
+        ],
+
+        'draft' => [
+            'title' => 'Reprendre le brouillon ?',
+            'description' => 'Nous avons trouvé un tableau enregistré dans ce navigateur avant votre connexion. L’importer conserve votre travail et ne crée pas de système.',
+            'unsupported_title' => 'Brouillon d’une version plus récente',
+            'unsupported_description' => 'Ce brouillon a été créé par une version plus récente de l’outil et ne peut pas être importé ici. Vous pouvez le supprimer.',
+            'import' => 'Importer le brouillon',
+            'discard' => 'Ignorer',
+        ],
+
+        'origin' => [
+            'from' => 'Créé à partir de la palette {name}.',
+            'open' => 'Voir la palette',
+            'remove' => 'Retirer l’origine',
+        ],
+
+        'lifecycle' => [
+            'restore_disabled' => 'La restauration est indisponible pour ce système : l’état enregistré ne conserve pas les valeurs automatiques. Utilisez « Régénérer avec la version actuelle ».',
+            'suggestions_off' => 'Les suggestions de contraste sont indisponibles pour ce système car la version de l’algorithme de suggestions a changé.',
+            'pending_regeneration' => 'La graine, la stratégie ou la secondaire a changé. Le tableau reste dans l’état enregistré jusqu’à ce que vous régénériez.',
+            'regenerate' => 'Régénérer avec la version actuelle',
+            'readonly_notice' => 'Ce système utilise une version plus récente que cet éditeur. Le tableau est en lecture seule ; dupliquez-le pour continuer à modifier.',
+        ],
+
+        'guard' => [
+            'title' => 'Quitter sans enregistrer ?',
+            'description' => 'Vous avez des modifications qui n’ont pas été enregistrées. Si vous quittez maintenant, elles seront perdues.',
+            'stay' => 'Continuer à modifier',
+            'leave' => 'Quitter sans enregistrer',
+        ],
     ],
 
     'json-viewer' => [

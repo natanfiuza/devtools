@@ -30,7 +30,7 @@ import {
 const rasterizeMock = vi.hoisted(() => vi.fn());
 const downloadMock = vi.hoisted(() => vi.fn());
 
-vi.mock('@/tools/palette-generator/prototype/rasterize', () => ({
+vi.mock('@/lib/prototype/rasterize', () => ({
     rasterizeSvg: rasterizeMock,
 }));
 

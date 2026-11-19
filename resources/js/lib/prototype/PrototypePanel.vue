@@ -9,6 +9,7 @@ import type {
     PaletteRoles,
     PaletteTheme,
 } from '@/types/colors';
+import { prototypeSampleCopy } from './copy';
 import { buildPrototype, type PrototypeBuildInput } from './defaults';
 import {
     downloadPrototypePng,
@@ -18,7 +19,7 @@ import {
 import { renderSvg } from './renderSvg';
 import PrototypePreview from './PrototypePreview.vue';
 import RoleEditor from './RoleEditor.vue';
-import type { PrototypeCopy, PrototypeTemplate } from './types';
+import type { PrototypeTemplate } from './types';
 
 /**
  * Aba Prototipo do editor (F4, ADR-126).
@@ -50,42 +51,7 @@ const pngError = ref<string | null>(null);
 const busy = ref(false);
 
 /** Texto de exemplo do prototipo, traduzido (o renderizador e puro). */
-const sample = computed<PrototypeCopy>(() => ({
-    brand: t('colors.prototype.sample.brand'),
-    nav: [
-        t('colors.prototype.sample.nav_1'),
-        t('colors.prototype.sample.nav_2'),
-        t('colors.prototype.sample.nav_3'),
-    ],
-    heading: t('colors.prototype.sample.heading'),
-    body: t('colors.prototype.sample.body'),
-    primaryAction: t('colors.prototype.sample.primary'),
-    secondaryAction: t('colors.prototype.sample.secondary'),
-    links: [
-        t('colors.prototype.sample.link_1'),
-        t('colors.prototype.sample.link_2'),
-        t('colors.prototype.sample.link_3'),
-    ],
-    sectionTitle: t('colors.prototype.sample.section'),
-    cards: [
-        t('colors.prototype.sample.card_1'),
-        t('colors.prototype.sample.card_2'),
-        t('colors.prototype.sample.card_3'),
-    ],
-    cardBody: t('colors.prototype.sample.card_body'),
-    cardLink: t('colors.prototype.sample.card_link'),
-    formTitle: t('colors.prototype.sample.form_title'),
-    formLabel: t('colors.prototype.sample.form_label'),
-    formPlaceholder: t('colors.prototype.sample.form_placeholder'),
-    formAction: t('colors.prototype.sample.form_action'),
-    footer: t('colors.prototype.sample.footer'),
-    tabs: [
-        t('colors.prototype.sample.tab_1'),
-        t('colors.prototype.sample.tab_2'),
-        t('colors.prototype.sample.tab_3'),
-    ],
-    tagline: t('colors.prototype.sample.tagline'),
-}));
+const sample = computed(() => prototypeSampleCopy(t));
 
 const templateName = computed(() =>
     t(`colors.prototype.template_${template.value}`),

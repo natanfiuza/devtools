@@ -1,6 +1,6 @@
 import { truncateText } from '@/lib/paletteOg';
-import { readableOn } from '../prototype/renderSvg';
-import type { PrototypeDocument, SvgNode } from '../prototype/types';
+import { readableOn } from '@/lib/prototype/renderSvg';
+import type { PrototypeDocument, SvgNode } from '@/lib/prototype/types';
 import {
     IMAGE_BACKGROUND,
     IMAGE_MUTED,

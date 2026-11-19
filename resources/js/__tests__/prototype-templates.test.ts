@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { buildPaletteScale, parseColor, type Rgba } from '@/lib/color';
 import { rolesFromScaleItems } from '@/lib/palettePayload';
-import { buildPrototype } from '@/tools/palette-generator/prototype/defaults';
+import { buildPrototype } from '@/lib/prototype/defaults';
 import type {
     PrototypeCopy,
     PrototypeDocument,
     SvgNode,
     SvgTextNode,
-} from '@/tools/palette-generator/prototype/types';
+} from '@/lib/prototype/types';
 import type { PaletteRoles } from '@/types/colors';
 
 /**

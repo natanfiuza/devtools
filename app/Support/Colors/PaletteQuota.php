@@ -3,13 +3,16 @@
 namespace App\Support\Colors;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 
 /**
- * Cota de paletas da conta (F4, ADR-096/ADR-123).
+ * Cota de itens Colors da conta (F4, ADR-096/ADR-123; F4 do LH, ADR-170).
  *
- * Free tem teto configuravel, pago e ilimitado (`null`). Arquivadas contam:
+ * Free tem teto configuravel, pago e ilimitado (`null`). A cota e conjunta:
+ * paletas e sistemas de layout dividem o mesmo contador. Arquivados contam:
  * so a exclusao definitiva libera uma vaga. A checagem acontece sob lock da
- * linha do usuario em `CreatePalette`/`DuplicatePalette`.
+ * linha do usuario em `CreatePalette`/`DuplicatePalette` e nas actions
+ * equivalentes do Layout Harmonizer.
  */
 final class PaletteQuota
 {
@@ -23,11 +26,21 @@ final class PaletteQuota
     }
 
     /**
-     * Total usado, incluindo paletas arquivadas.
+     * Total usado, incluindo paletas e sistemas arquivados.
+     *
+     * A tabela de sistemas pode ainda nao existir na janela entre o deploy do
+     * codigo e o `migrate`; nesse intervalo ela nao soma (e nunca quebra as
+     * telas antigas de paleta).
      */
     public function used(User $user): int
     {
-        return $user->colorPalettes()->count();
+        $used = $user->colorPalettes()->count();
+
+        if (Schema::hasTable('layout_systems')) {
+            $used += $user->layoutSystems()->count();
+        }
+
+        return $used;
     }
 
     public function reached(User $user): bool

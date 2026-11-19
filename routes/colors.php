@@ -9,11 +9,15 @@ use App\Http\Controllers\Api\Colors\PaletteFavoriteController;
 use App\Http\Controllers\Api\Colors\PaletteLikeController;
 use App\Http\Controllers\Api\Colors\PaletteMuteController;
 use App\Http\Controllers\Api\Colors\UserFollowController;
+use App\Http\Controllers\Colors\LayoutSystemController;
+use App\Http\Controllers\Colors\LayoutSystemDuplicationController;
+use App\Http\Controllers\Colors\LayoutSystemIntentController;
 use App\Http\Controllers\Colors\PaletteController;
 use App\Http\Controllers\Colors\PaletteDuplicationController;
 use App\Http\Controllers\Colors\PaletteIntentController;
 use App\Http\Controllers\Colors\PaletteOgController;
 use App\Http\Controllers\Colors\PaletteTagController;
+use App\Http\Controllers\Colors\PublicLayoutSystemController;
 use App\Http\Controllers\Colors\PublicPaletteController;
 use App\Http\Controllers\Colors\PublicProfileController;
 use App\Support\Locales;
@@ -138,6 +142,43 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
     Route::get('dashboard/colors/palettes/create', [PaletteIntentController::class, 'create'])
         ->name('dashboard.colors.palettes.create');
 
+    // Sistemas de layout (F4, ADR-168/ADR-174). Mesma area da conta e mesmos
+    // limiteres das paletas: a cota e conjunta (ADR-170).
+    Route::get('dashboard/colors/layout-systems', [LayoutSystemController::class, 'index'])
+        ->name('dashboard.colors.systems.index');
+
+    Route::get('dashboard/colors/layout-systems/create', [LayoutSystemIntentController::class, 'create'])
+        ->name('dashboard.colors.systems.create');
+
+    Route::get('dashboard/colors/layout-systems/{layoutSystem}/edit', [LayoutSystemController::class, 'edit'])
+        ->whereUlid('layoutSystem')
+        ->name('dashboard.colors.systems.edit');
+
+    Route::middleware('throttle:colors-management')->group(function (): void {
+        Route::post('dashboard/colors/layout-systems', [LayoutSystemController::class, 'store'])
+            ->name('dashboard.colors.systems.store');
+
+        Route::patch('dashboard/colors/layout-systems/{layoutSystem}', [LayoutSystemController::class, 'update'])
+            ->whereUlid('layoutSystem')
+            ->name('dashboard.colors.systems.update');
+
+        Route::patch('dashboard/colors/layout-systems/{layoutSystem}/archive', [LayoutSystemController::class, 'archive'])
+            ->whereUlid('layoutSystem')
+            ->name('dashboard.colors.systems.archive');
+
+        Route::patch('dashboard/colors/layout-systems/{layoutSystem}/restore', [LayoutSystemController::class, 'restore'])
+            ->whereUlid('layoutSystem')
+            ->name('dashboard.colors.systems.restore');
+
+        Route::delete('dashboard/colors/layout-systems/{layoutSystem}', [LayoutSystemController::class, 'destroy'])
+            ->whereUlid('layoutSystem')
+            ->name('dashboard.colors.systems.destroy');
+
+        Route::post('dashboard/colors/layout-systems/{layoutSystem}/duplicate', [LayoutSystemDuplicationController::class, 'store'])
+            ->whereUlid('layoutSystem')
+            ->name('dashboard.colors.systems.duplicate');
+    });
+
     Route::middleware('throttle:colors-management')->group(function (): void {
         Route::post('dashboard/colors/palettes', [PaletteController::class, 'store'])
             ->name('dashboard.colors.palettes.store');
@@ -226,6 +267,22 @@ Route::prefix('{locale}')
         Route::get('colors/p/{slug}/og.png', [PaletteOgController::class, 'show'])
             ->where('slug', $slug)
             ->name('colors.palettes.og');
+
+        // Sistema de layout publico (F4, ADR-174): a URL nasce na primeira
+        // publicacao e nunca e reemitida depois da exclusao.
+        Route::get('colors/s/{slug}', [PublicLayoutSystemController::class, 'show'])
+            ->where('slug', $slug)
+            ->name('colors.systems.show');
+
+        Route::get('colors/s/{slug}/duplicate', [LayoutSystemIntentController::class, 'duplicate'])
+            ->where('slug', $slug)
+            ->middleware(['auth', 'verified', 'active'])
+            ->name('colors.systems.duplicate.create');
+
+        Route::post('colors/s/{slug}/duplicate', [LayoutSystemDuplicationController::class, 'storePublic'])
+            ->where('slug', $slug)
+            ->middleware(['auth', 'verified', 'active', 'throttle:colors-management'])
+            ->name('colors.systems.duplicate.store');
 
         // "Duplicar" exige conta; o GET e so a intencao que sobrevive ao
         // login e volta para a pagina com o fluxo aberto.

@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { Copy, Download, FlaskConical, RotateCcw, Star } from '@lucide/vue';
+import {
+    Copy,
+    Download,
+    FlaskConical,
+    LayoutGrid,
+    RotateCcw,
+    Star,
+} from '@lucide/vue';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PageHead from '@/components/PageHead.vue';
@@ -26,6 +33,7 @@ import { buildFrozenScale } from '@/lib/frozenScale';
 import { payloadFromScale } from '@/lib/palettePayload';
 import colorsProfiles from '@/routes/colors/profiles';
 import duplicatePalettes from '@/routes/colors/palettes/duplicate';
+import systems from '@/routes/dashboard/colors/systems';
 import ExportPanel from '@/tools/palette-generator/components/ExportPanel.vue';
 import PaletteImagePanel from '@/tools/palette-generator/image/PaletteImagePanel.vue';
 import type {
@@ -193,6 +201,11 @@ const duplicateIntentUrl = computed(() =>
         locale: localeSlug.value,
         slug: props.palette.slug ?? '',
     }),
+);
+
+/** CTA do sistema de layout: a cor base da paleta vira a seed do tool. */
+const layoutSystemIntentUrl = computed(() =>
+    systems.create.url({ query: { palette: props.palette.id } }),
 );
 
 /** Retrato enviado quando a base experimentada vira a paleta nova. */
@@ -464,6 +477,16 @@ onMounted(() => {
                         ? t('colors.public.favorited')
                         : t('colors.public.favorite')
                 }}
+            </Button>
+
+            <Button as-child variant="outline">
+                <Link
+                    :href="layoutSystemIntentUrl"
+                    data-test="public-layout-system-cta"
+                >
+                    <LayoutGrid class="size-4" />
+                    {{ t('colors.actions.create_layout_system') }}
+                </Link>
             </Button>
 
             <Button

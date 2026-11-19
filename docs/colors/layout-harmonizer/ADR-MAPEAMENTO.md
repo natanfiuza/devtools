@@ -71,6 +71,14 @@ implementada e nenhum arquivo local seja removido sem revisão.
   ADR-167, novo, registra o estado efetivo, os overrides por tema/origem, a
   assinatura de regeneração, a secundária manual, os parâmetros das sugestões e
   o snapshot. O original local do 151 segue em `adr/` até o aceite da fase.
+- **2026-11-19 (F4)**: copiados 152 (quota), 154 (público), 159 (cadastro),
+  160 (downgrade), 161 (rascunho), 164 (ciclo de vida) e 165 (duplicação), com
+  o mesmo conteúdo, título/numeração ajustados e uma seção de implementação no
+  fim de cada um. Novos: 168 (persistência e snapshot), 169 (edição
+  compatível/congelada), 170 (cota conjunta: contador único e locks), 171 (slug
+  aposentado), 172 (crédito de origem), 173 (protótipos no workspace) e 174
+  (viewer público, rota e SEO). Os originais locais dos sete copiados seguem em
+  `adr/` até o aceite da fase.
 
 ## Contagem por fase
 
@@ -79,6 +87,6 @@ implementada e nenhum arquivo local seja removido sem revisão.
 | F1 (inclui os dois da F0) | 145, 146, 147, 149, 150, 156, 157, 158, 163, 166 |
 | F2 | 153, 162 |
 | F3 | 151 (retomada de 158; novo 167) |
-| F4 | 152, 154, 159, 160, 161, 164, 165 |
+| F4 | 152, 154, 159, 160, 161, 164, 165; novos 168–174 |
 | F5 | 148, 155 |
 | F0 | — (somente este mapeamento) |

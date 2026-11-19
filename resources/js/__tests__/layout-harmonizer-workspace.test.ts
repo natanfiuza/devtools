@@ -1,18 +1,27 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import LayoutWorkspace from '@/tools/layout-harmonizer/LayoutWorkspace.vue';
+import { useLayoutSystem } from '@/tools/layout-harmonizer/composables/useLayoutSystem';
 import { exportMessages } from './support/langMessages';
 
 const { writeClipboard } = vi.hoisted(() => ({ writeClipboard: vi.fn() }));
 
 vi.mock('@/lib/clipboard', () => ({ writeClipboard }));
 
+// O motor gera 66 tokens por montagem; sob a suite inteira em paralelo o
+// seletor de 5 s padrao aperta. O limite maior so cobre a montagem pesada.
+vi.setConfig({ testTimeout: 20_000 });
+
 /**
  * Workspace da F2: estado vazio, os tres modos de visualizacao, o ultimo
  * quadro valido e o tema do site intocado. Cada quadro tem 33 tokens; o modo
  * Comparar mostra os dois (66 celulas).
+ *
+ * Desde a F4 o workspace recebe o quadro pronto pelo `controller`; o harness
+ * monta o controller live (o mesmo caminho do painel) e nao o proprio painel,
+ * para o teste continuar medindo so o corpo da ferramenta.
  */
 
 function i18n() {
@@ -26,8 +35,17 @@ function i18n() {
     return instance;
 }
 
+const Harness = defineComponent({
+    name: 'WorkspaceHarness',
+    setup() {
+        const controller = useLayoutSystem();
+
+        return () => h(LayoutWorkspace, { controller });
+    },
+});
+
 function mountWorkspace() {
-    return mount(LayoutWorkspace, { global: { plugins: [i18n()] } });
+    return mount(Harness, { global: { plugins: [i18n()] } });
 }
 
 async function typeSeed(
