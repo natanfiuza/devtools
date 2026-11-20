@@ -15,12 +15,17 @@ import {
 import { formatHex } from '@/lib/color';
 import systems from '@/routes/dashboard/colors/systems';
 import type {
+    LayoutSystemExportLimits,
+    LayoutSystemExportMessages,
     LayoutSystemLimits,
     LayoutSystemQuota,
     LayoutSystemTag,
 } from '@/types/layoutSystem';
 import LayoutWorkspace from './LayoutWorkspace.vue';
+import LayoutExportPanel from './components/LayoutExportPanel.vue';
 import SaveLayoutSystemDialog from './components/SaveLayoutSystemDialog.vue';
+import { DEFAULT_LAYOUT_EXPORT_LIMITS } from './export/options';
+import type { LayoutExportOrigin } from './export/types';
 import { useFrozenLayout } from './composables/useFrozenLayout';
 import { useLayoutDraft } from './composables/useLayoutDraft';
 import { useLayoutSystem } from './composables/useLayoutSystem';
@@ -74,6 +79,11 @@ const props = withDefaults(
         showSaveButton?: boolean;
         /** Alteracoes fora do quadro (metadados do editor) tambem contam. */
         extraDirty?: (() => boolean) | null;
+        /** Traducoes das exportacoes nos 5 idiomas (F5, ADR-175). */
+        exportMessages?: LayoutSystemExportMessages;
+        exportLimits?: LayoutSystemExportLimits;
+        /** Origem publica exibida no documento exportado. */
+        exportOrigin?: LayoutExportOrigin | null;
     }>(),
     {
         state: null,
@@ -88,6 +98,9 @@ const props = withDefaults(
         guard: false,
         showSaveButton: true,
         extraDirty: null,
+        exportMessages: () => ({}),
+        exportLimits: () => DEFAULT_LAYOUT_EXPORT_LIMITS,
+        exportOrigin: null,
     },
 );
 
@@ -350,6 +363,19 @@ defineExpose({
         <LayoutWorkspace
             :controller="controller"
             :regenerate="controller.mode === 'live' ? null : regenerate"
+        />
+
+        <LayoutExportPanel
+            :state="currentState()"
+            :name="suggestedName"
+            :authenticated="authenticated"
+            :pending-regeneration="controller.pendingRegeneration.value"
+            :mode="controller.mode"
+            :read-only="controller.mode === 'readonly'"
+            :origin="exportOrigin"
+            :origin-palette-id="originPaletteId"
+            :export-messages="exportMessages"
+            :export-limits="exportLimits"
         />
 
         <SaveLayoutSystemDialog

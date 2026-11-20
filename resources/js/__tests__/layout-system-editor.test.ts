@@ -24,7 +24,7 @@ import type {
     LayoutSystemEditor as LayoutSystemEditorData,
     LayoutSystemEditorProps,
 } from '@/types/layoutSystem';
-import { exportMessages } from './support/langMessages';
+import { exportMessages, layoutExportMessages } from './support/langMessages';
 
 /**
  * Editor de um sistema de layout (F4, ADR-168/ADR-169).
@@ -38,7 +38,7 @@ import { exportMessages } from './support/langMessages';
 // seletor de 5 s padrao aperta. O limite maior so cobre a montagem pesada.
 vi.setConfig({ testTimeout: 20_000 });
 
-const { routerMock, pageState } = vi.hoisted(() => ({
+const { routerMock, pageState, downloadMock } = vi.hoisted(() => ({
     routerMock: {
         get: vi.fn(),
         post: vi.fn(),
@@ -46,6 +46,10 @@ const { routerMock, pageState } = vi.hoisted(() => ({
         delete: vi.fn(),
         on: vi.fn(() => vi.fn()),
         visit: vi.fn(),
+    },
+    downloadMock: {
+        downloadText: vi.fn(),
+        downloadBlob: vi.fn(),
     },
     pageState: {
         props: {
@@ -55,6 +59,8 @@ const { routerMock, pageState } = vi.hoisted(() => ({
         url: '/dashboard/colors/layout-systems/x/edit',
     },
 }));
+
+vi.mock('@/lib/download', () => downloadMock);
 
 vi.mock('@inertiajs/vue3', () => ({
     router: routerMock,
@@ -177,6 +183,8 @@ function props(
             algorithm: LAYOUT_ALGORITHM_VERSION,
             suggestions: LAYOUT_SUGGESTIONS_VERSION,
         },
+        exportMessages: layoutExportMessages(),
+        exportLimits: { prefixMaxLength: 32, scopeMaxLength: 64 },
         ...overrides,
     };
 }
@@ -210,6 +218,8 @@ describe('Editor de sistema de layout', () => {
         routerMock.patch.mockReset();
         routerMock.delete.mockReset();
         routerMock.on.mockClear();
+        downloadMock.downloadText.mockReset();
+        downloadMock.downloadBlob.mockReset();
         document.body.innerHTML = '';
         window.localStorage.clear();
     });
@@ -236,6 +246,36 @@ describe('Editor de sistema de layout', () => {
             document.querySelectorAll('[data-test="token-cell"]'),
         ).toHaveLength(66);
         expect(exists('[data-test="layout-system-editor-save"]')).toBe(true);
+        expect(exists('[data-test="layout-export-panel"]')).toBe(true);
+    });
+
+    it('origem do documento usa o crédito congelado, nunca a paleta ao vivo', async () => {
+        mountPage({
+            system: system({
+                credit: {
+                    source: {
+                        palette_name: 'Oceano congelado',
+                        palette_public: true,
+                    },
+                    origin: {
+                        id: 'palette-1',
+                        name: 'Oceano ao vivo',
+                        slug: 'oceano',
+                        public: true,
+                    },
+                },
+            }),
+        });
+
+        query<HTMLButtonElement>(
+            '[data-test="layout-export-markdown"]',
+        ).click();
+        await nextTick();
+
+        const contents = downloadMock.downloadText.mock.calls[0]?.[1];
+
+        expect(contents).toContain('Oceano congelado');
+        expect(contents).not.toContain('Oceano ao vivo');
     });
 
     it('abre o modal com os metadados do formulário e envia o PATCH', async () => {
@@ -296,6 +336,8 @@ describe('Editor de sistema de layout', () => {
         expect(exists('[data-test="layout-system-editor-save"]')).toBe(false);
         expect(exists('[data-test="layout-system-action-restore"]')).toBe(true);
         expect(exists('[data-test="layout-system-meta-form"]')).toBe(false);
+        expect(exists('[data-test="layout-export-panel"]')).toBe(true);
+        expect(exists('[data-test="layout-export-readonly"]')).toBe(true);
     });
 
     it('versão mais nova que o editor fica somente leitura com aviso', () => {

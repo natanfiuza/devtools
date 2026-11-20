@@ -79,6 +79,60 @@ it('responde 404 para sistema de outra conta', function () {
         ->assertNotFound();
 });
 
+it('entrega as traducoes e os limites de exportacao no editor', function () {
+    $user = User::factory()->create();
+    $system = LayoutSystem::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard.colors.systems.edit', $system))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('dashboard/colors/LayoutSystemEditor')
+            ->has('exportMessages', 5)
+            ->has('exportMessages.en.export')
+            ->has('exportMessages.pt_BR.export')
+            ->where('exportLimits.prefixMaxLength', 32)
+            ->where('exportLimits.scopeMaxLength', 64));
+});
+
+it('abre o tool pelo intent, com exportacao sem pedir salvamento', function () {
+    $user = User::factory()->create();
+
+    $save = $this->actingAs($user)->get(route('dashboard.colors.systems.create'));
+    $save->assertRedirect();
+    expect((string) $save->headers->get('Location'))->toContain('save=1');
+
+    $export = $this->actingAs($user)
+        ->get(route('dashboard.colors.systems.create', ['export' => 1]));
+    $export->assertRedirect();
+
+    $location = (string) $export->headers->get('Location');
+
+    expect($location)->toContain('export=1')->not->toContain('save=1');
+});
+
+it('preserva a paleta acessivel no intent de exportacao', function () {
+    $user = User::factory()->create();
+    $palette = ColorPalette::factory()->for($user)->create();
+    $another = ColorPalette::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('dashboard.colors.systems.create', [
+            'export' => 1,
+            'palette' => $palette->id,
+        ]))
+        ->assertRedirect()
+        ->assertRedirectContains('export=1')
+        ->assertRedirectContains('palette='.$palette->id);
+
+    $this->actingAs($user)
+        ->get(route('dashboard.colors.systems.create', [
+            'export' => 1,
+            'palette' => $another->id,
+        ]))
+        ->assertNotFound();
+});
+
 it('cria o sistema e abre o editor vinculado', function () {
     $user = User::factory()->create();
 

@@ -192,6 +192,22 @@ ficam desabilitados; mudar seed/estratégia/secundária apenas marca
 (ADR-169). `readonly` é shape/versão mais nova ou desconhecida: quadro sem
 edição, com ciclo de vida e duplicação.
 
+## Parâmetros das exportações (F5)
+
+| Parâmetro | Valor | Regra |
+|---|---|---|
+| `layout_systems.export.prefix_max_length` | `32` (`COLORS_LAYOUT_SYSTEM_EXPORT_PREFIX_MAX_LENGTH`) | teto do prefixo das variáveis; o padrão é `lh` |
+| `layout_systems.export.scope_max_length` | `64` (`COLORS_LAYOUT_SYSTEM_EXPORT_SCOPE_MAX_LENGTH`) | teto do nome da classe de escopo; o padrão é `:root` |
+| Prefixo | `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$` | identificador ASCII em kebab-case; gera `--{prefixo}-{token}` |
+| Escopo | `:root` ou `^\.[A-Za-z_][A-Za-z0-9_-]*$` | seletor arbitrário é recusado antes de gerar o arquivo |
+| Temas no CSS | `{escopo}`, `{escopo}[data-theme="light"]`, `{escopo}[data-theme="dark"]` | claro é o default; sem `@media` automática |
+| Fallback | HEX/`rgba()` + `@supports (color: oklch(0 0 0))` | alpha preservado, sem recompor |
+| Nomes no ZIP | `design-instructions.md`, `colors.css` | fixos; avulsos `design-instructions.{locale}.md` e `colors.css` |
+| Nome do ZIP | `{slug}-layout.zip` | sanitizado (NFD, hífen, máx. 32), fallback `layout-harmonizer` |
+| Determinismo do ZIP | `mtime` fixo em `2026-01-01T00:00:00Z`, nível `6` | mesma entrada gera os mesmos bytes no mesmo fuso |
+| Idiomas do documento | `en`, `pt_BR`, `pt_PT`, `fr`, `es` | seletor com default no locale ativo; subtree vem do servidor |
+| Biblioteca ZIP | `fflate ^0.8.3` | dependência direta (MIT), auditada no grill |
+
 ## Versionamento
 
 | Versão | Data | Mudança |
@@ -199,3 +215,4 @@ edição, com ciclo de vida e duplicação.
 | 1 | 2026-11-16 | primeira tabela aprovada e implementada na F1 |
 | Sugestões 1 | 2026-11-18 | parâmetros aprovados da F3 (meta, passo, teto e épsilon) |
 | Estado 1 | 2026-11-19 | envelope `state` da F4 (`stateVersion`/`snapshotVersion` = 1) e limites de persistência |
+| Exportações 1 | 2026-11-20 | prefixo/escopo, nomes fixos, ZIP determinístico e idiomas da F5 |

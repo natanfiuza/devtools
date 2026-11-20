@@ -12,11 +12,14 @@ import {
 } from './lib/draft';
 import type { LayoutSystemStateV1 } from './lib/state';
 import type {
+    LayoutSystemExportLimits,
+    LayoutSystemExportMessages,
     LayoutSystemLimits,
     LayoutSystemQuota,
     LayoutSystemTag,
     LayoutSystemToolOrigin,
 } from '@/types/layoutSystem';
+import { DEFAULT_LAYOUT_EXPORT_LIMITS } from './export/options';
 
 /**
  * Corpo da ferramenta Layout Harmonizer (F4, ADR-161/ADR-168).
@@ -35,6 +38,8 @@ const props = withDefaults(
         tags?: LayoutSystemTag[];
         origin?: LayoutSystemToolOrigin | null;
         currentVersions?: Record<string, number>;
+        exportMessages?: LayoutSystemExportMessages;
+        exportLimits?: LayoutSystemExportLimits;
     }>(),
     {
         authenticated: false,
@@ -48,6 +53,8 @@ const props = withDefaults(
         tags: () => [],
         origin: null,
         currentVersions: () => ({}),
+        exportMessages: () => ({}),
+        exportLimits: () => DEFAULT_LAYOUT_EXPORT_LIMITS,
     },
 );
 
@@ -182,6 +189,9 @@ onMounted(() => {
             :account-tags="tags"
             :origin-palette-id="originRemoved ? null : originId"
             :origin-name="originRemoved ? null : (origin?.name ?? null)"
+            :export-messages="exportMessages"
+            :export-limits="exportLimits"
+            :export-origin="originRemoved ? null : origin"
             :guard="authenticated"
             @regenerated="onRegenerated"
         />

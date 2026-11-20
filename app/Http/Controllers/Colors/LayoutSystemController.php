@@ -14,7 +14,9 @@ use App\Http\Requests\Colors\UpdateLayoutSystemRequest;
 use App\Models\LayoutSystem;
 use App\Models\User;
 use App\Support\Colors\LayoutSystemData;
+use App\Support\Colors\LayoutSystemExportMessages;
 use App\Support\Colors\LayoutSystemPresenter;
+use App\Support\Colors\LayoutSystemToolProps;
 use App\Support\Colors\PaletteQuota;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -91,6 +93,9 @@ class LayoutSystemController extends Controller
             'limits' => $quota->summary($user),
             'form' => $this->formLimits(),
             'currentVersions' => $this->currentVersions(),
+            // Mesmo pacote da pagina generica: exportar no editor (F5).
+            'exportMessages' => LayoutSystemExportMessages::all(),
+            'exportLimits' => LayoutSystemToolProps::exportLimits(),
         ]);
     }
 

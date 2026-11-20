@@ -241,6 +241,8 @@ describe('Página pública de sistema de layout', () => {
         expect(
             document.querySelectorAll('[data-test="copy-hex"]').length,
         ).toBeGreaterThan(0);
+        // A pagina publica nao exporta para ninguem (F5, ADR-175).
+        expect(exists('[data-test="layout-export-panel"]')).toBe(false);
     });
 
     it('liga o autor ao perfil e a estratégia ao nome traduzido', () => {

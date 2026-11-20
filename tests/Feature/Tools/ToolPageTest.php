@@ -123,7 +123,11 @@ it('serve a tool agrupada so na URL aninhada', function () {
             ->where('toolProps.tags', [])
             ->where('toolProps.limits.nameMaxLength', 80)
             ->where('toolProps.limits.descriptionMaxLength', 500)
-            ->has('toolProps.currentVersions'),
+            ->has('toolProps.currentVersions')
+            // Exportacoes locais (F5): traducoes dos 5 idiomas e limites.
+            ->has('toolProps.exportMessages', 5)
+            ->where('toolProps.exportLimits.prefixMaxLength', 32)
+            ->where('toolProps.exportLimits.scopeMaxLength', 64),
         );
 
     $this->get('/pt-br/tools/html-color-picker')->assertNotFound();
