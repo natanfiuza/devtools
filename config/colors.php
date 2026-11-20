@@ -73,6 +73,17 @@ return [
 
         'input_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_INPUT_MAX_LENGTH', 120),
 
+        /*
+        | Exportacoes locais (F5, ADR-175/ADR-176). O prefixo vira o nome das
+        | custom properties (`--{prefix}-primary`) e o escopo precisa ser
+        | `:root` ou uma classe simples; os tetos evitam string absurda no CSS.
+        */
+        'export' => [
+            'prefix_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_EXPORT_PREFIX_MAX_LENGTH', 32),
+
+            'scope_max_length' => (int) env('COLORS_LAYOUT_SYSTEM_EXPORT_SCOPE_MAX_LENGTH', 64),
+        ],
+
         'versions' => [
             'state' => 1,
             'schema' => 1,

@@ -44,6 +44,31 @@ echo json_encode(
 );
 `;
 
+/**
+ * Bloco `tools.layout-harmonizer` de cada locale, no shape de
+ * `LayoutSystemExportMessages::all()`.
+ *
+ * O servidor enxuga o subtree; aqui o bloco inteiro serve porque os
+ * exportadores so leem chaves e o teste de paridade cobre as cinco locales.
+ */
+export function layoutExportMessages(): Record<
+    string,
+    Record<string, unknown>
+> {
+    const all = exportMessages();
+    const result: Record<string, Record<string, unknown>> = {};
+
+    for (const [locale, namespaces] of Object.entries(all)) {
+        const block = namespaces.tools?.['layout-harmonizer'];
+
+        if (typeof block === 'object' && block !== null) {
+            result[locale] = block as Record<string, unknown>;
+        }
+    }
+
+    return result;
+}
+
 export function exportMessages(): ExportedMessages {
     let raw: string;
 

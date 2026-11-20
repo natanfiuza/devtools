@@ -72,7 +72,152 @@ const STATIC_KEYS = [
     'a11y.view_mode',
     'a11y.board_section',
     'a11y.contrast_summary',
+    'export.title',
+    'export.description',
+    'export.login_cta',
+    'export.login_hint',
+    'export.language_label',
+    'export.prefix_label',
+    'export.prefix_hint',
+    'export.scope_label',
+    'export.scope_root',
+    'export.scope_class',
+    'export.scope_class_label',
+    'export.download_markdown',
+    'export.download_css',
+    'export.download_zip',
+    'export.pending_regeneration',
+    'export.compatible_notice',
+    'export.readonly_notice',
+    'export.errors.prefix_required',
+    'export.errors.prefix_too_long',
+    'export.errors.prefix_invalid',
+    'export.errors.scope_required',
+    'export.errors.scope_too_long',
+    'export.errors.scope_invalid',
+    'export.targets.aa',
+    'export.targets.aaa',
+    'export.css.header',
+    'export.css.meta',
+    'export.css.theme_default',
+    'export.warnings.title',
+    'export.warnings.none',
+    'export.warnings.contrast',
+    'export.warnings.locked',
+    'export.warnings.manual',
+    'export.warnings.accepted',
+    'export.warnings.clipped',
+    'export.warnings.compatible',
+    'export.warnings.readonly',
+    'export.warnings.limitations',
+    'export.md.purpose',
+    'export.md.metadata_title',
+    'export.md.language',
+    'export.md.strategy',
+    'export.md.target',
+    'export.md.seed_original',
+    'export.md.seed_effective',
+    'export.md.seed_background',
+    'export.md.secondary',
+    'export.md.secondary_auto',
+    'export.md.secondary_manual',
+    'export.md.versions',
+    'export.md.origin',
+    'export.md.instructions_title',
+    'export.md.instructions_intro',
+    'export.md.instructions_semantic',
+    'export.md.instructions_manual',
+    'export.md.instructions_contrast',
+    'export.md.instructions_map',
+    'export.md.themes_title',
+    'export.md.themes_note',
+    'export.md.tokens_title',
+    'export.md.columns.token',
+    'export.md.columns.purpose',
+    'export.md.columns.hex',
+    'export.md.columns.oklch',
+    'export.md.columns.source',
+    'export.md.columns.locked',
+    'export.md.columns.foreground',
+    'export.md.columns.background',
+    'export.md.columns.ratio',
+    'export.md.columns.aa',
+    'export.md.columns.aaa',
+    'export.md.locked_yes',
+    'export.md.locked_no',
+    'export.md.rules_title',
+    'export.md.rules.backgrounds',
+    'export.md.rules.text',
+    'export.md.rules.buttons',
+    'export.md.rules.links',
+    'export.md.rules.feedback',
+    'export.md.rules.focus',
+    'export.md.contrast_title',
+    'export.md.pass',
+    'export.md.fail',
+    'export.md.generated_title',
+    'export.md.generation_note',
 ] as const;
+
+/**
+ * Placeholders que cada mensagem interpolada precisa manter nos 5 idiomas: o
+ * exportador troca `{chave}` depois, e uma traducao sem ele perderia o dado
+ * (versao, meta, alvo) silenciosamente.
+ */
+const NAMED_KEYS: Record<string, string[]> = {
+    'export.prefix_hint': ['prefix'],
+    'export.errors.prefix_too_long': ['max'],
+    'export.errors.scope_too_long': ['max'],
+    'export.css.header': ['name'],
+    'export.css.meta': [
+        'state',
+        'language',
+        'schema',
+        'algorithm',
+        'suggestions',
+        'snapshot',
+    ],
+    'export.warnings.contrast': [
+        'theme',
+        'foreground',
+        'background',
+        'ratio',
+        'target',
+    ],
+    'export.warnings.locked': ['theme', 'token'],
+    'export.warnings.manual': ['theme', 'token', 'hex'],
+    'export.warnings.accepted': ['theme', 'token', 'from', 'to', 'target'],
+    'export.warnings.clipped': ['theme', 'token'],
+    'export.warnings.compatible': ['algorithm', 'suggestions'],
+    'export.warnings.readonly': ['schema', 'algorithm', 'suggestions'],
+    'export.md.language': ['language'],
+    'export.md.strategy': ['strategy'],
+    'export.md.target': ['target'],
+    'export.md.seed_original': ['hex'],
+    'export.md.seed_effective': ['hex'],
+    'export.md.seed_background': ['hex'],
+    'export.md.secondary': ['mode'],
+    'export.md.versions': [
+        'state',
+        'schema',
+        'algorithm',
+        'suggestions',
+        'snapshot',
+    ],
+    'export.md.origin': ['name'],
+    'export.md.instructions_contrast': ['target'],
+    'export.md.tokens_title': ['theme'],
+    'export.md.contrast_title': ['theme'],
+    'export.md.generation_note': ['state', 'snapshot'],
+};
+
+function placeholdersOf(text: string): string[] {
+    const found = [...text.matchAll(/\{(\w+)\}/g)].map(
+        (match) => match[1] ?? '',
+    );
+
+    return [...new Set(found)].sort();
+}
 
 function valueAt(messages: NamespaceMessages, path: string): unknown {
     let current: unknown = messages;
@@ -145,6 +290,22 @@ describe('traducao do Layout Harmonizer', () => {
     it('nao tem `@` nem `|` crus no bloco (sintaxe do Laravel)', () => {
         for (const locale of LOCALES) {
             expect(JSON.stringify(block(locale))).not.toMatch(/[@|]/);
+        }
+    });
+
+    it('mantem os placeholders das mensagens interpoladas', () => {
+        for (const locale of LOCALES) {
+            const messages = block(locale);
+
+            for (const [key, expected] of Object.entries(NAMED_KEYS)) {
+                const value = valueAt(messages, key);
+
+                expect(typeof value, `${locale}:${key}`).toBe('string');
+                expect(
+                    placeholdersOf(value as string),
+                    `${locale}:${key}`,
+                ).toEqual([...expected].sort());
+            }
         }
     });
 });

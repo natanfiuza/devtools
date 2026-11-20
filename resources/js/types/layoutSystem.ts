@@ -121,6 +121,18 @@ export interface LayoutSystemToolOrigin {
     url: string | null;
 }
 
+/** Traducoes de exportacao por locale (`LayoutSystemExportMessages::all()`). */
+export type LayoutSystemExportMessages = Record<
+    string,
+    Record<string, unknown>
+>;
+
+/** Tetos do prefixo/escopo do CSS exportado (config/colors.php). */
+export interface LayoutSystemExportLimits {
+    prefixMaxLength: number;
+    scopeMaxLength: number;
+}
+
 export interface LayoutSystemToolProps {
     authenticated: boolean;
     limits: LayoutSystemLimits;
@@ -128,6 +140,8 @@ export interface LayoutSystemToolProps {
     tags: LayoutSystemTag[];
     origin: LayoutSystemToolOrigin | null;
     currentVersions: LayoutSystemVersions;
+    exportMessages: LayoutSystemExportMessages;
+    exportLimits: LayoutSystemExportLimits;
 }
 
 export interface LayoutSystemFilters {
@@ -166,6 +180,8 @@ export interface LayoutSystemEditorProps {
     limits: LayoutSystemQuota;
     form: LayoutSystemFormLimits;
     currentVersions: LayoutSystemVersions;
+    exportMessages: LayoutSystemExportMessages;
+    exportLimits: LayoutSystemExportLimits;
 }
 
 export interface PublicLayoutSystemProps {

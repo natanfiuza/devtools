@@ -12,8 +12,10 @@ import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import publicSystems from '@/routes/colors/systems';
 import systems from '@/routes/dashboard/colors/systems';
 import LayoutHarmonizerPanel from '@/tools/layout-harmonizer/LayoutHarmonizerPanel.vue';
+import LayoutExportPanel from '@/tools/layout-harmonizer/components/LayoutExportPanel.vue';
 import LayoutSystemPrototypePanel from '@/tools/layout-harmonizer/components/LayoutSystemPrototypePanel.vue';
 import ThemeComparison from '@/tools/layout-harmonizer/components/ThemeComparison.vue';
+import type { LayoutExportOrigin } from '@/tools/layout-harmonizer/export/types';
 import {
     strategyMessageKey,
     type LayoutSystemDetails,
@@ -100,6 +102,26 @@ const readOnly = computed(
 );
 
 const boards = computed(() => boardsFromSnapshot(props.system.state.snapshot));
+
+/**
+ * Origem do documento exportado (F5): so o credito **congelado** de paleta
+ * publica conta; a paleta ao vivo pode ter mudado de nome ou visibilidade.
+ */
+const exportOrigin = computed<LayoutExportOrigin | null>(() => {
+    const source = props.system.credit.source;
+
+    if (source?.palette_public !== true) {
+        return null;
+    }
+
+    const paletteName = source.palette_name;
+
+    if (paletteName === undefined || paletteName.trim() === '') {
+        return null;
+    }
+
+    return { name: paletteName, public: true };
+});
 
 const publicUrl = computed<string | null>(() => {
     if (
@@ -267,6 +289,18 @@ function onRegenerated(next: LayoutSystemStateV1): void {
             />
         </section>
 
+        <LayoutExportPanel
+            v-if="system.archived"
+            :state="state"
+            :name="system.name"
+            authenticated
+            :mode="mode"
+            read-only
+            :origin="exportOrigin"
+            :export-messages="exportMessages"
+            :export-limits="exportLimits"
+        />
+
         <template v-else>
             <LayoutSystemMetaForm
                 v-model:name="name"
@@ -291,6 +325,9 @@ function onRegenerated(next: LayoutSystemStateV1): void {
                 guard
                 :show-save-button="false"
                 :extra-dirty="metaDirty"
+                :export-messages="exportMessages"
+                :export-limits="exportLimits"
+                :export-origin="exportOrigin"
                 @regenerated="onRegenerated"
             />
 

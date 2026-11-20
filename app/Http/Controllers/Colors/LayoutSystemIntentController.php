@@ -10,17 +10,19 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 /**
- * Intencoes do Layout Harmonizer que sobrevivem ao login (F4).
+ * Intencoes do Layout Harmonizer que sobrevivem ao login (F4/F5).
  *
  * Criar abre o tool com `save=1` e, quando veio do CTA de uma paleta, preserva
- * `palette` (dono ou publica ativa). Duplicar leva o visitante de volta a
- * pagina publica com o fluxo aberto.
+ * `palette` (dono ou publica ativa). O CTA de exportacao do anonimo usa
+ * `export=1`: volta ao tool com o card liberado e **sem** abrir o modal de
+ * salvar (F5, ADR-175). Duplicar leva o visitante de volta a pagina publica
+ * com o fluxo aberto.
  */
 class LayoutSystemIntentController extends Controller
 {
     public function create(Request $request): RedirectResponse
     {
-        $query = ['save' => 1];
+        $query = $request->boolean('export') ? ['export' => 1] : ['save' => 1];
         $palette = $request->query('palette');
 
         if (is_string($palette) && $palette !== '') {

@@ -79,6 +79,13 @@ implementada e nenhum arquivo local seja removido sem revisão.
   aposentado), 172 (crédito de origem), 173 (protótipos no workspace) e 174
   (viewer público, rota e SEO). Os originais locais dos sete copiados seguem em
   `adr/` até o aceite da fase.
+- **2026-11-20 (F5)**: copiados 148 (exportações) e 155 (CSS), com o mesmo
+  conteúdo, título/numeração ajustados e uma seção “Implementação (F5)” no fim
+  de cada um. Novos: 175 (exportação local: cliente, `fflate`, nomes fixos,
+  permissões e snapshot único), 176 (fallback HEX/OKLCH, escopo e prefixo
+  validados, comentários sanitizados) e 177 (estrutura do Markdown, idioma,
+  avisos e origem pública). Os originais locais dos dois copiados seguem em
+  `adr/` até o aceite da fase.
 
 ## Contagem por fase
 
@@ -88,5 +95,5 @@ implementada e nenhum arquivo local seja removido sem revisão.
 | F2 | 153, 162 |
 | F3 | 151 (retomada de 158; novo 167) |
 | F4 | 152, 154, 159, 160, 161, 164, 165; novos 168–174 |
-| F5 | 148, 155 |
+| F5 | 148, 155; novos 175–177 |
 | F0 | — (somente este mapeamento) |

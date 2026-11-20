@@ -193,5 +193,9 @@
 - Regeneracao explicita: decisao do usuario de gerar de novo um sistema compativel com as versoes atuais, levando os tokens bloqueados como overrides e descartando as edicoes manuais nao bloqueadas; nunca acontece sozinha (ADR-169).
 - Slug aposentado: slug publico de um sistema arquivado ou excluido, reservado em `layout_systems.archived_slug` ou em `layout_system_retired_slugs`; nunca e reemitido, e a URL antiga responde 404 permanente (ADR-171).
 - Credito de origem: registro congelado no salvamento com o nome, o slug, a visibilidade e o autor da paleta que deu origem ao sistema; a origem privada nunca aparece no publico, e o texto sobrevive a exclusao da paleta mesmo perdendo o link (ADR-172).
+- Exportacao local: geracao de Markdown, CSS e ZIP no proprio navegador a partir do snapshot exibido, sem endpoint, sem IA e sem regenerar cores; avulsa ou em pacote deterministico, e disponivel para autenticado com ou sem salvar, nunca para o visitante anonimo (ADR-148, ADR-175).
+- Prefixo CSS: identificador ASCII em kebab-case (default `lh`, maximo 32 caracteres) que nomeia as variaveis do CSS exportado (`--lh-primary`); validado no cliente e configuravel por `config/colors.php` (ADR-155, ADR-176).
+- Escopo CSS: onde as variaveis sao declaradas no arquivo exportado - `:root` (default) ou uma classe simples (`.app`, maximo 64 caracteres); o tema escuro responde a `data-theme="dark"` no mesmo escopo, e nenhum seletor arbitrario e aceito (ADR-155, ADR-176).
+- Documento de instrucoes: Markdown autossuficiente no idioma escolhido, com metadados, seed, temas, 33 tokens, regras de aplicacao, contrastes e avisos, feito para uma IA aplicar o quadro sem inventar cores (ADR-177).
 
 

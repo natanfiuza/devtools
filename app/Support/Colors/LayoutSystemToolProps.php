@@ -48,6 +48,21 @@ final class LayoutSystemToolProps
                 'algorithm' => (int) config('colors.layout_systems.versions.algorithm', 1),
                 'suggestions' => (int) config('colors.layout_systems.versions.suggestions', 1),
             ],
+            // Exportacoes locais (F5): o cliente so tem o idioma ativo, entao
+            // as traducoes dos 5 idiomas vem do servidor junto com os limites.
+            'exportMessages' => LayoutSystemExportMessages::all(),
+            'exportLimits' => self::exportLimits(),
+        ];
+    }
+
+    /**
+     * @return array{prefixMaxLength: int, scopeMaxLength: int}
+     */
+    public static function exportLimits(): array
+    {
+        return [
+            'prefixMaxLength' => (int) config('colors.layout_systems.export.prefix_max_length', 32),
+            'scopeMaxLength' => (int) config('colors.layout_systems.export.scope_max_length', 64),
         ];
     }
 
