@@ -16,6 +16,8 @@ defineProps<{
     empty: boolean;
     backgroundVisible: boolean;
     backgroundInvalid: boolean;
+    /** O fundo digitado tem alpha: nao serve como composicao. */
+    backgroundAlpha: boolean;
 }>();
 
 const backgroundText = defineModel<string>('backgroundText', {
@@ -26,48 +28,52 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="space-y-4">
-        <ColorPickerControls
-            :state="picker"
-            :empty="empty"
-            :empty-label="t('tools.layout-harmonizer.seed.empty_value')"
-        />
+  <div class="space-y-4">
+    <ColorPickerControls
+      :state="picker"
+      :empty="empty"
+      :empty-label="t('tools.layout-harmonizer.seed.empty_value')"
+    />
 
-        <div
-            v-if="backgroundVisible"
-            class="space-y-1.5"
-            data-test="seed-background-field"
-        >
-            <Label for="layout-harmonizer-background">
-                {{ t('tools.layout-harmonizer.seed.background_label') }}
-            </Label>
+    <div
+      v-if="backgroundVisible"
+      class="space-y-1.5"
+      data-test="seed-background-field"
+    >
+      <Label for="layout-harmonizer-background">
+        {{ t('tools.layout-harmonizer.seed.background_label') }}
+      </Label>
 
-            <Input
-                id="layout-harmonizer-background"
-                v-model="backgroundText"
-                type="text"
-                autocomplete="off"
-                spellcheck="false"
-                :aria-invalid="backgroundInvalid"
-                aria-describedby="layout-harmonizer-background-help"
-                data-test="seed-background-input"
-            />
+      <Input
+        id="layout-harmonizer-background"
+        v-model="backgroundText"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        :aria-invalid="backgroundInvalid"
+        aria-describedby="layout-harmonizer-background-help"
+        data-test="seed-background-input"
+      />
 
-            <p
-                id="layout-harmonizer-background-help"
-                class="text-xs"
-                :class="
-                    backgroundInvalid
-                        ? 'text-destructive'
-                        : 'text-muted-foreground'
-                "
-            >
-                {{
-                    backgroundInvalid
-                        ? t('tools.layout-harmonizer.seed.background_invalid')
-                        : t('tools.layout-harmonizer.seed.background_hint')
-                }}
-            </p>
-        </div>
+      <p
+        id="layout-harmonizer-background-help"
+        class="text-xs"
+        :class="
+          backgroundInvalid
+            ? 'text-destructive'
+            : 'text-muted-foreground'
+        "
+      >
+        {{
+          backgroundAlpha
+            ? t(
+              'tools.layout-harmonizer.seed.background_alpha_invalid',
+            )
+            : backgroundInvalid
+              ? t('tools.layout-harmonizer.seed.background_invalid')
+              : t('tools.layout-harmonizer.seed.background_hint')
+        }}
+      </p>
     </div>
+  </div>
 </template>

@@ -266,9 +266,15 @@ describe('card de exportacao', () => {
         prefix.dispatchEvent(new Event('input'));
         await nextTick();
 
-        expect(
-            query('[data-test="layout-export-prefix-error"]').textContent,
-        ).toContain('minúsculas');
+        const error = query('[data-test="layout-export-prefix-error"]');
+
+        expect(error.textContent).toContain('minúsculas');
+        // O motivo chega ao leitor de tela e o campo aponta para ele.
+        expect(error.getAttribute('role')).toBe('alert');
+        expect(prefix.getAttribute('aria-invalid')).toBe('true');
+        expect(prefix.getAttribute('aria-describedby')).toContain(
+            error.getAttribute('id'),
+        );
 
         for (const selector of [
             'layout-export-markdown',

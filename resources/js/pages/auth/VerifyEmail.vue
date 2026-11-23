@@ -21,47 +21,47 @@ defineProps<{
 </script>
 
 <template>
-    <Head :title="t('auth.verify.title')" />
+  <Head :title="t('auth.verify.title')" />
 
-    <AuthCard :title="t('auth.verify.title')">
-        <p
-            v-if="status === 'verification-link-sent'"
-            class="mb-5 rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm"
-            role="status"
-            aria-live="polite"
-        >
-            {{ t('auth.verify.sent') }}
-        </p>
+  <AuthCard :title="t('auth.verify.title')">
+    <p
+      v-if="status === 'verification-link-sent'"
+      class="mb-5 rounded-md border border-brand/40 bg-brand/5 px-3 py-2 text-sm"
+      role="status"
+      aria-live="polite"
+    >
+      {{ t('auth.verify.sent') }}
+    </p>
 
-        <p class="mb-5 text-sm text-muted-foreground">
-            {{ t('auth.verify.description', { email }) }}
-        </p>
+    <p class="mb-5 text-sm text-muted-foreground">
+      {{ t('auth.verify.description', { email }) }}
+    </p>
 
-        <Form
-            v-slot="{ processing }"
-            v-bind="routes.form.resendVerification.value"
-            class="flex flex-col gap-3"
-        >
-            <Button
-                type="submit"
-                variant="secondary"
-                class="w-full"
-                :disabled="processing"
-                data-test="resend-verification-button"
-            >
-                <Spinner v-if="processing" />
-                {{ t('auth.verify.resend') }}
-            </Button>
+    <Form
+      v-slot="{ processing }"
+      v-bind="routes.form.resendVerification.value"
+      class="flex flex-col gap-3"
+    >
+      <Button
+        type="submit"
+        variant="secondary"
+        class="w-full"
+        :disabled="processing"
+        data-test="resend-verification-button"
+      >
+        <Spinner v-if="processing" />
+        {{ t('auth.verify.resend') }}
+      </Button>
 
-            <!-- Sair e POST: o TextLink precisa do metodo explicito. -->
-            <TextLink
-                :href="routes.logout.value"
-                method="post"
-                as="button"
-                class="mx-auto text-sm"
-            >
-                {{ t('auth.verify.logout') }}
-            </TextLink>
-        </Form>
-    </AuthCard>
+      <!-- Sair e POST: o TextLink precisa do metodo explicito. -->
+      <TextLink
+        :href="routes.logout.value"
+        method="post"
+        as="button"
+        class="mx-auto text-sm"
+      >
+        {{ t('auth.verify.logout') }}
+      </TextLink>
+    </Form>
+  </AuthCard>
 </template>

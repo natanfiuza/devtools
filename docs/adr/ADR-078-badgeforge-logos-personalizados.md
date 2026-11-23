@@ -30,16 +30,22 @@ Havia ainda três perguntas de contrato:
    declaração `<?xml ...?>` são recusados antes do parse.
 3. O documento é lido com `DOMDocument::loadXML(..., LIBXML_NONET | LIBXML_NOBLANKS)`
    — nunca `LIBXML_NOENT` e nunca resolução de DTD.
-4. A raiz é `<svg>` (namespace vazio ou SVG) e só `<g>` e `<path>` podem
-   aparecer abaixo dela. Texto só é aceito se for whitespace. Qualquer outra
-   tag — `script`, `style`, `image`, `use`, `foreignObject`, `defs`, `text`,
-   animações — vira erro.
+4. A raiz é `<svg>` (namespace vazio ou SVG) e, abaixo dela, são aceitos `<g>`,
+   `<path>` e as primitivas vetoriais seguras `<rect>`, `<circle>`, `<ellipse>`,
+   `<line>`, `<polyline>` e `<polygon>` — todas convertidas para `LogoPath`
+   (`d`) durante o parse. Tags benignas de metadados (`<title>`, `<desc>`,
+   `<metadata>`) são ignoradas (incluindo filhos). Texto fora dessas tags só é
+   aceito se for whitespace. Qualquer outra tag — `script`, `style`, `image`,
+   `use`, `foreignObject`, `defs`, `text`, animações — vira erro com indicação
+   do elemento recusado (`:element`).
 5. Atributos são um allowlist: `viewBox` obrigatório na raiz; `d` obrigatório
-   em `path`; `fill-rule`/`clip-rule` só com `nonzero`/`evenodd` (herdados de
-   `<g>`); `on*`, `href`, `xlink:href`, `style`, `transform`, `opacity`,
-   `filter`, `clip-path`, `mask`, `marker-*` e valores com `url(` são
-   recusados. `fill`/`width`/`height`/`class`/`id` são ignorados: o logo é
-   recolorido por `logoColor`.
+   em `path` (e atributos geométricos válidos nas primitivas);
+   `fill-rule`/`clip-rule` só com `nonzero`/`evenodd` (herdados de `<g>`);
+   `on*`, `href`, `xlink:href`, `style`, `transform`, `filter`, `clip-path`,
+   `mask`, `marker-*` e valores com `url(` são recusados. Atributos cosméticos
+   inofensivos (`fill`, `stroke`, `stroke-width`, `stroke-linecap`,
+   `stroke-linejoin`, `opacity`, `width`, `height` na raiz, `class`, `id`) são
+   aceitos e ignorados: o logo é recolorido por `logoColor`.
 6. O `d` segue `^[MmLlHhVvCcSsQqTtAaZz0-9+\-.,eE\s]+$`, começa por `M`/`m` e
    respeita `max_path_length`, `max_total_path_length` e `max_paths`. O
    `viewBox` tem quatro números com `w > 0`, `h > 0` e extensão limitada por

@@ -16,7 +16,7 @@ import {
 } from '../lib/frozen';
 import {
     LAYOUT_PLACEHOLDER,
-    parseBackgroundText,
+    parseOpaqueText,
     parseSecondaryText,
 } from '../lib/inputs';
 import type { LayoutSnapshot } from '../lib/snapshot';
@@ -58,6 +58,9 @@ export function useFrozenLayout(
     const strategy = ref<LayoutStrategy>(init.inputs.strategy);
     const backgroundText = ref(init.inputs.backgroundText);
     const secondaryText = ref(init.inputs.secondaryText);
+    const secondaryBackgroundText = ref(
+        init.inputs.secondaryBackgroundText ?? '',
+    );
     const snapshot = shallowRef<LayoutSnapshot>(init.snapshot);
     const pendingRegeneration = ref(false);
     const target = ref<LayoutEditTarget>(init.snapshot.target);
@@ -73,6 +76,7 @@ export function useFrozenLayout(
             strategy,
             backgroundText,
             secondaryText,
+            secondaryBackgroundText,
         ],
         () => {
             pendingRegeneration.value = true;
@@ -81,21 +85,51 @@ export function useFrozenLayout(
 
     const hasSeed = computed(() => picker.text.value.trim() !== '');
     const needsBackground = computed(() => picker.rgba.value.a < 1);
+    const parsedBackground = computed(() =>
+        parseOpaqueText(backgroundText.value),
+    );
     const background = computed(() =>
-        parseBackgroundText(backgroundText.value),
+        parsedBackground.value.kind === 'color'
+            ? parsedBackground.value.rgb
+            : null,
     );
     const backgroundInvalid = computed(
-        () => backgroundText.value.trim() !== '' && background.value === null,
+        () =>
+            parsedBackground.value.kind === 'invalid' ||
+            parsedBackground.value.kind === 'alpha',
+    );
+    const backgroundAlpha = computed(
+        () => parsedBackground.value.kind === 'alpha',
+    );
+    const parsedSecondary = computed(() =>
+        parseSecondaryText(secondaryText.value),
     );
     const secondaryInvalid = computed(
-        () => parseSecondaryText(secondaryText.value) === undefined,
+        () => parsedSecondary.value === undefined,
+    );
+    const secondaryColor = computed<Rgba | null>(
+        () => parsedSecondary.value ?? null,
+    );
+    const parsedSecondaryBackground = computed(() =>
+        parseOpaqueText(secondaryBackgroundText.value),
+    );
+    const secondaryBackground = computed(() =>
+        parsedSecondaryBackground.value.kind === 'color'
+            ? parsedSecondaryBackground.value.rgb
+            : null,
+    );
+    const secondaryBackgroundAlpha = computed(
+        () => parsedSecondaryBackground.value.kind === 'alpha',
+    );
+    const secondaryBackgroundInvalid = computed(
+        () =>
+            parsedSecondaryBackground.value.kind === 'invalid' ||
+            parsedSecondaryBackground.value.kind === 'alpha',
+    );
+    const secondaryNeedsBackground = computed(
+        () => secondaryColor.value !== null && secondaryColor.value.a < 1,
     );
     const secondarySource = computed(() => snapshot.value.secondarySource);
-    const secondaryColor = computed(() => {
-        const parsed = parseSecondaryText(secondaryText.value);
-
-        return parsed === undefined || parsed === null ? null : parsed;
-    });
 
     const result = computed<LayoutViewResult>(() =>
         frozenResult(snapshot.value),
@@ -134,11 +168,17 @@ export function useFrozenLayout(
         strategy,
         backgroundText,
         secondaryText,
+        secondaryBackgroundText,
         hasSeed,
         needsBackground,
         background,
         backgroundInvalid,
+        backgroundAlpha,
         secondaryInvalid,
+        secondaryNeedsBackground,
+        secondaryBackground,
+        secondaryBackgroundInvalid,
+        secondaryBackgroundAlpha,
         secondarySource,
         secondaryColor,
         result,
@@ -165,6 +205,7 @@ export function useFrozenLayout(
         restoreAllEdits: () => {},
         resetSecondary: () => {
             secondaryText.value = '';
+            secondaryBackgroundText.value = '';
         },
     };
 }

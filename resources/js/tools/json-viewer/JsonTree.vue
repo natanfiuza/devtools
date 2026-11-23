@@ -82,23 +82,23 @@ function onScroll(event: Event): void {
 </script>
 
 <template>
-    <div
-        ref="scroller"
-        class="h-full overflow-auto"
-        data-test="json-tree"
-        @scroll.passive="onScroll"
-    >
-        <div :style="spacer">
-            <TreeRow
-                v-for="line in lines"
-                :key="line.index"
-                :node="line.node"
-                :path="line.path"
-                :open="!collapsed.has(line.index)"
-                :matched="matches?.has(line.index) ?? false"
-                @toggle="emit('toggle', line.index)"
-                @copy="emit('copy', line.index)"
-            />
-        </div>
+  <div
+    ref="scroller"
+    class="h-full overflow-auto"
+    data-test="json-tree"
+    @scroll.passive="onScroll"
+  >
+    <div :style="spacer">
+      <TreeRow
+        v-for="line in lines"
+        :key="line.index"
+        :node="line.node"
+        :path="line.path"
+        :open="!collapsed.has(line.index)"
+        :matched="matches?.has(line.index) ?? false"
+        @toggle="emit('toggle', line.index)"
+        @copy="emit('copy', line.index)"
+      />
     </div>
+  </div>
 </template>

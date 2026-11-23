@@ -125,6 +125,6 @@ describe('compatibilidade', () => {
     it('mantem a versao do algoritmo', () => {
         const result = generate({ light: { primary: RED } });
 
-        expect(result.algorithmVersion).toBe(1);
+        expect(result.algorithmVersion).toBe(2);
     });
 });

@@ -81,135 +81,138 @@ async function remove(): Promise<void> {
 </script>
 
 <template>
-    <article
-        class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
-        data-test="favorite-palette-card"
+  <article
+    class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+    data-test="favorite-palette-card"
+  >
+    <div
+      class="flex h-14 overflow-hidden rounded-lg border border-border"
+      role="img"
+      :aria-label="t('colors.list.preview_alt', { name: palette.name })"
+      data-test="favorite-palette-preview"
     >
-        <div
-            class="flex h-14 overflow-hidden rounded-lg border border-border"
-            role="img"
-            :aria-label="t('colors.list.preview_alt', { name: palette.name })"
-            data-test="favorite-palette-preview"
+      <span
+        v-for="(hex, index) in palette.preview"
+        :key="`${hex}-${index}`"
+        class="h-full flex-1"
+        :style="{ backgroundColor: hex }"
+        :title="hex"
+      />
+    </div>
+
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h3 class="truncate text-base font-semibold">
+          <Link
+            v-if="publicUrl !== null"
+            :href="publicUrl"
+            class="hover:underline"
+            data-test="favorite-palette-name"
+          >
+            {{ palette.name }}
+          </Link>
+          <span
+            v-else
+            data-test="favorite-palette-name"
+          >{{
+            palette.name
+          }}</span>
+        </h3>
+        <p
+          v-if="palette.description !== null"
+          class="mt-1 line-clamp-2 text-sm text-muted-foreground"
+          data-test="favorite-palette-description"
         >
-            <span
-                v-for="(hex, index) in palette.preview"
-                :key="`${hex}-${index}`"
-                class="h-full flex-1"
-                :style="{ backgroundColor: hex }"
-                :title="hex"
-            />
-        </div>
+          {{ palette.description }}
+        </p>
+      </div>
 
-        <div class="flex flex-wrap items-start justify-between gap-2">
-            <div class="min-w-0">
-                <h3 class="truncate text-base font-semibold">
-                    <Link
-                        v-if="publicUrl !== null"
-                        :href="publicUrl"
-                        class="hover:underline"
-                        data-test="favorite-palette-name"
-                    >
-                        {{ palette.name }}
-                    </Link>
-                    <span v-else data-test="favorite-palette-name">{{
-                        palette.name
-                    }}</span>
-                </h3>
-                <p
-                    v-if="palette.description !== null"
-                    class="mt-1 line-clamp-2 text-sm text-muted-foreground"
-                    data-test="favorite-palette-description"
-                >
-                    {{ palette.description }}
-                </p>
-            </div>
+      <Badge variant="outline">
+        {{ t(`colors.list.kind_${palette.kind}`) }}
+      </Badge>
+    </div>
 
-            <Badge variant="outline">
-                {{ t(`colors.list.kind_${palette.kind}`) }}
-            </Badge>
-        </div>
+    <dl
+      class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+    >
+      <div>
+        <dt class="sr-only">
+          {{ t('colors.list.sort_colors_count') }}
+        </dt>
+        <dd>
+          {{
+            t('colors.list.colors_count', {
+              count: palette.colors_count,
+            })
+          }}
+        </dd>
+      </div>
+      <div>
+        <dt class="sr-only">
+          {{ t('colors.list.sort_duplications_count') }}
+        </dt>
+        <dd data-test="favorite-palette-usage">
+          {{
+            palette.duplications_count === 0
+              ? t('colors.list.usage_zero')
+              : t('colors.list.usage', {
+                count: palette.duplications_count,
+              })
+          }}
+        </dd>
+      </div>
+      <div v-if="formatDate(palette.favorited_at) !== null">
+        <dt class="sr-only">
+          {{ t('colors.favorites.tab_favorites') }}
+        </dt>
+        <dd data-test="favorite-palette-saved-at">
+          {{
+            t('colors.favorites.favorited_at', {
+              date: formatDate(palette.favorited_at),
+            })
+          }}
+        </dd>
+      </div>
+    </dl>
 
-        <dl
-            class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-        >
-            <div>
-                <dt class="sr-only">
-                    {{ t('colors.list.sort_colors_count') }}
-                </dt>
-                <dd>
-                    {{
-                        t('colors.list.colors_count', {
-                            count: palette.colors_count,
-                        })
-                    }}
-                </dd>
-            </div>
-            <div>
-                <dt class="sr-only">
-                    {{ t('colors.list.sort_duplications_count') }}
-                </dt>
-                <dd data-test="favorite-palette-usage">
-                    {{
-                        palette.duplications_count === 0
-                            ? t('colors.list.usage_zero')
-                            : t('colors.list.usage', {
-                                  count: palette.duplications_count,
-                              })
-                    }}
-                </dd>
-            </div>
-            <div v-if="formatDate(palette.favorited_at) !== null">
-                <dt class="sr-only">
-                    {{ t('colors.favorites.tab_favorites') }}
-                </dt>
-                <dd data-test="favorite-palette-saved-at">
-                    {{
-                        t('colors.favorites.favorited_at', {
-                            date: formatDate(palette.favorited_at),
-                        })
-                    }}
-                </dd>
-            </div>
-        </dl>
+    <ul
+      v-if="palette.tags.length > 0"
+      class="flex flex-wrap gap-1"
+      data-test="favorite-palette-tags"
+    >
+      <li
+        v-for="tag in palette.tags"
+        :key="tag.id"
+        class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+      >
+        {{ tag.name }}
+      </li>
+    </ul>
 
-        <ul
-            v-if="palette.tags.length > 0"
-            class="flex flex-wrap gap-1"
-            data-test="favorite-palette-tags"
-        >
-            <li
-                v-for="tag in palette.tags"
-                :key="tag.id"
-                class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-            >
-                {{ tag.name }}
-            </li>
-        </ul>
-
-        <div class="flex flex-wrap items-center gap-2">
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="removing"
-                data-test="favorite-palette-remove"
-                @click="remove"
-            >
-                <StarOff class="size-4" />
-                {{
-                    removing
-                        ? t('colors.favorites.removing')
-                        : t('colors.favorites.remove')
-                }}
-            </Button>
-            <p
-                v-if="failed"
-                class="text-xs text-destructive"
-                role="alert"
-                data-test="favorite-palette-error"
-            >
-                {{ t('colors.favorites.remove_error') }}
-            </p>
-        </div>
-    </article>
+    <div class="flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        :disabled="removing"
+        data-test="favorite-palette-remove"
+        @click="remove"
+      >
+        <StarOff class="size-4" />
+        {{
+          removing
+            ? t('colors.favorites.removing')
+            : t('colors.favorites.remove')
+        }}
+      </Button>
+      <p
+        v-if="failed"
+        class="text-xs text-destructive"
+        role="alert"
+        data-test="favorite-palette-error"
+      >
+        {{ t('colors.favorites.remove_error') }}
+      </p>
+    </div>
+  </article>
 </template>

@@ -121,55 +121,55 @@ function onKeydown(event: KeyboardEvent): void {
 </script>
 
 <template>
+  <div
+    ref="area"
+    role="slider"
+    tabindex="0"
+    :aria-label="t('tools.shared.color_picker.area.label')"
+    :aria-valuetext="valueText"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    :aria-valuenow="Math.round(hsv.s)"
+    class="relative h-56 w-full touch-none overflow-hidden rounded-lg border select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+    :style="{ backgroundColor: hueBackground(hsv.h) }"
+    data-test="color-area"
+    @pointerdown="onPointerDown"
+    @pointermove="onPointerMove"
+    @pointerup="onPointerEnd"
+    @pointercancel="onPointerEnd"
+    @keydown="onKeydown"
+  >
     <div
-        ref="area"
-        role="slider"
-        tabindex="0"
-        :aria-label="t('tools.shared.color_picker.area.label')"
-        :aria-valuetext="valueText"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        :aria-valuenow="Math.round(hsv.s)"
-        class="relative h-56 w-full touch-none overflow-hidden rounded-lg border select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-        :style="{ backgroundColor: hueBackground(hsv.h) }"
-        data-test="color-area"
-        @pointerdown="onPointerDown"
-        @pointermove="onPointerMove"
-        @pointerup="onPointerEnd"
-        @pointercancel="onPointerEnd"
-        @keydown="onKeydown"
-    >
-        <div
-            class="pointer-events-none absolute inset-0"
-            style="
+      class="pointer-events-none absolute inset-0"
+      style="
                 background-image: linear-gradient(
                     to right,
                     #ffffff,
                     rgba(255, 255, 255, 0)
                 );
             "
-        />
-        <div
-            class="pointer-events-none absolute inset-0"
-            style="
+    />
+    <div
+      class="pointer-events-none absolute inset-0"
+      style="
                 background-image: linear-gradient(
                     to top,
                     #000000,
                     rgba(0, 0, 0, 0)
                 );
             "
-        />
-        <div
-            class="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md"
-            :style="{
-                left: `${hsv.s}%`,
-                top: `${100 - hsv.v}%`,
-                backgroundColor: thumbColor,
-            }"
-            aria-hidden="true"
-        />
-    </div>
-    <p class="sr-only">
-        {{ t('tools.shared.color_picker.area.hint') }}
-    </p>
+    />
+    <div
+      class="pointer-events-none absolute size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md"
+      :style="{
+        left: `${hsv.s}%`,
+        top: `${100 - hsv.v}%`,
+        backgroundColor: thumbColor,
+      }"
+      aria-hidden="true"
+    />
+  </div>
+  <p class="sr-only">
+    {{ t('tools.shared.color_picker.area.hint') }}
+  </p>
 </template>

@@ -38,76 +38,85 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <section class="rounded-xl border bg-card p-4">
-        <div class="flex items-center justify-between gap-2">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.shared.library.favorites.title') }}
-            </h2>
-            <Button
-                v-if="colors.length > 0"
-                type="button"
-                variant="ghost"
-                size="sm"
-                @click="emit('clear')"
-            >
-                {{ t('tools.shared.library.favorites.clear') }}
-            </Button>
-        </div>
-        <p class="mt-1 text-xs text-muted-foreground">
-            {{
-                authenticated
-                    ? t('tools.shared.library.favorites.description.account')
-                    : t('tools.shared.library.favorites.description.local')
-            }}
-        </p>
+  <section class="rounded-xl border bg-card p-4">
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.shared.library.favorites.title') }}
+      </h2>
+      <Button
+        v-if="colors.length > 0"
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="emit('clear')"
+      >
+        {{ t('tools.shared.library.favorites.clear') }}
+      </Button>
+    </div>
+    <p class="mt-1 text-xs text-muted-foreground">
+      {{
+        authenticated
+          ? t('tools.shared.library.favorites.description.account')
+          : t('tools.shared.library.favorites.description.local')
+      }}
+    </p>
 
-        <Button
-            type="button"
-            :variant="isFavorite ? 'secondary' : 'outline'"
-            size="sm"
-            class="mt-3"
-            :aria-pressed="isFavorite"
-            data-test="favorites-toggle"
-            @click="emit('toggle')"
-        >
-            <Star v-if="isFavorite" aria-hidden="true" />
-            <StarOff v-else aria-hidden="true" />
-            {{
-                isFavorite
-                    ? t('tools.shared.library.favorites.remove')
-                    : t('tools.shared.library.favorites.add')
-            }}
-        </Button>
+    <Button
+      type="button"
+      :variant="isFavorite ? 'secondary' : 'outline'"
+      size="sm"
+      class="mt-3"
+      :aria-pressed="isFavorite"
+      data-test="favorites-toggle"
+      @click="emit('toggle')"
+    >
+      <Star
+        v-if="isFavorite"
+        aria-hidden="true"
+      />
+      <StarOff
+        v-else
+        aria-hidden="true"
+      />
+      {{
+        isFavorite
+          ? t('tools.shared.library.favorites.remove')
+          : t('tools.shared.library.favorites.add')
+      }}
+    </Button>
 
-        <p
-            v-if="colors.length === 0"
-            class="mt-3 text-sm text-muted-foreground"
-            data-test="favorites-empty"
-        >
-            {{ t('tools.shared.library.favorites.empty') }}
-        </p>
+    <p
+      v-if="colors.length === 0"
+      class="mt-3 text-sm text-muted-foreground"
+      data-test="favorites-empty"
+    >
+      {{ t('tools.shared.library.favorites.empty') }}
+    </p>
 
-        <div v-else class="mt-3 grid grid-cols-5 gap-1 sm:grid-cols-8">
-            <SwatchButton
-                v-for="color in colors"
-                :key="formatHex(color)"
-                :color="color"
-                :label="formatHex(color)"
-                @select="emit('apply', color)"
-            />
-        </div>
+    <div
+      v-else
+      class="mt-3 grid grid-cols-5 gap-1 sm:grid-cols-8"
+    >
+      <SwatchButton
+        v-for="color in colors"
+        :key="formatHex(color)"
+        :color="color"
+        :label="formatHex(color)"
+        @select="emit('apply', color)"
+      />
+    </div>
 
-        <Button
-            v-if="more"
-            type="button"
-            variant="ghost"
-            size="sm"
-            class="mt-3"
-            :disabled="loadingMore"
-            data-test="favorites-more"
-            @click="emit('more')"
-        >
-            {{ t('tools.shared.library.load_more') }}
-        </Button>
-    </section>
+    <Button
+      v-if="more"
+      type="button"
+      variant="ghost"
+      size="sm"
+      class="mt-3"
+      :disabled="loadingMore"
+      data-test="favorites-more"
+      @click="emit('more')"
+    >
+      {{ t('tools.shared.library.load_more') }}
+    </Button>
+  </section>
 </template>

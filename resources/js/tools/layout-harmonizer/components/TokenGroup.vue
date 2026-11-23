@@ -64,25 +64,33 @@ function restore(id: LayoutTokenId): void {
 </script>
 
 <template>
-    <section class="space-y-2" :aria-labelledby="headingId">
-        <h3 :id="headingId" class="text-sm font-medium">{{ title }}</h3>
+  <section
+    class="space-y-2"
+    :aria-labelledby="headingId"
+  >
+    <h3
+      :id="headingId"
+      class="text-sm font-medium"
+    >
+      {{ title }}
+    </h3>
 
-        <ul class="space-y-2">
-            <TokenCell
-                v-for="token in tokens"
-                :key="token.id"
-                :token="token"
-                :purpose="purposeOf(token.id)"
-                :checks="checksByToken[token.id] ?? []"
-                :copy="copy"
-                :locked="isLocked(token.id)"
-                :edited="isEdited(token.id)"
-                :suggested="isSuggested(token.id)"
-                :editable="editable"
-                :apply-color="(color) => apply(token.id, color)"
-                :toggle-lock="() => toggle(token.id)"
-                :restore-color="() => restore(token.id)"
-            />
-        </ul>
-    </section>
+    <ul class="space-y-2">
+      <TokenCell
+        v-for="token in tokens"
+        :key="token.id"
+        :token="token"
+        :purpose="purposeOf(token.id)"
+        :checks="checksByToken[token.id] ?? []"
+        :copy="copy"
+        :locked="isLocked(token.id)"
+        :edited="isEdited(token.id)"
+        :suggested="isSuggested(token.id)"
+        :editable="editable"
+        :apply-color="(color) => apply(token.id, color)"
+        :toggle-lock="() => toggle(token.id)"
+        :restore-color="() => restore(token.id)"
+      />
+    </ul>
+  </section>
 </template>

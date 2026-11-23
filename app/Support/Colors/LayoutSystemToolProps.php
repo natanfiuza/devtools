@@ -4,6 +4,7 @@ namespace App\Support\Colors;
 
 use App\Models\ColorPalette;
 use App\Models\User;
+use App\Support\Locales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -100,6 +101,10 @@ final class LayoutSystemToolProps
             return null;
         }
 
+        // O parametro de rota usa o slug do idioma (`pt-br`), nao o codigo de
+        // traducao do Laravel (`pt_BR`), que nao casa com `{locale}`.
+        $routeLocale = request()->route('locale');
+
         return [
             'id' => $palette->id,
             'name' => $palette->name,
@@ -110,7 +115,9 @@ final class LayoutSystemToolProps
                 ? route('dashboard.colors.palettes.edit', $palette)
                 : ($palette->slug !== null
                     ? route('colors.palettes.show', [
-                        'locale' => app()->getLocale(),
+                        'locale' => is_string($routeLocale) && $routeLocale !== ''
+                            ? $routeLocale
+                            : Locales::slug(app()->getLocale()),
                         'slug' => $palette->slug,
                     ])
                     : null),

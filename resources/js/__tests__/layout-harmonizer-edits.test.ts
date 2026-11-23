@@ -49,6 +49,19 @@ describe('assinatura das entradas', () => {
             signatureOf(RED, 'analogous', null),
         );
     });
+
+    it('inclui o fundo de composicao da secundaria com alpha', () => {
+        const translucent = { ...GREEN, a: 0.5 };
+        const white = { r: 255, g: 255, b: 255 };
+        const black = { r: 0, g: 0, b: 0 };
+        const base = signatureOf(RED, 'analogous', translucent, white);
+
+        expect(signatureOf(RED, 'analogous', translucent, white)).toBe(base);
+        expect(signatureOf(RED, 'analogous', translucent, black)).not.toBe(
+            base,
+        );
+        expect(signatureOf(RED, 'analogous', translucent, null)).not.toBe(base);
+    });
 });
 
 describe('bloqueio', () => {
@@ -93,6 +106,61 @@ describe('bloqueio', () => {
         expect(isLocked(state, 'light', 'primary')).toBe(true);
         expect(isLocked(state, 'dark', 'primary')).toBe(false);
         expect(state.overrides.dark).toBeUndefined();
+    });
+});
+
+describe('aceite de sugestao', () => {
+    it('mantem o bloqueio do token aceito e dos demais', () => {
+        let state = toggleLock(emptyEditState(), 'light', 'primary', RED);
+
+        state = toggleLock(state, 'light', 'on-primary', GREEN);
+        state = toggleLock(state, 'dark', 'background', GREEN);
+        state = acceptSuggestion(
+            state,
+            'light',
+            'on-primary',
+            GREEN,
+            RED,
+            'aaa',
+        );
+
+        expect(isLocked(state, 'light', 'on-primary')).toBe(true);
+        expect(isLocked(state, 'light', 'primary')).toBe(true);
+        expect(isLocked(state, 'dark', 'background')).toBe(true);
+        expect(state.overrides.light?.['on-primary']).toEqual({
+            rgb: { r: 255, g: 0, b: 0 },
+            origin: 'accept',
+        });
+        expect(state.accepted).toHaveLength(1);
+        expect(state.accepted[0]).toMatchObject({
+            theme: 'light',
+            token: 'on-primary',
+            target: 'aaa',
+        });
+    });
+
+    it('preserva os valores bloqueados ao montar os overrides efetivos', () => {
+        let state = toggleLock(emptyEditState(), 'light', 'primary', RED);
+
+        state = acceptSuggestion(
+            state,
+            'light',
+            'on-primary',
+            GREEN,
+            RED,
+            'aa',
+        );
+
+        expect(effectiveOverrides(state)?.light?.primary).toEqual({
+            r: 255,
+            g: 0,
+            b: 0,
+        });
+        expect(effectiveOverrides(state)?.light?.['on-primary']).toEqual({
+            r: 255,
+            g: 0,
+            b: 0,
+        });
     });
 });
 

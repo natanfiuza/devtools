@@ -43,57 +43,63 @@ const strategyName = computed(() =>
 </script>
 
 <template>
-    <dl
-        class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs"
-        data-test="seed-summary"
-    >
-        <dt class="text-muted-foreground">
-            {{ t('tools.layout-harmonizer.seed.summary.original') }}
-        </dt>
-        <dd class="font-mono">{{ original }}</dd>
+  <dl
+    class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs"
+    data-test="seed-summary"
+  >
+    <dt class="text-muted-foreground">
+      {{ t('tools.layout-harmonizer.seed.summary.original') }}
+    </dt>
+    <dd class="font-mono">
+      {{ original }}
+    </dd>
 
-        <template v-if="hasAlpha">
-            <dt class="text-muted-foreground">
-                {{ t('tools.layout-harmonizer.seed.summary.effective') }}
-            </dt>
-            <dd class="font-mono">{{ effective }}</dd>
+    <template v-if="hasAlpha">
+      <dt class="text-muted-foreground">
+        {{ t('tools.layout-harmonizer.seed.summary.effective') }}
+      </dt>
+      <dd class="font-mono">
+        {{ effective }}
+      </dd>
 
-            <dt class="text-muted-foreground">
-                {{ t('tools.layout-harmonizer.seed.summary.background') }}
-            </dt>
-            <dd class="font-mono">{{ background }}</dd>
-        </template>
+      <dt class="text-muted-foreground">
+        {{ t('tools.layout-harmonizer.seed.summary.background') }}
+      </dt>
+      <dd class="font-mono">
+        {{ background }}
+      </dd>
+    </template>
 
-        <dt class="text-muted-foreground">
-            {{ t('tools.layout-harmonizer.seed.summary.strategy') }}
-        </dt>
-        <dd>{{ strategyName }}</dd>
+    <dt class="text-muted-foreground">
+      {{ t('tools.layout-harmonizer.seed.summary.strategy') }}
+    </dt>
+    <dd>{{ strategyName }}</dd>
 
-        <dt class="text-muted-foreground">
-            {{ t('tools.layout-harmonizer.seed.summary.secondary') }}
-        </dt>
-        <dd data-test="seed-summary-secondary">
-            {{
-                secondarySource === 'manual'
-                    ? t('tools.layout-harmonizer.secondary.manual')
-                    : t('tools.layout-harmonizer.secondary.auto')
-            }}
-        </dd>
-    </dl>
+    <dt class="text-muted-foreground">
+      {{ t('tools.layout-harmonizer.seed.summary.secondary') }}
+    </dt>
+    <dd data-test="seed-summary-secondary">
+      {{
+        secondarySource === 'manual'
+          ? t('tools.layout-harmonizer.secondary.manual')
+          : t('tools.layout-harmonizer.secondary.auto')
+      }}
+    </dd>
+  </dl>
 
-    <p
-        v-if="hasAlpha"
-        class="text-xs text-muted-foreground"
-        data-test="seed-alpha-note"
-    >
-        {{ t('tools.layout-harmonizer.seed.summary.alpha_note') }}
-    </p>
+  <p
+    v-if="hasAlpha"
+    class="text-xs text-muted-foreground"
+    data-test="seed-alpha-note"
+  >
+    {{ t('tools.layout-harmonizer.seed.summary.alpha_note') }}
+  </p>
 
-    <p
-        v-if="seed.achromatic"
-        class="text-xs text-muted-foreground"
-        data-test="seed-achromatic-note"
-    >
-        {{ t('tools.layout-harmonizer.seed.summary.achromatic') }}
-    </p>
+  <p
+    v-if="seed.achromatic"
+    class="text-xs text-muted-foreground"
+    data-test="seed-achromatic-note"
+  >
+    {{ t('tools.layout-harmonizer.seed.summary.achromatic') }}
+  </p>
 </template>

@@ -268,71 +268,75 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-3">
-        <p class="text-sm text-muted-foreground">
-            {{ t('tools.html-color-picker.image.description') }}
-        </p>
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-muted-foreground">
+      {{ t('tools.html-color-picker.image.description') }}
+    </p>
 
-        <input
-            ref="fileInput"
-            type="file"
-            accept="image/*"
-            :aria-label="t('tools.html-color-picker.image.choose')"
-            class="block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-md file:border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent"
-            data-test="image-input"
-            @change="onFile"
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/*"
+      :aria-label="t('tools.html-color-picker.image.choose')"
+      class="block w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-md file:border file:bg-background file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent"
+      data-test="image-input"
+      @change="onFile"
+    >
+
+    <p
+      v-if="error"
+      class="text-sm text-destructive"
+      role="alert"
+    >
+      {{ t('tools.html-color-picker.image.error') }}
+    </p>
+
+    <div
+      v-if="loaded"
+      class="flex flex-col gap-3 sm:flex-row sm:items-start"
+    >
+      <div class="min-w-0">
+        <canvas
+          ref="canvas"
+          tabindex="0"
+          role="application"
+          :aria-label="
+            t('tools.html-color-picker.image.instructions')
+          "
+          class="max-w-full cursor-crosshair rounded-md border outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          data-test="image-canvas"
+          @pointermove="pickAt"
+          @pointerdown="pickAt"
+          @keydown="onKeydown"
         />
-
-        <p v-if="error" class="text-sm text-destructive" role="alert">
-            {{ t('tools.html-color-picker.image.error') }}
+        <p class="mt-1 text-xs text-muted-foreground">
+          {{ t('tools.html-color-picker.image.instructions') }}
         </p>
+      </div>
 
-        <div
-            v-if="loaded"
-            class="flex flex-col gap-3 sm:flex-row sm:items-start"
+      <div class="flex shrink-0 flex-col items-center gap-2">
+        <canvas
+          ref="magnifier"
+          width="96"
+          height="96"
+          aria-hidden="true"
+          class="size-24 rounded-md border"
+        />
+        <p
+          v-if="hovered !== null"
+          class="font-mono text-xs text-muted-foreground"
         >
-            <div class="min-w-0">
-                <canvas
-                    ref="canvas"
-                    tabindex="0"
-                    role="application"
-                    :aria-label="
-                        t('tools.html-color-picker.image.instructions')
-                    "
-                    class="max-w-full cursor-crosshair rounded-md border outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    data-test="image-canvas"
-                    @pointermove="pickAt"
-                    @pointerdown="pickAt"
-                    @keydown="onKeydown"
-                />
-                <p class="mt-1 text-xs text-muted-foreground">
-                    {{ t('tools.html-color-picker.image.instructions') }}
-                </p>
-            </div>
-
-            <div class="flex shrink-0 flex-col items-center gap-2">
-                <canvas
-                    ref="magnifier"
-                    width="96"
-                    height="96"
-                    aria-hidden="true"
-                    class="size-24 rounded-md border"
-                />
-                <p
-                    v-if="hovered !== null"
-                    class="font-mono text-xs text-muted-foreground"
-                >
-                    {{ formatHex(hovered) }}
-                </p>
-                <Button
-                    type="button"
-                    size="sm"
-                    :disabled="hovered === null"
-                    @click="apply"
-                >
-                    {{ t('tools.html-color-picker.image.apply') }}
-                </Button>
-            </div>
-        </div>
+          {{ formatHex(hovered) }}
+        </p>
+        <Button
+          type="button"
+          size="sm"
+          :disabled="hovered === null"
+          @click="apply"
+        >
+          {{ t('tools.html-color-picker.image.apply') }}
+        </Button>
+      </div>
     </div>
+  </div>
 </template>

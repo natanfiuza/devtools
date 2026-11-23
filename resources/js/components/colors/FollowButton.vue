@@ -48,39 +48,48 @@ const countLabel = computed(() => {
 </script>
 
 <template>
-    <div v-if="canFollow" class="flex flex-wrap items-center gap-2">
-        <Button
-            type="button"
-            :variant="following ? 'outline' : 'default'"
-            :disabled="pending"
-            :aria-pressed="following"
-            data-test="follow-button"
-            @click="toggle"
-        >
-            <UserCheck v-if="following" class="size-4" />
-            <UserPlus v-else class="size-4" />
-            {{
-                following
-                    ? t('colors.social.following')
-                    : t('colors.social.follow')
-            }}
-        </Button>
+  <div
+    v-if="canFollow"
+    class="flex flex-wrap items-center gap-2"
+  >
+    <Button
+      type="button"
+      :variant="following ? 'outline' : 'default'"
+      :disabled="pending"
+      :aria-pressed="following"
+      data-test="follow-button"
+      @click="toggle"
+    >
+      <UserCheck
+        v-if="following"
+        class="size-4"
+      />
+      <UserPlus
+        v-else
+        class="size-4"
+      />
+      {{
+        following
+          ? t('colors.social.following')
+          : t('colors.social.follow')
+      }}
+    </Button>
 
-        <span
-            v-if="showCount === true"
-            class="text-xs text-muted-foreground"
-            data-test="followers-count"
-        >
-            {{ countLabel }}
-        </span>
+    <span
+      v-if="showCount === true"
+      class="text-xs text-muted-foreground"
+      data-test="followers-count"
+    >
+      {{ countLabel }}
+    </span>
 
-        <p
-            v-if="failed"
-            class="text-xs text-destructive"
-            role="alert"
-            data-test="follow-error"
-        >
-            {{ t('colors.social.follow_error') }}
-        </p>
-    </div>
+    <p
+      v-if="failed"
+      class="text-xs text-destructive"
+      role="alert"
+      data-test="follow-error"
+    >
+      {{ t('colors.social.follow_error') }}
+    </p>
+  </div>
 </template>

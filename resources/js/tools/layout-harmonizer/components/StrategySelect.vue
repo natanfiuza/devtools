@@ -40,38 +40,38 @@ const description = computed(() =>
 </script>
 
 <template>
-    <div class="space-y-2">
-        <Label for="layout-harmonizer-strategy">
-            {{ t('tools.layout-harmonizer.strategy.label') }}
-        </Label>
+  <div class="space-y-2">
+    <Label for="layout-harmonizer-strategy">
+      {{ t('tools.layout-harmonizer.strategy.label') }}
+    </Label>
 
-        <Select v-model="selected">
-            <SelectTrigger
-                id="layout-harmonizer-strategy"
-                class="w-full"
-                data-test="strategy-select"
-            >
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem
-                    v-for="strategy in LAYOUT_STRATEGIES"
-                    :key="strategy"
-                    :value="strategy"
-                >
-                    {{ t(`tools.layout-harmonizer.strategy.${strategy}.name`) }}
-                </SelectItem>
-            </SelectContent>
-        </Select>
-
-        <p
-            class="text-xs text-muted-foreground"
-            data-test="strategy-description"
+    <Select v-model="selected">
+      <SelectTrigger
+        id="layout-harmonizer-strategy"
+        class="w-full"
+        data-test="strategy-select"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem
+          v-for="strategy in LAYOUT_STRATEGIES"
+          :key="strategy"
+          :value="strategy"
         >
-            {{ description }}
-        </p>
-        <p class="text-xs text-muted-foreground">
-            {{ t('tools.layout-harmonizer.strategy.hint') }}
-        </p>
-    </div>
+          {{ t(`tools.layout-harmonizer.strategy.${strategy}.name`) }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+
+    <p
+      class="text-xs text-muted-foreground"
+      data-test="strategy-description"
+    >
+      {{ description }}
+    </p>
+    <p class="text-xs text-muted-foreground">
+      {{ t('tools.layout-harmonizer.strategy.hint') }}
+    </p>
+  </div>
 </template>

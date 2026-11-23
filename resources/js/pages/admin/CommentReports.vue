@@ -93,134 +93,137 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <Head :title="t('admin.comment_reports.title')" />
+  <Head :title="t('admin.comment_reports.title')" />
 
-    <div class="space-y-4">
-        <header class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-                <h2 class="text-lg font-medium">
-                    {{ t('admin.comment_reports.title') }}
-                </h2>
-                <p class="mt-1 text-sm text-subtle">
-                    {{ t('admin.comment_reports.description') }}
-                </p>
-            </div>
+  <div class="space-y-4">
+    <header class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-medium">
+          {{ t('admin.comment_reports.title') }}
+        </h2>
+        <p class="mt-1 text-sm text-subtle">
+          {{ t('admin.comment_reports.description') }}
+        </p>
+      </div>
 
-            <div class="flex items-center gap-2">
-                <span class="text-xs text-subtle">
-                    {{ t('admin.comment_reports.filter') }}
-                </span>
-                <Select v-model="filter">
-                    <SelectTrigger class="w-44">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="pending">
-                            {{ t('admin.comment_reports.statuses.pending') }}
-                        </SelectItem>
-                        <SelectItem value="resolved">
-                            {{ t('admin.comment_reports.statuses.resolved') }}
-                        </SelectItem>
-                        <SelectItem value="dismissed">
-                            {{ t('admin.comment_reports.statuses.dismissed') }}
-                        </SelectItem>
-                        <SelectItem value="all">
-                            {{ t('admin.comment_reports.statuses.all') }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </header>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-subtle">
+          {{ t('admin.comment_reports.filter') }}
+        </span>
+        <Select v-model="filter">
+          <SelectTrigger class="w-44">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">
+              {{ t('admin.comment_reports.statuses.pending') }}
+            </SelectItem>
+            <SelectItem value="resolved">
+              {{ t('admin.comment_reports.statuses.resolved') }}
+            </SelectItem>
+            <SelectItem value="dismissed">
+              {{ t('admin.comment_reports.statuses.dismissed') }}
+            </SelectItem>
+            <SelectItem value="all">
+              {{ t('admin.comment_reports.statuses.all') }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </header>
 
-        <AdminTable
-            :columns="columns"
-            :rows="props.reports"
-            :empty="t('admin.comment_reports.empty')"
-            @page="goToPage"
+    <AdminTable
+      :columns="columns"
+      :rows="props.reports"
+      :empty="t('admin.comment_reports.empty')"
+      @page="goToPage"
+    >
+      <template #cell-comment="{ row }">
+        <p class="max-w-[60ch] text-sm whitespace-pre-line">
+          {{ row.comment.body }}
+        </p>
+        <p
+          class="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-subtle"
         >
-            <template #cell-comment="{ row }">
-                <p class="max-w-[60ch] text-sm whitespace-pre-line">
-                    {{ row.comment.body }}
-                </p>
-                <p
-                    class="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-subtle"
-                >
-                    <Badge :variant="commentStatusVariant(row.comment.status)">
-                        {{
-                            t(
-                                `admin.comment_reports.comment_statuses.${row.comment.status}`,
-                            )
-                        }}
-                    </Badge>
-                    <Badge v-if="row.comment.deleted" variant="outline">
-                        {{ t('admin.comment_reports.deleted') }}
-                    </Badge>
-                    <span>{{ row.comment.paletteName }}</span>
-                    <span v-if="row.comment.authorName !== null">
-                        {{ row.comment.authorName }}
-                    </span>
-                </p>
-            </template>
+          <Badge :variant="commentStatusVariant(row.comment.status)">
+            {{
+              t(
+                `admin.comment_reports.comment_statuses.${row.comment.status}`,
+              )
+            }}
+          </Badge>
+          <Badge
+            v-if="row.comment.deleted"
+            variant="outline"
+          >
+            {{ t('admin.comment_reports.deleted') }}
+          </Badge>
+          <span>{{ row.comment.paletteName }}</span>
+          <span v-if="row.comment.authorName !== null">
+            {{ row.comment.authorName }}
+          </span>
+        </p>
+      </template>
 
-            <template #cell-reason="{ row }">
-                {{ t(`colors.reports.reasons.${row.reason}`) }}
-            </template>
+      <template #cell-reason="{ row }">
+        {{ t(`colors.reports.reasons.${row.reason}`) }}
+      </template>
 
-            <template #cell-reporter="{ row }">
-                <p>{{ row.reporterName ?? '—' }}</p>
-                <p class="text-[12px] text-subtle">
-                    {{ row.reporterEmail }}
-                </p>
-            </template>
+      <template #cell-reporter="{ row }">
+        <p>{{ row.reporterName ?? '—' }}</p>
+        <p class="text-[12px] text-subtle">
+          {{ row.reporterEmail }}
+        </p>
+      </template>
 
-            <template #cell-status="{ row }">
-                <Badge
-                    :variant="
-                        row.status === 'pending' ? 'outline' : 'secondary'
-                    "
-                >
-                    {{ t(`admin.comment_reports.statuses.${row.status}`) }}
-                </Badge>
-                <p
-                    v-if="row.resolvedAt !== null"
-                    class="mt-1 text-[12px] text-subtle"
-                >
-                    {{ row.resolvedAt }}
-                    <template v-if="row.resolverName !== null">
-                        · {{ row.resolverName }}
-                    </template>
-                </p>
-            </template>
+      <template #cell-status="{ row }">
+        <Badge
+          :variant="
+            row.status === 'pending' ? 'outline' : 'secondary'
+          "
+        >
+          {{ t(`admin.comment_reports.statuses.${row.status}`) }}
+        </Badge>
+        <p
+          v-if="row.resolvedAt !== null"
+          class="mt-1 text-[12px] text-subtle"
+        >
+          {{ row.resolvedAt }}
+          <template v-if="row.resolverName !== null">
+            · {{ row.resolverName }}
+          </template>
+        </p>
+      </template>
 
-            <template #cell-reportedAt="{ row }">
-                {{ row.reportedAt }}
-            </template>
+      <template #cell-reportedAt="{ row }">
+        {{ row.reportedAt }}
+      </template>
 
-            <template #cell-actions="{ row }">
-                <div
-                    v-if="row.status === 'pending'"
-                    class="flex flex-wrap gap-2"
-                >
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        data-test="comment-report-resolve"
-                        @click="resolve(row)"
-                    >
-                        {{ t('admin.comment_reports.resolve') }}
-                    </Button>
-                    <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        data-test="comment-report-dismiss"
-                        @click="dismiss(row)"
-                    >
-                        {{ t('admin.comment_reports.dismiss') }}
-                    </Button>
-                </div>
-            </template>
-        </AdminTable>
-    </div>
+      <template #cell-actions="{ row }">
+        <div
+          v-if="row.status === 'pending'"
+          class="flex flex-wrap gap-2"
+        >
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            data-test="comment-report-resolve"
+            @click="resolve(row)"
+          >
+            {{ t('admin.comment_reports.resolve') }}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            data-test="comment-report-dismiss"
+            @click="dismiss(row)"
+          >
+            {{ t('admin.comment_reports.dismiss') }}
+          </Button>
+        </div>
+      </template>
+    </AdminTable>
+  </div>
 </template>

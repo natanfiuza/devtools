@@ -141,7 +141,7 @@ Ao entrar com sua conta, você desbloqueia recursos de organização e integraç
 
 - **Limite**: até **2** logos na conta Free (ilimitado no plano pago).
 - **Como enviar**: clique em **Meus logos** no construtor ou acesse `/dashboard/badgeforge` e envie um arquivo `.svg` (máximo de 256 KiB).
-- **Sanitização**: por segurança, apenas `<svg>`, `<g>` e `<path>` (com `viewBox`, `d`, `fill-rule` e `clip-rule`) são preservados; o arquivo bruto nunca fica armazenado.
+- **Sanitização**: por segurança, apenas `<svg>`, `<g>`, `<path>` e primitivas vetoriais simples (`<rect>`, `<circle>`, `<ellipse>`, `<polygon>`, `<polyline>`, `<line>`, convertidas para `<path>`) são aceitos; metadados benignos (`<title>`, `<desc>`, `<metadata>`) são ignorados e o arquivo bruto nunca fica armazenado. Elementos como `<text>`, `<style>`, `<defs>`, `<image>`, `<use>` ou `<script>` e atributos como `transform` são recusados.
 - **Como usar na URL**: o logo recebe um identificador opaco `u_<ULID>` (ex.: `?logo=u_01J...`). Badges com logo personalizado têm teto de cache de **3600 s** (1 hora), garantindo que renomeações ou exclusões reflitam rapidamente.
 
 ### 4.2 Presets (`Presets`)

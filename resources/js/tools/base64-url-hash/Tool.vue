@@ -309,209 +309,215 @@ const status = computed<{ text: string; error: boolean } | null>(() => {
 </script>
 
 <template>
-    <ToolShell split-key="base64-url-hash">
-        <template #actions>
-            <ToolActionBar>
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+  <ToolShell split-key="base64-url-hash">
+    <template #actions>
+      <ToolActionBar>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.open')"
-                    @click="openFile"
-                >
-                    <template #icon>
-                        <FolderOpen class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.open')"
+          @click="openFile"
+        >
+          <template #icon>
+            <FolderOpen class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="!hasOutput"
-                        @click="copyAll"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="!hasOutput"
+            @click="copyAll"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <!--
+    <!--
             A direcao fica no cabecalho da **entrada**: e ela que diz o que o
             texto de cima significa. Na aba Hash ela some - hash nao tem volta.
         -->
-        <template #input-header>
-            <Select v-if="mode !== 'hash'" v-model="direction">
-                <SelectTrigger
-                    class="h-7 w-36 text-xs"
-                    :aria-label="t('tools.base64-url-hash.direction')"
-                    data-test="base64-url-hash-direction"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="item in DIRECTIONS"
-                        :key="item"
-                        :value="item"
-                    >
-                        {{ t(`tools.base64-url-hash.directions.${item}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-        </template>
+    <template #input-header>
+      <Select
+        v-if="mode !== 'hash'"
+        v-model="direction"
+      >
+        <SelectTrigger
+          class="h-7 w-36 text-xs"
+          :aria-label="t('tools.base64-url-hash.direction')"
+          data-test="base64-url-hash-direction"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="item in DIRECTIONS"
+            :key="item"
+            :value="item"
+          >
+            {{ t(`tools.base64-url-hash.directions.${item}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </template>
 
-        <template #input>
-            <FileDropzone
-                ref="dropzone"
-                :accept="acceptAttribute(FILE_RULES)"
-                testid="base64-url-hash"
-                @file="onFile"
-            >
-                <CodeEditor
-                    v-model="text"
-                    testid="base64-url-hash-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                />
-            </FileDropzone>
-        </template>
+    <template #input>
+      <FileDropzone
+        ref="dropzone"
+        :accept="acceptAttribute(FILE_RULES)"
+        testid="base64-url-hash"
+        @file="onFile"
+      >
+        <CodeEditor
+          v-model="text"
+          testid="base64-url-hash-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+        />
+      </FileDropzone>
+    </template>
 
-        <template #output>
-            <Tabs v-model="mode" class="flex min-h-0 flex-1 flex-col">
-                <TabsList class="m-3 w-fit">
-                    <TabsTrigger
-                        v-for="item in MODES"
-                        :key="item"
-                        :value="item"
-                        :data-test="`base64-url-hash-mode-${item}`"
-                    >
-                        {{ t(`tools.base64-url-hash.modes.${item}`) }}
-                    </TabsTrigger>
-                </TabsList>
+    <template #output>
+      <Tabs
+        v-model="mode"
+        class="flex min-h-0 flex-1 flex-col"
+      >
+        <TabsList class="m-3 w-fit">
+          <TabsTrigger
+            v-for="item in MODES"
+            :key="item"
+            :value="item"
+            :data-test="`base64-url-hash-mode-${item}`"
+          >
+            {{ t(`tools.base64-url-hash.modes.${item}`) }}
+          </TabsTrigger>
+        </TabsList>
 
-                <!--
+        <!--
                     Uma aba so, com o conteudo trocando por dentro: as tres
                     desenham o mesmo par rotulo/valor, e escrever tres blocos
                     iguais seria escrever o mesmo componente tres vezes.
                 -->
-                <div class="min-h-0 flex-1 overflow-auto">
-                    <p
-                        v-if="state !== null"
-                        role="status"
-                        class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                        :class="
-                            state.error ? 'text-destructive' : 'text-subtle'
-                        "
-                        data-test="base64-url-hash-state"
-                    >
-                        <TriangleAlert
-                            v-if="state.error"
-                            class="size-5"
-                            aria-hidden="true"
-                        />
-                        {{ state.text }}
-                    </p>
+        <div class="min-h-0 flex-1 overflow-auto">
+          <p
+            v-if="state !== null"
+            role="status"
+            class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+            :class="
+              state.error ? 'text-destructive' : 'text-subtle'
+            "
+            data-test="base64-url-hash-state"
+          >
+            <TriangleAlert
+              v-if="state.error"
+              class="size-5"
+              aria-hidden="true"
+            />
+            {{ state.text }}
+          </p>
 
-                    <template v-else>
-                        <!--
+          <template v-else>
+            <!--
                             Fora de contexto seguro os tres SHAs nao saem. O
                             aviso aparece **uma vez**, e o MD5 continua na lista
                             logo abaixo: ele e a conta da casa.
                         -->
-                        <p
-                            v-if="someRefused"
-                            role="status"
-                            class="bg-surface-muted flex items-center gap-1.5 border-b border-border px-3 py-1.5 text-xs text-subtle"
-                            data-test="base64-url-hash-no-crypto"
-                        >
-                            <TriangleAlert
-                                class="size-3.5 shrink-0"
-                                aria-hidden="true"
-                            />
-                            {{ refusalMessage }}
-                        </p>
-
-                        <ul>
-                            <li
-                                v-for="row in rows"
-                                :key="row.label"
-                                class="border-b border-border px-3 py-2 last:border-b-0"
-                                :data-label="row.label"
-                                data-test="base64-url-hash-row"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <h3
-                                        class="text-[11px] font-medium tracking-wide text-subtle uppercase"
-                                        data-test="base64-url-hash-row-label"
-                                    >
-                                        {{ labelOf(row) }}
-                                    </h3>
-
-                                    <button
-                                        v-if="!row.refused && row.text !== ''"
-                                        type="button"
-                                        class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
-                                        :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
-                                        data-test="base64-url-hash-row-copy"
-                                        @click="copyRow(row)"
-                                    >
-                                        <Copy
-                                            class="size-3.5"
-                                            aria-hidden="true"
-                                        />
-                                    </button>
-                                </div>
-
-                                <p
-                                    v-if="row.refused"
-                                    class="mt-1 font-mono text-sm text-subtle"
-                                    data-test="base64-url-hash-refused"
-                                >
-                                    —
-                                </p>
-
-                                <p
-                                    v-else
-                                    class="mt-1 font-mono text-sm break-all whitespace-pre-wrap"
-                                    data-test="base64-url-hash-value"
-                                >
-                                    {{ row.text }}
-                                </p>
-                            </li>
-                        </ul>
-                    </template>
-                </div>
-            </Tabs>
-        </template>
-
-        <template #status>
             <p
-                v-if="status !== null"
-                class="text-xs"
-                :class="status.error ? 'text-destructive' : 'text-subtle'"
-                data-test="base64-url-hash-status"
+              v-if="someRefused"
+              role="status"
+              class="bg-surface-muted flex items-center gap-1.5 border-b border-border px-3 py-1.5 text-xs text-subtle"
+              data-test="base64-url-hash-no-crypto"
             >
-                {{ status.text }}
+              <TriangleAlert
+                class="size-3.5 shrink-0"
+                aria-hidden="true"
+              />
+              {{ refusalMessage }}
             </p>
-        </template>
-    </ToolShell>
+
+            <ul>
+              <li
+                v-for="row in rows"
+                :key="row.label"
+                class="border-b border-border px-3 py-2 last:border-b-0"
+                :data-label="row.label"
+                data-test="base64-url-hash-row"
+              >
+                <div class="flex items-center gap-2">
+                  <h3
+                    class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                    data-test="base64-url-hash-row-label"
+                  >
+                    {{ labelOf(row) }}
+                  </h3>
+
+                  <button
+                    v-if="!row.refused && row.text !== ''"
+                    type="button"
+                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
+                    :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
+                    data-test="base64-url-hash-row-copy"
+                    @click="copyRow(row)"
+                  >
+                    <Copy
+                      class="size-3.5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+
+                <p
+                  v-if="row.refused"
+                  class="mt-1 font-mono text-sm text-subtle"
+                  data-test="base64-url-hash-refused"
+                >
+                  —
+                </p>
+
+                <p
+                  v-else
+                  class="mt-1 font-mono text-sm break-all whitespace-pre-wrap"
+                  data-test="base64-url-hash-value"
+                >
+                  {{ row.text }}
+                </p>
+              </li>
+            </ul>
+          </template>
+        </div>
+      </Tabs>
+    </template>
+
+    <template #status>
+      <p
+        v-if="status !== null"
+        class="text-xs"
+        :class="status.error ? 'text-destructive' : 'text-subtle'"
+        data-test="base64-url-hash-status"
+      >
+        {{ status.text }}
+      </p>
+    </template>
+  </ToolShell>
 </template>

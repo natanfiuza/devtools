@@ -76,101 +76,101 @@ function submit(): void {
 </script>
 
 <template>
-    <form
-        class="space-y-3"
-        data-test="badge-logo-upload"
-        @submit.prevent="submit"
-    >
-        <div class="grid gap-3 sm:grid-cols-2">
-            <div class="space-y-2">
-                <Label for="badge-logo-name">
-                    {{ t('tools.badgeforge.management.name') }}
-                </Label>
-                <Input
-                    id="badge-logo-name"
-                    v-model="form.name"
-                    :maxlength="nameMaxLength"
-                    :placeholder="
-                        t('tools.badgeforge.management.name_placeholder')
-                    "
-                    data-test="badge-logo-name"
-                />
-                <InputError :message="form.errors.name" />
-            </div>
+  <form
+    class="space-y-3"
+    data-test="badge-logo-upload"
+    @submit.prevent="submit"
+  >
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div class="space-y-2">
+        <Label for="badge-logo-name">
+          {{ t('tools.badgeforge.management.name') }}
+        </Label>
+        <Input
+          id="badge-logo-name"
+          v-model="form.name"
+          :maxlength="nameMaxLength"
+          :placeholder="
+            t('tools.badgeforge.management.name_placeholder')
+          "
+          data-test="badge-logo-name"
+        />
+        <InputError :message="form.errors.name" />
+      </div>
 
-            <div class="space-y-2">
-                <Label for="badge-logo-file">
-                    {{ t('tools.badgeforge.management.logo_file') }}
-                </Label>
-                <input
-                    id="badge-logo-file"
-                    ref="fileInput"
-                    type="file"
-                    accept=".svg,image/svg+xml"
-                    class="block w-full rounded-md border border-input bg-transparent px-3 py-1.5 text-sm file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
-                    data-test="badge-logo-file"
-                    @change="onFileSelected"
-                />
-                <InputError :message="form.errors.logo" />
-            </div>
-        </div>
-
-        <p class="text-xs text-muted-foreground">
-            {{
-                t('tools.badgeforge.management.upload_hint', {
-                    size: maxKilobytes,
-                })
-            }}
-        </p>
-
-        <div class="flex flex-wrap items-center gap-3">
-            <Button
-                type="submit"
-                size="sm"
-                :disabled="limitReached || form.processing"
-                data-test="badge-logo-upload-submit"
-            >
-                <Upload class="size-4" />
-                {{
-                    form.processing
-                        ? t('tools.badgeforge.management.uploading')
-                        : t('tools.badgeforge.management.upload')
-                }}
-            </Button>
-
-            <p
-                v-if="limit !== null"
-                class="text-xs text-muted-foreground"
-                data-test="badge-logo-limit-note"
-            >
-                {{
-                    t('tools.badgeforge.management.limit_note', {
-                        used,
-                        limit,
-                    })
-                }}
-            </p>
-            <p
-                v-else
-                class="text-xs text-muted-foreground"
-                data-test="badge-logo-limit-note"
-            >
-                {{ t('tools.badgeforge.management.unlimited_note', { used }) }}
-            </p>
-        </div>
-
-        <p
-            v-if="limitReached"
-            class="text-xs text-amber-600"
-            data-test="badge-logo-upgrade"
+      <div class="space-y-2">
+        <Label for="badge-logo-file">
+          {{ t('tools.badgeforge.management.logo_file') }}
+        </Label>
+        <input
+          id="badge-logo-file"
+          ref="fileInput"
+          type="file"
+          accept=".svg,image/svg+xml"
+          class="block w-full rounded-md border border-input bg-transparent px-3 py-1.5 text-sm file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium"
+          data-test="badge-logo-file"
+          @change="onFileSelected"
         >
-            {{ t('tools.badgeforge.management.upgrade_cta', { limit }) }}
-            <a
-                :href="upgradeUrl"
-                class="font-medium underline underline-offset-2"
-            >
-                {{ t('tools.badgeforge.management.upgrade') }}
-            </a>
-        </p>
-    </form>
+        <InputError :message="form.errors.logo" />
+      </div>
+    </div>
+
+    <p class="text-xs text-muted-foreground">
+      {{
+        t('tools.badgeforge.management.upload_hint', {
+          size: maxKilobytes,
+        })
+      }}
+    </p>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <Button
+        type="submit"
+        size="sm"
+        :disabled="limitReached || form.processing"
+        data-test="badge-logo-upload-submit"
+      >
+        <Upload class="size-4" />
+        {{
+          form.processing
+            ? t('tools.badgeforge.management.uploading')
+            : t('tools.badgeforge.management.upload')
+        }}
+      </Button>
+
+      <p
+        v-if="limit !== null"
+        class="text-xs text-muted-foreground"
+        data-test="badge-logo-limit-note"
+      >
+        {{
+          t('tools.badgeforge.management.limit_note', {
+            used,
+            limit,
+          })
+        }}
+      </p>
+      <p
+        v-else
+        class="text-xs text-muted-foreground"
+        data-test="badge-logo-limit-note"
+      >
+        {{ t('tools.badgeforge.management.unlimited_note', { used }) }}
+      </p>
+    </div>
+
+    <p
+      v-if="limitReached"
+      class="text-xs text-amber-600"
+      data-test="badge-logo-upgrade"
+    >
+      {{ t('tools.badgeforge.management.upgrade_cta', { limit }) }}
+      <a
+        :href="upgradeUrl"
+        class="font-medium underline underline-offset-2"
+      >
+        {{ t('tools.badgeforge.management.upgrade') }}
+      </a>
+    </p>
+  </form>
 </template>

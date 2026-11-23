@@ -196,200 +196,209 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-    <Dialog :open="open" @update:open="setOpen">
-        <DialogContent class="sm:max-w-lg" data-test="tag-manager">
-            <DialogHeader>
-                <DialogTitle>{{ t('colors.tags_manager.title') }}</DialogTitle>
-                <DialogDescription>
-                    {{ t('colors.tags_manager.description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="open"
+    @update:open="setOpen"
+  >
+    <DialogContent
+      class="sm:max-w-lg"
+      data-test="tag-manager"
+    >
+      <DialogHeader>
+        <DialogTitle>{{ t('colors.tags_manager.title') }}</DialogTitle>
+        <DialogDescription>
+          {{ t('colors.tags_manager.description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <form class="flex flex-col gap-1" @submit.prevent="create">
-                <div class="flex gap-2">
-                    <Input
-                        v-model="newName"
-                        type="text"
-                        autocomplete="off"
-                        :maxlength="limits.tagNameMaxLength"
-                        :aria-invalid="newError !== null"
-                        :placeholder="t('colors.tags_manager.new_placeholder')"
-                        data-test="tag-manager-new"
-                    />
-                    <Button
-                        type="submit"
-                        size="sm"
-                        data-test="tag-manager-create"
-                    >
-                        {{ t('colors.tags_manager.create') }}
-                    </Button>
-                </div>
-                <p
-                    v-if="newError !== null"
-                    class="text-xs text-destructive"
-                    role="alert"
-                    data-test="tag-manager-new-error"
-                >
-                    {{ newError }}
-                </p>
-            </form>
+      <form
+        class="flex flex-col gap-1"
+        @submit.prevent="create"
+      >
+        <div class="flex gap-2">
+          <Input
+            v-model="newName"
+            type="text"
+            autocomplete="off"
+            :maxlength="limits.tagNameMaxLength"
+            :aria-invalid="newError !== null"
+            :placeholder="t('colors.tags_manager.new_placeholder')"
+            data-test="tag-manager-new"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            data-test="tag-manager-create"
+          >
+            {{ t('colors.tags_manager.create') }}
+          </Button>
+        </div>
+        <p
+          v-if="newError !== null"
+          class="text-xs text-destructive"
+          role="alert"
+          data-test="tag-manager-new-error"
+        >
+          {{ newError }}
+        </p>
+      </form>
 
+      <p
+        v-if="tags.length === 0"
+        class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+        data-test="tag-manager-empty"
+      >
+        {{ t('colors.tags_manager.empty') }}
+      </p>
+
+      <ul
+        v-else
+        class="flex flex-col divide-y divide-border rounded-lg border border-border"
+      >
+        <li
+          v-for="(tag, index) in tags"
+          :key="tag.id"
+          class="flex flex-wrap items-center gap-2 px-3 py-2"
+          data-test="tag-manager-row"
+        >
+          <template v-if="editingId === tag.id">
+            <Input
+              v-model="editingName"
+              type="text"
+              autocomplete="off"
+              :maxlength="limits.tagNameMaxLength"
+              :aria-invalid="editingError !== null"
+              class="h-8 max-w-48"
+              data-test="tag-manager-name-input"
+              @keydown.esc="cancelRename"
+            />
+            <Button
+              type="button"
+              size="sm"
+              data-test="tag-manager-save"
+              @click="rename(tag)"
+            >
+              <Check class="size-4" />
+              {{ t('colors.tags_manager.save') }}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              data-test="tag-manager-cancel"
+              @click="cancelRename"
+            >
+              <X class="size-4" />
+              {{ t('colors.tags_manager.cancel') }}
+            </Button>
             <p
-                v-if="tags.length === 0"
-                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
-                data-test="tag-manager-empty"
+              v-if="editingError !== null"
+              class="w-full text-xs text-destructive"
+              role="alert"
             >
-                {{ t('colors.tags_manager.empty') }}
+              {{ editingError }}
             </p>
+          </template>
 
-            <ul
-                v-else
-                class="flex flex-col divide-y divide-border rounded-lg border border-border"
+          <template v-else>
+            <span
+              class="min-w-0 flex-1 truncate text-sm"
+              data-test="tag-manager-name"
             >
-                <li
-                    v-for="(tag, index) in tags"
-                    :key="tag.id"
-                    class="flex flex-wrap items-center gap-2 px-3 py-2"
-                    data-test="tag-manager-row"
-                >
-                    <template v-if="editingId === tag.id">
-                        <Input
-                            v-model="editingName"
-                            type="text"
-                            autocomplete="off"
-                            :maxlength="limits.tagNameMaxLength"
-                            :aria-invalid="editingError !== null"
-                            class="h-8 max-w-48"
-                            data-test="tag-manager-name-input"
-                            @keydown.esc="cancelRename"
-                        />
-                        <Button
-                            type="button"
-                            size="sm"
-                            data-test="tag-manager-save"
-                            @click="rename(tag)"
-                        >
-                            <Check class="size-4" />
-                            {{ t('colors.tags_manager.save') }}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            data-test="tag-manager-cancel"
-                            @click="cancelRename"
-                        >
-                            <X class="size-4" />
-                            {{ t('colors.tags_manager.cancel') }}
-                        </Button>
-                        <p
-                            v-if="editingError !== null"
-                            class="w-full text-xs text-destructive"
-                            role="alert"
-                        >
-                            {{ editingError }}
-                        </p>
-                    </template>
-
-                    <template v-else>
-                        <span
-                            class="min-w-0 flex-1 truncate text-sm"
-                            data-test="tag-manager-name"
-                        >
-                            {{ tag.name }}
-                        </span>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            :disabled="index === 0"
-                            :aria-label="
-                                t('colors.tags_manager.up', { name: tag.name })
-                            "
-                            data-test="tag-manager-up"
-                            @click="move(tag, -1)"
-                        >
-                            <ArrowUp class="size-4" />
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            :disabled="index === tags.length - 1"
-                            :aria-label="
-                                t('colors.tags_manager.down', {
-                                    name: tag.name,
-                                })
-                            "
-                            data-test="tag-manager-down"
-                            @click="move(tag, 1)"
-                        >
-                            <ArrowDown class="size-4" />
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            data-test="tag-manager-rename"
-                            @click="startRename(tag)"
-                        >
-                            {{ t('colors.tags_manager.rename') }}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            class="text-destructive"
-                            data-test="tag-manager-delete"
-                            @click="remove(tag)"
-                        >
-                            <Trash2 class="size-4" />
-                            {{
-                                confirmingId === tag.id
-                                    ? t(
-                                          'colors.tags_manager.confirm_delete_action',
-                                      )
-                                    : t('colors.tags_manager.delete')
-                            }}
-                        </Button>
-                    </template>
-
-                    <p
-                        v-if="confirmingId === tag.id"
-                        class="w-full text-xs text-muted-foreground"
-                        role="status"
-                        data-test="tag-manager-delete-confirm"
-                    >
-                        {{
-                            t('colors.tags_manager.confirm_delete', {
-                                name: tag.name,
-                            })
-                        }}
-                        {{ t('colors.tags_manager.confirm_delete_hint') }}
-                    </p>
-                </li>
-            </ul>
-
-            <p
-                v-if="serverError !== null"
-                class="text-xs text-destructive"
-                role="alert"
-                data-test="tag-manager-error"
+              {{ tag.name }}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              :disabled="index === 0"
+              :aria-label="
+                t('colors.tags_manager.up', { name: tag.name })
+              "
+              data-test="tag-manager-up"
+              @click="move(tag, -1)"
             >
-                {{ serverError }}
-            </p>
+              <ArrowUp class="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              :disabled="index === tags.length - 1"
+              :aria-label="
+                t('colors.tags_manager.down', {
+                  name: tag.name,
+                })
+              "
+              data-test="tag-manager-down"
+              @click="move(tag, 1)"
+            >
+              <ArrowDown class="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              data-test="tag-manager-rename"
+              @click="startRename(tag)"
+            >
+              {{ t('colors.tags_manager.rename') }}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              class="text-destructive"
+              data-test="tag-manager-delete"
+              @click="remove(tag)"
+            >
+              <Trash2 class="size-4" />
+              {{
+                confirmingId === tag.id
+                  ? t(
+                    'colors.tags_manager.confirm_delete_action',
+                  )
+                  : t('colors.tags_manager.delete')
+              }}
+            </Button>
+          </template>
 
-            <div class="flex justify-end">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    data-test="tag-manager-close"
-                    @click="emit('close')"
-                >
-                    {{ t('colors.tags_manager.close') }}
-                </Button>
-            </div>
-        </DialogContent>
-    </Dialog>
+          <p
+            v-if="confirmingId === tag.id"
+            class="w-full text-xs text-muted-foreground"
+            role="status"
+            data-test="tag-manager-delete-confirm"
+          >
+            {{
+              t('colors.tags_manager.confirm_delete', {
+                name: tag.name,
+              })
+            }}
+            {{ t('colors.tags_manager.confirm_delete_hint') }}
+          </p>
+        </li>
+      </ul>
+
+      <p
+        v-if="serverError !== null"
+        class="text-xs text-destructive"
+        role="alert"
+        data-test="tag-manager-error"
+      >
+        {{ serverError }}
+      </p>
+
+      <div class="flex justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-test="tag-manager-close"
+          @click="emit('close')"
+        >
+          {{ t('colors.tags_manager.close') }}
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>

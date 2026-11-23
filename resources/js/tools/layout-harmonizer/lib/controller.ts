@@ -28,7 +28,11 @@ import type {
  */
 
 /** Aviso ativo; `null` quando a ultima entrada gerou um quadro. */
-export type LayoutNotice = LayoutEngineErrorCode | 'invalid-seed' | null;
+export type LayoutNotice =
+    | LayoutEngineErrorCode
+    | 'invalid-seed'
+    | 'seed-background-alpha-invalid'
+    | null;
 
 /** Aviso de edicao, separado do aviso do quadro para nao marcar stale. */
 export type LayoutEditNotice = 'discarded' | null;
@@ -44,18 +48,29 @@ interface LayoutControllerCommon {
     strategy: Ref<LayoutStrategy>;
     backgroundText: Ref<string>;
     secondaryText: Ref<string>;
+    /** Fundo de composicao da secundaria com alpha. */
+    secondaryBackgroundText: Ref<string>;
     /** Ha texto no campo da seed (mesmo invalido). */
     hasSeed: ComputedRef<boolean>;
     /** A seed tem alpha e precisa de fundo explicito. */
     needsBackground: ComputedRef<boolean>;
     background: ComputedRef<Rgb | null>;
     backgroundInvalid: ComputedRef<boolean>;
+    /** O fundo da seed tem alpha; nao e aceito como composicao. */
+    backgroundAlpha: ComputedRef<boolean>;
     /** Texto da secundaria preenchido e invalido; o ultimo valor vale. */
     secondaryInvalid: ComputedRef<boolean>;
+    /** A secundaria manual tem alpha e precisa de fundo de composicao. */
+    secondaryNeedsBackground: ComputedRef<boolean>;
+    secondaryBackground: ComputedRef<Rgb | null>;
+    /** Fundo da secundaria preenchido e nao opaco (invalido ou com alpha). */
+    secondaryBackgroundInvalid: ComputedRef<boolean>;
+    /** O fundo da secundaria digitado tem alpha. */
+    secondaryBackgroundAlpha: ComputedRef<boolean>;
     /** Origem efetiva da secundaria no quadro exibido. */
     secondarySource: ComputedRef<'auto' | 'manual'>;
-    /** RGB efetivo da secundaria manual; `null` quando automatica. */
-    secondaryColor: ComputedRef<Rgb | null>;
+    /** Secundaria manual informada, com o alpha digitado; `null` = automatica. */
+    secondaryColor: ComputedRef<Rgba | null>;
     seed: ComputedRef<LayoutSeedInfo | null>;
     notice: Ref<LayoutNotice>;
     /** Ha um quadro anterior enquanto a entrada atual e invalida. */

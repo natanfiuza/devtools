@@ -379,242 +379,254 @@ function save(): void {
 </script>
 
 <template>
-    <Head :title="palette.name" />
+  <Head :title="palette.name" />
 
-    <div class="flex flex-col gap-6" data-test="palette-editor">
-        <Link
-            :href="palettes.index.url()"
-            class="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            data-test="palette-editor-back"
-        >
-            <ArrowLeft class="size-4" />
-            {{ t('colors.editor.back') }}
-        </Link>
+  <div
+    class="flex flex-col gap-6"
+    data-test="palette-editor"
+  >
+    <Link
+      :href="palettes.index.url()"
+      class="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      data-test="palette-editor-back"
+    >
+      <ArrowLeft class="size-4" />
+      {{ t('colors.editor.back') }}
+    </Link>
 
-        <header class="flex flex-wrap items-start justify-between gap-4">
-            <div class="flex min-w-0 flex-col gap-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h2
-                        class="text-xl font-semibold"
-                        data-test="palette-editor-name"
-                    >
-                        {{ palette.name }}
-                    </h2>
-                    <Badge variant="outline">
-                        {{ t(`colors.list.kind_${palette.kind}`) }}
-                    </Badge>
-                    <Badge variant="secondary">
-                        {{
-                            palette.visibility === 'public'
-                                ? t('colors.list.badge_public')
-                                : t('colors.list.badge_private')
-                        }}
-                    </Badge>
-                    <Badge v-if="palette.archived" variant="destructive">
-                        {{ t('colors.list.badge_archived') }}
-                    </Badge>
-                </div>
-
-                <p
-                    class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-                >
-                    <span>
-                        {{
-                            palette.duplications_count === 0
-                                ? t('colors.editor.usage_zero')
-                                : t('colors.editor.usage', {
-                                      count: palette.duplications_count,
-                                  })
-                        }}
-                    </span>
-                    <span>
-                        {{
-                            t('colors.editor.colors_count', {
-                                count: palette.colors_count,
-                            })
-                        }}
-                    </span>
-                    <span v-if="formattedDate !== null">
-                        {{
-                            t('colors.editor.updated_at', {
-                                date: formattedDate,
-                            })
-                        }}
-                    </span>
-                </p>
-
-                <Link
-                    v-if="publicUrl !== null"
-                    :href="publicUrl"
-                    class="w-fit text-sm underline-offset-4 hover:underline"
-                    data-test="palette-editor-public"
-                >
-                    {{ t('colors.editor.public_link') }}
-                </Link>
-            </div>
-
-            <div class="flex flex-col items-end gap-2">
-                <Button
-                    v-if="!palette.archived"
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    data-test="palette-editor-import"
-                    @click="importOpen = true"
-                >
-                    {{ t('tools.shared.token_import.button') }}
-                </Button>
-
-                <Button
-                    v-if="!palette.archived"
-                    type="button"
-                    size="sm"
-                    :disabled="!canSave || saving"
-                    data-test="palette-editor-save"
-                    @click="save"
-                >
-                    {{
-                        saving
-                            ? t('colors.editor.saving')
-                            : t('colors.editor.save')
-                    }}
-                </Button>
-
-                <OgImageButton
-                    v-if="palette.visibility === 'public' && !palette.archived"
-                    :has-og="palette.has_og || ogUploaded"
-                    :busy="ogBusy"
-                    :error="ogError"
-                    @generate="ogImage.generate()"
-                />
-
-                <PaletteActions
-                    v-if="!palette.archived"
-                    :palette="palette"
-                    :show-edit="false"
-                    :show-prototype="false"
-                    @delete="deleting = true"
-                />
-            </div>
-        </header>
+    <header class="flex flex-wrap items-start justify-between gap-4">
+      <div class="flex min-w-0 flex-col gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2
+            class="text-xl font-semibold"
+            data-test="palette-editor-name"
+          >
+            {{ palette.name }}
+          </h2>
+          <Badge variant="outline">
+            {{ t(`colors.list.kind_${palette.kind}`) }}
+          </Badge>
+          <Badge variant="secondary">
+            {{
+              palette.visibility === 'public'
+                ? t('colors.list.badge_public')
+                : t('colors.list.badge_private')
+            }}
+          </Badge>
+          <Badge
+            v-if="palette.archived"
+            variant="destructive"
+          >
+            {{ t('colors.list.badge_archived') }}
+          </Badge>
+        </div>
 
         <p
-            v-if="alert !== null"
-            class="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-            role="alert"
-            data-test="palette-editor-error"
+          class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
         >
-            {{ alert }}
+          <span>
+            {{
+              palette.duplications_count === 0
+                ? t('colors.editor.usage_zero')
+                : t('colors.editor.usage', {
+                  count: palette.duplications_count,
+                })
+            }}
+          </span>
+          <span>
+            {{
+              t('colors.editor.colors_count', {
+                count: palette.colors_count,
+              })
+            }}
+          </span>
+          <span v-if="formattedDate !== null">
+            {{
+              t('colors.editor.updated_at', {
+                date: formattedDate,
+              })
+            }}
+          </span>
         </p>
 
-        <section
-            v-if="palette.archived"
-            class="flex flex-col gap-4 rounded-xl border border-dashed border-border p-4"
-            data-test="palette-editor-archived"
+        <Link
+          v-if="publicUrl !== null"
+          :href="publicUrl"
+          class="w-fit text-sm underline-offset-4 hover:underline"
+          data-test="palette-editor-public"
         >
-            <div>
-                <h3 class="text-sm font-semibold">
-                    {{ t('colors.editor.archived_title') }}
-                </h3>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    {{ t('colors.editor.archived_description') }}
-                </p>
-            </div>
+          {{ t('colors.editor.public_link') }}
+        </Link>
+      </div>
 
-            <div
-                class="flex h-14 overflow-hidden rounded-lg border border-border"
-                role="img"
-                :aria-label="
-                    t('colors.list.preview_alt', { name: palette.name })
-                "
-            >
-                <span
-                    v-for="(item, index) in palette.colors.items"
-                    :key="`${item.hex}-${index}`"
-                    class="h-full flex-1"
-                    :style="{ backgroundColor: item.hex }"
-                    :title="item.hex"
-                />
-            </div>
+      <div class="flex flex-col items-end gap-2">
+        <Button
+          v-if="!palette.archived"
+          type="button"
+          size="sm"
+          variant="outline"
+          data-test="palette-editor-import"
+          @click="importOpen = true"
+        >
+          {{ t('tools.shared.token_import.button') }}
+        </Button>
 
-            <PaletteActions
-                :palette="palette"
-                :show-edit="false"
-                :show-prototype="false"
-                @delete="deleting = true"
-            />
-        </section>
+        <Button
+          v-if="!palette.archived"
+          type="button"
+          size="sm"
+          :disabled="!canSave || saving"
+          data-test="palette-editor-save"
+          @click="save"
+        >
+          {{
+            saving
+              ? t('colors.editor.saving')
+              : t('colors.editor.save')
+          }}
+        </Button>
 
-        <template v-else>
-            <PaletteMetaForm
-                v-model:name="name"
-                v-model:description="description"
-                v-model:visibility="visibility"
-                v-model:tags="tags"
-                :limits="form"
-                :suggestions="props.tags"
-                :name-error="serverErrors.name ?? null"
-                :description-error="serverErrors.description ?? null"
-                :tags-error="serverErrors.tags ?? null"
-            />
+        <OgImageButton
+          v-if="palette.visibility === 'public' && !palette.archived"
+          :has-og="palette.has_og || ogUploaded"
+          :busy="ogBusy"
+          :error="ogError"
+          @generate="ogImage.generate()"
+        />
 
-            <GeneratorWorkspace
-                ref="workspace"
-                :image="image"
-                :library="props.library"
-                :roles="roles"
-                :initial-base="palette.colors.base"
-                :initial-scale="initialScale"
-                :initial-extracted="initialExtracted"
-                :initial-tab="tab"
-            >
-                <template #tabs-extra>
-                    <TabsTrigger
-                        value="prototype"
-                        data-test="palette-editor-tab-prototype"
-                    >
-                        {{ t('colors.prototype.tab') }}
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="image"
-                        data-test="palette-editor-tab-image"
-                    >
-                        {{ t('colors.image.tab') }}
-                    </TabsTrigger>
-                </template>
+        <PaletteActions
+          v-if="!palette.archived"
+          :palette="palette"
+          :show-edit="false"
+          :show-prototype="false"
+          @delete="deleting = true"
+        />
+      </div>
+    </header>
 
-                <template #panels-extra>
-                    <TabsContent value="prototype" class="mt-3">
-                        <PrototypePanel
-                            v-model:roles="roles"
-                            :defaults="roleDefaults"
-                        />
-                    </TabsContent>
-                    <TabsContent value="image" class="mt-3">
-                        <PaletteImagePanel
-                            :name="palette.name"
-                            :colors="
-                                palette.colors.items.map((item) => item.hex)
-                            "
-                        />
-                    </TabsContent>
-                </template>
-            </GeneratorWorkspace>
+    <p
+      v-if="alert !== null"
+      class="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+      role="alert"
+      data-test="palette-editor-error"
+    >
+      {{ alert }}
+    </p>
+
+    <section
+      v-if="palette.archived"
+      class="flex flex-col gap-4 rounded-xl border border-dashed border-border p-4"
+      data-test="palette-editor-archived"
+    >
+      <div>
+        <h3 class="text-sm font-semibold">
+          {{ t('colors.editor.archived_title') }}
+        </h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ t('colors.editor.archived_description') }}
+        </p>
+      </div>
+
+      <div
+        class="flex h-14 overflow-hidden rounded-lg border border-border"
+        role="img"
+        :aria-label="
+          t('colors.list.preview_alt', { name: palette.name })
+        "
+      >
+        <span
+          v-for="(item, index) in palette.colors.items"
+          :key="`${item.hex}-${index}`"
+          class="h-full flex-1"
+          :style="{ backgroundColor: item.hex }"
+          :title="item.hex"
+        />
+      </div>
+
+      <PaletteActions
+        :palette="palette"
+        :show-edit="false"
+        :show-prototype="false"
+        @delete="deleting = true"
+      />
+    </section>
+
+    <template v-else>
+      <PaletteMetaForm
+        v-model:name="name"
+        v-model:description="description"
+        v-model:visibility="visibility"
+        v-model:tags="tags"
+        :limits="form"
+        :suggestions="props.tags"
+        :name-error="serverErrors.name ?? null"
+        :description-error="serverErrors.description ?? null"
+        :tags-error="serverErrors.tags ?? null"
+      />
+
+      <GeneratorWorkspace
+        ref="workspace"
+        :image="image"
+        :library="props.library"
+        :roles="roles"
+        :initial-base="palette.colors.base"
+        :initial-scale="initialScale"
+        :initial-extracted="initialExtracted"
+        :initial-tab="tab"
+      >
+        <template #tabs-extra>
+          <TabsTrigger
+            value="prototype"
+            data-test="palette-editor-tab-prototype"
+          >
+            {{ t('colors.prototype.tab') }}
+          </TabsTrigger>
+          <TabsTrigger
+            value="image"
+            data-test="palette-editor-tab-image"
+          >
+            {{ t('colors.image.tab') }}
+          </TabsTrigger>
         </template>
 
-        <TokenImportDialog
-            :open="importOpen"
-            :tokens="props.tokens"
-            :source-label-max-length="form.sourceLabelMaxLength"
-            @apply="applyTokens"
-            @close="importOpen = false"
-        />
+        <template #panels-extra>
+          <TabsContent
+            value="prototype"
+            class="mt-3"
+          >
+            <PrototypePanel
+              v-model:roles="roles"
+              :defaults="roleDefaults"
+            />
+          </TabsContent>
+          <TabsContent
+            value="image"
+            class="mt-3"
+          >
+            <PaletteImagePanel
+              :name="palette.name"
+              :colors="
+                palette.colors.items.map((item) => item.hex)
+              "
+            />
+          </TabsContent>
+        </template>
+      </GeneratorWorkspace>
+    </template>
 
-        <DeletePaletteDialog
-            :open="deleting"
-            :palette-id="palette.id"
-            :palette-name="palette.name"
-            @close="deleting = false"
-        />
-    </div>
+    <TokenImportDialog
+      :open="importOpen"
+      :tokens="props.tokens"
+      :source-label-max-length="form.sourceLabelMaxLength"
+      @apply="applyTokens"
+      @close="importOpen = false"
+    />
+
+    <DeletePaletteDialog
+      :open="deleting"
+      :palette-id="palette.id"
+      :palette-name="palette.name"
+      @close="deleting = false"
+    />
+  </div>
 </template>

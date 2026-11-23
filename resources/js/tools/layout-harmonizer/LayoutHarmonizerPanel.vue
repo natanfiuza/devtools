@@ -136,6 +136,7 @@ function inputsOf(): LayoutStateInputsV1 {
         seedText: controller.picker.text.value,
         backgroundText: controller.backgroundText.value,
         secondaryText: controller.secondaryText.value,
+        secondaryBackgroundText: controller.secondaryBackgroundText.value,
         strategy: controller.strategy.value,
     };
 }
@@ -152,6 +153,7 @@ function currentState(): LayoutSystemStateV1 | null {
         inputsOf(),
         controller.secondaryColor.value,
         snapshot,
+        controller.secondaryBackground.value,
     );
 }
 
@@ -169,6 +171,7 @@ const saveSource = computed<LayoutSystemSaveSource | null>(() => {
     return {
         inputs: inputsOf(),
         secondary: controller.secondaryColor.value,
+        secondaryBackground: controller.secondaryBackground.value,
         snapshot,
     };
 });
@@ -185,6 +188,20 @@ const draft = useLayoutDraft({
     state: currentState,
     originPaletteId: () => props.originPaletteId,
 });
+
+// O rascunho anonimo vive "ate limpar" (ADR-161): este e o descarte
+// explicito. Limpar o quadro junto impede a gravacao imediata do mesmo estado.
+const draftStored = draft.stored;
+const draftDiscardOpen = ref(false);
+
+function discardDraft(): void {
+    draftDiscardOpen.value = false;
+    draft.discard();
+    controller.picker.setFromText('');
+    controller.backgroundText.value = '';
+    controller.secondaryText.value = '';
+    controller.secondaryBackgroundText.value = '';
+}
 
 const quotaBlocked = computed(
     () =>
@@ -333,99 +350,165 @@ defineExpose({
 </script>
 
 <template>
-    <div class="space-y-4" data-test="layout-harmonizer-panel">
-        <div
-            v-if="showSaveButton"
-            class="flex flex-wrap items-center justify-end gap-2"
-        >
-            <p
-                v-if="quotaBlocked"
-                class="text-xs text-destructive"
-                data-test="layout-save-limit"
-            >
-                {{ saveTitle }}
-            </p>
-            <Button
-                data-test="layout-save-open"
-                :disabled="!canSave"
-                :title="saveTitle"
-                @click="save"
-            >
-                <Save class="size-4" />
-                {{
-                    authenticated
-                        ? t('tools.layout-harmonizer.save.save_button')
-                        : t('tools.layout-harmonizer.save.login_to_save')
-                }}
-            </Button>
-        </div>
-
-        <LayoutWorkspace
-            :controller="controller"
-            :regenerate="controller.mode === 'live' ? null : regenerate"
-        />
-
-        <LayoutExportPanel
-            :state="currentState()"
-            :name="suggestedName"
-            :authenticated="authenticated"
-            :pending-regeneration="controller.pendingRegeneration.value"
-            :mode="controller.mode"
-            :read-only="controller.mode === 'readonly'"
-            :origin="exportOrigin"
-            :origin-palette-id="originPaletteId"
-            :export-messages="exportMessages"
-            :export-limits="exportLimits"
-        />
-
-        <SaveLayoutSystemDialog
-            v-if="authenticated"
-            :open="saveOpen"
-            :mode="saveMode"
-            :system-id="systemId"
-            :source="saveSource"
-            :suggested-name="suggestedName"
-            :initial="initialDetails"
-            :limits="limits"
-            :account-tags="accountTags"
-            :origin-palette-id="saveMode === 'create' ? originPaletteId : null"
-            :before-save="releaseGuard"
-            @close="saveOpen = false"
-            @saved="onSaved"
-        />
-
-        <Dialog :open="guard.pending.value">
-            <DialogContent class="sm:max-w-md" data-test="layout-guard-dialog">
-                <DialogHeader>
-                    <DialogTitle>
-                        {{ t('tools.layout-harmonizer.guard.title') }}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {{ t('tools.layout-harmonizer.guard.description') }}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter class="gap-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        data-test="layout-guard-cancel"
-                        @click="guard.cancel()"
-                    >
-                        {{ t('tools.layout-harmonizer.guard.stay') }}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        data-test="layout-guard-confirm"
-                        @click="guard.confirm()"
-                    >
-                        {{ t('tools.layout-harmonizer.guard.leave') }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+  <div
+    class="space-y-4"
+    data-test="layout-harmonizer-panel"
+  >
+    <div
+      v-if="showSaveButton"
+      class="flex flex-wrap items-center justify-end gap-2"
+    >
+      <p
+        v-if="quotaBlocked"
+        class="text-xs text-destructive"
+        data-test="layout-save-limit"
+      >
+        {{ saveTitle }}
+      </p>
+      <Button
+        data-test="layout-save-open"
+        :disabled="!canSave"
+        :title="saveTitle"
+        @click="save"
+      >
+        <Save class="size-4" />
+        {{
+          authenticated
+            ? t('tools.layout-harmonizer.save.save_button')
+            : t('tools.layout-harmonizer.save.login_to_save')
+        }}
+      </Button>
     </div>
+
+    <div
+      v-if="!authenticated && draftStored"
+      class="flex justify-end"
+    >
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        data-test="layout-draft-discard-stored"
+        @click="draftDiscardOpen = true"
+      >
+        {{ t('tools.layout-harmonizer.draft.discard_stored') }}
+      </Button>
+    </div>
+
+    <LayoutWorkspace
+      :controller="controller"
+      :regenerate="controller.mode === 'live' ? null : regenerate"
+    />
+
+    <LayoutExportPanel
+      :state="currentState()"
+      :name="suggestedName"
+      :authenticated="authenticated"
+      :pending-regeneration="controller.pendingRegeneration.value"
+      :mode="controller.mode"
+      :read-only="controller.mode === 'readonly'"
+      :origin="exportOrigin"
+      :origin-palette-id="originPaletteId"
+      :export-messages="exportMessages"
+      :export-limits="exportLimits"
+    />
+
+    <SaveLayoutSystemDialog
+      v-if="authenticated"
+      :open="saveOpen"
+      :mode="saveMode"
+      :system-id="systemId"
+      :source="saveSource"
+      :suggested-name="suggestedName"
+      :initial="initialDetails"
+      :limits="limits"
+      :account-tags="accountTags"
+      :origin-palette-id="saveMode === 'create' ? originPaletteId : null"
+      :before-save="releaseGuard"
+      @close="saveOpen = false"
+      @saved="onSaved"
+    />
+
+    <Dialog
+      :open="draftDiscardOpen"
+      @update:open="
+        (open) => {
+          if (!open) {
+            draftDiscardOpen = false;
+          }
+        }
+      "
+    >
+      <DialogContent
+        class="sm:max-w-md"
+        data-test="layout-draft-discard-dialog"
+      >
+        <DialogHeader>
+          <DialogTitle>
+            {{ t('tools.layout-harmonizer.draft.discard_title') }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('tools.layout-harmonizer.draft.discard_body') }}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            data-test="layout-draft-discard-cancel"
+            @click="draftDiscardOpen = false"
+          >
+            {{ t('tools.layout-harmonizer.restore.cancel') }}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            data-test="layout-draft-discard-confirm"
+            @click="discardDraft"
+          >
+            {{ t('tools.layout-harmonizer.draft.discard') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog :open="guard.pending.value">
+      <DialogContent
+        class="sm:max-w-md"
+        data-test="layout-guard-dialog"
+      >
+        <DialogHeader>
+          <DialogTitle>
+            {{ t('tools.layout-harmonizer.guard.title') }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('tools.layout-harmonizer.guard.description') }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter class="gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            data-test="layout-guard-cancel"
+            @click="guard.cancel()"
+          >
+            {{ t('tools.layout-harmonizer.guard.stay') }}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            data-test="layout-guard-confirm"
+            @click="guard.confirm()"
+          >
+            {{ t('tools.layout-harmonizer.guard.leave') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>

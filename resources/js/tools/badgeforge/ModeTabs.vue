@@ -33,23 +33,23 @@ const modes = computed<readonly BadgeMode[]>(() =>
 </script>
 
 <template>
-    <div
-        class="inline-flex items-center gap-1 rounded-md border p-1"
-        role="tablist"
-        data-test="badge-modes"
+  <div
+    class="inline-flex items-center gap-1 rounded-md border p-1"
+    role="tablist"
+    data-test="badge-modes"
+  >
+    <Button
+      v-for="mode in modes"
+      :key="mode"
+      type="button"
+      size="sm"
+      role="tab"
+      :variant="modelValue === mode ? 'default' : 'ghost'"
+      :aria-selected="modelValue === mode"
+      :data-test="`badge-mode-${mode}`"
+      @click="emit('update:modelValue', mode)"
     >
-        <Button
-            v-for="mode in modes"
-            :key="mode"
-            type="button"
-            size="sm"
-            role="tab"
-            :variant="modelValue === mode ? 'default' : 'ghost'"
-            :aria-selected="modelValue === mode"
-            :data-test="`badge-mode-${mode}`"
-            @click="emit('update:modelValue', mode)"
-        >
-            {{ t(`tools.badgeforge.modes.${mode}`) }}
-        </Button>
-    </div>
+      {{ t(`tools.badgeforge.modes.${mode}`) }}
+    </Button>
+  </div>
 </template>

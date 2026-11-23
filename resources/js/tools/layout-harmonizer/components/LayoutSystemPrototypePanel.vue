@@ -65,76 +65,82 @@ const svg = computed(() =>
 </script>
 
 <template>
-    <section class="flex flex-col gap-4" data-test="layout-system-prototype">
-        <div class="flex flex-col gap-1">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.layout-harmonizer.prototype.title') }}
-            </h2>
-            <p class="text-xs text-muted-foreground">
-                {{ t('tools.layout-harmonizer.prototype.description') }}
-            </p>
+  <section
+    class="flex flex-col gap-4"
+    data-test="layout-system-prototype"
+  >
+    <div class="flex flex-col gap-1">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.layout-harmonizer.prototype.title') }}
+      </h2>
+      <p class="text-xs text-muted-foreground">
+        {{ t('tools.layout-harmonizer.prototype.description') }}
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-end gap-6">
+      <div
+        class="flex flex-col gap-1"
+        role="group"
+        :aria-label="
+          t('tools.layout-harmonizer.prototype.template_label')
+        "
+      >
+        <span class="text-xs font-medium">
+          {{ t('tools.layout-harmonizer.prototype.template_label') }}
+        </span>
+        <div class="flex gap-1">
+          <Button
+            v-for="option in TEMPLATE_OPTIONS"
+            :key="option"
+            type="button"
+            size="sm"
+            :variant="template === option ? 'default' : 'outline'"
+            :aria-pressed="template === option"
+            :data-test="`layout-prototype-template-${option}`"
+            @click="template = option"
+          >
+            {{
+              t(
+                `tools.layout-harmonizer.prototype.template_${option}`,
+              )
+            }}
+          </Button>
         </div>
+      </div>
 
-        <div class="flex flex-wrap items-end gap-6">
-            <div
-                class="flex flex-col gap-1"
-                role="group"
-                :aria-label="
-                    t('tools.layout-harmonizer.prototype.template_label')
-                "
-            >
-                <span class="text-xs font-medium">
-                    {{ t('tools.layout-harmonizer.prototype.template_label') }}
-                </span>
-                <div class="flex gap-1">
-                    <Button
-                        v-for="option in TEMPLATE_OPTIONS"
-                        :key="option"
-                        type="button"
-                        size="sm"
-                        :variant="template === option ? 'default' : 'outline'"
-                        :aria-pressed="template === option"
-                        :data-test="`layout-prototype-template-${option}`"
-                        @click="template = option"
-                    >
-                        {{
-                            t(
-                                `tools.layout-harmonizer.prototype.template_${option}`,
-                            )
-                        }}
-                    </Button>
-                </div>
-            </div>
-
-            <div
-                class="flex flex-col gap-1"
-                role="group"
-                :aria-label="t('tools.layout-harmonizer.prototype.theme_label')"
-            >
-                <span class="text-xs font-medium">
-                    {{ t('tools.layout-harmonizer.prototype.theme_label') }}
-                </span>
-                <div class="flex gap-1">
-                    <Button
-                        v-for="option in THEME_OPTIONS"
-                        :key="option"
-                        type="button"
-                        size="sm"
-                        :variant="theme === option ? 'default' : 'outline'"
-                        :aria-pressed="theme === option"
-                        :data-test="`layout-prototype-theme-${option}`"
-                        @click="theme = option"
-                    >
-                        {{
-                            t(
-                                `tools.layout-harmonizer.prototype.theme_${option}`,
-                            )
-                        }}
-                    </Button>
-                </div>
-            </div>
+      <div
+        class="flex flex-col gap-1"
+        role="group"
+        :aria-label="t('tools.layout-harmonizer.prototype.theme_label')"
+      >
+        <span class="text-xs font-medium">
+          {{ t('tools.layout-harmonizer.prototype.theme_label') }}
+        </span>
+        <div class="flex gap-1">
+          <Button
+            v-for="option in THEME_OPTIONS"
+            :key="option"
+            type="button"
+            size="sm"
+            :variant="theme === option ? 'default' : 'outline'"
+            :aria-pressed="theme === option"
+            :data-test="`layout-prototype-theme-${option}`"
+            @click="theme = option"
+          >
+            {{
+              t(
+                `tools.layout-harmonizer.prototype.theme_${option}`,
+              )
+            }}
+          </Button>
         </div>
+      </div>
+    </div>
 
-        <PrototypePreview :svg="svg" :label="label" />
-    </section>
+    <PrototypePreview
+      :svg="svg"
+      :label="label"
+    />
+  </section>
 </template>

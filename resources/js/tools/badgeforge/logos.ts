@@ -15,6 +15,22 @@ const files = import.meta.glob('../../../badgeforge/logos/*.svg', {
 
 const logos: Record<string, BadgeLogo> = {};
 
+function extractRule(
+    attributes: string,
+    attribute: 'fill-rule' | 'clip-rule',
+): 'nonzero' | 'evenodd' | null {
+    const match = new RegExp(
+        `\\b${attribute}="(nonzero|evenodd)"`,
+        'i',
+    ).exec(attributes);
+
+    if (match === null || match[1] === undefined) {
+        return null;
+    }
+
+    return match[1].toLowerCase() as 'nonzero' | 'evenodd';
+}
+
 for (const [path, svg] of Object.entries(files)) {
     const slug = path
         .split('/')
@@ -26,18 +42,35 @@ for (const [path, svg] of Object.entries(files)) {
     }
 
     const viewBox = /<svg\b[^>]*\bviewBox="([^"]+)"/i.exec(svg);
-    const pathData = /<path\b[^>]*\bd="([^"]+)"/i.exec(svg);
 
-    if (
-        viewBox !== null &&
-        pathData !== null &&
-        viewBox[1] !== undefined &&
-        pathData[1] !== undefined
-    ) {
+    if (viewBox === null || viewBox[1] === undefined) {
+        continue;
+    }
+
+    const paths: BadgeLogo['paths'] = [];
+    let invalidPath = false;
+
+    for (const pathMatch of svg.matchAll(/<path\b([^>]*)>/gi)) {
+        const attributes = pathMatch[1] ?? '';
+        const dMatch = /\bd="([^"]+)"/i.exec(attributes);
+
+        if (dMatch === null || dMatch[1] === undefined) {
+            invalidPath = true;
+            break;
+        }
+
+        paths.push({
+            d: dMatch[1],
+            fillRule: extractRule(attributes, 'fill-rule'),
+            clipRule: extractRule(attributes, 'clip-rule'),
+        });
+    }
+
+    if (!invalidPath && paths.length > 0) {
         logos[slug] = {
             slug,
             viewBox: viewBox[1],
-            paths: [{ d: pathData[1], fillRule: null, clipRule: null }],
+            paths,
         };
     }
 }

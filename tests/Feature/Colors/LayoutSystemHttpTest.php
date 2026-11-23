@@ -109,6 +109,15 @@ it('abre o tool pelo intent, com exportacao sem pedir salvamento', function () {
     $location = (string) $export->headers->get('Location');
 
     expect($location)->toContain('export=1')->not->toContain('save=1');
+
+    // O idioma da rota publica e o slug (`pt-br`), nao o codigo (`pt_BR`).
+    // O middleware resolve o idioma da conta a cada requisicao.
+    $user->forceFill(['locale' => 'pt_BR'])->save();
+
+    $localized = $this->actingAs($user->refresh())->get(route('dashboard.colors.systems.create'));
+
+    expect((string) $localized->headers->get('Location'))
+        ->toContain('/pt-br/tools/colors/layout-harmonizer');
 });
 
 it('preserva a paleta acessivel no intent de exportacao', function () {
@@ -159,7 +168,9 @@ it('recusa estado invalido e origem inacessivel', function () {
 
     $this->actingAs($user)
         ->post(route('dashboard.colors.systems.store'), $invalid)
-        ->assertSessionHasErrors('state');
+        ->assertSessionHasErrors([
+            'state' => __('colors.validation.layout_state'),
+        ]);
 
     $palette = ColorPalette::factory()->create();
 
@@ -167,7 +178,37 @@ it('recusa estado invalido e origem inacessivel', function () {
         ->post(route('dashboard.colors.systems.store'), layoutSystemHttpPayload([
             'source_palette_id' => $palette->id,
         ]))
-        ->assertSessionHasErrors('source_palette_id');
+        ->assertSessionHasErrors([
+            'source_palette_id' => __('colors.validation.source_palette_unavailable'),
+        ]);
+});
+
+it('aceita secundaria com alpha somente com fundo de composicao', function () {
+    $user = User::factory()->create();
+
+    $state = LayoutSystemFactory::stateArray([
+        'secondary' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 0.5],
+        'snapshot' => ['secondarySource' => 'manual'],
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('dashboard.colors.systems.store'), layoutSystemHttpPayload([
+            'state' => $state,
+        ]))
+        ->assertSessionHasErrors('state');
+
+    $state['secondaryBackground'] = ['r' => 255, 'g' => 255, 'b' => 255];
+    $state['inputs']['secondaryBackgroundText'] = '#ffffff';
+
+    $this->actingAs($user)
+        ->post(route('dashboard.colors.systems.store'), layoutSystemHttpPayload([
+            'state' => $state,
+        ]))
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('dashboard.colors.systems.edit', LayoutSystem::sole()));
+
+    expect(LayoutSystem::sole()->state['secondaryBackground'])
+        ->toBe(['r' => 255, 'g' => 255, 'b' => 255]);
 });
 
 it('edita o sistema e recusa alteracao de arquivado', function () {

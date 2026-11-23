@@ -29,37 +29,40 @@ const bodyKey = computed<string>(
 </script>
 
 <template>
-    <Head :title="t(key)" />
+  <Head :title="t(key)" />
 
-    <div class="mx-auto w-full max-w-lg px-4 py-16">
-        <h1 class="text-2xl font-medium tracking-tight">
-            {{ t(key) }}
-        </h1>
-        <p class="mt-3 text-muted-foreground">
-            {{ t(bodyKey) }}
-        </p>
+  <div class="mx-auto w-full max-w-lg px-4 py-16">
+    <h1 class="text-2xl font-medium tracking-tight">
+      {{ t(key) }}
+    </h1>
+    <p class="mt-3 text-muted-foreground">
+      {{ t(bodyKey) }}
+    </p>
 
-        <Form
-            v-if="state === 'pending'"
-            v-slot="{ processing }"
-            v-bind="routes.form.newsletterUnsubscribe(token)"
-            class="mt-6"
-        >
-            <Button
-                type="submit"
-                variant="outline"
-                :disabled="processing"
-                data-test="newsletter-unsubscribe-button"
-            >
-                <Spinner v-if="processing" />
-                {{ t('newsletter.unsubscribe.action') }}
-            </Button>
-        </Form>
+    <Form
+      v-if="state === 'pending'"
+      v-slot="{ processing }"
+      v-bind="routes.form.newsletterUnsubscribe(token)"
+      class="mt-6"
+    >
+      <Button
+        type="submit"
+        variant="outline"
+        :disabled="processing"
+        data-test="newsletter-unsubscribe-button"
+      >
+        <Spinner v-if="processing" />
+        {{ t('newsletter.unsubscribe.action') }}
+      </Button>
+    </Form>
 
-        <p v-else class="mt-6">
-            <TextLink :href="routes.home.value">
-                {{ t('newsletter.back_home') }}
-            </TextLink>
-        </p>
-    </div>
+    <p
+      v-else
+      class="mt-6"
+    >
+      <TextLink :href="routes.home.value">
+        {{ t('newsletter.back_home') }}
+      </TextLink>
+    </p>
+  </div>
 </template>

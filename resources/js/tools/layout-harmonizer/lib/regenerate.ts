@@ -11,7 +11,7 @@ import {
     type LayoutEditState,
     type LayoutOverrideMap,
 } from './editState';
-import { parseBackgroundText, parseSecondaryText } from './inputs';
+import { parseOpaqueText, parseSecondaryText } from './inputs';
 import { buildSnapshot, type LayoutSnapshot } from './snapshot';
 import {
     buildLayoutState,
@@ -78,14 +78,27 @@ export function regenerateState(
         return null;
     }
 
-    const background = parseBackgroundText(inputs.backgroundText);
+    const parsedBackground = parseOpaqueText(inputs.backgroundText);
+    const parsedSecondaryBackground = parseOpaqueText(
+        inputs.secondaryBackgroundText ?? '',
+    );
+    const background =
+        parsedBackground.kind === 'color' ? parsedBackground.rgb : null;
+    const secondaryBackground =
+        parsedSecondaryBackground.kind === 'color'
+            ? parsedSecondaryBackground.rgb
+            : null;
     const secondary = parseSecondaryText(inputs.secondaryText);
 
-    if (secondary === undefined) {
+    if (secondary === undefined || parsedBackground.kind === 'alpha') {
         return null;
     }
 
     if (seed.a < 1 && background === null) {
+        return null;
+    }
+
+    if (secondary !== null && secondary.a < 1 && secondaryBackground === null) {
         return null;
     }
 
@@ -97,6 +110,7 @@ export function regenerateState(
             strategy: inputs.strategy,
             background,
             secondary,
+            secondaryBackground,
             overrides: effectiveOverrides(editState),
         });
 
@@ -106,7 +120,12 @@ export function regenerateState(
             state.snapshot.target,
         );
 
-        return buildLayoutState(inputs, secondary, snapshot);
+        return buildLayoutState(
+            inputs,
+            secondary,
+            snapshot,
+            secondaryBackground,
+        );
     } catch (error) {
         if (error instanceof LayoutEngineError) {
             return null;

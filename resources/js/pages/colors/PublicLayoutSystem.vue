@@ -129,193 +129,202 @@ onMounted(() => {
 </script>
 
 <template>
-    <PageHead />
+  <PageHead />
 
-    <article
-        class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
-        data-test="public-layout-system"
-    >
-        <header class="flex flex-col gap-3">
-            <h1
-                class="text-3xl font-semibold tracking-tight"
-                data-test="public-layout-system-name"
-            >
-                {{ system.name }}
-            </h1>
+  <article
+    class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
+    data-test="public-layout-system"
+  >
+    <header class="flex flex-col gap-3">
+      <h1
+        class="text-3xl font-semibold tracking-tight"
+        data-test="public-layout-system-name"
+      >
+        {{ system.name }}
+      </h1>
 
-            <p
-                v-if="system.description !== null"
-                class="max-w-2xl text-base text-muted-foreground"
-                data-test="public-layout-system-description"
-            >
-                {{ system.description }}
-            </p>
+      <p
+        v-if="system.description !== null"
+        class="max-w-2xl text-base text-muted-foreground"
+        data-test="public-layout-system-description"
+      >
+        {{ system.description }}
+      </p>
 
-            <div
-                v-if="system.author !== null"
-                class="flex flex-wrap items-center gap-2"
-                data-test="public-layout-system-author"
-            >
-                <img
-                    v-if="system.author.avatar !== null"
-                    :src="system.author.avatar"
-                    :alt="system.author.name"
-                    class="size-8 rounded-full border border-border object-cover"
-                />
-                <span
-                    v-else
-                    class="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground"
-                    :aria-label="system.author.name"
-                >
-                    {{ getInitials(system.author.name) }}
-                </span>
-
-                <Link
-                    :href="authorUrl ?? '#'"
-                    class="text-sm font-medium hover:underline"
-                    :aria-label="
-                        t('colors.public.by', { name: system.author.name })
-                    "
-                    data-test="public-layout-system-author-link"
-                >
-                    {{ system.author.name }}
-                </Link>
-                <span class="text-xs text-muted-foreground">
-                    @{{ system.author.username }}
-                </span>
-            </div>
-
-            <div
-                class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
-            >
-                <Badge
-                    variant="outline"
-                    data-test="public-layout-system-strategy"
-                >
-                    {{ strategyLabel }}
-                </Badge>
-                <span class="flex items-center gap-1">
-                    <span
-                        class="inline-block size-3 rounded-full border border-border"
-                        :style="{ backgroundColor: seedHex }"
-                        aria-hidden="true"
-                    />
-                    <span class="font-mono">{{ seedHex }}</span>
-                </span>
-                <span data-test="public-layout-system-tokens">
-                    {{
-                        t('colors.systems.list.tokens_count', {
-                            count: system.tokens_count,
-                        })
-                    }}
-                </span>
-                <span data-test="public-layout-system-usage">
-                    {{
-                        system.duplications_count === 0
-                            ? t('colors.list.usage_zero')
-                            : t('colors.list.usage', {
-                                  count: system.duplications_count,
-                              })
-                    }}
-                </span>
-                <span
-                    v-if="updatedAt !== null"
-                    data-test="public-layout-system-updated"
-                >
-                    {{ t('colors.list.updated_at', { date: updatedAt }) }}
-                </span>
-            </div>
-
-            <p
-                class="text-xs text-muted-foreground"
-                data-test="public-layout-system-versions"
-            >
-                {{
-                    t('colors.systems.public.versions', {
-                        schema: system.schema_version,
-                        algorithm: system.algorithm_version,
-                        suggestions: system.suggestions_version,
-                        snapshot: system.snapshot_version,
-                    })
-                }}
-            </p>
-
-            <p
-                v-if="system.credit !== null"
-                class="text-xs text-muted-foreground"
-                data-test="public-layout-system-credit"
-            >
-                {{ t('colors.systems.public.credit_from') }}
-                <Link
-                    v-if="system.credit.palette_url !== null"
-                    :href="system.credit.palette_url"
-                    class="font-medium underline-offset-4 hover:underline"
-                    data-test="public-layout-system-credit-link"
-                >
-                    {{ system.credit.palette_name }}
-                </Link>
-                <span v-else class="font-medium">
-                    {{ system.credit.palette_name }}
-                </span>
-            </p>
-
-            <ul
-                v-if="system.tags.length > 0"
-                class="flex flex-wrap gap-1"
-                data-test="public-layout-system-tags"
-            >
-                <li
-                    v-for="tag in system.tags"
-                    :key="tag.id"
-                    class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                >
-                    {{ tag.name }}
-                </li>
-            </ul>
-        </header>
-
-        <div v-if="canDuplicate" class="flex flex-wrap items-center gap-2">
-            <Button
-                v-if="authenticated"
-                type="button"
-                :disabled="duplicating"
-                data-test="public-layout-system-duplicate"
-                @click="duplicate"
-            >
-                <Copy class="size-4" />
-                {{ t('colors.public.duplicate') }}
-            </Button>
-            <Button v-else as-child>
-                <Link
-                    :href="duplicateIntentUrl"
-                    data-test="public-layout-system-duplicate-login"
-                >
-                    <Copy class="size-4" />
-                    {{ t('colors.public.duplicate_login') }}
-                </Link>
-            </Button>
-        </div>
-
-        <section
-            class="flex flex-col gap-3"
-            data-test="public-layout-system-boards"
+      <div
+        v-if="system.author !== null"
+        class="flex flex-wrap items-center gap-2"
+        data-test="public-layout-system-author"
+      >
+        <img
+          v-if="system.author.avatar !== null"
+          :src="system.author.avatar"
+          :alt="system.author.name"
+          class="size-8 rounded-full border border-border object-cover"
         >
-            <ThemeComparison
-                :light="boards.light"
-                :dark="boards.dark"
-                :copy="copyFeedback.copy"
-                :editable="false"
-            />
+        <span
+          v-else
+          class="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground"
+          :aria-label="system.author.name"
+        >
+          {{ getInitials(system.author.name) }}
+        </span>
 
-            <p
-                v-if="feedback !== null"
-                class="text-xs text-muted-foreground"
-                role="status"
-                aria-live="polite"
-                data-test="public-layout-system-copy-feedback"
-            >
-                {{ feedback }}
-            </p>
-        </section>
-    </article>
+        <Link
+          :href="authorUrl ?? '#'"
+          class="text-sm font-medium hover:underline"
+          :aria-label="
+            t('colors.public.by', { name: system.author.name })
+          "
+          data-test="public-layout-system-author-link"
+        >
+          {{ system.author.name }}
+        </Link>
+        <span class="text-xs text-muted-foreground">
+          @{{ system.author.username }}
+        </span>
+      </div>
+
+      <div
+        class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+      >
+        <Badge
+          variant="outline"
+          data-test="public-layout-system-strategy"
+        >
+          {{ strategyLabel }}
+        </Badge>
+        <span class="flex items-center gap-1">
+          <span
+            class="inline-block size-3 rounded-full border border-border"
+            :style="{ backgroundColor: seedHex }"
+            aria-hidden="true"
+          />
+          <span class="font-mono">{{ seedHex }}</span>
+        </span>
+        <span data-test="public-layout-system-tokens">
+          {{
+            t('colors.systems.list.tokens_count', {
+              count: system.tokens_count,
+            })
+          }}
+        </span>
+        <span data-test="public-layout-system-usage">
+          {{
+            system.duplications_count === 0
+              ? t('colors.list.usage_zero')
+              : t('colors.list.usage', {
+                count: system.duplications_count,
+              })
+          }}
+        </span>
+        <span
+          v-if="updatedAt !== null"
+          data-test="public-layout-system-updated"
+        >
+          {{ t('colors.list.updated_at', { date: updatedAt }) }}
+        </span>
+      </div>
+
+      <p
+        class="text-xs text-muted-foreground"
+        data-test="public-layout-system-versions"
+      >
+        {{
+          t('colors.systems.public.versions', {
+            schema: system.schema_version,
+            algorithm: system.algorithm_version,
+            suggestions: system.suggestions_version,
+            snapshot: system.snapshot_version,
+          })
+        }}
+      </p>
+
+      <p
+        v-if="system.credit !== null"
+        class="text-xs text-muted-foreground"
+        data-test="public-layout-system-credit"
+      >
+        {{ t('colors.systems.public.credit_from') }}
+        <Link
+          v-if="system.credit.palette_url !== null"
+          :href="system.credit.palette_url"
+          class="font-medium underline-offset-4 hover:underline"
+          data-test="public-layout-system-credit-link"
+        >
+          {{ system.credit.palette_name }}
+        </Link>
+        <span
+          v-else
+          class="font-medium"
+        >
+          {{ system.credit.palette_name }}
+        </span>
+      </p>
+
+      <ul
+        v-if="system.tags.length > 0"
+        class="flex flex-wrap gap-1"
+        data-test="public-layout-system-tags"
+      >
+        <li
+          v-for="tag in system.tags"
+          :key="tag.id"
+          class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+        >
+          {{ tag.name }}
+        </li>
+      </ul>
+    </header>
+
+    <div
+      v-if="canDuplicate"
+      class="flex flex-wrap items-center gap-2"
+    >
+      <Button
+        v-if="authenticated"
+        type="button"
+        :disabled="duplicating"
+        data-test="public-layout-system-duplicate"
+        @click="duplicate"
+      >
+        <Copy class="size-4" />
+        {{ t('colors.public.duplicate') }}
+      </Button>
+      <Button
+        v-else
+        as-child
+      >
+        <Link
+          :href="duplicateIntentUrl"
+          data-test="public-layout-system-duplicate-login"
+        >
+          <Copy class="size-4" />
+          {{ t('colors.public.duplicate_login') }}
+        </Link>
+      </Button>
+    </div>
+
+    <section
+      class="flex flex-col gap-3"
+      data-test="public-layout-system-boards"
+    >
+      <ThemeComparison
+        :light="boards.light"
+        :dark="boards.dark"
+        :copy="copyFeedback.copy"
+        :editable="false"
+      />
+
+      <p
+        v-if="feedback !== null"
+        class="text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        data-test="public-layout-system-copy-feedback"
+      >
+        {{ feedback }}
+      </p>
+    </section>
+  </article>
 </template>

@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\DB;
 /**
  * Restaura o sistema arquivado (F4, ADR-164/ADR-171).
  *
- * Restaurar nao consome vaga. O slug reservado volta se continuar livre; se
- * outra conta tomou o valor nesse meio-tempo, um novo slug nasce do nome atual.
+ * Restaurar nao consome vaga. Sistema publico recupera o slug reservado (ou
+ * ganha outro se outra conta tomou o valor); sistema privado mantem o valor em
+ * `archived_slug` ate a proxima publicacao (ADR-171).
  */
 final class RestoreLayoutSystem
 {
@@ -26,19 +27,19 @@ final class RestoreLayoutSystem
         for ($attempt = 1; ; $attempt++) {
             try {
                 return DB::transaction(function () use ($system): LayoutSystem {
-                    $slug = null;
+                    $public = $system->isPublic();
 
-                    if ($system->archived_slug !== null || $system->isPublic()) {
-                        $slug = $this->slug->claimOrGenerate(
+                    $slug = $public
+                        ? $this->slug->claimOrGenerate(
                             $system->archived_slug,
                             $system->name,
                             $system->id,
-                        );
-                    }
+                        )
+                        : null;
 
                     $system->forceFill([
                         'archived_at' => null,
-                        'archived_slug' => null,
+                        'archived_slug' => $public ? null : $system->archived_slug,
                         'slug' => $slug,
                     ])->save();
 

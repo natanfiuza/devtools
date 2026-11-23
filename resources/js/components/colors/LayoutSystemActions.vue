@@ -88,83 +88,91 @@ async function copyLink(): Promise<void> {
 </script>
 
 <template>
-    <div class="flex flex-col gap-2">
-        <div class="flex flex-wrap items-center gap-1">
-            <Button v-if="showEdit" as-child variant="ghost" size="sm">
-                <Link :href="editUrl" data-test="layout-system-action-edit">
-                    <Pencil class="size-4" />
-                    {{ t('colors.actions.edit') }}
-                </Link>
-            </Button>
-
-            <Button
-                variant="ghost"
-                size="sm"
-                data-test="layout-system-action-duplicate"
-                @click="duplicate"
-            >
-                <Copy class="size-4" />
-                {{ t('colors.actions.duplicate') }}
-            </Button>
-
-            <Button
-                variant="ghost"
-                size="sm"
-                :disabled="publicUrl === null"
-                :title="
-                    publicUrl === null
-                        ? t('colors.systems.actions.share_unavailable')
-                        : undefined
-                "
-                data-test="layout-system-action-share"
-                @click="copyLink"
-            >
-                <Link2 class="size-4" />
-                {{ t('colors.actions.share') }}
-            </Button>
-
-            <Button
-                v-if="!system.archived"
-                variant="ghost"
-                size="sm"
-                data-test="layout-system-action-archive"
-                @click="archive"
-            >
-                <Archive class="size-4" />
-                {{ t('colors.actions.archive') }}
-            </Button>
-
-            <Button
-                v-else
-                variant="ghost"
-                size="sm"
-                data-test="layout-system-action-restore"
-                @click="restore"
-            >
-                <RotateCcw class="size-4" />
-                {{ t('colors.actions.restore') }}
-            </Button>
-
-            <Button
-                variant="ghost"
-                size="sm"
-                class="text-destructive"
-                data-test="layout-system-action-delete"
-                @click="emit('delete', system)"
-            >
-                <Trash2 class="size-4" />
-                {{ t('colors.actions.delete') }}
-            </Button>
-        </div>
-
-        <p
-            v-if="shareFeedback !== null"
-            class="text-xs text-muted-foreground"
-            role="status"
-            aria-live="polite"
-            data-test="layout-system-share-feedback"
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-wrap items-center gap-1">
+      <Button
+        v-if="showEdit"
+        as-child
+        variant="ghost"
+        size="sm"
+      >
+        <Link
+          :href="editUrl"
+          data-test="layout-system-action-edit"
         >
-            {{ shareFeedback }}
-        </p>
+          <Pencil class="size-4" />
+          {{ t('colors.actions.edit') }}
+        </Link>
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        data-test="layout-system-action-duplicate"
+        @click="duplicate"
+      >
+        <Copy class="size-4" />
+        {{ t('colors.actions.duplicate') }}
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        :disabled="publicUrl === null"
+        :title="
+          publicUrl === null
+            ? t('colors.systems.actions.share_unavailable')
+            : undefined
+        "
+        data-test="layout-system-action-share"
+        @click="copyLink"
+      >
+        <Link2 class="size-4" />
+        {{ t('colors.actions.share') }}
+      </Button>
+
+      <Button
+        v-if="!system.archived"
+        variant="ghost"
+        size="sm"
+        data-test="layout-system-action-archive"
+        @click="archive"
+      >
+        <Archive class="size-4" />
+        {{ t('colors.actions.archive') }}
+      </Button>
+
+      <Button
+        v-else
+        variant="ghost"
+        size="sm"
+        data-test="layout-system-action-restore"
+        @click="restore"
+      >
+        <RotateCcw class="size-4" />
+        {{ t('colors.actions.restore') }}
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        class="text-destructive"
+        data-test="layout-system-action-delete"
+        @click="emit('delete', system)"
+      >
+        <Trash2 class="size-4" />
+        {{ t('colors.actions.delete') }}
+      </Button>
     </div>
+
+    <p
+      v-if="shareFeedback !== null"
+      class="text-xs text-muted-foreground"
+      role="status"
+      aria-live="polite"
+      data-test="layout-system-share-feedback"
+    >
+      {{ shareFeedback }}
+    </p>
+  </div>
 </template>

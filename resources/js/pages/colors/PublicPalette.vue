@@ -295,408 +295,420 @@ onMounted(() => {
 </script>
 
 <template>
-    <PageHead />
+  <PageHead />
 
-    <article
-        class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
-        data-test="public-palette"
+  <article
+    class="mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-4 py-10"
+    data-test="public-palette"
+  >
+    <header class="flex flex-col gap-3">
+      <h1
+        class="text-3xl font-semibold tracking-tight"
+        data-test="public-palette-name"
+      >
+        {{ palette.name }}
+      </h1>
+
+      <p
+        v-if="palette.description !== null"
+        class="max-w-2xl text-base text-muted-foreground"
+        data-test="public-palette-description"
+      >
+        {{ palette.description }}
+      </p>
+
+      <div
+        v-if="palette.author !== null"
+        class="flex flex-wrap items-center gap-2"
+        data-test="public-palette-author"
+      >
+        <img
+          v-if="palette.author.avatar !== null"
+          :src="palette.author.avatar"
+          :alt="palette.author.name"
+          class="size-8 rounded-full border border-border object-cover"
+        >
+        <span
+          v-else
+          class="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground"
+          :aria-label="palette.author.name"
+        >
+          {{ getInitials(palette.author.name) }}
+        </span>
+
+        <Link
+          :href="authorUrl ?? '#'"
+          class="text-sm font-medium hover:underline"
+          :aria-label="
+            t('colors.public.by', { name: palette.author.name })
+          "
+          data-test="public-palette-author-link"
+        >
+          {{ palette.author.name }}
+        </Link>
+        <span class="text-xs text-muted-foreground">
+          @{{ palette.author.username }}
+        </span>
+
+        <FollowButton
+          :user-id="palette.author.id"
+          :following="following"
+          :can-follow="canFollow"
+          data-test="public-palette-follow"
+        />
+      </div>
+
+      <div
+        class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+      >
+        <Badge variant="outline">
+          {{ t(`colors.list.kind_${palette.kind}`) }}
+        </Badge>
+        <span>
+          {{
+            t('colors.list.colors_count', {
+              count: palette.colors_count,
+            })
+          }}
+        </span>
+        <span data-test="public-palette-usage">
+          {{
+            palette.duplications_count === 0
+              ? t('colors.list.usage_zero')
+              : t('colors.list.usage', {
+                count: palette.duplications_count,
+              })
+          }}
+        </span>
+        <span
+          v-if="updatedAt !== null"
+          data-test="public-palette-updated"
+        >
+          {{ t('colors.list.updated_at', { date: updatedAt }) }}
+        </span>
+      </div>
+
+      <ul
+        v-if="palette.tags.length > 0"
+        class="flex flex-wrap gap-1"
+        data-test="public-palette-tags"
+      >
+        <li
+          v-for="tag in palette.tags"
+          :key="tag.id"
+          class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+        >
+          {{ tag.name }}
+        </li>
+      </ul>
+    </header>
+
+    <section
+      class="flex flex-col gap-3"
+      data-test="public-palette-colors"
     >
-        <header class="flex flex-col gap-3">
-            <h1
-                class="text-3xl font-semibold tracking-tight"
-                data-test="public-palette-name"
-            >
-                {{ palette.name }}
-            </h1>
-
-            <p
-                v-if="palette.description !== null"
-                class="max-w-2xl text-base text-muted-foreground"
-                data-test="public-palette-description"
-            >
-                {{ palette.description }}
-            </p>
-
-            <div
-                v-if="palette.author !== null"
-                class="flex flex-wrap items-center gap-2"
-                data-test="public-palette-author"
-            >
-                <img
-                    v-if="palette.author.avatar !== null"
-                    :src="palette.author.avatar"
-                    :alt="palette.author.name"
-                    class="size-8 rounded-full border border-border object-cover"
-                />
-                <span
-                    v-else
-                    class="flex size-8 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold text-muted-foreground"
-                    :aria-label="palette.author.name"
-                >
-                    {{ getInitials(palette.author.name) }}
-                </span>
-
-                <Link
-                    :href="authorUrl ?? '#'"
-                    class="text-sm font-medium hover:underline"
-                    :aria-label="
-                        t('colors.public.by', { name: palette.author.name })
-                    "
-                    data-test="public-palette-author-link"
-                >
-                    {{ palette.author.name }}
-                </Link>
-                <span class="text-xs text-muted-foreground">
-                    @{{ palette.author.username }}
-                </span>
-
-                <FollowButton
-                    :user-id="palette.author.id"
-                    :following="following"
-                    :can-follow="canFollow"
-                    data-test="public-palette-follow"
-                />
-            </div>
-
-            <div
-                class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
-            >
-                <Badge variant="outline">
-                    {{ t(`colors.list.kind_${palette.kind}`) }}
-                </Badge>
-                <span>
-                    {{
-                        t('colors.list.colors_count', {
-                            count: palette.colors_count,
-                        })
-                    }}
-                </span>
-                <span data-test="public-palette-usage">
-                    {{
-                        palette.duplications_count === 0
-                            ? t('colors.list.usage_zero')
-                            : t('colors.list.usage', {
-                                  count: palette.duplications_count,
-                              })
-                    }}
-                </span>
-                <span
-                    v-if="updatedAt !== null"
-                    data-test="public-palette-updated"
-                >
-                    {{ t('colors.list.updated_at', { date: updatedAt }) }}
-                </span>
-            </div>
-
-            <ul
-                v-if="palette.tags.length > 0"
-                class="flex flex-wrap gap-1"
-                data-test="public-palette-tags"
-            >
-                <li
-                    v-for="tag in palette.tags"
-                    :key="tag.id"
-                    class="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                >
-                    {{ tag.name }}
-                </li>
-            </ul>
-        </header>
-
-        <section class="flex flex-col gap-3" data-test="public-palette-colors">
-            <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                <li
-                    v-for="(item, index) in items"
-                    :key="`${item.hex}-${index}`"
-                >
-                    <button
-                        type="button"
-                        class="flex w-full flex-col overflow-hidden rounded-xl border border-border text-left transition hover:border-ring focus:outline-2 focus:outline-offset-2 focus:outline-ring"
-                        :title="t('colors.public.copy_hex')"
-                        data-test="public-swatch"
-                        @click="copyHex(item.hex)"
-                    >
-                        <span
-                            class="h-20 w-full"
-                            :style="{ backgroundColor: item.hex }"
-                        />
-                        <span
-                            class="flex items-center justify-between bg-surface px-2 py-1 text-xs"
-                        >
-                            <span class="font-mono">{{ item.hex }}</span>
-                            <span
-                                v-if="'tone' in item"
-                                class="text-muted-foreground"
-                            >
-                                {{ item.tone }}
-                            </span>
-                        </span>
-                    </button>
-                </li>
-            </ul>
-
-            <p
-                v-if="feedback !== null"
-                class="text-xs text-muted-foreground"
-                role="status"
-                aria-live="polite"
-                data-test="public-copy-feedback"
-            >
-                {{ feedback }}
-            </p>
-        </section>
-
-        <div class="flex flex-wrap items-center gap-2">
-            <LikeButton
-                :palette-id="palette.id"
-                :liked="liked"
-                :likes-count="palette.likes_count"
-                :can-like="canLike"
-                data-test="public-like"
+      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <li
+          v-for="(item, index) in items"
+          :key="`${item.hex}-${index}`"
+        >
+          <button
+            type="button"
+            class="flex w-full flex-col overflow-hidden rounded-xl border border-border text-left transition hover:border-ring focus:outline-2 focus:outline-offset-2 focus:outline-ring"
+            :title="t('colors.public.copy_hex')"
+            data-test="public-swatch"
+            @click="copyHex(item.hex)"
+          >
+            <span
+              class="h-20 w-full"
+              :style="{ backgroundColor: item.hex }"
             />
-
-            <MutePaletteButton
-                :palette-id="palette.id"
-                :muted="muted"
-                :can-mute="canMute"
-                data-test="public-mute"
-            />
-
-            <Button
-                v-if="canFavorite"
-                type="button"
-                :variant="favorited ? 'secondary' : 'outline'"
-                :disabled="favoriting"
-                :aria-pressed="favorited"
-                data-test="public-favorite"
-                @click="toggleFavorite"
+            <span
+              class="flex items-center justify-between bg-surface px-2 py-1 text-xs"
             >
-                <Star class="size-4" :class="favorited ? 'fill-current' : ''" />
-                {{
-                    favorited
-                        ? t('colors.public.favorited')
-                        : t('colors.public.favorite')
-                }}
-            </Button>
+              <span class="font-mono">{{ item.hex }}</span>
+              <span
+                v-if="'tone' in item"
+                class="text-muted-foreground"
+              >
+                {{ item.tone }}
+              </span>
+            </span>
+          </button>
+        </li>
+      </ul>
 
-            <Button as-child variant="outline">
-                <Link
-                    :href="layoutSystemIntentUrl"
-                    data-test="public-layout-system-cta"
-                >
-                    <LayoutGrid class="size-4" />
-                    {{ t('colors.actions.create_layout_system') }}
-                </Link>
-            </Button>
+      <p
+        v-if="feedback !== null"
+        class="text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        data-test="public-copy-feedback"
+      >
+        {{ feedback }}
+      </p>
+    </section>
 
-            <Button
-                v-if="authenticated"
-                type="button"
-                data-test="public-duplicate"
-                @click="duplicate"
-            >
-                <Copy class="size-4" />
-                {{ t('colors.public.duplicate') }}
-            </Button>
-            <Button v-else as-child>
-                <Link
-                    :href="duplicateIntentUrl"
-                    data-test="public-duplicate-login"
-                >
-                    <Copy class="size-4" />
-                    {{ t('colors.public.duplicate_login') }}
-                </Link>
-            </Button>
+    <div class="flex flex-wrap items-center gap-2">
+      <LikeButton
+        :palette-id="palette.id"
+        :liked="liked"
+        :likes-count="palette.likes_count"
+        :can-like="canLike"
+        data-test="public-like"
+      />
 
-            <Button
-                type="button"
-                variant="outline"
-                data-test="public-experiment-toggle"
-                @click="toggleExperiment"
-            >
-                <FlaskConical class="size-4" />
-                {{ t('colors.public.experiment_toggle') }}
-            </Button>
+      <MutePaletteButton
+        :palette-id="palette.id"
+        :muted="muted"
+        :can-mute="canMute"
+        data-test="public-mute"
+      />
 
-            <p
-                v-if="favoriteFailed"
-                class="text-xs text-destructive"
-                role="alert"
-                data-test="public-favorite-error"
-            >
-                {{ t('colors.public.favorite_error') }}
-            </p>
+      <Button
+        v-if="canFavorite"
+        type="button"
+        :variant="favorited ? 'secondary' : 'outline'"
+        :disabled="favoriting"
+        :aria-pressed="favorited"
+        data-test="public-favorite"
+        @click="toggleFavorite"
+      >
+        <Star
+          class="size-4"
+          :class="favorited ? 'fill-current' : ''"
+        />
+        {{
+          favorited
+            ? t('colors.public.favorited')
+            : t('colors.public.favorite')
+        }}
+      </Button>
+
+      <Button
+        as-child
+        variant="outline"
+      >
+        <Link
+          :href="layoutSystemIntentUrl"
+          data-test="public-layout-system-cta"
+        >
+          <LayoutGrid class="size-4" />
+          {{ t('colors.actions.create_layout_system') }}
+        </Link>
+      </Button>
+
+      <Button
+        v-if="authenticated"
+        type="button"
+        data-test="public-duplicate"
+        @click="duplicate"
+      >
+        <Copy class="size-4" />
+        {{ t('colors.public.duplicate') }}
+      </Button>
+      <Button
+        v-else
+        as-child
+      >
+        <Link
+          :href="duplicateIntentUrl"
+          data-test="public-duplicate-login"
+        >
+          <Copy class="size-4" />
+          {{ t('colors.public.duplicate_login') }}
+        </Link>
+      </Button>
+
+      <Button
+        type="button"
+        variant="outline"
+        data-test="public-experiment-toggle"
+        @click="toggleExperiment"
+      >
+        <FlaskConical class="size-4" />
+        {{ t('colors.public.experiment_toggle') }}
+      </Button>
+
+      <p
+        v-if="favoriteFailed"
+        class="text-xs text-destructive"
+        role="alert"
+        data-test="public-favorite-error"
+      >
+        {{ t('colors.public.favorite_error') }}
+      </p>
+    </div>
+
+    <section
+      v-if="testing"
+      class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
+      data-test="public-experiment"
+    >
+      <div>
+        <h2 class="text-sm font-semibold">
+          {{ t('colors.public.experiment_title') }}
+        </h2>
+        <p class="mt-1 text-xs text-muted-foreground">
+          {{ t('colors.public.experiment_description') }}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-1 sm:max-w-xs">
+        <Label for="public-experiment-base">
+          {{ t('colors.public.experiment_label') }}
+        </Label>
+        <Input
+          id="public-experiment-base"
+          ref="baseInputEl"
+          v-model="baseInput"
+          autocomplete="off"
+          spellcheck="false"
+          data-test="public-experiment-input"
+        />
+        <p
+          v-if="experimentalScale === null"
+          class="text-xs text-destructive"
+          data-test="public-experiment-invalid"
+        >
+          {{ t('colors.public.experiment_invalid') }}
+        </p>
+      </div>
+
+      <div
+        v-if="experimentalScale !== null"
+        class="flex h-14 overflow-hidden rounded-lg border border-border"
+        data-test="public-experiment-preview"
+      >
+        <span
+          v-for="tone in experimentalScale.tones"
+          :key="tone.tone"
+          class="h-full flex-1"
+          :style="{ backgroundColor: tone.hex }"
+          :title="tone.hex"
+        />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-test="public-experiment-reset"
+          @click="resetExperiment"
+        >
+          <RotateCcw class="size-4" />
+          {{ t('colors.public.experiment_reset') }}
+        </Button>
+        <p
+          v-if="experimenting"
+          class="text-xs text-muted-foreground"
+          data-test="public-experiment-duplicate-hint"
+        >
+          {{ t('colors.public.experiment_duplicate_hint') }}
+        </p>
+      </div>
+    </section>
+
+    <ExportPanel
+      v-if="frozenScale !== null"
+      :scale="frozenScale"
+      :copy="copyFeedback.copy"
+      data-test="public-export"
+    />
+
+    <section
+      v-else
+      class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+      data-test="public-extracted-export"
+    >
+      <div>
+        <h2 class="text-sm font-semibold">
+          {{ t('colors.public.extracted_title') }}
+        </h2>
+        <p class="mt-1 text-xs text-muted-foreground">
+          {{ t('colors.public.extracted_description') }}
+        </p>
+      </div>
+
+      <pre
+        tabindex="0"
+        class="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs leading-relaxed"
+        data-test="public-extracted-code"
+      >{{ extractedJson }}</pre>
+
+      <div class="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          data-test="public-extracted-copy"
+          @click="copyAll"
+        >
+          <Copy class="size-4" />
+          {{ t('colors.public.copy_all') }}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          data-test="public-extracted-download-json"
+          @click="downloadJson"
+        >
+          <Download class="size-4" />
+          {{ t('colors.public.download_json') }}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          data-test="public-extracted-download-hex"
+          @click="downloadHex"
+        >
+          <Download class="size-4" />
+          {{ t('colors.public.download_hex') }}
+        </Button>
+      </div>
+    </section>
+
+    <section
+      class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+      data-test="public-image"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-sm font-semibold">
+            {{ t('colors.image.title') }}
+          </h2>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {{ t('colors.image.description') }}
+          </p>
         </div>
-
-        <section
-            v-if="testing"
-            class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
-            data-test="public-experiment"
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          :aria-expanded="imageOpen"
+          data-test="public-image-toggle"
+          @click="imageOpen = !imageOpen"
         >
-            <div>
-                <h2 class="text-sm font-semibold">
-                    {{ t('colors.public.experiment_title') }}
-                </h2>
-                <p class="mt-1 text-xs text-muted-foreground">
-                    {{ t('colors.public.experiment_description') }}
-                </p>
-            </div>
+          {{
+            imageOpen
+              ? t('colors.image.close')
+              : t('colors.image.open')
+          }}
+        </Button>
+      </div>
 
-            <div class="flex flex-col gap-1 sm:max-w-xs">
-                <Label for="public-experiment-base">
-                    {{ t('colors.public.experiment_label') }}
-                </Label>
-                <Input
-                    id="public-experiment-base"
-                    ref="baseInputEl"
-                    v-model="baseInput"
-                    autocomplete="off"
-                    spellcheck="false"
-                    data-test="public-experiment-input"
-                />
-                <p
-                    v-if="experimentalScale === null"
-                    class="text-xs text-destructive"
-                    data-test="public-experiment-invalid"
-                >
-                    {{ t('colors.public.experiment_invalid') }}
-                </p>
-            </div>
+      <PaletteImagePanel
+        v-if="imageOpen"
+        :name="palette.name"
+        :colors="hexes"
+      />
+    </section>
 
-            <div
-                v-if="experimentalScale !== null"
-                class="flex h-14 overflow-hidden rounded-lg border border-border"
-                data-test="public-experiment-preview"
-            >
-                <span
-                    v-for="tone in experimentalScale.tones"
-                    :key="tone.tone"
-                    class="h-full flex-1"
-                    :style="{ backgroundColor: tone.hex }"
-                    :title="tone.hex"
-                />
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    data-test="public-experiment-reset"
-                    @click="resetExperiment"
-                >
-                    <RotateCcw class="size-4" />
-                    {{ t('colors.public.experiment_reset') }}
-                </Button>
-                <p
-                    v-if="experimenting"
-                    class="text-xs text-muted-foreground"
-                    data-test="public-experiment-duplicate-hint"
-                >
-                    {{ t('colors.public.experiment_duplicate_hint') }}
-                </p>
-            </div>
-        </section>
-
-        <ExportPanel
-            v-if="frozenScale !== null"
-            :scale="frozenScale"
-            :copy="copyFeedback.copy"
-            data-test="public-export"
-        />
-
-        <section
-            v-else
-            class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
-            data-test="public-extracted-export"
-        >
-            <div>
-                <h2 class="text-sm font-semibold">
-                    {{ t('colors.public.extracted_title') }}
-                </h2>
-                <p class="mt-1 text-xs text-muted-foreground">
-                    {{ t('colors.public.extracted_description') }}
-                </p>
-            </div>
-
-            <pre
-                tabindex="0"
-                class="max-h-80 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs leading-relaxed"
-                data-test="public-extracted-code"
-                >{{ extractedJson }}</pre>
-
-            <div class="flex flex-wrap gap-2">
-                <Button
-                    type="button"
-                    data-test="public-extracted-copy"
-                    @click="copyAll"
-                >
-                    <Copy class="size-4" />
-                    {{ t('colors.public.copy_all') }}
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    data-test="public-extracted-download-json"
-                    @click="downloadJson"
-                >
-                    <Download class="size-4" />
-                    {{ t('colors.public.download_json') }}
-                </Button>
-                <Button
-                    type="button"
-                    variant="outline"
-                    data-test="public-extracted-download-hex"
-                    @click="downloadHex"
-                >
-                    <Download class="size-4" />
-                    {{ t('colors.public.download_hex') }}
-                </Button>
-            </div>
-        </section>
-
-        <section
-            class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
-            data-test="public-image"
-        >
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    <h2 class="text-sm font-semibold">
-                        {{ t('colors.image.title') }}
-                    </h2>
-                    <p class="mt-1 text-xs text-muted-foreground">
-                        {{ t('colors.image.description') }}
-                    </p>
-                </div>
-                <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    :aria-expanded="imageOpen"
-                    data-test="public-image-toggle"
-                    @click="imageOpen = !imageOpen"
-                >
-                    {{
-                        imageOpen
-                            ? t('colors.image.close')
-                            : t('colors.image.open')
-                    }}
-                </Button>
-            </div>
-
-            <PaletteImagePanel
-                v-if="imageOpen"
-                :name="palette.name"
-                :colors="hexes"
-            />
-        </section>
-
-        <CommentThread
-            v-if="comments !== null && commentForm !== null"
-            :palette-id="palette.id"
-            :comments="comments"
-            :can-comment="canComment"
-            :max-length="commentForm.body_max_length"
-        />
-    </article>
+    <CommentThread
+      v-if="comments !== null && commentForm !== null"
+      :palette-id="palette.id"
+      :comments="comments"
+      :can-comment="canComment"
+      :max-length="commentForm.body_max_length"
+    />
+  </article>
 </template>

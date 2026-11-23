@@ -153,6 +153,99 @@ it('exige a secundaria manual e proibe quando automatica', function () {
     expect(layoutSystemStateValidator($valid)->errors()->has('state'))->toBeFalse();
 });
 
+it('aceita secundaria com alpha somente com fundo de composicao opaco', function () {
+    $base = [
+        'secondary' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 0.5],
+        'snapshot' => ['secondarySource' => 'manual'],
+    ];
+
+    expect(layoutSystemStateValidator(LayoutSystemFactory::stateArray($base))
+        ->errors()->has('state'))->toBeTrue();
+
+    $valid = LayoutSystemFactory::stateArray([
+        'secondaryBackground' => ['r' => 255, 'g' => 255, 'b' => 255],
+    ] + $base);
+
+    expect(layoutSystemStateValidator($valid)->errors()->has('state'))->toBeFalse();
+
+    $alphaBackground = LayoutSystemFactory::stateArray([
+        'secondaryBackground' => ['r' => 255, 'g' => 255, 'b' => 255, 'a' => 0.5],
+    ] + $base);
+
+    expect(layoutSystemStateValidator($alphaBackground)->errors()->has('state'))->toBeTrue();
+});
+
+it('aceita a secundaria opaca de linhas antigas com ou sem fundo', function () {
+    $withoutBackground = LayoutSystemFactory::stateArray([
+        'secondary' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 1],
+        'snapshot' => ['secondarySource' => 'manual'],
+    ]);
+
+    expect(layoutSystemStateValidator($withoutBackground)->errors()->has('state'))->toBeFalse();
+
+    $withBackground = LayoutSystemFactory::stateArray([
+        'secondary' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 1],
+        'secondaryBackground' => ['r' => 255, 'g' => 255, 'b' => 255],
+        'snapshot' => ['secondarySource' => 'manual'],
+    ]);
+
+    expect(layoutSystemStateValidator($withBackground)->errors()->has('state'))->toBeFalse();
+});
+
+it('valida a informacao aditiva da secundaria no snapshot', function () {
+    $info = [
+        'original' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 0.5],
+        'effective' => ['r' => 129, 'g' => 130, 'b' => 131, 'a' => 1],
+        'background' => ['r' => 255, 'g' => 255, 'b' => 255],
+    ];
+
+    $valid = LayoutSystemFactory::stateArray([
+        'secondary' => ['r' => 1, 'g' => 2, 'b' => 3, 'a' => 0.5],
+        'secondaryBackground' => ['r' => 255, 'g' => 255, 'b' => 255],
+        'snapshot' => ['secondarySource' => 'manual', 'secondary' => $info],
+    ]);
+
+    expect(layoutSystemStateValidator($valid)->errors()->has('state'))->toBeFalse();
+
+    $withoutBackground = LayoutSystemFactory::stateArray();
+    $withoutBackground['snapshot']['secondary'] = [
+        ...$info,
+        'background' => null,
+    ];
+
+    expect(layoutSystemStateValidator($withoutBackground)
+        ->errors()->has('state'))->toBeTrue();
+
+    $translucentEffective = LayoutSystemFactory::stateArray();
+    $translucentEffective['snapshot']['secondary'] = [
+        ...$info,
+        'effective' => [...$info['effective'], 'a' => 0.5],
+    ];
+
+    expect(layoutSystemStateValidator($translucentEffective)
+        ->errors()->has('state'))->toBeTrue();
+});
+
+it('valida o texto do fundo de composicao nas entradas', function () {
+    $valid = LayoutSystemFactory::stateArray([
+        'inputs' => ['secondaryBackgroundText' => '#ffffff'],
+    ]);
+
+    expect(layoutSystemStateValidator($valid)->errors()->has('state'))->toBeFalse();
+
+    $long = LayoutSystemFactory::stateArray([
+        'inputs' => ['secondaryBackgroundText' => str_repeat('#', 200)],
+    ]);
+
+    expect(layoutSystemStateValidator($long)->errors()->has('state'))->toBeTrue();
+
+    $notString = LayoutSystemFactory::stateArray([
+        'inputs' => ['secondaryBackgroundText' => 123],
+    ]);
+
+    expect(layoutSystemStateValidator($notString)->errors()->has('state'))->toBeTrue();
+});
+
 it('exige fundo quando a seed original tem alpha', function () {
     $state = LayoutSystemFactory::stateArray();
     $state['snapshot']['seed']['original']['a'] = 0.5;
@@ -160,6 +253,23 @@ it('exige fundo quando a seed original tem alpha', function () {
     expect(layoutSystemStateValidator($state)->errors()->has('state'))->toBeTrue();
 
     $state['snapshot']['seed']['background'] = ['r' => 255, 'g' => 255, 'b' => 255];
+
+    expect(layoutSystemStateValidator($state)->errors()->has('state'))->toBeFalse();
+});
+
+it('recusa fundo de composicao da seed com alpha', function () {
+    $state = LayoutSystemFactory::stateArray();
+    $state['snapshot']['seed']['original']['a'] = 0.5;
+    $state['snapshot']['seed']['background'] = [
+        'r' => 255,
+        'g' => 255,
+        'b' => 255,
+        'a' => 0.5,
+    ];
+
+    expect(layoutSystemStateValidator($state)->errors()->has('state'))->toBeTrue();
+
+    $state['snapshot']['seed']['background']['a'] = 1;
 
     expect(layoutSystemStateValidator($state)->errors()->has('state'))->toBeFalse();
 });

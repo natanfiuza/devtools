@@ -3,6 +3,69 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Track Layout Harmonizer: painel semântico, edição e exportações - 2026-11-22
+
+O Layout Harmonizer fecha as seis fases (ADR-145 a ADR-178) em
+`/{locale}/tools/colors/layout-harmonizer`, com o motor e as exportações 100%
+no navegador e só a conta no servidor. A fonte de verdade é
+[docs/colors/layout-harmonizer/](docs/colors/layout-harmonizer/); o aceite
+está em
+[docs/acceptance/LAYOUT-HARMONIZER-FASE-6.md](docs/acceptance/LAYOUT-HARMONIZER-FASE-6.md).
+
+### Adicionado
+
+- **Motor determinístico**: 33 tokens semânticos, quatro estratégias, temas
+  claro/escuro, contraste AA/AAA sem arredondar, gamut, alpha e sugestões de
+  menor delta de L que nunca se aplicam sozinhas (F1/F3, ADR-146 a ADR-158,
+  ADR-167).
+- **Quadro semântico e edição manual**: seed sem padrão, comparação de temas,
+  cópia de HEX/OKLCH, overrides por token/tema com origem (edição, aceite ou
+  bloqueio), restaurar por token/tema/sistema, secundária manual com volta
+  explícita ao automático e snapshot do estado efetivo (F2/F3, ADR-151,
+  ADR-153, ADR-162).
+- **Persistência e ciclo de produto**: tabela própria `layout_systems`,
+  hidratação sem regenerar, modos live/compatível/somente leitura, cota
+  conjunta de 25 com as paletas, privado por padrão, slug nunca reemitido,
+  crédito de origem, rascunho anônimo local, duplicação, protótipos e página
+  pública read-only com SEO/sitemap (F4, ADR-152, ADR-154, ADR-159 a
+  ADR-161, ADR-164, ADR-165, ADR-168 a ADR-174).
+- **Exportações locais**: Markdown de instruções para IA nos cinco idiomas,
+  CSS com fallback HEX/`rgba()` e `@supports` em OKLCH (escopo `:root` ou
+  classe, prefixo validado) e ZIP determinístico com `fflate` (F5, ADR-148,
+  ADR-155, ADR-175 a ADR-177).
+- **Auditoria final (F6, ADR-178)**: secundária manual com alpha e fundo de
+  composição explícito, rejeição explícita de alpha no fundo da seed, teste de
+  concorrência MySQL opt-in, as quatro lacunas de `TESTES.md` cobertas e a
+  operação no RUNBOOK §12 e no `.env.example`.
+
+### Corrigido
+
+- **Teto de croma**: os quatro tokens que excediam o teto do F0 passaram a
+  respeitá-lo (`on-background`, `on-surface` e `on-surface-variant` no claro;
+  `hairline` no escuro), com o motor na versão 2 e as 80 fixtures regeneradas.
+- **Variante de marca**: o passo de 0.12 evita que `primary-variant` e
+  `primary-active` caiam no mesmo HEX.
+- **UI e acessibilidade**: "Regenerar com a versão atual" aparece ao abrir o
+  sistema compatível e pede confirmação; restaurar no editor de token pede
+  confirmação; fechar o diálogo de importação não apaga mais o rascunho, e o
+  anônimo ganhou descarte explícito; campo de cor com id único por editor;
+  erros de exportação ligados por `aria-describedby`/`role="alert"`; selos
+  com texto acessível além do `title`.
+- **Documentação**: `PARAMETROS.md`, `CONTRATO-TECNICO.md`, `DADOS.md`,
+  `TESTES.md`, glossário, SPEC, RUNBOOK e `.env.example` alinhados ao código;
+  os 22 ADRs originais locais foram removidos em favor de `docs/adr/`.
+
+### Operação
+
+- Três migrations aditivas (`layout_systems`, `layout_system_retired_slugs`,
+  `color_tag_layout_system`), sem alterar tabelas existentes e sem backfill.
+- Sistemas salvos com `algorithmVersion` 1 abrem no modo compatível e
+  regeneram para 2 pela própria tela (ADR-169).
+- Rollback é só de aplicação: os dados ficam; um sistema salvo em 2 abre
+  somente leitura no código antigo e volta ao normal com a release nova.
+- Cota e limites em `.env` (`COLORS_LAYOUT_SYSTEM_*` e
+  `COLORS_TAGS_PER_LAYOUT_SYSTEM`), documentados no RUNBOOK §12.
+
 ## Track Colors: picker, gerador, paletas, social e comentários - 2026-11-15
 
 O grupo Colors fecha as oito fases (ADR-091 a ADR-144) em

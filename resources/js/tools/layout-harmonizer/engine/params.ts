@@ -1,14 +1,19 @@
 import type { LayoutStrategy, LayoutTheme } from './types';
 
 /**
- * Tabela numerica aprovada na F1 (2026-11-16).
+ * Tabela numerica aprovada na F1 (2026-11-16), emendada na F6 (2026-11-22).
  *
  * Fonte: docs/colors/layout-harmonizer/PARAMETROS.md, derivada da tabela
  * candidata da F0. Mudar qualquer numero daqui muda o resultado do motor e
  * exige subir `LAYOUT_ALGORITHM_VERSION` e atualizar as fixtures.
+ *
+ * Emenda da F6: o teto de croma do F0 (superficies/textos: C <= 0.012 no
+ * claro e <= 0.020 no escuro) passa a valer para os quatro tokens que o
+ * excediam (`on-background`, `on-surface` e `on-surface-variant` no claro;
+ * `hairline` no escuro). Matte/clareza nao mudam.
  */
 
-export const LAYOUT_PARAMS_VERSION = 1;
+export const LAYOUT_PARAMS_VERSION = 2;
 
 export interface ToneParams {
     l: number;
@@ -43,7 +48,7 @@ export const SURFACE_PARAMS: Record<
     },
     hairline: {
         light: { l: 0.9, c: 0.012 },
-        dark: { l: 0.33, c: 0.022 },
+        dark: { l: 0.33, c: 0.02 },
     },
 };
 
@@ -59,15 +64,15 @@ export const SURFACE_TEXT_PARAMS: Record<
     Record<LayoutTheme, ToneParams>
 > = {
     'on-background': {
-        light: { l: 0.22, c: 0.015 },
+        light: { l: 0.22, c: 0.012 },
         dark: { l: 0.955, c: 0.006 },
     },
     'on-surface': {
-        light: { l: 0.26, c: 0.015 },
+        light: { l: 0.26, c: 0.012 },
         dark: { l: 0.93, c: 0.008 },
     },
     'on-surface-variant': {
-        light: { l: 0.48, c: 0.02 },
+        light: { l: 0.48, c: 0.012 },
         dark: { l: 0.74, c: 0.018 },
     },
 };
@@ -107,10 +112,15 @@ export const FEEDBACK_PARAMS: Record<
 /**
  * Variante de marca: passo maior que hover/active e croma reduzido, para a
  * variante nao se confundir com estado (ADR-157).
+ *
+ * Emenda da F6: o passo era 0.10, igual ao de `active`; com o croma fora do
+ * gamut, os dois tokens chegavam ao mesmo HEX em varias seeds/temas (o corte
+ * igualava o croma). O passo 0.12 mantem a direcao e os limites aprovados e
+ * garante L proprio em relacao aos estados.
  */
 export const VARIANT_DELTA: Record<LayoutTheme, number> = {
-    light: -0.1,
-    dark: 0.1,
+    light: -0.12,
+    dark: 0.12,
 };
 
 export const VARIANT_LIMITS: Record<

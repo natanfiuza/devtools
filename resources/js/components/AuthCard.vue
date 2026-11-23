@@ -13,16 +13,19 @@ defineProps<{
 </script>
 
 <template>
-    <div class="space-y-2 text-center">
-        <h1 class="text-xl font-medium tracking-tight">
-            {{ title }}
-        </h1>
-        <p v-if="description" class="text-sm text-muted-foreground">
-            {{ description }}
-        </p>
-    </div>
+  <div class="space-y-2 text-center">
+    <h1 class="text-xl font-medium tracking-tight">
+      {{ title }}
+    </h1>
+    <p
+      v-if="description"
+      class="text-sm text-muted-foreground"
+    >
+      {{ description }}
+    </p>
+  </div>
 
-    <div class="mt-6 rounded-xl border bg-card p-6">
-        <slot />
-    </div>
+  <div class="mt-6 rounded-xl border bg-card p-6">
+    <slot />
+  </div>
 </template>

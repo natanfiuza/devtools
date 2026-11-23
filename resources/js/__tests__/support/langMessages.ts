@@ -69,7 +69,13 @@ export function layoutExportMessages(): Record<
     return result;
 }
 
+let cached: ExportedMessages | null = null;
+
 export function exportMessages(): ExportedMessages {
+    if (cached !== null) {
+        return cached;
+    }
+
     let raw: string;
 
     try {
@@ -90,7 +96,11 @@ export function exportMessages(): ExportedMessages {
     }
 
     try {
-        return JSON.parse(raw) as ExportedMessages;
+        // O `lang/` nao muda durante a suite: uma leitura por arquivo de teste
+        // evita um spawn de PHP por caso (que estourava os 5 s no suite cheio).
+        cached = JSON.parse(raw) as ExportedMessages;
+
+        return cached;
     } catch (error) {
         throw new Error(
             `Saida invalida do PHP ao ler lang/: ${raw.slice(0, 200)}`,

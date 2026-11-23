@@ -81,7 +81,7 @@ final class LogoCatalog
             return null;
         }
 
-        if (preg_match('/<path\b[^>]*\bd="([^"]+)"/i', $svg, $path) !== 1) {
+        if (preg_match_all('/<path\b([^>]*)>/i', $svg, $pathMatches) < 1) {
             return null;
         }
 
@@ -93,11 +93,34 @@ final class LogoCatalog
             }
         }
 
+        $paths = [];
+
+        foreach ($pathMatches[1] as $attributes) {
+            if (preg_match('/\bd="([^"]+)"/i', $attributes, $dMatch) !== 1) {
+                return null;
+            }
+
+            $paths[] = new LogoPath(
+                d: $dMatch[1],
+                fillRule: $this->extractRule($attributes, 'fill-rule'),
+                clipRule: $this->extractRule($attributes, 'clip-rule'),
+            );
+        }
+
         return new Logo(
             slug: $slug,
             name: (string) ($definition['name'] ?? $slug),
             viewBox: $viewBox[1],
-            paths: [new LogoPath($path[1])],
+            paths: $paths,
         );
+    }
+
+    private function extractRule(string $attributes, string $attribute): ?string
+    {
+        if (preg_match('/\b'.preg_quote($attribute, '/').'="(nonzero|evenodd)"/i', $attributes, $match) !== 1) {
+            return null;
+        }
+
+        return strtolower($match[1]);
     }
 }

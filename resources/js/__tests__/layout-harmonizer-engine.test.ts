@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { formatHex, parseColor, rgbToOklch, type Rgba } from '@/lib/color';
+import {
+    compositeOver,
+    formatHex,
+    parseColor,
+    rgbToOklch,
+    type Rgba,
+} from '@/lib/color';
 import {
     ACHROMATIC_CHROMA,
     LAYOUT_ALGORITHM_VERSION,
     LAYOUT_PARAMS_VERSION,
     LAYOUT_SCHEMA_VERSION,
+    LAYOUT_STRATEGIES,
     LAYOUT_TOKEN_IDS,
     LAYOUT_TOKEN_SPECS,
     LayoutEngineError,
@@ -56,8 +63,8 @@ describe('catalogo de tokens', () => {
 
     it('expoe as versoes do contrato e da tabela', () => {
         expect(LAYOUT_SCHEMA_VERSION).toBe(1);
-        expect(LAYOUT_ALGORITHM_VERSION).toBe(1);
-        expect(LAYOUT_PARAMS_VERSION).toBe(1);
+        expect(LAYOUT_ALGORITHM_VERSION).toBe(2);
+        expect(LAYOUT_PARAMS_VERSION).toBe(2);
     });
 
     it('conhece apenas as quatro estrategias', () => {
@@ -183,7 +190,7 @@ describe('geracao', () => {
         const result = generateLayoutSystem({
             seed: BLUE,
             strategy: 'triadic',
-            secondary: { r: green.r, g: green.g, b: green.b },
+            secondary: green,
         });
 
         expect(result.secondarySource).toBe('manual');
@@ -218,5 +225,149 @@ describe('geracao', () => {
                 'seed-alpha-without-background',
             );
         }
+    });
+});
+
+describe('secundaria com alpha', () => {
+    const translucent = colorOf('rgba(16, 185, 129, 0.5)');
+    const white = { r: 255, g: 255, b: 255 };
+
+    it('recusa alpha sem fundo explicito', () => {
+        try {
+            generateLayoutSystem({
+                seed: BLUE,
+                strategy: 'triadic',
+                secondary: translucent,
+            });
+            throw new Error('deveria falhar');
+        } catch (error) {
+            expect(error).toBeInstanceOf(LayoutEngineError);
+            expect((error as LayoutEngineError).code).toBe(
+                'secondary-alpha-without-background',
+            );
+        }
+    });
+
+    it('compoe sobre o fundo e deriva da cor efetiva', () => {
+        const result = generateLayoutSystem({
+            seed: BLUE,
+            strategy: 'triadic',
+            secondary: translucent,
+            secondaryBackground: white,
+        });
+        const effective = { ...compositeOver(translucent, white), a: 1 };
+
+        expect(result.secondarySource).toBe('manual');
+        expect(result.secondary).toEqual({
+            original: translucent,
+            effective,
+            background: white,
+        });
+
+        for (const theme of ['light', 'dark'] as const) {
+            const token = result.themes[theme].tokens.secondary;
+
+            expect(token.rgba).toEqual(effective);
+            expect(token.hex).toBe(formatHex(effective));
+            expect(token.source).toBe('manual');
+        }
+    });
+
+    it('ignora o fundo quando a secundaria ja e opaca', () => {
+        const green = colorOf('#10b981');
+        const result = generateLayoutSystem({
+            seed: BLUE,
+            strategy: 'triadic',
+            secondary: green,
+            secondaryBackground: { r: 0, g: 0, b: 0 },
+        });
+
+        expect(result.secondary).toEqual({
+            original: green,
+            effective: { ...green, a: 1 },
+            background: null,
+        });
+    });
+
+    it('nao inventa composicao para a secundaria automatica', () => {
+        const result = generateLayoutSystem({
+            seed: BLUE,
+            strategy: 'triadic',
+        });
+
+        expect(result.secondary).toBeNull();
+    });
+});
+
+describe('semantica fixa do quadro', () => {
+    it('mantem o feedback identico entre seeds diferentes', () => {
+        for (const strategy of LAYOUT_STRATEGIES as readonly LayoutStrategy[]) {
+            const first = generateLayoutSystem({ seed: BLUE, strategy });
+            const second = generateLayoutSystem({
+                seed: colorOf('#ef4444'),
+                strategy,
+            });
+
+            for (const theme of ['light', 'dark'] as const) {
+                for (const id of [
+                    'error',
+                    'success',
+                    'warning',
+                    'info',
+                ] as const) {
+                    expect(
+                        first.themes[theme].tokens[id].hex,
+                        `${strategy} ${theme} ${id}`,
+                    ).toBe(second.themes[theme].tokens[id].hex);
+                }
+            }
+        }
+    });
+
+    it('distingue feedback, hover, active e variante em cada tema e estrategia', () => {
+        for (const strategy of LAYOUT_STRATEGIES as readonly LayoutStrategy[]) {
+            const result = generateLayoutSystem({ seed: BLUE, strategy });
+
+            for (const theme of ['light', 'dark'] as const) {
+                const tokens = result.themes[theme].tokens;
+                const brand = [
+                    tokens.primary.hex,
+                    tokens['primary-hover'].hex,
+                    tokens['primary-active'].hex,
+                    tokens['primary-variant'].hex,
+                ];
+                const feedback = [
+                    tokens.error.hex,
+                    tokens.success.hex,
+                    tokens.warning.hex,
+                    tokens.info.hex,
+                ];
+
+                expect(new Set(brand).size, `${strategy} ${theme}`).toBe(4);
+                expect(new Set(feedback).size, `${strategy} ${theme}`).toBe(4);
+            }
+        }
+    });
+
+    it('so troca o Primary da seed quando um override e aplicado', () => {
+        const baseline = generateLayoutSystem({
+            seed: BLUE,
+            strategy: 'analogous',
+        });
+
+        for (const theme of ['light', 'dark'] as const) {
+            expect(baseline.themes[theme].tokens.primary.hex).toBe(
+                formatHex(BLUE),
+            );
+        }
+
+        const overridden = generateLayoutSystem({
+            seed: BLUE,
+            strategy: 'analogous',
+            overrides: { light: { primary: { r: 255, g: 0, b: 0 } } },
+        });
+
+        expect(overridden.themes.light.tokens.primary.hex).toBe('#ff0000');
+        expect(overridden.themes.dark.tokens.primary.hex).toBe(formatHex(BLUE));
     });
 });

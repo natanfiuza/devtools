@@ -42,7 +42,7 @@ final class ParseCustomLogoUpload
             return $this->parser->parse($contents, (int) $file->getSize());
         } catch (InvalidCustomLogoException $exception) {
             throw ValidationException::withMessages([
-                'logo' => __('validation.custom_logo.'.$exception->reason),
+                'logo' => __('validation.custom_logo.'.$exception->reason, $exception->context),
             ]);
         }
     }

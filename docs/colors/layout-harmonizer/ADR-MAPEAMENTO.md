@@ -86,6 +86,13 @@ implementada e nenhum arquivo local seja removido sem revisão.
   validados, comentários sanitizados) e 177 (estrutura do Markdown, idioma,
   avisos e origem pública). Os originais locais dos dois copiados seguem em
   `adr/` até o aceite da fase.
+- **2026-11-22 (F6)**: novo 178 (auditoria final e entrega: teto de croma e
+  passo da variante na versão 2, Accent fechado pelo TOKENS/ADR-163, secundária
+  com alpha, rejeição do alpha no fundo da seed, teste de concorrência opt-in
+  e remoção dos originais). No aceite, **os 22 originais locais de `adr/`
+  foram removidos**: o conteúdo (com as emendas de implementação) está
+  integralmente em `docs/adr/ADR-145` a `ADR-178`, que passa a ser a fonte
+  única.
 
 ## Contagem por fase
 
@@ -96,4 +103,7 @@ implementada e nenhum arquivo local seja removido sem revisão.
 | F3 | 151 (retomada de 158; novo 167) |
 | F4 | 152, 154, 159, 160, 161, 164, 165; novos 168–174 |
 | F5 | 148, 155; novos 175–177 |
+| F6 | novo 178; remoção dos 22 originais locais |
 | F0 | — (somente este mapeamento) |
+
+**Total final**: 34 ADRs no track (145–178), todos em `docs/adr/`.

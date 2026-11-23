@@ -33,103 +33,109 @@ const passwordInput = useTemplateRef('passwordInput');
 </script>
 
 <template>
-    <div class="space-y-6">
-        <Heading
-            variant="small"
-            :title="t('account.delete.title')"
-            :description="t('account.delete.description')"
-        />
-        <div
-            class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
-        >
-            <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-                <p class="font-medium">
-                    {{ t('account.delete.warning_title') }}
-                </p>
-                <p class="text-sm">
-                    {{ t('account.delete.warning') }}
-                </p>
+  <div class="space-y-6">
+    <Heading
+      variant="small"
+      :title="t('account.delete.title')"
+      :description="t('account.delete.description')"
+    />
+    <div
+      class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
+    >
+      <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
+        <p class="font-medium">
+          {{ t('account.delete.warning_title') }}
+        </p>
+        <p class="text-sm">
+          {{ t('account.delete.warning') }}
+        </p>
+      </div>
+      <Dialog>
+        <DialogTrigger as-child>
+          <Button
+            variant="destructive"
+            data-test="delete-user-button"
+          >
+            {{ t('account.delete.action') }}
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <Form
+            v-slot="{ errors, processing, reset, clearErrors }"
+            v-bind="ProfileController.destroy.form()"
+            reset-on-success
+            :options="{
+              preserveScroll: true,
+            }"
+            class="space-y-6"
+            @error="() => passwordInput?.focus()"
+          >
+            <DialogHeader class="space-y-3">
+              <DialogTitle>
+                {{ t('account.delete.dialog_title') }}
+              </DialogTitle>
+              <DialogDescription>
+                {{ t('account.delete.dialog_description') }}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div class="grid gap-2">
+              <Label
+                for="password"
+                class="sr-only"
+              >
+                {{ t('account.delete.password') }}
+              </Label>
+              <PasswordInput
+                id="password"
+                ref="passwordInput"
+                name="password"
+                :placeholder="
+                  t('account.delete.password_placeholder')
+                "
+              />
+              <InputError :message="errors.password" />
             </div>
-            <Dialog>
-                <DialogTrigger as-child>
-                    <Button
-                        variant="destructive"
-                        data-test="delete-user-button"
-                    >
-                        {{ t('account.delete.action') }}
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <Form
-                        v-slot="{ errors, processing, reset, clearErrors }"
-                        v-bind="ProfileController.destroy.form()"
-                        reset-on-success
-                        :options="{
-                            preserveScroll: true,
-                        }"
-                        class="space-y-6"
-                        @error="() => passwordInput?.focus()"
-                    >
-                        <DialogHeader class="space-y-3">
-                            <DialogTitle>
-                                {{ t('account.delete.dialog_title') }}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {{ t('account.delete.dialog_description') }}
-                            </DialogDescription>
-                        </DialogHeader>
 
-                        <div class="grid gap-2">
-                            <Label for="password" class="sr-only">
-                                {{ t('account.delete.password') }}
-                            </Label>
-                            <PasswordInput
-                                id="password"
-                                ref="passwordInput"
-                                name="password"
-                                :placeholder="
-                                    t('account.delete.password_placeholder')
-                                "
-                            />
-                            <InputError :message="errors.password" />
-                        </div>
+            <DialogFooter class="gap-2">
+              <Button
+                variant="outline"
+                as-child
+              >
+                <a
+                  :href="profile.export.url()"
+                  data-test="delete-download-button"
+                >
+                  {{ t('account.delete.download') }}
+                </a>
+              </Button>
 
-                        <DialogFooter class="gap-2">
-                            <Button variant="outline" as-child>
-                                <a
-                                    :href="profile.export.url()"
-                                    data-test="delete-download-button"
-                                >
-                                    {{ t('account.delete.download') }}
-                                </a>
-                            </Button>
+              <DialogClose as-child>
+                <Button
+                  variant="secondary"
+                  @click="
+                    () => {
+                      clearErrors();
+                      reset();
+                    }
+                  "
+                >
+                  {{ t('account.delete.cancel') }}
+                </Button>
+              </DialogClose>
 
-                            <DialogClose as-child>
-                                <Button
-                                    variant="secondary"
-                                    @click="
-                                        () => {
-                                            clearErrors();
-                                            reset();
-                                        }
-                                    "
-                                >
-                                    {{ t('account.delete.cancel') }}
-                                </Button>
-                            </DialogClose>
-
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                :disabled="processing"
-                                data-test="confirm-delete-user-button"
-                            >
-                                {{ t('account.delete.confirm') }}
-                            </Button>
-                        </DialogFooter>
-                    </Form>
-                </DialogContent>
-            </Dialog>
-        </div>
+              <Button
+                type="submit"
+                variant="destructive"
+                :disabled="processing"
+                data-test="confirm-delete-user-button"
+              >
+                {{ t('account.delete.confirm') }}
+              </Button>
+            </DialogFooter>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
+  </div>
 </template>

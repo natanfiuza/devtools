@@ -1,5 +1,5 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyTranslations, createI18nInstance } from '@/lib/i18n';
 import { parseColor } from '@/lib/color';
@@ -193,7 +193,7 @@ describe('bloqueio e restaurar', () => {
         expect(editor('token-editor-restore').attributes('disabled')).toBe('');
     });
 
-    it('restaura uma edicao e fecha', async () => {
+    it('pede confirmacao antes de restaurar e so entao fecha', async () => {
         const { wrapper, props } = mountCell({ edited: true });
 
         await openEditor(wrapper);
@@ -205,8 +205,66 @@ describe('bloqueio e restaurar', () => {
         await editor('token-editor-restore').trigger('click');
         await flushPromises();
 
+        // Nada foi restaurado ainda: o override e o bloqueio so saem no confirm.
+        expect(props.restoreColor).not.toHaveBeenCalled();
+        expect(editor('token-restore-confirm').exists()).toBe(true);
+
+        await editor('token-restore-cancel').trigger('click');
+        await flushPromises();
+
+        expect(props.restoreColor).not.toHaveBeenCalled();
+        // O bloco de confirmacao some junto com o cancelamento.
+        expect(
+            document.body.querySelector('[data-test="token-restore-confirm"]'),
+        ).toBeNull();
+        expect(editorElement()).not.toBeNull();
+
+        await editor('token-editor-restore').trigger('click');
+        await flushPromises();
+        await editor('token-restore-confirm-button').trigger('click');
+        await flushPromises();
+
         expect(props.restoreColor).toHaveBeenCalledTimes(1);
         expect(editorElement()).toBeNull();
+    });
+
+    it('usa um id unico quando dois editores estao abertos', async () => {
+        // `useId` e por aplicacao Vue, entao as duas celulas vivem no mesmo
+        // app - e assim que dois editores ficam abertos na tela de verdade.
+        const shared = {
+            token: token(),
+            purpose: 'Finalidade do token',
+            checks: [],
+            copy: vi.fn(async () => true),
+        };
+
+        const parent = defineComponent({
+            render: () =>
+                h('div', [h(TokenCell, shared), h(TokenCell, shared)]),
+        });
+
+        const wrapper = mount(parent, {
+            global: { plugins: [i18n()] },
+            attachTo: document.body,
+        });
+
+        const buttons = wrapper.findAll('[data-test="token-edit"]');
+
+        expect(buttons).toHaveLength(2);
+
+        await buttons[0]!.trigger('click');
+        await buttons[1]!.trigger('click');
+        await flushPromises();
+
+        const ids = Array.from(
+            document.body.querySelectorAll<HTMLInputElement>(
+                '[data-test="token-color-input"]',
+            ),
+        ).map((input) => input.id);
+
+        expect(ids).toHaveLength(2);
+        expect(new Set(ids).size).toBe(2);
+        expect(ids[0]).toContain('layout-token-color-value-');
     });
 });
 

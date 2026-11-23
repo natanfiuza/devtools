@@ -26,43 +26,43 @@ const tints = computed(() => tintsOf(props.rgba, 10));
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <section class="rounded-xl border bg-card p-4">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.html-color-picker.shades.title') }}
-            </h2>
-            <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('tools.html-color-picker.shades.description') }}
-            </p>
-            <div class="mt-3 grid grid-cols-5 gap-1">
-                <SwatchButton
-                    v-for="color in shades"
-                    :key="`shade-${formatHex(color)}`"
-                    :color="color"
-                    :label="formatHex(color)"
-                    caption
-                    @select="emit('apply', color)"
-                />
-            </div>
-        </section>
+  <div class="flex flex-col gap-4">
+    <section class="rounded-xl border bg-card p-4">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.html-color-picker.shades.title') }}
+      </h2>
+      <p class="mt-1 text-xs text-muted-foreground">
+        {{ t('tools.html-color-picker.shades.description') }}
+      </p>
+      <div class="mt-3 grid grid-cols-5 gap-1">
+        <SwatchButton
+          v-for="color in shades"
+          :key="`shade-${formatHex(color)}`"
+          :color="color"
+          :label="formatHex(color)"
+          caption
+          @select="emit('apply', color)"
+        />
+      </div>
+    </section>
 
-        <section class="rounded-xl border bg-card p-4">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.html-color-picker.tints.title') }}
-            </h2>
-            <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('tools.html-color-picker.tints.description') }}
-            </p>
-            <div class="mt-3 grid grid-cols-5 gap-1">
-                <SwatchButton
-                    v-for="color in tints"
-                    :key="`tint-${formatHex(color)}`"
-                    :color="color"
-                    :label="formatHex(color)"
-                    caption
-                    @select="emit('apply', color)"
-                />
-            </div>
-        </section>
-    </div>
+    <section class="rounded-xl border bg-card p-4">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.html-color-picker.tints.title') }}
+      </h2>
+      <p class="mt-1 text-xs text-muted-foreground">
+        {{ t('tools.html-color-picker.tints.description') }}
+      </p>
+      <div class="mt-3 grid grid-cols-5 gap-1">
+        <SwatchButton
+          v-for="color in tints"
+          :key="`tint-${formatHex(color)}`"
+          :color="color"
+          :label="formatHex(color)"
+          caption
+          @select="emit('apply', color)"
+        />
+      </div>
+    </section>
+  </div>
 </template>

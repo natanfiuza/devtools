@@ -167,41 +167,44 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="space-y-4" data-test="layout-harmonizer-tool">
-        <p class="text-sm text-muted-foreground">
-            {{ t('tools.layout-harmonizer.intro') }}
-        </p>
+  <div
+    class="space-y-4"
+    data-test="layout-harmonizer-tool"
+  >
+    <p class="text-sm text-muted-foreground">
+      {{ t('tools.layout-harmonizer.intro') }}
+    </p>
 
-        <LayoutSystemOriginBanner
-            v-if="origin !== null && !originRemoved"
-            :origin="origin"
-            @remove="removeOrigin"
-        />
+    <LayoutSystemOriginBanner
+      v-if="origin !== null && !originRemoved"
+      :origin="origin"
+      @remove="removeOrigin"
+    />
 
-        <LayoutHarmonizerPanel
-            ref="panel"
-            :key="panelKey"
-            :state="state"
-            :seed-text="seedText()"
-            :authenticated="authenticated"
-            :limits="limits"
-            :quota="quota"
-            :account-tags="tags"
-            :origin-palette-id="originRemoved ? null : originId"
-            :origin-name="originRemoved ? null : (origin?.name ?? null)"
-            :export-messages="exportMessages"
-            :export-limits="exportLimits"
-            :export-origin="originRemoved ? null : origin"
-            :guard="authenticated"
-            @regenerated="onRegenerated"
-        />
+    <LayoutHarmonizerPanel
+      ref="panel"
+      :key="panelKey"
+      :state="state"
+      :seed-text="seedText()"
+      :authenticated="authenticated"
+      :limits="limits"
+      :quota="quota"
+      :account-tags="tags"
+      :origin-palette-id="originRemoved ? null : originId"
+      :origin-name="originRemoved ? null : (origin?.name ?? null)"
+      :export-messages="exportMessages"
+      :export-limits="exportLimits"
+      :export-origin="originRemoved ? null : origin"
+      :guard="authenticated"
+      @regenerated="onRegenerated"
+    />
 
-        <ImportDraftDialog
-            v-if="authenticated"
-            :open="draftOpen"
-            :supported="storedDraft?.supported ?? false"
-            @import="importDraft"
-            @discard="discardDraft"
-        />
-    </div>
+    <ImportDraftDialog
+      v-if="authenticated"
+      :open="draftOpen"
+      :supported="storedDraft?.supported ?? false"
+      @import="importDraft"
+      @discard="discardDraft"
+    />
+  </div>
 </template>

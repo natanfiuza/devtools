@@ -88,7 +88,7 @@ return [
             'state' => 1,
             'schema' => 1,
             'snapshot' => 1,
-            'algorithm' => 1,
+            'algorithm' => 2,
             'suggestions' => 1,
         ],
     ],

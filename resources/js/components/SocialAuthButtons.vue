@@ -60,24 +60,27 @@ function buttonText(provider: Provider): string {
 </script>
 
 <template>
-    <div class="grid gap-2">
-        <Button
-            v-for="provider in providers"
-            :key="provider"
-            variant="outline"
-            class="w-full"
-            as-child
+  <div class="grid gap-2">
+    <Button
+      v-for="provider in providers"
+      :key="provider"
+      variant="outline"
+      class="w-full"
+      as-child
+    >
+      <a
+        :href="buttonUrl(provider)"
+        :data-test="`social-${provider}`"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          class="size-4 fill-current"
+          aria-hidden="true"
         >
-            <a :href="buttonUrl(provider)" :data-test="`social-${provider}`">
-                <svg
-                    viewBox="0 0 24 24"
-                    class="size-4 fill-current"
-                    aria-hidden="true"
-                >
-                    <path :d="marks[provider]" />
-                </svg>
-                {{ buttonText(provider) }}
-            </a>
-        </Button>
-    </div>
+          <path :d="marks[provider]" />
+        </svg>
+        {{ buttonText(provider) }}
+      </a>
+    </Button>
+  </div>
 </template>

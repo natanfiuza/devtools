@@ -1,4 +1,4 @@
-import type { Rgb } from '@/lib/color';
+import type { Rgb, Rgba } from '@/lib/color';
 import type { LayoutSystemVisibility } from '@/types/layoutSystem';
 import type { LayoutStrategy } from '../engine';
 import type { LayoutSnapshot } from './snapshot';
@@ -32,7 +32,9 @@ export interface LayoutSystemDetails {
 /** O que o workspace entrega ao modal. */
 export interface LayoutSystemSaveSource {
     inputs: LayoutStateInputsV1;
-    secondary: Rgb | null;
+    secondary: Rgba | null;
+    /** Fundo de composicao da secundaria com alpha (emenda da F6). */
+    secondaryBackground?: Rgb | null;
     snapshot: LayoutSnapshot;
 }
 
@@ -126,6 +128,7 @@ export function layoutSystemPayload(
             source.inputs,
             source.secondary,
             source.snapshot,
+            source.secondaryBackground ?? null,
         ),
     };
 

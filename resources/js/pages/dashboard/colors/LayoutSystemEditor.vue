@@ -169,176 +169,184 @@ function onRegenerated(next: LayoutSystemStateV1): void {
 </script>
 
 <template>
-    <Head :title="system.name" />
+  <Head :title="system.name" />
 
-    <div class="flex flex-col gap-6" data-test="layout-system-editor">
-        <Link
-            :href="systems.index.url()"
-            class="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            data-test="layout-system-editor-back"
+  <div
+    class="flex flex-col gap-6"
+    data-test="layout-system-editor"
+  >
+    <Link
+      :href="systems.index.url()"
+      class="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      data-test="layout-system-editor-back"
+    >
+      <ArrowLeft class="size-4" />
+      {{ t('colors.systems.editor.back') }}
+    </Link>
+
+    <header class="flex flex-wrap items-start justify-between gap-4">
+      <div class="flex min-w-0 flex-col gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2
+            class="text-xl font-semibold"
+            data-test="layout-system-editor-name"
+          >
+            {{ system.name }}
+          </h2>
+          <Badge variant="outline">
+            {{ strategyLabel }}
+          </Badge>
+          <Badge variant="secondary">
+            {{
+              system.visibility === 'public'
+                ? t('colors.list.badge_public')
+                : t('colors.list.badge_private')
+            }}
+          </Badge>
+          <Badge
+            v-if="system.archived"
+            variant="destructive"
+          >
+            {{ t('colors.list.badge_archived') }}
+          </Badge>
+        </div>
+
+        <p
+          class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
         >
-            <ArrowLeft class="size-4" />
-            {{ t('colors.systems.editor.back') }}
+          <span data-test="layout-system-editor-usage">
+            {{
+              system.duplications_count === 0
+                ? t('colors.list.usage_zero')
+                : t('colors.list.usage', {
+                  count: system.duplications_count,
+                })
+            }}
+          </span>
+          <span data-test="layout-system-editor-tokens">
+            {{
+              t('colors.systems.list.tokens_count', {
+                count: system.tokens_count,
+              })
+            }}
+          </span>
+          <span v-if="formattedDate !== null">
+            {{
+              t('colors.list.updated_at', { date: formattedDate })
+            }}
+          </span>
+        </p>
+
+        <Link
+          v-if="publicUrl !== null"
+          :href="publicUrl"
+          class="w-fit text-sm underline-offset-4 hover:underline"
+          data-test="layout-system-editor-public"
+        >
+          {{ t('colors.systems.editor.public_link') }}
         </Link>
 
-        <header class="flex flex-wrap items-start justify-between gap-4">
-            <div class="flex min-w-0 flex-col gap-2">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h2
-                        class="text-xl font-semibold"
-                        data-test="layout-system-editor-name"
-                    >
-                        {{ system.name }}
-                    </h2>
-                    <Badge variant="outline">{{ strategyLabel }}</Badge>
-                    <Badge variant="secondary">
-                        {{
-                            system.visibility === 'public'
-                                ? t('colors.list.badge_public')
-                                : t('colors.list.badge_private')
-                        }}
-                    </Badge>
-                    <Badge v-if="system.archived" variant="destructive">
-                        {{ t('colors.list.badge_archived') }}
-                    </Badge>
-                </div>
-
-                <p
-                    class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-                >
-                    <span data-test="layout-system-editor-usage">
-                        {{
-                            system.duplications_count === 0
-                                ? t('colors.list.usage_zero')
-                                : t('colors.list.usage', {
-                                      count: system.duplications_count,
-                                  })
-                        }}
-                    </span>
-                    <span data-test="layout-system-editor-tokens">
-                        {{
-                            t('colors.systems.list.tokens_count', {
-                                count: system.tokens_count,
-                            })
-                        }}
-                    </span>
-                    <span v-if="formattedDate !== null">
-                        {{
-                            t('colors.list.updated_at', { date: formattedDate })
-                        }}
-                    </span>
-                </p>
-
-                <Link
-                    v-if="publicUrl !== null"
-                    :href="publicUrl"
-                    class="w-fit text-sm underline-offset-4 hover:underline"
-                    data-test="layout-system-editor-public"
-                >
-                    {{ t('colors.systems.editor.public_link') }}
-                </Link>
-
-                <p
-                    v-if="!system.archived && mode === 'readonly'"
-                    class="max-w-2xl text-sm text-muted-foreground"
-                    data-test="layout-system-editor-readonly"
-                >
-                    {{ t('tools.layout-harmonizer.lifecycle.readonly_notice') }}
-                </p>
-            </div>
-
-            <div class="flex flex-col items-end gap-2">
-                <Button
-                    v-if="!system.archived"
-                    type="button"
-                    size="sm"
-                    :disabled="readOnly"
-                    data-test="layout-system-editor-save"
-                    @click="openSave"
-                >
-                    {{ t('colors.editor.save') }}
-                </Button>
-
-                <LayoutSystemActions
-                    :system="system"
-                    :show-edit="false"
-                    @delete="deleting = true"
-                />
-            </div>
-        </header>
-
-        <section
-            v-if="system.archived"
-            class="flex flex-col gap-4 rounded-xl border border-dashed border-border p-4"
-            data-test="layout-system-editor-archived"
+        <p
+          v-if="!system.archived && mode === 'readonly'"
+          class="max-w-2xl text-sm text-muted-foreground"
+          data-test="layout-system-editor-readonly"
         >
-            <div>
-                <h3 class="text-sm font-semibold">
-                    {{ t('colors.systems.editor.archived_title') }}
-                </h3>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    {{ t('colors.systems.editor.archived_description') }}
-                </p>
-            </div>
+          {{ t('tools.layout-harmonizer.lifecycle.readonly_notice') }}
+        </p>
+      </div>
 
-            <ThemeComparison
-                :light="boards.light"
-                :dark="boards.dark"
-                :copy="copyFeedback.copy"
-                :editable="false"
-            />
-        </section>
+      <div class="flex flex-col items-end gap-2">
+        <Button
+          v-if="!system.archived"
+          type="button"
+          size="sm"
+          :disabled="readOnly"
+          data-test="layout-system-editor-save"
+          @click="openSave"
+        >
+          {{ t('colors.editor.save') }}
+        </Button>
 
-        <LayoutExportPanel
-            v-if="system.archived"
-            :state="state"
-            :name="system.name"
-            authenticated
-            :mode="mode"
-            read-only
-            :origin="exportOrigin"
-            :export-messages="exportMessages"
-            :export-limits="exportLimits"
+        <LayoutSystemActions
+          :system="system"
+          :show-edit="false"
+          @delete="deleting = true"
         />
+      </div>
+    </header>
 
-        <template v-else>
-            <LayoutSystemMetaForm
-                v-model:name="name"
-                v-model:description="description"
-                v-model:visibility="visibility"
-                v-model:tags="tags"
-                :limits="form"
-                :suggestions="props.tags"
-            />
+    <section
+      v-if="system.archived"
+      class="flex flex-col gap-4 rounded-xl border border-dashed border-border p-4"
+      data-test="layout-system-editor-archived"
+    >
+      <div>
+        <h3 class="text-sm font-semibold">
+          {{ t('colors.systems.editor.archived_title') }}
+        </h3>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ t('colors.systems.editor.archived_description') }}
+        </p>
+      </div>
 
-            <LayoutHarmonizerPanel
-                ref="panel"
-                :key="panelKey"
-                :state="state"
-                authenticated
-                save-mode="update"
-                :system-id="system.id"
-                :initial-details="details"
-                :limits="form"
-                :quota="limits"
-                :account-tags="props.tags"
-                guard
-                :show-save-button="false"
-                :extra-dirty="metaDirty"
-                :export-messages="exportMessages"
-                :export-limits="exportLimits"
-                :export-origin="exportOrigin"
-                @regenerated="onRegenerated"
-            />
+      <ThemeComparison
+        :light="boards.light"
+        :dark="boards.dark"
+        :copy="copyFeedback.copy"
+        :editable="false"
+      />
+    </section>
 
-            <LayoutSystemPrototypePanel :state="state" />
-        </template>
+    <LayoutExportPanel
+      v-if="system.archived"
+      :state="state"
+      :name="system.name"
+      authenticated
+      :mode="mode"
+      read-only
+      :origin="exportOrigin"
+      :export-messages="exportMessages"
+      :export-limits="exportLimits"
+    />
 
-        <DeleteLayoutSystemDialog
-            :open="deleting"
-            :system-id="system.id"
-            :system-name="system.name"
-            @close="deleting = false"
-        />
-    </div>
+    <template v-else>
+      <LayoutSystemMetaForm
+        v-model:name="name"
+        v-model:description="description"
+        v-model:visibility="visibility"
+        v-model:tags="tags"
+        :limits="form"
+        :suggestions="props.tags"
+      />
+
+      <LayoutHarmonizerPanel
+        ref="panel"
+        :key="panelKey"
+        :state="state"
+        authenticated
+        save-mode="update"
+        :system-id="system.id"
+        :initial-details="details"
+        :limits="form"
+        :quota="limits"
+        :account-tags="props.tags"
+        guard
+        :show-save-button="false"
+        :extra-dirty="metaDirty"
+        :export-messages="exportMessages"
+        :export-limits="exportLimits"
+        :export-origin="exportOrigin"
+        @regenerated="onRegenerated"
+      />
+
+      <LayoutSystemPrototypePanel :state="state" />
+    </template>
+
+    <DeleteLayoutSystemDialog
+      :open="deleting"
+      :system-id="system.id"
+      :system-name="system.name"
+      @close="deleting = false"
+    />
+  </div>
 </template>

@@ -144,6 +144,20 @@ describe('alpha e fundo de composicao', () => {
         expect(state.backgroundInvalid.value).toBe(false);
     });
 
+    it('recusa fundo de composicao da seed com alpha', async () => {
+        const state = useLayoutSystem();
+
+        state.picker.setFromText('rgba(59, 130, 246, 0.6)');
+        await flush();
+        state.backgroundText.value = 'rgba(255, 255, 255, 0.5)';
+        await flush();
+
+        expect(state.backgroundAlpha.value).toBe(true);
+        expect(state.backgroundInvalid.value).toBe(true);
+        expect(state.result.value).toBeNull();
+        expect(state.notice.value).toBe('seed-background-alpha-invalid');
+    });
+
     it('marca o fundo invalido e mantem o ultimo quadro', async () => {
         const state = useLayoutSystem();
 
@@ -449,6 +463,50 @@ describe('secundaria manual (F3)', () => {
         expect(state.result.value!.themes.light.tokens.secondary.hex).not.toBe(
             '#00ff00',
         );
+    });
+
+    it('exige fundo para a secundaria com alpha e compoe sobre ele', async () => {
+        const state = useLayoutSystem();
+
+        state.picker.setFromText('#3b82f6');
+        await flush();
+
+        state.secondaryText.value = 'rgba(0, 255, 0, 0.5)';
+        await flush();
+
+        expect(state.secondaryNeedsBackground.value).toBe(true);
+        expect(state.result.value?.secondarySource).toBe('auto');
+        expect(state.notice.value).toBe('secondary-alpha-without-background');
+
+        state.secondaryBackgroundText.value = '#ffffff';
+        await flush();
+
+        expect(state.notice.value).toBeNull();
+        expect(state.result.value!.secondary).toMatchObject({
+            original: { r: 0, g: 255, b: 0, a: 0.5 },
+            background: { r: 255, g: 255, b: 255 },
+        });
+
+        for (const theme of ['light', 'dark'] as const) {
+            expect(
+                state.result.value!.themes[theme].tokens.secondary.rgba.a,
+            ).toBe(1);
+        }
+    });
+
+    it('recusa fundo de composicao da secundaria com alpha', async () => {
+        const state = useLayoutSystem();
+
+        state.picker.setFromText('#3b82f6');
+        await flush();
+        state.secondaryText.value = 'rgba(0, 255, 0, 0.5)';
+        await flush();
+        state.secondaryBackgroundText.value = 'rgba(255, 255, 255, 0.5)';
+        await flush();
+
+        expect(state.secondaryBackgroundAlpha.value).toBe(true);
+        expect(state.secondaryBackgroundInvalid.value).toBe(true);
+        expect(state.notice.value).toBe('secondary-alpha-without-background');
     });
 
     it('texto invalido preserva o ultimo quadro e pede correcao', async () => {

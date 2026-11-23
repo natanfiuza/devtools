@@ -64,48 +64,61 @@ const rowHeight = `${ROW_HEIGHT}px`;
 </script>
 
 <template>
-    <div
-        class="group flex items-center gap-1"
-        :class="matched === true ? 'bg-surface-2' : ''"
-        :style="{ height: rowHeight, paddingLeft: indent }"
-        data-test="json-tree-row"
+  <div
+    class="group flex items-center gap-1"
+    :class="matched === true ? 'bg-surface-2' : ''"
+    :style="{ height: rowHeight, paddingLeft: indent }"
+    data-test="json-tree-row"
+  >
+    <button
+      v-if="collapsible"
+      type="button"
+      class="flex size-4 shrink-0 items-center justify-center rounded text-subtle hover:text-foreground"
+      :aria-expanded="open"
+      :aria-label="t('tools.json-viewer.tree.toggle')"
+      data-test="json-tree-toggle"
+      @click="emit('toggle')"
     >
-        <button
-            v-if="collapsible"
-            type="button"
-            class="flex size-4 shrink-0 items-center justify-center rounded text-subtle hover:text-foreground"
-            :aria-expanded="open"
-            :aria-label="t('tools.json-viewer.tree.toggle')"
-            data-test="json-tree-toggle"
-            @click="emit('toggle')"
-        >
-            <component
-                :is="open ? ChevronDown : ChevronRight"
-                class="size-3.5"
-            />
-        </button>
-        <span v-else class="size-4 shrink-0" aria-hidden="true" />
+      <component
+        :is="open ? ChevronDown : ChevronRight"
+        class="size-3.5"
+      />
+    </button>
+    <span
+      v-else
+      class="size-4 shrink-0"
+      aria-hidden="true"
+    />
 
-        <span class="min-w-0 truncate font-mono text-xs leading-none">
-            <span v-if="label !== null" class="text-json-key">{{ label }}</span>
-            <span class="text-json-punct">{{
-                label === null ? '' : ': '
-            }}</span>
-            <span v-if="container" class="text-json-punct">
-                {{ openBracket }}{{ node.childCount }}{{ closeBracket }}
-            </span>
-            <span v-else :class="valueClass">{{ leafText(node) }}</span>
-        </span>
+    <span class="min-w-0 truncate font-mono text-xs leading-none">
+      <span
+        v-if="label !== null"
+        class="text-json-key"
+      >{{ label }}</span>
+      <span class="text-json-punct">{{
+        label === null ? '' : ': '
+      }}</span>
+      <span
+        v-if="container"
+        class="text-json-punct"
+      >
+        {{ openBracket }}{{ node.childCount }}{{ closeBracket }}
+      </span>
+      <span
+        v-else
+        :class="valueClass"
+      >{{ leafText(node) }}</span>
+    </span>
 
-        <button
-            type="button"
-            class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-subtle opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-            :title="path"
-            :aria-label="t('tools.json-viewer.tree.copy_path')"
-            data-test="json-tree-copy"
-            @click="emit('copy')"
-        >
-            <Copy class="size-3" />
-        </button>
-    </div>
+    <button
+      type="button"
+      class="ml-auto flex size-5 shrink-0 items-center justify-center rounded text-subtle opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+      :title="path"
+      :aria-label="t('tools.json-viewer.tree.copy_path')"
+      data-test="json-tree-copy"
+      @click="emit('copy')"
+    >
+      <Copy class="size-3" />
+    </button>
+  </div>
 </template>

@@ -5,6 +5,7 @@ import {
     LAYOUT_THEMES,
     LAYOUT_TOKEN_SPECS,
     type LayoutPairCheck,
+    type LayoutSecondaryInfo,
     type LayoutStrategy,
     type LayoutSystemResult,
     type LayoutTheme,
@@ -97,6 +98,11 @@ export interface LayoutSnapshot {
     };
     strategy: LayoutStrategy;
     secondarySource: 'auto' | 'manual';
+    /**
+     * Secundaria manual resolvida (emenda da F6). Campo aditivo e opcional:
+     * snapshots gravados antes da emenda nao o possuem.
+     */
+    secondary?: LayoutSecondaryInfo | null;
     themes: LayoutSnapshotTheme[];
     overrides: LayoutSnapshotOverride[];
     locks: LayoutSnapshotLock[];
@@ -202,6 +208,15 @@ export function buildSnapshot(
         },
         strategy: result.strategy,
         secondarySource: result.secondarySource,
+        secondary: result.secondary
+            ? {
+                  original: copyRgba(result.secondary.original),
+                  effective: copyRgba(result.secondary.effective),
+                  background: result.secondary.background
+                      ? { ...result.secondary.background }
+                      : null,
+              }
+            : null,
         themes,
         overrides,
         locks,

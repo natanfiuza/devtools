@@ -67,79 +67,86 @@ function goToPage(target: number): void {
 </script>
 
 <template>
-    <section class="flex flex-col gap-3" data-test="comment-thread">
-        <h2 class="text-lg font-semibold">
-            {{ t('colors.comments.title') }}
-        </h2>
+  <section
+    class="flex flex-col gap-3"
+    data-test="comment-thread"
+  >
+    <h2 class="text-lg font-semibold">
+      {{ t('colors.comments.title') }}
+    </h2>
 
-        <CommentForm
-            v-if="canComment"
-            :max-length="maxLength"
-            :busy="busy"
-            :error="error"
-            @submit="(body) => create(body, null)"
-        />
+    <CommentForm
+      v-if="canComment"
+      :max-length="maxLength"
+      :busy="busy"
+      :error="error"
+      @submit="(body) => create(body, null)"
+    />
 
-        <p
-            v-if="threadItems.length === 0"
-            class="text-sm text-muted-foreground"
-            data-test="comment-thread-empty"
-        >
-            {{ t('colors.comments.empty') }}
-        </p>
+    <p
+      v-if="threadItems.length === 0"
+      class="text-sm text-muted-foreground"
+      data-test="comment-thread-empty"
+    >
+      {{ t('colors.comments.empty') }}
+    </p>
 
-        <ul v-else class="flex flex-col gap-3" data-test="comment-thread-list">
-            <CommentItem
-                v-for="comment in threadItems"
-                :key="comment.id"
-                :comment="comment"
-                :can-comment="canComment"
-                :max-length="maxLength"
-                :depth="0"
-                :busy="busy"
-                :error="error"
-                :create="create"
-                :update="update"
-                :destroy="remove"
-                :clear-error="clearError"
-            />
-        </ul>
+    <ul
+      v-else
+      class="flex flex-col gap-3"
+      data-test="comment-thread-list"
+    >
+      <CommentItem
+        v-for="comment in threadItems"
+        :key="comment.id"
+        :comment="comment"
+        :can-comment="canComment"
+        :max-length="maxLength"
+        :depth="0"
+        :busy="busy"
+        :error="error"
+        :create="create"
+        :update="update"
+        :destroy="remove"
+        :clear-error="clearError"
+      />
+    </ul>
 
-        <div
-            v-if="hasPages"
-            class="flex flex-wrap items-center justify-center gap-2"
-            data-test="comment-pagination"
-        >
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="comments.current_page <= 1"
-                data-test="comment-page-prev"
-                @click="goToPage(comments.current_page - 1)"
-            >
-                {{ t('colors.comments.page_prev') }}
-            </Button>
+    <div
+      v-if="hasPages"
+      class="flex flex-wrap items-center justify-center gap-2"
+      data-test="comment-pagination"
+    >
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        :disabled="comments.current_page <= 1"
+        data-test="comment-page-prev"
+        @click="goToPage(comments.current_page - 1)"
+      >
+        {{ t('colors.comments.page_prev') }}
+      </Button>
 
-            <span class="text-xs text-muted-foreground">
-                {{
-                    t('colors.comments.page_status', {
-                        page: comments.current_page,
-                        pages: comments.last_page,
-                    })
-                }}
-            </span>
+      <span class="text-xs text-muted-foreground">
+        {{
+          t('colors.comments.page_status', {
+            page: comments.current_page,
+            pages: comments.last_page,
+          })
+        }}
+      </span>
 
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="comments.current_page >= comments.last_page"
-                data-test="comment-page-next"
-                @click="goToPage(comments.current_page + 1)"
-            >
-                {{ t('colors.comments.page_next') }}
-            </Button>
-        </div>
-    </section>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        :disabled="comments.current_page >= comments.last_page"
+        data-test="comment-page-next"
+        @click="goToPage(comments.current_page + 1)"
+      >
+        {{ t('colors.comments.page_next') }}
+      </Button>
+    </div>
+  </section>
 </template>

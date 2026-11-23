@@ -203,6 +203,24 @@ it('arquiva reservando o slug e restaura devolvendo a url', function () {
         ->and($system->isArchived())->toBeFalse();
 });
 
+it('restaurado privado mantem o slug reservado ate a publicacao', function () {
+    $user = User::factory()->create();
+    $system = app(CreateLayoutSystem::class)($user, layoutSystemActionData(['visibility' => 'public']));
+
+    app(UpdateLayoutSystem::class)($system, layoutSystemActionData(['visibility' => 'private']));
+    app(ArchiveLayoutSystem::class)($system);
+    app(RestoreLayoutSystem::class)($system);
+
+    expect($system->refresh()->slug)->toBeNull()
+        ->and($system->archived_slug)->toBe('sistema-do-site')
+        ->and($system->isArchived())->toBeFalse();
+
+    app(UpdateLayoutSystem::class)($system, layoutSystemActionData(['visibility' => 'public']));
+
+    expect($system->refresh()->slug)->toBe('sistema-do-site')
+        ->and($system->archived_slug)->toBeNull();
+});
+
 it('aposenta o slug na exclusao e nunca o reemite', function () {
     config(['colors.palettes.free_limit' => 1]);
 

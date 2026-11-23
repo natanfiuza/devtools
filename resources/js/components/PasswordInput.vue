@@ -25,31 +25,37 @@ defineExpose({
 </script>
 
 <template>
-    <div class="relative">
-        <Input
-            ref="inputRef"
-            v-focus="props.autofocus"
-            :type="showPassword ? 'text' : 'password'"
-            :class="cn('pr-10', props.class)"
-            v-bind="$attrs"
-        />
-        <button
-            type="button"
-            :class="
-                cn(
-                    'absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none',
-                )
-            "
-            :aria-label="
-                showPassword
-                    ? t('app.actions.hide_password')
-                    : t('app.actions.show_password')
-            "
-            :tabindex="-1"
-            @click="showPassword = !showPassword"
-        >
-            <EyeOff v-if="showPassword" class="size-4" />
-            <Eye v-else class="size-4" />
-        </button>
-    </div>
+  <div class="relative">
+    <Input
+      ref="inputRef"
+      v-focus="props.autofocus"
+      :type="showPassword ? 'text' : 'password'"
+      :class="cn('pr-10', props.class)"
+      v-bind="$attrs"
+    />
+    <button
+      type="button"
+      :class="
+        cn(
+          'absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none',
+        )
+      "
+      :aria-label="
+        showPassword
+          ? t('app.actions.hide_password')
+          : t('app.actions.show_password')
+      "
+      :tabindex="-1"
+      @click="showPassword = !showPassword"
+    >
+      <EyeOff
+        v-if="showPassword"
+        class="size-4"
+      />
+      <Eye
+        v-else
+        class="size-4"
+      />
+    </button>
+  </div>
 </template>

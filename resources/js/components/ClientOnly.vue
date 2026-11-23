@@ -22,5 +22,5 @@ onMounted(() => {
 </script>
 
 <template>
-    <slot v-if="mounted" />
+  <slot v-if="mounted" />
 </template>

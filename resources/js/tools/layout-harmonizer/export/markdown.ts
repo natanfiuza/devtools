@@ -59,12 +59,43 @@ function metadataLines(
         `- ${message(input.messages, 'export.md.seed_effective', {
             hex: formatHex(snapshot.seed.effective),
         })}`,
+    ];
+
+    if (snapshot.seed.background !== null) {
+        lines.push(
+            `- ${message(input.messages, 'export.md.seed_background', {
+                hex: formatHex({ ...snapshot.seed.background, a: 1 }),
+            })}`,
+        );
+    }
+
+    lines.push(
         `- ${message(input.messages, 'export.md.secondary', {
             mode: message(
                 input.messages,
                 `export.md.secondary_${snapshot.secondarySource}`,
             ),
         })}`,
+    );
+
+    // Secundaria com alpha: o original nunca e descartado no arquivo exportado.
+    if (snapshot.secondary && snapshot.secondary.original.a < 1) {
+        lines.push(
+            `- ${message(input.messages, 'export.md.secondary_original', {
+                hex: seedText(snapshot.secondary.original),
+            })}`,
+            `- ${message(input.messages, 'export.md.secondary_effective', {
+                hex: formatHex(snapshot.secondary.effective),
+            })}`,
+            `- ${message(input.messages, 'export.md.secondary_background', {
+                hex: snapshot.secondary.background
+                    ? formatHex({ ...snapshot.secondary.background, a: 1 })
+                    : '',
+            })}`,
+        );
+    }
+
+    lines.push(
         `- ${message(input.messages, 'export.md.versions', {
             state: input.state.stateVersion,
             schema: snapshot.schemaVersion,
@@ -72,17 +103,7 @@ function metadataLines(
             suggestions: snapshot.suggestionsVersion,
             snapshot: snapshot.snapshotVersion,
         })}`,
-    ];
-
-    if (snapshot.seed.background !== null) {
-        lines.splice(
-            5,
-            0,
-            `- ${message(input.messages, 'export.md.seed_background', {
-                hex: formatHex({ ...snapshot.seed.background, a: 1 }),
-            })}`,
-        );
-    }
+    );
 
     if (input.origin !== null && input.origin.public) {
         lines.push(
