@@ -20,49 +20,52 @@ const routes = useRoutes();
 </script>
 
 <template>
-    <div class="w-full sm:max-w-xs">
-        <p class="text-sm font-medium text-foreground">
-            {{ t('newsletter.form.label') }}
-        </p>
-        <p class="mt-1 text-xs text-muted-foreground">
-            {{ t('newsletter.form.description') }}
-        </p>
+  <div class="w-full sm:max-w-xs">
+    <p class="text-sm font-medium text-foreground">
+      {{ t('newsletter.form.label') }}
+    </p>
+    <p class="mt-1 text-xs text-muted-foreground">
+      {{ t('newsletter.form.description') }}
+    </p>
 
-        <Form
-            v-slot="{ errors, processing }"
-            v-bind="routes.form.newsletter.value"
-            :reset-on-success="['email']"
-            class="mt-3 flex items-start gap-2"
+    <Form
+      v-slot="{ errors, processing }"
+      v-bind="routes.form.newsletter.value"
+      :reset-on-success="['email']"
+      class="mt-3 flex items-start gap-2"
+    >
+      <div class="grid flex-1 gap-1">
+        <Label
+          for="newsletter-email"
+          class="sr-only"
         >
-            <div class="grid flex-1 gap-1">
-                <Label for="newsletter-email" class="sr-only">
-                    {{ t('newsletter.form.email') }}
-                </Label>
-                <Input
-                    id="newsletter-email"
-                    type="email"
-                    name="email"
-                    required
-                    autocomplete="email"
-                    :placeholder="t('newsletter.form.email_placeholder')"
-                    :aria-invalid="errors.email ? 'true' : undefined"
-                    aria-describedby="newsletter-email-error"
-                />
-                <InputError
-                    id="newsletter-email-error"
-                    :message="errors.email"
-                />
-            </div>
+          {{ t('newsletter.form.email') }}
+        </Label>
+        <Input
+          id="newsletter-email"
+          type="email"
+          name="email"
+          required
+          autocomplete="email"
+          :placeholder="t('newsletter.form.email_placeholder')"
+          :aria-invalid="errors.email ? 'true' : undefined"
+          aria-describedby="newsletter-email-error"
+        />
+        <InputError
+          id="newsletter-email-error"
+          :message="errors.email"
+        />
+      </div>
 
-            <Button
-                type="submit"
-                variant="outline"
-                :disabled="processing"
-                data-test="newsletter-subscribe-button"
-            >
-                <Spinner v-if="processing" />
-                {{ t('newsletter.form.submit') }}
-            </Button>
-        </Form>
-    </div>
+      <Button
+        type="submit"
+        variant="outline"
+        :disabled="processing"
+        data-test="newsletter-subscribe-button"
+      >
+        <Spinner v-if="processing" />
+        {{ t('newsletter.form.submit') }}
+      </Button>
+    </Form>
+  </div>
 </template>

@@ -133,125 +133,128 @@ const snippets = computed<Record<'url' | 'markdown' | 'html', string>>(() => ({
 </script>
 
 <template>
-    <section class="space-y-6">
-        <div class="flex items-center justify-between gap-2">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.badgeforge.preview.title') }}
-            </h2>
+  <section class="space-y-6">
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.badgeforge.preview.title') }}
+      </h2>
 
-            <div class="w-24">
-                <Select v-model="format">
-                    <SelectTrigger
-                        id="badge-custom-format"
-                        class="w-full"
-                        :aria-label="t('tools.badgeforge.fields.format')"
-                        data-test="badge-custom-format"
-                    >
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="value in ['svg', 'png'] as const"
-                            :key="value"
-                            :value="value"
-                        >
-                            {{ t(`tools.badgeforge.formats.${value}`) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-
-        <div
-            class="flex min-h-[140px] items-center justify-center rounded-md border bg-neutral-100 p-6"
-            data-test="badge-custom-stage"
-        >
-            <img
-                v-if="debouncedUrl !== ''"
-                :src="debouncedUrl"
-                :alt="altText"
-                class="max-w-full"
-                data-test="badge-custom-preview"
-            />
-            <p
-                v-else
-                class="text-sm text-muted-foreground"
-                data-test="badge-custom-invalid-preview"
+      <div class="w-24">
+        <Select v-model="format">
+          <SelectTrigger
+            id="badge-custom-format"
+            class="w-full"
+            :aria-label="t('tools.badgeforge.fields.format')"
+            data-test="badge-custom-format"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="value in ['svg', 'png'] as const"
+              :key="value"
+              :value="value"
             >
-                {{
-                    t(
-                        'tools.badgeforge.custom_providers.builder.preview_invalid',
-                    )
-                }}
-            </p>
-        </div>
+              {{ t(`tools.badgeforge.formats.${value}`) }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
 
-        <p class="text-xs text-muted-foreground">
-            {{ t('tools.badgeforge.custom_providers.builder.cache_note') }}
-        </p>
+    <div
+      class="flex min-h-[140px] items-center justify-center rounded-md border bg-neutral-100 p-6"
+      data-test="badge-custom-stage"
+    >
+      <img
+        v-if="debouncedUrl !== ''"
+        :src="debouncedUrl"
+        :alt="altText"
+        class="max-w-full"
+        data-test="badge-custom-preview"
+      >
+      <p
+        v-else
+        class="text-sm text-muted-foreground"
+        data-test="badge-custom-invalid-preview"
+      >
+        {{
+          t(
+            'tools.badgeforge.custom_providers.builder.preview_invalid',
+          )
+        }}
+      </p>
+    </div>
 
-        <div v-if="url !== ''" class="space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-sm font-semibold">
-                    {{ t('tools.badgeforge.snippets.title') }}
-                </h2>
+    <p class="text-xs text-muted-foreground">
+      {{ t('tools.badgeforge.custom_providers.builder.cache_note') }}
+    </p>
 
-                <Button
-                    as-child
-                    variant="outline"
-                    size="sm"
-                    data-test="badge-custom-download"
-                >
-                    <a :href="downloadUrl">
-                        <Download class="size-4" />
-                        {{ t('tools.ui.actions.download') }}
-                    </a>
-                </Button>
-            </div>
+    <div
+      v-if="url !== ''"
+      class="space-y-2"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-sm font-semibold">
+          {{ t('tools.badgeforge.snippets.title') }}
+        </h2>
 
-            <Tabs v-model="snippetTab">
-                <TabsList class="grid w-full grid-cols-3">
-                    <TabsTrigger value="url">
-                        {{ t('tools.badgeforge.snippets.url') }}
-                    </TabsTrigger>
-                    <TabsTrigger value="markdown">
-                        {{ t('tools.badgeforge.snippets.markdown') }}
-                    </TabsTrigger>
-                    <TabsTrigger value="html">
-                        {{ t('tools.badgeforge.snippets.html') }}
-                    </TabsTrigger>
-                </TabsList>
+        <Button
+          as-child
+          variant="outline"
+          size="sm"
+          data-test="badge-custom-download"
+        >
+          <a :href="downloadUrl">
+            <Download class="size-4" />
+            {{ t('tools.ui.actions.download') }}
+          </a>
+        </Button>
+      </div>
 
-                <TabsContent
-                    v-for="tab in ['url', 'markdown', 'html'] as const"
-                    :key="tab"
-                    :value="tab"
-                    class="space-y-2"
-                >
-                    <pre
-                        class="overflow-x-auto rounded-md bg-muted p-3 text-xs break-all whitespace-pre-wrap"
-                        data-test="badge-custom-snippet"
-                        >{{ snippets[tab] }}</pre>
-                    <div class="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            data-test="badge-custom-copy"
-                            @click="copySnippet(snippets[tab])"
-                        >
-                            <Copy class="size-4" />
-                            {{ t('tools.ui.actions.copy') }}
-                        </Button>
-                        <span
-                            v-if="copyMessage"
-                            class="text-xs text-muted-foreground"
-                            data-test="badge-custom-copy-feedback"
-                        >
-                            {{ copyMessage }}
-                        </span>
-                    </div>
-                </TabsContent>
-            </Tabs>
-        </div>
-    </section>
+      <Tabs v-model="snippetTab">
+        <TabsList class="grid w-full grid-cols-3">
+          <TabsTrigger value="url">
+            {{ t('tools.badgeforge.snippets.url') }}
+          </TabsTrigger>
+          <TabsTrigger value="markdown">
+            {{ t('tools.badgeforge.snippets.markdown') }}
+          </TabsTrigger>
+          <TabsTrigger value="html">
+            {{ t('tools.badgeforge.snippets.html') }}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent
+          v-for="tab in ['url', 'markdown', 'html'] as const"
+          :key="tab"
+          :value="tab"
+          class="space-y-2"
+        >
+          <pre
+            class="overflow-x-auto rounded-md bg-muted p-3 text-xs break-all whitespace-pre-wrap"
+            data-test="badge-custom-snippet"
+          >{{ snippets[tab] }}</pre>
+          <div class="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              data-test="badge-custom-copy"
+              @click="copySnippet(snippets[tab])"
+            >
+              <Copy class="size-4" />
+              {{ t('tools.ui.actions.copy') }}
+            </Button>
+            <span
+              v-if="copyMessage"
+              class="text-xs text-muted-foreground"
+              data-test="badge-custom-copy-feedback"
+            >
+              {{ copyMessage }}
+            </span>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  </section>
 </template>

@@ -262,250 +262,262 @@ const status = computed<string>(() => {
 </script>
 
 <template>
-    <ToolShell split-key="timestamp-uuid">
-        <template #actions>
-            <ToolActionBar>
-                <ToolButton
-                    :label="t('tools.timestamp-uuid.now')"
-                    @click="useNow"
-                >
-                    <template #icon>
-                        <Clock class="size-3.5" />
-                    </template>
-                </ToolButton>
+  <ToolShell split-key="timestamp-uuid">
+    <template #actions>
+      <ToolActionBar>
+        <ToolButton
+          :label="t('tools.timestamp-uuid.now')"
+          @click="useNow"
+        >
+          <template #icon>
+            <Clock class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="!hasOutput"
-                        @click="copyAll"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="!hasOutput"
+            @click="copyAll"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <template #input>
-            <div class="relative flex min-h-0 flex-1 flex-col">
-                <CodeEditor
-                    v-model="text"
-                    testid="timestamp-uuid-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                />
-            </div>
-        </template>
+    <template #input>
+      <div class="relative flex min-h-0 flex-1 flex-col">
+        <CodeEditor
+          v-model="text"
+          testid="timestamp-uuid-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+        />
+      </div>
+    </template>
 
-        <!--
+    <!--
             Os geradores vivem no cabecalho do painel de **saida**: e nele que a
             lista aparece, e as duas escolhas (tipo e quantidade) valem para o
             que sai, nao para o que entra.
         -->
-        <template #output-header>
-            <div class="flex flex-wrap items-center gap-2">
-                <Select v-model="idKind">
-                    <SelectTrigger
-                        class="h-7 w-32 text-xs"
-                        :aria-label="t('tools.timestamp-uuid.kind')"
-                        data-test="timestamp-uuid-kind"
-                    >
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="kind in ID_KINDS"
-                            :key="kind"
-                            :value="kind"
-                        >
-                            {{ t(`tools.timestamp-uuid.kinds.${kind}`) }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+    <template #output-header>
+      <div class="flex flex-wrap items-center gap-2">
+        <Select v-model="idKind">
+          <SelectTrigger
+            class="h-7 w-32 text-xs"
+            :aria-label="t('tools.timestamp-uuid.kind')"
+            data-test="timestamp-uuid-kind"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="kind in ID_KINDS"
+              :key="kind"
+              :value="kind"
+            >
+              {{ t(`tools.timestamp-uuid.kinds.${kind}`) }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
-                <Select v-model="idQuantity">
-                    <SelectTrigger
-                        class="h-7 w-20 text-xs"
-                        :aria-label="t('tools.timestamp-uuid.quantity')"
-                        data-test="timestamp-uuid-quantity"
-                    >
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="quantity in ID_QUANTITIES"
-                            :key="quantity"
-                            :value="quantity"
-                        >
-                            {{ quantity }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+        <Select v-model="idQuantity">
+          <SelectTrigger
+            class="h-7 w-20 text-xs"
+            :aria-label="t('tools.timestamp-uuid.quantity')"
+            data-test="timestamp-uuid-quantity"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="quantity in ID_QUANTITIES"
+              :key="quantity"
+              :value="quantity"
+            >
+              {{ quantity }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
-                <ToolButton
-                    :label="t('tools.timestamp-uuid.generate')"
-                    data-test="timestamp-uuid-generate"
-                    @click="generate"
-                >
-                    <template #icon>
-                        <RefreshCw class="size-3.5" />
-                    </template>
-                </ToolButton>
-            </div>
-        </template>
+        <ToolButton
+          :label="t('tools.timestamp-uuid.generate')"
+          data-test="timestamp-uuid-generate"
+          @click="generate"
+        >
+          <template #icon>
+            <RefreshCw class="size-3.5" />
+          </template>
+        </ToolButton>
+      </div>
+    </template>
 
-        <template #output>
-            <div class="min-h-0 flex-1 overflow-auto">
-                <p
-                    v-if="state !== null"
-                    role="status"
-                    class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                    :class="state.error ? 'text-destructive' : 'text-subtle'"
-                    data-test="timestamp-uuid-state"
-                >
-                    <TriangleAlert
-                        v-if="state.error"
-                        class="size-5"
-                        aria-hidden="true"
-                    />
-                    {{ state.text }}
-                </p>
+    <template #output>
+      <div class="min-h-0 flex-1 overflow-auto">
+        <p
+          v-if="state !== null"
+          role="status"
+          class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+          :class="state.error ? 'text-destructive' : 'text-subtle'"
+          data-test="timestamp-uuid-state"
+        >
+          <TriangleAlert
+            v-if="state.error"
+            class="size-5"
+            aria-hidden="true"
+          />
+          {{ state.text }}
+        </p>
 
-                <template v-else>
-                    <!--
+        <template v-else>
+          <!--
                         Um id colado nao e um instante escrito: o aviso diz de
                         onde o instante saiu, para ninguem achar que o texto de
                         cima era uma data.
                     -->
-                    <p
-                        v-if="isId"
-                        class="flex items-center gap-1.5 border-b border-accent/40 bg-accent/5 px-3 py-1.5 text-xs text-foreground"
-                        data-test="timestamp-uuid-recognised"
-                    >
-                        <Hash
-                            class="size-3.5 shrink-0 text-subtle"
-                            aria-hidden="true"
-                        />
-                        {{ recognised }}
-                    </p>
+          <p
+            v-if="isId"
+            class="flex items-center gap-1.5 border-b border-accent/40 bg-accent/5 px-3 py-1.5 text-xs text-foreground"
+            data-test="timestamp-uuid-recognised"
+          >
+            <Hash
+              class="size-3.5 shrink-0 text-subtle"
+              aria-hidden="true"
+            />
+            {{ recognised }}
+          </p>
 
-                    <ul>
-                        <li
-                            v-for="row in readings"
-                            :key="row.label"
-                            class="border-b border-border px-3 py-2 last:border-b-0"
-                            :data-label="row.label"
-                            data-test="timestamp-uuid-reading"
-                        >
-                            <div class="flex items-center gap-2">
-                                <h3
-                                    class="text-[11px] font-medium tracking-wide text-subtle uppercase"
-                                    data-test="timestamp-uuid-reading-label"
-                                >
-                                    {{ labelOf(row) }}
-                                </h3>
+          <ul>
+            <li
+              v-for="row in readings"
+              :key="row.label"
+              class="border-b border-border px-3 py-2 last:border-b-0"
+              :data-label="row.label"
+              data-test="timestamp-uuid-reading"
+            >
+              <div class="flex items-center gap-2">
+                <h3
+                  class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                  data-test="timestamp-uuid-reading-label"
+                >
+                  {{ labelOf(row) }}
+                </h3>
 
-                                <button
-                                    type="button"
-                                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
-                                    :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
-                                    data-test="timestamp-uuid-reading-copy"
-                                    @click="copyReading(row)"
-                                >
-                                    <Copy class="size-3.5" aria-hidden="true" />
-                                </button>
-                            </div>
+                <button
+                  type="button"
+                  class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
+                  :aria-label="`${t('tools.ui.actions.copy')} — ${labelOf(row)}`"
+                  data-test="timestamp-uuid-reading-copy"
+                  @click="copyReading(row)"
+                >
+                  <Copy
+                    class="size-3.5"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
 
-                            <p
-                                class="mt-1 font-mono text-sm break-all"
-                                data-test="timestamp-uuid-reading-value"
-                            >
-                                {{ row.text }}
-                            </p>
-                        </li>
-                    </ul>
+              <p
+                class="mt-1 font-mono text-sm break-all"
+                data-test="timestamp-uuid-reading-value"
+              >
+                {{ row.text }}
+              </p>
+            </li>
+          </ul>
 
-                    <section
-                        v-if="ids.length > 0"
-                        class="border-t border-border"
-                        data-test="timestamp-uuid-ids"
-                    >
-                        <div class="flex items-center gap-2 px-3 py-2">
-                            <h3
-                                class="text-[11px] font-medium tracking-wide text-subtle uppercase"
-                                data-test="timestamp-uuid-ids-title"
-                            >
-                                {{
-                                    t('tools.timestamp-uuid.ids_title', {
-                                        count: ids.length,
-                                    })
-                                }}
-                            </h3>
+          <section
+            v-if="ids.length > 0"
+            class="border-t border-border"
+            data-test="timestamp-uuid-ids"
+          >
+            <div class="flex items-center gap-2 px-3 py-2">
+              <h3
+                class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+                data-test="timestamp-uuid-ids-title"
+              >
+                {{
+                  t('tools.timestamp-uuid.ids_title', {
+                    count: ids.length,
+                  })
+                }}
+              </h3>
 
-                            <button
-                                type="button"
-                                class="hover:bg-surface-muted ml-auto flex items-center gap-1 rounded px-1.5 py-1 text-xs text-subtle transition-colors hover:text-foreground"
-                                :aria-label="t('tools.timestamp-uuid.copy_ids')"
-                                data-test="timestamp-uuid-ids-copy"
-                                @click="copyIds"
-                            >
-                                <Copy class="size-3.5" aria-hidden="true" />
-                                {{ t('tools.timestamp-uuid.copy_ids') }}
-                            </button>
-                        </div>
-
-                        <ul>
-                            <li
-                                v-for="(id, index) in ids"
-                                :key="`${index}-${id}`"
-                                class="flex items-center gap-2 border-t border-border px-3 py-1.5"
-                                data-test="timestamp-uuid-id"
-                            >
-                                <p class="font-mono text-sm break-all">
-                                    {{ id }}
-                                </p>
-
-                                <button
-                                    type="button"
-                                    class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
-                                    :aria-label="`${t('tools.ui.actions.copy')} — ${id}`"
-                                    data-test="timestamp-uuid-id-copy"
-                                    @click="copyId(id)"
-                                >
-                                    <Copy class="size-3.5" aria-hidden="true" />
-                                </button>
-                            </li>
-                        </ul>
-                    </section>
-                </template>
+              <button
+                type="button"
+                class="hover:bg-surface-muted ml-auto flex items-center gap-1 rounded px-1.5 py-1 text-xs text-subtle transition-colors hover:text-foreground"
+                :aria-label="t('tools.timestamp-uuid.copy_ids')"
+                data-test="timestamp-uuid-ids-copy"
+                @click="copyIds"
+              >
+                <Copy
+                  class="size-3.5"
+                  aria-hidden="true"
+                />
+                {{ t('tools.timestamp-uuid.copy_ids') }}
+              </button>
             </div>
-        </template>
 
-        <template #status>
-            <p class="text-xs text-subtle" data-test="timestamp-uuid-status">
-                {{ status }}
-            </p>
+            <ul>
+              <li
+                v-for="(id, index) in ids"
+                :key="`${index}-${id}`"
+                class="flex items-center gap-2 border-t border-border px-3 py-1.5"
+                data-test="timestamp-uuid-id"
+              >
+                <p class="font-mono text-sm break-all">
+                  {{ id }}
+                </p>
+
+                <button
+                  type="button"
+                  class="hover:bg-surface-muted ml-auto rounded p-1 text-subtle transition-colors hover:text-foreground"
+                  :aria-label="`${t('tools.ui.actions.copy')} — ${id}`"
+                  data-test="timestamp-uuid-id-copy"
+                  @click="copyId(id)"
+                >
+                  <Copy
+                    class="size-3.5"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            </ul>
+          </section>
         </template>
-    </ToolShell>
+      </div>
+    </template>
+
+    <template #status>
+      <p
+        class="text-xs text-subtle"
+        data-test="timestamp-uuid-status"
+      >
+        {{ status }}
+      </p>
+    </template>
+  </ToolShell>
 </template>

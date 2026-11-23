@@ -59,16 +59,24 @@ export function opaqueRgb(color: Rgba): Rgb {
 
 /**
  * Assinatura das entradas que regeneram o quadro: seed efetiva, estrategia e
- * secundaria manual. O fundo de composicao ja esta dentro da seed efetiva, e
- * repetir o mesmo texto nao pode derrubar edicoes.
+ * secundaria manual (com o alpha e o fundo de composicao quando existir). O
+ * fundo da seed ja esta dentro da seed efetiva, e repetir o mesmo texto nao
+ * pode derrubar edicoes.
  */
 export function signatureOf(
     effectiveSeed: Rgba,
     strategy: LayoutStrategy,
-    manualSecondary: Rgb | null,
+    manualSecondary: Rgba | null,
+    secondaryBackground: Rgb | null = null,
 ): string {
+    const background =
+        manualSecondary !== null &&
+        manualSecondary.a < 1 &&
+        secondaryBackground !== null
+            ? canonicalKey({ ...secondaryBackground, a: 1 })
+            : 'none';
     const secondary = manualSecondary
-        ? canonicalKey({ ...manualSecondary, a: 1 })
+        ? `${canonicalKey(manualSecondary)}@${background}`
         : 'auto';
 
     return `${canonicalKey(effectiveSeed)}|${strategy}|${secondary}`;

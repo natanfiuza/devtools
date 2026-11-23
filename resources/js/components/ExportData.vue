@@ -15,23 +15,29 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="space-y-6">
-        <Heading
-            variant="small"
-            :title="t('account.export.title')"
-            :description="t('account.export.description')"
-        />
+  <div class="space-y-6">
+    <Heading
+      variant="small"
+      :title="t('account.export.title')"
+      :description="t('account.export.description')"
+    />
 
-        <div class="space-y-4">
-            <Button variant="outline" as-child>
-                <a :href="profile.export.url()" data-test="export-data-button">
-                    {{ t('account.export.action') }}
-                </a>
-            </Button>
+    <div class="space-y-4">
+      <Button
+        variant="outline"
+        as-child
+      >
+        <a
+          :href="profile.export.url()"
+          data-test="export-data-button"
+        >
+          {{ t('account.export.action') }}
+        </a>
+      </Button>
 
-            <p class="text-sm text-subtle">
-                {{ t('account.export.hint') }}
-            </p>
-        </div>
+      <p class="text-sm text-subtle">
+        {{ t('account.export.hint') }}
+      </p>
     </div>
+  </div>
 </template>

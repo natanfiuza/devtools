@@ -164,6 +164,18 @@ const canExport = computed(
         validation.value.valid,
 );
 
+// Erros de validacao precisam de id/aria-describedby para o leitor de tela
+// saber por que os botoes de download estao desabilitados (DESIGN.md).
+const PREFIX_HINT_ID = 'layout-export-prefix-hint';
+const PREFIX_ERROR_ID = 'layout-export-prefix-error';
+const SCOPE_ERROR_ID = 'layout-export-scope-class-error';
+
+const prefixDescribedBy = computed(() =>
+    validation.value.prefixError === null
+        ? PREFIX_HINT_ID
+        : `${PREFIX_HINT_ID} ${PREFIX_ERROR_ID}`,
+);
+
 function buildInput(): LayoutExportInput | null {
     if (props.state === null) {
         return null;
@@ -250,216 +262,234 @@ function login(): void {
 </script>
 
 <template>
-    <section
-        v-if="hasMessages"
-        class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
-        data-test="layout-export-panel"
+  <section
+    v-if="hasMessages"
+    class="flex flex-col gap-4 rounded-xl border border-border bg-card p-4"
+    data-test="layout-export-panel"
+  >
+    <div>
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.layout-harmonizer.export.title') }}
+      </h2>
+      <p class="mt-1 text-xs text-muted-foreground">
+        {{ t('tools.layout-harmonizer.export.description') }}
+      </p>
+    </div>
+
+    <div
+      v-if="!authenticated"
+      class="flex flex-col items-start gap-3 rounded-lg border border-dashed border-border bg-muted/40 p-3"
+      data-test="layout-export-locked"
     >
-        <div>
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.layout-harmonizer.export.title') }}
-            </h2>
-            <p class="mt-1 text-xs text-muted-foreground">
-                {{ t('tools.layout-harmonizer.export.description') }}
-            </p>
+      <p class="flex items-center gap-2 text-sm font-medium">
+        <Lock class="size-4" />
+        {{ t('tools.layout-harmonizer.export.title') }}
+      </p>
+      <p class="text-xs text-muted-foreground">
+        {{ t('tools.layout-harmonizer.export.login_hint') }}
+      </p>
+      <Button
+        type="button"
+        size="sm"
+        data-test="layout-export-login"
+        @click="login"
+      >
+        {{ t('tools.layout-harmonizer.export.login_cta') }}
+      </Button>
+    </div>
+
+    <template v-else>
+      <p
+        v-if="pendingRegeneration"
+        class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
+        data-test="layout-export-pending"
+      >
+        {{ t('tools.layout-harmonizer.export.pending_regeneration') }}
+      </p>
+      <p
+        v-else-if="mode === 'compatible'"
+        class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
+        data-test="layout-export-compatible"
+      >
+        {{ t('tools.layout-harmonizer.export.compatible_notice') }}
+      </p>
+      <p
+        v-if="readOnly"
+        class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
+        data-test="layout-export-readonly"
+      >
+        {{ t('tools.layout-harmonizer.export.readonly_notice') }}
+      </p>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div class="space-y-2">
+          <Label for="layout-export-language">
+            {{ t('tools.layout-harmonizer.export.language_label') }}
+          </Label>
+          <Select v-model="selectedLanguage">
+            <SelectTrigger
+              id="layout-export-language"
+              class="w-full"
+              data-test="layout-export-language"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="code in languages"
+                :key="code"
+                :value="code"
+              >
+                {{ languageLabel(code) }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="layout-export-prefix">
+            {{ t('tools.layout-harmonizer.export.prefix_label') }}
+          </Label>
+          <Input
+            id="layout-export-prefix"
+            v-model="prefix"
+            class="w-full"
+            :aria-invalid="validation.prefixError !== null"
+            :aria-describedby="prefixDescribedBy"
+            data-test="layout-export-prefix"
+          />
+          <p
+            :id="PREFIX_HINT_ID"
+            class="text-xs text-muted-foreground"
+          >
+            {{
+              t('tools.layout-harmonizer.export.prefix_hint', {
+                prefix: prefix.trim(),
+              })
+            }}
+          </p>
+          <p
+            v-if="validation.prefixError !== null"
+            :id="PREFIX_ERROR_ID"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="layout-export-prefix-error"
+          >
+            {{
+              t(
+                `tools.layout-harmonizer.export.errors.${validation.prefixError}`,
+                { max: exportLimits.prefixMaxLength },
+              )
+            }}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <Label for="layout-export-scope">
+            {{ t('tools.layout-harmonizer.export.scope_label') }}
+          </Label>
+          <Select v-model="selectedScopeKind">
+            <SelectTrigger
+              id="layout-export-scope"
+              class="w-full"
+              data-test="layout-export-scope"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="root">
+                {{
+                  t(
+                    'tools.layout-harmonizer.export.scope_root',
+                  )
+                }}
+              </SelectItem>
+              <SelectItem value="class">
+                {{
+                  t(
+                    'tools.layout-harmonizer.export.scope_class',
+                  )
+                }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div
-            v-if="!authenticated"
-            class="flex flex-col items-start gap-3 rounded-lg border border-dashed border-border bg-muted/40 p-3"
-            data-test="layout-export-locked"
+          v-if="scopeKind === 'class'"
+          class="space-y-2"
         >
-            <p class="flex items-center gap-2 text-sm font-medium">
-                <Lock class="size-4" />
-                {{ t('tools.layout-harmonizer.export.title') }}
-            </p>
-            <p class="text-xs text-muted-foreground">
-                {{ t('tools.layout-harmonizer.export.login_hint') }}
-            </p>
-            <Button
-                type="button"
-                size="sm"
-                data-test="layout-export-login"
-                @click="login"
-            >
-                {{ t('tools.layout-harmonizer.export.login_cta') }}
-            </Button>
+          <Label for="layout-export-scope-class">
+            {{
+              t(
+                'tools.layout-harmonizer.export.scope_class_label',
+              )
+            }}
+          </Label>
+          <Input
+            id="layout-export-scope-class"
+            v-model="className"
+            class="w-full"
+            :aria-invalid="validation.scopeError !== null"
+            :aria-describedby="
+              validation.scopeError !== null
+                ? SCOPE_ERROR_ID
+                : undefined
+            "
+            data-test="layout-export-scope-class"
+          />
+          <p
+            v-if="validation.scopeError !== null"
+            :id="SCOPE_ERROR_ID"
+            class="text-xs text-destructive"
+            role="alert"
+            data-test="layout-export-scope-error"
+          >
+            {{
+              t(
+                `tools.layout-harmonizer.export.errors.${validation.scopeError}`,
+                { max: exportLimits.scopeMaxLength },
+              )
+            }}
+          </p>
         </div>
+      </div>
 
-        <template v-else>
-            <p
-                v-if="pendingRegeneration"
-                class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
-                data-test="layout-export-pending"
-            >
-                {{ t('tools.layout-harmonizer.export.pending_regeneration') }}
-            </p>
-            <p
-                v-else-if="mode === 'compatible'"
-                class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
-                data-test="layout-export-compatible"
-            >
-                {{ t('tools.layout-harmonizer.export.compatible_notice') }}
-            </p>
-            <p
-                v-if="readOnly"
-                class="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground"
-                data-test="layout-export-readonly"
-            >
-                {{ t('tools.layout-harmonizer.export.readonly_notice') }}
-            </p>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                    <Label for="layout-export-language">
-                        {{ t('tools.layout-harmonizer.export.language_label') }}
-                    </Label>
-                    <Select v-model="selectedLanguage">
-                        <SelectTrigger
-                            id="layout-export-language"
-                            class="w-full"
-                            data-test="layout-export-language"
-                        >
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem
-                                v-for="code in languages"
-                                :key="code"
-                                :value="code"
-                            >
-                                {{ languageLabel(code) }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="layout-export-prefix">
-                        {{ t('tools.layout-harmonizer.export.prefix_label') }}
-                    </Label>
-                    <Input
-                        id="layout-export-prefix"
-                        v-model="prefix"
-                        class="w-full"
-                        data-test="layout-export-prefix"
-                    />
-                    <p class="text-xs text-muted-foreground">
-                        {{
-                            t('tools.layout-harmonizer.export.prefix_hint', {
-                                prefix: prefix.trim(),
-                            })
-                        }}
-                    </p>
-                    <p
-                        v-if="validation.prefixError !== null"
-                        class="text-xs text-destructive"
-                        data-test="layout-export-prefix-error"
-                    >
-                        {{
-                            t(
-                                `tools.layout-harmonizer.export.errors.${validation.prefixError}`,
-                                { max: exportLimits.prefixMaxLength },
-                            )
-                        }}
-                    </p>
-                </div>
-
-                <div class="space-y-2">
-                    <Label for="layout-export-scope">
-                        {{ t('tools.layout-harmonizer.export.scope_label') }}
-                    </Label>
-                    <Select v-model="selectedScopeKind">
-                        <SelectTrigger
-                            id="layout-export-scope"
-                            class="w-full"
-                            data-test="layout-export-scope"
-                        >
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="root">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.export.scope_root',
-                                    )
-                                }}
-                            </SelectItem>
-                            <SelectItem value="class">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.export.scope_class',
-                                    )
-                                }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div v-if="scopeKind === 'class'" class="space-y-2">
-                    <Label for="layout-export-scope-class">
-                        {{
-                            t(
-                                'tools.layout-harmonizer.export.scope_class_label',
-                            )
-                        }}
-                    </Label>
-                    <Input
-                        id="layout-export-scope-class"
-                        v-model="className"
-                        class="w-full"
-                        data-test="layout-export-scope-class"
-                    />
-                    <p
-                        v-if="validation.scopeError !== null"
-                        class="text-xs text-destructive"
-                        data-test="layout-export-scope-error"
-                    >
-                        {{
-                            t(
-                                `tools.layout-harmonizer.export.errors.${validation.scopeError}`,
-                                { max: exportLimits.scopeMaxLength },
-                            )
-                        }}
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-                <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    :disabled="!canExport"
-                    data-test="layout-export-markdown"
-                    @click="downloadMarkdown"
-                >
-                    <Download class="size-4" />
-                    {{ t('tools.layout-harmonizer.export.download_markdown') }}
-                </Button>
-                <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    :disabled="!canExport"
-                    data-test="layout-export-css"
-                    @click="downloadCss"
-                >
-                    <Download class="size-4" />
-                    {{ t('tools.layout-harmonizer.export.download_css') }}
-                </Button>
-                <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    :disabled="!canExport"
-                    data-test="layout-export-zip"
-                    @click="downloadZip"
-                >
-                    <Download class="size-4" />
-                    {{ t('tools.layout-harmonizer.export.download_zip') }}
-                </Button>
-            </div>
-        </template>
-    </section>
+      <div class="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          :disabled="!canExport"
+          data-test="layout-export-markdown"
+          @click="downloadMarkdown"
+        >
+          <Download class="size-4" />
+          {{ t('tools.layout-harmonizer.export.download_markdown') }}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          :disabled="!canExport"
+          data-test="layout-export-css"
+          @click="downloadCss"
+        >
+          <Download class="size-4" />
+          {{ t('tools.layout-harmonizer.export.download_css') }}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          :disabled="!canExport"
+          data-test="layout-export-zip"
+          @click="downloadZip"
+        >
+          <Download class="size-4" />
+          {{ t('tools.layout-harmonizer.export.download_zip') }}
+        </Button>
+      </div>
+    </template>
+  </section>
 </template>

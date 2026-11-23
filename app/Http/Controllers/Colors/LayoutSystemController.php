@@ -108,7 +108,7 @@ class LayoutSystemController extends Controller
 
         if ($layoutSystem->isArchived()) {
             throw ValidationException::withMessages([
-                'layout_system' => __('colors.validation.archived'),
+                'layout_system' => __('colors.systems.validation.archived'),
             ]);
         }
 

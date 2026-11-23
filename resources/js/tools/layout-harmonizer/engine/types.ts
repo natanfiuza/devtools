@@ -11,7 +11,7 @@ import type { ContrastVerdict, Oklch, Rgb, Rgba } from '@/lib/color';
 export const LAYOUT_SCHEMA_VERSION = 1;
 
 /** Sobe quando qualquer numero de `params.ts` mudar o resultado. */
-export const LAYOUT_ALGORITHM_VERSION = 1;
+export const LAYOUT_ALGORITHM_VERSION = 2;
 
 export const LAYOUT_THEMES = ['light', 'dark'] as const;
 
@@ -114,6 +114,18 @@ export interface LayoutSeedInfo {
 }
 
 /**
+ * Secundaria manual depois da composicao (emenda da F6).
+ *
+ * O original preserva o alpha digitado; o motor trabalha com a efetiva. O
+ * fundo so existe quando a secundaria tinha alpha e foi composta.
+ */
+export interface LayoutSecondaryInfo {
+    original: Rgba;
+    effective: Rgba;
+    background: Rgb | null;
+}
+
+/**
  * Valores manuais por tema e token (F3). O override vale exatamente para o
  * token informado: nao recalcula derivados, e o contraste e medido depois dele.
  */
@@ -129,8 +141,16 @@ export interface GenerateLayoutInput {
      * composicao precisa ser explicita (ADR-149).
      */
     background?: Rgb | null;
-    /** Secundaria manual opaca; ausente = derivada da estrategia. */
-    secondary?: Rgb | null;
+    /**
+     * Secundaria manual; ausente = derivada da estrategia. Com alpha exige
+     * `secondaryBackground` explicito (mesma regra da seed).
+     */
+    secondary?: Rgba | null;
+    /**
+     * Fundo de composicao da secundaria com alpha. Nunca existe fundo padrao:
+     * sem ele o motor recusa a entrada em vez de descartar o alpha.
+     */
+    secondaryBackground?: Rgb | null;
     /**
      * Overrides manuais por tema; ausente ou vazio devolve o quadro automatico.
      * Precedencia: override por token > secundaria manual > derivacao.
@@ -144,11 +164,15 @@ export interface LayoutSystemResult {
     seed: LayoutSeedInfo;
     strategy: LayoutStrategy;
     secondarySource: 'auto' | 'manual';
+    /** Secundaria manual resolvida; `null` quando automatica. */
+    secondary: LayoutSecondaryInfo | null;
     themes: Record<LayoutTheme, LayoutThemeBoard>;
 }
 
 export type LayoutEngineErrorCode =
-    'invalid-strategy' | 'seed-alpha-without-background';
+    | 'invalid-strategy'
+    | 'seed-alpha-without-background'
+    | 'secondary-alpha-without-background';
 
 export class LayoutEngineError extends Error {
     constructor(

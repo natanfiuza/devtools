@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Colors;
 
 use App\Http\Controllers\Controller;
 use App\Models\ColorPalette;
+use App\Support\Locales;
 use Illuminate\Http\RedirectResponse;
 
 /**
@@ -18,7 +19,7 @@ class PaletteIntentController extends Controller
     public function create(): RedirectResponse
     {
         return redirect()->route('tools.show.grouped', [
-            'locale' => app()->getLocale(),
+            'locale' => Locales::slug(app()->getLocale()),
             'group' => 'colors',
             'slug' => 'palette-generator',
             'save' => 1,

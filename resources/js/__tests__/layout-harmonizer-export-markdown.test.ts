@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseColor } from '@/lib/color';
+import { compositeOver, formatHex, parseColor } from '@/lib/color';
 import { generateLayoutSystem } from '@/tools/layout-harmonizer/engine';
 import { buildLayoutMarkdown } from '@/tools/layout-harmonizer/export/markdown';
 import { lookupMessage } from '@/tools/layout-harmonizer/export/messages';
@@ -125,12 +125,41 @@ describe('export/markdown', () => {
         expect(text).toContain('Effective seed: #3b82f6');
         expect(text).toContain('Secondary: automatic');
         expect(text).toContain(
-            'Versions: state 1, schema 1, algorithm 1, suggestions 1, snapshot 1',
+            'Versions: state 1, schema 1, algorithm 2, suggestions 1, snapshot 1',
         );
         expect(text).toContain('Do not invent colours');
         expect(text).toContain('must stay exactly as listed');
         expect(text).toContain('focus-ring');
         expect(text).toContain('data-theme="dark"');
+    });
+
+    it('lista a secundaria com alpha, efetiva e fundo de composicao', () => {
+        const translucent = { ...color('#00ff00'), a: 0.5 };
+        const white = { r: 255, g: 255, b: 255 };
+        const result = generateLayoutSystem({
+            seed: color('#3b82f6'),
+            strategy: 'analogous',
+            secondary: translucent,
+            secondaryBackground: white,
+        });
+        const state = buildLayoutState(
+            {
+                ...INPUTS,
+                secondaryText: 'rgba(0, 255, 0, 0.5)',
+                secondaryBackgroundText: '#ffffff',
+            },
+            translucent,
+            buildSnapshot(result, emptyEditState(), 'aa'),
+            white,
+        );
+        const text = markdown({ state });
+
+        expect(text).toContain('Secondary: manual');
+        expect(text).toContain('Original secondary: rgba(0, 255, 0, 0.5)');
+        expect(text).toContain(
+            `Effective secondary: ${formatHex({ ...compositeOver(translucent, white), a: 1 })}`,
+        );
+        expect(text).toContain('Secondary composition background: #ffffff');
     });
 
     it('mostra a origem somente quando o credito e de paleta publica', () => {

@@ -44,59 +44,62 @@ async function onCopyScale(): Promise<void> {
 </script>
 
 <template>
-    <section
-        class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
-        data-test="tone-scale"
+  <section
+    class="flex flex-col gap-3 rounded-xl border border-border bg-card p-4"
+    data-test="tone-scale"
+  >
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="min-w-0">
+        <h2 class="text-sm font-semibold">
+          {{ t('tools.palette-generator.scale.title') }}
+        </h2>
+        <p class="mt-1 text-xs text-muted-foreground">
+          {{ t('tools.palette-generator.scale.description') }}
+        </p>
+      </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        data-test="scale-copy"
+        @click="onCopyScale"
+      >
+        <CopyStatusIcon :copied="copied" />
+        {{ t('tools.palette-generator.scale.copy_scale') }}
+      </Button>
+    </div>
+
+    <div
+      class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+      data-test="tone-grid"
     >
-        <div class="flex flex-wrap items-start justify-between gap-2">
-            <div class="min-w-0">
-                <h2 class="text-sm font-semibold">
-                    {{ t('tools.palette-generator.scale.title') }}
-                </h2>
-                <p class="mt-1 text-xs text-muted-foreground">
-                    {{ t('tools.palette-generator.scale.description') }}
-                </p>
-            </div>
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                data-test="scale-copy"
-                @click="onCopyScale"
-            >
-                <CopyStatusIcon :copied="copied" />
-                {{ t('tools.palette-generator.scale.copy_scale') }}
-            </Button>
-        </div>
+      <ToneCard
+        v-for="tone in scale.tones"
+        :key="tone.tone"
+        :tone="tone"
+        :nearest="tone.tone === scale.nearestTone"
+        :copy="copy"
+      />
+    </div>
 
-        <div
-            class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
-            data-test="tone-grid"
-        >
-            <ToneCard
-                v-for="tone in scale.tones"
-                :key="tone.tone"
-                :tone="tone"
-                :nearest="tone.tone === scale.nearestTone"
-                :copy="copy"
-            />
-        </div>
-
-        <div class="flex flex-col gap-1 text-xs text-muted-foreground">
-            <p data-test="scale-version">
-                {{
-                    t('tools.palette-generator.scale.algorithm_version', {
-                        version: scale.algorithmVersion,
-                    })
-                }}
-            </p>
-            <p v-if="scale.clippedTones.length > 0" data-test="scale-clipped">
-                {{
-                    t('tools.palette-generator.scale.clipped_summary', {
-                        tones: clippedText,
-                    })
-                }}
-            </p>
-        </div>
-    </section>
+    <div class="flex flex-col gap-1 text-xs text-muted-foreground">
+      <p data-test="scale-version">
+        {{
+          t('tools.palette-generator.scale.algorithm_version', {
+            version: scale.algorithmVersion,
+          })
+        }}
+      </p>
+      <p
+        v-if="scale.clippedTones.length > 0"
+        data-test="scale-clipped"
+      >
+        {{
+          t('tools.palette-generator.scale.clipped_summary', {
+            tones: clippedText,
+          })
+        }}
+      </p>
+    </div>
+  </section>
 </template>

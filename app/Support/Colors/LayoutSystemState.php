@@ -89,13 +89,20 @@ final class LayoutSystemState
         }
 
         $secondary = $state['secondary'] ?? null;
+        $background = $state['secondaryBackground'] ?? null;
         $manual = ($snapshot['secondarySource'] ?? null) === 'manual';
 
-        if ($manual ? ! $this->isRgb($secondary) : $secondary !== null) {
+        if ($manual ? ! $this->isStoredSecondary($secondary) : $secondary !== null) {
             return false;
         }
 
-        return true;
+        // Secundaria com alpha so existe com o fundo de composicao explicito e
+        // opaco (emenda da F6); o fundo extra com secundaria opaca e ignorado.
+        if (! $this->isNullableOpaqueRgb($background)) {
+            return false;
+        }
+
+        return ! ($manual && $this->alphaOf($secondary) < 1 && $background === null);
     }
 
     /**
@@ -111,6 +118,14 @@ final class LayoutSystemState
             if (! is_string($value) || mb_strlen($value) > $max) {
                 return false;
             }
+        }
+
+        // Campo aditivo da emenda da F6: ausente nos estados gravados antes.
+        $secondaryBackground = $inputs['secondaryBackgroundText'] ?? null;
+
+        if ($secondaryBackground !== null
+            && (! is_string($secondaryBackground) || mb_strlen($secondaryBackground) > $max)) {
+            return false;
         }
 
         return is_string($inputs['strategy'] ?? null)
@@ -151,7 +166,7 @@ final class LayoutSystemState
             || ! $this->isRgba($seed['original'] ?? null)
             || ! $this->isRgba($seed['effective'] ?? null, true)
             || ! is_bool($seed['achromatic'] ?? null)
-            || ! $this->isNullableRgb($seed['background'] ?? null)) {
+            || ! $this->isNullableOpaqueRgb($seed['background'] ?? null)) {
             return false;
         }
 
@@ -160,6 +175,26 @@ final class LayoutSystemState
 
         if (($original['a'] ?? 1) < 1 && $seed['background'] === null) {
             return false;
+        }
+
+        // Informacao da secundaria (aditiva, emenda da F6): opcional para nao
+        // invalidar linhas gravadas antes; quando presente exige fundo com alpha.
+        $secondary = $snapshot['secondary'] ?? null;
+
+        if ($secondary !== null) {
+            if (! is_array($secondary)
+                || ! $this->isRgba($secondary['original'] ?? null)
+                || ! $this->isRgba($secondary['effective'] ?? null, true)
+                || ! $this->isNullableOpaqueRgb($secondary['background'] ?? null)) {
+                return false;
+            }
+
+            /** @var array<string, mixed> $secondaryOriginal */
+            $secondaryOriginal = $secondary['original'];
+
+            if (($secondaryOriginal['a'] ?? 1) < 1 && $secondary['background'] === null) {
+                return false;
+            }
         }
 
         if (! $this->validThemes($snapshot['themes'] ?? null)) {
@@ -376,11 +411,42 @@ final class LayoutSystemState
     }
 
     /**
+     * Secundaria manual gravada: RGB opaco (linhas antigas) ou RGBA valido.
+     *
      * @param  mixed  $value
      */
-    private function isNullableRgb($value): bool
+    private function isStoredSecondary($value): bool
     {
-        return $value === null || $this->isRgb($value);
+        return $this->isRgb($value)
+            && (! array_key_exists('a', $value) || $this->isRgba($value));
+    }
+
+    /**
+     * @param  mixed  $value
+     */
+    private function alphaOf($value): float
+    {
+        return is_array($value) && array_key_exists('a', $value) && is_numeric($value['a'])
+            ? (float) $value['a']
+            : 1.0;
+    }
+
+    /**
+     * RGB sem canal alpha (ou com `a` exatamente 1): fundo de composicao.
+     *
+     * @param  mixed  $value
+     */
+    private function isNullableOpaqueRgb($value): bool
+    {
+        if ($value === null) {
+            return true;
+        }
+
+        if (! $this->isRgb($value)) {
+            return false;
+        }
+
+        return ! array_key_exists('a', $value) || $value['a'] === 1;
     }
 
     /**

@@ -59,82 +59,97 @@ const description = computed(() =>
 </script>
 
 <template>
-    <Head :title="title" />
+  <Head :title="title" />
 
-    <AuthCard :title="title" :description="description">
-        <form class="flex flex-col gap-5" @submit.prevent="submit">
-            <div class="grid gap-4">
-                <div v-if="!recovery" class="grid gap-2">
-                    <Label for="code">{{
-                        t('auth.two_factor.code_label')
-                    }}</Label>
-                    <Input
-                        id="code"
-                        ref="codeInput"
-                        v-model="form.code"
-                        type="text"
-                        inputmode="numeric"
-                        autofocus
-                        autocomplete="one-time-code"
-                        placeholder="123456"
-                        maxlength="6"
-                        class="text-center font-mono text-lg tracking-widest"
-                        :aria-invalid="form.errors.code ? 'true' : undefined"
-                        aria-describedby="code-error"
-                    />
-                    <InputError id="code-error" :message="form.errors.code" />
-                </div>
+  <AuthCard
+    :title="title"
+    :description="description"
+  >
+    <form
+      class="flex flex-col gap-5"
+      @submit.prevent="submit"
+    >
+      <div class="grid gap-4">
+        <div
+          v-if="!recovery"
+          class="grid gap-2"
+        >
+          <Label for="code">{{
+            t('auth.two_factor.code_label')
+          }}</Label>
+          <Input
+            id="code"
+            ref="codeInput"
+            v-model="form.code"
+            type="text"
+            inputmode="numeric"
+            autofocus
+            autocomplete="one-time-code"
+            placeholder="123456"
+            maxlength="6"
+            class="text-center font-mono text-lg tracking-widest"
+            :aria-invalid="form.errors.code ? 'true' : undefined"
+            aria-describedby="code-error"
+          />
+          <InputError
+            id="code-error"
+            :message="form.errors.code"
+          />
+        </div>
 
-                <div v-else class="grid gap-2">
-                    <Label for="recovery_code">
-                        {{ t('auth.two_factor.recovery_code_label') }}
-                    </Label>
-                    <Input
-                        id="recovery_code"
-                        ref="recoveryCodeInput"
-                        v-model="form.recovery_code"
-                        type="text"
-                        autofocus
-                        autocomplete="one-time-code"
-                        placeholder="abcdef-98765"
-                        class="text-center font-mono tracking-wider"
-                        :aria-invalid="
-                            form.errors.recovery_code ? 'true' : undefined
-                        "
-                        aria-describedby="recovery-code-error"
-                    />
-                    <InputError
-                        id="recovery-code-error"
-                        :message="form.errors.recovery_code"
-                    />
-                </div>
-            </div>
+        <div
+          v-else
+          class="grid gap-2"
+        >
+          <Label for="recovery_code">
+            {{ t('auth.two_factor.recovery_code_label') }}
+          </Label>
+          <Input
+            id="recovery_code"
+            ref="recoveryCodeInput"
+            v-model="form.recovery_code"
+            type="text"
+            autofocus
+            autocomplete="one-time-code"
+            placeholder="abcdef-98765"
+            class="text-center font-mono tracking-wider"
+            :aria-invalid="
+              form.errors.recovery_code ? 'true' : undefined
+            "
+            aria-describedby="recovery-code-error"
+          />
+          <InputError
+            id="recovery-code-error"
+            :message="form.errors.recovery_code"
+          />
+        </div>
+      </div>
 
-            <div class="flex flex-col gap-3">
-                <Button
-                    type="submit"
-                    class="w-full"
-                    :disabled="form.processing"
-                    data-test="confirm-two-factor-button"
-                >
-                    <Spinner v-if="form.processing" />
-                    {{ t('auth.two_factor.submit') }}
-                </Button>
+      <div class="flex flex-col gap-3">
+        <Button
+          type="submit"
+          class="w-full"
+          :disabled="form.processing"
+          data-test="confirm-two-factor-button"
+        >
+          <Spinner v-if="form.processing" />
+          {{ t('auth.two_factor.submit') }}
+        </Button>
 
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="text-xs text-muted-foreground hover:text-foreground"
-                    @click="toggleRecovery"
-                >
-                    {{
-                        recovery
-                            ? t('auth.two_factor.use_auth_code')
-                            : t('auth.two_factor.use_recovery_code')
-                    }}
-                </Button>
-            </div>
-        </form>
-    </AuthCard>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="text-xs text-muted-foreground hover:text-foreground"
+          @click="toggleRecovery"
+        >
+          {{
+            recovery
+              ? t('auth.two_factor.use_auth_code')
+              : t('auth.two_factor.use_recovery_code')
+          }}
+        </Button>
+      </div>
+    </form>
+  </AuthCard>
 </template>

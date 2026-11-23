@@ -53,34 +53,36 @@ function familyTitle(family: (typeof groups.value)[number]['family']): string {
 </script>
 
 <template>
-    <section
-        role="region"
-        :aria-label="
-            t('tools.layout-harmonizer.a11y.board_section', { theme: title })
-        "
-        class="space-y-4 rounded-xl border p-4"
-        data-test="theme-board"
-    >
-        <h2 class="text-base font-semibold">{{ title }}</h2>
+  <section
+    role="region"
+    :aria-label="
+      t('tools.layout-harmonizer.a11y.board_section', { theme: title })
+    "
+    class="space-y-4 rounded-xl border p-4"
+    data-test="theme-board"
+  >
+    <h2 class="text-base font-semibold">
+      {{ title }}
+    </h2>
 
-        <TokenGroup
-            v-for="group in groups"
-            :key="group.family"
-            :title="familyTitle(group.family)"
-            :tokens="group.tokens"
-            :checks-by-token="checks"
-            :purpose-of="purposeOf"
-            :copy="copy"
-            :locks="locks"
-            :overrides="overrides"
-            :suggested-tokens="suggestedTokens"
-            :editable="editable"
-            :apply-color="applyColor"
-            :toggle-lock="toggleLock"
-            :restore-token="restoreToken"
-        />
+    <TokenGroup
+      v-for="group in groups"
+      :key="group.family"
+      :title="familyTitle(group.family)"
+      :tokens="group.tokens"
+      :checks-by-token="checks"
+      :purpose-of="purposeOf"
+      :copy="copy"
+      :locks="locks"
+      :overrides="overrides"
+      :suggested-tokens="suggestedTokens"
+      :editable="editable"
+      :apply-color="applyColor"
+      :toggle-lock="toggleLock"
+      :restore-token="restoreToken"
+    />
 
-        <FeedbackPreview :tokens="board.tokens" />
-        <ContrastSummary :checks="board.checks" />
-    </section>
+    <FeedbackPreview :tokens="board.tokens" />
+    <ContrastSummary :checks="board.checks" />
+  </section>
 </template>

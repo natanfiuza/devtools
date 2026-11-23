@@ -228,199 +228,211 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-    <Dialog :open="open" @update:open="setOpen">
-        <DialogContent class="sm:max-w-lg" data-test="layout-save-dialog">
-            <DialogHeader>
-                <DialogTitle>
-                    {{ t('tools.layout-harmonizer.save.title') }}
-                </DialogTitle>
-                <DialogDescription>
-                    {{ t('tools.layout-harmonizer.save.description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="open"
+    @update:open="setOpen"
+  >
+    <DialogContent
+      class="sm:max-w-lg"
+      data-test="layout-save-dialog"
+    >
+      <DialogHeader>
+        <DialogTitle>
+          {{ t('tools.layout-harmonizer.save.title') }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('tools.layout-harmonizer.save.description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <form class="flex flex-col gap-4" @submit.prevent="submit('save')">
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-baseline justify-between gap-2">
-                        <Label for="layout-save-name">
-                            {{ t('tools.layout-harmonizer.save.name_label') }}
-                        </Label>
-                        <span class="text-xs text-muted-foreground">
-                            {{ name.trim().length }}/{{ limits.nameMaxLength }}
-                        </span>
-                    </div>
-                    <Input
-                        id="layout-save-name"
-                        v-model="name"
-                        type="text"
-                        autocomplete="off"
-                        :maxlength="limits.nameMaxLength"
-                        :aria-invalid="nameError !== null"
-                        :placeholder="
-                            t('tools.layout-harmonizer.save.name_placeholder')
-                        "
-                        data-test="layout-save-name"
-                    />
-                    <InputError :message="nameError ?? undefined" />
-                </div>
+      <form
+        class="flex flex-col gap-4"
+        @submit.prevent="submit('save')"
+      >
+        <div class="flex flex-col gap-2">
+          <div class="flex items-baseline justify-between gap-2">
+            <Label for="layout-save-name">
+              {{ t('tools.layout-harmonizer.save.name_label') }}
+            </Label>
+            <span class="text-xs text-muted-foreground">
+              {{ name.trim().length }}/{{ limits.nameMaxLength }}
+            </span>
+          </div>
+          <Input
+            id="layout-save-name"
+            v-model="name"
+            type="text"
+            autocomplete="off"
+            :maxlength="limits.nameMaxLength"
+            :aria-invalid="nameError !== null"
+            :placeholder="
+              t('tools.layout-harmonizer.save.name_placeholder')
+            "
+            data-test="layout-save-name"
+          />
+          <InputError :message="nameError ?? undefined" />
+        </div>
 
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-baseline justify-between gap-2">
-                        <Label for="layout-save-description">
-                            {{
-                                t(
-                                    'tools.layout-harmonizer.save.description_label',
-                                )
-                            }}
-                        </Label>
-                        <span class="text-xs text-muted-foreground">
-                            {{ description.length }}/{{
-                                limits.descriptionMaxLength
-                            }}
-                        </span>
-                    </div>
-                    <textarea
-                        id="layout-save-description"
-                        v-model="description"
-                        :maxlength="limits.descriptionMaxLength"
-                        :aria-invalid="descriptionError !== null"
-                        :placeholder="
-                            t(
-                                'tools.layout-harmonizer.save.description_placeholder',
-                            )
-                        "
-                        class="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
-                        data-test="layout-save-description"
-                    />
-                    <InputError :message="descriptionError ?? undefined" />
-                </div>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-baseline justify-between gap-2">
+            <Label for="layout-save-description">
+              {{
+                t(
+                  'tools.layout-harmonizer.save.description_label',
+                )
+              }}
+            </Label>
+            <span class="text-xs text-muted-foreground">
+              {{ description.length }}/{{
+                limits.descriptionMaxLength
+              }}
+            </span>
+          </div>
+          <textarea
+            id="layout-save-description"
+            v-model="description"
+            :maxlength="limits.descriptionMaxLength"
+            :aria-invalid="descriptionError !== null"
+            :placeholder="
+              t(
+                'tools.layout-harmonizer.save.description_placeholder',
+              )
+            "
+            class="min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+            data-test="layout-save-description"
+          />
+          <InputError :message="descriptionError ?? undefined" />
+        </div>
 
-                <fieldset class="flex flex-col gap-2">
-                    <legend class="text-sm font-medium">
-                        {{ t('tools.layout-harmonizer.save.visibility_label') }}
-                    </legend>
-                    <div class="grid gap-2 sm:grid-cols-2">
-                        <button
-                            type="button"
-                            role="radio"
-                            :aria-checked="visibility === 'private'"
-                            class="rounded-lg border px-3 py-2 text-left text-sm"
-                            :class="
-                                visibility === 'private'
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border'
-                            "
-                            data-test="layout-save-visibility-private"
-                            @click="visibility = 'private'"
-                        >
-                            <span class="block font-medium">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.save.visibility_private',
-                                    )
-                                }}
-                            </span>
-                            <span class="block text-xs text-muted-foreground">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.save.visibility_private_hint',
-                                    )
-                                }}
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            role="radio"
-                            :aria-checked="visibility === 'public'"
-                            class="rounded-lg border px-3 py-2 text-left text-sm"
-                            :class="
-                                visibility === 'public'
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-border'
-                            "
-                            data-test="layout-save-visibility-public"
-                            @click="visibility = 'public'"
-                        >
-                            <span class="block font-medium">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.save.visibility_public',
-                                    )
-                                }}
-                            </span>
-                            <span class="block text-xs text-muted-foreground">
-                                {{
-                                    t(
-                                        'tools.layout-harmonizer.save.visibility_public_hint',
-                                    )
-                                }}
-                            </span>
-                        </button>
-                    </div>
-                </fieldset>
+        <fieldset class="flex flex-col gap-2">
+          <legend class="text-sm font-medium">
+            {{ t('tools.layout-harmonizer.save.visibility_label') }}
+          </legend>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              role="radio"
+              :aria-checked="visibility === 'private'"
+              class="rounded-lg border px-3 py-2 text-left text-sm"
+              :class="
+                visibility === 'private'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border'
+              "
+              data-test="layout-save-visibility-private"
+              @click="visibility = 'private'"
+            >
+              <span class="block font-medium">
+                {{
+                  t(
+                    'tools.layout-harmonizer.save.visibility_private',
+                  )
+                }}
+              </span>
+              <span class="block text-xs text-muted-foreground">
+                {{
+                  t(
+                    'tools.layout-harmonizer.save.visibility_private_hint',
+                  )
+                }}
+              </span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              :aria-checked="visibility === 'public'"
+              class="rounded-lg border px-3 py-2 text-left text-sm"
+              :class="
+                visibility === 'public'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border'
+              "
+              data-test="layout-save-visibility-public"
+              @click="visibility = 'public'"
+            >
+              <span class="block font-medium">
+                {{
+                  t(
+                    'tools.layout-harmonizer.save.visibility_public',
+                  )
+                }}
+              </span>
+              <span class="block text-xs text-muted-foreground">
+                {{
+                  t(
+                    'tools.layout-harmonizer.save.visibility_public_hint',
+                  )
+                }}
+              </span>
+            </button>
+          </div>
+        </fieldset>
 
-                <div class="flex flex-col gap-1">
-                    <TagInput
-                        id="layout-save-tags"
-                        v-model="tags"
-                        :suggestions="accountTags"
-                        :max="limits.tagsPerSystem"
-                        :name-max-length="limits.tagNameMaxLength"
-                    />
-                    <InputError :message="tagsError ?? undefined" />
-                </div>
+        <div class="flex flex-col gap-1">
+          <TagInput
+            id="layout-save-tags"
+            v-model="tags"
+            :suggestions="accountTags"
+            :max="limits.tagsPerSystem"
+            :name-max-length="limits.tagNameMaxLength"
+          />
+          <InputError :message="tagsError ?? undefined" />
+        </div>
 
-                <div
-                    v-if="formErrors.length > 0"
-                    class="flex flex-col gap-1 rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
-                    role="alert"
-                    data-test="layout-save-error"
-                >
-                    <p v-for="message in formErrors" :key="message">
-                        {{ message }}
-                    </p>
-                </div>
+        <div
+          v-if="formErrors.length > 0"
+          class="flex flex-col gap-1 rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
+          role="alert"
+          data-test="layout-save-error"
+        >
+          <p
+            v-for="message in formErrors"
+            :key="message"
+          >
+            {{ message }}
+          </p>
+        </div>
 
-                <DialogFooter class="gap-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        :disabled="saving"
-                        data-test="layout-save-cancel"
-                        @click="emit('close')"
-                    >
-                        {{ t('tools.layout-harmonizer.save.cancel') }}
-                    </Button>
-                    <Button
-                        v-if="mode === 'update'"
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        :disabled="!canSubmit"
-                        data-test="layout-save-as-new"
-                        @click="submit('copy')"
-                    >
-                        {{ t('tools.layout-harmonizer.save.save_as_new') }}
-                    </Button>
-                    <Button
-                        type="submit"
-                        size="sm"
-                        :disabled="!canSubmit"
-                        data-test="layout-save-submit"
-                    >
-                        {{
-                            saving
-                                ? t('tools.layout-harmonizer.save.saving')
-                                : mode === 'update'
-                                  ? t(
-                                        'tools.layout-harmonizer.save.submit_update',
-                                    )
-                                  : t('tools.layout-harmonizer.save.submit')
-                        }}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-    </Dialog>
+        <DialogFooter class="gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            :disabled="saving"
+            data-test="layout-save-cancel"
+            @click="emit('close')"
+          >
+            {{ t('tools.layout-harmonizer.save.cancel') }}
+          </Button>
+          <Button
+            v-if="mode === 'update'"
+            type="button"
+            variant="outline"
+            size="sm"
+            :disabled="!canSubmit"
+            data-test="layout-save-as-new"
+            @click="submit('copy')"
+          >
+            {{ t('tools.layout-harmonizer.save.save_as_new') }}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            :disabled="!canSubmit"
+            data-test="layout-save-submit"
+          >
+            {{
+              saving
+                ? t('tools.layout-harmonizer.save.saving')
+                : mode === 'update'
+                  ? t(
+                    'tools.layout-harmonizer.save.submit_update',
+                  )
+                  : t('tools.layout-harmonizer.save.submit')
+            }}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>

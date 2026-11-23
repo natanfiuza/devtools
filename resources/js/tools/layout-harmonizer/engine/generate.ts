@@ -9,7 +9,7 @@ import {
     type Rgb,
     type Rgba,
 } from '@/lib/color';
-import { resolveSeed } from './alpha';
+import { resolveSecondary, resolveSeed } from './alpha';
 import { evaluateContrast } from './contrast';
 import {
     ACHROMATIC_CHROMA,
@@ -396,10 +396,13 @@ export function generateLayoutSystem(
     }
 
     const resolved = resolveSeed(input.seed, input.background ?? null);
+    const resolvedSecondary = input.secondary
+        ? resolveSecondary(input.secondary, input.secondaryBackground ?? null)
+        : null;
     const seedOklch = rgbToOklch(resolved.effective);
     const achromatic = seedOklch.c < ACHROMATIC_CHROMA;
-    const manualSecondary: Rgba | null = input.secondary
-        ? { ...input.secondary, a: 1 }
+    const manualSecondary: Rgba | null = resolvedSecondary
+        ? resolvedSecondary.effective
         : null;
 
     const boardInput = {
@@ -421,6 +424,7 @@ export function generateLayoutSystem(
         },
         strategy: input.strategy,
         secondarySource: manualSecondary ? 'manual' : 'auto',
+        secondary: resolvedSecondary,
         themes: {
             light: buildBoard({
                 ...boardInput,

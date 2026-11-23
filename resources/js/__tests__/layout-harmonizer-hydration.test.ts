@@ -132,7 +132,7 @@ describe('reabrir um sistema salvo', () => {
     });
 
     it('reabre com a secundaria manual efetiva', () => {
-        const manual = { r: 0, g: 255, b: 0 };
+        const manual = { r: 0, g: 255, b: 0, a: 1 };
         const result = generateLayoutSystem({
             seed: color('#3b82f6'),
             strategy: 'analogous',

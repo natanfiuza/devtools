@@ -42,9 +42,16 @@ final class UpdateLayoutSystem
                     $system->loadMissing('tags');
 
                     $slug = $system->slug;
+                    $archivedSlug = $system->archived_slug;
 
                     if ($data->visibility === PaletteVisibility::Public && $slug === null) {
-                        $slug = $this->slug->unique($this->slug->base($data->name));
+                        // Sistema restaurado privado guardou o slug reservado;
+                        // publicar de novo reivindica esse valor (ADR-171).
+                        $slug = $archivedSlug !== null
+                            ? $this->slug->claimOrGenerate($archivedSlug, $data->name, $system->id)
+                            : $this->slug->unique($this->slug->base($data->name));
+
+                        $archivedSlug = null;
                     }
 
                     $source = $this->source($system->user, $data->sourcePaletteId, $system);
@@ -57,6 +64,7 @@ final class UpdateLayoutSystem
                         'source' => $source['credit'],
                         'source_palette_id' => $source['palette']?->id,
                         'slug' => $slug,
+                        'archived_slug' => $archivedSlug,
                         ...$this->state->derive($data->state),
                     ])->save();
 

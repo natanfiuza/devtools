@@ -101,141 +101,148 @@ function prune(): void {
 </script>
 
 <template>
-    <Head :title="t('admin.ai_cache.title')" />
+  <Head :title="t('admin.ai_cache.title')" />
 
-    <div class="space-y-4">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('admin.ai_cache.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.ai_cache.description') }}
-            </p>
-            <p class="mt-1 text-xs text-subtle">
-                {{ t('admin.ai_cache.readonly') }}
-            </p>
-        </header>
+  <div class="space-y-4">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('admin.ai_cache.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.ai_cache.description') }}
+      </p>
+      <p class="mt-1 text-xs text-subtle">
+        {{ t('admin.ai_cache.readonly') }}
+      </p>
+    </header>
 
-        <div class="flex flex-wrap items-center gap-2">
-            <form class="flex items-center gap-2" @submit.prevent="apply">
-                <Select v-model="filters.state">
-                    <SelectTrigger
-                        class="h-9 w-44"
-                        :aria-label="t('admin.ai_cache.state')"
-                    >
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem :value="ALL">
-                            {{ t('admin.ai_cache.state_all') }}
-                        </SelectItem>
-                        <SelectItem value="valid">
-                            {{ t('admin.ai_cache.state_valid') }}
-                        </SelectItem>
-                        <SelectItem value="expired">
-                            {{ t('admin.ai_cache.state_expired') }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
+    <div class="flex flex-wrap items-center gap-2">
+      <form
+        class="flex items-center gap-2"
+        @submit.prevent="apply"
+      >
+        <Select v-model="filters.state">
+          <SelectTrigger
+            class="h-9 w-44"
+            :aria-label="t('admin.ai_cache.state')"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem :value="ALL">
+              {{ t('admin.ai_cache.state_all') }}
+            </SelectItem>
+            <SelectItem value="valid">
+              {{ t('admin.ai_cache.state_valid') }}
+            </SelectItem>
+            <SelectItem value="expired">
+              {{ t('admin.ai_cache.state_expired') }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
-                <Button type="submit" variant="outline" size="sm">
-                    {{ t('admin.common.search') }}
-                </Button>
-            </form>
-
-            <Button
-                variant="outline"
-                size="sm"
-                :disabled="expired === 0"
-                class="ml-auto"
-                data-test="ai-cache-prune"
-                @click="confirmOpen = true"
-            >
-                {{ t('admin.ai_cache.prune') }} ({{
-                    t('admin.ai_cache.expired_count', { count: expired })
-                }})
-            </Button>
-        </div>
-
-        <AdminTable
-            :columns="columns"
-            :rows="entries"
-            :empty="t('admin.ai_cache.empty')"
-            @page="goToPage"
+        <Button
+          type="submit"
+          variant="outline"
+          size="sm"
         >
-            <template #cell-hash="{ row }">
-                {{ row.hash }}
-            </template>
+          {{ t('admin.common.search') }}
+        </Button>
+      </form>
 
-            <template #cell-model="{ row }">
-                {{ row.model }}
-            </template>
-
-            <template #cell-promptVersion="{ row }">
-                {{ row.promptVersion }}
-            </template>
-
-            <template #cell-tokens="{ row }">
-                {{
-                    t('admin.ai_cache.tokens_count', {
-                        in: row.tokensIn,
-                        out: row.tokensOut,
-                    })
-                }}
-            </template>
-
-            <template #cell-hits="{ row }">
-                {{ row.hits }}
-            </template>
-
-            <template #cell-createdAt="{ row }">
-                {{ row.createdAt ?? '—' }}
-            </template>
-
-            <template #cell-expiresAt="{ row }">
-                {{ row.expiresAt ?? '—' }}
-            </template>
-
-            <template #cell-state="{ row }">
-                <Badge :variant="row.expired ? 'destructive' : 'secondary'">
-                    {{
-                        row.expired
-                            ? t('admin.ai_cache.expired')
-                            : t('admin.ai_cache.valid')
-                    }}
-                </Badge>
-            </template>
-        </AdminTable>
-
-        <Dialog v-model:open="confirmOpen">
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>
-                        {{ t('admin.ai_cache.prune_confirm_title') }}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {{ t('admin.ai_cache.prune_confirm_description') }}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        @click="confirmOpen = false"
-                    >
-                        {{ t('admin.common.cancel') }}
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        data-test="ai-cache-prune-confirm"
-                        @click="prune"
-                    >
-                        {{ t('admin.ai_cache.prune_confirm_button') }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+      <Button
+        variant="outline"
+        size="sm"
+        :disabled="expired === 0"
+        class="ml-auto"
+        data-test="ai-cache-prune"
+        @click="confirmOpen = true"
+      >
+        {{ t('admin.ai_cache.prune') }} ({{
+          t('admin.ai_cache.expired_count', { count: expired })
+        }})
+      </Button>
     </div>
+
+    <AdminTable
+      :columns="columns"
+      :rows="entries"
+      :empty="t('admin.ai_cache.empty')"
+      @page="goToPage"
+    >
+      <template #cell-hash="{ row }">
+        {{ row.hash }}
+      </template>
+
+      <template #cell-model="{ row }">
+        {{ row.model }}
+      </template>
+
+      <template #cell-promptVersion="{ row }">
+        {{ row.promptVersion }}
+      </template>
+
+      <template #cell-tokens="{ row }">
+        {{
+          t('admin.ai_cache.tokens_count', {
+            in: row.tokensIn,
+            out: row.tokensOut,
+          })
+        }}
+      </template>
+
+      <template #cell-hits="{ row }">
+        {{ row.hits }}
+      </template>
+
+      <template #cell-createdAt="{ row }">
+        {{ row.createdAt ?? '—' }}
+      </template>
+
+      <template #cell-expiresAt="{ row }">
+        {{ row.expiresAt ?? '—' }}
+      </template>
+
+      <template #cell-state="{ row }">
+        <Badge :variant="row.expired ? 'destructive' : 'secondary'">
+          {{
+            row.expired
+              ? t('admin.ai_cache.expired')
+              : t('admin.ai_cache.valid')
+          }}
+        </Badge>
+      </template>
+    </AdminTable>
+
+    <Dialog v-model:open="confirmOpen">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {{ t('admin.ai_cache.prune_confirm_title') }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('admin.ai_cache.prune_confirm_description') }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter>
+          <Button
+            variant="ghost"
+            size="sm"
+            @click="confirmOpen = false"
+          >
+            {{ t('admin.common.cancel') }}
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            data-test="ai-cache-prune-confirm"
+            @click="prune"
+          >
+            {{ t('admin.ai_cache.prune_confirm_button') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>

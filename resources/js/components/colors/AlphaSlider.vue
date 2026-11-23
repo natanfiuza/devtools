@@ -49,26 +49,26 @@ function onInput(event: Event): void {
 </script>
 
 <template>
-    <label class="block">
-        <span class="flex items-center justify-between text-sm font-medium">
-            <span>{{ t('tools.shared.color_picker.alpha.label') }}</span>
-            <span class="text-muted-foreground tabular-nums">
-                {{ percent }}%
-            </span>
-        </span>
-        <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            :value="percent"
-            :aria-label="t('tools.shared.color_picker.alpha.label')"
-            class="mt-2 h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
-            :style="trackStyle"
-            data-test="alpha-slider"
-            @input="onInput"
-            @change="emit('finalize')"
-            @blur="emit('finalize')"
-        />
-    </label>
+  <label class="block">
+    <span class="flex items-center justify-between text-sm font-medium">
+      <span>{{ t('tools.shared.color_picker.alpha.label') }}</span>
+      <span class="text-muted-foreground tabular-nums">
+        {{ percent }}%
+      </span>
+    </span>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      step="1"
+      :value="percent"
+      :aria-label="t('tools.shared.color_picker.alpha.label')"
+      class="mt-2 h-2 w-full cursor-pointer appearance-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-[var(--thumb-color)] [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-[var(--thumb-color)] [&::-webkit-slider-thumb]:shadow-md"
+      :style="trackStyle"
+      data-test="alpha-slider"
+      @input="onInput"
+      @change="emit('finalize')"
+      @blur="emit('finalize')"
+    >
+  </label>
 </template>

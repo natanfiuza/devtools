@@ -1,5 +1,5 @@
 import { compositeOver, type Rgb, type Rgba } from '@/lib/color';
-import { LayoutEngineError } from './types';
+import { LayoutEngineError, type LayoutSecondaryInfo } from './types';
 
 export interface ResolvedSeed {
     /** Cor informada, preservada como veio (inclusive alpha). */
@@ -37,6 +37,40 @@ export function resolveSeed(seed: Rgba, background?: Rgb | null): ResolvedSeed {
 
     return {
         original: { ...seed },
+        effective: { ...composed, a: 1 },
+        background,
+    };
+}
+
+/**
+ * Resolve a secundaria manual com alpha (emenda da F6).
+ *
+ * Mesma regra da seed: alpha sem fundo explicito e recusado, nunca descartado.
+ * Sem alpha o fundo informado e ignorado e a cor entra como veio.
+ */
+export function resolveSecondary(
+    secondary: Rgba,
+    background?: Rgb | null,
+): LayoutSecondaryInfo {
+    if (secondary.a >= 1) {
+        return {
+            original: { ...secondary },
+            effective: { ...secondary, a: 1 },
+            background: null,
+        };
+    }
+
+    if (!background) {
+        throw new LayoutEngineError(
+            'secondary-alpha-without-background',
+            'secundaria com alpha exige um fundo explicito para a composicao',
+        );
+    }
+
+    const composed = compositeOver(secondary, background);
+
+    return {
+        original: { ...secondary },
         effective: { ...composed, a: 1 },
         background,
     };

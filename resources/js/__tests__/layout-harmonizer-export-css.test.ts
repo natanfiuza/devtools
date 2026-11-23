@@ -178,7 +178,7 @@ describe('export/css', () => {
         expect(css).toContain('Layout Harmonizer — Sistema Oceano');
         expect(css).toContain('State 1');
         expect(css).toContain('Schema 1');
-        expect(css).toContain('Algorithm 1');
+        expect(css).toContain('Algorithm 2');
         expect(css).toContain('Suggestions 1');
         expect(css).toContain('Snapshot 1');
         expect(css).toContain('Default theme: light.');

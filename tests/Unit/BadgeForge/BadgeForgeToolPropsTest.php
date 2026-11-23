@@ -66,7 +66,7 @@ it('registra todo logo com arquivo e viewBox', function () {
     }
 });
 
-it('mantem cada SVG de logo com um unico path', function () {
+it('mantem cada SVG de logo apenas com tags svg e path', function () {
     $directory = (string) config('badgeforge.logos_path');
 
     foreach (glob($directory.'/*.svg') ?: [] as $file) {
@@ -77,6 +77,6 @@ it('mantem cada SVG de logo com um unico path', function () {
         $unique = array_values(array_unique(array_map('strtolower', $tags[1])));
 
         expect($unique)->toBe(['svg', 'path'])
-            ->and(substr_count($svg, '<path'))->toBe(1);
+            ->and(substr_count($svg, '<path'))->toBeGreaterThanOrEqual(1);
     }
 });

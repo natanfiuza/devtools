@@ -107,7 +107,7 @@ it('recusa nome repetido na mesma conta mas aceita em outra', function () {
     expect(BadgeCustomLogo::query()->count())->toBe(2);
 });
 
-it('devolve 422 traduzido para SVG fora da allowlist', function (string $svg, string $key) {
+it('devolve 422 traduzido para SVG fora da allowlist', function (string $svg, string $key, array $replace = []) {
     $user = User::factory()->create();
 
     $this->actingAs($user)
@@ -115,13 +115,14 @@ it('devolve 422 traduzido para SVG fora da allowlist', function (string $svg, st
             'name' => 'bad',
             'logo' => badgeLogoUpload($svg),
         ])
-        ->assertSessionHasErrors(['logo' => __('validation.custom_logo.'.$key)]);
+        ->assertSessionHasErrors(['logo' => __('validation.custom_logo.'.$key, $replace)]);
 
     expect(BadgeCustomLogo::query()->count())->toBe(0);
 })->with([
     'script' => [
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><script>alert(1)</script></svg>',
         'unsupported_element',
+        ['element' => '<script>'],
     ],
     'onload' => [
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"><path d="M0 0h1v1H0z" onload="x()"/></svg>',
@@ -136,6 +137,27 @@ it('devolve 422 traduzido para SVG fora da allowlist', function (string $svg, st
         'missing_paths',
     ],
 ]);
+
+it('aceita upload de SVG com primitivas geometricas e metadados', function () {
+    $user = User::factory()->create();
+
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor"><title>Marca</title><rect x="2" y="2" width="20" height="20"/><circle cx="12" cy="12" r="4"/></svg>';
+
+    $this->actingAs($user)
+        ->post(route('badgeforge.logos.store'), [
+            'name' => 'marca',
+            'logo' => badgeLogoUpload($svg),
+        ])
+        ->assertSessionHasNoErrors();
+
+    $logo = BadgeCustomLogo::query()->sole();
+
+    expect($logo->path_count)->toBe(2)
+        ->and($logo->paths)->toBe([
+            ['d' => 'M2 2h20v20h-20Z'],
+            ['d' => 'M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0Z'],
+        ]);
+});
 
 it('limita o plano Free a dois logos', function () {
     $user = User::factory()->create();

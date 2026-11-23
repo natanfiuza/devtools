@@ -38,45 +38,53 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-    <Dialog :open="props.open" @update:open="setOpen">
-        <DialogContent class="sm:max-w-md" data-test="history-import-dialog">
-            <DialogHeader>
-                <DialogTitle>{{
-                    t('tools.shared.library.import.title')
-                }}</DialogTitle>
-                <DialogDescription>
-                    {{
-                        t('tools.shared.library.import.description', {
-                            count: props.count,
-                        })
-                    }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="props.open"
+    @update:open="setOpen"
+  >
+    <DialogContent
+      class="sm:max-w-md"
+      data-test="history-import-dialog"
+    >
+      <DialogHeader>
+        <DialogTitle>
+          {{
+            t('tools.shared.library.import.title')
+          }}
+        </DialogTitle>
+        <DialogDescription>
+          {{
+            t('tools.shared.library.import.description', {
+              count: props.count,
+            })
+          }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <DialogFooter class="gap-2">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    :disabled="props.busy"
-                    @click="emit('close')"
-                >
-                    {{ t('tools.shared.library.import.cancel') }}
-                </Button>
-                <Button
-                    type="button"
-                    size="sm"
-                    :disabled="props.busy"
-                    data-test="history-import-confirm"
-                    @click="emit('confirm')"
-                >
-                    {{
-                        props.busy
-                            ? t('tools.shared.library.import.busy')
-                            : t('tools.shared.library.import.confirm')
-                    }}
-                </Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+      <DialogFooter class="gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          :disabled="props.busy"
+          @click="emit('close')"
+        >
+          {{ t('tools.shared.library.import.cancel') }}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          :disabled="props.busy"
+          data-test="history-import-confirm"
+          @click="emit('confirm')"
+        >
+          {{
+            props.busy
+              ? t('tools.shared.library.import.busy')
+              : t('tools.shared.library.import.confirm')
+          }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

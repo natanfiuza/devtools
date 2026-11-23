@@ -29,42 +29,66 @@ function onConversionDone(_item: ConversionItem) {
 </script>
 
 <template>
-    <div class="mx-auto max-w-5xl space-y-6 py-4">
-        <Tabs v-model="activeTab" class="w-full">
-            <div class="mb-6 flex items-center justify-between border-b pb-3">
-                <TabsList class="grid w-full grid-cols-3 sm:w-auto">
-                    <TabsTrigger value="encoder" class="gap-2">
-                        <ImageIcon class="h-4 w-4" />
-                        <span>{{ t('tools.base64-image.tabs.encoder') }}</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="decoder" class="gap-2">
-                        <Binary class="h-4 w-4" />
-                        <span>{{ t('tools.base64-image.tabs.decoder') }}</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="history" class="gap-2">
-                        <History class="h-4 w-4" />
-                        <span>{{ t('tools.base64-image.tabs.history') }}</span>
-                    </TabsTrigger>
-                </TabsList>
-            </div>
+  <div class="mx-auto max-w-5xl space-y-6 py-4">
+    <Tabs
+      v-model="activeTab"
+      class="w-full"
+    >
+      <div class="mb-6 flex items-center justify-between border-b pb-3">
+        <TabsList class="grid w-full grid-cols-3 sm:w-auto">
+          <TabsTrigger
+            value="encoder"
+            class="gap-2"
+          >
+            <ImageIcon class="h-4 w-4" />
+            <span>{{ t('tools.base64-image.tabs.encoder') }}</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="decoder"
+            class="gap-2"
+          >
+            <Binary class="h-4 w-4" />
+            <span>{{ t('tools.base64-image.tabs.decoder') }}</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="history"
+            class="gap-2"
+          >
+            <History class="h-4 w-4" />
+            <span>{{ t('tools.base64-image.tabs.history') }}</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-            <!-- Aba do Codificador (Imagem -> Base64) -->
-            <TabsContent value="encoder" class="focus-visible:outline-none">
-                <EncoderPanel
-                    :tool-props="props"
-                    @conversion-done="onConversionDone"
-                />
-            </TabsContent>
+      <!-- Aba do Codificador (Imagem -> Base64) -->
+      <TabsContent
+        value="encoder"
+        class="focus-visible:outline-none"
+      >
+        <EncoderPanel
+          :tool-props="props"
+          @conversion-done="onConversionDone"
+        />
+      </TabsContent>
 
-            <!-- Aba do Decodificador (Base64 -> Imagem) -->
-            <TabsContent value="decoder" class="focus-visible:outline-none">
-                <DecoderPanel />
-            </TabsContent>
+      <!-- Aba do Decodificador (Base64 -> Imagem) -->
+      <TabsContent
+        value="decoder"
+        class="focus-visible:outline-none"
+      >
+        <DecoderPanel />
+      </TabsContent>
 
-            <!-- Aba do Historico -->
-            <TabsContent value="history" class="focus-visible:outline-none">
-                <HistoryPanel ref="historyRef" :tool-props="props" />
-            </TabsContent>
-        </Tabs>
-    </div>
+      <!-- Aba do Historico -->
+      <TabsContent
+        value="history"
+        class="focus-visible:outline-none"
+      >
+        <HistoryPanel
+          ref="historyRef"
+          :tool-props="props"
+        />
+      </TabsContent>
+    </Tabs>
+  </div>
 </template>

@@ -80,121 +80,128 @@ function submit(): void {
 </script>
 
 <template>
-    <Dialog :open="intent !== null" @update:open="setOpen">
-        <DialogContent class="sm:max-w-md">
-            <DialogHeader>
-                <DialogTitle>
-                    {{ t('admin.intents.confirm_dialog.title') }}
-                </DialogTitle>
-                <DialogDescription>
-                    {{ t('admin.intents.confirm_dialog.description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="intent !== null"
+    @update:open="setOpen"
+  >
+    <DialogContent class="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>
+          {{ t('admin.intents.confirm_dialog.title') }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('admin.intents.confirm_dialog.description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <form v-if="intent" class="grid gap-4" @submit.prevent="submit">
-                <dl
-                    class="grid gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs"
-                >
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-subtle">
-                            {{ t('admin.intents.account') }}
-                        </dt>
-                        <dd class="font-medium">
-                            {{ intent.userName }} ({{ intent.userEmail }})
-                        </dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-subtle">
-                            {{ t('admin.intents.plan') }}
-                        </dt>
-                        <dd class="font-medium">
-                            {{ intent.planName }}
-                            <span
-                                v-if="intent.planPrice"
-                                class="font-mono text-subtle"
-                            >
-                                &middot; {{ intent.planPrice }}
-                            </span>
-                        </dd>
-                    </div>
-                    <div class="flex items-center justify-between gap-2">
-                        <dt class="text-subtle">
-                            {{ t('admin.intents.payment_method') }}
-                        </dt>
-                        <dd class="font-medium">
-                            {{
-                                t(
-                                    `home.subscribe.payment_methods.${intent.paymentMethod}`,
-                                )
-                            }}
-                        </dd>
-                    </div>
-                </dl>
+      <form
+        v-if="intent"
+        class="grid gap-4"
+        @submit.prevent="submit"
+      >
+        <dl
+          class="grid gap-2 rounded-md border border-border bg-muted/40 p-3 text-xs"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-subtle">
+              {{ t('admin.intents.account') }}
+            </dt>
+            <dd class="font-medium">
+              {{ intent.userName }} ({{ intent.userEmail }})
+            </dd>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-subtle">
+              {{ t('admin.intents.plan') }}
+            </dt>
+            <dd class="font-medium">
+              {{ intent.planName }}
+              <span
+                v-if="intent.planPrice"
+                class="font-mono text-subtle"
+              >
+                &middot; {{ intent.planPrice }}
+              </span>
+            </dd>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-subtle">
+              {{ t('admin.intents.payment_method') }}
+            </dt>
+            <dd class="font-medium">
+              {{
+                t(
+                  `home.subscribe.payment_methods.${intent.paymentMethod}`,
+                )
+              }}
+            </dd>
+          </div>
+        </dl>
 
-                <div class="grid gap-2">
-                    <Label for="confirm-intent-amount">
-                        {{ t('admin.payments.amount') }}
-                    </Label>
-                    <Input
-                        id="confirm-intent-amount"
-                        v-model="form.amount"
-                        type="text"
-                        inputmode="decimal"
-                        data-test="confirm-intent-amount"
-                        required
-                    />
-                    <InputError :message="form.errors.amount" />
-                </div>
+        <div class="grid gap-2">
+          <Label for="confirm-intent-amount">
+            {{ t('admin.payments.amount') }}
+          </Label>
+          <Input
+            id="confirm-intent-amount"
+            v-model="form.amount"
+            type="text"
+            inputmode="decimal"
+            data-test="confirm-intent-amount"
+            required
+          />
+          <InputError :message="form.errors.amount" />
+        </div>
 
-                <div class="grid gap-2">
-                    <Label for="confirm-intent-paid-at">
-                        {{ t('admin.payments.paid_at') }}
-                    </Label>
-                    <Input
-                        id="confirm-intent-paid-at"
-                        v-model="form.paid_at"
-                        type="date"
-                        data-test="confirm-intent-paid-at"
-                    />
-                    <p class="text-xs text-subtle">
-                        {{ t('admin.payments.paid_at_help') }}
-                    </p>
-                    <InputError :message="form.errors.paid_at" />
-                </div>
+        <div class="grid gap-2">
+          <Label for="confirm-intent-paid-at">
+            {{ t('admin.payments.paid_at') }}
+          </Label>
+          <Input
+            id="confirm-intent-paid-at"
+            v-model="form.paid_at"
+            type="date"
+            data-test="confirm-intent-paid-at"
+          />
+          <p class="text-xs text-subtle">
+            {{ t('admin.payments.paid_at_help') }}
+          </p>
+          <InputError :message="form.errors.paid_at" />
+        </div>
 
-                <div class="grid gap-2">
-                    <Label for="confirm-intent-note">
-                        {{ t('admin.payments.note') }}
-                    </Label>
-                    <Input
-                        id="confirm-intent-note"
-                        v-model="form.note"
-                        type="text"
-                        data-test="confirm-intent-note"
-                    />
-                    <InputError :message="form.errors.note" />
-                </div>
+        <div class="grid gap-2">
+          <Label for="confirm-intent-note">
+            {{ t('admin.payments.note') }}
+          </Label>
+          <Input
+            id="confirm-intent-note"
+            v-model="form.note"
+            type="text"
+            data-test="confirm-intent-note"
+          />
+          <InputError :message="form.errors.note" />
+        </div>
 
-                <DialogFooter class="gap-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        :disabled="form.processing"
-                        @click="emit('close')"
-                    >
-                        {{ t('admin.payments.cancel') }}
-                    </Button>
-                    <Button
-                        type="submit"
-                        size="sm"
-                        data-test="confirm-intent-submit"
-                        :disabled="form.processing"
-                    >
-                        {{ t('admin.intents.confirm_dialog.submit') }}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-    </Dialog>
+        <DialogFooter class="gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            :disabled="form.processing"
+            @click="emit('close')"
+          >
+            {{ t('admin.payments.cancel') }}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            data-test="confirm-intent-submit"
+            :disabled="form.processing"
+          >
+            {{ t('admin.intents.confirm_dialog.submit') }}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>

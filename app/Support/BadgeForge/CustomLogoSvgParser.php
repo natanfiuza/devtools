@@ -8,14 +8,17 @@ use DOMElement;
 /**
  * Sanitizador de SVG para logos personalizados (ADR-078).
  *
- * Nao existe "SVG seguro": o parser aceita apenas `<svg>`, `<g>` e `<path>`,
- * com um allowlist minimo de atributos, e devolve somente viewBox + paths.
- * O arquivo enviado nao e persistido nem servido. Qualquer desvio vira
+ * Nao existe "SVG seguro": o parser aceita apenas `<svg>`, `<g>`, `<path>` e
+ * primitivas vetoriais convertidas para `<path>` (`<rect>`, `<circle>`,
+ * `<ellipse>`, `<line>`, `<polyline>`, `<polygon>`), ignora metadados
+ * benignos (`<title>`, `<desc>`, `<metadata>`), e devolve somente viewBox +
+ * paths. O arquivo enviado nao e persistido nem servido. Qualquer desvio vira
  * `InvalidCustomLogoException` com um codigo estavel para o 422 traduzido.
  *
- * O desenho e recolorido por `logoColor`, entao `fill`/`stroke`/`style` do
- * arquivo sao ignorados (e `style` e recusado). `fill-rule`/`clip-rule` sao
- * preservados porque mudam a geometria visivel.
+ * O desenho e recolorido por `logoColor`, entao atributos cosmeticos (`fill`,
+ * `stroke`, `stroke-width`, `stroke-linecap`, `stroke-linejoin`, `opacity`,
+ * `class`, `id`) sao aceitos e ignorados; `style` e `transform` sao recusados.
+ * `fill-rule`/`clip-rule` sao preservados porque mudam a geometria visivel.
  */
 final class CustomLogoSvgParser
 {
@@ -23,8 +26,20 @@ final class CustomLogoSvgParser
 
     private const XMLNS_NAMESPACE = 'http://www.w3.org/2000/xmlns/';
 
+    /** Elementos de metadados ignorados (incluindo filhos e texto). */
+    private const IGNORED_ELEMENTS = ['title', 'desc', 'metadata'];
+
+    /** Primitivas geometricas convertidas em `<path>`. */
+    private const PRIMITIVE_ELEMENTS = ['rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon'];
+
     /** Elementos permitidos abaixo do `<svg>` raiz. */
-    private const ALLOWED_ELEMENTS = ['g', 'path'];
+    private const ALLOWED_ELEMENTS = ['g', 'path', ...self::PRIMITIVE_ELEMENTS];
+
+    /** Atributos cosmeticos aceitos e ignorados em elementos de desenho. */
+    private const COSMETIC_ATTRIBUTES = [
+        'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+        'opacity', 'class', 'id',
+    ];
 
     private const RULE_VALUES = ['nonzero', 'evenodd'];
 
@@ -130,9 +145,10 @@ final class CustomLogoSvgParser
     private function assertRootAttributes(DOMElement $root): void
     {
         $allowed = [
-            'viewbox', 'xmlns', 'width', 'height', 'fill', 'class', 'id',
-            'version', 'role', 'aria-label', 'aria-hidden', 'focusable',
-            'preserveaspectratio',
+            'viewbox', 'xmlns', 'width', 'height', 'fill', 'stroke',
+            'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity',
+            'class', 'id', 'version', 'role', 'aria-label', 'aria-hidden',
+            'focusable', 'preserveaspectratio',
         ];
 
         // Sem atributos, o mapa vem vazio (nunca null): o loop nao roda.
@@ -262,13 +278,23 @@ final class CustomLogoSvgParser
             }
 
             if (! $child instanceof DOMElement) {
-                throw new InvalidCustomLogoException('unsupported_element');
+                throw new InvalidCustomLogoException('unsupported_element', [
+                    'element' => $child->nodeName,
+                ]);
             }
 
             $name = strtolower((string) $child->localName);
 
+            if (in_array($name, self::IGNORED_ELEMENTS, true)) {
+                $this->assertNamespace($child);
+
+                continue;
+            }
+
             if (! in_array($name, self::ALLOWED_ELEMENTS, true)) {
-                throw new InvalidCustomLogoException('unsupported_element');
+                throw new InvalidCustomLogoException('unsupported_element', [
+                    'element' => '<'.$child->localName.'>',
+                ]);
             }
 
             $this->assertNamespace($child);
@@ -283,7 +309,13 @@ final class CustomLogoSvgParser
                 continue;
             }
 
-            $this->appendPath($child, $fillRule, $clipRule, $paths, $totalLength);
+            if ($name === 'path') {
+                $this->appendPath($child, $fillRule, $clipRule, $paths, $totalLength);
+
+                continue;
+            }
+
+            $this->appendPrimitive($child, $name, $fillRule, $clipRule, $paths, $totalLength);
         }
     }
 
@@ -299,7 +331,77 @@ final class CustomLogoSvgParser
         array &$paths,
         int &$totalLength,
     ): void {
-        foreach ($path->childNodes as $child) {
+        $this->assertNoElementText($path);
+
+        if (! $path->hasAttribute('d')) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        [$pathFillRule, $pathClipRule] = $this->readRules($path);
+
+        $this->appendPathData(
+            trim($path->getAttribute('d')),
+            $pathFillRule ?? $fillRule,
+            $pathClipRule ?? $clipRule,
+            $paths,
+            $totalLength,
+        );
+    }
+
+    /**
+     * Converte uma primitiva geometrica (`rect`, `circle`, `ellipse`, `line`,
+     * `polyline`, `polygon`) em `LogoPath` normalizado.
+     *
+     * @param  list<LogoPath>  $paths
+     *
+     * @throws InvalidCustomLogoException
+     */
+    private function appendPrimitive(
+        DOMElement $element,
+        string $name,
+        ?string $fillRule,
+        ?string $clipRule,
+        array &$paths,
+        int &$totalLength,
+    ): void {
+        $this->assertNoElementText($element);
+
+        $geometryAttrs = match ($name) {
+            'rect' => ['x', 'y', 'width', 'height', 'rx', 'ry'],
+            'circle' => ['cx', 'cy', 'r'],
+            'ellipse' => ['cx', 'cy', 'rx', 'ry'],
+            'line' => ['x1', 'y1', 'x2', 'y2'],
+            'polyline', 'polygon' => ['points'],
+            default => [],
+        };
+
+        [$elFillRule, $elClipRule] = $this->readRules($element, $geometryAttrs);
+
+        $data = match ($name) {
+            'rect' => $this->rectToPath($element),
+            'circle' => $this->circleToPath($element),
+            'ellipse' => $this->ellipseToPath($element),
+            'line' => $this->lineToPath($element),
+            'polyline' => $this->polyToPath($element, closed: false),
+            'polygon' => $this->polyToPath($element, closed: true),
+            default => throw new InvalidCustomLogoException('unsupported_element', ['element' => '<'.$name.'>']),
+        };
+
+        $this->appendPathData(
+            $data,
+            $elFillRule ?? $fillRule,
+            $elClipRule ?? $clipRule,
+            $paths,
+            $totalLength,
+        );
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function assertNoElementText(DOMElement $element): void
+    {
+        foreach ($element->childNodes as $child) {
             if ($child->nodeType === XML_COMMENT_NODE) {
                 continue;
             }
@@ -311,13 +413,20 @@ final class CustomLogoSvgParser
 
             throw new InvalidCustomLogoException('text_not_allowed');
         }
+    }
 
-        if (! $path->hasAttribute('d')) {
-            throw new InvalidCustomLogoException('invalid_path');
-        }
-
-        $data = trim($path->getAttribute('d'));
-
+    /**
+     * @param  list<LogoPath>  $paths
+     *
+     * @throws InvalidCustomLogoException
+     */
+    private function appendPathData(
+        string $data,
+        ?string $fillRule,
+        ?string $clipRule,
+        array &$paths,
+        int &$totalLength,
+    ): void {
         if (! self::isSafePathData($data)) {
             throw new InvalidCustomLogoException('invalid_path');
         }
@@ -340,27 +449,215 @@ final class CustomLogoSvgParser
             throw new InvalidCustomLogoException('too_many_paths');
         }
 
-        [$pathFillRule, $pathClipRule] = $this->readRules($path);
-
         $paths[] = new LogoPath(
             d: $data,
-            fillRule: $pathFillRule ?? $fillRule,
-            clipRule: $pathClipRule ?? $clipRule,
+            fillRule: $fillRule,
+            clipRule: $clipRule,
         );
     }
 
     /**
-     * Le `fill-rule`/`clip-rule` de um elemento `g` ou `path`.
+     * @throws InvalidCustomLogoException
+     */
+    private function rectToPath(DOMElement $element): string
+    {
+        $x = $this->parseOptionalNumber($element, 'x', 0.0);
+        $y = $this->parseOptionalNumber($element, 'y', 0.0);
+        $width = $this->parseRequiredPositiveNumber($element, 'width');
+        $height = $this->parseRequiredPositiveNumber($element, 'height');
+
+        $hasRx = $element->hasAttribute('rx');
+        $hasRy = $element->hasAttribute('ry');
+        $rx = $hasRx ? $this->parseOptionalNumber($element, 'rx', 0.0) : 0.0;
+        $ry = $hasRy ? $this->parseOptionalNumber($element, 'ry', 0.0) : 0.0;
+
+        if ($rx < 0.0 || $ry < 0.0) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        if ($hasRx && ! $hasRy) {
+            $ry = $rx;
+        } elseif ($hasRy && ! $hasRx) {
+            $rx = $ry;
+        }
+
+        $rx = min($rx, $width / 2.0);
+        $ry = min($ry, $height / 2.0);
+
+        $fx = $this->formatNumber($x);
+        $fy = $this->formatNumber($y);
+        $fw = $this->formatNumber($width);
+        $fh = $this->formatNumber($height);
+
+        if ($rx === 0.0 || $ry === 0.0) {
+            return "M{$fx} {$fy}h{$fw}v{$fh}h-{$fw}Z";
+        }
+
+        $frx = $this->formatNumber($rx);
+        $fry = $this->formatNumber($ry);
+        $fInnerW = $this->formatNumber($width - 2.0 * $rx);
+        $fInnerH = $this->formatNumber($height - 2.0 * $ry);
+        $fStartX = $this->formatNumber($x + $rx);
+
+        return "M{$fStartX} {$fy}h{$fInnerW}a{$frx} {$fry} 0 0 1 {$frx} {$fry}v{$fInnerH}a{$frx} {$fry} 0 0 1 -{$frx} {$fry}h-{$fInnerW}a{$frx} {$fry} 0 0 1 -{$frx} -{$fry}v-{$fInnerH}a{$frx} {$fry} 0 0 1 {$frx} -{$fry}Z";
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function circleToPath(DOMElement $element): string
+    {
+        $cx = $this->parseOptionalNumber($element, 'cx', 0.0);
+        $cy = $this->parseOptionalNumber($element, 'cy', 0.0);
+        $r = $this->parseRequiredPositiveNumber($element, 'r');
+
+        $startX = $this->formatNumber($cx - $r);
+        $fcy = $this->formatNumber($cy);
+        $fr = $this->formatNumber($r);
+        $fd = $this->formatNumber(2.0 * $r);
+
+        return "M{$startX} {$fcy}a{$fr} {$fr} 0 1 0 {$fd} 0a{$fr} {$fr} 0 1 0 -{$fd} 0Z";
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function ellipseToPath(DOMElement $element): string
+    {
+        $cx = $this->parseOptionalNumber($element, 'cx', 0.0);
+        $cy = $this->parseOptionalNumber($element, 'cy', 0.0);
+        $rx = $this->parseRequiredPositiveNumber($element, 'rx');
+        $ry = $this->parseRequiredPositiveNumber($element, 'ry');
+
+        $startX = $this->formatNumber($cx - $rx);
+        $fcy = $this->formatNumber($cy);
+        $frx = $this->formatNumber($rx);
+        $fry = $this->formatNumber($ry);
+        $fdx = $this->formatNumber(2.0 * $rx);
+
+        return "M{$startX} {$fcy}a{$frx} {$fry} 0 1 0 {$fdx} 0a{$frx} {$fry} 0 1 0 -{$fdx} 0Z";
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function lineToPath(DOMElement $element): string
+    {
+        $x1 = $this->formatNumber($this->parseOptionalNumber($element, 'x1', 0.0));
+        $y1 = $this->formatNumber($this->parseOptionalNumber($element, 'y1', 0.0));
+        $x2 = $this->formatNumber($this->parseOptionalNumber($element, 'x2', 0.0));
+        $y2 = $this->formatNumber($this->parseOptionalNumber($element, 'y2', 0.0));
+
+        return "M{$x1} {$y1}L{$x2} {$y2}";
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function polyToPath(DOMElement $element, bool $closed): string
+    {
+        if (! $element->hasAttribute('points')) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        $tokens = array_values(array_filter(
+            preg_split('/[\s,]+/', trim($element->getAttribute('points'))) ?: [],
+            static fn (string $token): bool => $token !== '',
+        ));
+
+        $minCoords = $closed ? 6 : 4;
+
+        if (count($tokens) < $minCoords || count($tokens) % 2 !== 0) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        $coords = [];
+
+        foreach ($tokens as $token) {
+            if (preg_match(self::NUMBER_PATTERN, $token) !== 1) {
+                throw new InvalidCustomLogoException('invalid_path');
+            }
+
+            $number = (float) $token;
+
+            if (! is_finite($number)) {
+                throw new InvalidCustomLogoException('invalid_path');
+            }
+
+            $coords[] = $this->formatNumber($number);
+        }
+
+        $d = "M{$coords[0]} {$coords[1]}";
+
+        for ($i = 2, $len = count($coords); $i < $len; $i += 2) {
+            $d .= "L{$coords[$i]} {$coords[$i + 1]}";
+        }
+
+        return $closed ? $d.'Z' : $d;
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function parseOptionalNumber(DOMElement $element, string $attribute, float $default): float
+    {
+        if (! $element->hasAttribute($attribute)) {
+            return $default;
+        }
+
+        $raw = trim($element->getAttribute($attribute));
+
+        if (preg_match(self::NUMBER_PATTERN, $raw) !== 1) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        $number = (float) $raw;
+
+        if (! is_finite($number)) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        return $number;
+    }
+
+    /**
+     * @throws InvalidCustomLogoException
+     */
+    private function parseRequiredPositiveNumber(DOMElement $element, string $attribute): float
+    {
+        if (! $element->hasAttribute($attribute)) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        $number = $this->parseOptionalNumber($element, $attribute, 0.0);
+
+        if ($number <= 0.0) {
+            throw new InvalidCustomLogoException('invalid_path');
+        }
+
+        return $number;
+    }
+
+    private function formatNumber(float $value): string
+    {
+        return Svg::number($value === 0.0 ? 0.0 : $value, 4);
+    }
+
+    /**
+     * Le `fill-rule`/`clip-rule` de um elemento `g`, `path` ou primitiva.
      *
+     * @param  list<string>  $extraAllowed
      * @return array{0: string|null, 1: string|null}
      *
      * @throws InvalidCustomLogoException
      */
-    private function readRules(DOMElement $element): array
+    private function readRules(DOMElement $element, array $extraAllowed = []): array
     {
-        $this->assertAttributes($element, $element->localName === 'g'
-            ? ['fill-rule', 'clip-rule', 'fill', 'class', 'id']
-            : ['d', 'fill-rule', 'clip-rule', 'fill', 'class', 'id']);
+        $base = $element->localName === 'path'
+            ? ['d', 'fill-rule', 'clip-rule', ...self::COSMETIC_ATTRIBUTES]
+            : ['fill-rule', 'clip-rule', ...self::COSMETIC_ATTRIBUTES];
+
+        $this->assertAttributes($element, [...$base, ...$extraAllowed]);
 
         return [
             $this->ruleAttribute($element, 'fill-rule'),

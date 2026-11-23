@@ -47,34 +47,37 @@ const countLabel = computed(() => {
 </script>
 
 <template>
-    <div class="flex flex-wrap items-center gap-2">
-        <Button
-            v-if="canLike"
-            type="button"
-            :variant="liked ? 'secondary' : 'outline'"
-            :disabled="pending"
-            :aria-pressed="liked"
-            data-test="palette-like"
-            @click="toggle"
-        >
-            <Heart class="size-4" :class="liked ? 'fill-current' : ''" />
-            {{ label }}
-        </Button>
+  <div class="flex flex-wrap items-center gap-2">
+    <Button
+      v-if="canLike"
+      type="button"
+      :variant="liked ? 'secondary' : 'outline'"
+      :disabled="pending"
+      :aria-pressed="liked"
+      data-test="palette-like"
+      @click="toggle"
+    >
+      <Heart
+        class="size-4"
+        :class="liked ? 'fill-current' : ''"
+      />
+      {{ label }}
+    </Button>
 
-        <span
-            class="text-xs text-muted-foreground"
-            data-test="palette-likes-count"
-        >
-            {{ countLabel }}
-        </span>
+    <span
+      class="text-xs text-muted-foreground"
+      data-test="palette-likes-count"
+    >
+      {{ countLabel }}
+    </span>
 
-        <p
-            v-if="failed"
-            class="text-xs text-destructive"
-            role="alert"
-            data-test="palette-like-error"
-        >
-            {{ t('colors.social.like_error') }}
-        </p>
-    </div>
+    <p
+      v-if="failed"
+      class="text-xs text-destructive"
+      role="alert"
+      data-test="palette-like-error"
+    >
+      {{ t('colors.social.like_error') }}
+    </p>
+  </div>
 </template>

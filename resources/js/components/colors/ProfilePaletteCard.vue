@@ -61,84 +61,87 @@ function formatDate(value: string | null): string | null {
 </script>
 
 <template>
-    <article
-        class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
-        data-test="profile-palette-card"
+  <article
+    class="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+    data-test="profile-palette-card"
+  >
+    <div
+      class="flex h-14 overflow-hidden rounded-lg border border-border"
+      role="img"
+      :aria-label="t('colors.list.preview_alt', { name: palette.name })"
+      data-test="profile-palette-preview"
     >
-        <div
-            class="flex h-14 overflow-hidden rounded-lg border border-border"
-            role="img"
-            :aria-label="t('colors.list.preview_alt', { name: palette.name })"
-            data-test="profile-palette-preview"
+      <span
+        v-for="(hex, index) in palette.preview"
+        :key="`${hex}-${index}`"
+        class="h-full flex-1"
+        :style="{ backgroundColor: hex }"
+        :title="hex"
+      />
+    </div>
+
+    <div class="min-w-0">
+      <h3 class="truncate text-base font-semibold">
+        <Link
+          v-if="publicUrl !== null"
+          :href="publicUrl"
+          class="hover:underline"
+          data-test="profile-palette-name"
         >
-            <span
-                v-for="(hex, index) in palette.preview"
-                :key="`${hex}-${index}`"
-                class="h-full flex-1"
-                :style="{ backgroundColor: hex }"
-                :title="hex"
-            />
-        </div>
+          {{ palette.name }}
+        </Link>
+        <span
+          v-else
+          data-test="profile-palette-name"
+        >{{
+          palette.name
+        }}</span>
+      </h3>
+      <p
+        v-if="palette.description !== null"
+        class="mt-1 line-clamp-2 text-sm text-muted-foreground"
+        data-test="profile-palette-description"
+      >
+        {{ palette.description }}
+      </p>
+    </div>
 
-        <div class="min-w-0">
-            <h3 class="truncate text-base font-semibold">
-                <Link
-                    v-if="publicUrl !== null"
-                    :href="publicUrl"
-                    class="hover:underline"
-                    data-test="profile-palette-name"
-                >
-                    {{ palette.name }}
-                </Link>
-                <span v-else data-test="profile-palette-name">{{
-                    palette.name
-                }}</span>
-            </h3>
-            <p
-                v-if="palette.description !== null"
-                class="mt-1 line-clamp-2 text-sm text-muted-foreground"
-                data-test="profile-palette-description"
-            >
-                {{ palette.description }}
-            </p>
-        </div>
+    <div class="flex flex-wrap items-center gap-1">
+      <Badge variant="outline">
+        {{ t(`colors.list.kind_${palette.kind}`) }}
+      </Badge>
+      <Badge variant="secondary">
+        {{
+          t('colors.list.colors_count', {
+            count: palette.colors_count,
+          })
+        }}
+      </Badge>
+    </div>
 
-        <div class="flex flex-wrap items-center gap-1">
-            <Badge variant="outline">
-                {{ t(`colors.list.kind_${palette.kind}`) }}
-            </Badge>
-            <Badge variant="secondary">
-                {{
-                    t('colors.list.colors_count', {
-                        count: palette.colors_count,
-                    })
-                }}
-            </Badge>
-        </div>
-
-        <dl
-            class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
-        >
-            <div>
-                <dt class="sr-only">
-                    {{ t('colors.social.like') }}
-                </dt>
-                <dd data-test="profile-palette-likes">
-                    {{ likesLabel }}
-                </dd>
-            </div>
-            <div v-if="formatDate(palette.updated_at) !== null">
-                <dt class="sr-only">
-                    {{ t('colors.list.sort_updated_at') }}
-                </dt>
-                <dd>
-                    {{
-                        t('colors.list.updated_at', {
-                            date: formatDate(palette.updated_at),
-                        })
-                    }}
-                </dd>
-            </div>
-        </dl>
-    </article>
+    <dl
+      class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
+    >
+      <div>
+        <dt class="sr-only">
+          {{ t('colors.social.like') }}
+        </dt>
+        <dd data-test="profile-palette-likes">
+          {{ likesLabel }}
+        </dd>
+      </div>
+      <div v-if="formatDate(palette.updated_at) !== null">
+        <dt class="sr-only">
+          {{ t('colors.list.sort_updated_at') }}
+        </dt>
+        <dd>
+          {{
+            t('colors.list.updated_at', {
+              date: formatDate(palette.updated_at),
+            })
+          }}
+        </dd>
+      </div>
+    </dl>
+  </article>
 </template>

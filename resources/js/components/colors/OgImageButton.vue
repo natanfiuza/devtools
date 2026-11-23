@@ -24,39 +24,42 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="flex flex-col items-end gap-1" data-test="og-image">
-        <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            :disabled="busy"
-            :aria-busy="busy"
-            data-test="og-image-generate"
-            @click="emit('generate')"
-        >
-            <ImageIcon class="size-4" />
-            {{
-                busy
-                    ? t('colors.og.generating')
-                    : hasOg
-                      ? t('colors.og.regenerate')
-                      : t('colors.og.generate')
-            }}
-        </Button>
+  <div
+    class="flex flex-col items-end gap-1"
+    data-test="og-image"
+  >
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      :disabled="busy"
+      :aria-busy="busy"
+      data-test="og-image-generate"
+      @click="emit('generate')"
+    >
+      <ImageIcon class="size-4" />
+      {{
+        busy
+          ? t('colors.og.generating')
+          : hasOg
+            ? t('colors.og.regenerate')
+            : t('colors.og.generate')
+      }}
+    </Button>
 
-        <p
-            v-if="error"
-            class="max-w-60 text-end text-xs text-destructive"
-            role="alert"
-            data-test="og-image-error"
-        >
-            {{ t('colors.og.error') }}
-        </p>
-        <p
-            v-else-if="!hasOg"
-            class="max-w-60 text-end text-xs text-muted-foreground"
-        >
-            {{ t('colors.og.hint') }}
-        </p>
-    </div>
+    <p
+      v-if="error"
+      class="max-w-60 text-end text-xs text-destructive"
+      role="alert"
+      data-test="og-image-error"
+    >
+      {{ t('colors.og.error') }}
+    </p>
+    <p
+      v-else-if="!hasOg"
+      class="max-w-60 text-end text-xs text-muted-foreground"
+    >
+      {{ t('colors.og.hint') }}
+    </p>
+  </div>
 </template>

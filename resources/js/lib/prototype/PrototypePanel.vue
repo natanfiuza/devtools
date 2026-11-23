@@ -123,134 +123,140 @@ async function exportPng(scale: 1 | 2): Promise<void> {
 </script>
 
 <template>
-    <div class="flex flex-col gap-4" data-test="prototype-panel">
-        <div class="flex flex-col gap-1">
-            <h3 class="text-sm font-semibold">
-                {{ t('colors.prototype.title') }}
-            </h3>
-            <p class="text-xs text-muted-foreground">
-                {{ t('colors.prototype.description') }}
-            </p>
-        </div>
-
-        <div class="flex flex-wrap items-end gap-6">
-            <div
-                class="flex flex-col gap-1"
-                role="group"
-                :aria-label="t('colors.prototype.template_label')"
-            >
-                <span class="text-xs font-medium">
-                    {{ t('colors.prototype.template_label') }}
-                </span>
-                <div class="flex gap-1">
-                    <Button
-                        v-for="option in TEMPLATE_OPTIONS"
-                        :key="option"
-                        type="button"
-                        size="sm"
-                        :variant="template === option ? 'default' : 'outline'"
-                        :aria-pressed="template === option"
-                        :data-test="`prototype-template-${option}`"
-                        @click="template = option"
-                    >
-                        {{ t(`colors.prototype.template_${option}`) }}
-                    </Button>
-                </div>
-            </div>
-
-            <div
-                class="flex flex-col gap-1"
-                role="group"
-                :aria-label="t('colors.prototype.theme_label')"
-            >
-                <span class="text-xs font-medium">
-                    {{ t('colors.prototype.theme_label') }}
-                </span>
-                <div class="flex gap-1">
-                    <Button
-                        v-for="option in THEME_OPTIONS"
-                        :key="option"
-                        type="button"
-                        size="sm"
-                        :variant="theme === option ? 'default' : 'outline'"
-                        :aria-pressed="theme === option"
-                        :data-test="`prototype-theme-${option}`"
-                        @click="theme = option"
-                    >
-                        {{ t(`colors.prototype.theme_${option}`) }}
-                    </Button>
-                </div>
-            </div>
-        </div>
-
-        <PrototypePreview :svg="svg" :label="label" />
-
-        <div class="flex flex-wrap gap-2">
-            <Button
-                type="button"
-                size="sm"
-                data-test="prototype-export-svg"
-                @click="exportSvg"
-            >
-                <Download class="size-4" />
-                {{ t('colors.prototype.download_svg') }}
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                :disabled="busy"
-                data-test="prototype-export-png-1x"
-                @click="exportPng(1)"
-            >
-                {{ t('colors.prototype.download_png_1x') }}
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                :disabled="busy"
-                data-test="prototype-export-png-2x"
-                @click="exportPng(2)"
-            >
-                {{ t('colors.prototype.download_png_2x') }}
-            </Button>
-            <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                data-test="prototype-copy-svg"
-                @click="copySvg"
-            >
-                <Copy class="size-4" />
-                {{ t('colors.prototype.copy_svg') }}
-            </Button>
-        </div>
-
-        <p
-            v-if="feedback !== null"
-            class="text-xs text-muted-foreground"
-            role="status"
-            aria-live="polite"
-            data-test="prototype-feedback"
-        >
-            {{ feedback }}
-        </p>
-
-        <p
-            v-if="pngError !== null"
-            class="text-xs text-destructive"
-            role="alert"
-            data-test="prototype-png-error"
-        >
-            {{ pngError }}
-        </p>
-
-        <RoleEditor
-            :colors="themeColors"
-            :defaults="themeDefaults"
-            @update:colors="updateColors"
-            @restore="restoreDefaults"
-        />
+  <div
+    class="flex flex-col gap-4"
+    data-test="prototype-panel"
+  >
+    <div class="flex flex-col gap-1">
+      <h3 class="text-sm font-semibold">
+        {{ t('colors.prototype.title') }}
+      </h3>
+      <p class="text-xs text-muted-foreground">
+        {{ t('colors.prototype.description') }}
+      </p>
     </div>
+
+    <div class="flex flex-wrap items-end gap-6">
+      <div
+        class="flex flex-col gap-1"
+        role="group"
+        :aria-label="t('colors.prototype.template_label')"
+      >
+        <span class="text-xs font-medium">
+          {{ t('colors.prototype.template_label') }}
+        </span>
+        <div class="flex gap-1">
+          <Button
+            v-for="option in TEMPLATE_OPTIONS"
+            :key="option"
+            type="button"
+            size="sm"
+            :variant="template === option ? 'default' : 'outline'"
+            :aria-pressed="template === option"
+            :data-test="`prototype-template-${option}`"
+            @click="template = option"
+          >
+            {{ t(`colors.prototype.template_${option}`) }}
+          </Button>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col gap-1"
+        role="group"
+        :aria-label="t('colors.prototype.theme_label')"
+      >
+        <span class="text-xs font-medium">
+          {{ t('colors.prototype.theme_label') }}
+        </span>
+        <div class="flex gap-1">
+          <Button
+            v-for="option in THEME_OPTIONS"
+            :key="option"
+            type="button"
+            size="sm"
+            :variant="theme === option ? 'default' : 'outline'"
+            :aria-pressed="theme === option"
+            :data-test="`prototype-theme-${option}`"
+            @click="theme = option"
+          >
+            {{ t(`colors.prototype.theme_${option}`) }}
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <PrototypePreview
+      :svg="svg"
+      :label="label"
+    />
+
+    <div class="flex flex-wrap gap-2">
+      <Button
+        type="button"
+        size="sm"
+        data-test="prototype-export-svg"
+        @click="exportSvg"
+      >
+        <Download class="size-4" />
+        {{ t('colors.prototype.download_svg') }}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        :disabled="busy"
+        data-test="prototype-export-png-1x"
+        @click="exportPng(1)"
+      >
+        {{ t('colors.prototype.download_png_1x') }}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        :disabled="busy"
+        data-test="prototype-export-png-2x"
+        @click="exportPng(2)"
+      >
+        {{ t('colors.prototype.download_png_2x') }}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        data-test="prototype-copy-svg"
+        @click="copySvg"
+      >
+        <Copy class="size-4" />
+        {{ t('colors.prototype.copy_svg') }}
+      </Button>
+    </div>
+
+    <p
+      v-if="feedback !== null"
+      class="text-xs text-muted-foreground"
+      role="status"
+      aria-live="polite"
+      data-test="prototype-feedback"
+    >
+      {{ feedback }}
+    </p>
+
+    <p
+      v-if="pngError !== null"
+      class="text-xs text-destructive"
+      role="alert"
+      data-test="prototype-png-error"
+    >
+      {{ pngError }}
+    </p>
+
+    <RoleEditor
+      :colors="themeColors"
+      :defaults="themeDefaults"
+      @update:colors="updateColors"
+      @restore="restoreDefaults"
+    />
+  </div>
 </template>

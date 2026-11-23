@@ -17,23 +17,23 @@ const MODES: readonly LayoutViewMode[] = ['light', 'dark', 'compare'];
 </script>
 
 <template>
-    <div
-        class="flex flex-wrap gap-1"
-        role="group"
-        :aria-label="t('tools.layout-harmonizer.a11y.view_mode')"
-        data-test="view-mode-switch"
+  <div
+    class="flex flex-wrap gap-1"
+    role="group"
+    :aria-label="t('tools.layout-harmonizer.a11y.view_mode')"
+    data-test="view-mode-switch"
+  >
+    <Button
+      v-for="mode in MODES"
+      :key="mode"
+      type="button"
+      size="sm"
+      :variant="model === mode ? 'secondary' : 'outline'"
+      :aria-pressed="model === mode"
+      :data-test="`view-mode-${mode}`"
+      @click="model = mode"
     >
-        <Button
-            v-for="mode in MODES"
-            :key="mode"
-            type="button"
-            size="sm"
-            :variant="model === mode ? 'secondary' : 'outline'"
-            :aria-pressed="model === mode"
-            :data-test="`view-mode-${mode}`"
-            @click="model = mode"
-        >
-            {{ t(`tools.layout-harmonizer.view.${mode}`) }}
-        </Button>
-    </div>
+      {{ t(`tools.layout-harmonizer.view.${mode}`) }}
+    </Button>
+  </div>
 </template>

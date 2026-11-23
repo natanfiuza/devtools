@@ -1,4 +1,4 @@
-import { onScopeDispose, watch, type ComputedRef, type Ref } from 'vue';
+import { onScopeDispose, ref, watch, type ComputedRef, type Ref } from 'vue';
 import type { LayoutSnapshot } from '../lib/snapshot';
 import {
     browserLocalStorage,
@@ -44,6 +44,8 @@ export interface LayoutDraftWriter {
     markImported(): void;
     markRefused(): void;
     discard(): void;
+    /** Ha rascunho gravado neste navegador (para oferecer o descarte). */
+    stored: Ref<boolean>;
 }
 
 export function useLayoutDraft(options: LayoutDraftOptions): LayoutDraftWriter {
@@ -52,6 +54,8 @@ export function useLayoutDraft(options: LayoutDraftOptions): LayoutDraftWriter {
     const debounceMs = options.debounceMs ?? 500;
 
     let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const stored = ref(readLayoutDraft(storage) !== null);
 
     function cancelTimer(): void {
         if (timer !== null) {
@@ -84,6 +88,7 @@ export function useLayoutDraft(options: LayoutDraftOptions): LayoutDraftWriter {
         }
 
         writeLayoutDraft({ state, originPaletteId: originId() }, storage);
+        stored.value = true;
     }
 
     function schedule(): void {
@@ -115,6 +120,8 @@ export function useLayoutDraft(options: LayoutDraftOptions): LayoutDraftWriter {
         discard: () => {
             cancelTimer();
             clearLayoutDraft(storage);
+            stored.value = false;
         },
+        stored,
     };
 }

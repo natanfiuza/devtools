@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ColorPalette;
 use App\Models\LayoutSystem;
 use App\Models\User;
+use App\Support\Locales;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -32,7 +33,7 @@ class LayoutSystemIntentController extends Controller
         }
 
         return redirect()->route('tools.show.grouped', [
-            'locale' => app()->getLocale(),
+            'locale' => Locales::slug(app()->getLocale()),
             'group' => 'colors',
             'slug' => 'layout-harmonizer',
             ...$query,

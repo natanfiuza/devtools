@@ -198,314 +198,320 @@ async function refresh(badge: BadgeForgePersonalBadge): Promise<void> {
 </script>
 
 <template>
-    <section class="space-y-3" data-test="badgeforge-personal">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-            <h3 class="text-sm font-medium">
-                {{ t('tools.badgeforge.personal.title') }}
-            </h3>
+  <section
+    class="space-y-3"
+    data-test="badgeforge-personal"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h3 class="text-sm font-medium">
+        {{ t('tools.badgeforge.personal.title') }}
+      </h3>
 
-            <span
-                v-if="copyMessage"
-                class="text-xs text-muted-foreground"
-                data-test="badgeforge-personal-copy-feedback"
+      <span
+        v-if="copyMessage"
+        class="text-xs text-muted-foreground"
+        data-test="badgeforge-personal-copy-feedback"
+      >
+        {{ copyMessage }}
+      </span>
+    </div>
+
+    <p class="text-xs text-subtle">
+      {{ t('tools.badgeforge.personal.description') }}
+    </p>
+
+    <div
+      v-if="!canEdit()"
+      class="rounded-md border border-dashed px-4 py-3 text-sm"
+      data-test="badgeforge-personal-upgrade"
+    >
+      <p class="text-subtle">
+        {{ t('tools.badgeforge.personal.readonly_note') }}
+      </p>
+      <Button
+        as-child
+        variant="outline"
+        size="sm"
+        class="mt-2"
+        data-test="badgeforge-personal-upgrade-link"
+      >
+        <a :href="upgradeUrl">
+          {{ t('tools.badgeforge.personal.upgrade') }}
+        </a>
+      </Button>
+    </div>
+
+    <div
+      v-if="badges().length === 0"
+      class="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-subtle"
+      data-test="badgeforge-personal-empty"
+    >
+      {{ t('tools.badgeforge.personal.empty') }}
+    </div>
+
+    <ul
+      v-else
+      class="divide-y rounded-lg border border-border"
+      data-test="badgeforge-personal-list"
+    >
+      <li
+        v-for="badge in badges()"
+        :key="badge.id"
+        class="space-y-2 px-4 py-3"
+        data-test="badgeforge-personal-row"
+      >
+        <div class="flex flex-wrap items-center gap-2">
+          <img
+            v-if="displayUrl(badge) !== ''"
+            :src="displayUrl(badge)"
+            :alt="badge.name"
+            class="h-5 max-w-48"
+            data-test="badgeforge-personal-preview"
+          >
+
+          <div class="min-w-0 flex-1">
+            <template v-if="editingId === badge.id">
+              <Input
+                v-model="renameForm.name"
+                :maxlength="
+                  toolProps.limits.personalBadges
+                    .nameMaxLength
+                "
+                :aria-label="
+                  t('tools.badgeforge.personal.name')
+                "
+                data-test="badgeforge-personal-rename-input"
+                @keyup.enter="saveRename(badge)"
+              />
+              <InputError :message="renameForm.errors.name" />
+            </template>
+            <div
+              v-else
+              class="flex flex-wrap items-center gap-2"
             >
-                {{ copyMessage }}
-            </span>
+              <p class="truncate text-sm font-medium">
+                {{ badge.name }}
+              </p>
+              <Badge
+                variant="outline"
+                data-test="badgeforge-personal-type"
+              >
+                {{
+                  badge.type === 'provider'
+                    ? metricName(badge)
+                    : t('tools.badgeforge.modes.static')
+                }}
+              </Badge>
+              <Badge
+                v-if="badge.private"
+                variant="outline"
+                data-test="badgeforge-personal-private"
+              >
+                {{ t('tools.badgeforge.personal.private') }}
+              </Badge>
+            </div>
+            <p
+              class="text-xs text-subtle"
+              data-test="badgeforge-personal-credential-status"
+            >
+              {{ credentialStatus(badge) }}
+            </p>
+          </div>
+
+          <template v-if="editingId === badge.id">
+            <Button
+              size="sm"
+              :disabled="renameForm.processing"
+              data-test="badgeforge-personal-rename-save"
+              @click="saveRename(badge)"
+            >
+              {{ t('tools.badgeforge.management.save') }}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              data-test="badgeforge-personal-rename-cancel"
+              @click="editingId = null"
+            >
+              {{ t('tools.badgeforge.management.cancel') }}
+            </Button>
+          </template>
+          <template v-else>
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="badge.url === null"
+              data-test="badgeforge-personal-copy-svg"
+              @click="copy(displayUrl(badge))"
+            >
+              <Copy class="size-4" />
+              {{ t('tools.badgeforge.personal.copy_svg') }}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              :disabled="badge.pngUrl === null"
+              data-test="badgeforge-personal-copy-png"
+              @click="copy(displayUrl(badge, true))"
+            >
+              <Copy class="size-4" />
+              {{ t('tools.badgeforge.personal.copy_png') }}
+            </Button>
+
+            <template v-if="canEdit()">
+              <Button
+                v-if="badge.type === 'provider'"
+                variant="ghost"
+                size="sm"
+                :disabled="refreshingId === badge.id"
+                data-test="badgeforge-personal-refresh"
+                @click="refresh(badge)"
+              >
+                <RefreshCw class="size-4" />
+                {{
+                  refreshingId === badge.id
+                    ? t(
+                      'tools.badgeforge.personal.refreshing',
+                    )
+                    : t('tools.badgeforge.personal.refresh')
+                }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-test="badgeforge-personal-rename"
+                @click="startRename(badge)"
+              >
+                <Pencil class="size-4" />
+                {{ t('tools.badgeforge.management.rename') }}
+              </Button>
+              <Button
+                v-if="badge.private"
+                variant="ghost"
+                size="sm"
+                data-test="badgeforge-personal-credential"
+                @click="startCredential(badge)"
+              >
+                {{
+                  t(
+                    'tools.badgeforge.personal.change_credential',
+                  )
+                }}
+              </Button>
+            </template>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              data-test="badgeforge-personal-delete"
+              @click="startDelete(badge)"
+            >
+              <Trash2 class="size-4" />
+              {{ t('tools.badgeforge.management.delete') }}
+            </Button>
+          </template>
         </div>
 
-        <p class="text-xs text-subtle">
-            {{ t('tools.badgeforge.personal.description') }}
+        <p
+          v-if="refreshFailedId === badge.id"
+          class="text-xs text-destructive"
+          data-test="badgeforge-personal-refresh-error"
+        >
+          {{ t('tools.badgeforge.personal.refresh_failed') }}
         </p>
 
         <div
-            v-if="!canEdit()"
-            class="rounded-md border border-dashed px-4 py-3 text-sm"
-            data-test="badgeforge-personal-upgrade"
+          v-if="credentialId === badge.id"
+          class="space-y-2 rounded-md border p-3"
+          data-test="badgeforge-personal-credential-form"
         >
-            <p class="text-subtle">
-                {{ t('tools.badgeforge.personal.readonly_note') }}
-            </p>
+          <Input
+            v-model="credentialForm.credential"
+            type="password"
+            autocomplete="new-password"
+            :placeholder="
+              t(
+                'tools.badgeforge.personal.credential_placeholder',
+              )
+            "
+            :aria-label="t('tools.badgeforge.personal.credential')"
+            data-test="badgeforge-personal-credential-input"
+          />
+          <InputError :message="credentialForm.errors.credential" />
+
+          <Input
+            v-if="needsUsername(badge)"
+            v-model="credentialForm.credential_username"
+            autocomplete="off"
+            :placeholder="
+              t('tools.badgeforge.personal.credential_username')
+            "
+            :aria-label="
+              t('tools.badgeforge.personal.credential_username')
+            "
+            data-test="badgeforge-personal-credential-username"
+          />
+          <InputError
+            :message="credentialForm.errors.credential_username"
+          />
+
+          <div class="flex gap-2">
             <Button
-                as-child
-                variant="outline"
-                size="sm"
-                class="mt-2"
-                data-test="badgeforge-personal-upgrade-link"
+              size="sm"
+              :disabled="credentialForm.processing"
+              data-test="badgeforge-personal-credential-save"
+              @click="saveCredential(badge)"
             >
-                <a :href="upgradeUrl">
-                    {{ t('tools.badgeforge.personal.upgrade') }}
-                </a>
+              {{ t('tools.badgeforge.management.save') }}
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              data-test="badgeforge-personal-credential-cancel"
+              @click="cancelCredential"
+            >
+              {{ t('tools.badgeforge.management.cancel') }}
+            </Button>
+          </div>
         </div>
 
         <div
-            v-if="badges().length === 0"
-            class="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-subtle"
-            data-test="badgeforge-personal-empty"
+          v-if="confirmingId === badge.id"
+          class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
+          data-test="badgeforge-personal-delete-confirm"
         >
-            {{ t('tools.badgeforge.personal.empty') }}
-        </div>
-
-        <ul
-            v-else
-            class="divide-y rounded-lg border border-border"
-            data-test="badgeforge-personal-list"
-        >
-            <li
-                v-for="badge in badges()"
-                :key="badge.id"
-                class="space-y-2 px-4 py-3"
-                data-test="badgeforge-personal-row"
+          <p class="text-sm font-medium">
+            {{
+              t('tools.badgeforge.management.delete_title', {
+                name: badge.name,
+              })
+            }}
+          </p>
+          <p class="text-xs text-subtle">
+            {{
+              t('tools.badgeforge.management.delete_description')
+            }}
+          </p>
+          <div class="mt-2 flex gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              data-test="badgeforge-personal-delete-confirmed"
+              @click="destroy(badge)"
             >
-                <div class="flex flex-wrap items-center gap-2">
-                    <img
-                        v-if="displayUrl(badge) !== ''"
-                        :src="displayUrl(badge)"
-                        :alt="badge.name"
-                        class="h-5 max-w-48"
-                        data-test="badgeforge-personal-preview"
-                    />
-
-                    <div class="min-w-0 flex-1">
-                        <template v-if="editingId === badge.id">
-                            <Input
-                                v-model="renameForm.name"
-                                :maxlength="
-                                    toolProps.limits.personalBadges
-                                        .nameMaxLength
-                                "
-                                :aria-label="
-                                    t('tools.badgeforge.personal.name')
-                                "
-                                data-test="badgeforge-personal-rename-input"
-                                @keyup.enter="saveRename(badge)"
-                            />
-                            <InputError :message="renameForm.errors.name" />
-                        </template>
-                        <div v-else class="flex flex-wrap items-center gap-2">
-                            <p class="truncate text-sm font-medium">
-                                {{ badge.name }}
-                            </p>
-                            <Badge
-                                variant="outline"
-                                data-test="badgeforge-personal-type"
-                            >
-                                {{
-                                    badge.type === 'provider'
-                                        ? metricName(badge)
-                                        : t('tools.badgeforge.modes.static')
-                                }}
-                            </Badge>
-                            <Badge
-                                v-if="badge.private"
-                                variant="outline"
-                                data-test="badgeforge-personal-private"
-                            >
-                                {{ t('tools.badgeforge.personal.private') }}
-                            </Badge>
-                        </div>
-                        <p
-                            class="text-xs text-subtle"
-                            data-test="badgeforge-personal-credential-status"
-                        >
-                            {{ credentialStatus(badge) }}
-                        </p>
-                    </div>
-
-                    <template v-if="editingId === badge.id">
-                        <Button
-                            size="sm"
-                            :disabled="renameForm.processing"
-                            data-test="badgeforge-personal-rename-save"
-                            @click="saveRename(badge)"
-                        >
-                            {{ t('tools.badgeforge.management.save') }}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            data-test="badgeforge-personal-rename-cancel"
-                            @click="editingId = null"
-                        >
-                            {{ t('tools.badgeforge.management.cancel') }}
-                        </Button>
-                    </template>
-                    <template v-else>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            :disabled="badge.url === null"
-                            data-test="badgeforge-personal-copy-svg"
-                            @click="copy(displayUrl(badge))"
-                        >
-                            <Copy class="size-4" />
-                            {{ t('tools.badgeforge.personal.copy_svg') }}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            :disabled="badge.pngUrl === null"
-                            data-test="badgeforge-personal-copy-png"
-                            @click="copy(displayUrl(badge, true))"
-                        >
-                            <Copy class="size-4" />
-                            {{ t('tools.badgeforge.personal.copy_png') }}
-                        </Button>
-
-                        <template v-if="canEdit()">
-                            <Button
-                                v-if="badge.type === 'provider'"
-                                variant="ghost"
-                                size="sm"
-                                :disabled="refreshingId === badge.id"
-                                data-test="badgeforge-personal-refresh"
-                                @click="refresh(badge)"
-                            >
-                                <RefreshCw class="size-4" />
-                                {{
-                                    refreshingId === badge.id
-                                        ? t(
-                                              'tools.badgeforge.personal.refreshing',
-                                          )
-                                        : t('tools.badgeforge.personal.refresh')
-                                }}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                data-test="badgeforge-personal-rename"
-                                @click="startRename(badge)"
-                            >
-                                <Pencil class="size-4" />
-                                {{ t('tools.badgeforge.management.rename') }}
-                            </Button>
-                            <Button
-                                v-if="badge.private"
-                                variant="ghost"
-                                size="sm"
-                                data-test="badgeforge-personal-credential"
-                                @click="startCredential(badge)"
-                            >
-                                {{
-                                    t(
-                                        'tools.badgeforge.personal.change_credential',
-                                    )
-                                }}
-                            </Button>
-                        </template>
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            data-test="badgeforge-personal-delete"
-                            @click="startDelete(badge)"
-                        >
-                            <Trash2 class="size-4" />
-                            {{ t('tools.badgeforge.management.delete') }}
-                        </Button>
-                    </template>
-                </div>
-
-                <p
-                    v-if="refreshFailedId === badge.id"
-                    class="text-xs text-destructive"
-                    data-test="badgeforge-personal-refresh-error"
-                >
-                    {{ t('tools.badgeforge.personal.refresh_failed') }}
-                </p>
-
-                <div
-                    v-if="credentialId === badge.id"
-                    class="space-y-2 rounded-md border p-3"
-                    data-test="badgeforge-personal-credential-form"
-                >
-                    <Input
-                        v-model="credentialForm.credential"
-                        type="password"
-                        autocomplete="new-password"
-                        :placeholder="
-                            t(
-                                'tools.badgeforge.personal.credential_placeholder',
-                            )
-                        "
-                        :aria-label="t('tools.badgeforge.personal.credential')"
-                        data-test="badgeforge-personal-credential-input"
-                    />
-                    <InputError :message="credentialForm.errors.credential" />
-
-                    <Input
-                        v-if="needsUsername(badge)"
-                        v-model="credentialForm.credential_username"
-                        autocomplete="off"
-                        :placeholder="
-                            t('tools.badgeforge.personal.credential_username')
-                        "
-                        :aria-label="
-                            t('tools.badgeforge.personal.credential_username')
-                        "
-                        data-test="badgeforge-personal-credential-username"
-                    />
-                    <InputError
-                        :message="credentialForm.errors.credential_username"
-                    />
-
-                    <div class="flex gap-2">
-                        <Button
-                            size="sm"
-                            :disabled="credentialForm.processing"
-                            data-test="badgeforge-personal-credential-save"
-                            @click="saveCredential(badge)"
-                        >
-                            {{ t('tools.badgeforge.management.save') }}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            data-test="badgeforge-personal-credential-cancel"
-                            @click="cancelCredential"
-                        >
-                            {{ t('tools.badgeforge.management.cancel') }}
-                        </Button>
-                    </div>
-                </div>
-
-                <div
-                    v-if="confirmingId === badge.id"
-                    class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
-                    data-test="badgeforge-personal-delete-confirm"
-                >
-                    <p class="text-sm font-medium">
-                        {{
-                            t('tools.badgeforge.management.delete_title', {
-                                name: badge.name,
-                            })
-                        }}
-                    </p>
-                    <p class="text-xs text-subtle">
-                        {{
-                            t('tools.badgeforge.management.delete_description')
-                        }}
-                    </p>
-                    <div class="mt-2 flex gap-2">
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            data-test="badgeforge-personal-delete-confirmed"
-                            @click="destroy(badge)"
-                        >
-                            {{ t('tools.badgeforge.management.delete') }}
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            data-test="badgeforge-personal-delete-cancel"
-                            @click="confirmingId = null"
-                        >
-                            {{ t('tools.badgeforge.management.cancel') }}
-                        </Button>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </section>
+              {{ t('tools.badgeforge.management.delete') }}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              data-test="badgeforge-personal-delete-cancel"
+              @click="confirmingId = null"
+            >
+              {{ t('tools.badgeforge.management.cancel') }}
+            </Button>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
 </template>

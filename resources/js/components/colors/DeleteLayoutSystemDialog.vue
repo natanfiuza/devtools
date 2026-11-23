@@ -85,63 +85,69 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-    <Dialog :open="open" @update:open="setOpen">
-        <DialogContent
-            class="sm:max-w-md"
-            data-test="layout-system-delete-dialog"
-        >
-            <DialogHeader>
-                <DialogTitle>
-                    {{ t('colors.systems.delete.title') }}
-                </DialogTitle>
-                <DialogDescription>
-                    {{ t('colors.systems.delete.description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="open"
+    @update:open="setOpen"
+  >
+    <DialogContent
+      class="sm:max-w-md"
+      data-test="layout-system-delete-dialog"
+    >
+      <DialogHeader>
+        <DialogTitle>
+          {{ t('colors.systems.delete.title') }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('colors.systems.delete.description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <form class="flex flex-col gap-3" @submit.prevent="destroy">
-                <div class="flex flex-col gap-2">
-                    <Label for="layout-system-delete-name">
-                        {{ t('colors.systems.delete.label') }}
-                    </Label>
-                    <Input
-                        id="layout-system-delete-name"
-                        v-model="confirmName"
-                        type="text"
-                        autocomplete="off"
-                        :placeholder="systemName"
-                        :aria-invalid="serverError !== null"
-                        data-test="layout-system-delete-name"
-                    />
-                    <InputError :message="serverError ?? undefined" />
-                </div>
+      <form
+        class="flex flex-col gap-3"
+        @submit.prevent="destroy"
+      >
+        <div class="flex flex-col gap-2">
+          <Label for="layout-system-delete-name">
+            {{ t('colors.systems.delete.label') }}
+          </Label>
+          <Input
+            id="layout-system-delete-name"
+            v-model="confirmName"
+            type="text"
+            autocomplete="off"
+            :placeholder="systemName"
+            :aria-invalid="serverError !== null"
+            data-test="layout-system-delete-name"
+          />
+          <InputError :message="serverError ?? undefined" />
+        </div>
 
-                <DialogFooter class="gap-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        :disabled="deleting"
-                        data-test="layout-system-delete-cancel"
-                        @click="emit('close')"
-                    >
-                        {{ t('colors.systems.delete.cancel') }}
-                    </Button>
-                    <Button
-                        type="submit"
-                        variant="destructive"
-                        size="sm"
-                        :disabled="!matches || deleting"
-                        data-test="layout-system-delete-confirm"
-                    >
-                        {{
-                            deleting
-                                ? t('colors.systems.delete.deleting')
-                                : t('colors.systems.delete.confirm')
-                        }}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-    </Dialog>
+        <DialogFooter class="gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            :disabled="deleting"
+            data-test="layout-system-delete-cancel"
+            @click="emit('close')"
+          >
+            {{ t('colors.systems.delete.cancel') }}
+          </Button>
+          <Button
+            type="submit"
+            variant="destructive"
+            size="sm"
+            :disabled="!matches || deleting"
+            data-test="layout-system-delete-confirm"
+          >
+            {{
+              deleting
+                ? t('colors.systems.delete.deleting')
+                : t('colors.systems.delete.confirm')
+            }}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>

@@ -188,310 +188,318 @@ function setOpen(value: boolean): void {
 </script>
 
 <template>
-    <Dialog :open="props.open" @update:open="setOpen">
-        <DialogContent class="sm:max-w-xl" data-test="token-import-dialog">
-            <DialogHeader>
-                <DialogTitle>{{
-                    t('tools.shared.token_import.title')
-                }}</DialogTitle>
-                <DialogDescription>
-                    {{ t('tools.shared.token_import.description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="props.open"
+    @update:open="setOpen"
+  >
+    <DialogContent
+      class="sm:max-w-xl"
+      data-test="token-import-dialog"
+    >
+      <DialogHeader>
+        <DialogTitle>
+          {{
+            t('tools.shared.token_import.title')
+          }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('tools.shared.token_import.description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <div class="flex flex-col gap-4">
-                <FileDropzone
-                    ref="dropzone"
-                    :accept="accept"
-                    testid="token-import"
-                    @file="onFile"
+      <div class="flex flex-col gap-4">
+        <FileDropzone
+          ref="dropzone"
+          :accept="accept"
+          testid="token-import"
+          @file="onFile"
+        >
+          <div
+            class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-center"
+          >
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              :disabled="reading"
+              data-test="token-import-choose"
+              @click="dropzone?.pick()"
+            >
+              {{ t('tools.shared.token_import.choose') }}
+            </Button>
+            <p class="text-xs text-muted-foreground">
+              {{
+                t('tools.shared.token_import.hint', {
+                  size: formatBytes(
+                    props.tokens.maxBytes,
+                    locale,
+                  ),
+                })
+              }}
+            </p>
+          </div>
+        </FileDropzone>
+
+        <p
+          v-if="reading"
+          class="text-sm text-muted-foreground"
+          role="status"
+          data-test="token-import-reading"
+        >
+          {{ t('tools.shared.token_import.reading') }}
+        </p>
+
+        <p
+          v-if="fileError !== null"
+          class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
+          role="alert"
+          data-test="token-import-file-error"
+        >
+          {{ fileErrorMessage(fileError) }}
+        </p>
+
+        <p
+          v-if="fileName !== ''"
+          class="text-xs text-muted-foreground"
+          data-test="token-import-filename"
+        >
+          {{
+            t('tools.shared.token_import.preview.filename', {
+              name: fileName,
+            })
+          }}
+        </p>
+
+        <template v-if="result !== null">
+          <section
+            v-if="!result.ok"
+            class="flex flex-col gap-2"
+            aria-live="polite"
+            data-test="token-import-error"
+          >
+            <h3 class="text-sm font-semibold">
+              {{
+                t('tools.shared.token_import.diagnostics.title')
+              }}
+            </h3>
+            <ul class="flex flex-col gap-1">
+              <li
+                v-for="(diagnostic, index) in shownDiagnostics"
+                :key="`${diagnostic.code}-${index}`"
+                class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
+                data-test="token-import-diagnostic"
+                :data-severity="diagnostic.severity"
+              >
+                {{ diagnosticText(diagnostic) }}
+              </li>
+            </ul>
+            <p
+              v-if="hiddenDiagnostics > 0"
+              class="text-xs text-muted-foreground"
+              data-test="token-import-hidden"
+            >
+              {{
+                t(
+                  'tools.shared.token_import.diagnostics.hidden',
+                  {
+                    count: hiddenDiagnostics,
+                  },
+                )
+              }}
+            </p>
+          </section>
+
+          <section
+            v-else
+            class="flex flex-col gap-3 rounded-lg border border-border p-3"
+            data-test="token-import-preview"
+          >
+            <h3 class="text-sm font-semibold">
+              {{ t('tools.shared.token_import.preview.title') }}
+            </h3>
+
+            <dl class="grid gap-2 text-xs sm:grid-cols-2">
+              <div class="flex gap-2">
+                <dt class="text-muted-foreground">
+                  {{
+                    t(
+                      'tools.shared.token_import.preview.format',
+                    )
+                  }}
+                </dt>
+                <dd data-test="token-import-format">
+                  {{
+                    t(
+                      `tools.shared.token_import.formats.${palette!.format}`,
+                    )
+                  }}
+                </dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-muted-foreground">
+                  {{
+                    t(
+                      'tools.shared.token_import.preview.kind',
+                    )
+                  }}
+                </dt>
+                <dd data-test="token-import-kind">
+                  {{
+                    t(
+                      `tools.shared.token_import.kinds.${palette!.kind}`,
+                    )
+                  }}
+                </dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-muted-foreground">
+                  {{
+                    t(
+                      'tools.shared.token_import.preview.base',
+                    )
+                  }}
+                </dt>
+                <dd>
+                  <code data-test="token-import-base">{{
+                    palette!.base
+                  }}</code>
+                </dd>
+              </div>
+              <div class="flex gap-2">
+                <dt class="text-muted-foreground">
+                  {{
+                    t(
+                      'tools.shared.token_import.preview.colors_label',
+                    )
+                  }}
+                </dt>
+                <dd data-test="token-import-count">
+                  {{ previewColors.length }}
+                </dd>
+              </div>
+            </dl>
+
+            <p
+              class="text-xs"
+              :class="
+                palette!.roles === null
+                  ? 'text-muted-foreground'
+                  : 'text-foreground'
+              "
+              data-test="token-import-roles"
+            >
+              {{
+                palette!.roles === null
+                  ? t(
+                    'tools.shared.token_import.preview.no_roles',
+                  )
+                  : t(
+                    'tools.shared.token_import.preview.roles',
+                  )
+              }}
+            </p>
+
+            <p
+              v-if="palette!.name !== null"
+              class="text-xs text-muted-foreground"
+              data-test="token-import-name"
+            >
+              {{
+                t('tools.shared.token_import.preview.name', {
+                  name: palette!.name,
+                })
+              }}
+            </p>
+
+            <ul class="flex flex-wrap gap-1">
+              <li
+                v-for="(hex, index) in previewColors"
+                :key="`${hex}-${index}`"
+                class="size-6 rounded border border-border"
+                :style="{ backgroundColor: hex }"
+                :title="hex"
+                aria-hidden="true"
+              />
+            </ul>
+
+            <template v-if="shownDiagnostics.length > 0">
+              <h4 class="text-xs font-semibold">
+                {{
+                  t(
+                    'tools.shared.token_import.diagnostics.warnings',
+                  )
+                }}
+              </h4>
+              <ul class="flex flex-col gap-1">
+                <li
+                  v-for="(
+                    diagnostic, index
+                  ) in shownDiagnostics"
+                  :key="`${diagnostic.code}-${index}`"
+                  class="rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground"
+                  data-test="token-import-diagnostic"
+                  :data-severity="diagnostic.severity"
                 >
-                    <div
-                        class="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-center"
-                    >
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            :disabled="reading"
-                            data-test="token-import-choose"
-                            @click="dropzone?.pick()"
-                        >
-                            {{ t('tools.shared.token_import.choose') }}
-                        </Button>
-                        <p class="text-xs text-muted-foreground">
-                            {{
-                                t('tools.shared.token_import.hint', {
-                                    size: formatBytes(
-                                        props.tokens.maxBytes,
-                                        locale,
-                                    ),
-                                })
-                            }}
-                        </p>
-                    </div>
-                </FileDropzone>
+                  {{ diagnosticText(diagnostic) }}
+                </li>
+              </ul>
+              <p
+                v-if="hiddenDiagnostics > 0"
+                class="text-xs text-muted-foreground"
+                data-test="token-import-hidden"
+              >
+                {{
+                  t(
+                    'tools.shared.token_import.diagnostics.hidden',
+                    {
+                      count: hiddenDiagnostics,
+                    },
+                  )
+                }}
+              </p>
+            </template>
 
-                <p
-                    v-if="reading"
-                    class="text-sm text-muted-foreground"
-                    role="status"
-                    data-test="token-import-reading"
-                >
-                    {{ t('tools.shared.token_import.reading') }}
-                </p>
+            <p class="text-xs text-muted-foreground">
+              {{
+                t(
+                  'tools.shared.token_import.preview.apply_hint',
+                )
+              }}
+            </p>
+          </section>
+        </template>
+      </div>
 
-                <p
-                    v-if="fileError !== null"
-                    class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
-                    role="alert"
-                    data-test="token-import-file-error"
-                >
-                    {{ fileErrorMessage(fileError) }}
-                </p>
-
-                <p
-                    v-if="fileName !== ''"
-                    class="text-xs text-muted-foreground"
-                    data-test="token-import-filename"
-                >
-                    {{
-                        t('tools.shared.token_import.preview.filename', {
-                            name: fileName,
-                        })
-                    }}
-                </p>
-
-                <template v-if="result !== null">
-                    <section
-                        v-if="!result.ok"
-                        class="flex flex-col gap-2"
-                        aria-live="polite"
-                        data-test="token-import-error"
-                    >
-                        <h3 class="text-sm font-semibold">
-                            {{
-                                t('tools.shared.token_import.diagnostics.title')
-                            }}
-                        </h3>
-                        <ul class="flex flex-col gap-1">
-                            <li
-                                v-for="(diagnostic, index) in shownDiagnostics"
-                                :key="`${diagnostic.code}-${index}`"
-                                class="rounded-lg border border-destructive/40 px-3 py-2 text-xs text-destructive"
-                                data-test="token-import-diagnostic"
-                                :data-severity="diagnostic.severity"
-                            >
-                                {{ diagnosticText(diagnostic) }}
-                            </li>
-                        </ul>
-                        <p
-                            v-if="hiddenDiagnostics > 0"
-                            class="text-xs text-muted-foreground"
-                            data-test="token-import-hidden"
-                        >
-                            {{
-                                t(
-                                    'tools.shared.token_import.diagnostics.hidden',
-                                    {
-                                        count: hiddenDiagnostics,
-                                    },
-                                )
-                            }}
-                        </p>
-                    </section>
-
-                    <section
-                        v-else
-                        class="flex flex-col gap-3 rounded-lg border border-border p-3"
-                        data-test="token-import-preview"
-                    >
-                        <h3 class="text-sm font-semibold">
-                            {{ t('tools.shared.token_import.preview.title') }}
-                        </h3>
-
-                        <dl class="grid gap-2 text-xs sm:grid-cols-2">
-                            <div class="flex gap-2">
-                                <dt class="text-muted-foreground">
-                                    {{
-                                        t(
-                                            'tools.shared.token_import.preview.format',
-                                        )
-                                    }}
-                                </dt>
-                                <dd data-test="token-import-format">
-                                    {{
-                                        t(
-                                            `tools.shared.token_import.formats.${palette!.format}`,
-                                        )
-                                    }}
-                                </dd>
-                            </div>
-                            <div class="flex gap-2">
-                                <dt class="text-muted-foreground">
-                                    {{
-                                        t(
-                                            'tools.shared.token_import.preview.kind',
-                                        )
-                                    }}
-                                </dt>
-                                <dd data-test="token-import-kind">
-                                    {{
-                                        t(
-                                            `tools.shared.token_import.kinds.${palette!.kind}`,
-                                        )
-                                    }}
-                                </dd>
-                            </div>
-                            <div class="flex gap-2">
-                                <dt class="text-muted-foreground">
-                                    {{
-                                        t(
-                                            'tools.shared.token_import.preview.base',
-                                        )
-                                    }}
-                                </dt>
-                                <dd>
-                                    <code data-test="token-import-base">{{
-                                        palette!.base
-                                    }}</code>
-                                </dd>
-                            </div>
-                            <div class="flex gap-2">
-                                <dt class="text-muted-foreground">
-                                    {{
-                                        t(
-                                            'tools.shared.token_import.preview.colors_label',
-                                        )
-                                    }}
-                                </dt>
-                                <dd data-test="token-import-count">
-                                    {{ previewColors.length }}
-                                </dd>
-                            </div>
-                        </dl>
-
-                        <p
-                            class="text-xs"
-                            :class="
-                                palette!.roles === null
-                                    ? 'text-muted-foreground'
-                                    : 'text-foreground'
-                            "
-                            data-test="token-import-roles"
-                        >
-                            {{
-                                palette!.roles === null
-                                    ? t(
-                                          'tools.shared.token_import.preview.no_roles',
-                                      )
-                                    : t(
-                                          'tools.shared.token_import.preview.roles',
-                                      )
-                            }}
-                        </p>
-
-                        <p
-                            v-if="palette!.name !== null"
-                            class="text-xs text-muted-foreground"
-                            data-test="token-import-name"
-                        >
-                            {{
-                                t('tools.shared.token_import.preview.name', {
-                                    name: palette!.name,
-                                })
-                            }}
-                        </p>
-
-                        <ul class="flex flex-wrap gap-1">
-                            <li
-                                v-for="(hex, index) in previewColors"
-                                :key="`${hex}-${index}`"
-                                class="size-6 rounded border border-border"
-                                :style="{ backgroundColor: hex }"
-                                :title="hex"
-                                aria-hidden="true"
-                            />
-                        </ul>
-
-                        <template v-if="shownDiagnostics.length > 0">
-                            <h4 class="text-xs font-semibold">
-                                {{
-                                    t(
-                                        'tools.shared.token_import.diagnostics.warnings',
-                                    )
-                                }}
-                            </h4>
-                            <ul class="flex flex-col gap-1">
-                                <li
-                                    v-for="(
-                                        diagnostic, index
-                                    ) in shownDiagnostics"
-                                    :key="`${diagnostic.code}-${index}`"
-                                    class="rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground"
-                                    data-test="token-import-diagnostic"
-                                    :data-severity="diagnostic.severity"
-                                >
-                                    {{ diagnosticText(diagnostic) }}
-                                </li>
-                            </ul>
-                            <p
-                                v-if="hiddenDiagnostics > 0"
-                                class="text-xs text-muted-foreground"
-                                data-test="token-import-hidden"
-                            >
-                                {{
-                                    t(
-                                        'tools.shared.token_import.diagnostics.hidden',
-                                        {
-                                            count: hiddenDiagnostics,
-                                        },
-                                    )
-                                }}
-                            </p>
-                        </template>
-
-                        <p class="text-xs text-muted-foreground">
-                            {{
-                                t(
-                                    'tools.shared.token_import.preview.apply_hint',
-                                )
-                            }}
-                        </p>
-                    </section>
-                </template>
-            </div>
-
-            <DialogFooter class="gap-2">
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    data-test="token-import-cancel"
-                    @click="emit('close')"
-                >
-                    {{ t('tools.shared.token_import.preview.cancel') }}
-                </Button>
-                <Button
-                    v-if="fileName !== ''"
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    data-test="token-import-replace"
-                    @click="reset()"
-                >
-                    {{ t('tools.shared.token_import.preview.replace') }}
-                </Button>
-                <Button
-                    type="button"
-                    size="sm"
-                    :disabled="palette === null"
-                    data-test="token-import-apply"
-                    @click="apply"
-                >
-                    {{ t('tools.shared.token_import.preview.apply') }}
-                </Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+      <DialogFooter class="gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-test="token-import-cancel"
+          @click="emit('close')"
+        >
+          {{ t('tools.shared.token_import.preview.cancel') }}
+        </Button>
+        <Button
+          v-if="fileName !== ''"
+          type="button"
+          variant="ghost"
+          size="sm"
+          data-test="token-import-replace"
+          @click="reset()"
+        >
+          {{ t('tools.shared.token_import.preview.replace') }}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          :disabled="palette === null"
+          data-test="token-import-apply"
+          @click="apply"
+        >
+          {{ t('tools.shared.token_import.preview.apply') }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

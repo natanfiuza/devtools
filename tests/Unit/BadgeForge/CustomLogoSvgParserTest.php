@@ -163,7 +163,7 @@ it('recusa atributos perigosos ou desconhecidos', function (string $path) {
     'onclick' => ['<path d="M0 0h1v1H0z" onclick="alert(1)"/>'],
     'style' => ['<path d="M0 0h1v1H0z" style="fill:red"/>'],
     'transform' => ['<path d="M0 0h1v1H0z" transform="scale(2)"/>'],
-    'opacity' => ['<path d="M0 0h1v1H0z" opacity="0.5"/>'],
+    'filter' => ['<path d="M0 0h1v1H0z" filter="blur(1px)"/>'],
     'href na raiz do grupo' => ['<g href="#x"><path d="M0 0h1v1H0z"/></g>'],
     'atributo estranho' => ['<path d="M0 0h1v1H0z" data-x="1"/>'],
     'fill-rule invalido' => ['<path d="M0 0h1v1H0z" fill-rule="inherit"/>'],
@@ -232,4 +232,65 @@ it('valida o charset e o inicio de um path isolado', function () {
         ->and(CustomLogoSvgParser::isSafePathData(''))->toBeFalse()
         ->and(CustomLogoSvgParser::isSafePathData('L0 0h1'))->toBeFalse()
         ->and(CustomLogoSvgParser::isSafePathData('M0 0<script>'))->toBeFalse();
+});
+
+it('converte primitivas vetoriais em paths normalizados', function () {
+    $parsed = parseCustomLogo(<<<'SVG'
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14"/>
+            <rect x="4" y="5" width="10" height="8" rx="2"/>
+            <circle cx="12" cy="12" r="5"/>
+            <ellipse cx="12" cy="12" rx="6" ry="3"/>
+            <line x1="1" y1="2" x2="22" y2="23"/>
+            <polyline points="2 4 6 8 10 4"/>
+            <polygon points="12,2 22,22 2,22" fill-rule="evenodd"/>
+        </svg>
+        SVG);
+
+    expect($parsed->paths)->toHaveCount(7)
+        ->and($parsed->paths[0]->d)->toBe('M2 3h20v14h-20Z')
+        ->and($parsed->paths[1]->d)->toBe('M6 5h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2v-4a2 2 0 0 1 2 -2Z')
+        ->and($parsed->paths[2]->d)->toBe('M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0Z')
+        ->and($parsed->paths[3]->d)->toBe('M6 12a6 3 0 1 0 12 0a6 3 0 1 0 -12 0Z')
+        ->and($parsed->paths[4]->d)->toBe('M1 2L22 23')
+        ->and($parsed->paths[5]->d)->toBe('M2 4L6 8L10 4')
+        ->and($parsed->paths[6]->d)->toBe('M12 2L22 22L2 22Z')
+        ->and($parsed->paths[6]->fillRule)->toBe('evenodd');
+});
+
+it('ignora tags de metadados benignos e seus filhos', function () {
+    $parsed = parseCustomLogo(<<<'SVG'
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <title>Logo do Projeto</title>
+            <desc>Descricao interna</desc>
+            <metadata><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description/></rdf:RDF></metadata>
+            <rect width="24" height="24" opacity="0.8" stroke="none"/>
+        </svg>
+        SVG);
+
+    expect($parsed->paths)->toHaveCount(1)
+        ->and($parsed->paths[0]->d)->toBe('M0 0h24v24h-24Z');
+});
+
+it('recusa primitivas com geometria invalida', function (string $primitive) {
+    expect(parseCustomLogoError(customSvg($primitive)))->toBe('invalid_path');
+})->with([
+    'rect sem largura' => ['<rect height="10"/>'],
+    'rect com largura zero' => ['<rect width="0" height="10"/>'],
+    'rect com rx negativo' => ['<rect width="10" height="10" rx="-1"/>'],
+    'circle sem raio' => ['<circle cx="5" cy="5"/>'],
+    'circle com raio zero' => ['<circle cx="5" cy="5" r="0"/>'],
+    'ellipse com ry negativo' => ['<ellipse cx="5" cy="5" rx="4" ry="-2"/>'],
+    'polygon sem pontos suficientes' => ['<polygon points="1 2 3 4"/>'],
+    'polyline com coordenadas impares' => ['<polyline points="1 2 3"/>'],
+]);
+
+it('inclui o nome do elemento recusado no contexto de unsupported_element', function () {
+    try {
+        parseCustomLogo(customSvg('<script>alert(1)</script>'));
+        throw new RuntimeException('Esperava InvalidCustomLogoException.');
+    } catch (InvalidCustomLogoException $exception) {
+        expect($exception->reason)->toBe('unsupported_element')
+            ->and($exception->context)->toBe(['element' => '<script>']);
+    }
 });

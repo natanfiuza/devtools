@@ -897,3 +897,94 @@ mexer, `optimize:clear && optimize`.
 | OG 500/403 | diretório de `colors.og.path` sem escrita para o `www-data` |
 | Sitemap sem paletas novas | acervo passou de `COLORS_PALETTES_SITEMAP_LIMIT` (500): o teto protege o tempo de resposta, não é defeito |
 | Thread vazia mas comentários no banco | flag desligada: os comentários voltam quando a flag ligar, sem migração |
+
+## 12. Layout Harmonizer (sistemas de layout)
+
+A tool (`/{locale}/tools/colors/layout-harmonizer`) roda 100% no navegador: o
+motor, o quadro, as edições e as exportações MD/CSS/ZIP não fazem requisição
+ao servidor e não dependem de fila, worker ou variável de ambiente. O que
+existe no servidor é a superfície de conta: `layout_systems`,
+`layout_system_retired_slugs`, o pivot `color_tag_layout_system`, a página
+pública `/{locale}/colors/s/{slug}`, o sitemap e o crédito da origem. Fonte de
+verdade: [colors/](colors/); aceite:
+[acceptance/LAYOUT-HARMONIZER-FASE-6.md](acceptance/LAYOUT-HARMONIZER-FASE-6.md).
+
+### Deploy
+
+O deploy normal já cobre o track: o cron copia a release instalada, roda
+`php artisan migrate --force` (seção 2) e reinicia o que precisa. As três
+migrations são **só criação** e retrocompatíveis, executadas uma vez:
+
+| Migration | Efeito | Reversão |
+| --- | --- | --- |
+| `2026_11_19_000001_create_layout_systems_table` | cria `layout_systems` (ULID, FKs para dono/duplicada/paleta de origem, `state` JSON, versões, slug/arquivado, índices) | `down` apaga a tabela — perde os sistemas salvos |
+| `2026_11_19_000002_create_layout_system_retired_slugs_table` | cria `layout_system_retired_slugs` (slugs nunca reemitidos) | `down` apaga a tabela — slugs podem ser reusados |
+| `2026_11_19_000003_create_color_tag_layout_system_table` | cria o pivot `color_tag_layout_system` | `down` apaga o vínculo sistema↔tag |
+
+Nenhuma coluna de tabela existente muda; `migrate:rollback` só é seguro se a
+intenção for descartar os dados do track. Não há backfill: `algorithmVersion`
+fica no JSON do `state`.
+
+### Rollback (só aplicação)
+
+Voltar a release anterior pelo caminho normal da seção 2 restaura o
+comportamento antigo; **os dados ficam intactos**. Atenção a um efeito
+esperado: um sistema salvo com `algorithmVersion` 2 passa a abrir no modo
+somente leitura no código antigo (a versão é mais nova que a conhecida,
+ADR-169) — não edita nem regenera ali, mas exibe o snapshot e permite
+metadados, ciclo de vida e duplicação. Ao voltar para a release nova, ele
+reabre normalmente. Nenhuma migration precisa ser revertida no rollback de
+aplicação.
+
+### `algorithmVersion` 2 e sistemas existentes
+
+A auditoria da F6 subiu o motor para a versão 2 (teto de croma e passo da
+variante de marca, ADR-178). Sistemas salvos em 1 **não** são reescritos:
+abrem no modo **compatível**, com o quadro gravado, edição/bloqueio
+disponíveis e sugestões/restaurar desabilitados; a própria tela oferece
+"Regenerar com a versão atual", que pede confirmação, mantém os tokens
+bloqueados e descarta as edições sem bloqueio só depois do aceite explícito.
+Não há job nem backfill em massa.
+
+### Limites, cota e sitemap (só `.env`, nunca no código)
+
+| Chave | Padrão | Efeito |
+| --- | --- | --- |
+| `COLORS_FREE_LIMIT` / `COLORS_PAID_LIMIT` | 25 / ilimitado | cota **conjunta** de paletas + sistemas (arquivados contam; ADR-170) |
+| `COLORS_LAYOUT_SYSTEM_NAME_MAX_LENGTH` / `..._DESCRIPTION_MAX_LENGTH` | 80 / 500 | nome e descrição |
+| `COLORS_LAYOUT_SYSTEMS_PER_PAGE` / `..._PREVIEW_COLORS` | 20 / 6 | lista da conta e HEX do card |
+| `COLORS_LAYOUT_SYSTEMS_SITEMAP_LIMIT` | 500 | públicos ativos no sitemap |
+| `COLORS_LAYOUT_SYSTEM_STATE_MAX_BYTES` | 262144 (256 KB) | teto do JSON de `state` (caso real ~25 KB) |
+| `COLORS_LAYOUT_SYSTEM_INPUT_MAX_LENGTH` | 120 | cada texto cru de `state.inputs` |
+| `COLORS_LAYOUT_SYSTEM_EXPORT_PREFIX_MAX_LENGTH` / `..._SCOPE_MAX_LENGTH` | 32 / 64 | prefixo e classe do CSS exportado |
+| `COLORS_TAGS_PER_LAYOUT_SYSTEM` / `COLORS_TAG_NAME_MAX_LENGTH` | 10 / 30 | tags por sistema |
+| `COLORS_MANAGEMENT_RATE_LIMIT` | 60/min | throttle da área de gestão (o mesmo das paletas) |
+
+Depois de mexer, `php artisan optimize:clear && php artisan optimize`.
+Cuidado com `(int) ''` no `.env`: variável **vazia** vira `0`, não o default —
+para usar o padrão, remova a linha; para limite zero (ex.: nenhum sistema no
+sitemap), o `0` é intencional.
+
+### Desligar ou limitar sem migration
+
+Não existe flag de kill switch para o track. Sem migration, as opções são:
+baixar `COLORS_FREE_LIMIT` (a cota conjunta freia novas criações sem apagar
+nada), zerar `COLORS_LAYOUT_SYSTEMS_SITEMAP_LIMIT` (tira do sitemap), e tornar
+sistemas privados/arquivados pela própria UI (a URL pública responde 404 e sai
+do sitemap). Para remover a superfície inteira, é deploy de código (rotas e
+links), não `.env`; os dados continuam no banco e voltam com o código.
+
+### Diagnóstico rápido do Layout Harmonizer
+
+| Sintoma | Causa provável |
+| --- | --- |
+| 422 ao salvar citando versões | `state` com `stateVersion`/`snapshotVersion`/`schemaVersion` diferente do atual ou `algorithmVersion`/`suggestionsVersion` fora de 1..999 |
+| Banner "modo compatível" ao abrir | sistema salvo com `algorithmVersion` 1: comportamento esperado; regenerar pela tela |
+| Quadro somente leitura | `algorithmVersion`/`suggestionsVersion` maior que o código conhece (ex.: rollback): esperado, sem perda |
+| Página pública 404 | sistema privado, arquivado, excluído ou slug aposentado — 404 uniforme de propósito |
+| Sistema some do sitemap | acervo passou de `COLORS_LAYOUT_SYSTEMS_SITEMAP_LIMIT` (500) |
+| "Limite atingido" ao criar | cota conjunta das paletas (25 Free), contando arquivados; excluir definitivamente libera |
+| Exportação vazia/erro no navegador | conteúdo do quadro (nada de rede); prefixo/escopo inválidos bloqueiam os botões com erro local |
+
+Logs e auditoria nunca registram o conteúdo de `state`/schema (CLAUDE.md);
+sintomas acima se confirmam pela UI, não por dump do payload.

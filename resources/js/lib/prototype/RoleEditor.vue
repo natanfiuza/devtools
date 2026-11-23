@@ -32,38 +32,41 @@ function setRole(role: PaletteRole, hex: string): void {
 </script>
 
 <template>
-    <section class="flex flex-col gap-3" data-test="role-editor">
-        <div class="flex flex-wrap items-start justify-between gap-2">
-            <div>
-                <h3 class="text-sm font-semibold">
-                    {{ t('colors.prototype.roles_title') }}
-                </h3>
-                <p class="mt-1 text-xs text-muted-foreground">
-                    {{ t('colors.prototype.roles_description') }}
-                </p>
-            </div>
+  <section
+    class="flex flex-col gap-3"
+    data-test="role-editor"
+  >
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <h3 class="text-sm font-semibold">
+          {{ t('colors.prototype.roles_title') }}
+        </h3>
+        <p class="mt-1 text-xs text-muted-foreground">
+          {{ t('colors.prototype.roles_description') }}
+        </p>
+      </div>
 
-            <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                data-test="role-editor-restore"
-                @click="emit('restore')"
-            >
-                <RotateCcw class="size-4" />
-                {{ t('colors.prototype.roles_restore') }}
-            </Button>
-        </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        data-test="role-editor-restore"
+        @click="emit('restore')"
+      >
+        <RotateCcw class="size-4" />
+        {{ t('colors.prototype.roles_restore') }}
+      </Button>
+    </div>
 
-        <div class="grid gap-3 sm:grid-cols-2">
-            <RoleColorField
-                v-for="role in PALETTE_ROLES"
-                :key="role"
-                :label="t(`colors.prototype.role_${role}`)"
-                :model-value="colors[role]"
-                :test-id="`role-field-${role}`"
-                @update:model-value="setRole(role, $event)"
-            />
-        </div>
-    </section>
+    <div class="grid gap-3 sm:grid-cols-2">
+      <RoleColorField
+        v-for="role in PALETTE_ROLES"
+        :key="role"
+        :label="t(`colors.prototype.role_${role}`)"
+        :model-value="colors[role]"
+        :test-id="`role-field-${role}`"
+        @update:model-value="setRole(role, $event)"
+      />
+    </div>
+  </section>
 </template>

@@ -42,187 +42,215 @@ const aiHref = computed(() =>
 </script>
 
 <template>
-    <PageHead />
+  <PageHead />
 
-    <div class="mx-auto w-full max-w-[1120px] px-4 py-16 sm:py-24">
-        <header class="max-w-3xl">
-            <h1
-                class="text-4xl leading-tight font-semibold tracking-tight sm:text-[56px]"
+  <div class="mx-auto w-full max-w-[1120px] px-4 py-16 sm:py-24">
+    <header class="max-w-3xl">
+      <h1
+        class="text-4xl leading-tight font-semibold tracking-tight sm:text-[56px]"
+      >
+        {{ t('home.title') }}
+      </h1>
+      <p class="mt-4 text-lg text-muted-foreground">
+        {{ t('home.subtitle') }}
+      </p>
+
+      <div class="mt-8 max-w-xl">
+        <SearchTrigger variant="hero" />
+      </div>
+    </header>
+
+    <section
+      id="tools"
+      class="mt-20 scroll-mt-20"
+    >
+      <h2 class="text-[32px] font-semibold tracking-[-0.02em]">
+        {{ t('home.tools.title') }}
+      </h2>
+      <p class="mt-2 max-w-2xl text-muted-foreground">
+        {{ t('home.tools.subtitle') }}
+      </p>
+
+      <ToolGrid :tools="tools" />
+    </section>
+
+    <section class="mt-20">
+      <div
+        class="grid items-center gap-8 rounded-xl border bg-surface p-6 sm:p-10 lg:grid-cols-2"
+      >
+        <div>
+          <Badge variant="secondary">
+            <Sparkles
+              class="size-3"
+              aria-hidden="true"
+            />
+            {{ t('home.ai.badge') }}
+          </Badge>
+
+          <h2
+            class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
+          >
+            {{ t('home.ai.title') }}
+          </h2>
+          <p class="mt-2 text-muted-foreground">
+            {{ t('home.ai.body') }}
+          </p>
+          <p class="mt-4 text-sm text-subtle">
+            {{ t('home.ai.note') }}
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <Button
+              v-if="aiHref"
+              as-child
             >
-                {{ t('home.title') }}
-            </h1>
-            <p class="mt-4 text-lg text-muted-foreground">
-                {{ t('home.subtitle') }}
-            </p>
-
-            <div class="mt-8 max-w-xl">
-                <SearchTrigger variant="hero" />
-            </div>
-        </header>
-
-        <section id="tools" class="mt-20 scroll-mt-20">
-            <h2 class="text-[32px] font-semibold tracking-[-0.02em]">
-                {{ t('home.tools.title') }}
-            </h2>
-            <p class="mt-2 max-w-2xl text-muted-foreground">
-                {{ t('home.tools.subtitle') }}
-            </p>
-
-            <ToolGrid :tools="tools" />
-        </section>
-
-        <section class="mt-20">
-            <div
-                class="grid items-center gap-8 rounded-xl border bg-surface p-6 sm:p-10 lg:grid-cols-2"
+              <Link
+                :href="aiHref"
+                data-test="home-ai-cta"
+              >
+                {{ t('home.ai.cta') }}
+              </Link>
+            </Button>
+            <Button
+              v-else
+              as-child
             >
-                <div>
-                    <Badge variant="secondary">
-                        <Sparkles class="size-3" aria-hidden="true" />
-                        {{ t('home.ai.badge') }}
-                    </Badge>
+              <Link :href="routes.register.value">
+                {{ t('home.cta.register') }}
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              as-child
+            >
+              <Link :href="routes.pricing.value">
+                {{ t('app.nav.pricing') }}
+              </Link>
+            </Button>
+          </div>
+        </div>
 
-                    <h2
-                        class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
-                    >
-                        {{ t('home.ai.title') }}
-                    </h2>
-                    <p class="mt-2 text-muted-foreground">
-                        {{ t('home.ai.body') }}
-                    </p>
-                    <p class="mt-4 text-sm text-subtle">
-                        {{ t('home.ai.note') }}
-                    </p>
-
-                    <div class="mt-6 flex flex-wrap items-center gap-3">
-                        <Button v-if="aiHref" as-child>
-                            <Link :href="aiHref" data-test="home-ai-cta">
-                                {{ t('home.ai.cta') }}
-                            </Link>
-                        </Button>
-                        <Button v-else as-child>
-                            <Link :href="routes.register.value">
-                                {{ t('home.cta.register') }}
-                            </Link>
-                        </Button>
-                        <Button variant="outline" as-child>
-                            <Link :href="routes.pricing.value">
-                                {{ t('app.nav.pricing') }}
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-
-                <!-- Exemplo estatico do que a tool faz (o pedido e o SQL que
+        <!-- Exemplo estatico do que a tool faz (o pedido e o SQL que
                      ela devolve). A ferramenta de verdade vive em
                      `/{locale}/tools/ai-sql-builder`. -->
-                <figure class="rounded-lg border bg-surface-2 p-4">
-                    <p class="text-sm text-subtle">
-                        {{ t('home.ai.preview_prompt') }}
-                    </p>
-                    <pre
-                        class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
-                    ><code>{{ t('home.ai.preview_sql') }}</code></pre>
-                </figure>
-            </div>
-        </section>
+        <figure class="rounded-lg border bg-surface-2 p-4">
+          <p class="text-sm text-subtle">
+            {{ t('home.ai.preview_prompt') }}
+          </p>
+          <pre
+            class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
+          ><code>{{ t('home.ai.preview_sql') }}</code></pre>
+        </figure>
+      </div>
+    </section>
 
-        <section class="mt-20">
-            <div
-                class="grid items-center gap-8 rounded-xl border bg-surface p-6 sm:p-10 lg:grid-cols-2"
+    <section class="mt-20">
+      <div
+        class="grid items-center gap-8 rounded-xl border bg-surface p-6 sm:p-10 lg:grid-cols-2"
+      >
+        <div>
+          <Badge variant="secondary">
+            <Terminal
+              class="size-3"
+              aria-hidden="true"
+            />
+            {{ t('home.api.badge') }}
+          </Badge>
+
+          <h2
+            class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
+          >
+            {{ t('home.api.title') }}
+          </h2>
+          <p class="mt-2 text-muted-foreground">
+            {{ t('home.api.body') }}
+          </p>
+          <p class="mt-4 text-sm text-subtle">
+            {{ t('home.api.note') }}
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <Button as-child>
+              <Link
+                :href="routes.apiDocs.value"
+                data-test="home-api-docs-cta"
+              >
+                {{ t('home.api.cta_docs') }}
+              </Link>
+            </Button>
+            <Button
+              v-if="isAuthenticated"
+              variant="outline"
+              as-child
             >
-                <div>
-                    <Badge variant="secondary">
-                        <Terminal class="size-3" aria-hidden="true" />
-                        {{ t('home.api.badge') }}
-                    </Badge>
+              <Link
+                :href="apiTokens.url()"
+                data-test="home-api-tokens-cta"
+              >
+                {{ t('home.api.cta_tokens') }}
+              </Link>
+            </Button>
+            <Button
+              v-else
+              variant="outline"
+              as-child
+            >
+              <Link
+                :href="routes.register.value"
+                data-test="home-api-register-cta"
+              >
+                {{ t('home.cta.register') }}
+              </Link>
+            </Button>
+          </div>
+        </div>
 
-                    <h2
-                        class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
-                    >
-                        {{ t('home.api.title') }}
-                    </h2>
-                    <p class="mt-2 text-muted-foreground">
-                        {{ t('home.api.body') }}
-                    </p>
-                    <p class="mt-4 text-sm text-subtle">
-                        {{ t('home.api.note') }}
-                    </p>
+        <figure class="rounded-lg border bg-surface-2 p-4">
+          <p class="text-sm text-subtle">
+            {{ t('home.api.preview_title') }}
+          </p>
+          <pre
+            class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
+          ><code>{{ t('home.api.preview_code') }}</code></pre>
+        </figure>
+      </div>
+    </section>
 
-                    <div class="mt-6 flex flex-wrap items-center gap-3">
-                        <Button as-child>
-                            <Link
-                                :href="routes.apiDocs.value"
-                                data-test="home-api-docs-cta"
-                            >
-                                {{ t('home.api.cta_docs') }}
-                            </Link>
-                        </Button>
-                        <Button
-                            v-if="isAuthenticated"
-                            variant="outline"
-                            as-child
-                        >
-                            <Link
-                                :href="apiTokens.url()"
-                                data-test="home-api-tokens-cta"
-                            >
-                                {{ t('home.api.cta_tokens') }}
-                            </Link>
-                        </Button>
-                        <Button v-else variant="outline" as-child>
-                            <Link
-                                :href="routes.register.value"
-                                data-test="home-api-register-cta"
-                            >
-                                {{ t('home.cta.register') }}
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
+    <section class="mt-20">
+      <div class="rounded-xl border bg-surface p-6 sm:p-10">
+        <div class="max-w-3xl">
+          <Badge variant="secondary">
+            <HeartHandshake
+              class="size-3"
+              aria-hidden="true"
+            />
+            {{ t('home.donation.badge') }}
+          </Badge>
 
-                <figure class="rounded-lg border bg-surface-2 p-4">
-                    <p class="text-sm text-subtle">
-                        {{ t('home.api.preview_title') }}
-                    </p>
-                    <pre
-                        class="mt-3 overflow-x-auto font-mono text-[13px] leading-relaxed text-foreground"
-                    ><code>{{ t('home.api.preview_code') }}</code></pre>
-                </figure>
-            </div>
-        </section>
+          <h2
+            class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
+          >
+            {{ t('home.donation.title') }}
+          </h2>
+          <p class="mt-2 text-muted-foreground">
+            {{ t('home.donation.body') }}
+          </p>
+          <p class="mt-4 text-sm text-subtle">
+            {{ t('home.donation.note') }}
+          </p>
 
-        <section class="mt-20">
-            <div class="rounded-xl border bg-surface p-6 sm:p-10">
-                <div class="max-w-3xl">
-                    <Badge variant="secondary">
-                        <HeartHandshake class="size-3" aria-hidden="true" />
-                        {{ t('home.donation.badge') }}
-                    </Badge>
-
-                    <h2
-                        class="mt-4 text-[32px] font-semibold tracking-[-0.02em]"
-                    >
-                        {{ t('home.donation.title') }}
-                    </h2>
-                    <p class="mt-2 text-muted-foreground">
-                        {{ t('home.donation.body') }}
-                    </p>
-                    <p class="mt-4 text-sm text-subtle">
-                        {{ t('home.donation.note') }}
-                    </p>
-
-                    <div class="mt-6 flex flex-wrap items-center gap-3">
-                        <Button as-child>
-                            <Link
-                                :href="routes.donate.value"
-                                data-test="home-donate-cta"
-                            >
-                                {{ t('home.donation.cta') }}
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <Button as-child>
+              <Link
+                :href="routes.donate.value"
+                data-test="home-donate-cta"
+              >
+                {{ t('home.donation.cta') }}
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </template>

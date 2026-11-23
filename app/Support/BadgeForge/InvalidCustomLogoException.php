@@ -13,8 +13,13 @@ use RuntimeException;
  */
 final class InvalidCustomLogoException extends RuntimeException
 {
-    public function __construct(public readonly string $reason)
-    {
+    /**
+     * @param  array<string, string>  $context
+     */
+    public function __construct(
+        public readonly string $reason,
+        public readonly array $context = [],
+    ) {
         parent::__construct($reason);
     }
 }

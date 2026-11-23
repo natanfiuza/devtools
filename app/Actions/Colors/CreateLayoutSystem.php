@@ -46,7 +46,7 @@ final class CreateLayoutSystem
 
                     if ($this->quota->reached($user)) {
                         throw ValidationException::withMessages([
-                            'layout_system' => __('colors.validation.limit_reached'),
+                            'layout_system' => __('colors.systems.validation.limit_reached'),
                         ]);
                     }
 

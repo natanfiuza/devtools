@@ -31,6 +31,15 @@ export function frozenResult(snapshot: LayoutSnapshot): LayoutViewResult {
         },
         strategy: snapshot.strategy,
         secondarySource: snapshot.secondarySource,
+        secondary: snapshot.secondary
+            ? {
+                  original: { ...snapshot.secondary.original },
+                  effective: { ...snapshot.secondary.effective },
+                  background: snapshot.secondary.background
+                      ? { ...snapshot.secondary.background }
+                      : null,
+              }
+            : null,
         themes: boardsFromSnapshot(snapshot),
     };
 }

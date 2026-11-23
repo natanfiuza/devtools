@@ -483,169 +483,184 @@ defineExpose({
 </script>
 
 <template>
-    <div class="flex flex-col gap-6">
-        <div
-            class="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
+  <div class="flex flex-col gap-6">
+    <div
+      class="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start"
+    >
+      <aside class="min-w-0 lg:sticky lg:top-6">
+        <section
+          class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
         >
-            <aside class="min-w-0 lg:sticky lg:top-6">
-                <section
-                    class="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4"
-                >
-                    <h2 class="text-sm font-semibold">
-                        {{ t('tools.palette-generator.base.title') }}
-                    </h2>
-                    <ColorPickerControls :state="state" />
-                </section>
-            </aside>
+          <h2 class="text-sm font-semibold">
+            {{ t('tools.palette-generator.base.title') }}
+          </h2>
+          <ColorPickerControls :state="state" />
+        </section>
+      </aside>
 
-            <div class="flex min-w-0 flex-col gap-6">
-                <Tabs v-model="activeTab" data-test="page-tabs">
-                    <TabsList
-                        :class="
-                            hasExtraTabs
-                                ? 'flex w-full flex-wrap'
-                                : 'grid w-full grid-cols-4'
-                        "
-                    >
-                        <TabsTrigger value="scale" data-test="page-tab-scale">
-                            {{ t('tools.palette-generator.tabs.scale') }}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="harmonies"
-                            data-test="page-tab-harmonies"
-                        >
-                            {{ t('tools.palette-generator.tabs.harmonies') }}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="extraction"
-                            data-test="page-tab-extraction"
-                        >
-                            {{ t('tools.palette-generator.tabs.extraction') }}
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="library"
-                            data-test="page-tab-library"
-                        >
-                            {{ t('tools.palette-generator.tabs.library') }}
-                        </TabsTrigger>
-                        <slot name="tabs-extra" />
-                    </TabsList>
-
-                    <TabsContent value="scale" class="mt-3 flex flex-col gap-6">
-                        <EmptyPalette
-                            v-if="isEmpty"
-                            @restore="restoreExample"
-                        />
-
-                        <template v-else>
-                            <p
-                                v-if="showStale"
-                                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
-                                role="status"
-                                data-test="palette-stale"
-                            >
-                                {{ t('tools.palette-generator.state.stale') }}
-                            </p>
-
-                            <BaseColorRow
-                                :scale="scale"
-                                :copy="copyFeedback.copy"
-                            />
-
-                            <ToneScale
-                                :scale="scale"
-                                :copy="copyFeedback.copy"
-                            />
-
-                            <ExportPanel
-                                :scale="scale"
-                                :copy="copyFeedback.copy"
-                                :roles="activeRoles"
-                            />
-                        </template>
-                    </TabsContent>
-
-                    <TabsContent
-                        value="harmonies"
-                        class="mt-3 flex flex-col gap-6"
-                    >
-                        <EmptyPalette
-                            v-if="isEmpty"
-                            @restore="restoreExample"
-                        />
-
-                        <template v-else>
-                            <p
-                                v-if="showStale"
-                                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
-                                role="status"
-                                data-test="harmonies-stale"
-                            >
-                                {{ t('tools.palette-generator.state.stale') }}
-                            </p>
-
-                            <HarmonyPanel
-                                :base="state.rgba.value"
-                                :copy="copyFeedback.copy"
-                                @use-base="useBase"
-                            />
-                        </template>
-                    </TabsContent>
-
-                    <TabsContent value="extraction" class="mt-3">
-                        <ExtractionPanel
-                            v-model="extracted"
-                            :image="image"
-                            :copy="copyFeedback.copy"
-                            @use-base="useBase"
-                        />
-                    </TabsContent>
-
-                    <TabsContent
-                        value="library"
-                        class="mt-3 flex flex-col gap-4"
-                    >
-                        <FavoritesPanel
-                            :colors="favoriteColors"
-                            :is-favorite="currentIsFavorite"
-                            :authenticated="
-                                props.library?.authenticated === true
-                            "
-                            :more="hasMoreFavorites"
-                            :loading-more="loadingMore"
-                            @apply="useBase"
-                            @toggle="toggleCurrentFavorite"
-                            @clear="clearFavorites"
-                            @more="loadMoreFavorites"
-                        />
-                        <HistoryPanel
-                            :colors="historyColors"
-                            :authenticated="
-                                props.library?.authenticated === true
-                            "
-                            :importable="importable"
-                            :importing="importing"
-                            :more="hasMoreHistory"
-                            :loading-more="loadingMore"
-                            @apply="useBase"
-                            @clear="clearHistory"
-                            @import="importHistory"
-                            @more="loadMoreHistory"
-                        />
-                    </TabsContent>
-
-                    <slot v-if="hasExtraPanels" name="panels-extra" />
-                </Tabs>
-            </div>
-        </div>
-
-        <p
-            class="min-h-5 text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-            data-test="palette-feedback"
+      <div class="flex min-w-0 flex-col gap-6">
+        <Tabs
+          v-model="activeTab"
+          data-test="page-tabs"
         >
-            {{ feedback }}
-        </p>
+          <TabsList
+            :class="
+              hasExtraTabs
+                ? 'flex w-full flex-wrap'
+                : 'grid w-full grid-cols-4'
+            "
+          >
+            <TabsTrigger
+              value="scale"
+              data-test="page-tab-scale"
+            >
+              {{ t('tools.palette-generator.tabs.scale') }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="harmonies"
+              data-test="page-tab-harmonies"
+            >
+              {{ t('tools.palette-generator.tabs.harmonies') }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="extraction"
+              data-test="page-tab-extraction"
+            >
+              {{ t('tools.palette-generator.tabs.extraction') }}
+            </TabsTrigger>
+            <TabsTrigger
+              value="library"
+              data-test="page-tab-library"
+            >
+              {{ t('tools.palette-generator.tabs.library') }}
+            </TabsTrigger>
+            <slot name="tabs-extra" />
+          </TabsList>
+
+          <TabsContent
+            value="scale"
+            class="mt-3 flex flex-col gap-6"
+          >
+            <EmptyPalette
+              v-if="isEmpty"
+              @restore="restoreExample"
+            />
+
+            <template v-else>
+              <p
+                v-if="showStale"
+                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+                role="status"
+                data-test="palette-stale"
+              >
+                {{ t('tools.palette-generator.state.stale') }}
+              </p>
+
+              <BaseColorRow
+                :scale="scale"
+                :copy="copyFeedback.copy"
+              />
+
+              <ToneScale
+                :scale="scale"
+                :copy="copyFeedback.copy"
+              />
+
+              <ExportPanel
+                :scale="scale"
+                :copy="copyFeedback.copy"
+                :roles="activeRoles"
+              />
+            </template>
+          </TabsContent>
+
+          <TabsContent
+            value="harmonies"
+            class="mt-3 flex flex-col gap-6"
+          >
+            <EmptyPalette
+              v-if="isEmpty"
+              @restore="restoreExample"
+            />
+
+            <template v-else>
+              <p
+                v-if="showStale"
+                class="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+                role="status"
+                data-test="harmonies-stale"
+              >
+                {{ t('tools.palette-generator.state.stale') }}
+              </p>
+
+              <HarmonyPanel
+                :base="state.rgba.value"
+                :copy="copyFeedback.copy"
+                @use-base="useBase"
+              />
+            </template>
+          </TabsContent>
+
+          <TabsContent
+            value="extraction"
+            class="mt-3"
+          >
+            <ExtractionPanel
+              v-model="extracted"
+              :image="image"
+              :copy="copyFeedback.copy"
+              @use-base="useBase"
+            />
+          </TabsContent>
+
+          <TabsContent
+            value="library"
+            class="mt-3 flex flex-col gap-4"
+          >
+            <FavoritesPanel
+              :colors="favoriteColors"
+              :is-favorite="currentIsFavorite"
+              :authenticated="
+                props.library?.authenticated === true
+              "
+              :more="hasMoreFavorites"
+              :loading-more="loadingMore"
+              @apply="useBase"
+              @toggle="toggleCurrentFavorite"
+              @clear="clearFavorites"
+              @more="loadMoreFavorites"
+            />
+            <HistoryPanel
+              :colors="historyColors"
+              :authenticated="
+                props.library?.authenticated === true
+              "
+              :importable="importable"
+              :importing="importing"
+              :more="hasMoreHistory"
+              :loading-more="loadingMore"
+              @apply="useBase"
+              @clear="clearHistory"
+              @import="importHistory"
+              @more="loadMoreHistory"
+            />
+          </TabsContent>
+
+          <slot
+            v-if="hasExtraPanels"
+            name="panels-extra"
+          />
+        </Tabs>
+      </div>
     </div>
+
+    <p
+      class="min-h-5 text-sm text-muted-foreground"
+      role="status"
+      aria-live="polite"
+      data-test="palette-feedback"
+    >
+      {{ feedback }}
+    </p>
+  </div>
 </template>

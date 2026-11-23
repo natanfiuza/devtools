@@ -46,11 +46,11 @@ const svg = computed(() => {
 </script>
 
 <template>
-    <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado aqui -->
-    <span
-        class="inline-flex shrink-0"
-        data-test="badge-logo-preview"
-        v-html="svg"
-    />
-    <!-- eslint-enable vue/no-v-html -->
+  <!-- eslint-disable vue/no-v-html -- SVG gerado e escapado aqui -->
+  <span
+    class="inline-flex shrink-0"
+    data-test="badge-logo-preview"
+    v-html="svg"
+  />
+  <!-- eslint-enable vue/no-v-html -->
 </template>

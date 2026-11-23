@@ -25,33 +25,33 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div
-        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm"
-        data-test="layout-origin-banner"
-    >
-        <p>
-            {{
-                t('tools.layout-harmonizer.origin.from', { name: origin.name })
-            }}
-            <Link
-                v-if="origin.url !== null"
-                :href="origin.url"
-                class="underline hover:no-underline"
-                data-test="layout-origin-link"
-            >
-                {{ t('tools.layout-harmonizer.origin.open') }}
-            </Link>
-        </p>
+  <div
+    class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm"
+    data-test="layout-origin-banner"
+  >
+    <p>
+      {{
+        t('tools.layout-harmonizer.origin.from', { name: origin.name })
+      }}
+      <Link
+        v-if="origin.url !== null"
+        :href="origin.url"
+        class="underline hover:no-underline"
+        data-test="layout-origin-link"
+      >
+        {{ t('tools.layout-harmonizer.origin.open') }}
+      </Link>
+    </p>
 
-        <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            data-test="layout-origin-remove"
-            @click="emit('remove')"
-        >
-            <X class="size-4" />
-            {{ t('tools.layout-harmonizer.origin.remove') }}
-        </Button>
-    </div>
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      data-test="layout-origin-remove"
+      @click="emit('remove')"
+    >
+      <X class="size-4" />
+      {{ t('tools.layout-harmonizer.origin.remove') }}
+    </Button>
+  </div>
 </template>

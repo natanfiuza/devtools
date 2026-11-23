@@ -426,175 +426,178 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <ToolShell split-key="sql-formatter">
-        <template #actions>
-            <ToolActionBar>
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+  <ToolShell split-key="sql-formatter">
+    <template #actions>
+      <ToolActionBar>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.open')"
-                    @click="openFile"
-                >
-                    <template #icon>
-                        <FolderOpen class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.open')"
+          @click="openFile"
+        >
+          <template #icon>
+            <FolderOpen class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="!hasCode"
-                        @click="copyCode"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="!hasCode"
+            @click="copyCode"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
 
-                    <ToolButton
-                        :label="t('tools.ui.actions.download')"
-                        :disabled="!hasCode"
-                        @click="download"
-                    >
-                        <template #icon>
-                            <Download class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+          <ToolButton
+            :label="t('tools.ui.actions.download')"
+            :disabled="!hasCode"
+            @click="download"
+          >
+            <template #icon>
+              <Download class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <template #input>
-            <FileDropzone
-                ref="dropzone"
-                :accept="acceptAttribute(FILE_RULES)"
-                testid="sql-formatter"
-                @file="onFile"
-            >
-                <CodeEditor
-                    v-model="text"
-                    testid="sql-formatter-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                    :error="editorError"
-                    :extensions="[
-                        sql({ dialect: highlighterOf(DEFAULT_DIALECT) }),
-                    ]"
-                />
-            </FileDropzone>
-        </template>
+    <template #input>
+      <FileDropzone
+        ref="dropzone"
+        :accept="acceptAttribute(FILE_RULES)"
+        testid="sql-formatter"
+        @file="onFile"
+      >
+        <CodeEditor
+          v-model="text"
+          testid="sql-formatter-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+          :error="editorError"
+          :extensions="[
+            sql({ dialect: highlighterOf(DEFAULT_DIALECT) }),
+          ]"
+        />
+      </FileDropzone>
+    </template>
 
-        <!--
+    <!--
             O dialeto e a caixa das palavras-chave ficam no cabecalho da
             **saida**: sao as duas escolhas que mudam o que esta do lado de la.
         -->
-        <template #output-header>
-            <Select v-model="dialect">
-                <SelectTrigger
-                    class="h-7 w-32 text-xs"
-                    :aria-label="t('tools.sql-formatter.dialect')"
-                    data-test="sql-formatter-dialect"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="item in DIALECTS"
-                        :key="item"
-                        :value="item"
-                    >
-                        {{ t(`tools.sql-formatter.dialects.${item}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
+    <template #output-header>
+      <Select v-model="dialect">
+        <SelectTrigger
+          class="h-7 w-32 text-xs"
+          :aria-label="t('tools.sql-formatter.dialect')"
+          data-test="sql-formatter-dialect"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="item in DIALECTS"
+            :key="item"
+            :value="item"
+          >
+            {{ t(`tools.sql-formatter.dialects.${item}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <Select v-model="keywordCase">
-                <SelectTrigger
-                    class="h-7 w-36 text-xs"
-                    :aria-label="t('tools.sql-formatter.keyword_case')"
-                    data-test="sql-formatter-case"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem
-                        v-for="item in KEYWORD_CASES"
-                        :key="item"
-                        :value="item"
-                    >
-                        {{ t(`tools.sql-formatter.cases.${item}`) }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-        </template>
+      <Select v-model="keywordCase">
+        <SelectTrigger
+          class="h-7 w-36 text-xs"
+          :aria-label="t('tools.sql-formatter.keyword_case')"
+          data-test="sql-formatter-case"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="item in KEYWORD_CASES"
+            :key="item"
+            :value="item"
+          >
+            {{ t(`tools.sql-formatter.cases.${item}`) }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+    </template>
 
-        <template #output>
-            <!--
+    <template #output>
+      <!--
                 O SQL na tela e da ultima entrada valida, e nao do texto que esta
                 no editor: o aviso diz isso, e o SQL sai em opacidade reduzida
                 (SPEC secao 5).
             -->
-            <p
-                v-if="stale"
-                role="status"
-                class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
-                data-test="sql-formatter-stale"
-            >
-                <TriangleAlert class="size-3.5" aria-hidden="true" />
-                {{ t('tools.ui.states.stale_output') }}
-            </p>
+      <p
+        v-if="stale"
+        role="status"
+        class="flex items-center justify-center gap-1.5 border-b border-destructive/30 bg-destructive/5 px-3 py-1.5 text-xs text-destructive"
+        data-test="sql-formatter-stale"
+      >
+        <TriangleAlert
+          class="size-3.5"
+          aria-hidden="true"
+        />
+        {{ t('tools.ui.states.stale_output') }}
+      </p>
 
-            <div class="relative min-h-0 flex-1 overflow-auto">
-                <pre
-                    v-if="hasCode"
-                    class="p-3 font-mono text-sm transition-opacity"
-                    :class="stale ? 'opacity-50' : ''"
-                    data-test="sql-formatter-output"
-                    >{{ code }}</pre>
+      <div class="relative min-h-0 flex-1 overflow-auto">
+        <pre
+          v-if="hasCode"
+          class="p-3 font-mono text-sm transition-opacity"
+          :class="stale ? 'opacity-50' : ''"
+          data-test="sql-formatter-output"
+        >{{ code }}</pre>
 
-                <p
-                    v-else-if="state !== null"
-                    role="status"
-                    class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                    :class="state.error ? 'text-destructive' : 'text-subtle'"
-                    data-test="sql-formatter-state"
-                >
-                    <TriangleAlert
-                        v-if="state.error"
-                        class="size-5"
-                        aria-hidden="true"
-                    />
-                    {{ state.text }}
-                </p>
-            </div>
-        </template>
+        <p
+          v-else-if="state !== null"
+          role="status"
+          class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+          :class="state.error ? 'text-destructive' : 'text-subtle'"
+          data-test="sql-formatter-state"
+        >
+          <TriangleAlert
+            v-if="state.error"
+            class="size-5"
+            aria-hidden="true"
+          />
+          {{ state.text }}
+        </p>
+      </div>
+    </template>
 
-        <template #status>
-            <p
-                v-if="status !== null"
-                class="text-xs"
-                :class="status.error ? 'text-destructive' : 'text-subtle'"
-                data-test="sql-formatter-status"
-            >
-                {{ status.text }}
-            </p>
-        </template>
-    </ToolShell>
+    <template #status>
+      <p
+        v-if="status !== null"
+        class="text-xs"
+        :class="status.error ? 'text-destructive' : 'text-subtle'"
+        data-test="sql-formatter-status"
+      >
+        {{ status.text }}
+      </p>
+    </template>
+  </ToolShell>
 </template>

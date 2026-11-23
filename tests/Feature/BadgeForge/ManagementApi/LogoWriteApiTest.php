@@ -64,7 +64,7 @@ it('responde 422 no envelope para SVG fora da allowlist', function () {
         ])
         ->assertStatus(422)
         ->assertJsonPath('error.code', 'validation_error')
-        ->assertJsonPath('error.details.errors.logo.0', __('validation.custom_logo.unsupported_element'));
+        ->assertJsonPath('error.details.errors.logo.0', __('validation.custom_logo.unsupported_element', ['element' => '<script>']));
 
     expect(BadgeCustomLogo::query()->count())->toBe(0);
 });

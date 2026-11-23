@@ -77,125 +77,150 @@ function goToPage(page: number): void {
 </script>
 
 <template>
-    <Head :title="t('admin.users.title')" />
+  <Head :title="t('admin.users.title')" />
 
-    <div class="space-y-4">
-        <header>
-            <h2 class="text-lg font-medium">
-                {{ t('admin.users.title') }}
-            </h2>
-            <p class="mt-1 text-sm text-subtle">
-                {{ t('admin.users.description') }}
-            </p>
-        </header>
+  <div class="space-y-4">
+    <header>
+      <h2 class="text-lg font-medium">
+        {{ t('admin.users.title') }}
+      </h2>
+      <p class="mt-1 text-sm text-subtle">
+        {{ t('admin.users.description') }}
+      </p>
+    </header>
 
-        <form class="flex flex-wrap items-center gap-2" @submit.prevent="apply">
-            <Input
-                v-model="form.q"
-                class="h-9 max-w-xs"
-                type="search"
-                :placeholder="t('admin.users.search_placeholder')"
-                :aria-label="t('admin.common.search')"
-            />
+    <form
+      class="flex flex-wrap items-center gap-2"
+      @submit.prevent="apply"
+    >
+      <Input
+        v-model="form.q"
+        class="h-9 max-w-xs"
+        type="search"
+        :placeholder="t('admin.users.search_placeholder')"
+        :aria-label="t('admin.common.search')"
+      />
 
-            <Select v-model="form.role">
-                <SelectTrigger
-                    class="h-9 w-40"
-                    :aria-label="t('admin.users.role')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.users.role_all') }}
-                    </SelectItem>
-                    <SelectItem value="user">
-                        {{ t('admin.users.role_user') }}
-                    </SelectItem>
-                    <SelectItem value="admin">
-                        {{ t('admin.users.role_admin') }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Select v-model="form.status">
-                <SelectTrigger
-                    class="h-9 w-44"
-                    :aria-label="t('admin.users.status')"
-                >
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem :value="ALL">
-                        {{ t('admin.users.status_all') }}
-                    </SelectItem>
-                    <SelectItem value="active">
-                        {{ t('admin.users.status_active') }}
-                    </SelectItem>
-                    <SelectItem value="suspended">
-                        {{ t('admin.users.status_suspended') }}
-                    </SelectItem>
-                    <SelectItem value="unverified">
-                        {{ t('admin.users.status_unverified') }}
-                    </SelectItem>
-                </SelectContent>
-            </Select>
-
-            <Button type="submit" variant="outline" size="sm">
-                {{ t('admin.common.search') }}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" @click="clear">
-                {{ t('admin.common.clear') }}
-            </Button>
-        </form>
-
-        <AdminTable
-            :columns="columns"
-            :rows="users"
-            :empty="t('admin.users.empty')"
-            @page="goToPage"
+      <Select v-model="form.role">
+        <SelectTrigger
+          class="h-9 w-40"
+          :aria-label="t('admin.users.role')"
         >
-            <template #cell-account="{ row }">
-                <Link
-                    :href="admin.users.show.url(row.id)"
-                    class="hover:underline"
-                >
-                    {{ row.name }}
-                </Link>
-                <span class="block text-sm text-subtle">{{ row.email }}</span>
-            </template>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.users.role_all') }}
+          </SelectItem>
+          <SelectItem value="user">
+            {{ t('admin.users.role_user') }}
+          </SelectItem>
+          <SelectItem value="admin">
+            {{ t('admin.users.role_admin') }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <template #cell-plan="{ row }">
-                {{ row.plan }}
-            </template>
+      <Select v-model="form.status">
+        <SelectTrigger
+          class="h-9 w-44"
+          :aria-label="t('admin.users.status')"
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem :value="ALL">
+            {{ t('admin.users.status_all') }}
+          </SelectItem>
+          <SelectItem value="active">
+            {{ t('admin.users.status_active') }}
+          </SelectItem>
+          <SelectItem value="suspended">
+            {{ t('admin.users.status_suspended') }}
+          </SelectItem>
+          <SelectItem value="unverified">
+            {{ t('admin.users.status_unverified') }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
-            <template #cell-role="{ row }">
-                {{ t(`admin.users.role_${row.role}`) }}
-            </template>
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+      >
+        {{ t('admin.common.search') }}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        @click="clear"
+      >
+        {{ t('admin.common.clear') }}
+      </Button>
+    </form>
 
-            <template #cell-status="{ row }">
-                <Badge v-if="row.suspended" variant="destructive">
-                    {{ t('admin.users.status_suspended') }}
-                </Badge>
-                <Badge v-else-if="!row.verified" variant="outline">
-                    {{ t('admin.users.unverified') }}
-                </Badge>
-                <Badge v-else variant="secondary">
-                    {{ t('admin.users.status_active') }}
-                </Badge>
-            </template>
+    <AdminTable
+      :columns="columns"
+      :rows="users"
+      :empty="t('admin.users.empty')"
+      @page="goToPage"
+    >
+      <template #cell-account="{ row }">
+        <Link
+          :href="admin.users.show.url(row.id)"
+          class="hover:underline"
+        >
+          {{ row.name }}
+        </Link>
+        <span class="block text-sm text-subtle">{{ row.email }}</span>
+      </template>
 
-            <template #cell-createdAt="{ row }">
-                {{ row.createdAt }}
-            </template>
+      <template #cell-plan="{ row }">
+        {{ row.plan }}
+      </template>
 
-            <template #actions="{ row }">
-                <Button variant="outline" size="sm" as-child>
-                    <Link :href="admin.users.show.url(row.id)">
-                        {{ t('admin.users.open') }}
-                    </Link>
-                </Button>
-            </template>
-        </AdminTable>
-    </div>
+      <template #cell-role="{ row }">
+        {{ t(`admin.users.role_${row.role}`) }}
+      </template>
+
+      <template #cell-status="{ row }">
+        <Badge
+          v-if="row.suspended"
+          variant="destructive"
+        >
+          {{ t('admin.users.status_suspended') }}
+        </Badge>
+        <Badge
+          v-else-if="!row.verified"
+          variant="outline"
+        >
+          {{ t('admin.users.unverified') }}
+        </Badge>
+        <Badge
+          v-else
+          variant="secondary"
+        >
+          {{ t('admin.users.status_active') }}
+        </Badge>
+      </template>
+
+      <template #cell-createdAt="{ row }">
+        {{ row.createdAt }}
+      </template>
+
+      <template #actions="{ row }">
+        <Button
+          variant="outline"
+          size="sm"
+          as-child
+        >
+          <Link :href="admin.users.show.url(row.id)">
+            {{ t('admin.users.open') }}
+          </Link>
+        </Button>
+      </template>
+    </AdminTable>
+  </div>
 </template>

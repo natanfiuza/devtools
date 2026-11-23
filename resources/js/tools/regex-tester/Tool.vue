@@ -514,267 +514,268 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <ToolShell split-key="regex-tester">
-        <template #actions>
-            <ToolActionBar>
-                <!--
+  <ToolShell split-key="regex-tester">
+    <template #actions>
+      <ToolActionBar>
+        <!--
                     O padrao como um literal de expressao: as barras em volta e as
                     flags no fim. As flags sao **sintaxe** - nao passam pelo i18n -,
                     e os alternadores logo ao lado dizem quais estao ligadas.
                 -->
-                <div
-                    class="flex min-w-40 flex-1 items-center gap-1 font-mono text-sm"
-                >
-                    <span class="text-subtle" aria-hidden="true">/</span>
-                    <input
-                        ref="patternInput"
-                        v-model="pattern"
-                        type="text"
-                        spellcheck="false"
-                        autocomplete="off"
-                        autocapitalize="off"
-                        class="h-8 min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 font-mono text-sm"
-                        :aria-label="t('tools.regex-tester.pattern')"
-                        :placeholder="t('tools.regex-tester.pattern')"
-                        data-test="regex-tester-pattern"
-                    />
-                    <span class="text-subtle" aria-hidden="true"
-                        >/{{ activeFlags }}</span
-                    >
-                </div>
+        <div
+          class="flex min-w-40 flex-1 items-center gap-1 font-mono text-sm"
+        >
+          <span
+            class="text-subtle"
+            aria-hidden="true"
+          >/</span>
+          <input
+            ref="patternInput"
+            v-model="pattern"
+            type="text"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            class="h-8 min-w-0 flex-1 rounded-md border border-border bg-transparent px-2 font-mono text-sm"
+            :aria-label="t('tools.regex-tester.pattern')"
+            :placeholder="t('tools.regex-tester.pattern')"
+            data-test="regex-tester-pattern"
+          >
+          <span
+            class="text-subtle"
+            aria-hidden="true"
+          >/{{ activeFlags }}</span>
+        </div>
 
-                <div class="flex items-center gap-1">
-                    <ToolButton
-                        v-for="flag in REGEX_FLAGS"
-                        :key="flag"
-                        :label="flag"
-                        :aria-label="t(`tools.regex-tester.flags.${flag}`)"
-                        :pressed="toggles[flag]"
-                        :variant="toggles[flag] ? 'default' : 'outline'"
-                        @click="toggle(flag)"
-                    />
-                </div>
+        <div class="flex items-center gap-1">
+          <ToolButton
+            v-for="flag in REGEX_FLAGS"
+            :key="flag"
+            :label="flag"
+            :aria-label="t(`tools.regex-tester.flags.${flag}`)"
+            :pressed="toggles[flag]"
+            :variant="toggles[flag] ? 'default' : 'outline'"
+            @click="toggle(flag)"
+          />
+        </div>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.example')"
-                    @click="loadExample"
-                >
-                    <template #icon>
-                        <Sparkles class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.example')"
+          @click="loadExample"
+        >
+          <template #icon>
+            <Sparkles class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.open')"
-                    @click="openFile"
-                >
-                    <template #icon>
-                        <FolderOpen class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.open')"
+          @click="openFile"
+        >
+          <template #icon>
+            <FolderOpen class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <ToolButton
-                    :label="t('tools.ui.actions.clear')"
-                    :disabled="isEmpty"
-                    @click="clear"
-                >
-                    <template #icon>
-                        <Eraser class="size-3.5" />
-                    </template>
-                </ToolButton>
+        <ToolButton
+          :label="t('tools.ui.actions.clear')"
+          :disabled="isEmpty"
+          @click="clear"
+        >
+          <template #icon>
+            <Eraser class="size-3.5" />
+          </template>
+        </ToolButton>
 
-                <template #end>
-                    <ToolButton
-                        :label="t('tools.ui.actions.copy')"
-                        :disabled="replaced === null"
-                        @click="copy"
-                    >
-                        <template #icon>
-                            <Copy class="size-3.5" />
-                        </template>
-                    </ToolButton>
-                </template>
-            </ToolActionBar>
+        <template #end>
+          <ToolButton
+            :label="t('tools.ui.actions.copy')"
+            :disabled="replaced === null"
+            @click="copy"
+          >
+            <template #icon>
+              <Copy class="size-3.5" />
+            </template>
+          </ToolButton>
         </template>
+      </ToolActionBar>
+    </template>
 
-        <template #input>
-            <FileDropzone
-                ref="dropzone"
-                :accept="acceptAttribute(FILE_RULES)"
-                testid="regex-tester"
-                @file="onFile"
-            >
-                <CodeEditor
-                    v-model="text"
-                    testid="regex-tester-editor"
-                    class="absolute inset-0"
-                    :placeholder="t('tools.ui.states.empty')"
-                    @find="focusPattern"
-                />
-            </FileDropzone>
-        </template>
+    <template #input>
+      <FileDropzone
+        ref="dropzone"
+        :accept="acceptAttribute(FILE_RULES)"
+        testid="regex-tester"
+        @file="onFile"
+      >
+        <CodeEditor
+          v-model="text"
+          testid="regex-tester-editor"
+          class="absolute inset-0"
+          :placeholder="t('tools.ui.states.empty')"
+          @find="focusPattern"
+        />
+      </FileDropzone>
+    </template>
 
-        <!--
+    <!--
             A troca fica no cabecalho da **saida**: ela nao muda o que se procura,
             muda o que sai da busca - e a previa do resultado esta logo abaixo.
         -->
-        <template #output-header>
-            <input
-                v-model="replacement"
-                type="text"
-                spellcheck="false"
-                autocomplete="off"
-                class="h-7 w-44 rounded-md border border-border bg-transparent px-2 font-mono text-xs"
-                :aria-label="t('tools.regex-tester.replacement')"
-                :placeholder="t('tools.regex-tester.replacement_hint')"
-                data-test="regex-tester-replacement"
-            />
-        </template>
+    <template #output-header>
+      <input
+        v-model="replacement"
+        type="text"
+        spellcheck="false"
+        autocomplete="off"
+        class="h-7 w-44 rounded-md border border-border bg-transparent px-2 font-mono text-xs"
+        :aria-label="t('tools.regex-tester.replacement')"
+        :placeholder="t('tools.regex-tester.replacement_hint')"
+        data-test="regex-tester-replacement"
+      >
+    </template>
 
-        <template #output>
-            <div
-                class="relative min-h-0 flex-1 overflow-auto"
-                data-test="regex-tester-output"
-            >
-                <!-- O estado manda: sem leitura valida nao ha o que realcar. -->
-                <div
-                    v-if="state !== null"
-                    role="status"
-                    class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
-                    :class="state.error ? 'text-destructive' : 'text-subtle'"
-                    data-test="regex-tester-state"
-                >
-                    <TriangleAlert
-                        v-if="state.error"
-                        class="size-5"
-                        aria-hidden="true"
-                    />
-                    <span>{{ state.text }}</span>
-                    <code
-                        v-if="state.detail !== null"
-                        class="max-w-full text-xs break-words text-subtle"
-                        data-test="regex-tester-detail"
-                        >{{ state.detail }}</code
-                    >
-                </div>
+    <template #output>
+      <div
+        class="relative min-h-0 flex-1 overflow-auto"
+        data-test="regex-tester-output"
+      >
+        <!-- O estado manda: sem leitura valida nao ha o que realcar. -->
+        <div
+          v-if="state !== null"
+          role="status"
+          class="flex h-full flex-col items-center justify-center gap-2 p-6 text-center text-sm"
+          :class="state.error ? 'text-destructive' : 'text-subtle'"
+          data-test="regex-tester-state"
+        >
+          <TriangleAlert
+            v-if="state.error"
+            class="size-5"
+            aria-hidden="true"
+          />
+          <span>{{ state.text }}</span>
+          <code
+            v-if="state.detail !== null"
+            class="max-w-full text-xs break-words text-subtle"
+            data-test="regex-tester-detail"
+          >{{ state.detail }}</code>
+        </div>
 
-                <template v-else>
-                    <!--
+        <template v-else>
+          <!--
                         O texto com os casamentos pintados. Os pedacos sao um por
                         casamento (mais os pedacos entre eles), entao o teto de
                         casamentos ja limita quantos elementos nascem aqui.
                     -->
-                    <pre
-                        v-if="parts.length > 0"
-                        class="border-b px-3 py-2 font-mono text-sm break-words whitespace-pre-wrap"
-                        data-test="regex-tester-preview"
-                    ><span
+          <pre
+            v-if="parts.length > 0"
+            class="border-b px-3 py-2 font-mono text-sm break-words whitespace-pre-wrap"
+            data-test="regex-tester-preview"
+          ><span
                         v-for="(part, index) in parts"
                         :key="index"
                         :class="part.match ? 'rounded-sm bg-accent-2/30' : ''"
                     >{{ part.text }}</span></pre>
 
-                    <p
-                        v-if="hasResult && matches.length === 0"
-                        class="p-3 text-sm text-subtle"
-                        data-test="regex-tester-none"
-                    >
-                        {{ t('tools.regex-tester.matches_none') }}
-                    </p>
+          <p
+            v-if="hasResult && matches.length === 0"
+            class="p-3 text-sm text-subtle"
+            data-test="regex-tester-none"
+          >
+            {{ t('tools.regex-tester.matches_none') }}
+          </p>
 
-                    <p
-                        v-if="truncated"
-                        class="border-b px-3 py-1.5 text-xs text-subtle"
-                        data-test="regex-tester-truncated"
-                    >
-                        {{
-                            t('tools.regex-tester.truncated', {
-                                count: matches.length,
-                            })
-                        }}
-                    </p>
+          <p
+            v-if="truncated"
+            class="border-b px-3 py-1.5 text-xs text-subtle"
+            data-test="regex-tester-truncated"
+          >
+            {{
+              t('tools.regex-tester.truncated', {
+                count: matches.length,
+              })
+            }}
+          </p>
 
-                    <ol
-                        v-if="matches.length > 0"
-                        data-test="regex-tester-matches"
-                    >
-                        <li
-                            v-for="(match, index) in matches"
-                            :key="`${index}-${match.index}`"
-                            class="border-b border-border/60 px-3 py-2 last:border-b-0"
-                            data-test="regex-tester-match"
-                        >
-                            <div
-                                class="flex flex-wrap items-baseline gap-x-2 gap-y-1"
-                            >
-                                <span class="font-mono text-xs text-subtle"
-                                    >#{{ index + 1 }}</span
-                                >
-                                <span
-                                    class="rounded-sm bg-surface-2 px-1 font-mono text-sm"
-                                    data-test="regex-tester-match-text"
-                                    >{{ excerptOf(match) }}</span
-                                >
-                                <span
-                                    class="text-xs text-subtle"
-                                    data-test="regex-tester-match-position"
-                                >
-                                    {{
-                                        t('tools.regex-tester.position', {
-                                            start: match.index,
-                                        })
-                                    }}
-                                </span>
-                            </div>
-
-                            <div
-                                v-if="
-                                    match.groups.length > 0 ||
-                                    match.named.length > 0
-                                "
-                                class="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-subtle"
-                            >
-                                <span
-                                    v-for="(group, at) in match.groups"
-                                    :key="`g${at}`"
-                                    data-test="regex-tester-group"
-                                    >${{ at + 1 }}: {{ group ?? AUSENTE }}</span
-                                >
-                                <span
-                                    v-for="group in match.named"
-                                    :key="group.name"
-                                    data-test="regex-tester-named-group"
-                                    >$&lt;{{ group.name }}&gt;:
-                                    {{ group.text ?? AUSENTE }}</span
-                                >
-                            </div>
-                        </li>
-                    </ol>
-
-                    <section v-if="replaced !== null" class="px-3 py-2">
-                        <h3
-                            class="text-[11px] font-medium tracking-wide text-subtle uppercase"
-                        >
-                            {{ t('tools.regex-tester.replaced_title') }}
-                        </h3>
-                        <pre
-                            class="mt-1 font-mono text-sm break-words whitespace-pre-wrap"
-                            data-test="regex-tester-replaced"
-                            >{{ replaced }}</pre>
-                    </section>
-                </template>
-            </div>
-        </template>
-
-        <template #status>
-            <p
-                v-if="status !== null"
-                class="text-xs"
-                :class="status.error ? 'text-destructive' : 'text-subtle'"
-                data-test="regex-tester-status"
+          <ol
+            v-if="matches.length > 0"
+            data-test="regex-tester-matches"
+          >
+            <li
+              v-for="(match, index) in matches"
+              :key="`${index}-${match.index}`"
+              class="border-b border-border/60 px-3 py-2 last:border-b-0"
+              data-test="regex-tester-match"
             >
-                {{ status.text }}
-            </p>
+              <div
+                class="flex flex-wrap items-baseline gap-x-2 gap-y-1"
+              >
+                <span class="font-mono text-xs text-subtle">#{{ index + 1 }}</span>
+                <span
+                  class="rounded-sm bg-surface-2 px-1 font-mono text-sm"
+                  data-test="regex-tester-match-text"
+                >{{ excerptOf(match) }}</span>
+                <span
+                  class="text-xs text-subtle"
+                  data-test="regex-tester-match-position"
+                >
+                  {{
+                    t('tools.regex-tester.position', {
+                      start: match.index,
+                    })
+                  }}
+                </span>
+              </div>
+
+              <div
+                v-if="
+                  match.groups.length > 0 ||
+                    match.named.length > 0
+                "
+                class="mt-1 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-subtle"
+              >
+                <span
+                  v-for="(group, at) in match.groups"
+                  :key="`g${at}`"
+                  data-test="regex-tester-group"
+                >${{ at + 1 }}: {{ group ?? AUSENTE }}</span>
+                <span
+                  v-for="group in match.named"
+                  :key="group.name"
+                  data-test="regex-tester-named-group"
+                >$&lt;{{ group.name }}&gt;:
+                  {{ group.text ?? AUSENTE }}</span>
+              </div>
+            </li>
+          </ol>
+
+          <section
+            v-if="replaced !== null"
+            class="px-3 py-2"
+          >
+            <h3
+              class="text-[11px] font-medium tracking-wide text-subtle uppercase"
+            >
+              {{ t('tools.regex-tester.replaced_title') }}
+            </h3>
+            <pre
+              class="mt-1 font-mono text-sm break-words whitespace-pre-wrap"
+              data-test="regex-tester-replaced"
+            >{{ replaced }}</pre>
+          </section>
         </template>
-    </ToolShell>
+      </div>
+    </template>
+
+    <template #status>
+      <p
+        v-if="status !== null"
+        class="text-xs"
+        :class="status.error ? 'text-destructive' : 'text-subtle'"
+        data-test="regex-tester-status"
+      >
+        {{ status.text }}
+      </p>
+    </template>
+  </ToolShell>
 </template>

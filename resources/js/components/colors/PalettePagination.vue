@@ -28,55 +28,58 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <nav
-        v-if="paginator.last_page > 1"
-        class="flex flex-wrap items-center justify-between gap-2"
-        :aria-label="
-            t('colors.pagination.page', {
-                page: paginator.current_page,
-                last: paginator.last_page,
-            })
-        "
-        data-test="palette-pagination"
+  <nav
+    v-if="paginator.last_page > 1"
+    class="flex flex-wrap items-center justify-between gap-2"
+    :aria-label="
+      t('colors.pagination.page', {
+        page: paginator.current_page,
+        last: paginator.last_page,
+      })
+    "
+    data-test="palette-pagination"
+  >
+    <p
+      class="text-xs text-muted-foreground"
+      data-test="palette-page-info"
     >
-        <p class="text-xs text-muted-foreground" data-test="palette-page-info">
-            {{
-                t('colors.list.results', {
-                    from: paginator.from ?? 0,
-                    to: paginator.to ?? 0,
-                    total: paginator.total,
-                })
-            }}
-            ·
-            {{
-                t('colors.pagination.page', {
-                    page: paginator.current_page,
-                    last: paginator.last_page,
-                })
-            }}
-        </p>
+      {{
+        t('colors.list.results', {
+          from: paginator.from ?? 0,
+          to: paginator.to ?? 0,
+          total: paginator.total,
+        })
+      }}
+      ·
+      {{
+        t('colors.pagination.page', {
+          page: paginator.current_page,
+          last: paginator.last_page,
+        })
+      }}
+    </p>
 
-        <div class="flex gap-2">
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="paginator.current_page <= 1"
-                data-test="palette-page-prev"
-                @click="emit('select', paginator.current_page - 1)"
-            >
-                {{ t('colors.pagination.previous') }}
-            </Button>
-            <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                :disabled="paginator.current_page >= paginator.last_page"
-                data-test="palette-page-next"
-                @click="emit('select', paginator.current_page + 1)"
-            >
-                {{ t('colors.pagination.next') }}
-            </Button>
-        </div>
-    </nav>
+    <div class="flex gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        :disabled="paginator.current_page <= 1"
+        data-test="palette-page-prev"
+        @click="emit('select', paginator.current_page - 1)"
+      >
+        {{ t('colors.pagination.previous') }}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        :disabled="paginator.current_page >= paginator.last_page"
+        data-test="palette-page-next"
+        @click="emit('select', paginator.current_page + 1)"
+      >
+        {{ t('colors.pagination.next') }}
+      </Button>
+    </div>
+  </nav>
 </template>

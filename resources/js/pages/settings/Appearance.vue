@@ -8,14 +8,14 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <Head :title="t('settings.appearance.title')" />
+  <Head :title="t('settings.appearance.title')" />
 
-    <div class="space-y-6">
-        <Heading
-            variant="small"
-            :title="t('settings.appearance.title')"
-            :description="t('settings.appearance.description')"
-        />
-        <AppearanceTabs />
-    </div>
+  <div class="space-y-6">
+    <Heading
+      variant="small"
+      :title="t('settings.appearance.title')"
+      :description="t('settings.appearance.description')"
+    />
+    <AppearanceTabs />
+  </div>
 </template>

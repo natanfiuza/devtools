@@ -183,7 +183,7 @@ return [
         'unsafe_value' => 'El SVG usa un valor no permitido.',
         'invalid_viewbox' => 'El SVG necesita un viewBox válido.',
         'too_deep' => 'El SVG tiene demasiados grupos anidados.',
-        'unsupported_element' => 'El SVG usa un elemento no permitido.',
+        'unsupported_element' => 'El SVG usa un elemento no permitido (:element).',
         'text_not_allowed' => 'El SVG no puede contener texto.',
         'invalid_path' => 'Uno de los trazados no es válido.',
         'path_too_long' => 'Uno de los trazados es demasiado largo.',

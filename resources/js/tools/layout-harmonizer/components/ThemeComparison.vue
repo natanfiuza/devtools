@@ -65,33 +65,33 @@ function restore(theme: LayoutTheme, token: LayoutTokenId): void {
 </script>
 
 <template>
-    <div
-        class="grid grid-cols-1 gap-4 lg:grid-cols-2"
-        data-test="theme-comparison"
-    >
-        <ThemeBoard
-            :board="light"
-            :title="t('tools.layout-harmonizer.view.board_light')"
-            :copy="copy"
-            :locks="locks('light')"
-            :overrides="overrides('light')"
-            :suggested-tokens="suggestedTokens('light')"
-            :editable="editable"
-            :apply-color="(token, color) => apply('light', token, color)"
-            :toggle-lock="(token) => toggle('light', token)"
-            :restore-token="(token) => restore('light', token)"
-        />
-        <ThemeBoard
-            :board="dark"
-            :title="t('tools.layout-harmonizer.view.board_dark')"
-            :copy="copy"
-            :locks="locks('dark')"
-            :overrides="overrides('dark')"
-            :suggested-tokens="suggestedTokens('dark')"
-            :editable="editable"
-            :apply-color="(token, color) => apply('dark', token, color)"
-            :toggle-lock="(token) => toggle('dark', token)"
-            :restore-token="(token) => restore('dark', token)"
-        />
-    </div>
+  <div
+    class="grid grid-cols-1 gap-4 lg:grid-cols-2"
+    data-test="theme-comparison"
+  >
+    <ThemeBoard
+      :board="light"
+      :title="t('tools.layout-harmonizer.view.board_light')"
+      :copy="copy"
+      :locks="locks('light')"
+      :overrides="overrides('light')"
+      :suggested-tokens="suggestedTokens('light')"
+      :editable="editable"
+      :apply-color="(token, color) => apply('light', token, color)"
+      :toggle-lock="(token) => toggle('light', token)"
+      :restore-token="(token) => restore('light', token)"
+    />
+    <ThemeBoard
+      :board="dark"
+      :title="t('tools.layout-harmonizer.view.board_dark')"
+      :copy="copy"
+      :locks="locks('dark')"
+      :overrides="overrides('dark')"
+      :suggested-tokens="suggestedTokens('dark')"
+      :editable="editable"
+      :apply-color="(token, color) => apply('dark', token, color)"
+      :toggle-lock="(token) => toggle('dark', token)"
+      :restore-token="(token) => restore('dark', token)"
+    />
+  </div>
 </template>

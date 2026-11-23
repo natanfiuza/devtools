@@ -58,7 +58,7 @@ final class DeleteLayoutSystemRequest extends FormRequest
                 }
 
                 if ($this->input('confirm_name') !== $system->name) {
-                    $validator->errors()->add('confirm_name', __('colors.validation.confirm_name'));
+                    $validator->errors()->add('confirm_name', __('colors.systems.validation.confirm_name'));
                 }
             },
         ];

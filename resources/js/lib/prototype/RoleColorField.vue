@@ -53,25 +53,28 @@ function fromText(): void {
 </script>
 
 <template>
-    <div class="flex items-center gap-2" :data-test="testId">
-        <input
-            type="color"
-            class="size-9 shrink-0 cursor-pointer rounded-md border border-border bg-transparent p-0"
-            :value="swatch"
-            :aria-label="label"
-            @input="fromSwatch"
-        />
-        <label class="flex min-w-0 flex-col">
-            <span class="text-xs font-medium">{{ label }}</span>
-            <input
-                v-model="text"
-                type="text"
-                class="w-28 rounded-md border border-border bg-background px-2 py-1 font-mono text-xs"
-                autocomplete="off"
-                spellcheck="false"
-                :data-test="`${testId}-text`"
-                @change="fromText"
-            />
-        </label>
-    </div>
+  <div
+    class="flex items-center gap-2"
+    :data-test="testId"
+  >
+    <input
+      type="color"
+      class="size-9 shrink-0 cursor-pointer rounded-md border border-border bg-transparent p-0"
+      :value="swatch"
+      :aria-label="label"
+      @input="fromSwatch"
+    >
+    <label class="flex min-w-0 flex-col">
+      <span class="text-xs font-medium">{{ label }}</span>
+      <input
+        v-model="text"
+        type="text"
+        class="w-28 rounded-md border border-border bg-background px-2 py-1 font-mono text-xs"
+        autocomplete="off"
+        spellcheck="false"
+        :data-test="`${testId}-text`"
+        @change="fromText"
+      >
+    </label>
+  </div>
 </template>

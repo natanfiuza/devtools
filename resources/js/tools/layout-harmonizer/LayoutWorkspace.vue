@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { useCopyFeedback } from '@/composables/useCopyFeedback';
 import type { Rgba } from '@/lib/color';
 import type { LayoutViewMode } from './lib/boardView';
@@ -39,10 +48,15 @@ const picker = props.controller.picker;
 const strategy = props.controller.strategy;
 const backgroundText = props.controller.backgroundText;
 const secondaryText = props.controller.secondaryText;
+const secondaryBackgroundText = props.controller.secondaryBackgroundText;
 const hasSeed = props.controller.hasSeed;
 const needsBackground = props.controller.needsBackground;
 const backgroundInvalid = props.controller.backgroundInvalid;
+const backgroundAlpha = props.controller.backgroundAlpha;
 const secondaryInvalid = props.controller.secondaryInvalid;
+const secondaryNeedsBackground = props.controller.secondaryNeedsBackground;
+const secondaryBackgroundInvalid = props.controller.secondaryBackgroundInvalid;
+const secondaryBackgroundAlpha = props.controller.secondaryBackgroundAlpha;
 const secondarySource = props.controller.secondarySource;
 const result = props.controller.result;
 const seed = props.controller.seed;
@@ -56,7 +70,7 @@ const editable = props.controller.editable;
 const pendingRegeneration = props.controller.pendingRegeneration;
 const canRestoreEdits = props.controller.canRestoreEdits;
 const canSuggest = props.controller.canSuggest;
-const mode = props.controller.mode;
+const mode = computed(() => props.controller.mode);
 const applyColor = props.controller.applyColor;
 const toggleTokenLock = props.controller.toggleTokenLock;
 const acceptAdjustment = props.controller.acceptAdjustment;
@@ -149,182 +163,285 @@ function restoreIn(theme: LayoutTheme, token: LayoutTokenId): void {
     restoreTokenEdit(theme, token);
 }
 
+const regenerateOpen = ref(false);
+
+/**
+ * Quadro congelado (ADR-169): a regeneracao fica sempre ao alcance, mesmo sem
+ * mudar as entradas - e a unica rota para migrar o sistema para as versoes
+ * atuais. Trocar uma entrada so muda o texto do aviso.
+ */
+const regenerating = computed(
+    () => mode.value !== 'live' && props.regenerate != null,
+);
+
+/** Valores sem bloqueio que a regeneracao descarta (o aviso mostra quantos). */
+const unlockedEditCount = computed(() => {
+    let count = 0;
+
+    for (const theme of ['light', 'dark'] as const) {
+        for (const override of Object.values(
+            editState.value.overrides[theme] ?? {},
+        )) {
+            if (override.origin !== 'lock') {
+                count += 1;
+            }
+        }
+    }
+
+    return count;
+});
+
+// Regenerar descarta edicoes sem bloqueio: a confirmacao vem antes (ADR-169).
 function requestRegeneration(): void {
+    if (props.regenerate == null) {
+        return;
+    }
+
+    regenerateOpen.value = true;
+}
+
+function confirmRegeneration(): void {
+    regenerateOpen.value = false;
     props.regenerate?.();
 }
 </script>
 
 <template>
-    <div
-        class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)]"
-        :data-mode="mode"
-        data-test="layout-workspace"
-    >
-        <section class="space-y-3 rounded-xl border p-4">
-            <h2 class="text-sm font-semibold">
-                {{ t('tools.layout-harmonizer.seed.title') }}
-            </h2>
-            <p class="text-xs text-muted-foreground">
-                {{ t('tools.layout-harmonizer.seed.description') }}
-            </p>
+  <div
+    class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[360px_minmax(0,1fr)]"
+    :data-mode="mode"
+    data-test="layout-workspace"
+  >
+    <section class="space-y-3 rounded-xl border p-4">
+      <h2 class="text-sm font-semibold">
+        {{ t('tools.layout-harmonizer.seed.title') }}
+      </h2>
+      <p class="text-xs text-muted-foreground">
+        {{ t('tools.layout-harmonizer.seed.description') }}
+      </p>
 
-            <SeedPicker
-                v-model:background-text="backgroundText"
-                :picker="picker"
-                :empty="!hasSeed"
-                :background-visible="needsBackground"
-                :background-invalid="backgroundInvalid"
-            />
+      <SeedPicker
+        v-model:background-text="backgroundText"
+        :picker="picker"
+        :empty="!hasSeed"
+        :background-visible="needsBackground"
+        :background-invalid="backgroundInvalid"
+        :background-alpha="backgroundAlpha"
+      />
 
-            <StrategySelect v-model="strategy" />
+      <StrategySelect v-model="strategy" />
 
-            <SecondaryField
-                v-model:secondary-text="secondaryText"
-                :invalid="secondaryInvalid"
-                :manual="secondarySource === 'manual'"
-                @reset="resetSecondary"
-            />
+      <SecondaryField
+        v-model:secondary-text="secondaryText"
+        v-model:secondary-background-text="secondaryBackgroundText"
+        :invalid="secondaryInvalid"
+        :manual="secondarySource === 'manual'"
+        :needs-background="secondaryNeedsBackground"
+        :background-invalid="secondaryBackgroundInvalid"
+        :background-alpha="secondaryBackgroundAlpha"
+        @reset="resetSecondary"
+      />
 
-            <SeedSummary
-                v-if="seed !== null && result !== null"
-                :seed="seed"
-                :strategy="result.strategy"
-                :secondary-source="secondarySource"
-            />
-        </section>
+      <SeedSummary
+        v-if="seed !== null && result !== null"
+        :seed="seed"
+        :strategy="result.strategy"
+        :secondary-source="secondarySource"
+      />
+    </section>
 
-        <div class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <ViewModeSwitch v-if="result !== null" v-model="viewMode" />
+    <div class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <ViewModeSwitch
+          v-if="result !== null"
+          v-model="viewMode"
+        />
 
-                <RestoreControls
-                    v-if="result !== null && canRestoreEdits"
-                    :counts="restoreCounts"
-                    :total="restoreTotal"
-                    :restore-theme="restoreThemeEdits"
-                    :restore-all="restoreAllEdits"
-                />
-            </div>
+        <RestoreControls
+          v-if="result !== null && canRestoreEdits"
+          :counts="restoreCounts"
+          :total="restoreTotal"
+          :restore-theme="restoreThemeEdits"
+          :restore-all="restoreAllEdits"
+        />
+      </div>
 
-            <p
-                v-if="!canRestoreEdits && result !== null"
-                class="text-xs text-muted-foreground"
-                data-test="layout-restore-disabled"
+      <p
+        v-if="!canRestoreEdits && result !== null"
+        class="text-xs text-muted-foreground"
+        data-test="layout-restore-disabled"
+      >
+        {{ t('tools.layout-harmonizer.lifecycle.restore_disabled') }}
+      </p>
+
+      <div
+        v-if="regenerating"
+        class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm"
+        role="status"
+        aria-live="polite"
+        :data-test="
+          pendingRegeneration
+            ? 'layout-pending-regeneration'
+            : 'layout-regenerate-banner'
+        "
+      >
+        <span>
+          {{
+            t(
+              pendingRegeneration
+                ? 'tools.layout-harmonizer.lifecycle.pending_regeneration'
+                : 'tools.layout-harmonizer.lifecycle.regenerate_available',
+            )
+          }}
+        </span>
+        <button
+          type="button"
+          class="rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
+          data-test="layout-regenerate"
+          @click="requestRegeneration"
+        >
+          {{ t('tools.layout-harmonizer.lifecycle.regenerate') }}
+        </button>
+      </div>
+
+      <Dialog
+        :open="regenerateOpen"
+        @update:open="
+          (open) => {
+            if (!open) {
+              regenerateOpen = false;
+            }
+          }
+        "
+      >
+        <DialogContent data-test="layout-regenerate-dialog">
+          <DialogHeader>
+            <DialogTitle>
+              {{
+                t(
+                  'tools.layout-harmonizer.lifecycle.regenerate_confirm_title',
+                )
+              }}
+            </DialogTitle>
+            <DialogDescription>
+              {{
+                t(
+                  'tools.layout-harmonizer.lifecycle.regenerate_confirm_body',
+                  { count: unlockedEditCount },
+                )
+              }}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              data-test="layout-regenerate-cancel"
+              @click="regenerateOpen = false"
             >
-                {{ t('tools.layout-harmonizer.lifecycle.restore_disabled') }}
-            </p>
-
-            <div
-                v-if="pendingRegeneration"
-                class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-sm"
-                role="status"
-                aria-live="polite"
-                data-test="layout-pending-regeneration"
+              {{ t('tools.layout-harmonizer.restore.cancel') }}
+            </Button>
+            <Button
+              type="button"
+              data-test="layout-regenerate-confirm"
+              @click="confirmRegeneration"
             >
-                <span>
-                    {{
-                        t(
-                            'tools.layout-harmonizer.lifecycle.pending_regeneration',
-                        )
-                    }}
-                </span>
-                <button
-                    v-if="regenerate"
-                    type="button"
-                    class="rounded-md border border-border px-2 py-1 text-xs font-medium hover:bg-muted"
-                    data-test="layout-regenerate"
-                    @click="requestRegeneration"
-                >
-                    {{ t('tools.layout-harmonizer.lifecycle.regenerate') }}
-                </button>
-            </div>
+              {{
+                t(
+                  'tools.layout-harmonizer.lifecycle.regenerate',
+                )
+              }}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-            <p
-                class="min-h-5 text-sm text-destructive"
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-                data-test="layout-notice"
-            >
-                {{ noticeText }}
-            </p>
+      <p
+        class="min-h-5 text-sm text-destructive"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        data-test="layout-notice"
+      >
+        {{ noticeText }}
+      </p>
 
-            <p
-                class="min-h-5 text-sm text-muted-foreground"
-                role="status"
-                aria-live="polite"
-                aria-atomic="true"
-                data-test="layout-edit-notice"
-            >
-                {{ editNoticeText }}
-            </p>
+      <p
+        class="min-h-5 text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        data-test="layout-edit-notice"
+      >
+        {{ editNoticeText }}
+      </p>
 
-            <template v-if="result !== null">
-                <ThemeComparison
-                    v-if="viewMode === 'compare'"
-                    :light="result.themes.light"
-                    :dark="result.themes.dark"
-                    :copy="feedback.copy"
-                    :edit-state="editState"
-                    :suggested="suggestedByTheme"
-                    :editable="editable"
-                    :apply-color="applyIn"
-                    :toggle-lock="toggleIn"
-                    :restore-token="restoreIn"
-                />
-                <ThemeBoard
-                    v-else
-                    :board="result.themes[singleTheme]"
-                    :title="singleTitle"
-                    :copy="feedback.copy"
-                    :locks="editState.locks[singleTheme] ?? {}"
-                    :overrides="editState.overrides[singleTheme] ?? {}"
-                    :suggested-tokens="suggestedByTheme[singleTheme] ?? []"
-                    :editable="editable"
-                    :apply-color="
-                        (token, color) => applyIn(singleTheme, token, color)
-                    "
-                    :toggle-lock="(token) => toggleIn(singleTheme, token)"
-                    :restore-token="(token) => restoreIn(singleTheme, token)"
-                />
+      <template v-if="result !== null">
+        <ThemeComparison
+          v-if="viewMode === 'compare'"
+          :light="result.themes.light"
+          :dark="result.themes.dark"
+          :copy="feedback.copy"
+          :edit-state="editState"
+          :suggested="suggestedByTheme"
+          :editable="editable"
+          :apply-color="applyIn"
+          :toggle-lock="toggleIn"
+          :restore-token="restoreIn"
+        />
+        <ThemeBoard
+          v-else
+          :board="result.themes[singleTheme]"
+          :title="singleTitle"
+          :copy="feedback.copy"
+          :locks="editState.locks[singleTheme] ?? {}"
+          :overrides="editState.overrides[singleTheme] ?? {}"
+          :suggested-tokens="suggestedByTheme[singleTheme] ?? []"
+          :editable="editable"
+          :apply-color="
+            (token, color) => applyIn(singleTheme, token, color)
+          "
+          :toggle-lock="(token) => toggleIn(singleTheme, token)"
+          :restore-token="(token) => restoreIn(singleTheme, token)"
+        />
 
-                <SuggestionsPanel
-                    v-if="canSuggest"
-                    v-model:target="target"
-                    :suggestions="suggestions"
-                    :accept="acceptAdjustment"
-                    :accept-both="acceptAdjustmentInBothThemes"
-                />
-                <p
-                    v-else
-                    class="text-xs text-muted-foreground"
-                    data-test="layout-suggestions-off"
-                >
-                    {{ t('tools.layout-harmonizer.lifecycle.suggestions_off') }}
-                </p>
-            </template>
+        <SuggestionsPanel
+          v-if="canSuggest"
+          v-model:target="target"
+          :suggestions="suggestions"
+          :accept="acceptAdjustment"
+          :accept-both="acceptAdjustmentInBothThemes"
+        />
+        <p
+          v-else
+          class="text-xs text-muted-foreground"
+          data-test="layout-suggestions-off"
+        >
+          {{ t('tools.layout-harmonizer.lifecycle.suggestions_off') }}
+        </p>
+      </template>
 
-            <section
-                v-else
-                class="rounded-xl border border-dashed p-8 text-center"
-                data-test="layout-empty"
-            >
-                <h2 class="text-base font-medium">
-                    {{ t('tools.layout-harmonizer.states.empty_title') }}
-                </h2>
-                <p class="mt-1 text-sm text-muted-foreground">
-                    {{ t('tools.layout-harmonizer.states.empty_description') }}
-                </p>
-            </section>
+      <section
+        v-else
+        class="rounded-xl border border-dashed p-8 text-center"
+        data-test="layout-empty"
+      >
+        <h2 class="text-base font-medium">
+          {{ t('tools.layout-harmonizer.states.empty_title') }}
+        </h2>
+        <p class="mt-1 text-sm text-muted-foreground">
+          {{ t('tools.layout-harmonizer.states.empty_description') }}
+        </p>
+      </section>
 
-            <p
-                class="min-h-5 text-sm text-muted-foreground"
-                role="status"
-                aria-live="polite"
-                data-test="layout-feedback"
-            >
-                {{ feedback.message }}
-            </p>
-        </div>
+      <p
+        class="min-h-5 text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        data-test="layout-feedback"
+      >
+        {{ feedback.message }}
+      </p>
     </div>
+  </div>
 </template>

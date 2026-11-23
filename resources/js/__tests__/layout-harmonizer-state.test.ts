@@ -54,7 +54,7 @@ function snapshotOf(
     seed: Rgba,
     strategy: LayoutStrategy = 'analogous',
     background: { r: number; g: number; b: number } | null = null,
-    secondary: { r: number; g: number; b: number } | null = null,
+    secondary: Rgba | null = null,
     target: 'aa' | 'aaa' = 'aa',
 ) {
     return buildSnapshot(
@@ -72,7 +72,7 @@ function snapshotOf(
 
 function stateOf(
     overrides: Partial<LayoutStateInputsV1> = {},
-    secondary: { r: number; g: number; b: number } | null = null,
+    secondary: Rgba | null = null,
     snapshot = snapshotOf(color('#3b82f6')),
 ): LayoutSystemStateV1 {
     return buildLayoutState(inputs(overrides), secondary, snapshot);
@@ -145,7 +145,7 @@ describe('envelope do estado', () => {
     });
 
     it('preserva a secundaria manual efetiva e normaliza seu texto', () => {
-        const manual = { r: 0, g: 255, b: 0 };
+        const manual = { r: 0, g: 255, b: 0, a: 1 };
         const snapshot = snapshotOf(
             color('#3b82f6'),
             'analogous',
@@ -176,6 +176,74 @@ describe('envelope do estado', () => {
 
         expect(hydrated.inputs.secondaryText).toBe('');
         expect(hydrated.secondary).toBeNull();
+    });
+
+    it('preserva a secundaria com alpha e o fundo de composicao', () => {
+        const translucent = color('#00ff00');
+        translucent.a = 0.5;
+
+        const white = { r: 255, g: 255, b: 255 };
+        const result = generateLayoutSystem({
+            seed: color('#3b82f6'),
+            strategy: 'analogous',
+            secondary: translucent,
+            secondaryBackground: white,
+        });
+        const state = buildLayoutState(
+            inputs({
+                secondaryText: 'rgba(0, 255, 0, 0.5)',
+                secondaryBackgroundText: '#fff',
+            }),
+            translucent,
+            buildSnapshot(result, emptyEditState(), 'aa'),
+            white,
+        );
+        const parsed: unknown = JSON.parse(JSON.stringify(state));
+
+        expect(isLayoutSystemState(parsed)).toBe(true);
+
+        const hydrated = hydrateState(parsed as LayoutSystemStateV1);
+
+        expect(hydrated.secondary).toEqual(translucent);
+        expect(hydrated.secondaryBackground).toEqual(white);
+        expect(hydrated.inputs.secondaryBackgroundText).toBe('#fff');
+        expect(hydrated.inputs.secondaryText).toBe('rgba(0, 255, 0, 0.5)');
+    });
+
+    it('aceita linhas antigas sem os campos da emenda', () => {
+        const state = stateOf();
+        const old = JSON.parse(JSON.stringify(state)) as {
+            inputs: Record<string, unknown>;
+            secondary?: unknown;
+        };
+
+        delete old.inputs.secondaryBackgroundText;
+
+        expect(isLayoutSystemState(old)).toBe(true);
+
+        const hydrated = hydrateState(old as unknown as LayoutSystemStateV1);
+
+        expect(hydrated.inputs.secondaryBackgroundText).toBe('');
+        expect(hydrated.secondaryBackground).toBeNull();
+    });
+
+    it('normaliza a secundaria RGB sem canal alpha de linhas antigas', () => {
+        const manual = { r: 0, g: 255, b: 0, a: 1 };
+        const state = stateOf(
+            { secondaryText: '#00ff00' },
+            manual,
+            snapshotOf(color('#3b82f6'), 'analogous', null, manual),
+        );
+        const old = JSON.parse(JSON.stringify(state)) as {
+            secondary: Record<string, unknown>;
+        };
+
+        delete old.secondary.a;
+
+        expect(isLayoutSystemState(old)).toBe(true);
+        expect(
+            hydrateState(old as unknown as LayoutSystemStateV1).secondary,
+        ).toEqual(manual);
     });
 });
 

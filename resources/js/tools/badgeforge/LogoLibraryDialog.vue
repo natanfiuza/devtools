@@ -149,202 +149,205 @@ function destroy(logo: BadgeForgeCustomLogoSummary): void {
 </script>
 
 <template>
-    <Dialog
-        :open="open"
-        @update:open="(value: boolean) => emit('update:open', value)"
-    >
-        <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-            <DialogHeader>
-                <DialogTitle>
-                    {{ t('tools.badgeforge.management.logos_title') }}
-                </DialogTitle>
-                <DialogDescription>
-                    {{ t('tools.badgeforge.management.logos_description') }}
-                </DialogDescription>
-            </DialogHeader>
+  <Dialog
+    :open="open"
+    @update:open="(value: boolean) => emit('update:open', value)"
+  >
+    <DialogContent class="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+      <DialogHeader>
+        <DialogTitle>
+          {{ t('tools.badgeforge.management.logos_title') }}
+        </DialogTitle>
+        <DialogDescription>
+          {{ t('tools.badgeforge.management.logos_description') }}
+        </DialogDescription>
+      </DialogHeader>
 
-            <LogoUploadForm
-                :max-bytes="limits.maxBytes"
-                :name-max-length="limits.nameMaxLength"
-                :limit="limits.limit"
-                :used="limits.used"
-                :upgrade-url="upgradeUrl"
-            />
+      <LogoUploadForm
+        :max-bytes="limits.maxBytes"
+        :name-max-length="limits.nameMaxLength"
+        :limit="limits.limit"
+        :used="limits.used"
+        :upgrade-url="upgradeUrl"
+      />
 
-            <div
-                v-if="logos.length === 0"
-                class="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground"
-                data-test="badge-logo-empty"
-            >
-                {{ t('tools.badgeforge.management.empty_logos') }}
-            </div>
+      <div
+        v-if="logos.length === 0"
+        class="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground"
+        data-test="badge-logo-empty"
+      >
+        {{ t('tools.badgeforge.management.empty_logos') }}
+      </div>
 
-            <ul
+      <ul
+        v-else
+        class="divide-y rounded-md border"
+        data-test="badge-logo-list"
+      >
+        <li
+          v-for="logo in logos"
+          :key="logo.id"
+          class="space-y-2 px-3 py-2"
+          data-test="badge-logo-row"
+        >
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="min-w-0 flex-1">
+              <template v-if="editingId === logo.id">
+                <Input
+                  v-model="renameForm.name"
+                  :maxlength="limits.nameMaxLength"
+                  :aria-label="
+                    t('tools.badgeforge.management.name')
+                  "
+                  data-test="badge-logo-rename-input"
+                  @keyup.enter="saveRename(logo)"
+                />
+                <InputError :message="renameForm.errors.name" />
+              </template>
+              <p
                 v-else
-                class="divide-y rounded-md border"
-                data-test="badge-logo-list"
-            >
-                <li
-                    v-for="logo in logos"
-                    :key="logo.id"
-                    class="space-y-2 px-3 py-2"
-                    data-test="badge-logo-row"
-                >
-                    <div class="flex flex-wrap items-center gap-2">
-                        <div class="min-w-0 flex-1">
-                            <template v-if="editingId === logo.id">
-                                <Input
-                                    v-model="renameForm.name"
-                                    :maxlength="limits.nameMaxLength"
-                                    :aria-label="
-                                        t('tools.badgeforge.management.name')
-                                    "
-                                    data-test="badge-logo-rename-input"
-                                    @keyup.enter="saveRename(logo)"
-                                />
-                                <InputError :message="renameForm.errors.name" />
-                            </template>
-                            <p v-else class="truncate text-sm font-medium">
-                                {{ logo.name }}
-                            </p>
-                            <p class="text-xs text-muted-foreground">
-                                {{
-                                    t(
-                                        'tools.badgeforge.management.path_count',
-                                        {
-                                            count: logo.pathCount,
-                                        },
-                                    )
-                                }}
-                            </p>
-                        </div>
-
-                        <template v-if="editingId === logo.id">
-                            <Button
-                                size="sm"
-                                :disabled="renameForm.processing"
-                                data-test="badge-logo-rename-save"
-                                @click="saveRename(logo)"
-                            >
-                                {{ t('tools.badgeforge.management.save') }}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                data-test="badge-logo-rename-cancel"
-                                @click="cancelRename"
-                            >
-                                {{ t('tools.badgeforge.management.cancel') }}
-                            </Button>
-                        </template>
-                        <template v-else>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                data-test="badge-logo-preview-toggle"
-                                @click="togglePreview(logo)"
-                            >
-                                <Eye class="size-4" />
-                                {{ t('tools.badgeforge.management.preview') }}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                data-test="badge-logo-rename"
-                                @click="startRename(logo)"
-                            >
-                                <Pencil class="size-4" />
-                                {{ t('tools.badgeforge.management.rename') }}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                data-test="badge-logo-delete"
-                                @click="startDelete(logo)"
-                            >
-                                <Trash2 class="size-4" />
-                                {{ t('tools.badgeforge.management.delete') }}
-                            </Button>
-                        </template>
-                    </div>
-
-                    <div
-                        v-if="previewId === logo.id"
-                        class="flex min-h-10 items-center rounded-md bg-muted/50 px-3 py-2"
-                    >
-                        <p
-                            v-if="previewLoading"
-                            class="text-xs text-muted-foreground"
-                        >
-                            {{
-                                t('tools.badgeforge.management.preview_loading')
-                            }}
-                        </p>
-                        <p
-                            v-else-if="previewFailed || previewLogo === null"
-                            class="text-xs text-destructive"
-                        >
-                            {{ t('tools.badgeforge.management.preview_error') }}
-                        </p>
-                        <LogoPreview
-                            v-else
-                            :view-box="previewLogo.viewBox"
-                            :paths="previewLogo.paths"
-                            color="#000000"
-                        />
-                    </div>
-
-                    <div
-                        v-if="confirmingId === logo.id"
-                        class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
-                        data-test="badge-logo-delete-confirm"
-                    >
-                        <p class="text-sm font-medium">
-                            {{
-                                t('tools.badgeforge.management.delete_title', {
-                                    name: logo.name,
-                                })
-                            }}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                            {{
-                                t(
-                                    'tools.badgeforge.management.delete_description',
-                                )
-                            }}
-                        </p>
-                        <div class="mt-2 flex gap-2">
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                data-test="badge-logo-delete-confirmed"
-                                @click="destroy(logo)"
-                            >
-                                {{ t('tools.badgeforge.management.delete') }}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                data-test="badge-logo-delete-cancel"
-                                @click="confirmingId = null"
-                            >
-                                {{ t('tools.badgeforge.management.cancel') }}
-                            </Button>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-
-            <div class="flex justify-end">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    data-test="badge-logo-close"
-                    @click="close"
-                >
-                    {{ t('tools.badgeforge.management.cancel') }}
-                </Button>
+                class="truncate text-sm font-medium"
+              >
+                {{ logo.name }}
+              </p>
+              <p class="text-xs text-muted-foreground">
+                {{
+                  t(
+                    'tools.badgeforge.management.path_count',
+                    {
+                      count: logo.pathCount,
+                    },
+                  )
+                }}
+              </p>
             </div>
-        </DialogContent>
-    </Dialog>
+
+            <template v-if="editingId === logo.id">
+              <Button
+                size="sm"
+                :disabled="renameForm.processing"
+                data-test="badge-logo-rename-save"
+                @click="saveRename(logo)"
+              >
+                {{ t('tools.badgeforge.management.save') }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-test="badge-logo-rename-cancel"
+                @click="cancelRename"
+              >
+                {{ t('tools.badgeforge.management.cancel') }}
+              </Button>
+            </template>
+            <template v-else>
+              <Button
+                variant="outline"
+                size="sm"
+                data-test="badge-logo-preview-toggle"
+                @click="togglePreview(logo)"
+              >
+                <Eye class="size-4" />
+                {{ t('tools.badgeforge.management.preview') }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-test="badge-logo-rename"
+                @click="startRename(logo)"
+              >
+                <Pencil class="size-4" />
+                {{ t('tools.badgeforge.management.rename') }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-test="badge-logo-delete"
+                @click="startDelete(logo)"
+              >
+                <Trash2 class="size-4" />
+                {{ t('tools.badgeforge.management.delete') }}
+              </Button>
+            </template>
+          </div>
+
+          <div
+            v-if="previewId === logo.id"
+            class="flex min-h-10 items-center rounded-md bg-muted/50 px-3 py-2"
+          >
+            <p
+              v-if="previewLoading"
+              class="text-xs text-muted-foreground"
+            >
+              {{
+                t('tools.badgeforge.management.preview_loading')
+              }}
+            </p>
+            <p
+              v-else-if="previewFailed || previewLogo === null"
+              class="text-xs text-destructive"
+            >
+              {{ t('tools.badgeforge.management.preview_error') }}
+            </p>
+            <LogoPreview
+              v-else
+              :view-box="previewLogo.viewBox"
+              :paths="previewLogo.paths"
+              color="#000000"
+            />
+          </div>
+
+          <div
+            v-if="confirmingId === logo.id"
+            class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2"
+            data-test="badge-logo-delete-confirm"
+          >
+            <p class="text-sm font-medium">
+              {{
+                t('tools.badgeforge.management.delete_title', {
+                  name: logo.name,
+                })
+              }}
+            </p>
+            <p class="text-xs text-muted-foreground">
+              {{
+                t(
+                  'tools.badgeforge.management.delete_description',
+                )
+              }}
+            </p>
+            <div class="mt-2 flex gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                data-test="badge-logo-delete-confirmed"
+                @click="destroy(logo)"
+              >
+                {{ t('tools.badgeforge.management.delete') }}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                data-test="badge-logo-delete-cancel"
+                @click="confirmingId = null"
+              >
+                {{ t('tools.badgeforge.management.cancel') }}
+              </Button>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          data-test="badge-logo-close"
+          @click="close"
+        >
+          {{ t('tools.badgeforge.management.cancel') }}
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>

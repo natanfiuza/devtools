@@ -29,59 +29,65 @@ const year = new Date().getFullYear();
 </script>
 
 <template>
-    <div class="flex min-h-svh flex-col bg-background">
-        <a
-            href="#conteudo"
-            class="sr-only rounded-md px-3 py-2 text-sm focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+  <div class="flex min-h-svh flex-col bg-background">
+    <a
+      href="#conteudo"
+      class="sr-only rounded-md px-3 py-2 text-sm focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
+    >
+      {{ t('app.actions.skip_to_content') }}
+    </a>
+
+    <header
+      class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur"
+    >
+      <div
+        class="mx-auto flex h-14 w-full max-w-[1120px] items-center gap-2 px-4"
+      >
+        <Link
+          :href="routes.home.value"
+          class="rounded-md"
         >
-            {{ t('app.actions.skip_to_content') }}
-        </a>
+          <AppWordmark />
+          <span class="sr-only">{{ t('app.brand') }}</span>
+        </Link>
 
-        <header
-            class="sticky top-0 z-40 border-b bg-background/80 backdrop-blur"
+        <div class="ml-auto flex items-center gap-2">
+          <LocaleSwitcher />
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+
+    <main
+      id="conteudo"
+      class="flex flex-1 items-center justify-center px-4 py-10"
+    >
+      <div class="w-full max-w-sm">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="border-t">
+      <div
+        class="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-4 text-sm text-muted-foreground"
+      >
+        <span>&copy; {{ year }} {{ t('app.brand') }}</span>
+        <Link
+          :href="routes.privacy.value"
+          class="hover:text-foreground"
         >
-            <div
-                class="mx-auto flex h-14 w-full max-w-[1120px] items-center gap-2 px-4"
-            >
-                <Link :href="routes.home.value" class="rounded-md">
-                    <AppWordmark />
-                    <span class="sr-only">{{ t('app.brand') }}</span>
-                </Link>
-
-                <div class="ml-auto flex items-center gap-2">
-                    <LocaleSwitcher />
-                    <ThemeToggle />
-                </div>
-            </div>
-        </header>
-
-        <main
-            id="conteudo"
-            class="flex flex-1 items-center justify-center px-4 py-10"
+          {{ t('app.footer.privacy') }}
+        </Link>
+        <Link
+          :href="routes.terms.value"
+          class="hover:text-foreground"
         >
-            <div class="w-full max-w-sm">
-                <slot />
-            </div>
-        </main>
+          {{ t('app.footer.terms') }}
+        </Link>
+      </div>
+    </footer>
 
-        <footer class="border-t">
-            <div
-                class="mx-auto flex w-full max-w-[1120px] flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-4 text-sm text-muted-foreground"
-            >
-                <span>&copy; {{ year }} {{ t('app.brand') }}</span>
-                <Link
-                    :href="routes.privacy.value"
-                    class="hover:text-foreground"
-                >
-                    {{ t('app.footer.privacy') }}
-                </Link>
-                <Link :href="routes.terms.value" class="hover:text-foreground">
-                    {{ t('app.footer.terms') }}
-                </Link>
-            </div>
-        </footer>
-
-        <ConsentBanner />
-        <AnalyticsScript />
-    </div>
+    <ConsentBanner />
+    <AnalyticsScript />
+  </div>
 </template>

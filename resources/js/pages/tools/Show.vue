@@ -81,59 +81,62 @@ const intro = computed(() => t(`tools.${props.slug}.intro`));
 </script>
 
 <template>
-    <PageHead />
+  <PageHead />
 
-    <div class="mx-auto w-full max-w-[1120px] px-4 py-8">
-        <Breadcrumb class="mb-6">
-            <BreadcrumbList>
-                <BreadcrumbItem>
-                    <BreadcrumbLink as-child>
-                        <Link :href="routes.home.value">
-                            {{ t('app.nav.tools') }}
-                        </Link>
-                    </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                    <BreadcrumbPage>{{ name }}</BreadcrumbPage>
-                </BreadcrumbItem>
-            </BreadcrumbList>
-        </Breadcrumb>
+  <div class="mx-auto w-full max-w-[1120px] px-4 py-8">
+    <Breadcrumb class="mb-6">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink as-child>
+            <Link :href="routes.home.value">
+              {{ t('app.nav.tools') }}
+            </Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+        <BreadcrumbItem>
+          <BreadcrumbPage>{{ name }}</BreadcrumbPage>
+        </BreadcrumbItem>
+      </BreadcrumbList>
+    </Breadcrumb>
 
-        <header class="max-w-3xl">
-            <div class="flex items-center gap-3">
-                <component
-                    :is="toolIcon(tool?.icon ?? '')"
-                    class="size-6 shrink-0 text-brand"
-                    aria-hidden="true"
-                />
-                <h1 class="text-3xl font-semibold tracking-tight">
-                    {{ name }}
-                </h1>
-            </div>
-            <p class="mt-3 text-muted-foreground">
-                {{ description }}
-            </p>
-            <p class="mt-2 text-sm text-subtle">
-                {{ intro }}
-            </p>
-        </header>
+    <header class="max-w-3xl">
+      <div class="flex items-center gap-3">
+        <component
+          :is="toolIcon(tool?.icon ?? '')"
+          class="size-6 shrink-0 text-brand"
+          aria-hidden="true"
+        />
+        <h1 class="text-3xl font-semibold tracking-tight">
+          {{ name }}
+        </h1>
+      </div>
+      <p class="mt-3 text-muted-foreground">
+        {{ description }}
+      </p>
+      <p class="mt-2 text-sm text-subtle">
+        {{ intro }}
+      </p>
+    </header>
 
-        <div class="mt-8">
-            <ClientOnly>
-                <component
-                    :is="toolComponent"
-                    v-if="toolComponent"
-                    :max-input-bytes="maxInputBytes"
-                    :virtualize-from="virtualizeFrom"
-                    :regex-timeout-ms="regexTimeoutMs"
-                    :regex-max-matches="regexMaxMatches"
-                    v-bind="toolProps"
-                />
-                <p v-else class="text-sm text-destructive">
-                    {{ t('tools.ui.states.unavailable') }}
-                </p>
-            </ClientOnly>
-        </div>
+    <div class="mt-8">
+      <ClientOnly>
+        <component
+          :is="toolComponent"
+          v-if="toolComponent"
+          :max-input-bytes="maxInputBytes"
+          :virtualize-from="virtualizeFrom"
+          :regex-timeout-ms="regexTimeoutMs"
+          :regex-max-matches="regexMaxMatches"
+          v-bind="toolProps"
+        />
+        <p
+          v-else
+          class="text-sm text-destructive"
+        >
+          {{ t('tools.ui.states.unavailable') }}
+        </p>
+      </ClientOnly>
     </div>
+  </div>
 </template>

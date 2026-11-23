@@ -1,10 +1,17 @@
-import { formatHex, parseColor, type Rgb, type Rgba } from '@/lib/color';
+import {
+    formatColor,
+    formatHex,
+    parseColor,
+    type Rgb,
+    type Rgba,
+} from '@/lib/color';
 import {
     LAYOUT_ALGORITHM_VERSION,
     LAYOUT_SCHEMA_VERSION,
     LAYOUT_STRATEGIES,
     LAYOUT_THEMES,
     LAYOUT_TOKEN_SPECS,
+    type LayoutSecondaryInfo,
     type LayoutSeedInfo,
     type LayoutStrategy,
     type LayoutSystemResult,
@@ -48,14 +55,27 @@ export interface LayoutStateInputsV1 {
     seedText: string;
     backgroundText: string;
     secondaryText: string;
+    /**
+     * Fundo de composicao da secundaria com alpha (emenda da F6). Ausente em
+     * estados gravados antes da emenda.
+     */
+    secondaryBackgroundText?: string;
     strategy: LayoutStrategy;
 }
+
+/** Secundaria manual; linhas v1 antigas gravavam RGB sem o canal alpha. */
+export type LayoutStateSecondary = Rgba | Rgb;
 
 export interface LayoutSystemStateV1 {
     stateVersion: typeof LAYOUT_STATE_VERSION;
     inputs: LayoutStateInputsV1;
-    /** RGB efetivo da secundaria manual; `null` quando automatica. */
-    secondary: Rgb | null;
+    /** Secundaria manual informada; `null` quando automatica. */
+    secondary: LayoutStateSecondary | null;
+    /**
+     * Fundo de composicao da secundaria com alpha; ausente quando a secundaria
+     * e opaca ou automatica.
+     */
+    secondaryBackground?: Rgb | null;
     snapshot: LayoutSnapshot;
 }
 
@@ -64,7 +84,8 @@ export type LayoutHydrateMode = 'live' | 'compatible' | 'readonly';
 
 export interface HydratedLayoutState {
     inputs: LayoutStateInputsV1;
-    secondary: Rgb | null;
+    secondary: Rgba | null;
+    secondaryBackground: Rgb | null;
     snapshot: LayoutSnapshot;
     editState: LayoutEditState;
     target: LayoutEditTarget;
@@ -82,6 +103,7 @@ export interface LayoutViewResult {
     seed: LayoutSeedInfo;
     strategy: LayoutStrategy;
     secondarySource: 'auto' | 'manual';
+    secondary: LayoutSecondaryInfo | null;
     themes: Record<LayoutTheme, LayoutThemeBoard>;
 }
 
@@ -209,6 +231,13 @@ function isSnapshot(value: unknown): value is LayoutSnapshot {
         isStrategy(value.strategy) &&
         (value.secondarySource === 'auto' ||
             value.secondarySource === 'manual') &&
+        (value.secondary === undefined ||
+            value.secondary === null ||
+            (isRecord(value.secondary) &&
+                isRgba(value.secondary.original) &&
+                isRgba(value.secondary.effective) &&
+                (value.secondary.background === null ||
+                    isRgb(value.secondary.background)))) &&
         Array.isArray(value.themes) &&
         value.themes.length === LAYOUT_THEMES.length &&
         value.themes.every(isSnapshotTheme) &&
@@ -225,6 +254,14 @@ function isSnapshot(value: unknown): value is LayoutSnapshot {
     );
 }
 
+/** Secundaria com alpha exige o fundo de composicao explicito. */
+function hasCompositionBackground(
+    secondary: unknown,
+    background: unknown,
+): boolean {
+    return !isRgba(secondary) || secondary.a >= 1 || isRgb(background);
+}
+
 /** Shape minimo do envelope persistido; snapshots parciais sao recusados. */
 export function isLayoutSystemState(
     value: unknown,
@@ -236,8 +273,16 @@ export function isLayoutSystemState(
         typeof value.inputs.seedText === 'string' &&
         typeof value.inputs.backgroundText === 'string' &&
         typeof value.inputs.secondaryText === 'string' &&
+        (value.inputs.secondaryBackgroundText === undefined ||
+            typeof value.inputs.secondaryBackgroundText === 'string') &&
         isStrategy(value.inputs.strategy) &&
-        (value.secondary === null || isRgb(value.secondary)) &&
+        (value.secondary === null ||
+            isRgb(value.secondary) ||
+            isRgba(value.secondary)) &&
+        (value.secondaryBackground === undefined ||
+            value.secondaryBackground === null ||
+            isRgb(value.secondaryBackground)) &&
+        hasCompositionBackground(value.secondary, value.secondaryBackground) &&
         isSnapshot(value.snapshot)
     );
 }
@@ -321,27 +366,63 @@ function parseBackground(raw: string): Rgb | null {
         : null;
 }
 
+/** Secundaria informada, normalizada para Rgba (linhas antigas nao tem `a`). */
+function secondaryColorOf(state: LayoutSystemStateV1): Rgba | null {
+    if (state.snapshot.secondary) {
+        return { ...state.snapshot.secondary.original };
+    }
+
+    if (state.secondary === null) {
+        return null;
+    }
+
+    return 'a' in state.secondary
+        ? { ...state.secondary }
+        : { ...state.secondary, a: 1 };
+}
+
+/** Fundo de composicao gravado, com o snapshot como fonte preferida. */
+function secondaryBackgroundOf(state: LayoutSystemStateV1): Rgb | null {
+    return (
+        state.snapshot.secondary?.background ??
+        state.secondaryBackground ??
+        null
+    );
+}
+
 function secondaryInput(raw: string, state: LayoutSystemStateV1): string {
-    if (
-        state.snapshot.secondarySource !== 'manual' ||
-        state.secondary === null
-    ) {
+    if (state.snapshot.secondarySource !== 'manual') {
         return '';
     }
 
-    const manual = state.secondary;
-    const parsed = parseColor(raw.trim());
-    const typed = parsed.ok
-        ? {
-              r: parsed.color.rgba.r,
-              g: parsed.color.rgba.g,
-              b: parsed.color.rgba.b,
-          }
-        : null;
+    const manual = secondaryColorOf(state);
 
-    return typed && sameRgb(typed, manual)
+    if (manual === null) {
+        return '';
+    }
+
+    const parsed = parseColor(raw.trim());
+
+    return parsed.ok && sameRgba(parsed.color.rgba, manual)
         ? raw
-        : formatHex({ ...manual, a: 1 });
+        : formatColor(manual, manual.a < 1 ? 'rgba' : 'hex');
+}
+
+function secondaryBackgroundInput(
+    raw: string,
+    state: LayoutSystemStateV1,
+): string {
+    const background = secondaryBackgroundOf(state);
+
+    if (background === null) {
+        return '';
+    }
+
+    const parsed = parseBackground(raw);
+
+    return parsed && sameRgb(parsed, background)
+        ? raw
+        : formatHex({ ...background, a: 1 });
 }
 
 /** Locks do snapshot filtrados contra o catalogo atual. */
@@ -452,6 +533,15 @@ export function materializeResult(
         },
         strategy: snapshot.strategy,
         secondarySource: snapshot.secondarySource,
+        secondary: snapshot.secondary
+            ? {
+                  original: { ...snapshot.secondary.original },
+                  effective: { ...snapshot.secondary.effective },
+                  background: snapshot.secondary.background
+                      ? { ...snapshot.secondary.background }
+                      : null,
+              }
+            : null,
         themes: boardsFromSnapshot(snapshot),
     };
 }
@@ -461,6 +551,8 @@ export function materializeResult(
  * normalizados para nunca reabrirem um quadro diferente do gravado.
  */
 export function hydrateState(state: LayoutSystemStateV1): HydratedLayoutState {
+    const secondaryBackground = secondaryBackgroundOf(state);
+
     return {
         inputs: {
             seedText: seededText(state.inputs.seedText, state.snapshot),
@@ -469,9 +561,14 @@ export function hydrateState(state: LayoutSystemStateV1): HydratedLayoutState {
                 state.snapshot,
             ),
             secondaryText: secondaryInput(state.inputs.secondaryText, state),
+            secondaryBackgroundText: secondaryBackgroundInput(
+                state.inputs.secondaryBackgroundText ?? '',
+                state,
+            ),
             strategy: state.inputs.strategy,
         },
-        secondary: state.secondary ? { ...state.secondary } : null,
+        secondary: secondaryColorOf(state),
+        secondaryBackground,
         snapshot: state.snapshot,
         editState: editStateFromSnapshot(state.snapshot),
         target: state.snapshot.target,
@@ -482,18 +579,25 @@ export function hydrateState(state: LayoutSystemStateV1): HydratedLayoutState {
 /** Envelope enviado ao servidor: snapshot, entradas cruas e secundaria. */
 export function buildLayoutState(
     inputs: LayoutStateInputsV1,
-    secondary: Rgb | null,
+    secondary: Rgba | null,
     snapshot: LayoutSnapshot,
+    secondaryBackground: Rgb | null = null,
 ): LayoutSystemStateV1 {
+    const composed = secondary !== null && secondary.a < 1;
+
     return {
         stateVersion: LAYOUT_STATE_VERSION,
         inputs: {
             seedText: inputs.seedText,
             backgroundText: inputs.backgroundText,
             secondaryText: inputs.secondaryText,
+            secondaryBackgroundText: inputs.secondaryBackgroundText ?? '',
             strategy: inputs.strategy,
         },
         secondary: secondary ? { ...secondary } : null,
+        ...(composed && secondaryBackground
+            ? { secondaryBackground: { ...secondaryBackground } }
+            : {}),
         snapshot,
     };
 }

@@ -104,6 +104,9 @@ describe('conteudo da celula', () => {
 
         expect(wrapper.text()).toContain('Feedback');
         expect(badge?.attributes('title')).toContain('sRGB');
+        // A explicacao tambem existe como texto acessivel, sem depender do
+        // titulo (hover).
+        expect(wrapper.text()).toContain('sRGB');
     });
 
     it('mantem o swatch fora da arvore de acessibilidade e sem texto', () => {
@@ -122,6 +125,8 @@ describe('selos de contraste', () => {
         expect(badge.text()).toContain('AA');
         expect(badge.text()).toContain(formatRatio(4.826, 'pt_BR'));
         expect(badge.attributes('title')).toBe('Contra primary');
+        // O fundo medido tambem vem em texto acessivel, nao so no titulo.
+        expect(badge.text()).toContain('Contra primary');
     });
 
     it('mostra um selo de falha quando o par nao atinge AA', () => {

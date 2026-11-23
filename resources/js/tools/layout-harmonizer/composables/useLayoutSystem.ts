@@ -35,7 +35,7 @@ import type {
 } from '../lib/controller';
 import {
     LAYOUT_PLACEHOLDER,
-    parseBackgroundText,
+    parseOpaqueText,
     parseSecondaryText,
 } from '../lib/inputs';
 import { buildSnapshot, type LayoutSnapshot } from '../lib/snapshot';
@@ -83,6 +83,7 @@ export function useLayoutSystem(
     const strategy = ref<LayoutStrategy>('analogous');
     const backgroundText = ref('');
     const secondaryText = ref('');
+    const secondaryBackgroundText = ref('');
     const result = shallowRef<LayoutSystemResult | null>(null);
     const notice = ref<LayoutNotice>(null);
     const editNotice = ref<LayoutEditNotice>(null);
@@ -95,24 +96,63 @@ export function useLayoutSystem(
 
     const hasSeed = computed(() => picker.text.value.trim() !== '');
 
-    const background = computed<Rgb | null>(() =>
-        parseBackgroundText(backgroundText.value),
+    const parsedBackground = computed(() =>
+        parseOpaqueText(backgroundText.value),
     );
 
+    const background = computed<Rgb | null>(() =>
+        parsedBackground.value.kind === 'color'
+            ? parsedBackground.value.rgb
+            : null,
+    );
+
+    /** Fundo da seed precisa ser opaco: invalido e alpha sao recusados. */
     const backgroundInvalid = computed(
-        () => backgroundText.value.trim() !== '' && background.value === null,
+        () =>
+            parsedBackground.value.kind === 'invalid' ||
+            parsedBackground.value.kind === 'alpha',
+    );
+
+    const backgroundAlpha = computed(
+        () => parsedBackground.value.kind === 'alpha',
+    );
+
+    const parsedSecondary = computed(() =>
+        parseSecondaryText(secondaryText.value),
     );
 
     const secondaryInvalid = computed(
-        () => parseSecondaryText(secondaryText.value) === undefined,
+        () => parsedSecondary.value === undefined,
     );
 
-    /** RGB efetivo da secundaria manual, pronto para o envelope persistido. */
-    const secondaryColor = computed<Rgb | null>(() => {
-        const parsed = parseSecondaryText(secondaryText.value);
+    /** Secundaria informada (com alpha), pronta para o envelope persistido. */
+    const secondaryColor = computed<Rgba | null>(
+        () => parsedSecondary.value ?? null,
+    );
 
-        return parsed === undefined || parsed === null ? null : parsed;
-    });
+    const parsedSecondaryBackground = computed(() =>
+        parseOpaqueText(secondaryBackgroundText.value),
+    );
+
+    const secondaryBackground = computed<Rgb | null>(() =>
+        parsedSecondaryBackground.value.kind === 'color'
+            ? parsedSecondaryBackground.value.rgb
+            : null,
+    );
+
+    const secondaryBackgroundAlpha = computed(
+        () => parsedSecondaryBackground.value.kind === 'alpha',
+    );
+
+    const secondaryBackgroundInvalid = computed(
+        () =>
+            parsedSecondaryBackground.value.kind === 'invalid' ||
+            parsedSecondaryBackground.value.kind === 'alpha',
+    );
+
+    const secondaryNeedsBackground = computed(
+        () => secondaryColor.value !== null && secondaryColor.value.a < 1,
+    );
 
     const needsBackground = computed(() => picker.rgba.value.a < 1);
 
@@ -145,7 +185,7 @@ export function useLayoutSystem(
      * geracao, e o aviso correspondente aparece sem marcar o quadro como stale.
      */
     function regenerate(): void {
-        const manualSecondary = parseSecondaryText(secondaryText.value);
+        const manualSecondary = parsedSecondary.value;
 
         // Secundaria digitada e invalida preserva o ultimo quadro, como a seed.
         if (manualSecondary === undefined) {
@@ -169,8 +209,25 @@ export function useLayoutSystem(
             return;
         }
 
+        // Fundo de composicao nunca tem alpha: recusar e melhor que descartar.
+        if (backgroundAlpha.value) {
+            notice.value = 'seed-background-alpha-invalid';
+
+            return;
+        }
+
         if (picker.rgba.value.a < 1 && background.value === null) {
             notice.value = 'seed-alpha-without-background';
+
+            return;
+        }
+
+        if (
+            manualSecondary !== null &&
+            manualSecondary.a < 1 &&
+            secondaryBackground.value === null
+        ) {
+            notice.value = 'secondary-alpha-without-background';
 
             return;
         }
@@ -193,6 +250,7 @@ export function useLayoutSystem(
             resolved.effective,
             strategy.value,
             manualSecondary,
+            secondaryBackground.value,
         );
         const signatureChanged =
             lastSignature !== null && signature !== lastSignature;
@@ -208,6 +266,7 @@ export function useLayoutSystem(
                 strategy: strategy.value,
                 background: background.value,
                 secondary: manualSecondary,
+                secondaryBackground: secondaryBackground.value,
                 overrides: effectiveOverrides(nextState),
             });
 
@@ -243,6 +302,8 @@ export function useLayoutSystem(
         strategy.value = hydrated.inputs.strategy;
         backgroundText.value = hydrated.inputs.backgroundText;
         secondaryText.value = hydrated.inputs.secondaryText;
+        secondaryBackgroundText.value =
+            hydrated.inputs.secondaryBackgroundText ?? '';
         result.value = materializeResult(hydrated.snapshot);
         editState.value = hydrated.editState;
         target.value = hydrated.target;
@@ -250,6 +311,7 @@ export function useLayoutSystem(
             hydrated.snapshot.seed.effective,
             hydrated.snapshot.strategy,
             hydrated.secondary,
+            hydrated.secondaryBackground,
         );
         skipNext = true;
     } else if (options.seedText !== undefined) {
@@ -274,6 +336,7 @@ export function useLayoutSystem(
             strategy,
             backgroundText,
             secondaryText,
+            secondaryBackgroundText,
         ],
         onInputsChanged,
         { immediate: true },
@@ -376,6 +439,7 @@ export function useLayoutSystem(
 
     function resetSecondary(): void {
         secondaryText.value = '';
+        secondaryBackgroundText.value = '';
     }
 
     const suggestions = computed<LayoutSuggestion[]>(() =>
@@ -394,11 +458,17 @@ export function useLayoutSystem(
         strategy,
         backgroundText,
         secondaryText,
+        secondaryBackgroundText,
         hasSeed,
         needsBackground,
         background,
         backgroundInvalid,
+        backgroundAlpha,
         secondaryInvalid,
+        secondaryNeedsBackground,
+        secondaryBackground,
+        secondaryBackgroundInvalid,
+        secondaryBackgroundAlpha,
         secondarySource,
         secondaryColor,
         result,

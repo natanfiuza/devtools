@@ -276,6 +276,11 @@ return [
         'strategy' => [
             'unknown' => 'Estrategia desconocida',
         ],
+        'validation' => [
+            'limit_reached' => 'Has alcanzado el límite de elementos Colors (paletas y sistemas).',
+            'archived' => 'Restaura el sistema antes de editarlo.',
+            'confirm_name' => 'Escribe el nombre del sistema exactamente para eliminarlo.',
+        ],
         'toasts' => [
             'created' => 'Sistema guardado.',
             'updated' => 'Sistema actualizado.',
@@ -464,6 +469,9 @@ return [
         'rate_limited' => 'Demasiadas solicitudes. Inténtalo de nuevo en un minuto.',
         'archived' => 'Restaura la paleta antes de editarla.',
         'confirm_name' => 'Escribe el nombre de la paleta exactamente para eliminarla.',
+        'layout_state' => 'El estado del sistema de diseño no es válido. Recarga la página e inténtalo de nuevo.',
+        'layout_state_too_large' => 'El estado del sistema de diseño es demasiado grande para guardarlo.',
+        'source_palette_unavailable' => 'Esta paleta ya no está disponible como origen.',
         'algorithm_version' => 'Esta paleta se generó con una versión no compatible. Recarga la página e inténtalo de nuevo.',
         'extracted_count' => 'Una paleta extraída debe tener 5, 7, 9 u 11 colores.',
         'base_not_in_items' => 'El color base debe ser uno de los colores de la paleta.',
