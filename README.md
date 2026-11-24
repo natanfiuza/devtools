@@ -13,6 +13,7 @@ seguir, comentar) falam com o servidor, com a visibilidade publica opcional.
 
 - Especificacao: [docs/SPEC.md](docs/SPEC.md)
 - Decisoes: [docs/adr/](docs/adr/)
+- Programa Futuro (roadmap das próximas tools): [docs/ROADMAP.md](docs/ROADMAP.md)
 - Design system: [docs/design/DESIGN.md](docs/design/DESIGN.md)
 - Glossario: [docs/glossario.md](docs/glossario.md)
 - Operacao no servidor: [docs/RUNBOOK.md](docs/RUNBOOK.md)
