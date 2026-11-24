@@ -199,5 +199,8 @@
 - Prefixo CSS: identificador ASCII em kebab-case (default `lh`, maximo 32 caracteres) que nomeia as variaveis do CSS exportado (`--lh-primary`); validado no cliente e configuravel por `config/colors.php` (ADR-155, ADR-176).
 - Escopo CSS: onde as variaveis sao declaradas no arquivo exportado - `:root` (default) ou uma classe simples (`.app`, maximo 64 caracteres); o tema escuro responde a `data-theme="dark"` no mesmo escopo, e nenhum seletor arbitrario e aceito (ADR-155, ADR-176).
 - Documento de instrucoes: Markdown autossuficiente no idioma escolhido, com metadados, seed, temas, 33 tokens, regras de aplicacao, contrastes e avisos, feito para uma IA aplicar o quadro sem inventar cores (ADR-177).
+- Programa Futuro: conjunto das doze candidatas da SPEC secao 5 - nove tools novas e tres frentes de produto - organizado em ondas e sete fases, com a fonte de verdade em `docs/ROADMAP.md` e o protocolo de fase proprio (ADR-179).
+- Onda: agrupamento tematico de fases do Programa Futuro; a ordem das ondas e recomendacao, nao bloqueio, e nao tem data.
+- Porte (S/M/L): tamanho relativo de uma fase do Programa Futuro - S sem parser novo, M com parser ou varias tools pequenas, L com motor novo ou superficie de servidor; so desempata os criterios de prioridade e nunca os substitui.
 
 
