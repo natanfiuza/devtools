@@ -1,0 +1,18 @@
+{
+    "slug": "data-format-converter",
+    "status": "available",
+    "category": "text",
+    "icon": "arrow-left-right",
+    "order": 130,
+    "keywords": [
+        "json",
+        "yaml",
+        "toml",
+        "xml",
+        "convert",
+        "converter",
+        "format",
+        "transform",
+        "config"
+    ]
+}

@@ -1,8 +1,10 @@
 import {
+    ArrowLeftRight,
     Binary,
     Braces,
     Clock,
     Database,
+    Diff,
     FileCode,
     FileText,
     Image,
@@ -27,10 +29,12 @@ import type { Component } from 'vue';
  * chave generica evita que um erro de registro derrube a tela.
  */
 const icons: Record<string, Component> = {
+    'arrow-left-right': ArrowLeftRight,
     binary: Binary,
     braces: Braces,
     clock: Clock,
     database: Database,
+    diff: Diff,
     'file-code': FileCode,
     'file-text': FileText,
     image: Image,

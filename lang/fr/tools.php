@@ -1543,4 +1543,93 @@ return [
         ],
         'social_note' => 'Le style social utilise toujours ses propres couleurs.',
     ],
+
+    'data-format-converter' => [
+        'name' => 'Data Format Converter',
+        'description' => 'Convertissez JSON, YAML, TOML et XML entre eux, avec un avertissement pour ce que le format cible ne peut pas représenter.',
+        'keywords' => 'convertir, json, yaml, toml, xml, format',
+        'intro' => 'Choisissez les formats d\'entrée et de sortie et collez le document : la conversion s\'exécute dans votre navigateur, et ce que la cible ne peut pas représenter apparaît comme un avertissement. Rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'from' => 'Format d\'entrée',
+        'to' => 'Format de sortie',
+        'swap' => 'Inverser',
+        'download_name' => 'document',
+        'file_types' => 'JSON, YAML, TOML, XML ou TXT',
+
+        'formats' => [
+            'json' => 'JSON',
+            'yaml' => 'YAML',
+            'toml' => 'TOML',
+            'xml' => 'XML',
+        ],
+
+        'errors' => [
+            'toml-root' => 'Le TOML exige une table à la racine : un tableau ou une valeur seule n\'a pas sa place.',
+            'toml-mixed-array' => 'Le TOML n\'accepte pas une liste à types mélangés (à {key}).',
+            'toml-invalid' => 'Le TOML a refusé le document (à {key}).',
+            'xml-name' => 'La clé {key} n\'est pas un nom d\'élément XML valide.',
+            'xml-attribute' => 'L\'attribut {key} doit être une valeur simple ; les objets et les listes ne peuvent pas devenir un attribut.',
+            'xml-invalid' => 'L\'XML n\'a pas pu être écrit.',
+        ],
+
+        'losses' => [
+            'title' => 'Ce qui a été laissé de côté',
+            'date-as-text' => 'Les dates TOML deviennent du texte dans la cible : {count}.',
+            'binary-as-base64' => 'Les données binaires deviennent du texte Base64 : {count}.',
+            'bigint-as-text' => 'Les entiers plus grands que JavaScript ne représente deviennent du texte : {count}.',
+            'comments-dropped' => 'Les commentaires ne sont pas conservés : {count}.',
+            'null-dropped' => 'Les valeurs nulles n\'existent pas en TOML et ont été supprimées : {count}.',
+            'null-as-empty-element' => 'Les valeurs nulles deviennent un élément vide en XML : {count}.',
+            'non-finite-as-null' => 'NaN et Infinity n\'existent pas en JSON et sont devenus null : {count}.',
+            'non-finite-as-text' => 'NaN et Infinity deviennent du texte en XML : {count}.',
+            'mixed-content-flattened' => 'Le texte mêlé aux éléments a été joint avant les enfants : {count}.',
+            'root-wrapped' => 'Le document a reçu un élément racine <root> : {count}.',
+            'value-dropped' => 'Les valeurs sans représentation dans l\'arbre ont été supprimées : {count}.',
+        ],
+    ],
+
+    'diff' => [
+        'name' => 'Diff',
+        'description' => 'Comparez deux textes ligne par ligne ou deux documents JSON par chemin, avec surlignage et rapport prêt à copier.',
+        'keywords' => 'comparer, différence, diff, texte, json',
+        'intro' => 'Collez l\'original et le modifié et voyez où ils divergent. En mode texte, la comparaison se fait ligne par ligne, avec les régions surlignées ; en mode JSON, elle est sémantique, clé par clé, et l\'ordre des clés ne compte pas. Tout s\'exécute dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'left' => 'Original',
+        'right' => 'Modifié',
+        'open_left' => 'Ouvrir l\'original',
+        'open_right' => 'Ouvrir le modifié',
+        'previous' => 'Différence précédente',
+        'next' => 'Différence suivante',
+        'summary' => [
+            'text' => 'Ajoutées : {added} · Supprimées : {removed}',
+            'json' => 'Ajoutées : {added} · Supprimées : {removed} · Modifiées : {changed}',
+        ],
+        'truncated' => 'Diff grossier : au-delà du budget d\'éditions.',
+        'no_changes' => 'Aucune différence.',
+        'changes_title' => 'Chemins modifiés',
+        'invalid_side' => 'Le côté {side} n\'est pas du JSON valide : {message}',
+        'download_name' => 'diff',
+        'file_types' => 'TXT, JSON, YAML, TOML ou XML',
+
+        'modes' => [
+            'text' => 'Texte',
+            'json' => 'JSON',
+        ],
+
+        'report' => [
+            'title' => 'Diff',
+            'text' => 'Texte',
+            'json' => 'JSON',
+            'original' => 'original',
+            'modified' => 'modifié',
+            'added' => 'Ajoutées',
+            'removed' => 'Supprimées',
+            'changed' => 'Modifiées',
+            'no_changes' => 'Aucune différence.',
+            'truncated' => 'Diff grossier : au-delà du budget d\'éditions.',
+            'invalid' => 'JSON invalide',
+            'line' => 'ligne',
+            'column' => 'colonne',
+        ],
+    ],
 ];

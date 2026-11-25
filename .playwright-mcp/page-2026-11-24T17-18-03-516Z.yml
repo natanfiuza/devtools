@@ -1,0 +1,149 @@
+- generic:
+  - generic:
+    - generic:
+      - link [aria-hidden]:
+        - /url: "#conteudo"
+        - text: Skip to content
+      - banner [aria-hidden]:
+        - generic:
+          - link:
+            - /url: /en
+            - generic: devtools_
+            - generic: devtools
+          - navigation:
+            - link:
+              - /url: /en
+              - text: Tools
+            - link:
+              - /url: /en/pricing
+              - text: Pricing
+          - generic:
+            - button:
+              - generic: Search tools
+              - generic: Ctrl K
+            - button:
+              - generic: English
+            - button
+            - link:
+              - /url: /en/login
+              - text: Log in
+      - main:
+        - generic:
+          - navigation [aria-hidden]:
+            - list:
+              - listitem:
+                - link:
+                  - /url: /en
+                  - text: Tools
+              - listitem [aria-hidden]
+              - listitem:
+                - link [disabled]: Data Format Converter
+          - generic [aria-hidden]:
+            - generic:
+              - heading [level=1]: Data Format Converter
+            - paragraph: Convert JSON, YAML, TOML and XML into one another, with a warning for whatever the target format cannot represent.
+            - paragraph: "Pick the input and output formats and paste the document: the conversion runs in your browser, and anything the target cannot represent shows up as a warning. Nothing you paste here is sent to the server."
+          - generic:
+            - generic:
+              - generic [aria-hidden]:
+                - generic:
+                  - button: Example
+                  - button: Open file
+                  - button: Clear
+                  - button: Swap
+                  - generic:
+                    - button: Copy
+                    - button: Download
+              - generic:
+                - generic:
+                  - generic [aria-hidden]:
+                    - heading [level=2]: Input
+                    - generic:
+                      - combobox:
+                        - generic: JSON
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic [aria-hidden]:
+                            - generic [aria-hidden]:
+                              - generic:
+                                - generic: "1"
+                                - generic: "2"
+                                - generic: "3"
+                                - generic: "4"
+                                - generic: "5"
+                                - generic: "6"
+                                - generic: "7"
+                                - generic: "8"
+                                - generic: "9"
+                                - generic: "10"
+                                - generic: "11"
+                                - generic: "12"
+                            - textbox:
+                              - generic: "{"
+                              - generic: "\"name\": \"devtools\","
+                              - generic: "\"version\": 2,"
+                              - generic: "\"active\": true,"
+                              - generic: "\"features\": [\"converter\", \"diff\"],"
+                              - generic: "\"author\": {"
+                              - generic: "\"name\": \"Nataniel\","
+                              - generic: "\"site\": \"devtools.natanfiuza.dev.br\""
+                              - generic: "},"
+                              - generic: "\"tags\": null"
+                              - generic: "}"
+                      - button [aria-hidden]
+                - separator [aria-hidden]
+                - generic [aria-hidden]:
+                  - generic:
+                    - heading [level=2]: Output
+                    - generic:
+                      - combobox [expanded]:
+                        - generic: YAML
+                  - generic: "name: devtools version: 2 active: true features: - converter - diff author: name: Nataniel site: devtools.natanfiuza.dev.br tags: null"
+              - generic [aria-hidden]:
+                - paragraph: 196 byte of 5 MB
+      - contentinfo [aria-hidden]:
+        - generic:
+          - generic:
+            - paragraph: © 2026 devtools · All rights reserved.
+            - navigation:
+              - link:
+                - /url: /en/api-docs
+                - text: API
+              - link:
+                - /url: /en/docs/badgeforge
+                - text: BadgeForge docs
+              - link:
+                - /url: /en/privacy
+                - text: Privacy
+              - link:
+                - /url: /en/terms
+                - text: Terms
+              - link:
+                - /url: /en/donate
+                - text: Donate
+              - link:
+                - /url: /en/contact
+                - text: Contact
+              - button: Cookies
+            - generic:
+              - generic: Language
+              - button:
+                - generic: English
+          - generic:
+            - paragraph: Newsletter
+            - paragraph: News about the tools, once in a while. No spam.
+            - generic:
+              - generic:
+                - generic: Email
+                - textbox:
+                  - /placeholder: you@example.com
+              - button: Subscribe
+      - region "Notifications alt+T":
+        - list
+  - listbox [ref=e131]:
+    - option "JSON" [ref=e132]
+    - option "YAML" [active] [selected] [ref=e135]
+    - option "TOML" [ref=e139]
+    - option "XML" [ref=e142]

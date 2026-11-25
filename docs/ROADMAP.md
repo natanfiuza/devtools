@@ -1,6 +1,6 @@
 # ROADMAP — Programa Futuro: tools e frentes de produto
 
-Versão: 1.0
+Versão: 1.1
 Data: 2026-11-24
 Fonte de verdade da seção "Futuro" da [SPEC](./SPEC.md) (ADR-179). Sem datas: ordem + porte.
 
@@ -67,7 +67,7 @@ O porte nunca é o critério principal: uma tool barata que não atende demanda 
 
 | Fase | Onda | Escopo | Ferramentas/frente | Porte | Condição | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| F1 | 1 | Conversores e diff | `data-format-converter`, `diff` | L | — | planejada |
+| F1 | 1 | Conversores e diff | `data-format-converter`, `diff` | L | — | concluída em 2026-11-24 ([aceite](../acceptance/FUTURO-FASE-1.md)) |
 | F2 | 2 | CLI e ambiente | `cron-explainer`, `curl-to-code`, `env-example` | M | — | planejada |
 | F3 | 3 | Banco e schema | `ddl-to-migration`, `schema-mock-data`, `sql-explain` | L | — | planejada |
 | F4 | 4 | Referência | `cheatsheets` | S | — | planejada |
@@ -280,3 +280,4 @@ Perguntas que o roadmap deliberadamente **não** decide:
 | Versão | Data | Mudança | ADR |
 | --- | --- | --- | --- |
 | 1.0 | 2026-11-24 | criação do Programa Futuro (5 ondas, 7 fases, protocolo) | ADR-179 |
+| 1.1 | 2026-11-24 | F1 concluída: conversor de formatos e diff entregues, com o aceite registrado | ADR-180 |

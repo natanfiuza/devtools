@@ -202,5 +202,10 @@
 - Programa Futuro: conjunto das doze candidatas da SPEC secao 5 - nove tools novas e tres frentes de produto - organizado em ondas e sete fases, com a fonte de verdade em `docs/ROADMAP.md` e o protocolo de fase proprio (ADR-179).
 - Onda: agrupamento tematico de fases do Programa Futuro; a ordem das ondas e recomendacao, nao bloqueio, e nao tem data.
 - Porte (S/M/L): tamanho relativo de uma fase do Programa Futuro - S sem parser novo, M com parser ou varias tools pequenas, L com motor novo ou superficie de servidor; so desempata os criterios de prioridade e nunca os substitui.
+- Arvore intermediaria: modelo unico (`DataValue`: objeto, array, string, numero, booleano, nulo e a data do TOML) entre os formatos do conversor - cada formato tem um parser e um serializador, e a conversao e sempre origem -> arvore -> destino, o que cobre as dezesseis combinacoes com quatro de cada (ADR-180).
+- Conversao com perda: conversao que sempre acontece, com aviso visivel e agrupado por codigo com contagem do que o destino nao representa (o `null` que o TOML nao tem, a data do TOML fora dele, o comentario, o binario, o inteiro que o `number` do JavaScript nao guarda, o conteudo misto do XML); nenhuma perda e silenciosa (ADR-180).
+- Convencao do XML: regra que leva o XML para a arvore e de volta - elemento raiz vira chave de topo, atributo vira `@nome`, texto de elemento com atributo ou filho vira `#text`, irmaos de mesmo nome viram array e elemento vazio vira string vazia; declaracao, comentario e instrucao de processamento sao descartados, e o comentario que a origem tinha conta como perda (ADR-180).
+- Diff de texto: comparacao linha a linha por Myers, com corte de prefixo e sufixo iguais e orcamento de 2000 edicoes; acima do orcamento o resultado vira posicional e sai marcado `truncated`, com aviso (ADR-180).
+- Diff semantico: comparacao de JSON pela arvore, nao pelo texto - cada folha vira um caminho (`$.a`, `$.a[0]`, `$["chave estranha"]`), objeto e array vazios contam como folhas, array e comparado por indice e a ordem das chaves nao e diferenca (ADR-180).
 
 

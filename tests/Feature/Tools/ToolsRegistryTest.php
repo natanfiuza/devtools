@@ -29,6 +29,8 @@ function mvpToolSlugs(): array
         'html-color-picker',
         'palette-generator',
         'layout-harmonizer',
+        'data-format-converter',
+        'diff',
     ];
 }
 
@@ -106,6 +108,8 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'html-color-picker',
         'palette-generator',
         'layout-harmonizer',
+        'data-format-converter',
+        'diff',
     ]);
 });
 
