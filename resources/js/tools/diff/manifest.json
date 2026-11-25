@@ -1,0 +1,16 @@
+{
+    "slug": "diff",
+    "status": "available",
+    "category": "text",
+    "icon": "diff",
+    "order": 140,
+    "keywords": [
+        "diff",
+        "compare",
+        "comparison",
+        "text",
+        "json",
+        "changes",
+        "patch"
+    ]
+}

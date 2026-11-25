@@ -1,0 +1,99 @@
+- generic [ref=f1e3]:
+  - link "Skip to content" [ref=f1e4] [cursor=pointer]:
+    - /url: "#conteudo"
+  - banner [ref=f1e5]:
+    - generic [ref=f1e6]:
+      - link "devtools devtools" [ref=f1e7] [cursor=pointer]:
+        - /url: /en
+        - generic [ref=f1e8]: devtools_
+        - generic [ref=f1e9]: devtools
+      - navigation "Tools" [ref=f1e10]:
+        - link "Tools" [ref=f1e11] [cursor=pointer]:
+          - /url: /en
+        - link "Pricing" [ref=f1e12] [cursor=pointer]:
+          - /url: /en/pricing
+      - generic [ref=f1e13]:
+        - button "Search tools Ctrl K" [ref=f1e14]:
+          - generic [ref=f1e18]: Search tools
+          - generic [ref=f1e19]: Ctrl K
+        - button "Change language" [ref=f1e20]:
+          - generic [ref=f1e21]: English
+        - button "Theme" [ref=f1e22]
+        - link "Log in" [ref=f1e23] [cursor=pointer]:
+          - /url: /en/login
+  - main [ref=f1e24]:
+    - generic [ref=f1e25]:
+      - navigation "breadcrumb" [ref=f1e26]:
+        - list [ref=f1e27]:
+          - listitem [ref=f1e28]:
+            - link "Tools" [ref=f1e29] [cursor=pointer]:
+              - /url: /en
+          - listitem [aria-hidden] [ref=f1e30]
+          - listitem [ref=f1e33]:
+            - link "Data Format Converter" [disabled] [ref=f1e34]
+      - generic [ref=f1e35]:
+        - heading "Data Format Converter" [level=1] [ref=f1e40]
+        - paragraph [ref=f1e41]: Convert JSON, YAML, TOML and XML into one another, with a warning for whatever the target format cannot represent.
+        - paragraph [ref=f1e42]: "Pick the input and output formats and paste the document: the conversion runs in your browser, and anything the target cannot represent shows up as a warning. Nothing you paste here is sent to the server."
+      - generic [ref=f1e44]:
+        - generic [ref=f1e46]:
+          - button "Example" [ref=f1e47]
+          - button "Open file" [ref=f1e48]
+          - button "Clear" [ref=f1e102]
+          - button "Swap" [ref=f1e103]
+          - generic [ref=f1e49]:
+            - button "Copy" [ref=f1e123]
+            - button "Download" [ref=f1e124]
+        - generic [ref=f1e50]:
+          - generic [ref=f1e51]:
+            - generic [ref=f1e52]:
+              - heading "Input" [level=2] [ref=f1e53]
+              - combobox "Input format" [active] [ref=f1e55]:
+                - generic: YAML
+            - generic [ref=f1e57]:
+              - generic [ref=f1e60]:
+                - generic [ref=f1e62]: "1"
+                - textbox [ref=f1e66]:
+                  - generic [ref=f1e67]: <config port="8080"><name>devtools</name><tags><tag>converter</tag><tag>diff</tag></tags></config>
+              - button "Choose File" [ref=f1e68]
+          - separator "Resize the panels" [ref=f1e69]
+          - generic [ref=f1e71]:
+            - generic [ref=f1e72]:
+              - heading "Output" [level=2] [ref=f1e73]
+              - combobox "Output format" [ref=f1e75]:
+                - generic: JSON
+            - generic [ref=f1e76]: "\"<config port=\\\"8080\\\"><name>devtools</name><tags><tag>converter</tag><tag>diff</tag></tags></config>\""
+        - paragraph [ref=f1e108]: 98 byte of 5 MB
+  - contentinfo [ref=f1e78]:
+    - generic [ref=f1e79]:
+      - generic [ref=f1e80]:
+        - paragraph [ref=f1e81]: © 2026 devtools · All rights reserved.
+        - navigation "Language" [ref=f1e82]:
+          - link "API" [ref=f1e83] [cursor=pointer]:
+            - /url: /en/api-docs
+          - link "BadgeForge docs" [ref=f1e84] [cursor=pointer]:
+            - /url: /en/docs/badgeforge
+          - link "Privacy" [ref=f1e85] [cursor=pointer]:
+            - /url: /en/privacy
+          - link "Terms" [ref=f1e86] [cursor=pointer]:
+            - /url: /en/terms
+          - link "Donate" [ref=f1e87] [cursor=pointer]:
+            - /url: /en/donate
+          - link "Contact" [ref=f1e88] [cursor=pointer]:
+            - /url: /en/contact
+          - button "Cookies" [ref=f1e89]
+        - generic [ref=f1e90]:
+          - generic [ref=f1e91]: Language
+          - button "Change language" [ref=f1e92]:
+            - generic [ref=f1e93]: English
+      - generic [ref=f1e94]:
+        - paragraph [ref=f1e95]: Newsletter
+        - paragraph [ref=f1e96]: News about the tools, once in a while. No spam.
+        - generic [ref=f1e97]:
+          - generic [ref=f1e98]:
+            - generic [ref=f1e99]: Email
+            - textbox "Email" [ref=f1e100]:
+              - /placeholder: you@example.com
+          - button "Subscribe" [ref=f1e101]
+  - region "Notifications alt+T":
+    - list

@@ -18,6 +18,7 @@ import {
     placeholder as placeholderExtension,
     type KeyBinding,
 } from '@codemirror/view';
+import { lineHighlightField } from './highlights';
 import { codeEditorTheme, codeHighlightStyle } from './theme';
 
 /**
@@ -130,6 +131,10 @@ export function createEditor(
         bracketMatching(),
         indentOnInput(),
         ...(options.extensions ?? []),
+        // Sempre presente, mesmo sem realce pedido: o campo e o canal por onde
+        // a tela pinta linhas depois de montada, e um campo so nasce junto com
+        // o estado.
+        lineHighlightField,
         closeBrackets(),
         highlightSelectionMatches(),
         lintGutter(),

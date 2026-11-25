@@ -36,6 +36,8 @@ const MVP = [
     'html-color-picker',
     'palette-generator',
     'layout-harmonizer',
+    'data-format-converter',
+    'diff',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */

@@ -1,0 +1,121 @@
+- generic [ref=e3]:
+  - link "Skip to content" [ref=e4] [cursor=pointer]:
+    - /url: "#conteudo"
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - link "devtools devtools" [ref=e7] [cursor=pointer]:
+        - /url: /en
+        - generic [ref=e8]: devtools_
+        - generic [ref=e9]: devtools
+      - navigation "Tools" [ref=e10]:
+        - link "Tools" [ref=e11] [cursor=pointer]:
+          - /url: /en
+        - link "Pricing" [ref=e12] [cursor=pointer]:
+          - /url: /en/pricing
+      - generic [ref=e13]:
+        - button "Search tools Ctrl K" [ref=e14]:
+          - generic [ref=e18]: Search tools
+          - generic [ref=e19]: Ctrl K
+        - button "Change language" [ref=e20]:
+          - generic [ref=e21]: English
+        - button "Theme" [ref=e22]
+        - link "Log in" [ref=e23] [cursor=pointer]:
+          - /url: /en/login
+  - main [ref=e24]:
+    - generic [ref=e25]:
+      - navigation "breadcrumb" [ref=e26]:
+        - list [ref=e27]:
+          - listitem [ref=e28]:
+            - link "Tools" [ref=e29] [cursor=pointer]:
+              - /url: /en
+          - listitem [aria-hidden] [ref=e30]
+          - listitem [ref=e33]:
+            - link "Data Format Converter" [disabled] [ref=e34]
+      - generic [ref=e35]:
+        - heading "Data Format Converter" [level=1] [ref=e40]
+        - paragraph [ref=e41]: Convert JSON, YAML, TOML and XML into one another, with a warning for whatever the target format cannot represent.
+        - paragraph [ref=e42]: "Pick the input and output formats and paste the document: the conversion runs in your browser, and anything the target cannot represent shows up as a warning. Nothing you paste here is sent to the server."
+      - generic [ref=e44]:
+        - generic [ref=e46]:
+          - button "Example" [active] [ref=e47]
+          - button "Open file" [ref=e48]
+          - button "Clear" [ref=e102]
+          - button "Swap" [ref=e103]
+          - generic [ref=e49]:
+            - button "Copy" [ref=e104]
+            - button "Download" [ref=e105]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - heading "Input" [level=2] [ref=e53]
+              - combobox "Input format" [ref=e55]:
+                - generic: JSON
+            - generic [ref=e57]:
+              - generic [ref=e60]:
+                - generic [ref=e62]:
+                  - generic [ref=e63]: "1"
+                  - generic [ref=e106]: "2"
+                  - generic [ref=e107]: "3"
+                  - generic [ref=e108]: "4"
+                  - generic [ref=e109]: "5"
+                  - generic [ref=e110]: "6"
+                  - generic [ref=e111]: "7"
+                  - generic [ref=e112]: "8"
+                  - generic [ref=e113]: "9"
+                  - generic [ref=e114]: "10"
+                  - generic [ref=e115]: "11"
+                  - generic [ref=e116]: "12"
+                - textbox [ref=e66]:
+                  - generic [ref=e67]: "{"
+                  - generic [ref=e117]: "\"name\": \"devtools\","
+                  - generic [ref=e118]: "\"version\": 2,"
+                  - generic [ref=e119]: "\"active\": true,"
+                  - generic [ref=e120]: "\"features\": [\"converter\", \"diff\"],"
+                  - generic [ref=e121]: "\"author\": {"
+                  - generic [ref=e122]: "\"name\": \"Nataniel\","
+                  - generic [ref=e123]: "\"site\": \"devtools.natanfiuza.dev.br\""
+                  - generic [ref=e124]: "},"
+                  - generic [ref=e125]: "\"tags\": null"
+                  - generic [ref=e126]: "}"
+              - button "Choose File" [ref=e68]
+          - separator "Resize the panels" [ref=e69]
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "Output" [level=2] [ref=e73]
+              - combobox "Output format" [ref=e75]:
+                - generic: YAML
+            - generic [ref=e76]: "name: devtools version: 2 active: true features: - converter - diff author: name: Nataniel site: devtools.natanfiuza.dev.br tags: null"
+        - paragraph [ref=e130]: 196 byte of 5 MB
+  - contentinfo [ref=e78]:
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - paragraph [ref=e81]: © 2026 devtools · All rights reserved.
+        - navigation "Language" [ref=e82]:
+          - link "API" [ref=e83] [cursor=pointer]:
+            - /url: /en/api-docs
+          - link "BadgeForge docs" [ref=e84] [cursor=pointer]:
+            - /url: /en/docs/badgeforge
+          - link "Privacy" [ref=e85] [cursor=pointer]:
+            - /url: /en/privacy
+          - link "Terms" [ref=e86] [cursor=pointer]:
+            - /url: /en/terms
+          - link "Donate" [ref=e87] [cursor=pointer]:
+            - /url: /en/donate
+          - link "Contact" [ref=e88] [cursor=pointer]:
+            - /url: /en/contact
+          - button "Cookies" [ref=e89]
+        - generic [ref=e90]:
+          - generic [ref=e91]: Language
+          - button "Change language" [ref=e92]:
+            - generic [ref=e93]: English
+      - generic [ref=e94]:
+        - paragraph [ref=e95]: Newsletter
+        - paragraph [ref=e96]: News about the tools, once in a while. No spam.
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e99]: Email
+            - textbox "Email" [ref=e100]:
+              - /placeholder: you@example.com
+          - button "Subscribe" [ref=e101]
+  - region "Notifications alt+T":
+    - list

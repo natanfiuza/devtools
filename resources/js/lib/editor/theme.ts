@@ -89,6 +89,24 @@ export const codeEditorTheme = EditorView.theme({
     '&.cm-focused .cm-selectionBackground': {
         backgroundColor: 'var(--secondary)',
     },
+    /*
+    | O realce das linhas do diff (ver `lib/editor/highlights.ts`).
+    |
+    | O tom entra por `color-mix` sobre o token, e nao por uma cor com alfa: o
+    | token continua sendo a fonte da verdade e a troca de tema repinta sem
+    | JavaScript. As regras vem depois do `activeLine` de proposito - a linha
+    | que o cursor esta tambem faz parte do resultado, e o tom do diff manda.
+    */
+    '.cm-diff-added': {
+        backgroundColor: 'color-mix(in srgb, var(--brand) 16%, transparent)',
+    },
+    '.cm-diff-removed': {
+        backgroundColor:
+            'color-mix(in srgb, var(--destructive) 14%, transparent)',
+    },
+    '.cm-diff-changed': {
+        backgroundColor: 'color-mix(in srgb, var(--accent-2) 14%, transparent)',
+    },
     '.cm-selectionMatch': {
         backgroundColor: 'var(--surface-2)',
         outline: '1px solid var(--border-strong)',

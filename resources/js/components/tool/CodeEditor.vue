@@ -16,6 +16,7 @@ import {
     type EditorError,
     type EditorOptions,
 } from '@/lib/editor/createEditor';
+import { setLineHighlights, type LineHighlight } from '@/lib/editor/highlights';
 
 /*
  * A casca Vue do editor: ele nasce no `onMounted` e morre no
@@ -31,12 +32,18 @@ const props = withDefaults(
         error?: EditorError | null;
         /** Linguagem e afins: entram uma vez, na montagem. */
         extensions?: Extension[];
+        /**
+         * Linhas pintadas por quem sabe o que elas significam - hoje, o diff.
+         * Linha zero-based; a lista pode trocar a qualquer momento.
+         */
+        lineHighlights?: LineHighlight[];
         /** Gancho de teste do host do editor. */
         testid?: string;
     }>(),
     {
         error: null,
         extensions: () => [],
+        lineHighlights: () => [],
         testid: 'code-editor',
     },
 );
@@ -97,6 +104,7 @@ onMounted(() => {
     view.value = createEditor(host.value, options);
 
     setEditorError(view.value, props.error ?? null);
+    setLineHighlights(view.value, props.lineHighlights);
 });
 
 onBeforeUnmount(() => {
@@ -128,12 +136,35 @@ watch(
         }
     },
 );
+
+/*
+| O realce e derivado do texto, entao quem chama manda uma lista nova a cada
+| resultado. O `deep` existe pelo caso oposto: uma lista que so troca o tom de
+| uma linha ja desenhada continua sendo a mesma referencia, e o editor precisa
+| repintar.
+*/
+watch(
+    () => props.lineHighlights,
+    (value) => {
+        if (view.value !== null) {
+            setLineHighlights(view.value, value ?? []);
+        }
+    },
+    { deep: true },
+);
+
+/*
+| O diff precisa da instancia para rolar os dois paineis juntos e para levar o
+| cursor ate a proxima diferenca. Expor o motor inteiro e deliberado: a casca
+| do editor nao ganha um metodo para cada necessidade futura.
+*/
+defineExpose({ view });
 </script>
 
 <template>
-  <div
-    ref="host"
-    class="h-full min-h-0 font-mono text-sm"
-    :data-test="testid"
-  />
+    <div
+        ref="host"
+        class="h-full min-h-0 font-mono text-sm"
+        :data-test="testid"
+    />
 </template>

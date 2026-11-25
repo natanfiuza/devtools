@@ -1,0 +1,124 @@
+- generic [ref=f2e3]:
+  - link "Skip to content" [ref=f2e4] [cursor=pointer]:
+    - /url: "#conteudo"
+  - banner [ref=f2e5]:
+    - generic [ref=f2e6]:
+      - link "devtools devtools" [ref=f2e7] [cursor=pointer]:
+        - /url: /en
+        - generic [ref=f2e8]: devtools_
+        - generic [ref=f2e9]: devtools
+      - navigation "Tools" [ref=f2e10]:
+        - link "Tools" [ref=f2e11] [cursor=pointer]:
+          - /url: /en
+        - link "Pricing" [ref=f2e12] [cursor=pointer]:
+          - /url: /en/pricing
+      - generic [ref=f2e13]:
+        - button "Search tools Ctrl K" [ref=f2e14]:
+          - generic [ref=f2e18]: Search tools
+          - generic [ref=f2e19]: Ctrl K
+        - button "Change language" [ref=f2e20]:
+          - generic [ref=f2e21]: English
+        - button "Theme" [ref=f2e22]
+        - link "Log in" [ref=f2e23] [cursor=pointer]:
+          - /url: /en/login
+  - main [ref=f2e24]:
+    - generic [ref=f2e25]:
+      - navigation "breadcrumb" [ref=f2e26]:
+        - list [ref=f2e27]:
+          - listitem [ref=f2e28]:
+            - link "Tools" [ref=f2e29] [cursor=pointer]:
+              - /url: /en
+          - listitem [aria-hidden] [ref=f2e30]
+          - listitem [ref=f2e33]:
+            - link "Diff" [disabled] [ref=f2e34]
+      - generic [ref=f2e35]:
+        - heading "Diff" [level=1] [ref=f2e38]
+        - paragraph [ref=f2e39]: Compare two texts line by line or two JSON documents by path, with highlights and a report ready to copy.
+        - paragraph [ref=f2e40]: "Paste the original and the modified document and see where they diverge. In text mode the comparison is line by line, with the regions highlighted; in JSON mode it is semantic, key by key, and key order is not a change. Everything runs in your browser: nothing you paste here is sent to the server."
+      - generic [ref=f2e42]:
+        - generic [ref=f2e44]:
+          - button "Example" [ref=f2e45]
+          - button "Clear" [ref=f2e112]
+          - button "Text" [pressed] [ref=f2e46]
+          - button "JSON" [ref=f2e47]
+          - generic [ref=f2e48]:
+            - button "Previous difference" [ref=f2e113]
+            - button "Next difference" [active] [ref=f2e114]
+            - button "Copy" [ref=f2e115]
+            - button "Download" [ref=f2e116]
+        - generic [ref=f2e49]:
+          - generic [ref=f2e50]:
+            - generic [ref=f2e51]:
+              - heading "Original" [level=2] [ref=f2e52]
+              - button "Open the original" [ref=f2e54]: Open file
+            - generic [ref=f2e56]:
+              - generic [ref=f2e59]:
+                - generic [ref=f2e61]:
+                  - generic [ref=f2e62]: "1"
+                  - generic [ref=f2e117]: "2"
+                  - generic [ref=f2e118]: "3"
+                  - generic [ref=f2e119]: "4"
+                  - generic [ref=f2e120]: "5"
+                - textbox [ref=f2e65]:
+                  - generic [ref=f2e66]: name = devtools
+                  - generic [ref=f2e121]: port = 8080
+                  - generic [ref=f2e122]: debug = false
+                  - generic [ref=f2e123]: workers = 2
+                  - generic [ref=f2e124]: log = info
+              - button "Choose File" [ref=f2e67]
+          - separator "Resize the panels" [ref=f2e68]
+          - generic [ref=f2e70]:
+            - generic [ref=f2e71]:
+              - heading "Modified" [level=2] [ref=f2e72]
+              - button "Open the modified" [ref=f2e74]: Open file
+            - generic [ref=f2e76]:
+              - generic [ref=f2e79]:
+                - generic [ref=f2e81]:
+                  - generic [ref=f2e82]: "1"
+                  - generic [ref=f2e125]: "2"
+                  - generic [ref=f2e126]: "3"
+                  - generic [ref=f2e127]: "4"
+                  - generic [ref=f2e128]: "5"
+                  - generic [ref=f2e129]: "6"
+                - textbox [ref=f2e85]:
+                  - generic [ref=f2e86]: name = devtools
+                  - generic [ref=f2e130]: port = 8080
+                  - generic [ref=f2e131]: debug = true
+                  - generic [ref=f2e132]: workers = 4
+                  - generic [ref=f2e133]: log = info
+                  - generic [ref=f2e134]: region = sa-east-1
+              - button "Choose File" [ref=f2e87]
+        - paragraph [ref=f2e136]: "Added: 3 · Removed: 2"
+  - contentinfo [ref=f2e88]:
+    - generic [ref=f2e89]:
+      - generic [ref=f2e90]:
+        - paragraph [ref=f2e91]: © 2026 devtools · All rights reserved.
+        - navigation "Language" [ref=f2e92]:
+          - link "API" [ref=f2e93] [cursor=pointer]:
+            - /url: /en/api-docs
+          - link "BadgeForge docs" [ref=f2e94] [cursor=pointer]:
+            - /url: /en/docs/badgeforge
+          - link "Privacy" [ref=f2e95] [cursor=pointer]:
+            - /url: /en/privacy
+          - link "Terms" [ref=f2e96] [cursor=pointer]:
+            - /url: /en/terms
+          - link "Donate" [ref=f2e97] [cursor=pointer]:
+            - /url: /en/donate
+          - link "Contact" [ref=f2e98] [cursor=pointer]:
+            - /url: /en/contact
+          - button "Cookies" [ref=f2e99]
+        - generic [ref=f2e100]:
+          - generic [ref=f2e101]: Language
+          - button "Change language" [ref=f2e102]:
+            - generic [ref=f2e103]: English
+      - generic [ref=f2e104]:
+        - paragraph [ref=f2e105]: Newsletter
+        - paragraph [ref=f2e106]: News about the tools, once in a while. No spam.
+        - generic [ref=f2e107]:
+          - generic [ref=f2e108]:
+            - generic [ref=f2e109]: Email
+            - textbox "Email" [ref=f2e110]:
+              - /placeholder: you@example.com
+          - button "Subscribe" [ref=f2e111]
+  - region "Notifications alt+T":
+    - list

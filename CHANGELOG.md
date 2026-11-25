@@ -3,6 +3,43 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Programa Futuro F1: conversor de formatos e diff - 2026-11-24
+
+A F1 do Programa Futuro ([ROADMAP](docs/ROADMAP.md), ADR-179) entrega as duas
+primeiras tools do programa, ambas 100% no navegador: nada do que se cola sai
+do navegador, e nao ha cota, retencao nem log de conteudo. As decisoes de
+implementacao estao na [ADR-180](docs/adr/ADR-180-futuro-fase-1-conversor-diff.md)
+e o aceite em
+[docs/acceptance/FUTURO-FASE-1.md](docs/acceptance/FUTURO-FASE-1.md).
+
+### Adicionado
+
+- **Conversor de formatos** (`data-format-converter`): a matriz completa
+  JSON ↔ YAML ↔ TOML ↔ XML por arvore intermediaria (4 parsers + 4
+  serializadores), formato de origem e destino escolhidos na tela (sem
+  deteccao automatica), conversao no mesmo formato como normalizacao, exemplos
+  por formato, abrir arquivo, copiar, baixar e o aviso das perdas com
+  contagem (null no TOML, data do TOML como texto, comentario, binario,
+  inteiro grande, conteudo misto do XML). YAML pela `yaml`, TOML pela
+  `smol-toml`, JSON pelo motor do `json-viewer` e XML pelo `DOMParser`.
+- **Diff** (`diff`): modo texto com Myers (corte de prefixo/sufixo e orcamento
+  de 2000 edicoes, com queda posicional avisada) e modo JSON pela comparacao
+  semantica por caminho de folha, arrays por indice e ordem de chave
+  irrelevante; navegacao entre diferencas com rolagem sincronizada, resumo,
+  relatorio para copiar e baixar e abas Original/Modificado no mobile.
+- **Infra compartilhada**: `ToolShell` com rotulos de painel opcionais
+  (`paneLabels`) e `CodeEditor` com realce por linha (`lineHighlights`) e a
+  `EditorView` exposta; sem as props, as 15 tools anteriores seguem identicas.
+- **Registro, i18n e SEO**: os dois manifestos na categoria `text` (ordens 130
+  e 140), icones `arrow-left-right` e `diff`, blocos completos nos cinco
+  idiomas e as duas imagens OG 1200×1200.
+
+### Notas
+
+- Sem migration, sem endpoint e sem mudanca em fonte de precos ou limites.
+- Duas dependencias novas em `dependencies` (`yaml@^2.9.1` e
+  `smol-toml@^1.9.1`), lazy como toda tool; o peso medido esta na ADR-180.
+
 ## Track Layout Harmonizer: painel semântico, edição e exportações - 2026-11-22
 
 O Layout Harmonizer fecha as seis fases (ADR-145 a ADR-178) em
