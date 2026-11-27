@@ -1633,4 +1633,190 @@ return [
             'column' => 'column',
         ],
     ],
+
+    'cron-explainer' => [
+        'name' => 'Cron explainer',
+        'description' => 'Understand a cron expression field by field and see the next ten runs in your browser time zone.',
+        'keywords' => 'cron, crontab, schedule, next run, time',
+        'intro' => 'Paste the five-field expression and see what each field means and when it will run, in your browser time zone. Shortcut macros (daily, hourly, monthly and the others) are accepted; seconds and the Quartz extensions (L, W, #, ?) are not. Everything runs in your browser: nothing you paste here is sent to the server.',
+
+        'expression' => 'Expression',
+        'hint' => 'Five fields: minute, hour, day of month, month and day of week. E.g. 0 9 * * 1-5',
+        'zone' => 'Time zone: {zone}',
+        'exhausted' => 'The expression is valid but never matches a date in the coming years (like February 30).',
+
+        'panes' => [
+            'expression' => 'Expression',
+            'runs' => 'Next runs',
+        ],
+
+        'states' => [
+            'empty' => 'Paste a cron expression to see the explanation and the next runs.',
+            'invalid' => 'Fix the expression to see the next runs.',
+        ],
+
+        'status' => [
+            'valid' => '{count} next runs in the {zone} time zone.',
+        ],
+
+        'table' => [
+            'field' => 'Field',
+            'value' => 'Value',
+            'meaning' => 'Meaning',
+        ],
+
+        'fields' => [
+            'minute' => 'Minute',
+            'hour' => 'Hour',
+            'day_of_month' => 'Day of month',
+            'month' => 'Month',
+            'day_of_week' => 'Day of week',
+        ],
+
+        'names' => [
+            'months' => [
+                1 => 'January',
+                2 => 'February',
+                3 => 'March',
+                4 => 'April',
+                5 => 'May',
+                6 => 'June',
+                7 => 'July',
+                8 => 'August',
+                9 => 'September',
+                10 => 'October',
+                11 => 'November',
+                12 => 'December',
+            ],
+            'days' => [
+                0 => 'Sunday',
+                1 => 'Monday',
+                2 => 'Tuesday',
+                3 => 'Wednesday',
+                4 => 'Thursday',
+                5 => 'Friday',
+                6 => 'Saturday',
+            ],
+        ],
+
+        'meanings' => [
+            'any' => [
+                'minute' => 'Any minute',
+                'hour' => 'Any hour',
+                'day_of_month' => 'Any day of the month',
+                'month' => 'Any month',
+                'day_of_week' => 'Any day of the week',
+            ],
+            'step_star' => [
+                'minute' => 'Every {step} minutes',
+                'hour' => 'Every {step} hours',
+                'day_of_month' => 'Every {step} days',
+                'month' => 'Every {step} months',
+                'day_of_week' => 'Every {step} days of the week',
+            ],
+            'step_range' => [
+                'minute' => 'Every {step} minutes, from {from} to {to}',
+                'hour' => 'Every {step} hours, from {from} to {to}',
+                'day_of_month' => 'Every {step} days, from day {from} to {to}',
+                'month' => 'Every {step} months, from {from} to {to}',
+                'day_of_week' => 'Every {step} days of the week, from {from} to {to}',
+            ],
+            'range' => 'From {from} to {to}',
+            'at' => 'At {values}',
+        ],
+
+        'errors' => [
+            'empty' => 'Type a cron expression.',
+            'field_count' => 'A cron expression has five fields; this one has {token}.',
+            'unknown_macro' => 'Unknown macro: {token}.',
+            'macro_with_fields' => 'The macro {token} stands alone; do not add fields after it.',
+            'unknown_name' => 'Unknown name in {field}: {token}.',
+            'invalid_value' => 'Value out of range in {field}: {token}.',
+            'invalid_range' => 'Invalid range in {field}: {token}.',
+            'invalid_step' => 'Invalid step in {field}: {token}.',
+            'invalid_syntax' => 'Could not read {field}: {token}.',
+        ],
+
+        'report' => [
+            'zone' => 'Time zone',
+            'runs' => 'Next runs',
+            'empty' => 'No run within the horizon.',
+        ],
+    ],
+
+    'curl-to-code' => [
+        'name' => 'cURL to code',
+        'description' => 'Convert a curl command into Laravel, fetch or axios code, with a warning about what was left out.',
+        'keywords' => 'curl, http, request, fetch, axios, laravel, api',
+        'intro' => 'Paste a curl command and get the same request in Laravel, fetch or axios. The core is covered: method, headers, body, URL, basic auth and the most common command-line options; whatever is not supported shows up in the warning, never silently dropped. Everything runs in your browser: nothing you paste here is sent to the server.',
+
+        'panes' => [
+            'command' => 'Command',
+            'code' => 'Code',
+        ],
+
+        'tabs' => [
+            'laravel' => 'Laravel',
+            'fetch' => 'fetch',
+            'axios' => 'axios',
+        ],
+
+        'unsupported' => 'Unsupported options (left out): {options}.',
+        'states' => [
+            'empty' => 'Paste a curl command to see the code.',
+        ],
+
+        'status' => [
+            'ready' => '{method} {url}',
+        ],
+
+        'warnings' => [
+            'credential_in_output' => 'The credentials for {user} ended up in the code. Prefer environment variables.',
+            'extra_url' => 'The URL {url} was ignored: the first one wins.',
+            'header_without_colon' => 'Header without a colon ignored: {token}.',
+            'data_from_file' => 'Reading the body from a file is not supported: {token}.',
+        ],
+
+        'errors' => [
+            'empty' => 'Paste a curl command.',
+            'not_curl' => 'The command must start with curl.',
+            'shell' => 'The command is not closed: {detail}',
+            'missing_value' => 'The {option} option needs a value.',
+            'missing_url' => 'The command has no URL.',
+        ],
+
+        'shell_details' => [
+            'dangling_escape' => 'there is a backslash at the end of the line without a continuation.',
+            'unterminated_single' => 'there is an unclosed single quote.',
+            'unterminated_double' => 'there is an unclosed double quote.',
+        ],
+    ],
+
+    'env-example' => [
+        'name' => '.env to example',
+        'description' => 'Turn a .env into a .env.example: only the values of sensitive keys are removed; order, comments and everything else stay the same.',
+        'keywords' => 'env, dotenv, environment, example, secrets, config',
+        'intro' => 'Paste or open your .env and get a .env.example that keeps the order, the comments and the grouping, with the value of sensitive keys emptied. A key counts as sensitive by its name segments, or when the value is a URL with a password. Everything runs in your browser: nothing you paste here is sent to the server.',
+
+        'panes' => [
+            'source' => 'Your .env',
+            'example' => '.env.example',
+        ],
+
+        'file_types' => '.env file',
+        'states' => [
+            'empty' => 'Paste or open a .env file to generate the .env.example.',
+        ],
+
+        'notices' => [
+            'masked' => 'Keys with the value removed',
+            'masked_key' => '{key}, line {line}',
+            'invalid' => 'Lines kept without a key and value shape',
+            'invalid_line' => 'Line {line}',
+        ],
+
+        'status' => [
+            'summary' => 'Removed: {masked} · Invalid: {invalid}',
+        ],
+    ],
 ];

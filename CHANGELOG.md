@@ -3,6 +3,43 @@
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 Versoes por fase do [SPEC](docs/SPEC.md); datas em AAAA-MM-DD.
 
+## Programa Futuro F2: CLI e ambiente - 2026-11-25
+
+A F2 do Programa Futuro ([ROADMAP](docs/ROADMAP.md), ADR-179) entrega tres
+tools 100% no navegador: nada do que se cola sai do navegador, e nao ha cota,
+retencao nem log de conteudo. As decisoes de implementacao estao na
+[ADR-181](docs/adr/ADR-181-futuro-fase-2-cli-ambiente.md) e o aceite em
+[docs/acceptance/FUTURO-FASE-2.md](docs/acceptance/FUTURO-FASE-2.md).
+
+### Adicionado
+
+- **Explicador de cron** (`cron-explainer`): expressao de cinco campos com
+  parser proprio, macros (`@yearly`, `@monthly`, `@weekly`, `@daily` e as
+  outras), listas, intervalos, passos e nomes de mes e de dia; semantica
+  Vixie quando o dia do mes e o dia da semana estao restritos; fuso do
+  navegador exibido e as dez proximas execucoes no locale da interface, com
+  aviso quando a expressao nunca cai em data (`exhausted`).
+- **cURL para codigo** (`curl-to-code`): tokenizador de shell proprio (aspas,
+  escapes e continuacao com barra invertida) e o nucleo do cURL (`-X`, `-H`,
+  `-d`, `-G`, `--url`, `-u` e `--json`), com saida deterministica em Laravel,
+  `fetch` e `axios`; tudo o que nao e suportado aparece no aviso, e a
+  credencial de `-u` avisa que vai para o codigo.
+- **ENV para exemplo** (`env-example`): leitura que preserva ordem,
+  comentarios, linhas em branco, agrupamentos, `export ` e aspas; mascara por
+  segmento do nome (`KEY`, `SECRET`, `PASSWORD`, `PASS`, `TOKEN`, `AUTH`,
+  `CREDENTIAL`, `DSN`, `PRIVATE`, `PASSWD`, `PWD`) e por URL com credencial,
+  com a chave e a linha no aviso; abrir `.env`, copiar e baixar o
+  `.env.example`.
+- **Registro, i18n e SEO**: os tres manifestos (`time` na ordem 150 e `text`
+  nas ordens 160 e 170), icones `calendar-clock`, `terminal` e `file-key`,
+  blocos completos nos cinco idiomas e as tres imagens OG 1200x1200.
+
+### Notas
+
+- Sem migration, sem endpoint, sem worker e sem dependencia nova.
+- As tres tools reusam a casca e as utilidades existentes; nenhum componente
+  compartilhado mudou nesta fase.
+
 ## Programa Futuro F1: conversor de formatos e diff - 2026-11-24
 
 A F1 do Programa Futuro ([ROADMAP](docs/ROADMAP.md), ADR-179) entrega as duas

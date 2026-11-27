@@ -1,0 +1,90 @@
+- generic [ref=e3]:
+  - link "Ir para o conteúdo" [ref=e4] [cursor=pointer]:
+    - /url: "#conteudo"
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - link "devtools devtools" [ref=e7] [cursor=pointer]:
+        - /url: /pt-br
+        - generic [ref=e8]: devtools_
+        - generic [ref=e9]: devtools
+      - navigation "Ferramentas" [ref=e10]:
+        - link "Ferramentas" [ref=e11] [cursor=pointer]:
+          - /url: /pt-br
+        - link "Planos" [ref=e12] [cursor=pointer]:
+          - /url: /pt-br/pricing
+      - generic [ref=e13]:
+        - button "Buscar ferramentas Ctrl K" [ref=e14]:
+          - generic [ref=e18]: Buscar ferramentas
+          - generic [ref=e19]: Ctrl K
+        - button "Mudar idioma" [ref=e20]:
+          - generic [ref=e21]: Português (Brasil)
+        - button "Tema" [ref=e22]
+        - link "Entrar" [ref=e23] [cursor=pointer]:
+          - /url: /pt-br/login
+  - main [ref=e24]:
+    - generic [ref=e25]:
+      - navigation "breadcrumb" [ref=e26]:
+        - list [ref=e27]:
+          - listitem [ref=e28]:
+            - link "Ferramentas" [ref=e29] [cursor=pointer]:
+              - /url: /pt-br
+          - listitem [aria-hidden] [ref=e30]
+          - listitem [ref=e33]:
+            - link "Explicador de cron" [disabled] [ref=e34]
+      - generic [ref=e35]:
+        - heading "Explicador de cron" [level=1] [ref=e41]
+        - paragraph [ref=e42]: Entenda uma expressão cron campo a campo e veja as próximas dez execuções no fuso do seu navegador.
+        - paragraph [ref=e43]: "Cole a expressão de cinco campos e veja o que cada campo significa e quando ela vai rodar, no fuso do seu navegador. As macros de atalho (daily, hourly, monthly e as outras) valem; segundos e as extensões Quartz (L, W, #, ?) não. Tudo roda no seu navegador: nada do que você cola aqui é enviado para o servidor."
+      - generic [ref=e45]:
+        - generic [ref=e47]:
+          - button "Exemplo" [ref=e48]
+          - button "Limpar" [disabled]
+          - generic [ref=e49]:
+            - button "Copiar" [disabled]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - heading "Expressão" [level=2] [ref=e53]
+            - generic [ref=e56]:
+              - text: Expressão
+              - textbox "Expressão" [ref=e57]
+              - status [ref=e58]: "Cinco campos: minuto, hora, dia do mês, mês e dia da semana. Ex.: 0 9 * * 1-5"
+          - separator "Redimensionar os painéis" [ref=e59]
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - heading "Próximas execuções" [level=2] [ref=e63]
+              - paragraph [ref=e65]: "Fuso: America/Sao_Paulo"
+            - status [ref=e68]: Cole uma expressão cron para ver a explicação e as próximas execuções.
+        - paragraph [ref=e70]: Cole, digite ou solte um arquivo para começar.
+  - contentinfo [ref=e71]:
+    - generic [ref=e72]:
+      - generic [ref=e73]:
+        - paragraph [ref=e74]: © 2026 devtools · Todos os direitos reservados.
+        - navigation "Idioma" [ref=e75]:
+          - link "API" [ref=e76] [cursor=pointer]:
+            - /url: /pt-br/api-docs
+          - link "Docs do BadgeForge" [ref=e77] [cursor=pointer]:
+            - /url: /pt-br/docs/badgeforge
+          - link "Privacidade" [ref=e78] [cursor=pointer]:
+            - /url: /pt-br/privacy
+          - link "Termos" [ref=e79] [cursor=pointer]:
+            - /url: /pt-br/terms
+          - link "Doar" [ref=e80] [cursor=pointer]:
+            - /url: /pt-br/donate
+          - link "Contato" [ref=e81] [cursor=pointer]:
+            - /url: /pt-br/contact
+          - button "Cookies" [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: Idioma
+          - button "Mudar idioma" [ref=e85]:
+            - generic [ref=e86]: Português (Brasil)
+      - generic [ref=e87]:
+        - paragraph [ref=e88]: Newsletter
+        - paragraph [ref=e89]: Novidades das ferramentas, de vez em quando. Sem spam.
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - generic [ref=e92]: E-mail
+            - textbox "E-mail" [ref=e93]:
+              - /placeholder: voce@exemplo.com
+          - button "Inscrever" [ref=e94]
+  - region "Notifications alt+T":
+    - list

@@ -31,6 +31,9 @@ function mvpToolSlugs(): array
         'layout-harmonizer',
         'data-format-converter',
         'diff',
+        'cron-explainer',
+        'curl-to-code',
+        'env-example',
     ];
 }
 
@@ -110,6 +113,9 @@ it('lista para o sitemap apenas as tools que funcionam', function () {
         'layout-harmonizer',
         'data-format-converter',
         'diff',
+        'cron-explainer',
+        'curl-to-code',
+        'env-example',
     ]);
 });
 

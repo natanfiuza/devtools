@@ -207,5 +207,9 @@
 - Convencao do XML: regra que leva o XML para a arvore e de volta - elemento raiz vira chave de topo, atributo vira `@nome`, texto de elemento com atributo ou filho vira `#text`, irmaos de mesmo nome viram array e elemento vazio vira string vazia; declaracao, comentario e instrucao de processamento sao descartados, e o comentario que a origem tinha conta como perda (ADR-180).
 - Diff de texto: comparacao linha a linha por Myers, com corte de prefixo e sufixo iguais e orcamento de 2000 edicoes; acima do orcamento o resultado vira posicional e sai marcado `truncated`, com aviso (ADR-180).
 - Diff semantico: comparacao de JSON pela arvore, nao pelo texto - cada folha vira um caminho (`$.a`, `$.a[0]`, `$["chave estranha"]`), objeto e array vazios contam como folhas, array e comparado por indice e a ordem das chaves nao e diferenca (ADR-180).
+- Expressao cron: sequencia de cinco campos - minuto, hora, dia do mes, mes e dia da semana - em que cada campo aceita `*`, lista, intervalo, passo e nomes de mes ou de dia; a tool explica campo a campo e calcula as dez proximas execucoes no fuso do navegador (ADR-181).
+- Macro do cron: atalho (`@yearly`, `@annually`, `@monthly`, `@weekly`, `@daily`, `@midnight`, `@hourly`) que vale pelos cinco campos e sozinho; campo depois da macro e erro, nunca soma silenciosa (ADR-181).
+- Semantica Vixie: regra do cron classico para o dia - quando dia do mes e dia da semana estao ambos restritos, a data casa se qualquer um dos dois casar; `*` (inclusive com passo) nao restringe, e `0` e `7` sao domingo (ADR-181).
+- Chave sensivel: chave de `.env` cujo nome tem um segmento da lista aprovada (`KEY`, `SECRET`, `PASSWORD`, `PASS`, `TOKEN`, `AUTH`, `CREDENTIAL`, `DSN`, `PRIVATE`, `PASSWD`, `PWD`) ou cujo valor e uma URL com `user:senha@`; so o valor dela e esvaziado no `.env.example`, com a chave e a linha no aviso (ADR-181).
 
 

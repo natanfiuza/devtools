@@ -1,0 +1,12 @@
+# Aplicacao
+APP_NAME=Demo
+APP_KEY=base64:9f2c1d4e5a6b7c8d
+
+# Banco
+DB_HOST=127.0.0.1
+DB_PASSWORD=trocar-esta-senha # segredo
+DATABASE_URL=mysql://root:segredo@127.0.0.1/app
+
+# E-mail
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587

@@ -1632,4 +1632,190 @@ return [
             'column' => 'colonne',
         ],
     ],
+
+    'cron-explainer' => [
+        'name' => 'Explorateur de cron',
+        'description' => 'Comprenez une expression cron champ par champ et voyez les dix prochaines exécutions dans le fuseau de votre navigateur.',
+        'keywords' => 'cron, crontab, planification, prochaine exécution, horaire',
+        'intro' => 'Collez l\'expression à cinq champs et voyez ce que chaque champ signifie et quand elle va s\'exécuter, dans le fuseau de votre navigateur. Les macros raccourcies (daily, hourly, monthly et les autres) sont acceptées ; les secondes et les extensions Quartz (L, W, #, ?) ne le sont pas. Tout s\'exécute dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'expression' => 'Expression',
+        'hint' => 'Cinq champs : minute, heure, jour du mois, mois et jour de la semaine. Ex. : 0 9 * * 1-5',
+        'zone' => 'Fuseau : {zone}',
+        'exhausted' => 'L\'expression est valide mais ne tombe sur aucune date dans les prochaines années (comme le 30 février).',
+
+        'panes' => [
+            'expression' => 'Expression',
+            'runs' => 'Prochaines exécutions',
+        ],
+
+        'states' => [
+            'empty' => 'Collez une expression cron pour voir l\'explication et les prochaines exécutions.',
+            'invalid' => 'Corrigez l\'expression pour voir les prochaines exécutions.',
+        ],
+
+        'status' => [
+            'valid' => '{count} prochaines exécutions dans le fuseau {zone}.',
+        ],
+
+        'table' => [
+            'field' => 'Champ',
+            'value' => 'Valeur',
+            'meaning' => 'Signification',
+        ],
+
+        'fields' => [
+            'minute' => 'Minute',
+            'hour' => 'Heure',
+            'day_of_month' => 'Jour du mois',
+            'month' => 'Mois',
+            'day_of_week' => 'Jour de la semaine',
+        ],
+
+        'names' => [
+            'months' => [
+                1 => 'janvier',
+                2 => 'février',
+                3 => 'mars',
+                4 => 'avril',
+                5 => 'mai',
+                6 => 'juin',
+                7 => 'juillet',
+                8 => 'août',
+                9 => 'septembre',
+                10 => 'octobre',
+                11 => 'novembre',
+                12 => 'décembre',
+            ],
+            'days' => [
+                0 => 'dimanche',
+                1 => 'lundi',
+                2 => 'mardi',
+                3 => 'mercredi',
+                4 => 'jeudi',
+                5 => 'vendredi',
+                6 => 'samedi',
+            ],
+        ],
+
+        'meanings' => [
+            'any' => [
+                'minute' => 'Chaque minute',
+                'hour' => 'Chaque heure',
+                'day_of_month' => 'Chaque jour du mois',
+                'month' => 'Chaque mois',
+                'day_of_week' => 'Chaque jour de la semaine',
+            ],
+            'step_star' => [
+                'minute' => 'Toutes les {step} minutes',
+                'hour' => 'Toutes les {step} heures',
+                'day_of_month' => 'Tous les {step} jours',
+                'month' => 'Tous les {step} mois',
+                'day_of_week' => 'Tous les {step} jours de la semaine',
+            ],
+            'step_range' => [
+                'minute' => 'Toutes les {step} minutes, de {from} à {to}',
+                'hour' => 'Toutes les {step} heures, de {from} à {to}',
+                'day_of_month' => 'Tous les {step} jours, du jour {from} au {to}',
+                'month' => 'Tous les {step} mois, de {from} à {to}',
+                'day_of_week' => 'Tous les {step} jours de la semaine, de {from} à {to}',
+            ],
+            'range' => 'De {from} à {to}',
+            'at' => 'À {values}',
+        ],
+
+        'errors' => [
+            'empty' => 'Saisissez une expression cron.',
+            'field_count' => 'Une expression cron a cinq champs ; celle-ci en a {token}.',
+            'unknown_macro' => 'Macro inconnue : {token}.',
+            'macro_with_fields' => 'La macro {token} se suffit à elle-même ; n\'ajoutez pas de champs après.',
+            'unknown_name' => 'Nom inconnu dans {field} : {token}.',
+            'invalid_value' => 'Valeur hors de la plage dans {field} : {token}.',
+            'invalid_range' => 'Plage invalide dans {field} : {token}.',
+            'invalid_step' => 'Pas invalide dans {field} : {token}.',
+            'invalid_syntax' => 'Impossible de lire {field} : {token}.',
+        ],
+
+        'report' => [
+            'zone' => 'Fuseau',
+            'runs' => 'Prochaines exécutions',
+            'empty' => 'Aucune exécution dans l\'horizon.',
+        ],
+    ],
+
+    'curl-to-code' => [
+        'name' => 'cURL vers code',
+        'description' => 'Convertissez une commande curl en code Laravel, fetch ou axios, avec un avertissement sur ce qui a été laissé de côté.',
+        'keywords' => 'curl, http, requête, fetch, axios, laravel, api',
+        'intro' => 'Collez une commande curl et obtenez la même requête en Laravel, fetch ou axios. Le cœur est couvert : méthode, en-têtes, corps, URL, authentification basique et les options de ligne de commande les plus courantes ; ce qui n\'est pas pris en charge apparaît dans l\'avertissement, jamais silencieusement. Tout s\'exécute dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'panes' => [
+            'command' => 'Commande',
+            'code' => 'Code',
+        ],
+
+        'tabs' => [
+            'laravel' => 'Laravel',
+            'fetch' => 'fetch',
+            'axios' => 'axios',
+        ],
+
+        'unsupported' => 'Options non prises en charge (laissées de côté) : {options}.',
+        'states' => [
+            'empty' => 'Collez une commande curl pour voir le code.',
+        ],
+
+        'status' => [
+            'ready' => '{method} {url}',
+        ],
+
+        'warnings' => [
+            'credential_in_output' => 'Les identifiants de {user} ont fini dans le code. Préférez des variables d\'environnement.',
+            'extra_url' => 'L\'URL {url} a été ignorée : la première l\'emporte.',
+            'header_without_colon' => 'En-tête sans deux-points ignoré : {token}.',
+            'data_from_file' => 'Lire le corps depuis un fichier n\'est pas pris en charge : {token}.',
+        ],
+
+        'errors' => [
+            'empty' => 'Collez une commande curl.',
+            'not_curl' => 'La commande doit commencer par curl.',
+            'shell' => 'La commande n\'est pas fermée : {detail}',
+            'missing_value' => 'L\'option {option} a besoin d\'une valeur.',
+            'missing_url' => 'La commande n\'a pas d\'URL.',
+        ],
+
+        'shell_details' => [
+            'dangling_escape' => 'il y a une barre oblique inversée en fin de ligne sans continuation.',
+            'unterminated_single' => 'il y a des guillemets simples non fermés.',
+            'unterminated_double' => 'il y a des guillemets doubles non fermés.',
+        ],
+    ],
+
+    'env-example' => [
+        'name' => '.env vers exemple',
+        'description' => 'Transformez un .env en .env.example : seules les valeurs des clés sensibles sont retirées ; l\'ordre, les commentaires et le reste ne changent pas.',
+        'keywords' => 'env, dotenv, environnement, exemple, secrets, config',
+        'intro' => 'Collez ou ouvrez votre .env et obtenez un .env.example qui garde l\'ordre, les commentaires et les regroupements, avec la valeur des clés sensibles vidée. Une clé est considérée comme sensible d\'après les segments de son nom, ou lorsque la valeur est une URL avec un mot de passe. Tout s\'exécute dans votre navigateur : rien de ce que vous collez ici n\'est envoyé au serveur.',
+
+        'panes' => [
+            'source' => 'Votre .env',
+            'example' => '.env.example',
+        ],
+
+        'file_types' => 'Fichier .env',
+        'states' => [
+            'empty' => 'Collez ou ouvrez un fichier .env pour générer le .env.example.',
+        ],
+
+        'notices' => [
+            'masked' => 'Clés dont la valeur a été retirée',
+            'masked_key' => '{key}, ligne {line}',
+            'invalid' => 'Lignes conservées sans forme clé et valeur',
+            'invalid_line' => 'Ligne {line}',
+        ],
+
+        'status' => [
+            'summary' => 'Retirées : {masked} · Invalides : {invalid}',
+        ],
+    ],
 ];

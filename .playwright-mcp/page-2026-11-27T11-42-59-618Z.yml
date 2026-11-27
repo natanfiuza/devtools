@@ -1,0 +1,97 @@
+- generic [ref=f1e3]:
+  - link "Ir para o conteúdo" [ref=f1e4] [cursor=pointer]:
+    - /url: "#conteudo"
+  - banner [ref=f1e5]:
+    - generic [ref=f1e6]:
+      - link "devtools devtools" [ref=f1e7] [cursor=pointer]:
+        - /url: /pt-br
+        - generic [ref=f1e8]: devtools_
+        - generic [ref=f1e9]: devtools
+      - navigation "Ferramentas" [ref=f1e10]:
+        - link "Ferramentas" [ref=f1e11] [cursor=pointer]:
+          - /url: /pt-br
+        - link "Planos" [ref=f1e12] [cursor=pointer]:
+          - /url: /pt-br/pricing
+      - generic [ref=f1e13]:
+        - button "Buscar ferramentas Ctrl K" [ref=f1e14]:
+          - generic [ref=f1e18]: Buscar ferramentas
+          - generic [ref=f1e19]: Ctrl K
+        - button "Mudar idioma" [ref=f1e20]:
+          - generic [ref=f1e21]: Português (Brasil)
+        - button "Tema" [ref=f1e22]
+        - link "Entrar" [ref=f1e23] [cursor=pointer]:
+          - /url: /pt-br/login
+  - main [ref=f1e24]:
+    - generic [ref=f1e25]:
+      - navigation "breadcrumb" [ref=f1e26]:
+        - list [ref=f1e27]:
+          - listitem [ref=f1e28]:
+            - link "Ferramentas" [ref=f1e29] [cursor=pointer]:
+              - /url: /pt-br
+          - listitem [aria-hidden] [ref=f1e30]
+          - listitem [ref=f1e33]:
+            - link "cURL para código" [disabled] [ref=f1e34]
+      - generic [ref=f1e35]:
+        - heading "cURL para código" [level=1] [ref=f1e39]
+        - paragraph [ref=f1e40]: Converta um comando curl em código Laravel, fetch ou axios, com aviso do que ficou de fora.
+        - paragraph [ref=f1e41]: "Cole um comando curl e receba o mesmo pedido em Laravel, fetch ou axios. O núcleo está coberto: método, cabeçalhos, corpo, URL, credencial básica e as opções de linha de comando mais comuns; o que não é suportado aparece no aviso, nunca some em silêncio. Tudo roda no seu navegador: nada do que você cola aqui é enviado para o servidor."
+      - generic [ref=f1e67]:
+        - generic [ref=f1e69]:
+          - button "Exemplo" [ref=f1e70]
+          - button "Limpar" [ref=f1e71]
+          - button "Copiar" [ref=f1e73]
+        - generic [ref=f1e74]:
+          - generic [ref=f1e75]:
+            - heading "Comando" [level=2] [ref=f1e77]
+            - generic [ref=f1e81]:
+              - generic [ref=f1e83]: "1"
+              - textbox [ref=f1e87]:
+                - generic [ref=f1e88]: "curl -X POST https://api.example.com/users -H 'Content-Type: application/json' -b 'sess=abc' -u ana:segredo -d '{\"name\":\"Ana\"}'"
+          - separator "Redimensionar os painéis" [ref=f1e89]
+          - generic [ref=f1e91]:
+            - heading "Código" [level=2] [ref=f1e93]
+            - generic [ref=f1e95]:
+              - generic [ref=f1e96]:
+                - paragraph [ref=f1e97]: "Opções não suportadas (ficaram de fora): -b."
+                - paragraph [ref=f1e100]: "A URL sess=abc foi ignorada: vale a primeira."
+                - paragraph [ref=f1e103]: A credencial de ana foi parar no código. Prefira variáveis de ambiente.
+              - generic [ref=f1e106]:
+                - tablist [ref=f1e107]:
+                  - tab "Laravel" [ref=f1e108]
+                  - tab "fetch" [active] [selected] [ref=f1e109]
+                  - tab "axios" [ref=f1e110]
+                - generic [ref=f1e111]: "const response = await fetch('https://api.example.com/users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + btoa('ana:segredo'), }, body: '{\"name\":\"Ana\"}', });"
+        - paragraph [ref=f1e114]: POST https://api.example.com/users
+  - contentinfo [ref=f1e42]:
+    - generic [ref=f1e43]:
+      - generic [ref=f1e44]:
+        - paragraph [ref=f1e45]: © 2026 devtools · Todos os direitos reservados.
+        - navigation "Idioma" [ref=f1e46]:
+          - link "API" [ref=f1e47] [cursor=pointer]:
+            - /url: /pt-br/api-docs
+          - link "Docs do BadgeForge" [ref=f1e48] [cursor=pointer]:
+            - /url: /pt-br/docs/badgeforge
+          - link "Privacidade" [ref=f1e49] [cursor=pointer]:
+            - /url: /pt-br/privacy
+          - link "Termos" [ref=f1e50] [cursor=pointer]:
+            - /url: /pt-br/terms
+          - link "Doar" [ref=f1e51] [cursor=pointer]:
+            - /url: /pt-br/donate
+          - link "Contato" [ref=f1e52] [cursor=pointer]:
+            - /url: /pt-br/contact
+          - button "Cookies" [ref=f1e53]
+        - generic [ref=f1e54]:
+          - generic [ref=f1e55]: Idioma
+          - button "Mudar idioma" [ref=f1e56]:
+            - generic [ref=f1e57]: Português (Brasil)
+      - generic [ref=f1e58]:
+        - paragraph [ref=f1e59]: Newsletter
+        - paragraph [ref=f1e60]: Novidades das ferramentas, de vez em quando. Sem spam.
+        - generic [ref=f1e61]:
+          - generic [ref=f1e62]:
+            - generic [ref=f1e63]: E-mail
+            - textbox "E-mail" [ref=f1e64]:
+              - /placeholder: voce@exemplo.com
+          - button "Inscrever" [ref=f1e65]
+  - region "Notifications alt+T":
+    - list

@@ -1632,4 +1632,190 @@ return [
             'column' => 'columna',
         ],
     ],
+
+    'cron-explainer' => [
+        'name' => 'Explicador de cron',
+        'description' => 'Entiende una expresión cron campo a campo y mira las próximas diez ejecuciones en la zona horaria de tu navegador.',
+        'keywords' => 'cron, crontab, programación, próxima ejecución, horario',
+        'intro' => 'Pega la expresión de cinco campos y mira qué significa cada campo y cuándo se va a ejecutar, en la zona horaria de tu navegador. Las macros de atajo (daily, hourly, monthly y las demás) valen; los segundos y las extensiones Quartz (L, W, #, ?) no. Todo corre en tu navegador: nada de lo que pegues aquí se envía al servidor.',
+
+        'expression' => 'Expresión',
+        'hint' => 'Cinco campos: minuto, hora, día del mes, mes y día de la semana. Ej.: 0 9 * * 1-5',
+        'zone' => 'Zona horaria: {zone}',
+        'exhausted' => 'La expresión es válida, pero no cae en ninguna fecha en los próximos años (como el 30 de febrero).',
+
+        'panes' => [
+            'expression' => 'Expresión',
+            'runs' => 'Próximas ejecuciones',
+        ],
+
+        'states' => [
+            'empty' => 'Pega una expresión cron para ver la explicación y las próximas ejecuciones.',
+            'invalid' => 'Corrige la expresión para ver las próximas ejecuciones.',
+        ],
+
+        'status' => [
+            'valid' => '{count} próximas ejecuciones en la zona horaria {zone}.',
+        ],
+
+        'table' => [
+            'field' => 'Campo',
+            'value' => 'Valor',
+            'meaning' => 'Significado',
+        ],
+
+        'fields' => [
+            'minute' => 'Minuto',
+            'hour' => 'Hora',
+            'day_of_month' => 'Día del mes',
+            'month' => 'Mes',
+            'day_of_week' => 'Día de la semana',
+        ],
+
+        'names' => [
+            'months' => [
+                1 => 'enero',
+                2 => 'febrero',
+                3 => 'marzo',
+                4 => 'abril',
+                5 => 'mayo',
+                6 => 'junio',
+                7 => 'julio',
+                8 => 'agosto',
+                9 => 'septiembre',
+                10 => 'octubre',
+                11 => 'noviembre',
+                12 => 'diciembre',
+            ],
+            'days' => [
+                0 => 'domingo',
+                1 => 'lunes',
+                2 => 'martes',
+                3 => 'miércoles',
+                4 => 'jueves',
+                5 => 'viernes',
+                6 => 'sábado',
+            ],
+        ],
+
+        'meanings' => [
+            'any' => [
+                'minute' => 'Cualquier minuto',
+                'hour' => 'Cualquier hora',
+                'day_of_month' => 'Cualquier día del mes',
+                'month' => 'Cualquier mes',
+                'day_of_week' => 'Cualquier día de la semana',
+            ],
+            'step_star' => [
+                'minute' => 'Cada {step} minutos',
+                'hour' => 'Cada {step} horas',
+                'day_of_month' => 'Cada {step} días',
+                'month' => 'Cada {step} meses',
+                'day_of_week' => 'Cada {step} días de la semana',
+            ],
+            'step_range' => [
+                'minute' => 'Cada {step} minutos, de {from} a {to}',
+                'hour' => 'Cada {step} horas, de {from} a {to}',
+                'day_of_month' => 'Cada {step} días, del día {from} al {to}',
+                'month' => 'Cada {step} meses, de {from} a {to}',
+                'day_of_week' => 'Cada {step} días de la semana, de {from} a {to}',
+            ],
+            'range' => 'De {from} a {to}',
+            'at' => 'En {values}',
+        ],
+
+        'errors' => [
+            'empty' => 'Escribe una expresión cron.',
+            'field_count' => 'Una expresión cron tiene cinco campos; esta tiene {token}.',
+            'unknown_macro' => 'Macro desconocida: {token}.',
+            'macro_with_fields' => 'La macro {token} va sola; no añadas campos después.',
+            'unknown_name' => 'Nombre desconocido en {field}: {token}.',
+            'invalid_value' => 'Valor fuera del rango en {field}: {token}.',
+            'invalid_range' => 'Rango no válido en {field}: {token}.',
+            'invalid_step' => 'Paso no válido en {field}: {token}.',
+            'invalid_syntax' => 'No se pudo leer {field}: {token}.',
+        ],
+
+        'report' => [
+            'zone' => 'Zona horaria',
+            'runs' => 'Próximas ejecuciones',
+            'empty' => 'Ninguna ejecución dentro del horizonte.',
+        ],
+    ],
+
+    'curl-to-code' => [
+        'name' => 'cURL a código',
+        'description' => 'Convierte un comando curl en código Laravel, fetch o axios, con aviso de lo que quedó fuera.',
+        'keywords' => 'curl, http, petición, fetch, axios, laravel, api',
+        'intro' => 'Pega un comando curl y recibe la misma petición en Laravel, fetch o axios. El núcleo está cubierto: método, cabeceras, cuerpo, URL, credencial básica y las opciones de línea de comandos más comunes; lo que no se admite aparece en el aviso, nunca se descarta en silencio. Todo corre en tu navegador: nada de lo que pegues aquí se envía al servidor.',
+
+        'panes' => [
+            'command' => 'Comando',
+            'code' => 'Código',
+        ],
+
+        'tabs' => [
+            'laravel' => 'Laravel',
+            'fetch' => 'fetch',
+            'axios' => 'axios',
+        ],
+
+        'unsupported' => 'Opciones no admitidas (quedaron fuera): {options}.',
+        'states' => [
+            'empty' => 'Pega un comando curl para ver el código.',
+        ],
+
+        'status' => [
+            'ready' => '{method} {url}',
+        ],
+
+        'warnings' => [
+            'credential_in_output' => 'La credencial de {user} terminó en el código. Prefiere variables de entorno.',
+            'extra_url' => 'La URL {url} se ignoró: vale la primera.',
+            'header_without_colon' => 'Cabecera sin dos puntos ignorada: {token}.',
+            'data_from_file' => 'Leer el cuerpo desde un archivo no se admite: {token}.',
+        ],
+
+        'errors' => [
+            'empty' => 'Pega un comando curl.',
+            'not_curl' => 'El comando debe empezar por curl.',
+            'shell' => 'El comando no se cierra: {detail}',
+            'missing_value' => 'La opción {option} necesita un valor.',
+            'missing_url' => 'El comando no tiene URL.',
+        ],
+
+        'shell_details' => [
+            'dangling_escape' => 'hay una barra invertida al final de la línea sin continuación.',
+            'unterminated_single' => 'hay comillas simples sin cerrar.',
+            'unterminated_double' => 'hay comillas dobles sin cerrar.',
+        ],
+    ],
+
+    'env-example' => [
+        'name' => '.env a ejemplo',
+        'description' => 'Convierte un .env en .env.example: solo salen los valores de las claves sensibles; el orden, los comentarios y el resto quedan igual.',
+        'keywords' => 'env, dotenv, entorno, ejemplo, secretos, config',
+        'intro' => 'Pega o abre tu .env y recibe un .env.example que mantiene el orden, los comentarios y las agrupaciones, con el valor de las claves sensibles vaciado. La clave cuenta como sensible por el nombre, por segmento, o cuando el valor es una URL con contraseña. Todo corre en tu navegador: nada de lo que pegues aquí se envía al servidor.',
+
+        'panes' => [
+            'source' => 'Tu .env',
+            'example' => '.env.example',
+        ],
+
+        'file_types' => 'Archivo .env',
+        'states' => [
+            'empty' => 'Pega o abre un archivo .env para generar el .env.example.',
+        ],
+
+        'notices' => [
+            'masked' => 'Claves con el valor eliminado',
+            'masked_key' => '{key}, línea {line}',
+            'invalid' => 'Líneas mantenidas sin forma de clave y valor',
+            'invalid_line' => 'Línea {line}',
+        ],
+
+        'status' => [
+            'summary' => 'Eliminadas: {masked} · No válidas: {invalid}',
+        ],
+    ],
 ];

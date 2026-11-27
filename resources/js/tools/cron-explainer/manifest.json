@@ -1,0 +1,15 @@
+{
+    "slug": "cron-explainer",
+    "status": "available",
+    "category": "time",
+    "icon": "calendar-clock",
+    "order": 150,
+    "keywords": [
+        "cron",
+        "crontab",
+        "schedule",
+        "agendamento",
+        "next run",
+        "time"
+    ]
+}
