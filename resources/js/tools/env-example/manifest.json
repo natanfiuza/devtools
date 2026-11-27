@@ -1,0 +1,8 @@
+{
+    "slug": "env-example",
+    "status": "available",
+    "category": "text",
+    "icon": "file-key",
+    "order": 170,
+    "keywords": ["env", "dotenv", "environment", "example", "secrets", "config"]
+}

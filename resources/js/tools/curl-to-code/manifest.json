@@ -1,0 +1,8 @@
+{
+    "slug": "curl-to-code",
+    "status": "available",
+    "category": "text",
+    "icon": "terminal",
+    "order": 160,
+    "keywords": ["curl", "http", "request", "fetch", "axios", "laravel", "api"]
+}

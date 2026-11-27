@@ -1,7 +1,7 @@
 # ROADMAP — Programa Futuro: tools e frentes de produto
 
-Versão: 1.1
-Data: 2026-11-24
+Versão: 1.2
+Data: 2026-11-25
 Fonte de verdade da seção "Futuro" da [SPEC](./SPEC.md) (ADR-179). Sem datas: ordem + porte.
 
 ## 1. Propósito e escopo
@@ -68,7 +68,7 @@ O porte nunca é o critério principal: uma tool barata que não atende demanda 
 | Fase | Onda | Escopo | Ferramentas/frente | Porte | Condição | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | F1 | 1 | Conversores e diff | `data-format-converter`, `diff` | L | — | concluída em 2026-11-24 ([aceite](../acceptance/FUTURO-FASE-1.md)) |
-| F2 | 2 | CLI e ambiente | `cron-explainer`, `curl-to-code`, `env-example` | M | — | planejada |
+| F2 | 2 | CLI e ambiente | `cron-explainer`, `curl-to-code`, `env-example` | M | — | concluída em 2026-11-25 ([aceite](../acceptance/FUTURO-FASE-2.md)) |
 | F3 | 3 | Banco e schema | `ddl-to-migration`, `schema-mock-data`, `sql-explain` | L | — | planejada |
 | F4 | 4 | Referência | `cheatsheets` | S | — | planejada |
 | F5 | 5 | Histórico compartilhável | extensão do `share-text` | M | grill + ADR de entrada | planejada |
@@ -281,3 +281,4 @@ Perguntas que o roadmap deliberadamente **não** decide:
 | --- | --- | --- | --- |
 | 1.0 | 2026-11-24 | criação do Programa Futuro (5 ondas, 7 fases, protocolo) | ADR-179 |
 | 1.1 | 2026-11-24 | F1 concluída: conversor de formatos e diff entregues, com o aceite registrado | ADR-180 |
+| 1.2 | 2026-11-25 | F2 concluída: explicador de cron, cURL para código e `.env` para exemplo, com o aceite registrado | ADR-181 |

@@ -38,6 +38,9 @@ const MVP = [
     'layout-harmonizer',
     'data-format-converter',
     'diff',
+    'cron-explainer',
+    'curl-to-code',
+    'env-example',
 ];
 
 /** Tool registrada por indice, com guarda: `noUncheckedIndexedAccess` esta ligado. */
